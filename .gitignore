@@ -1,0 +1,36 @@
+# 執行日誌（自動產生，排程清理）
+logs/
+
+# ntfy 推播暫存檔
+ntfy_temp.json
+
+# 執行時產生的資料檔（跨次記憶、快取、狀態）
+context/digest-memory.json
+cache/
+state/scheduler-state.json
+
+# Agent Team 並行結果（Phase 1 產出，Phase 2 清理）
+results/
+
+# Windows 誤產生的 nul 檔案
+nul
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets (security)
+.env
+.env.*
+secrets/
+
+# 編輯器
+.vscode/
+*.swp
+*.swo
+*~
