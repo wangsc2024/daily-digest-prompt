@@ -60,7 +60,7 @@ class TodoistAPI:
             try:
                 error_detail = e.response.json()
                 error_msg += f": {error_detail}"
-            except:
+            except (ValueError, KeyError):
                 error_msg += f": {e.response.text}"
             print(f"❌ API 錯誤: {error_msg}", file=sys.stderr)
             return None
