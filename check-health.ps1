@@ -38,7 +38,12 @@ else {
         # Last 7 days
         $sevenDaysAgo = (Get-Date).AddDays(-7)
         $recentRuns = $runs | Where-Object {
-            [datetime]::Parse($_.timestamp) -gt $sevenDaysAgo
+            try {
+                [datetime]::Parse($_.timestamp) -gt $sevenDaysAgo
+            }
+            catch {
+                $false  # Skip records with invalid timestamps
+            }
         }
 
         $totalRuns = $recentRuns.Count
