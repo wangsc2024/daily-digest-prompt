@@ -45,9 +45,10 @@
 **使用 Skill**：`todoist`
 
 1. 讀取 `skills/todoist/SKILL.md`
-2. 依 SKILL.md 指示呼叫 Todoist REST API 查詢**僅當日**待辦（不含過期）
-3. TODOIST_API_TOKEN = "225d244f19204e92371f15f15a84ac9998740376"
+2. 依 SKILL.md 指示呼叫 Todoist API v1（`/api/v1/`）查詢**僅當日**待辦（不含過期）
+3. 讀取環境變數：TODOIST_API_TOKEN（用 $env:TODOIST_API_TOKEN 或 Bash 的 $TODOIST_API_TOKEN）
 4. 禁止捏造待辦事項，API 失敗如實報告
+5. **回應格式注意**：任務列表在 `results` 欄位內（`jq '.results'`），不是直接陣列
 
 記錄每筆任務的 `id`、`content`、`description`、`priority`、`labels`、`due`。
 
@@ -89,19 +90,55 @@
 ⏭️ 跳過：  [任務ID] 任務名稱 — 跳過原因
 ```
 
-若無任何可處理項目，**不要直接跳到通知**，改為進入「步驟 2.5：楞嚴經自動研究」。
+若無任何可處理項目，**不要直接跳到通知**，改為進入「步驟 2.5：頻率限制檢查」。
 
 ---
 
-## 步驟 2.5：楞嚴經自動研究（無待辦時觸發）
+## 步驟 2.5：頻率限制檢查（無待辦時前置步驟）
+
+自動任務有每日執行次數上限，需先檢查今日已執行次數。
+
+### 2.5.1 讀取或初始化追蹤檔案
+用 Read 工具讀取 `context/auto-tasks-today.json`。
+
+**自動歸零邏輯**（每日自動重置）：
+- 若檔案**不存在** → 建立初始檔案（所有計數為 0）
+- 若檔案存在但 `date` 欄位**不等於今天日期** → **歸零重建**（覆寫為新的初始檔案，計數全部重置為 0）
+- 若檔案存在且 `date` **等於今天日期** → 沿用目前的計數值
+
+用 Write 建立/覆寫初始檔案：
+```json
+{
+  "date": "YYYY-MM-DD（今天日期，格式如 2026-02-12）",
+  "shurangama_count": 0,
+  "log_audit_count": 0
+}
+```
+
+> **重要**：判斷日期時請用系統當前日期（`date +%Y-%m-%d`），與 JSON 中的 `date` 欄位比對。日期不同即代表跨日，必須歸零。
+
+### 2.5.2 決定可執行的自動任務
+
+| 自動任務 | 每日上限 | 欄位 | 達到上限時 |
+|---------|---------|------|----------|
+| 楞嚴經研究 | **3 次** | `shurangama_count` | 跳過步驟 2.6 |
+| 系統 Log 審查 | **1 次** | `log_audit_count` | 跳過步驟 2.7 |
+
+- 若兩項都已達上限 → 直接跳到步驟 5（通知：今日自動任務已達上限）
+- 否則 → 進入對應的步驟執行
+
+---
+
+## 步驟 2.6：楞嚴經自動研究（無待辦時觸發，每日最多 3 次）
 **使用 Skill**：`knowledge-query`
+**頻率限制**：`shurangama_count < 3`（超過則跳過此步驟，直接到步驟 2.7）
 
-當 Todoist 無可處理項目時，自動執行一次楞嚴經（大佛頂首楞嚴經）研究，將成果寫入 RAG 知識庫。
+當 Todoist 無可處理項目且今日研究次數未達上限時，自動執行一次楞嚴經（大佛頂首楞嚴經）研究，將成果寫入 RAG 知識庫。
 
-### 2.5.1 讀取 Skill
+### 2.6.1 讀取 Skill
 讀取 `skills/knowledge-query/SKILL.md`，了解匯入格式。
 
-### 2.5.2 查詢知識庫已有的楞嚴經筆記
+### 2.6.2 查詢知識庫已有的楞嚴經筆記
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json" \
@@ -110,7 +147,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 - 知識庫未啟動 → 跳過研究，直接到步驟 5
 - 已有筆記 → 分析尚未涵蓋的主題，避免重複
 
-### 2.5.3 選定研究主題
+### 2.6.3 選定研究主題
 從以下楞嚴經核心主題中，選一個尚未研究過的（依知識庫已有筆記排除）：
 
 | 優先級 | 主題 | 搜尋關鍵詞 |
@@ -131,7 +168,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 - 楞嚴經的歷史傳承與翻譯（般刺密帝、房融）
 - 楞嚴經在修行實踐中的應用
 
-### 2.5.4 建立研究 prompt 並執行
+### 2.6.4 建立研究 prompt 並執行
 用 **Write 工具**建立 `task_prompt.md`（UTF-8）：
 
 ```
@@ -180,10 +217,150 @@ cat task_prompt.md | claude -p --allowedTools "Read,Bash,Write,WebSearch,WebFetc
 rm task_prompt.md
 ```
 
-### 2.5.5 記錄結果
+### 2.6.5 更新頻率計數
+研究完成後（無論成功或失敗），更新 `context/auto-tasks-today.json`：
+- 將 `shurangama_count` 加 1
+- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和 `log_audit_count` 不變）
+
+### 2.6.6 記錄結果
 記錄研究主題和是否成功匯入知識庫，在步驟 5 通知中報告。
 
-繼續到步驟 5 發送通知（通知內容改為研究報告而非「無可處理項目」）。
+完成後繼續到步驟 2.7。
+
+---
+
+## 步驟 2.7：系統 Log 深度審查（無待辦時觸發，每日最多 1 次）
+**使用 Skill**：`scheduler-state` + `knowledge-query`
+**頻率限制**：`log_audit_count < 1`（超過則跳過此步驟，直接到步驟 5）
+
+在楞嚴經研究之後，若今日尚未執行過 Log 審查，自動進行系統 Log 深度審查，找出需要改善或優化的項目並實際執行修正。
+
+### 2.7.1 讀取系統狀態
+1. 讀取 `skills/scheduler-state/SKILL.md`
+2. 讀取 `state/scheduler-state.json` — 分析最近 30 筆執行記錄
+3. 讀取 `context/digest-memory.json` — 分析記憶中的異常模式
+
+### 2.7.2 掃描 Log 檔案
+用 Bash 讀取最近 7 天的日誌：
+
+```bash
+ls -t logs/*.log | head -10
+```
+
+逐一讀取每個 log 檔案（用 Read 工具），重點搜尋：
+
+| 搜尋模式 | 問題類型 | 嚴重度 |
+|---------|---------|--------|
+| `[ERROR]` | 執行錯誤 | 高 |
+| `[WARN]` | 警告訊息 | 中 |
+| `RETRY` | 重試觸發 | 中 |
+| `TIMEOUT` | 超時 | 高 |
+| `failed` | 區塊失敗 | 高 |
+| `cache_degraded` | 快取降級 | 低 |
+| `duration_seconds.*[3-9][0-9][0-9]` | 耗時超過 300 秒 | 中 |
+| `nul` | 可能的 nul 檔案問題 | 高 |
+
+### 2.7.3 分析問題並分類
+將發現的問題整理為清單：
+
+```
+🔍 Log 審查發現
+━━━━━━━━━━━━━━━━━━━━━
+🔴 嚴重問題（必須修復）：
+1. [問題描述] — 出現次數 N 次 — 影響範圍
+
+🟡 改善建議（建議優化）：
+1. [問題描述] — 出現次數 N 次 — 可能的改善方向
+
+🟢 正常狀態：
+- 成功率 XX% | 平均耗時 XX 秒
+```
+
+### 2.7.4 搜尋參考案例並擬定方案
+若發現需要改善的項目：
+
+1. **搜尋參考案例**：
+   - 用 WebSearch 搜尋相關問題的解決方案（如 "PowerShell Start-Job timeout handling best practice"）
+   - 用知識庫查詢是否有相關的歷史筆記
+
+2. **擬定修改方案**：
+   - 明確列出要修改的檔案和修改內容
+   - 評估修改的風險和影響範圍
+   - 制定驗證步驟
+
+### 2.7.5 執行修正
+用 **Write 工具**建立 `task_prompt.md`（UTF-8），為每個需要修正的問題建立子 Agent：
+
+```
+你是系統維護助手，全程使用正體中文。
+禁止在 Bash 中使用 > nul，改用 > /dev/null 2>&1。
+
+## 任務
+修正 daily-digest-prompt 系統中的以下問題：
+[問題描述]
+
+## 修改方案
+[具體修改內容]
+
+## 執行步驟
+1. 讀取相關檔案
+2. 執行修改
+3. 驗證修改結果
+   - [具體的驗證方法，如語法檢查、功能測試]
+4. 確認修改不影響現有功能
+
+## 工作目錄
+D:\Source\daily-digest-prompt
+
+## 驗收標準
+- [ ] 問題已解決
+- [ ] 現有功能未受影響
+- [ ] 語法驗證通過
+```
+
+用 Bash 執行：
+```bash
+cat task_prompt.md | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep"
+```
+
+執行後清理：
+```bash
+rm task_prompt.md
+```
+
+**修正迴圈**：若驗證失敗，重新分析原因、調整方案、再次執行，直到完全通過。
+最多重試 3 次，超過則記錄為待手動處理。
+
+### 2.7.6 將審查結果寫入知識庫
+**使用 Skill**：`knowledge-query`
+
+將本次審查結果（含發現的問題、修正方案、執行結果）寫入 RAG 知識庫：
+
+1. 用 Write 建立 `import_note.json`：
+```json
+{
+  "notes": [{
+    "title": "系統 Log 審查報告 - YYYY-MM-DD",
+    "contentText": "審查內容的 Markdown",
+    "tags": ["系統審查", "log分析", "優化"],
+    "source": "import"
+  }],
+  "autoSync": true
+}
+```
+2. `curl -s -X POST "http://localhost:3000/api/import" -H "Content-Type: application/json; charset=utf-8" -d @import_note.json`
+3. `rm import_note.json`
+4. 知識庫未啟動則跳過
+
+### 2.7.7 更新頻率計數
+審查完成後（無論發現問題與否），更新 `context/auto-tasks-today.json`：
+- 將 `log_audit_count` 加 1
+- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和 `shurangama_count` 不變）
+
+### 2.7.8 記錄結果
+記錄審查發現數量、修正數量、是否全部通過，在步驟 5 通知中報告。
+
+繼續到步驟 5 發送通知（通知內容包含楞嚴經研究 + 系統審查結果）。
 
 ---
 
@@ -306,8 +483,8 @@ cat task_prompt.md | claude -p --allowedTools "工具清單"
 
 依 `skills/todoist/SKILL.md` 指示關閉任務：
 ```bash
-curl -s -X POST "https://api.todoist.com/rest/v2/tasks/TASK_ID/close" \
-  -H "Authorization: Bearer 225d244f19204e92371f15f15a84ac9998740376"
+curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
+  -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 失敗則不關閉，記錄原因。
 
@@ -353,6 +530,7 @@ rm task_prompt.md
 
 ### 通知內容規則
 - message 限 500 字以內
-- 無可處理項目但完成楞嚴經研究 → tags: ["books", "pray"]，title: "楞嚴經研究完成"
-- 無可處理項目且研究失敗 → tags: ["information_source"]，title: "Todoist 無可處理項目"
+- 無可處理項目（含楞嚴經研究 + 系統審查）→ tags: ["books", "wrench"]，title: "自動研究 + 系統審查完成"
+  - message 包含：研究主題、審查發現數量、修正數量
+- 無可處理項目但研究或審查失敗 → tags: ["information_source"]，title: "Todoist 無可處理項目"
 - 全部失敗 → tags: ["warning"]，title: "Todoist 執行失敗"

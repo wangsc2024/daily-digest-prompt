@@ -1,6 +1,7 @@
 """Tests for TodoistAPI request methods using mocks."""
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from todoist import TodoistAPI
 
 
@@ -30,10 +31,10 @@ class TestGetTasks:
 
     @patch("todoist.requests.request")
     def test_get_tasks_success(self, mock_request, mock_api_token):
-        """Successful API call should return task list."""
+        """Successful API call should return task list from results field."""
         mock_response = Mock()
-        mock_response.text = '[{"id": "1", "content": "Task 1"}]'
-        mock_response.json.return_value = [{"id": "1", "content": "Task 1"}]
+        mock_response.text = '{"results": [{"id": "1", "content": "Task 1"}], "next_cursor": null}'
+        mock_response.json.return_value = {"results": [{"id": "1", "content": "Task 1"}], "next_cursor": None}
         mock_response.raise_for_status = Mock()
         mock_request.return_value = mock_response
 
@@ -48,8 +49,8 @@ class TestGetTasks:
     def test_get_tasks_with_filter(self, mock_request, mock_api_token):
         """Filter parameter should be passed to API."""
         mock_response = Mock()
-        mock_response.text = "[]"
-        mock_response.json.return_value = []
+        mock_response.text = '{"results": [], "next_cursor": null}'
+        mock_response.json.return_value = {"results": [], "next_cursor": None}
         mock_response.raise_for_status = Mock()
         mock_request.return_value = mock_response
 

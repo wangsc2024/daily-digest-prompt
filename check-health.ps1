@@ -143,5 +143,98 @@ else {
     }
 }
 
+# --- Log Analysis ---
+Write-Host ""
+Write-Host "[日誌分析]" -ForegroundColor Yellow
+
+$LogDir = "$AgentDir\logs"
+if (-not (Test-Path $LogDir)) {
+    Write-Host "  日誌目錄不存在" -ForegroundColor Gray
+}
+else {
+    $logFiles = Get-ChildItem -Path $LogDir -Filter "*.log" -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } |
+        Sort-Object LastWriteTime -Descending
+
+    if ($logFiles.Count -eq 0) {
+        Write-Host "  無近 7 天日誌" -ForegroundColor Gray
+    }
+    else {
+        Write-Host "  近 7 天日誌數量: $($logFiles.Count)" -ForegroundColor White
+
+        # 統計問題類型
+        $errorCount = 0
+        $warnCount = 0
+        $retryCount = 0
+        $timeoutCount = 0
+        $recentErrors = @()
+
+        foreach ($logFile in $logFiles | Select-Object -First 10) {
+            $content = Get-Content -Path $logFile.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+            if ($content) {
+                # 統計錯誤
+                $errors = [regex]::Matches($content, '\[ERROR\]')
+                $errorCount += $errors.Count
+
+                # 統計警告
+                $warns = [regex]::Matches($content, '\[WARN\]')
+                $warnCount += $warns.Count
+
+                # 統計重試
+                $retries = [regex]::Matches($content, 'RETRY')
+                $retryCount += $retries.Count
+
+                # 統計超時
+                $timeouts = [regex]::Matches($content, 'TIMEOUT')
+                $timeoutCount += $timeouts.Count
+
+                # 收集最近的錯誤訊息
+                if ($recentErrors.Count -lt 3) {
+                    $errorLines = $content -split "`n" | Where-Object { $_ -match '\[ERROR\]' } | Select-Object -First 2
+                    foreach ($errLine in $errorLines) {
+                        if ($recentErrors.Count -lt 3) {
+                            $recentErrors += @{
+                                file = $logFile.Name
+                                message = $errLine.Trim().Substring(0, [Math]::Min(60, $errLine.Trim().Length))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        # 輸出統計
+        $totalIssues = $errorCount + $warnCount + $timeoutCount
+        if ($totalIssues -eq 0) {
+            Write-Host "  問題統計: " -NoNewline -ForegroundColor White
+            Write-Host "無問題發現" -ForegroundColor Green
+        }
+        else {
+            Write-Host "  問題統計:" -ForegroundColor White
+            if ($errorCount -gt 0) {
+                Write-Host "    🔴 ERROR: $errorCount 次" -ForegroundColor Red
+            }
+            if ($warnCount -gt 0) {
+                Write-Host "    🟡 WARN: $warnCount 次" -ForegroundColor Yellow
+            }
+            if ($retryCount -gt 0) {
+                Write-Host "    🔄 RETRY: $retryCount 次" -ForegroundColor Yellow
+            }
+            if ($timeoutCount -gt 0) {
+                Write-Host "    ⏰ TIMEOUT: $timeoutCount 次" -ForegroundColor Red
+            }
+        }
+
+        # 輸出最近錯誤
+        if ($recentErrors.Count -gt 0) {
+            Write-Host ""
+            Write-Host "  [最近錯誤]" -ForegroundColor Yellow
+            foreach ($err in $recentErrors) {
+                Write-Host "    $($err.file): $($err.message)..." -ForegroundColor Red
+            }
+        }
+    }
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

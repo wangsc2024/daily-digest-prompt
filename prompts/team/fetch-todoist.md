@@ -25,9 +25,11 @@
 依 todoist SKILL.md 指示，查詢**僅當日**待辦（不含 overdue）：
 
 ```bash
-curl -s "https://api.todoist.com/rest/v2/tasks?filter=today" \
-  -H "Authorization: Bearer 225d244f19204e92371f15f15a84ac9998740376"
+curl -s "https://api.todoist.com/api/v1/tasks?filter=today" \
+  -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
+
+> **注意**：需先設定環境變數 `TODOIST_API_TOKEN`。PowerShell 腳本會自動傳遞此環境變數。
 
 - 成功 → 用 Write 寫入快取 `cache/todoist.json`（依 api-cache 格式：`{"cached_at":"ISO","ttl_minutes":30,"source":"todoist","data":回應}`）
 - 失敗 → 嘗試用 Read 讀取過期快取（24 小時內），source 標記 "cache_degraded"

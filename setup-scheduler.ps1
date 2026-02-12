@@ -4,7 +4,8 @@
 # ============================================
 param(
     [string]$Time,
-    [string]$TaskName
+    [string]$TaskName,
+    [string]$Script
 )
 
 if (-not $TaskName) {
@@ -14,7 +15,13 @@ if (-not $TaskName) {
     }
 }
 $AgentDir = "D:\Source\daily-digest-prompt"
-$ScriptPath = "$AgentDir\run-agent.ps1"
+
+# 決定執行腳本
+if (-not $Script) {
+    $ScriptPath = "$AgentDir\run-agent.ps1"
+} else {
+    $ScriptPath = "$AgentDir\$Script"
+}
 
 # 檢查腳本是否存在
 if (-not (Test-Path $ScriptPath)) {

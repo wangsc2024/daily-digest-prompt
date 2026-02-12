@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 11 個 Skill 的速查表（名稱、觸發關鍵字、用途）
+- 12 個 Skill 的速查表（名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -25,7 +25,7 @@
 
 ### Skill 使用強度
 - **必用**（每次必定使用）：todoist、pingtung-news、pingtung-policy-expert、hackernews-ai-digest、atomic-habits、learning-mastery、ntfy-notify、digest-memory、api-cache、scheduler-state
-- **積極用**（有機會就用）：knowledge-query
+- **積極用**（有機會就用）：knowledge-query、gmail
 - **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫
 
 ## 架構
@@ -47,11 +47,13 @@ daily-digest-prompt/
   results/                        # 團隊模式 Phase 1 結果（Phase 2 清理）
   context/                        # 跨次記憶（持久化）
     digest-memory.json            # 摘要記憶（連續天數、待辦統計等）
+    auto-tasks-today.json         # 自動任務頻率追蹤（每日歸零）
   cache/                          # API 回應快取
     todoist.json                  # Todoist 快取（TTL: 30 分鐘）
     pingtung-news.json            # 屏東新聞快取（TTL: 6 小時）
     hackernews.json               # HN 快取（TTL: 2 小時）
     knowledge.json                # 知識庫快取（TTL: 1 小時）
+    gmail.json                    # Gmail 快取（TTL: 30 分鐘）
   state/                          # 排程執行狀態
     scheduler-state.json          # 執行記錄（最近 30 筆）
   skills/                         # 專案內 skill 指引（自包含）
@@ -67,6 +69,7 @@ daily-digest-prompt/
     digest-memory/SKILL.md        # 摘要記憶持久化
     api-cache/SKILL.md            # HTTP 回應快取
     scheduler-state/SKILL.md      # 排程狀態管理
+    gmail/SKILL.md                # Gmail 郵件讀取（OAuth2）
   logs/                           # 執行日誌（自動清理 7 天）
 ```
 
@@ -102,7 +105,10 @@ daily-digest-prompt/
 4. **Agent 首先載入 `skills/SKILL_INDEX.md`（Skill-First）**
 5. 查詢 Todoist → 用 SKILL_INDEX 觸發關鍵字比對任務 → 匹配 Skill 納入執行方案
 6. 生成子 Agent prompt（含 SKILL.md 路徑引用）→ 執行 → 關閉任務 → ntfy 通知
-7. **無可處理項目時**：自動進行楞嚴經研究，將成果寫入 RAG 知識庫
+7. **無可處理項目時**（含頻率限制，每日自動歸零）：
+   - 楞嚴經研究（每日最多 **3 次**），將成果寫入 RAG 知識庫
+   - 系統 Log 深度審查（每日最多 **1 次**），找出改善/優化項目並執行修正
+   - 頻率追蹤：`context/auto-tasks-today.json`（跨日自動歸零）
 
 ## 技術棧
 - **執行環境**: Windows PowerShell
@@ -140,6 +146,7 @@ daily-digest-prompt/
 - `skills/digest-memory/SKILL.md` - 摘要記憶持久化（跨次追蹤）
 - `skills/api-cache/SKILL.md` - HTTP 回應快取（降級保護）
 - `skills/scheduler-state/SKILL.md` - 排程狀態管理（執行記錄）
+- `skills/gmail/SKILL.md` - Gmail 郵件讀取（OAuth2 認證，可選）
 
 > Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含，不依賴外部路徑。
 

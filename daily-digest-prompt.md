@@ -63,7 +63,7 @@
 1. 讀取 `skills/todoist/SKILL.md`
 2. **api-cache 快取流程**：讀取 `cache/todoist.json`，30 分鐘內有效 → 用快取
 3. 若無快取或已過期 → 依 SKILL.md 指示呼叫 Todoist REST API
-4. TODOIST_API_TOKEN = "225d244f19204e92371f15f15a84ac9998740376"
+4. 讀取環境變數：TODOIST_API_TOKEN（從 $env:TODOIST_API_TOKEN 取得）
 5. 成功後寫入快取，失敗則降級使用過期快取
 6. 禁止捏造待辦事項
 

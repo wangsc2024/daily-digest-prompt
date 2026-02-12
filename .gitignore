@@ -28,6 +28,9 @@ htmlcov/
 .env
 .env.*
 secrets/
+credentials.json
+token.json
+key/
 
 # 編輯器
 .vscode/

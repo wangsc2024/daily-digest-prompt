@@ -1,6 +1,6 @@
 """Tests for TodoistAPI formatting methods."""
-import pytest
 from datetime import datetime, timedelta
+
 from todoist import TodoistAPI
 
 
