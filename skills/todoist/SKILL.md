@@ -82,6 +82,46 @@ curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 
+### 新增任務評論
+
+> **Windows 注意**：POST 請求必須用 Write 工具建立 JSON 檔案，再用 `-d @file.json` 發送。
+
+```bash
+# 步驟 1：用 Write 工具建立 comment.json
+# {"task_id":"TASK_ID","content":"評論內容"}
+
+# 步驟 2：發送
+curl -s -X POST "https://api.todoist.com/api/v1/comments" \
+  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @comment.json
+
+# 步驟 3：刪除暫存檔
+rm comment.json
+```
+
+### 更新任務（優先級、截止日期等）
+
+> 用於失敗處理：降低優先級、重新排程到明天。
+
+```bash
+# 步驟 1：用 Write 工具建立 update.json
+# 降低優先級：{"priority": 3}
+# 重新排程：{"due_string": "tomorrow"}
+# 同時修改：{"priority": 3, "due_string": "tomorrow"}
+
+# 步驟 2：發送
+curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" \
+  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @update.json
+
+# 步驟 3：刪除暫存檔
+rm update.json
+```
+
+---
+
 ## API 使用（Python）
 
 ```python

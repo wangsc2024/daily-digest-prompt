@@ -32,6 +32,9 @@ credentials.json
 token.json
 key/
 
+# Claude Code 本地設定
+.claude/
+
 # 編輯器
 .vscode/
 *.swp

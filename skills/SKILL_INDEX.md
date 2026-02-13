@@ -32,9 +32,28 @@
 
 ---
 
-## Skill 路由決策樹
+## 標籤路由（Label Routing）— 最高優先
 
-遇到任務時，按以下順序比對：
+Todoist 標籤是最優先的路由信號。若任務含有以下標籤，**直接映射到 Skill**，不需經過內容關鍵字分析。
+
+| Todoist 標籤 | 映射 Skill | allowedTools | 說明 |
+|-------------|-----------|-------------|------|
+| `@code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 先規劃再執行，含驗證閘門 |
+| `@research` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 研究成果匯入知識庫 |
+| `@write` | 文件撰寫 | Read,Bash,Write | 文件/報告產出 |
+| `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | 新聞查詢+政策解讀 |
+| `@ai` | hackernews-ai-digest | Read,Bash,Write | AI 技術動態查詢 |
+| `@knowledge` | knowledge-query | Read,Bash,Write | 知識庫查詢/匯入 |
+
+**路由優先順序**：標籤路由（信心度 100%）> 內容關鍵字（信心度 80%）> LLM 語義判斷（信心度 60%）
+
+> 無標籤任務仍走原有的內容關鍵字比對流程（見下方決策樹）。
+
+---
+
+## Skill 路由決策樹（內容關鍵字比對）
+
+遇到**無標籤**任務時，按以下順序比對：
 
 ```
 任務內容
@@ -146,7 +165,7 @@ digest-memory（讀取）→ api-cache（包裝所有 API）→ [主要流程] �
 
 | 外部服務 | 對應 Skill | API 端點 |
 |---------|-----------|---------|
-| Todoist | todoist | `api.todoist.com/rest/v2` |
+| Todoist | todoist | `api.todoist.com/api/v1` |
 | 屏東新聞 MCP | pingtung-news | `ptnews-mcp.pages.dev/mcp` |
 | Hacker News | hackernews-ai-digest | `hacker-news.firebaseio.com/v0` |
 | 知識庫 | knowledge-query | `localhost:3000` |

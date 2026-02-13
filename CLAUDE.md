@@ -108,6 +108,7 @@ daily-digest-prompt/
 7. **無可處理項目時**（含頻率限制，每日自動歸零）：
    - 楞嚴經研究（每日最多 **3 次**），將成果寫入 RAG 知識庫
    - 系統 Log 深度審查（每日最多 **1 次**），找出改善/優化項目並執行修正
+   - 專案推送 GitHub（每日最多 **2 次**），自動 commit + push 變更至 GitHub
    - 頻率追蹤：`context/auto-tasks-today.json`（跨日自動歸零）
 
 ## 技術棧
