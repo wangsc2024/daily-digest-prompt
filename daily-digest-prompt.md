@@ -38,7 +38,7 @@
 ## 0. 初始化：載入 Skill 引擎
 
 ### 0.1 讀取 Skill 索引（最優先）
-用 Read 讀取 `skills/SKILL_INDEX.md`，建立對所有 11 個 Skill 的完整認知。
+用 Read 讀取 `skills/SKILL_INDEX.md`，建立對所有 12 個 Skill 的完整認知。
 理解每個 Skill 的觸發關鍵字、鏈式組合模式、禁止行為。
 
 ### 0.2 讀取記憶
@@ -51,9 +51,9 @@
 讀取 `skills/api-cache/SKILL.md` 了解快取流程。
 後續所有 API 呼叫都必須遵循「查快取 → 呼叫 API → 寫快取 → 失敗降級」。
 
-### 0.4 載入狀態追蹤
-讀取 `skills/scheduler-state/SKILL.md` 了解狀態記錄。
-開始計時，記住各區塊的執行結果，最後寫入狀態。
+### 0.4 載入狀態（唯讀）
+讀取 `state/scheduler-state.json` 了解歷史執行記錄（此檔案由 PowerShell 腳本維護，Agent 只讀不寫）。
+開始計時，記住各區塊的執行結果，供寫入記憶時使用。
 
 ---
 
@@ -151,7 +151,7 @@
 - 列出佛學禪語
 
 🔧 Skill 使用報告
-- 本次使用 N/11 個 Skill
+- 本次使用 N/12 個 Skill
 - 快取命中：N 次 | API 呼叫：N 次 | 知識庫匯入：N 則
 
 ## 9. 發送 ntfy 通知
@@ -163,24 +163,23 @@
 4. 用 Bash 執行：curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh
 5. 用 Bash 刪除暫存檔：rm ntfy_temp.json
 
-## 10. 更新記憶與狀態（最後一步）
-**使用 Skill**：`digest-memory` + `scheduler-state`
+## 10. 更新記憶（最後一步）
+**使用 Skill**：`digest-memory`
 
 ### 10.1 寫入記憶
 依 `skills/digest-memory/SKILL.md` 指示，用 Write 更新 `context/digest-memory.json`。
 包含：待辦統計、習慣/學習連續天數、摘要總結、Skill 使用統計。
 
-### 10.2 寫入執行狀態
-依 `skills/scheduler-state/SKILL.md` 指示：
-1. 讀取 `state/scheduler-state.json`（不存在則初始化）
-2. 加入本次執行記錄，各區塊 sections 狀態需如實記錄
-3. 保留最近 30 筆
-4. 用 Write 寫回
+> **注意**：`state/scheduler-state.json` 由 PowerShell 執行腳本（run-agent.ps1 / run-agent-team.ps1）負責寫入，Agent 不需操作此檔案。
 
-### 10.3 最終自檢
-回顧本次執行，確認：
-- [ ] 所有 API 呼叫都經過 api-cache？
-- [ ] 屏東新聞有搭配政策解讀？
-- [ ] 有價值的內容有嘗試匯入知識庫？
-- [ ] 記憶和狀態都已寫入？
-- [ ] ntfy 通知已發送？
+### 10.2 最終驗證（Evidence-Based）
+
+以下每項必須有實際執行證據（非自我宣稱），未通過的項目須在摘要中標注。
+
+| 驗證項 | 驗證方式 | 通過標準 |
+|--------|---------|---------|
+| api-cache | 回顧本次所有 curl 呼叫 | 每個 API 呼叫前都先查了快取 |
+| 政策解讀 | 確認摘要含「📋 政策背景」區塊 | 至少 1 則新聞有解讀 |
+| 知識庫 | 確認是否有 POST /api/notes 呼叫 | 有嘗試即通過（無值得匯入也算通過） |
+| 記憶寫入 | 用 Read 讀回 digest-memory.json 確認 last_run 為今天 | JSON 可解析且日期正確 |
+| ntfy 通知 | 確認 curl 回應 HTTP 200 | 回應碼為 200 |

@@ -1,3 +1,12 @@
+---
+name: knowledge-query
+description: |
+  個人知識庫查詢與匯入。查詢 localhost:3000 知識庫筆記，或將研究成果匯入。
+  Use when: 知識庫、筆記、搜尋筆記、匯入、研究成果、知識查詢。
+allowed-tools: Bash, Read, Write
+cache-ttl: 60min
+---
+
 # 知識庫查詢與匯入
 
 查詢個人知識庫取得筆記內容，或將研究成果匯入知識庫。

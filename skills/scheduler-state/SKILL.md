@@ -1,7 +1,15 @@
+---
+name: scheduler-state
+description: |
+  排程狀態管理。追蹤執行記錄，提供健康度報告。Agent 唯讀，PowerShell 腳本負責寫入。
+  Use when: 狀態、健康度、執行記錄、排程狀態。
+allowed-tools: Read
+---
+
 # Scheduler State Skill - 排程狀態管理
 
 ## 用途
-追蹤每次排程執行的狀態，提供健康度報告。
+追蹤每次排程執行的狀態，提供健康度報告。由 PowerShell 腳本（run-agent.ps1 / run-agent-team.ps1）負責寫入，Agent 僅讀取。
 
 ## 狀態檔案位置
 - `state/scheduler-state.json` — 所有 Agent 的執行記錄
@@ -50,14 +58,15 @@
 
 ## Agent 寫入狀態（ntfy 通知之後、最後一步）
 
-每次執行結束時，用以下步驟更新狀態：
+**寫入由 PowerShell 腳本負責**（run-agent.ps1 / run-agent-team.ps1 / run-todoist-agent.ps1），Agent 不需操作此檔案。
 
-1. 用 Read 工具讀取 `state/scheduler-state.json`（不存在則初始化 `{"runs":[]}`）
+PowerShell 腳本的寫入邏輯：
+1. 讀取 `state/scheduler-state.json`（不存在則初始化 `{"runs":[]}`）
 2. 將本次執行記錄加入 `runs` 陣列末尾
-3. 若 `runs` 超過 200 筆，移除最舊的記錄（僅保留最近 200 筆）
-4. 用 Write 工具寫回檔案
+3. 若 `runs` 超過 200 筆，移除最舊的記錄
+4. 寫回檔案
 
-> **注意**：所有三種 Agent（daily-digest、daily-digest-team、todoist）都會寫入同一個 `scheduler-state.json`。
+> **注意**：Agent 對此檔案為**唯讀**。若需要健康度資訊，用 Read 讀取後分析即可。
 
 ## Todoist 歷史追蹤（todoist-history.json）
 

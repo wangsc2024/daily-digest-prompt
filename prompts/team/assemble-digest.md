@@ -11,7 +11,7 @@
 3. **能用 Skill 就用 Skill**：禁止自行拼湊邏輯
 
 ### 本 Agent 使用的 Skill
-- **必用**：pingtung-policy-expert、atomic-habits、learning-mastery、ntfy-notify、digest-memory、scheduler-state
+- **必用**：pingtung-policy-expert、atomic-habits、learning-mastery、ntfy-notify、digest-memory
 - **積極用**：knowledge-query（有機會就用）
 - **不用**（已由 Phase 1 完成）：todoist、pingtung-news、hackernews-ai-digest
 
@@ -32,9 +32,8 @@
 - 若存在：解析上次統計，準備「連續報到」區塊
 - 若不存在：首次執行，跳過
 
-### 0.3 載入狀態追蹤
-讀取 `skills/scheduler-state/SKILL.md`。
-讀取 `state/scheduler-state.json` 計算健康度。
+### 0.3 載入狀態（唯讀）
+讀取 `state/scheduler-state.json` 計算健康度（此檔案由 PowerShell 腳本維護，Agent 只讀不寫）。
 
 ---
 
@@ -123,7 +122,7 @@
 - 列出佛學禪語
 
 🔧 Skill 使用報告
-- 本次使用 N/11 個 Skill
+- 本次使用 N/12 個 Skill
 - 快取命中：N 次 | API 呼叫：N 次 | 知識庫匯入：N 則
 - ⚡ 執行模式：團隊並行（Phase 1 x3 + Phase 2 x1）
 
@@ -140,21 +139,14 @@
 
 ---
 
-## 9. 更新記憶與狀態
+## 9. 更新記憶與清理
 
 ### 9.1 寫入記憶
 依 `skills/digest-memory/SKILL.md` 指示，用 Write 更新 `context/digest-memory.json`。
 
-### 9.2 寫入執行狀態
-依 `skills/scheduler-state/SKILL.md` 指示：
-1. 讀取 `state/scheduler-state.json`（不存在則初始化 `{"runs":[]}`）
-2. 加入本次記錄，agent 欄位為 "daily-digest-team"
-3. sections 中 todoist/pingtung_news/hackernews 的狀態取自對應 results/*.json 的 status
-   - source 為 "cache" → sections 值為 "cached"
-4. 保留最近 30 筆
-5. 用 Write 寫回
+> **注意**：`state/scheduler-state.json` 由 PowerShell 執行腳本（run-agent-team.ps1）負責寫入，Agent 不需操作此檔案。
 
-### 9.3 清理 results/
+### 9.2 清理 results/
 用 Bash 清理：
 ```bash
 rm -f results/todoist.json results/news.json results/hackernews.json

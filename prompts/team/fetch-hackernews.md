@@ -67,6 +67,7 @@ AI, LLM, GPT, Claude, OpenAI, Anthropic, Gemini, DeepSeek, machine learning, dee
     "scanned_count": 30,
     "matched_count": 5
   },
+  "skills_used": ["hackernews-ai-digest", "api-cache"],
   "error": null
 }
 ```

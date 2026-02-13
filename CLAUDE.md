@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 12 個 Skill 的速查表（名稱、觸發關鍵字、用途）
+- 13 個 Skill 的速查表（名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -26,7 +26,7 @@
 ### Skill 使用強度
 - **必用**（每次必定使用）：todoist、pingtung-news、pingtung-policy-expert、hackernews-ai-digest、atomic-habits、learning-mastery、ntfy-notify、digest-memory、api-cache、scheduler-state
 - **積極用**（有機會就用）：knowledge-query、gmail
-- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫
+- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時
 
 ## 架構
 
@@ -39,6 +39,7 @@ daily-digest-prompt/
   run-todoist-agent.ps1           # Todoist 任務規劃執行腳本
   setup-scheduler.ps1             # 排程設定工具
   check-health.ps1                # 健康檢查報告工具（快速一覽）
+  scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
   query-logs.ps1                  # 執行成果查詢工具（5 種模式）
   prompts/team/                   # 團隊模式 Agent prompts
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
@@ -72,6 +73,7 @@ daily-digest-prompt/
     api-cache/SKILL.md            # HTTP 回應快取
     scheduler-state/SKILL.md      # 排程狀態管理
     gmail/SKILL.md                # Gmail 郵件讀取（OAuth2）
+    skill-scanner/SKILL.md        # AI 技能安全掃描（Cisco AI Defense）
   logs/                           # 執行日誌（自動清理 7 天）
 ```
 
@@ -86,7 +88,7 @@ daily-digest-prompt/
 6. 載入記憶（digest-memory）與快取機制（api-cache）
 7. 依序執行各步驟，每步嚴格依照對應 SKILL.md 操作
 8. 主動觸發 Skill 鏈式組合（如：新聞 → 政策解讀 → 知識庫匯入）
-9. 整理摘要（含連續報到、健康度、Skill 使用報告）→ ntfy 推播 → 寫入記憶與狀態
+9. 整理摘要（含連續報到、健康度、Skill 使用報告）→ ntfy 推播 → 寫入記憶（Agent）；狀態由 PowerShell 腳本寫入
 10. 若執行失敗，腳本自動重試一次（間隔 2 分鐘）
 
 ### 每日摘要 - 團隊並行模式（run-agent-team.ps1）
@@ -151,6 +153,7 @@ daily-digest-prompt/
 - `skills/api-cache/SKILL.md` - HTTP 回應快取（降級保護）
 - `skills/scheduler-state/SKILL.md` - 排程狀態管理（執行記錄）
 - `skills/gmail/SKILL.md` - Gmail 郵件讀取（OAuth2 認證，可選）
+- `skills/skill-scanner/SKILL.md` - Cisco AI Defense Skill Scanner（技能安全掃描）
 
 > Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含，不依賴外部路徑。
 
@@ -204,6 +207,10 @@ powershell -ExecutionPolicy Bypass -File check-health.ps1
 .\query-logs.ps1 -Mode todoist                 # 自動任務歷史
 .\query-logs.ps1 -Mode trend -Days 14          # 趨勢分析
 .\query-logs.ps1 -Mode summary -Format json    # JSON 輸出
+
+# 掃描 Skills 安全性
+.\scan-skills.ps1
+.\scan-skills.ps1 -Format markdown -UseBehavioral
 
 # 查看最新日誌
 Get-Content (Get-ChildItem logs\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1)

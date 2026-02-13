@@ -44,6 +44,7 @@ curl -s "https://api.todoist.com/api/v1/tasks?filter=today" \
   "status": "success",
   "source": "api 或 cache 或 cache_degraded",
   "fetched_at": "用 Bash date -u +%Y-%m-%dT%H:%M:%S 取得的 ISO 時間",
+  "skills_used": ["todoist", "api-cache"],
   "data": {
     "tasks": [ Todoist API 回傳的完整任務陣列 ]
   },

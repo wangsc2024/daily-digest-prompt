@@ -46,6 +46,7 @@ curl -s --max-time 10 -X POST https://ptnews-mcp.pages.dev/mcp \
   "source": "api 或 cache 或 cache_degraded 或 failed",
   "fetched_at": "ISO 時間",
   "retry_count": 0,
+  "skills_used": ["pingtung-news", "api-cache"],
   "data": {
     "news": [ 解析後的新聞陣列，每則含 title, date, url, summary 等 ]
   },

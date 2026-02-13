@@ -1,7 +1,11 @@
------
-
-## name: pingtung-news
-description: 屏東縣政府新聞查詢工具。查詢屏東縣最新新聞、依關鍵字搜尋新聞、依日期範圍篩選新聞稿。適用於查詢屏東新聞、屏東縣政、周春米縣長施政、屏東縣府公告等相關資訊。
+---
+name: pingtung-news
+description: |
+  屏東縣政府新聞查詢工具。查詢屏東縣最新新聞、依關鍵字搜尋新聞、依日期範圍篩選新聞稿。
+  Use when: 屏東新聞、縣政、周春米、縣府公告、屏東縣政府新聞。
+allowed-tools: Bash, Read, Write
+cache-ttl: 360min
+---
 
 # 屏東新聞通
 

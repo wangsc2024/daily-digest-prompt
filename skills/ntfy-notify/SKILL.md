@@ -14,6 +14,7 @@ triggers:
   - "做完通知"
   - "完成後提醒"
   - "處理完提醒"
+allowed-tools: Bash, Read, Write
 ---
 
 # ntfy 通知 (ntfy Notification Skill)

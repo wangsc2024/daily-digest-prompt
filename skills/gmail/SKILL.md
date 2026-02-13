@@ -6,6 +6,8 @@ description: |
   透過 Gmail API (OAuth2) 讀取郵件，支援快取與降級機制。
   Use when: 讀取郵件、檢查收件匣、郵件摘要、未讀郵件，or when user mentions gmail, email, 郵件, 信箱.
   Triggers: "gmail", "email", "郵件", "信箱", "未讀", "收件匣", "inbox", "mail"
+allowed-tools: Bash, Read, Write
+cache-ttl: 30min
 ---
 
 # Gmail 郵件讀取整合
