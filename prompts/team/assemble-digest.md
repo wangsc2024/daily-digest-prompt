@@ -55,12 +55,19 @@
 
 ---
 
-## 2. 屏東新聞政策解讀
-**使用 Skill**：`pingtung-policy-expert`
+## 2. 屏東新聞政策解讀 + RAG 增強
+**使用 Skill**：`pingtung-policy-expert` + `knowledge-query`
 
 1. 讀取 `skills/pingtung-policy-expert/SKILL.md`
 2. 若 results/news.json 的 status 為 success，為每則新聞附加施政背景解讀
-3. 若有重大新聞（重大建設、政策發布），標記為知識庫匯入候選
+3. **RAG 知識增強**：用知識庫搜尋相關政策筆記（若可用）：
+   `curl -s -X POST "http://localhost:3000/api/search/hybrid" -H "Content-Type: application/json" -d '{"query":"新聞關鍵字","topK":3}'`
+   - 有結果 → 附加「📎 知識庫關聯：[筆記標題]」
+   - 無結果或服務不可用 → 跳過
+4. 標記重大新聞（預算破億、新建設啟用、首創計畫）為步驟 5 匯入候選
+5. **AI 動態 RAG 增強**：同理，對 results/hackernews.json 中的 AI 新聞搜尋相關技術筆記
+   - 有結果 → 附加「📎 相關研究：[筆記標題]」
+6. 標記 HN 熱度 ≥ 300 的突破性技術為步驟 5 匯入候選
 
 ## 3. 生成今日習慣提示
 **使用 Skill**：`atomic-habits`
@@ -75,15 +82,35 @@
 2. 根據今天星期幾，選取對應的《深度學習的技術》每日技巧
 3. 輸出格式：📚 今日學習技巧：【主題】+ 提示內容 + 出處
 
-## 5. 查詢知識庫回顧 + 主動匯入
+## 5. 查詢知識庫 + 智慧匯入
 **使用 Skill**：`knowledge-query` + `api-cache`
 
+### 5.1 查詢回顧
 1. 讀取 `skills/knowledge-query/SKILL.md`
 2. 讀取 `skills/api-cache/SKILL.md`
 3. 讀取 `cache/knowledge.json`，1 小時內有效 → 用快取
 4. 查詢最近筆記，知識庫未啟動則跳過
-5. 回顧步驟 2 中標記的重大新聞和 HN 突破性 AI 動態，嘗試匯入知識庫
-   - 匯入失敗不影響整體
+5. 查詢知識庫統計：`curl -s "http://localhost:3000/api/stats"`，記錄 `total_notes`
+
+### 5.2 智慧匯入（每次至少執行判斷）
+回顧步驟 2 中標記的匯入候選，依以下規則判斷：
+
+**匯入觸發條件**（滿足任一即匯入）：
+| 條件 | 來源 | 範例 |
+|------|------|------|
+| 屏東新聞含重大政策 | 步驟 2 標記 | 預算破億、新建設啟用 |
+| AI 新聞 HN 熱度 ≥ 300 | 步驟 2 標記 | 突破性技術 |
+
+**去重檢查**（每個候選必做）：
+`curl -s -X POST "http://localhost:3000/api/search/hybrid" -H "Content-Type: application/json" -d '{"query":"候選標題","topK":3}'`
+- score > 0.85 → 跳過（已有相似筆記）
+- score ≤ 0.85 → 匯入
+
+**匯入格式**（依 SKILL.md，Write 建 JSON → curl POST → rm 暫存檔）：
+- 屏東新聞：tags=["屏東新聞","政策",施政領域]
+- AI 動態：tags=["AI動態","HN"]
+
+**無符合條件**：記錄「知識庫匯入：0 則（無符合條件）」。匯入失敗不影響整體。
 
 ## 6. 生成佛學禪語
 生成一個佛學禪語。

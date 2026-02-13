@@ -158,6 +158,24 @@ rm import_note.json
 }
 ```
 
+## 知識庫統計
+
+查詢知識庫整體狀態（用於健康監控和記憶寫入）：
+
+```bash
+curl -s "http://localhost:3000/api/stats"
+```
+
+回傳欄位包含總筆記數、標籤統計等，用於 digest-memory.json 的 `knowledge` 區塊。
+
+## 標籤列表
+
+查詢現有所有標籤（用於匯入前的標籤一致性檢查）：
+
+```bash
+curl -s "http://localhost:3000/api/notes/tags"
+```
+
 ## 注意事項
 
 - 如果知識庫服務未啟動，不要報錯，只需在摘要中省略此區塊
@@ -165,3 +183,4 @@ rm import_note.json
 - 匯入前先確認服務 health check 通過
 - **匯入內容放 `contentText`，不要填 `content`**
 - 不要手動建構 Tiptap JSON
+- 匯入前用 `/api/search/hybrid` 去重（score > 0.85 即為重複）

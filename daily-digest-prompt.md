@@ -77,7 +77,15 @@
 3. 若無快取或已過期 → 依 SKILL.md 呼叫 MCP 服務
 4. 成功後寫入快取
 5. 讀取 `skills/pingtung-policy-expert/SKILL.md`，為每則新聞附加施政背景解讀
-6. **Skill 加值**：若有重大新聞（如重大建設、政策發布），主動用 knowledge-query 匯入知識庫
+6. **RAG 知識增強**：查完新聞後，用知識庫搜尋相關政策筆記（若知識庫可用）：
+   ```bash
+   curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "新聞核心關鍵字（如醫療在地化、觀光）", "topK": 3}'
+   ```
+   - 有相關結果 → 在政策解讀後附加：「📎 知識庫關聯：[筆記標題]」
+   - 無結果或服務不可用 → 跳過（不影響流程）
+7. 標記重大新聞（預算破億、新建設啟用、首創計畫）為步驟 6 匯入候選
 
 ## 3. 查詢 AI 技術動態
 **使用 Skill**：`hackernews-ai-digest` + `api-cache` + `knowledge-query`（可選）
@@ -87,7 +95,15 @@
 3. 若無快取或已過期 → 依 SKILL.md 呼叫 HN API，篩選 AI 文章（3-5 則）
 4. 成功後寫入快取
 5. 標題翻譯為正體中文，保留技術術語原文
-6. **Skill 加值**：若有突破性 AI 技術動態（如新模型發布、重大研究），主動用 knowledge-query 匯入知識庫
+6. **RAG 知識增強**：查完 AI 新聞後，用知識庫搜尋相關技術筆記（若知識庫可用）：
+   ```bash
+   curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "技術名稱或核心概念", "topK": 3}'
+   ```
+   - 有相關結果 → 附加：「📎 相關研究：[筆記標題]」
+   - 無結果或服務不可用 → 跳過
+7. 標記 HN 熱度 ≥ 300 的突破性技術為步驟 6 匯入候選
 
 ## 4. 生成今日習慣提示
 **使用 Skill**：`atomic-habits`
@@ -104,15 +120,41 @@
 3. 無需外部 API
 4. 輸出格式：📚 今日學習技巧：【主題】+ 提示內容 + 出處
 
-## 6. 查詢知識庫回顧 + 主動匯入
+## 6. 查詢知識庫 + 智慧匯入
 **使用 Skill**：`knowledge-query` + `api-cache`
 
+### 6.1 查詢回顧
 1. 讀取 `skills/knowledge-query/SKILL.md`
 2. **api-cache 快取流程**：讀取 `cache/knowledge.json`，1 小時內有效 → 用快取
 3. 查詢最近筆記，若知識庫服務未啟動則跳過
-4. **主動匯入**：回顧步驟 2、3 中標記的重要內容，嘗試匯入知識庫
-   - 匯入格式依 SKILL.md 指示，用 Write 建 JSON → curl POST → 刪除暫存檔
-   - 匯入失敗不影響整體流程
+4. 查詢知識庫統計：`curl -s "http://localhost:3000/api/stats"`，記錄 `total_notes` 供記憶寫入
+
+### 6.2 智慧匯入（每次至少執行判斷，不可跳過）
+回顧步驟 2（屏東新聞）和步驟 3（AI 動態），依以下規則判斷是否匯入：
+
+**匯入觸發條件**（滿足任一即匯入）：
+| 條件 | 來源 | 範例 |
+|------|------|------|
+| 屏東新聞含重大政策 | 步驟 2 | 預算破億、新建設啟用、首創計畫、縣長出席 |
+| AI 新聞 HN 熱度 ≥ 300 | 步驟 3 | score ≥ 300 的突破性技術（新模型、重大融資） |
+| 知識庫中無相關筆記 | hybrid search | 最高 score < 0.85 表示為新內容 |
+
+**去重檢查**（每個匯入候選必做）：
+```bash
+curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "候選標題關鍵字", "topK": 3}'
+```
+- 最高 score > 0.85 → 跳過（已有相似筆記）
+- 最高 score ≤ 0.85 或無結果 → 執行匯入
+- hybrid search 失敗 → 仍嘗試匯入（寧可重複也不遺漏）
+
+**匯入格式**（依 SKILL.md 指示，用 Write 建 JSON → curl POST → rm 暫存檔）：
+- 屏東新聞：`title`=新聞標題, `tags`=["屏東新聞","政策",施政領域], `contentText`=新聞摘要+政策解讀
+- AI 動態：`title`=技術名稱, `tags`=["AI動態","HN"], `contentText`=技術摘要+影響分析+原文連結
+
+**無符合條件時**：在摘要中記錄「知識庫匯入：0 則（本次無重大新聞/技術突破）」，仍算通過驗證。
+匯入失敗不影響整體流程。
 
 ## 7. 生成一個佛學禪語
 生成一個佛學禪語（此步驟無對應 Skill，直接生成）

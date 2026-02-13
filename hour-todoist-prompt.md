@@ -210,10 +210,19 @@
 ## 任務
 對楞嚴經（大佛頂首楞嚴經）進行一次深度研究。
 
-## 第一步：查詢知識庫已有研究（必做）
+## 第一步：查詢知識庫已有研究（必做，兩階段去重）
 
-用以下指令查詢知識庫中已有的楞嚴經筆記：
+### 階段 1：語義搜尋（優先，更精確）
+```bash
+curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "楞嚴經 研究", "topK": 15}'
+```
+- 成功 → 列出所有結果的 title，作為去重依據
+- 失敗 → 進入階段 2
 
+### 階段 2：字串比對（備份，服務降級時使用）
+```bash
 curl -s "http://localhost:3000/api/notes?limit=100" -o kb_notes.json
 python -c "
 import json
@@ -225,8 +234,9 @@ for n in matched:
     print(f'  - {n[\"title\"]}')
 "
 rm kb_notes.json
+```
 
-- 知識庫無法連線 → 跳過查詢，從楞嚴經概論開始研究
+- 兩階段都失敗（知識庫無法連線）→ 跳過查詢，從楞嚴經概論開始研究
 - 有結果 → 仔細閱讀已有標題，避免重複
 
 ## 第二步：選定研究主題
@@ -648,9 +658,19 @@ Step 4: [Skill D] 通知 → 含 Step 1-3 結果摘要
 ## 任務
 [研究主題和目標]
 
-## 去重查詢（研究前必做）
-用以下指令查詢知識庫中已有的相關筆記：
+## 去重查詢（研究前必做，兩階段）
 
+### 階段 1：語義搜尋（優先，更精確）
+```bash
+curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "【研究主題關鍵字】", "topK": 10}'
+```
+- 成功 → 列出所有結果的 title，作為去重依據
+- 失敗 → 進入階段 2
+
+### 階段 2：字串比對（備份）
+```bash
 curl -s "http://localhost:3000/api/notes?limit=100" -o kb_notes.json
 python -c "
 import json
@@ -663,8 +683,9 @@ for n in matched:
     print(f'  - {n[\"title\"]}')
 "
 rm kb_notes.json
+```
 
-- 知識庫無法連線 → 跳過查詢，直接進行研究
+- 兩階段都失敗 → 跳過查詢，直接進行研究
 - 有結果 → 根據已有內容，選擇一個尚未涵蓋的角度進行研究，避免重複
 
 ## 執行步驟

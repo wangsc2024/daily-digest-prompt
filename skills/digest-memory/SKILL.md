@@ -48,6 +48,11 @@ allowed-tools: Read, Write
     "api_calls": 3,
     "knowledge_imports": 0
   },
+  "knowledge": {
+    "total_notes": 42,
+    "imports_today": 0,
+    "top_tags": ["楞嚴經", "AI動態", "系統審查"]
+  },
   "digest_summary": "昨日 5 項待辦完成 3 項，屏東新聞 2 則，AI 動態 3 則"
 }
 ```
@@ -81,8 +86,12 @@ allowed-tools: Read, Write
 8. `learning`：同上邏輯
 9. `digest_summary`：本次摘要的一句話總結
 10. `skill_usage`：本次 Skill 使用統計（total_skills, used_skills, cache_hits, api_calls, knowledge_imports）
-11. `trends`（可選，v2 新增）：最近 7 天趨勢資料，每天一筆
-12. `insights`（可選，v2 新增）：Agent 自動提煉的跨天觀察
+11. `knowledge`：知識庫健康資訊
+    - `total_notes`：從 `/api/stats` 取得的筆記總數（查詢失敗則保留前次值）
+    - `imports_today`：本次摘要匯入的筆記數
+    - `top_tags`：從 `/api/notes/tags` 取得的前 5 大標籤（查詢失敗則保留前次值）
+12. `trends`（可選，v2 新增）：最近 7 天趨勢資料，每天一筆
+13. `insights`（可選，v2 新增）：Agent 自動提煉的跨天觀察
 
 ### trends 區塊格式（可選）
 ```json
