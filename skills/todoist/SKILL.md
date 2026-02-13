@@ -29,21 +29,24 @@ Token 取得：https://todoist.com/app/settings/integrations/developer
 ### 查詢僅今日待辦（預設）
 
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks?filter=today" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 
 > **注意**：預設僅查詢今日任務，不含過期任務，避免重複執行。
+>
+> **重要**：API v1 的篩選端點為 `/tasks/filter?query=`，不是 `/tasks?filter=`。
+> 後者的 `filter` 參數會被靜默忽略，回傳全部任務。
 
 ### 自訂過濾器
 
 ```bash
 # 今日 + 過期（如需包含過期任務）
-curl -s "https://api.todoist.com/api/v1/tasks?filter=today%20%7C%20overdue" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 
 # 未來 7 天
-curl -s "https://api.todoist.com/api/v1/tasks?filter=7%20days" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=7%20days" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 
@@ -134,11 +137,12 @@ TOKEN = os.environ["TODOIST_API_TOKEN"]
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
 # 查詢任務（注意：回應格式為 { "results": [...], "next_cursor": ... }）
+# API v1 篩選端點：/tasks/filter?query=  （不是 /tasks?filter=）
 def get_tasks(filter_query="today"):
     response = requests.get(
-        "https://api.todoist.com/api/v1/tasks",
+        "https://api.todoist.com/api/v1/tasks/filter",
         headers=HEADERS,
-        params={"filter": filter_query}
+        params={"query": filter_query}
     )
     data = response.json()
     return data.get("results", [])

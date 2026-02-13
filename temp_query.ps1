@@ -9,7 +9,7 @@ $headers = @{
 }
 
 try {
-    $response = Invoke-RestMethod -Uri "https://api.todoist.com/api/v1/tasks?filter=today" -Headers $headers -Method Get
+    $response = Invoke-RestMethod -Uri "https://api.todoist.com/api/v1/tasks/filter?query=today" -Headers $headers -Method Get
     $response | ConvertTo-Json -Depth 10
 } catch {
     Write-Host "ERROR: $($_.Exception.Message)"

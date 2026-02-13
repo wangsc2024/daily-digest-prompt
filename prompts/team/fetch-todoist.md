@@ -25,7 +25,7 @@
 依 todoist SKILL.md 指示，查詢**僅當日**待辦（不含 overdue）：
 
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks?filter=today" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 

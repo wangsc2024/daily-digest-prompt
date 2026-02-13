@@ -1,4 +1,7 @@
-# Todoist REST API v2 完整參考
+# Todoist API v1 完整參考
+
+> **遷移注意**：REST API v2（`/api/v1/`）已棄用（410 Gone），已改用 API v1（`/api/v1/`）。
+> 關鍵變更：篩選查詢改為獨立端點 `/tasks/filter?query=`，不再使用 `/tasks?filter=`。
 
 ## 認證
 
@@ -14,32 +17,44 @@ Authorization: Bearer YOUR_API_TOKEN
 
 | 資源 | 端點 |
 |------|------|
-| 任務 | `/rest/v2/tasks` |
-| 專案 | `/rest/v2/projects` |
-| 區段 | `/rest/v2/sections` |
-| 標籤 | `/rest/v2/labels` |
-| 留言 | `/rest/v2/comments` |
+| 取得所有任務 | `GET /api/v1/tasks` |
+| 篩選任務 | `GET /api/v1/tasks/filter?query=` |
+| 建立任務 | `POST /api/v1/tasks` |
+| 完成任務 | `POST /api/v1/tasks/{id}/close` |
+| 更新任務 | `POST /api/v1/tasks/{id}` |
+| 刪除任務 | `DELETE /api/v1/tasks/{id}` |
 
 ## 任務 API
+
+### 篩選任務（推薦）
+
+```
+GET https://api.todoist.com/api/v1/tasks/filter?query=today
+```
+
+參數：
+- `query` (string, **必填**): 過濾條件（如 `today`、`overdue`、`today | overdue`）
+- `lang` (string): 語言代碼
+
+> **⚠️ 注意**：`GET /api/v1/tasks` 不支援 `filter` 參數（會被靜默忽略，回傳全部任務）。
+> 篩選必須使用 `/tasks/filter?query=` 端點。
 
 ### 取得所有任務
 
 ```
-GET https://api.todoist.com/rest/v2/tasks
+GET https://api.todoist.com/api/v1/tasks
 ```
 
 參數：
 - `project_id` (string): 專案 ID
-- `section_id` (string): 區段 ID  
+- `section_id` (string): 區段 ID
 - `label` (string): 標籤名稱
-- `filter` (string): 過濾條件
-- `lang` (string): 語言代碼
 - `ids` (string): 任務 ID，逗號分隔
 
 ### 建立任務
 
 ```
-POST https://api.todoist.com/rest/v2/tasks
+POST https://api.todoist.com/api/v1/tasks
 ```
 
 Body：
@@ -66,31 +81,31 @@ Body：
 ### 取得單一任務
 
 ```
-GET https://api.todoist.com/rest/v2/tasks/{task_id}
+GET https://api.todoist.com/api/v1/tasks/{task_id}
 ```
 
 ### 更新任務
 
 ```
-POST https://api.todoist.com/rest/v2/tasks/{task_id}
+POST https://api.todoist.com/api/v1/tasks/{task_id}
 ```
 
 ### 完成任務
 
 ```
-POST https://api.todoist.com/rest/v2/tasks/{task_id}/close
+POST https://api.todoist.com/api/v1/tasks/{task_id}/close
 ```
 
 ### 重新開啟任務
 
 ```
-POST https://api.todoist.com/rest/v2/tasks/{task_id}/reopen
+POST https://api.todoist.com/api/v1/tasks/{task_id}/reopen
 ```
 
 ### 刪除任務
 
 ```
-DELETE https://api.todoist.com/rest/v2/tasks/{task_id}
+DELETE https://api.todoist.com/api/v1/tasks/{task_id}
 ```
 
 ## 過濾器語法
@@ -228,13 +243,13 @@ assigned to: me & overdue
 ### 取得所有專案
 
 ```
-GET https://api.todoist.com/rest/v2/projects
+GET https://api.todoist.com/api/v1/projects
 ```
 
 ### 建立專案
 
 ```
-POST https://api.todoist.com/rest/v2/projects
+POST https://api.todoist.com/api/v1/projects
 ```
 
 Body：
@@ -253,13 +268,13 @@ Body：
 ### 取得所有標籤
 
 ```
-GET https://api.todoist.com/rest/v2/labels
+GET https://api.todoist.com/api/v1/labels
 ```
 
 ### 建立標籤
 
 ```
-POST https://api.todoist.com/rest/v2/labels
+POST https://api.todoist.com/api/v1/labels
 ```
 
 Body：

@@ -5,7 +5,7 @@ if ($token) {
     Write-Host "Token found (length: $($token.Length))"
     try {
         $headers = @{ "Authorization" = "Bearer $token" }
-        $resp = Invoke-RestMethod -Uri "https://api.todoist.com/api/v1/tasks?filter=today" -Headers $headers -ErrorAction Stop
+        $resp = Invoke-RestMethod -Uri "https://api.todoist.com/api/v1/tasks/filter?query=today" -Headers $headers -ErrorAction Stop
         Write-Host "API OK - today tasks: $($resp.results.Count)"
         foreach ($t in $resp.results | Select-Object -First 3) {
             Write-Host "  - $($t.content) (p$($t.priority))"
