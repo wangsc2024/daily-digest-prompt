@@ -46,6 +46,7 @@ allowed-tools: Read, Write
     "used_skills": 10,
     "cache_hits": 2,
     "api_calls": 3,
+    "cache_degraded": 0,
     "knowledge_imports": 0
   },
   "knowledge": {
@@ -85,7 +86,13 @@ allowed-tools: Read, Write
 7. `habits.topics_history`：保留最近 7 筆
 8. `learning`：同上邏輯
 9. `digest_summary`：本次摘要的一句話總結
-10. `skill_usage`：本次 Skill 使用統計（total_skills, used_skills, cache_hits, api_calls, knowledge_imports）
+10. `skill_usage`：本次 Skill 使用統計
+    - `total_skills`：專案定義的 Skill 總數（目前固定 12）
+    - `used_skills`：本次實際使用的 Skill 數量
+    - `cache_hits`：快取命中次數（從 api-cache 追蹤取得）
+    - `api_calls`：API 實際呼叫次數
+    - `cache_degraded`：降級使用過期快取次數（新增欄位）
+    - `knowledge_imports`：本次匯入知識庫的筆記數
 11. `knowledge`：知識庫健康資訊
     - `total_notes`：從 `/api/stats` 取得的筆記總數（查詢失敗則保留前次值）
     - `imports_today`：本次摘要匯入的筆記數
@@ -102,7 +109,8 @@ allowed-tools: Read, Write
     "tasks_completed": 0,
     "skills_used": 11,
     "cache_hits": 2,
-    "api_calls": 3
+    "api_calls": 3,
+    "cache_degraded": 0
   }
 ]
 ```
