@@ -120,9 +120,10 @@ todoist（確認無任務）→ [D1: 楞嚴經研究] → [D2: 系統 Log 審查
 ```
 
 **D1：楞嚴經自動研究**
-1. 用 knowledge-query 查詢已有楞嚴經筆記，避免重複
-2. 選取未研究的主題，用 WebSearch + WebFetch 蒐集資料
-3. 用 knowledge-query 將研究成果匯入知識庫
+1. 子 Agent 先用 `/api/notes?limit=100` + tag/title 篩選查詢知識庫已有筆記
+2. 根據已有內容自主選擇下一個研究主題（不硬編碼主題表）
+3. 用 WebSearch + WebFetch 蒐集資料
+4. 用 knowledge-query 將研究成果匯入知識庫
 
 **D2：系統 Log 深度審查**
 1. 用 scheduler-state 讀取執行記錄，分析成功率與耗時

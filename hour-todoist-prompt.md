@@ -52,6 +52,36 @@
 
 記錄每筆任務的 `id`、`content`、`description`、`priority`、`labels`、`due`。
 
+### 1.1 防止重複關閉：截止日期過濾 + 已關閉 ID 檢查
+
+循環任務（recurring tasks）每次被 `close` 後，Todoist 會自動將截止日期推進到下一個週期。
+若同一天內多次執行本 Agent，會重複關閉同一任務，導致截止日期被不斷往後推移。
+
+**必須依序執行以下兩道過濾：**
+
+#### 過濾 A：截止日期驗證
+取得今天的日期（`date +%Y-%m-%d`），逐一比對每筆任務的 `due.date`：
+- `due.date` ≤ 今天 → **保留**（今日或過期任務）
+- `due.date` > 今天 → **移除**（未來任務，不應處理）
+- `due` 為 null → **保留**（無日期任務仍可處理）
+
+#### 過濾 B：已關閉 ID 排除
+用 Read 工具讀取 `context/auto-tasks-today.json`：
+- 若檔案存在且 `date` 等於今天 → 取出 `closed_task_ids` 陣列
+- 若檔案不存在或日期不同 → `closed_task_ids` 視為空陣列
+- 逐一比對：任務 `id` 已在 `closed_task_ids` 中 → **移除**（今天已經關閉過）
+
+**過濾後輸出摘要**：
+```
+📋 任務過濾結果：
+- API 回傳：N 筆
+- 截止日期過濾後：M 筆（移除 X 筆未來任務）
+- 已關閉 ID 過濾後：K 筆（移除 Y 筆今日已處理）
+- 進入路由篩選：K 筆
+```
+
+> **關鍵**：只有通過兩道過濾的任務才進入步驟 2 的路由篩選。
+
 ---
 
 ## 步驟 2：三層路由篩選（標籤 > 關鍵字 > 語義）
@@ -132,9 +162,12 @@
   "date": "YYYY-MM-DD（今天日期，格式如 2026-02-12）",
   "shurangama_count": 0,
   "log_audit_count": 0,
-  "git_push_count": 0
+  "git_push_count": 0,
+  "closed_task_ids": []
 }
 ```
+
+> **`closed_task_ids`**：記錄今日已成功關閉的 Todoist 任務 ID，用於步驟 1.1 過濾 B 防止重複關閉循環任務。每日歸零時清空。
 
 > **重要**：判斷日期時請用系統當前日期（`date +%Y-%m-%d`），與 JSON 中的 `date` 欄位比對。日期不同即代表跨日，必須歸零。
 
@@ -160,38 +193,11 @@
 ### 2.6.1 讀取 Skill
 讀取 `skills/knowledge-query/SKILL.md`，了解匯入格式。
 
-### 2.6.2 查詢知識庫已有的楞嚴經筆記
-```bash
-curl -s -X POST "http://localhost:3000/api/search/hybrid" \
-  -H "Content-Type: application/json" \
-  -d "{\"query\": \"楞嚴經\", \"topK\": 10}"
-```
-- 知識庫未啟動 → 跳過研究，直接到步驟 5
-- 已有筆記 → 分析尚未涵蓋的主題，避免重複
+### 2.6.2 建立研究 prompt 並執行
 
-### 2.6.3 選定研究主題
-從以下楞嚴經核心主題中，選一個尚未研究過的（依知識庫已有筆記排除）：
+用 **Write 工具**建立 `task_prompt.md`（UTF-8）。
 
-| 優先級 | 主題 | 搜尋關鍵詞 |
-|--------|------|-----------|
-| 1 | 七處徵心 | 楞嚴經 七處徵心 阿難 心在哪裡 |
-| 2 | 十番顯見 | 楞嚴經 十番顯見 見性 不動 |
-| 3 | 五十陰魔 | 楞嚴經 五十陰魔 色陰 受陰 想陰 行陰 識陰 |
-| 4 | 二十五圓通 | 楞嚴經 二十五圓通 觀世音菩薩 耳根圓通 |
-| 5 | 四種清淨明誨 | 楞嚴經 四種清淨明誨 殺盜淫妄 |
-| 6 | 楞嚴咒功德 | 楞嚴咒 功德 持誦 護法 |
-| 7 | 如來藏與真心 | 楞嚴經 如來藏 真心 妄心 本覺 |
-| 8 | 六入本如來藏 | 楞嚴經 六入 十二處 十八界 如來藏妙真如性 |
-| 9 | 修行次第 | 楞嚴經 乾慧地 十信 十住 十行 十回向 |
-| 10 | 楞嚴經在禪宗的地位 | 楞嚴經 禪宗 開悟 明心見性 虛雲老和尚 |
-
-若全部已研究完畢，可從以下延伸主題中選取：
-- 楞嚴經與唯識學的關係
-- 楞嚴經的歷史傳承與翻譯（般刺密帝、房融）
-- 楞嚴經在修行實踐中的應用
-
-### 2.6.4 建立研究 prompt 並執行
-用 **Write 工具**建立 `task_prompt.md`（UTF-8）：
+> **注意**：主題選擇、去重查詢都由子 Agent 自主完成，不在此處硬編碼。
 
 ```
 你是佛學研究助手，全程使用正體中文。
@@ -202,30 +208,54 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 - skills/knowledge-query/SKILL.md
 
 ## 任務
-研究楞嚴經（大佛頂首楞嚴經）主題：【選定的主題名稱】
+對楞嚴經（大佛頂首楞嚴經）進行一次深度研究。
 
-## 執行步驟
-1. 使用 WebSearch 搜尋以下關鍵詞（至少 3 組搜尋）：
-   - 【主題對應的搜尋關鍵詞】
-   - 加上「解釋」「白話」「義理」等補充詞
+## 第一步：查詢知識庫已有研究（必做）
+
+用以下指令查詢知識庫中已有的楞嚴經筆記：
+
+curl -s "http://localhost:3000/api/notes?limit=100" -o kb_notes.json
+python -c "
+import json
+data = json.load(open('kb_notes.json', 'r', encoding='utf-8'))
+notes = data.get('notes', [])
+matched = [n for n in notes if '楞嚴經' in n.get('title','') or '楞嚴經' in str(n.get('tags',[]))]
+print(f'已有 {len(matched)} 筆楞嚴經研究：')
+for n in matched:
+    print(f'  - {n[\"title\"]}')
+"
+rm kb_notes.json
+
+- 知識庫無法連線 → 跳過查詢，從楞嚴經概論開始研究
+- 有結果 → 仔細閱讀已有標題，避免重複
+
+## 第二步：選定研究主題
+
+根據已有研究記錄，選擇一個尚未涵蓋的主題：
+- 不得重複已有筆記涵蓋的主題
+- 依楞嚴經經文順序與義理脈絡，選擇最合理的下一個主題
+- 從基礎到深入：背景概論 → 破妄顯真 → 修行法門 → 陰魔辨識 → 義理深究
+- 可深入已有主題的未涵蓋面向（如七處徵心已有多篇，則跳過轉研究下一個主題）
+- 每次聚焦一個主題，不貪多
+- 先輸出：「本次研究主題：XXX」
+
+## 第三步：執行研究
+1. 使用 WebSearch 搜尋（至少 3 組關鍵詞）
 2. 使用 WebFetch 獲取 2-3 篇有價值的文章
 3. 整理為結構化 Markdown 筆記，包含：
    - 主題概述（100-200 字）
    - 經文重點段落（附白話翻譯）
    - 義理解析（佛學術語需附解釋）
+   - 與已有研究的關聯（承上啟下）
    - 修行應用（如何在日常生活中實踐）
    - 參考來源
-4. 依 SKILL.md 指示寫入知識庫：
-   a. Write 建立 import_note.json
-   b. curl POST localhost:3000/api/import
-   c. 確認 imported >= 1
-   d. rm import_note.json
 
-## 重要規則
+## 第四步：寫入知識庫
+依 SKILL.md 指示匯入：
+- tags 必須包含 ["楞嚴經", "佛學", "本次主題名稱"]
 - contentText 放完整 Markdown，不填 content 欄位
 - 必須用 Write 建立 JSON，不可用 inline JSON
 - source 填 "import"
-- tags 填 ["楞嚴經", "佛學", "【主題名稱】"]
 - 知識庫未啟動則跳過匯入，改為將研究結果直接輸出
 
 ## 品質自評迴圈
@@ -254,9 +284,23 @@ rm task_prompt.md
 ### 2.6.5 更新頻率計數
 研究完成後（無論成功或失敗），更新 `context/auto-tasks-today.json`：
 - 將 `shurangama_count` 加 1
-- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和 `log_audit_count` 不變）
+- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和其他欄位不變）
 
-### 2.6.6 記錄結果
+### 2.6.6 寫入歷史追蹤
+用 Read 讀取 `state/todoist-history.json`（不存在則初始化 `{"auto_tasks":[],"daily_summary":[]}`）。
+在 `auto_tasks` 陣列末尾加入：
+```json
+{
+  "date": "今天日期",
+  "timestamp": "ISO 8601 格式",
+  "type": "shurangama",
+  "topic": "研究主題名稱",
+  "status": "success 或 failed"
+}
+```
+若 `auto_tasks` 超過 200 條，移除最舊的。用 Write 覆寫檔案。
+
+### 2.6.7 記錄結果
 記錄研究主題和是否成功匯入知識庫，在步驟 5 通知中報告。
 
 完成後繼續到步驟 2.7。
@@ -397,9 +441,24 @@ rm task_prompt.md
 ### 2.7.7 更新頻率計數
 審查完成後（無論發現問題與否），更新 `context/auto-tasks-today.json`：
 - 將 `log_audit_count` 加 1
-- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和 `shurangama_count` 不變）
+- 用 **Write 工具**覆寫整個 JSON 檔案（保留 `date` 和其他欄位不變）
 
-### 2.7.8 記錄結果
+### 2.7.8 寫入歷史追蹤
+用 Read 讀取 `state/todoist-history.json`（不存在則初始化）。
+在 `auto_tasks` 陣列末尾加入：
+```json
+{
+  "date": "今天日期",
+  "timestamp": "ISO 8601 格式",
+  "type": "log_audit",
+  "findings": 發現問題數量,
+  "fixes": 修正數量,
+  "status": "success 或 failed"
+}
+```
+若 `auto_tasks` 超過 200 條，移除最舊的。用 Write 覆寫檔案。
+
+### 2.7.9 記錄結果
 記錄審查發現數量、修正數量、是否全部通過，在步驟 5 通知中報告。
 
 繼續到步驟 2.8。
@@ -436,7 +495,21 @@ cd D:\Source\daily-digest-prompt && git push origin main
 - 將 `git_push_count` 加 1
 - 用 **Write 工具**覆寫整個 JSON 檔案（保留其他欄位不變）
 
-### 2.8.5 記錄結果
+### 2.8.5 寫入歷史追蹤
+用 Read 讀取 `state/todoist-history.json`（不存在則初始化）。
+在 `auto_tasks` 陣列末尾加入：
+```json
+{
+  "date": "今天日期",
+  "timestamp": "ISO 8601 格式",
+  "type": "git_push",
+  "commit_hash": "commit hash 或 null",
+  "status": "success 或 failed 或 no_changes"
+}
+```
+若 `auto_tasks` 超過 200 條，移除最舊的。用 Write 覆寫檔案。
+
+### 2.8.6 記錄結果
 記錄 commit hash、推送狀態（成功/失敗/無變更），在步驟 5 通知中報告。
 
 繼續到步驟 5 發送通知（通知內容包含楞嚴經研究 + 系統審查 + GitHub 推送結果）。
@@ -575,11 +648,31 @@ Step 4: [Skill D] 通知 → 含 Step 1-3 結果摘要
 ## 任務
 [研究主題和目標]
 
+## 去重查詢（研究前必做）
+用以下指令查詢知識庫中已有的相關筆記：
+
+curl -s "http://localhost:3000/api/notes?limit=100" -o kb_notes.json
+python -c "
+import json
+data = json.load(open('kb_notes.json', 'r', encoding='utf-8'))
+notes = data.get('notes', [])
+keyword = '【研究主題關鍵字】'
+matched = [n for n in notes if keyword in n.get('title','') or keyword in str(n.get('tags',[]))]
+print(f'已有 {len(matched)} 筆相關研究：')
+for n in matched:
+    print(f'  - {n[\"title\"]}')
+"
+rm kb_notes.json
+
+- 知識庫無法連線 → 跳過查詢，直接進行研究
+- 有結果 → 根據已有內容，選擇一個尚未涵蓋的角度進行研究，避免重複
+
 ## 執行步驟
-1. 使用 WebSearch 搜尋（至少 2-3 個搜尋詞）
-2. 使用 WebFetch 獲取有價值文章
-3. 整理為結構化 Markdown 筆記
-4. 依 SKILL.md 指示寫入知識庫：
+1. 根據去重查詢結果，決定本次研究的具體角度，先輸出：「本次研究主題：XXX」
+2. 使用 WebSearch 搜尋（至少 2-3 個搜尋詞）
+3. 使用 WebFetch 獲取有價值文章
+4. 整理為結構化 Markdown 筆記
+5. 依 SKILL.md 指示寫入知識庫：
    a. Write 建立 import_note.json
    b. curl POST localhost:3000/api/import
    c. 確認 imported >= 1
@@ -822,6 +915,14 @@ curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 
+#### 4.3.1b 記錄已關閉 task ID（防止重複關閉）
+關閉成功後，立即更新 `context/auto-tasks-today.json`：
+1. 用 Read 讀取 `context/auto-tasks-today.json`
+2. 將剛關閉的 `TASK_ID` 加入 `closed_task_ids` 陣列（若尚未存在）
+3. 用 Write 覆寫整個 JSON 檔案（保留 `date` 和其他欄位不變）
+
+> **為何在此記錄**：確保同一次執行中處理多個任務時，不會重複關閉；也確保同一天的下一次排程執行時，步驟 1.1 過濾 B 能正確排除已處理的任務。
+
 #### 4.3.2 附加執行結果評論
 依 `skills/todoist/SKILL.md`「新增任務評論」區段，附加成功報告：
 
@@ -892,6 +993,29 @@ rm comment.json
 
 #### 4.5.4 記錄失敗
 在步驟 5 通知中包含失敗任務資訊（任務名稱、失敗原因、已重試次數）。
+
+---
+
+## 步驟 4.9：更新歷史追蹤 daily_summary（步驟 5 之前執行）
+
+用 Read 讀取 `state/todoist-history.json`（不存在則初始化 `{"auto_tasks":[],"daily_summary":[]}`）。
+
+在 `daily_summary` 陣列中查找今天日期的條目：
+- **存在** → 更新該條目的計數值
+- **不存在** → 新增今天的條目
+
+```json
+{
+  "date": "今天日期",
+  "shurangama_count": 從 auto-tasks-today.json 讀取,
+  "log_audit_count": 從 auto-tasks-today.json 讀取,
+  "git_push_count": 從 auto-tasks-today.json 讀取,
+  "todoist_completed": 本次執行完成的任務數,
+  "total_executions": 今日第幾次執行（從 daily_summary 累計或初始化為 1）
+}
+```
+
+若 `daily_summary` 超過 30 條，移除最舊的。用 Write 覆寫檔案。
 
 ---
 

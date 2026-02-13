@@ -52,6 +52,7 @@ function Update-State {
         status           = $Status
         duration_seconds = $Duration
         error            = $ErrorMsg
+        log_file         = (Split-Path -Leaf $LogFile)
     }
 
     if (Test-Path $StateFile) {
@@ -66,8 +67,8 @@ function Update-State {
     $runs = [System.Collections.ArrayList]@($state.runs)
     $runs.Add($run) | Out-Null
 
-    # Keep only last 30 runs
-    while ($runs.Count -gt 30) {
+    # Keep only last 200 runs
+    while ($runs.Count -gt 200) {
         $runs.RemoveAt(0)
     }
 

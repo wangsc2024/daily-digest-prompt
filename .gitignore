@@ -8,6 +8,7 @@ ntfy_temp.json
 context/digest-memory.json
 cache/
 state/scheduler-state.json
+state/todoist-history.json
 
 # Agent Team 並行結果（Phase 1 產出，Phase 2 清理）
 results/

@@ -15,9 +15,11 @@ chcp 65001 | Out-Null
 $AgentDir = "D:\Source\daily-digest-prompt"
 $LogDir = "$AgentDir\logs"
 $PromptFile = "$AgentDir\hour-todoist-prompt.md"
+$StateFile = "$AgentDir\state\scheduler-state.json"
 
-# Create logs directory
+# Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$AgentDir\state" | Out-Null
 
 # Generate log filename
 $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -30,12 +32,53 @@ function Write-Log {
     [System.IO.File]::AppendAllText($LogFile, "$Message`r`n", [System.Text.Encoding]::UTF8)
 }
 
+# Update scheduler state
+function Update-State {
+    param(
+        [string]$Status,
+        [int]$Duration,
+        [string]$ErrorMsg
+    )
+
+    $run = @{
+        timestamp        = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
+        agent            = "todoist"
+        status           = $Status
+        duration_seconds = $Duration
+        error            = $ErrorMsg
+        log_file         = (Split-Path -Leaf $LogFile)
+    }
+
+    if (Test-Path $StateFile) {
+        $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
+        $state = $stateJson | ConvertFrom-Json
+    }
+    else {
+        $state = @{ runs = @() }
+    }
+
+    # Convert runs to ArrayList for manipulation
+    $runs = [System.Collections.ArrayList]@($state.runs)
+    $runs.Add($run) | Out-Null
+
+    # Keep only last 200 runs
+    while ($runs.Count -gt 200) {
+        $runs.RemoveAt(0)
+    }
+
+    $state.runs = $runs.ToArray()
+    $json = $state | ConvertTo-Json -Depth 5
+    [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::UTF8)
+}
+
 # Start execution
+$startTime = Get-Date
 Write-Log "=== Todoist Agent start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
 
 # Check prompt file exists
 if (-not (Test-Path $PromptFile)) {
     Write-Log "[ERROR] prompt file not found: $PromptFile"
+    Update-State -Status "failed" -Duration 0 -ErrorMsg "prompt file not found"
     exit 1
 }
 
@@ -46,21 +89,41 @@ $PromptContent = Get-Content -Path $PromptFile -Raw -Encoding UTF8
 $claudePath = Get-Command claude -ErrorAction SilentlyContinue
 if (-not $claudePath) {
     Write-Log "[ERROR] claude not found, install: npm install -g @anthropic-ai/claude-code"
+    Update-State -Status "failed" -Duration 0 -ErrorMsg "claude not found"
     exit 1
 }
 
 # Call Claude Code
 Write-Log "--- calling Claude Code ---"
+$success = $false
 try {
     $PromptContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {
         Write-Log $_
+    }
+
+    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
+        $success = $true
+    }
+    else {
+        Write-Log "[WARN] Claude exited with code: $LASTEXITCODE"
     }
 }
 catch {
     Write-Log "[ERROR] Claude failed: $_"
 }
 
-Write-Log "=== done: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+# Calculate duration
+$duration = [int]((Get-Date) - $startTime).TotalSeconds
+
+# Update state
+if ($success) {
+    Write-Log "=== done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+    Update-State -Status "success" -Duration $duration -ErrorMsg $null
+}
+else {
+    Write-Log "=== done (failed): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+    Update-State -Status "failed" -Duration $duration -ErrorMsg "claude execution failed"
+}
 
 # Clean up logs older than 7 days
 Get-ChildItem -Path $LogDir -Filter "todoist_*.log" |

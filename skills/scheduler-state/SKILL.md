@@ -4,9 +4,12 @@
 追蹤每次排程執行的狀態，提供健康度報告。
 
 ## 狀態檔案位置
-`state/scheduler-state.json`
+- `state/scheduler-state.json` — 所有 Agent 的執行記錄
+- `state/todoist-history.json` — Todoist 自動任務歷史（楞嚴經/Log審查/Git push）
 
 ## 狀態檔案格式
+
+### scheduler-state.json
 
 ```json
 {
@@ -26,11 +29,17 @@
         "zen": "success",
         "ntfy": "success"
       },
-      "error": null
+      "error": null,
+      "log_file": "20260211_080000.log"
     }
   ]
 }
 ```
+
+### agent 欄位值
+- `daily-digest`：每日摘要（單一模式）
+- `daily-digest-team`：每日摘要（團隊並行模式）
+- `todoist`：Todoist 任務規劃
 
 ### 狀態值說明
 - `success`：該區塊正常完成
@@ -45,8 +54,37 @@
 
 1. 用 Read 工具讀取 `state/scheduler-state.json`（不存在則初始化 `{"runs":[]}`）
 2. 將本次執行記錄加入 `runs` 陣列末尾
-3. 若 `runs` 超過 30 筆，移除最舊的記錄（僅保留最近 30 筆）
+3. 若 `runs` 超過 200 筆，移除最舊的記錄（僅保留最近 200 筆）
 4. 用 Write 工具寫回檔案
+
+> **注意**：所有三種 Agent（daily-digest、daily-digest-team、todoist）都會寫入同一個 `scheduler-state.json`。
+
+## Todoist 歷史追蹤（todoist-history.json）
+
+Todoist Agent 在執行自動任務（楞嚴經研究、Log 審查、Git push）時，需額外寫入 `state/todoist-history.json`：
+
+### 寫入時機
+- 步驟 2.6（楞嚴經研究完成後）
+- 步驟 2.7（Log 審查完成後）
+- 步驟 2.8（Git push 完成後）
+- 步驟 4.9（更新 daily_summary）
+
+### 格式
+```json
+{
+  "auto_tasks": [
+    { "date": "2026-02-13", "timestamp": "ISO 8601", "type": "shurangama", "topic": "主題名稱", "status": "success" },
+    { "date": "2026-02-13", "timestamp": "ISO 8601", "type": "log_audit", "findings": 1, "fixes": 1, "status": "success" },
+    { "date": "2026-02-13", "timestamp": "ISO 8601", "type": "git_push", "commit_hash": "abc1234", "status": "success" }
+  ],
+  "daily_summary": [
+    { "date": "2026-02-13", "shurangama_count": 2, "log_audit_count": 1, "git_push_count": 0, "todoist_completed": 6, "total_executions": 14 }
+  ]
+}
+```
+
+- `auto_tasks` 最多保留 200 條
+- `daily_summary` 最多保留 30 天
 
 ## 健康度摘要（Agent 可選加入摘要開頭）
 
@@ -60,12 +98,12 @@
 - 最近失敗：[日期] [原因]（若無則顯示「無」）
 ```
 
-計算方式：
-- 篩選 `timestamp` 在 7 天內的記錄
-- 成功率 = status 為 success 的次數 / 總次數 × 100%
-- 平均耗時 = 所有 duration_seconds 的平均值
+## 查詢工具
+
+使用 `query-logs.ps1` 進行靈活查詢（summary/detail/errors/todoist/trend 五種模式）。
 
 ## 注意事項
 - 用 Write 工具建立 JSON 檔案，確保 UTF-8 編碼
-- runs 陣列最多保留 30 筆，避免檔案過大
+- runs 陣列最多保留 200 筆
 - 每次執行都要寫入，包括失敗的執行
+- `log_file` 欄位記錄對應的日誌檔名，便於關聯查詢

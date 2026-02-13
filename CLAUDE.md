@@ -38,7 +38,8 @@ daily-digest-prompt/
   run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式）
   run-todoist-agent.ps1           # Todoist 任務規劃執行腳本
   setup-scheduler.ps1             # 排程設定工具
-  check-health.ps1                # 健康檢查報告工具
+  check-health.ps1                # 健康檢查報告工具（快速一覽）
+  query-logs.ps1                  # 執行成果查詢工具（5 種模式）
   prompts/team/                   # 團隊模式 Agent prompts
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
@@ -55,7 +56,8 @@ daily-digest-prompt/
     knowledge.json                # 知識庫快取（TTL: 1 小時）
     gmail.json                    # Gmail 快取（TTL: 30 分鐘）
   state/                          # 排程執行狀態
-    scheduler-state.json          # 執行記錄（最近 30 筆）
+    scheduler-state.json          # 執行記錄（最近 200 筆，含 log_file）
+    todoist-history.json          # Todoist 自動任務歷史（楞嚴經/Log審查/Git push）
   skills/                         # 專案內 skill 指引（自包含）
     SKILL_INDEX.md                # Skill 索引與路由引擎（Agent 首先載入）
     todoist/SKILL.md              # Todoist API 查詢今日待辦
@@ -110,6 +112,7 @@ daily-digest-prompt/
    - 系統 Log 深度審查（每日最多 **1 次**），找出改善/優化項目並執行修正
    - 專案推送 GitHub（每日最多 **2 次**），自動 commit + push 變更至 GitHub
    - 頻率追蹤：`context/auto-tasks-today.json`（跨日自動歸零）
+8. **研究任務 KB 去重機制**：所有研究類任務（楞嚴經、AI、Claude Code、GitHub、邏輯思維）的子 Agent 在研究前必須先查詢知識庫已有筆記（用 `/api/notes?limit=100` + tag/title 本地篩選），根據已有內容自主選擇未涵蓋的主題，避免重複研究
 
 ## 技術棧
 - **執行環境**: Windows PowerShell
@@ -190,8 +193,17 @@ powershell -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 # 查看排程狀態
 schtasks /query /tn ClaudeDailyDigest /v
 
-# 查看系統健康度
+# 查看系統健康度（快速一覽）
 powershell -ExecutionPolicy Bypass -File check-health.ps1
+
+# 查詢執行成果（靈活查詢）
+.\query-logs.ps1                              # 近 7 天摘要
+.\query-logs.ps1 -Days 3 -Agent todoist       # 近 3 天 Todoist
+.\query-logs.ps1 -Mode detail -Date 2026-02-12 # 特定日期詳情
+.\query-logs.ps1 -Mode errors                  # 錯誤彙總
+.\query-logs.ps1 -Mode todoist                 # 自動任務歷史
+.\query-logs.ps1 -Mode trend -Days 14          # 趨勢分析
+.\query-logs.ps1 -Mode summary -Format json    # JSON 輸出
 
 # 查看最新日誌
 Get-Content (Get-ChildItem logs\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
