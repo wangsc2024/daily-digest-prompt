@@ -36,7 +36,8 @@ daily-digest-prompt/
   hour-todoist-prompt.md          # Todoist 任務規劃 Agent prompt
   run-agent.ps1                   # 每日摘要執行腳本（單一模式，含重試）
   run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式）
-  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本
+  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本（單一模式）
+  run-todoist-agent-team.ps1      # Todoist 任務規劃執行腳本（團隊並行模式）
   setup-scheduler.ps1             # 排程設定工具
   check-health.ps1                # 健康檢查報告工具（快速一覽）
   scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
@@ -53,7 +54,14 @@ daily-digest-prompt/
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
     fetch-hackernews.md           # Phase 1: HN AI 新聞資料擷取
+    fetch-gmail.md                # Phase 1: Gmail 郵件擷取
+    fetch-security.md             # Phase 1: Cisco AI Defense 安全審查
     assemble-digest.md            # Phase 2: 摘要組裝 + 通知 + 狀態
+    todoist-query.md              # Todoist Team Phase 1: 查詢+過濾+路由+規劃
+    todoist-auto-shurangama.md    # Todoist Team Phase 2b: 楞嚴經研究
+    todoist-auto-logaudit.md      # Todoist Team Phase 2b: Log 審查
+    todoist-auto-gitpush.md       # Todoist Team Phase 2b: Git push
+    todoist-assemble.md           # Todoist Team Phase 3: 關閉+更新+通知
   results/                        # 團隊模式 Phase 1 結果（Phase 2 清理）
   context/                        # 跨次記憶（持久化）
     digest-memory.json            # 摘要記憶（連續天數、待辦統計等）
@@ -104,7 +112,7 @@ daily-digest-prompt/
 
 ### 每日摘要 - 團隊並行模式（run-agent-team.ps1）
 1. Windows Task Scheduler 觸發 `run-agent-team.ps1`
-2. **Phase 1**：用 `Start-Job` 同時啟動 3 個 `claude -p`（Todoist + 新聞 + HN）
+2. **Phase 1**：用 `Start-Job` 同時啟動 5 個 `claude -p`（Todoist + 新聞 + HN + Gmail + 安全審查）
 3. 各 Agent 獨立執行快取檢查 + API 呼叫，結果寫入 `results/*.json`
 4. 等待全部完成（timeout 180s），收集各 Agent 狀態
 5. **Phase 2**：啟動組裝 Agent 讀取 `results/*.json`
@@ -113,22 +121,26 @@ daily-digest-prompt/
 8. Phase 2 失敗可自動重試一次（間隔 60 秒）
 9. 預期耗時約 1 分鐘（單一模式約 3-4 分鐘）
 
-### Todoist 任務規劃（hour-todoist-prompt.md）
-1. Windows Task Scheduler 或手動觸發 `run-todoist-agent.ps1`
-2. 腳本讀取 `hour-todoist-prompt.md` 作為 prompt
-3. 透過 `claude -p --allowedTools "Read,Bash,Write"` 執行
-4. **Agent 首先載入 `skills/SKILL_INDEX.md`（Skill-First）**
-5. 查詢 Todoist → 用 SKILL_INDEX 觸發關鍵字比對任務 → 匹配 Skill 納入執行方案
-6. 生成子 Agent prompt（含 SKILL.md 路徑引用）→ 執行 → 關閉任務 → ntfy 通知
-7. **無可處理項目時**（含頻率限制，每日自動歸零）：
-   - 楞嚴經研究（每日最多 **3 次**），將成果寫入 RAG 知識庫
-   - 系統 Log 深度審查（每日最多 **1 次**），找出改善/優化項目並執行修正
-   - 專案推送 GitHub（每日最多 **2 次**），自動 commit + push 變更至 GitHub
-   - 頻率追蹤：`context/auto-tasks-today.json`（跨日自動歸零）
-8. **研究任務 KB 去重機制**：所有研究類任務（楞嚴經、AI、Claude Code、GitHub、邏輯思維）的子 Agent 在研究前必須先查詢知識庫已有筆記（用 `/api/notes?limit=100` + tag/title 本地篩選），根據已有內容自主選擇未涵蓋的主題，避免重複研究
+### Todoist 任務規劃 - 單一模式（hour-todoist-prompt.md）
+1. 手動觸發 `run-todoist-agent.ps1`（保留作為備用）
+2. 單一 Agent 完成全部流程：查詢 → 篩選 → 執行 → 關閉 → 通知
+
+### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
+1. Windows Task Scheduler 觸發 `run-todoist-agent-team.ps1`（每 30 分鐘，02:00-23:00）
+2. **Phase 1**：查詢 Agent（todoist-query.md）查詢 Todoist + 過濾 + 路由 + 頻率檢查
+3. 輸出執行計畫 `results/todoist-plan.json` + 任務 prompt 檔案
+4. PowerShell 讀取計畫，決定 Phase 2 組合
+5. **Phase 2**（並行）：
+   - 情境 A（有任務）：並行執行最多 2 個 Todoist 任務
+   - 情境 B（無任務）：並行執行自動任務（楞嚴經研究 + Log 審查 + Git push）
+   - 情境 C（全達上限）：直接跳到 Phase 3
+6. **Phase 3**：組裝 Agent（todoist-assemble.md）關閉任務 + 更新頻率/歷史 + ntfy 通知
+7. Phase 3 失敗可自動重試一次（間隔 60 秒）
+8. **自動任務頻率限制**：楞嚴經 3 次/日、Log 審查 1 次/日、Git push 2 次/日
+9. **研究任務 KB 去重機制**：楞嚴經研究 Agent 在研究前先查詢知識庫已有筆記，避免重複
 
 ## 技術棧
-- **執行環境**: Windows PowerShell
+- **執行環境**: PowerShell 7 (pwsh)
 - **排程**: Windows Task Scheduler
 - **Agent**: Claude Code CLI（`claude -p`）
 - **通知**: ntfy.sh（topic: `wangsc2025`）
@@ -220,7 +232,7 @@ python3 hooks/query_logs.py --format json
 
 ### 前置需求
 - Python 3.8+（hooks 用 Python 解析 JSON，跨平台相容）
-- Windows 環境需安裝 Git Bash 或確保 `python3` 可用（或改為 `python`）
+- Windows 環境使用 `python`（非 `python3`，因 Windows Store 的 `python3` 空殼會靜默失敗）
 
 ## NanoClaw 啟發的優化機制
 
@@ -268,8 +280,8 @@ python3 hooks/query_logs.py --format json
 - 日誌檔名格式：`yyyyMMdd_HHmmss.log`
 - 日誌保留 7 天，自動清理
 - prompt 內容修改後無需重新部署，下次排程自動生效
-- Windows 環境需設定 `chcp 65001` 確保 UTF-8 編碼
-- `.ps1` 檔案必須使用 UTF-8 with BOM 編碼（PowerShell 5.1 無 BOM 會用系統預設編碼讀取，中文會亂碼）
+- 所有 .ps1 腳本使用 PowerShell 7 (`pwsh`) 執行，UTF-8 為預設編碼
+- `.ps1` 檔案建議使用 UTF-8 with BOM 編碼（向下相容 PowerShell 5.1）
 
 ### 嚴禁產生 nul 檔案（最高優先級 — Hook 機器強制）
 以下行為全部禁止，違反將產生名為 `nul` 的垃圾檔案：
@@ -285,13 +297,16 @@ python3 hooks/query_logs.py --format json
 ## 常用操作
 ```powershell
 # 手動執行每日摘要（單一模式）
-powershell -ExecutionPolicy Bypass -File run-agent.ps1
+pwsh -ExecutionPolicy Bypass -File run-agent.ps1
 
 # 手動執行每日摘要（團隊並行模式，推薦）
-powershell -ExecutionPolicy Bypass -File run-agent-team.ps1
+pwsh -ExecutionPolicy Bypass -File run-agent-team.ps1
 
-# 手動執行 Todoist 任務規劃
-powershell -ExecutionPolicy Bypass -File run-todoist-agent.ps1
+# 手動執行 Todoist 任務規劃（團隊並行模式，推薦）
+pwsh -ExecutionPolicy Bypass -File run-todoist-agent-team.ps1
+
+# 手動執行 Todoist 任務規劃（單一模式，備用）
+pwsh -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 
 # 設定排程（可自訂時間）
 .\setup-scheduler.ps1 -Time "08:00"
@@ -300,7 +315,7 @@ powershell -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 schtasks /query /tn ClaudeDailyDigest /v
 
 # 查看系統健康度（快速一覽）
-powershell -ExecutionPolicy Bypass -File check-health.ps1
+pwsh -ExecutionPolicy Bypass -File check-health.ps1
 
 # 查詢執行成果（靈活查詢）
 .\query-logs.ps1                              # 近 7 天摘要

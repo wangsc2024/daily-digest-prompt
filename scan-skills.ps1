@@ -1,5 +1,5 @@
 ﻿# ============================================
-# Cisco AI Defense Skill Scanner (Windows PowerShell)
+# Cisco AI Defense Skill Scanner (PowerShell 7)
 # ============================================
 # Usage:
 #   .\scan-skills.ps1                          # 快速總覽（預設）

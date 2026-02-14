@@ -77,7 +77,7 @@ if ($FromHeartbeat) {
         $existing = Get-ScheduledTask -TaskName $taskNameFromHB -ErrorAction SilentlyContinue
         if ($existing) { Unregister-ScheduledTask -TaskName $taskNameFromHB -Confirm:$false }
 
-        $action = New-ScheduledTaskAction -Execute "powershell.exe" `
+        $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
             -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`"" `
             -WorkingDirectory $AgentDir
         $trigger = New-ScheduledTaskTrigger -Daily -At $cronTime
@@ -144,7 +144,7 @@ if ($existing) {
 
 # 建立排程
 $Action = New-ScheduledTaskAction `
-    -Execute "powershell.exe" `
+    -Execute "pwsh.exe" `
     -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ScriptPath`"" `
     -WorkingDirectory $AgentDir
 
@@ -203,5 +203,5 @@ Write-Host ""
 $test = Read-Host "是否立即測試執行？(y/n)"
 if ($test -eq "y") {
     Write-Host "開始測試..." -ForegroundColor Yellow
-    & powershell -ExecutionPolicy Bypass -File $ScriptPath
+    & pwsh -ExecutionPolicy Bypass -File $ScriptPath
 }

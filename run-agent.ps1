@@ -1,15 +1,14 @@
 ﻿# ============================================
-# Claude Agent Scheduled Script (Windows PowerShell)
+# Claude Agent Scheduled Script (PowerShell 7)
 # ============================================
 # Usage:
-#   Manual: powershell -ExecutionPolicy Bypass -File run-agent.ps1
+#   Manual: pwsh -ExecutionPolicy Bypass -File run-agent.ps1
 #   Task Scheduler: same command
 # ============================================
 
-# Set UTF-8 (console + code page)
+# PowerShell 7 defaults to UTF-8, explicit set for safety
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-chcp 65001 | Out-Null
 
 # Set paths
 $AgentDir = "D:\Source\daily-digest-prompt"
@@ -23,6 +22,7 @@ $RetryDelaySeconds = 120
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$LogDir\structured" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\state" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null

@@ -1,0 +1,360 @@
+# ============================================
+# Todoist Agent Team - Parallel Orchestrator (PowerShell 7)
+# ============================================
+# Usage:
+#   Manual: pwsh -ExecutionPolicy Bypass -File run-todoist-agent-team.ps1
+#   Task Scheduler: same command
+# ============================================
+# Architecture:
+#   Phase 1: 1 query agent (todoist query + filter + route + plan)
+#   Phase 2: N parallel agents (task execution or auto-tasks)
+#   Phase 3: 1 assembly agent (close + update + notify)
+# ============================================
+
+# PowerShell 7 defaults to UTF-8, explicit set for safety
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Set paths
+$AgentDir = "D:\Source\daily-digest-prompt"
+$LogDir = "$AgentDir\logs"
+$StateFile = "$AgentDir\state\scheduler-state.json"
+$ResultsDir = "$AgentDir\results"
+
+# Config
+$Phase1TimeoutSeconds = 180
+$Phase2TimeoutSeconds = 600
+$Phase3TimeoutSeconds = 180
+$MaxPhase3Retries = 1
+
+# Create directories
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$LogDir\structured" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AgentDir\state" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
+New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null
+New-Item -ItemType Directory -Force -Path $ResultsDir | Out-Null
+
+# Generate log filename
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = "$LogDir\todoist-team_$Timestamp.log"
+
+# Write-Log function (UTF-8 without BOM)
+function Write-Log {
+    param([string]$Message)
+    Write-Host $Message
+    [System.IO.File]::AppendAllText($LogFile, "$Message`r`n", [System.Text.Encoding]::UTF8)
+}
+
+# Update scheduler state
+function Update-State {
+    param(
+        [string]$Status,
+        [int]$Duration,
+        [string]$ErrorMsg,
+        [hashtable]$Sections
+    )
+
+    $run = @{
+        timestamp        = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
+        agent            = "todoist-team"
+        status           = $Status
+        duration_seconds = $Duration
+        error            = $ErrorMsg
+        sections         = $Sections
+        log_file         = (Split-Path -Leaf $LogFile)
+    }
+
+    if (Test-Path $StateFile) {
+        $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
+        $state = $stateJson | ConvertFrom-Json
+    }
+    else {
+        $state = @{ runs = @() }
+    }
+
+    $runs = [System.Collections.ArrayList]@($state.runs)
+    $runs.Add($run) | Out-Null
+
+    while ($runs.Count -gt 200) {
+        $runs.RemoveAt(0)
+    }
+
+    $state.runs = $runs.ToArray()
+    $json = $state | ConvertTo-Json -Depth 5
+    [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::UTF8)
+}
+
+# ============================================
+# Start execution
+# ============================================
+$startTime = Get-Date
+Write-Log "=== Todoist Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+Write-Log "Mode: parallel (Phase 1 x1 + Phase 2 xN + Phase 3 x1)"
+
+# Check if claude is installed
+$claudePath = Get-Command claude -ErrorAction SilentlyContinue
+if (-not $claudePath) {
+    Write-Log "[ERROR] claude not found, install: npm install -g @anthropic-ai/claude-code"
+    Update-State -Status "failed" -Duration 0 -ErrorMsg "claude not found" -Sections @{}
+    exit 1
+}
+
+# ============================================
+# Phase 1: Query + Filter + Route + Plan
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 1: Query & Plan start ==="
+
+$queryPrompt = "$AgentDir\prompts\team\todoist-query.md"
+if (-not (Test-Path $queryPrompt)) {
+    Write-Log "[ERROR] Query prompt not found: $queryPrompt"
+    Update-State -Status "failed" -Duration 0 -ErrorMsg "query prompt not found" -Sections @{}
+    exit 1
+}
+
+$queryContent = Get-Content -Path $queryPrompt -Raw -Encoding UTF8
+$phase1Success = $false
+
+try {
+    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+        param($prompt)
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $OutputEncoding = [System.Text.Encoding]::UTF8
+        $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
+    } -ArgumentList $queryContent
+
+    $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
+
+    if ($null -eq $completed) {
+        $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
+        if ($partialOutput) { foreach ($line in $partialOutput) { Write-Log "  [query] $line" } }
+        Stop-Job $job
+        Write-Log "[Phase1] TIMEOUT after ${Phase1TimeoutSeconds}s"
+    }
+    else {
+        $output = Receive-Job $job
+        # Log last 10 lines
+        $outputLines = @($output)
+        $startIdx = [Math]::Max(0, $outputLines.Count - 10)
+        for ($i = $startIdx; $i -lt $outputLines.Count; $i++) {
+            Write-Log "  [query] $($outputLines[$i])"
+        }
+        if ($job.State -eq 'Completed') { $phase1Success = $true }
+    }
+    Remove-Job $job -Force
+}
+catch {
+    Write-Log "[Phase1] Error: $_"
+}
+
+$phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
+Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
+
+# Check Phase 1 result
+$planFile = "$ResultsDir\todoist-plan.json"
+if (-not $phase1Success -or -not (Test-Path $planFile)) {
+    Write-Log "[ERROR] Phase 1 failed or plan file not found"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "phase 1 failed" -Sections @{ query = "failed" }
+    exit 1
+}
+
+# Parse plan
+try {
+    $planJson = Get-Content -Path $planFile -Raw -Encoding UTF8
+    $plan = $planJson | ConvertFrom-Json
+    Write-Log "[Phase1] plan_type=$($plan.plan_type) | tasks=$($plan.tasks.Count)"
+}
+catch {
+    Write-Log "[ERROR] Failed to parse plan: $_"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan parse error" -Sections @{ query = "failed" }
+    exit 1
+}
+
+# ============================================
+# Phase 2: Parallel Execution
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 2: Parallel execution start ==="
+
+$phase2Jobs = @()
+$sections = @{ query = "success" }
+
+if ($plan.plan_type -eq "tasks") {
+    # Scenario A: Execute Todoist tasks in parallel
+    foreach ($task in $plan.tasks) {
+        $promptFile = $task.prompt_file
+        if (-not (Test-Path "$AgentDir\$promptFile")) {
+            Write-Log "[Phase2] Task prompt not found: $promptFile"
+            continue
+        }
+        $taskPrompt = Get-Content -Path "$AgentDir\$promptFile" -Raw -Encoding UTF8
+        $taskTools = $task.allowed_tools
+
+        $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+            param($prompt, $tools)
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+            $prompt | claude -p --allowedTools $tools 2>&1
+        } -ArgumentList $taskPrompt, $taskTools
+
+        $taskName = "task-$($task.rank)"
+        $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $taskName
+        $phase2Jobs += $job
+        Write-Log "[Phase2] Started: $taskName (Job $($job.Id)) - $($task.content)"
+    }
+}
+elseif ($plan.plan_type -eq "auto") {
+    # Scenario B: Execute auto-tasks in parallel
+    $autoTasks = @(
+        @{ Name = "shurangama"; Field = "shurangama"; Prompt = "$AgentDir\prompts\team\todoist-auto-shurangama.md" },
+        @{ Name = "logaudit";   Field = "log_audit";  Prompt = "$AgentDir\prompts\team\todoist-auto-logaudit.md" },
+        @{ Name = "gitpush";    Field = "git_push";   Prompt = "$AgentDir\prompts\team\todoist-auto-gitpush.md" }
+    )
+
+    foreach ($auto in $autoTasks) {
+        # Check if enabled in plan
+        $autoConfig = $plan.auto_tasks | Select-Object -ExpandProperty $auto.Field -ErrorAction SilentlyContinue
+        if ($null -eq $autoConfig -or -not $autoConfig.enabled) {
+            Write-Log "[Phase2] Skipped: $($auto.Name) (disabled or at limit)"
+            $sections[$auto.Name] = "skipped"
+            continue
+        }
+        if (-not (Test-Path $auto.Prompt)) {
+            Write-Log "[Phase2] Prompt not found: $($auto.Prompt)"
+            $sections[$auto.Name] = "failed"
+            continue
+        }
+
+        $promptContent = Get-Content -Path $auto.Prompt -Raw -Encoding UTF8
+
+        $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+            param($prompt)
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+            $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>&1
+        } -ArgumentList $promptContent
+
+        $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $auto.Name
+        $phase2Jobs += $job
+        Write-Log "[Phase2] Started: $($auto.Name) (Job $($job.Id))"
+    }
+}
+else {
+    # Scenario C: idle
+    Write-Log "[Phase2] Idle - all auto-tasks at daily limit"
+}
+
+# Wait for Phase 2 jobs
+if ($phase2Jobs.Count -gt 0) {
+    Write-Log "[Phase2] Waiting for $($phase2Jobs.Count) agents (timeout: ${Phase2TimeoutSeconds}s)..."
+    $phase2Jobs | Wait-Job -Timeout $Phase2TimeoutSeconds | Out-Null
+}
+
+# Collect Phase 2 results
+foreach ($job in $phase2Jobs) {
+    $agentName = $job.AgentName
+    $output = Receive-Job -Job $job -ErrorAction SilentlyContinue
+
+    if ($job.State -eq "Completed") {
+        if ($output) {
+            $outputLines = @($output)
+            $startIdx = [Math]::Max(0, $outputLines.Count - 5)
+            for ($i = $startIdx; $i -lt $outputLines.Count; $i++) {
+                Write-Log "  [$agentName] $($outputLines[$i])"
+            }
+        }
+        $sections[$agentName] = "success"
+        Write-Log "[Phase2] $agentName completed"
+    }
+    elseif ($job.State -eq "Running") {
+        Write-Log "[Phase2] $agentName TIMEOUT - stopping"
+        Stop-Job -Job $job
+        $sections[$agentName] = "timeout"
+    }
+    else {
+        Write-Log "[Phase2] $agentName failed (state: $($job.State))"
+        if ($output) { foreach ($line in @($output)) { Write-Log "  [$agentName] $line" } }
+        $sections[$agentName] = "failed"
+    }
+}
+
+$phase2Jobs | Remove-Job -Force -ErrorAction SilentlyContinue
+
+$phase2Duration = [int]((Get-Date) - $startTime).TotalSeconds - $phase1Duration
+Write-Log ""
+Write-Log "=== Phase 2 complete (${phase2Duration}s) ==="
+
+# ============================================
+# Phase 3: Assembly (close + update + notify)
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 3: Assembly start ==="
+
+$assemblePrompt = "$AgentDir\prompts\team\todoist-assemble.md"
+if (-not (Test-Path $assemblePrompt)) {
+    Write-Log "[ERROR] Assembly prompt not found: $assemblePrompt"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly prompt not found" -Sections $sections
+    exit 1
+}
+
+$assembleContent = Get-Content -Path $assemblePrompt -Raw -Encoding UTF8
+$phase3Success = $false
+$attempt = 0
+
+while ($attempt -le $MaxPhase3Retries) {
+    if ($attempt -gt 0) {
+        Write-Log "[Phase3] Retry attempt $($attempt + 1) in 60s..."
+        Start-Sleep -Seconds 60
+    }
+
+    Write-Log "[Phase3] Running assembly agent (attempt $($attempt + 1))..."
+    $phase3Start = Get-Date
+
+    try {
+        $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {
+            Write-Log "  [assemble] $_"
+        }
+
+        if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
+            $phase3Success = $true
+            $phase3Duration = [int]((Get-Date) - $phase3Start).TotalSeconds
+            Write-Log "[Phase3] Assembly completed (${phase3Duration}s)"
+            break
+        }
+        else {
+            Write-Log "[Phase3] Assembly exited with code: $LASTEXITCODE"
+        }
+    }
+    catch {
+        Write-Log "[Phase3] Assembly failed: $_"
+    }
+
+    $attempt++
+}
+
+# ============================================
+# Final status
+# ============================================
+$totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+
+if ($phase3Success) {
+    Write-Log ""
+    Write-Log "=== Todoist Agent Team done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+    Write-Log "Total: ${totalDuration}s (Phase1: ${phase1Duration}s + Phase2: ${phase2Duration}s)"
+    Update-State -Status "success" -Duration $totalDuration -ErrorMsg $null -Sections $sections
+}
+else {
+    Write-Log ""
+    Write-Log "=== Todoist Agent Team done (failed): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+    Write-Log "Total: ${totalDuration}s"
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly failed after $($MaxPhase3Retries + 1) attempts" -Sections $sections
+}
+
+# Clean up logs older than 7 days
+Get-ChildItem -Path $LogDir -Filter "todoist-team_*.log" |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
+    Remove-Item -Force

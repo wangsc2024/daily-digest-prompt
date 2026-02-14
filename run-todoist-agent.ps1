@@ -1,15 +1,14 @@
 ﻿# ============================================
-# Todoist Task Planner Agent (Windows PowerShell)
+# Todoist Task Planner Agent (PowerShell 7)
 # ============================================
 # Usage:
-#   Manual: powershell -ExecutionPolicy Bypass -File run-todoist-agent.ps1
+#   Manual: pwsh -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 #   Task Scheduler: same command
 # ============================================
 
-# Set UTF-8 (console + code page)
+# PowerShell 7 defaults to UTF-8, explicit set for safety
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-chcp 65001 | Out-Null
 
 # Config
 $MaxDurationSeconds = 1800  # 30 minutes timeout (prevents stuck processes like 3672s incidents)
@@ -22,6 +21,7 @@ $StateFile = "$AgentDir\state\scheduler-state.json"
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$LogDir\structured" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\state" | Out-Null
 
 # Generate log filename
@@ -102,9 +102,10 @@ $success = $false
 $timedOut = $false
 
 try {
-    $job = Start-Job -ScriptBlock {
+    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
         param($prompt)
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $OutputEncoding = [System.Text.Encoding]::UTF8
         $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
     } -ArgumentList $PromptContent
 

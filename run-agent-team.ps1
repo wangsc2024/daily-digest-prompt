@@ -1,19 +1,18 @@
 ﻿# ============================================
-# Claude Agent Team - Parallel Orchestrator
+# Claude Agent Team - Parallel Orchestrator (PowerShell 7)
 # ============================================
 # Usage:
-#   Manual: powershell -ExecutionPolicy Bypass -File run-agent-team.ps1
+#   Manual: pwsh -ExecutionPolicy Bypass -File run-agent-team.ps1
 #   Task Scheduler: same command
 # ============================================
 # Architecture:
-#   Phase 1: 3 parallel fetch agents (todoist, news, hackernews)
+#   Phase 1: 5 parallel fetch agents (todoist, news, hackernews, gmail, security)
 #   Phase 2: 1 assembly agent (reads results, compiles digest, sends notification)
 # ============================================
 
-# Set UTF-8 (console + code page)
+# PowerShell 7 defaults to UTF-8, explicit set for safety
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-chcp 65001 | Out-Null
 
 # Set paths
 $AgentDir = "D:\Source\daily-digest-prompt"
@@ -28,6 +27,7 @@ $Phase2TimeoutSeconds = 300
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+New-Item -ItemType Directory -Force -Path "$LogDir\structured" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\state" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null
@@ -90,7 +90,7 @@ function Update-State {
 # ============================================
 $startTime = Get-Date
 Write-Log "=== Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
-Write-Log "Mode: parallel (Phase 1 x3 + Phase 2 x1)"
+Write-Log "Mode: parallel (Phase 1 x5 + Phase 2 x1)"
 
 # Check if claude is installed
 $claudePath = Get-Command claude -ErrorAction SilentlyContinue
@@ -109,7 +109,9 @@ Write-Log "=== Phase 1: Parallel fetch start ==="
 $fetchAgents = @(
     @{ Name = "todoist";    Prompt = "$AgentDir\prompts\team\fetch-todoist.md";    Result = "$ResultsDir\todoist.json" },
     @{ Name = "news";       Prompt = "$AgentDir\prompts\team\fetch-news.md";       Result = "$ResultsDir\news.json" },
-    @{ Name = "hackernews"; Prompt = "$AgentDir\prompts\team\fetch-hackernews.md"; Result = "$ResultsDir\hackernews.json" }
+    @{ Name = "hackernews"; Prompt = "$AgentDir\prompts\team\fetch-hackernews.md"; Result = "$ResultsDir\hackernews.json" },
+    @{ Name = "gmail";      Prompt = "$AgentDir\prompts\team\fetch-gmail.md";      Result = "$ResultsDir\gmail.json" },
+    @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json" }
 )
 
 $jobs = @()
@@ -122,13 +124,12 @@ foreach ($agent in $fetchAgents) {
     $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
     $agentName = $agent.Name
 
-    $job = Start-Job -ScriptBlock {
-        param($Content, $WorkDir)
-        Set-Location $WorkDir
+    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+        param($Content)
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
         $Content | claude -p --allowedTools "Read,Bash,Write" 2>&1
-    } -ArgumentList $promptContent, $AgentDir
+    } -ArgumentList $promptContent
 
     $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
     $jobs += $job
@@ -193,7 +194,7 @@ $jobs | Remove-Job -Force -ErrorAction SilentlyContinue
 $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
 Write-Log ""
 Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
-Write-Log "Results: todoist=$($sections['todoist']) | news=$($sections['news']) | hackernews=$($sections['hackernews'])"
+Write-Log "Results: todoist=$($sections['todoist']) | news=$($sections['news']) | hackernews=$($sections['hackernews']) | gmail=$($sections['gmail']) | security=$($sections['security'])"
 
 # ============================================
 # Phase 2: Assembly (1 agent, with retry)

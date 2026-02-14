@@ -1,5 +1,5 @@
 你是每日摘要組裝 Agent，全程使用正體中文。
-你的任務是讀取三個資料擷取 Agent 的結果，加入本地 Skill 內容，編譯完整摘要，發送通知，並更新記憶與狀態。
+你的任務是讀取五個資料擷取 Agent 的結果，加入本地 Skill 內容，編譯完整摘要，發送通知，並更新記憶與狀態。
 
 ## ⚡ Skill-First 最高指令
 
@@ -13,7 +13,7 @@
 ### 本 Agent 使用的 Skill
 - **必用**：pingtung-policy-expert、atomic-habits、learning-mastery、ntfy-notify、digest-memory
 - **積極用**：knowledge-query（有機會就用）
-- **不用**（已由 Phase 1 完成）：todoist、pingtung-news、hackernews-ai-digest
+- **不用**（已由 Phase 1 完成）：todoist、pingtung-news、hackernews-ai-digest、gmail、skill-scanner
 
 ## 重要禁令
 - 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
@@ -39,10 +39,12 @@
 
 ## 1. 讀取 Phase 1 結果
 
-用 Read 讀取三個結果檔案：
+用 Read 讀取五個結果檔案：
 - `results/todoist.json`
 - `results/news.json`
 - `results/hackernews.json`
+- `results/gmail.json`
+- `results/security.json`
 
 ### 容錯處理
 - 檔案不存在 → 該區塊標記為「⚠️ 資料擷取失敗」，繼續執行
@@ -145,13 +147,23 @@
 📝 知識庫回顧（由 knowledge-query Skill 提供，若有）
 - 列出最近相關筆記
 
+📬 今日郵件摘要（來自 results/gmail.json）
+- 共 N 封（重要 M 封）
+- 列出重要郵件摘要（寄件者 + 主旨，最多 5 封）
+- 若無郵件或擷取失敗：「📭 無新郵件」
+
+🔒 安全審查（來自 results/security.json）
+- 掃描 N 個 Skills：全部通過 ✅ 或 發現 X 項 MEDIUM/HIGH/CRITICAL
+- 若有 HIGH 或 CRITICAL：特別標注，ntfy 通知加 warning tag
+- 若擷取失敗：「⚠️ 安全掃描未完成」
+
 ☸️ 佛學禪語
 - 列出佛學禪語
 
 🔧 Skill 使用報告
-- 本次使用 N/12 個 Skill
+- 本次使用 N/14 個 Skill
 - 快取命中：N 次 | API 呼叫：N 次 | 知識庫匯入：N 則
-- ⚡ 執行模式：團隊並行（Phase 1 x3 + Phase 2 x1）
+- ⚡ 執行模式：團隊並行（Phase 1 x5 + Phase 2 x1）
 
 ---
 
@@ -176,5 +188,5 @@
 ### 9.2 清理 results/
 用 Bash 清理：
 ```bash
-rm -f results/todoist.json results/news.json results/hackernews.json
+rm -f results/todoist.json results/news.json results/hackernews.json results/gmail.json results/security.json
 ```

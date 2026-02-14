@@ -1,8 +1,8 @@
 ﻿# ============================================
-# Claude Agent Health Check (Windows PowerShell)
+# Claude Agent Health Check (PowerShell 7)
 # ============================================
 # Usage:
-#   powershell -ExecutionPolicy Bypass -File check-health.ps1
+#   pwsh -ExecutionPolicy Bypass -File check-health.ps1
 # ============================================
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8

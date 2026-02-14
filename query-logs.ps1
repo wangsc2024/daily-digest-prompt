@@ -1,5 +1,5 @@
 ﻿# ============================================
-# Claude Agent Log Query Tool (Windows PowerShell)
+# Claude Agent Log Query Tool (PowerShell 7)
 # ============================================
 # Usage:
 #   .\query-logs.ps1                              # 近 7 天摘要

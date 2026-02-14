@@ -3,10 +3,14 @@
 Stop Hook - Session-end health check + auto-alert via ntfy.
 
 When the Agent session ends, this hook:
-  1. Reads today's structured log (logs/structured/YYYY-MM-DD.jsonl)
+  1. Reads NEW entries from today's structured log (since last analysis)
   2. Analyzes: blocked events, errors, cache bypass violations
   3. Writes session summary to logs/structured/session-summary.jsonl
   4. If issues detected, sends ntfy alert to wangsc2025
+
+Uses offset tracking (.last_analyzed_offset) to avoid re-counting
+events from previous sessions. Only new entries since the last
+analysis trigger alerts.
 
 Alert severity:
   - critical: blocked events OR 5+ errors
@@ -23,24 +27,66 @@ from collections import Counter
 NTFY_TOPIC = "wangsc2025"
 
 
-def read_todays_log() -> list:
-    """Read today's structured log entries."""
+def _offset_file() -> str:
+    """Return path to the offset tracking file for today."""
+    return os.path.join("logs", "structured", ".last_analyzed_offset")
+
+
+def _read_offset() -> tuple:
+    """Read last analyzed offset. Returns (date_str, line_count)."""
+    path = _offset_file()
+    if not os.path.exists(path):
+        return ("", 0)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return (data.get("date", ""), data.get("offset", 0))
+    except (json.JSONDecodeError, Exception):
+        return ("", 0)
+
+
+def _write_offset(date_str: str, offset: int):
+    """Write the current analyzed offset."""
+    path = _offset_file()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"date": date_str, "offset": offset}, f)
+
+
+def read_todays_log() -> tuple:
+    """Read only NEW entries from today's structured log.
+
+    Returns (new_entries, total_line_count) where new_entries only
+    contains lines added since the last analysis.
+    """
     today = datetime.now().strftime("%Y-%m-%d")
     log_file = os.path.join("logs", "structured", f"{today}.jsonl")
 
     if not os.path.exists(log_file):
-        return []
+        return ([], 0)
 
-    entries = []
+    # Read all lines
+    all_lines = []
     with open(log_file, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                try:
-                    entries.append(json.loads(line))
-                except json.JSONDecodeError:
-                    pass
-    return entries
+        all_lines = f.readlines()
+
+    total_count = len(all_lines)
+
+    # Determine offset: skip lines already analyzed
+    prev_date, prev_offset = _read_offset()
+    skip = prev_offset if prev_date == today else 0
+
+    # Parse only new lines
+    new_entries = []
+    for line in all_lines[skip:]:
+        line = line.strip()
+        if line:
+            try:
+                new_entries.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+
+    return (new_entries, total_count)
 
 
 def analyze_entries(entries: list) -> dict:
@@ -222,11 +268,20 @@ def main():
     except Exception:
         pass
 
-    entries = read_todays_log()
-    if not entries:
+    today = datetime.now().strftime("%Y-%m-%d")
+    new_entries, total_count = read_todays_log()
+
+    # Always update offset, even if no new entries
+    _write_offset(today, total_count)
+
+    if not new_entries:
+        # No new entries since last analysis - record healthy, no alert
+        write_session_summary(
+            analyze_entries([]), alert_sent=False, severity="healthy"
+        )
         sys.exit(0)
 
-    analysis = analyze_entries(entries)
+    analysis = analyze_entries(new_entries)
     alert = build_alert_message(analysis)
 
     if alert:
