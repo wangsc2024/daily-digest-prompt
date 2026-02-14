@@ -11,6 +11,9 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
 
+# Config
+$MaxDurationSeconds = 1800  # 30 minutes timeout (prevents stuck processes like 3672s incidents)
+
 # Set paths
 $AgentDir = "D:\Source\daily-digest-prompt"
 $LogDir = "$AgentDir\logs"
@@ -93,20 +96,48 @@ if (-not $claudePath) {
     exit 1
 }
 
-# Call Claude Code
-Write-Log "--- calling Claude Code ---"
+# Call Claude Code (with timeout protection)
+Write-Log "--- calling Claude Code (timeout: ${MaxDurationSeconds}s) ---"
 $success = $false
-try {
-    $PromptContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {
-        Write-Log $_
-    }
+$timedOut = $false
 
-    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-        $success = $true
+try {
+    $job = Start-Job -ScriptBlock {
+        param($prompt)
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
+    } -ArgumentList $PromptContent
+
+    $completed = $job | Wait-Job -Timeout $MaxDurationSeconds
+
+    if ($null -eq $completed) {
+        # Timeout: retrieve partial output, then kill
+        $timedOut = $true
+        $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
+        if ($partialOutput) {
+            foreach ($line in $partialOutput) {
+                Write-Log $line
+            }
+        }
+        Stop-Job $job
+        Write-Log "[TIMEOUT] Claude exceeded ${MaxDurationSeconds}s (30 min), forcefully terminated"
     }
     else {
-        Write-Log "[WARN] Claude exited with code: $LASTEXITCODE"
+        # Completed within timeout
+        $output = Receive-Job $job
+        foreach ($line in $output) {
+            Write-Log $line
+        }
+
+        if ($job.State -eq 'Completed') {
+            $success = $true
+        }
+        else {
+            Write-Log "[WARN] Job ended with state: $($job.State)"
+        }
     }
+
+    Remove-Job $job -Force
 }
 catch {
     Write-Log "[ERROR] Claude failed: $_"
@@ -119,6 +150,10 @@ $duration = [int]((Get-Date) - $startTime).TotalSeconds
 if ($success) {
     Write-Log "=== done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
     Update-State -Status "success" -Duration $duration -ErrorMsg $null
+}
+elseif ($timedOut) {
+    Write-Log "=== done (timeout): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+    Update-State -Status "timeout" -Duration $duration -ErrorMsg "exceeded ${MaxDurationSeconds}s limit"
 }
 else {
     Write-Log "=== done (failed): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
