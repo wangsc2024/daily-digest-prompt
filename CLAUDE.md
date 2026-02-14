@@ -41,6 +41,14 @@ daily-digest-prompt/
   check-health.ps1                # 健康檢查報告工具（快速一覽）
   scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
   query-logs.ps1                  # 執行成果查詢工具（5 種模式）
+  .claude/
+    settings.json                 # Hooks 設定（PreToolUse/PostToolUse/Stop）
+  hooks/                          # Claude Code Hooks（機器強制層）
+    pre_bash_guard.py             # PreToolUse:Bash - 攔截 nul 重導向、危險操作
+    pre_write_guard.py            # PreToolUse:Write/Edit - 攔截 nul 寫入、敏感檔案
+    post_tool_logger.py           # PostToolUse:* - 結構化 JSONL 日誌（自動標籤）
+    on_stop_alert.py              # Stop - Session 結束時健康檢查 + ntfy 自動告警
+    query_logs.py                 # 結構化日誌查詢工具（CLI）
   prompts/team/                   # 團隊模式 Agent prompts
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
@@ -75,6 +83,9 @@ daily-digest-prompt/
     gmail/SKILL.md                # Gmail 郵件讀取（OAuth2）
     skill-scanner/SKILL.md        # AI 技能安全掃描（Cisco AI Defense）
   logs/                           # 執行日誌（自動清理 7 天）
+    structured/                   # 結構化 JSONL 日誌（hooks 自動產生）
+      YYYY-MM-DD.jsonl            # 每日工具呼叫記錄（自動標籤）
+      session-summary.jsonl       # Session 健康摘要（Stop hook 產生）
 ```
 
 ## 執行流程
@@ -121,6 +132,95 @@ daily-digest-prompt/
 - **排程**: Windows Task Scheduler
 - **Agent**: Claude Code CLI（`claude -p`）
 - **通知**: ntfy.sh（topic: `wangsc2025`）
+
+## Hooks 機器強制層（Harness Enforcement）
+
+從「Agent 自律」升級到「機器強制」。透過 Claude Code Hooks 在 runtime 攔截工具呼叫，違規操作在執行前就被阻斷。
+
+### 設定檔
+`.claude/settings.json`（專案級，commit 到 repo，所有開發者共享）
+
+### Hook 清單
+
+| Hook | 類型 | Matcher | 用途 |
+|------|------|---------|------|
+| `pre_bash_guard.py` | PreToolUse | Bash | 攔截 nul 重導向、scheduler-state 寫入、危險刪除、force push |
+| `pre_write_guard.py` | PreToolUse | Write, Edit | 攔截 nul 檔案建立、scheduler-state 寫入、敏感檔案寫入 |
+| `post_tool_logger.py` | PostToolUse | *（所有工具） | 結構化 JSONL 日誌，自動標籤分類 |
+| `on_stop_alert.py` | Stop | — | Session 結束時分析日誌，異常時自動 ntfy 告警 |
+
+### 強制規則對照表（Prompt 自律 → Hook 強制）
+
+| 規則 | 之前（Prompt 宣告） | 之後（Hook 攔截） |
+|------|-------------------|------------------|
+| 禁止 `> nul` 重導向 | Prompt 寫「禁止」，Agent 自律 | `pre_bash_guard.py` 在執行前攔截，回傳 block reason |
+| 禁止寫入 `nul` 檔案 | Prompt 寫「禁止」，Agent 自律 | `pre_write_guard.py` 攔截 file_path 為 nul 的 Write |
+| scheduler-state.json 只讀 | Prompt 寫「Agent 只讀」 | Hook 攔截所有對此檔案的寫入/編輯/重導向 |
+| 敏感檔案保護 | .gitignore 排除 | Hook 攔截 .env/credentials/token 的寫入 |
+| force push 保護 | 開發者口頭約定 | Hook 攔截 `git push --force` 到 main/master |
+
+### 結構化日誌系統
+
+`post_tool_logger.py` 對每個工具呼叫自動產生 JSONL 記錄，含：
+
+**自動標籤分類**：
+| 標籤 | 觸發條件 | 用途 |
+|------|---------|------|
+| `api-call` | Bash 指令含 `curl` | API 呼叫追蹤 |
+| `todoist` / `pingtung-news` / `hackernews` / `knowledge` / `gmail` | URL 模式匹配 | API 來源識別 |
+| `cache-read` / `cache-write` | 讀寫 `cache/*.json` | 快取操作追蹤 |
+| `skill-read` / `skill-index` | 讀取 `SKILL.md` / `SKILL_INDEX.md` | Skill 使用追蹤 |
+| `memory-read` / `memory-write` | 讀寫 `digest-memory.json` | 記憶操作追蹤 |
+| `sub-agent` | Bash 指令含 `claude -p` | 子 Agent 追蹤 |
+| `blocked` | PreToolUse hook 攔截 | 違規操作記錄 |
+| `error` | 工具輸出含錯誤關鍵字 | 錯誤追蹤 |
+
+**JSONL 格式**：
+```json
+{"ts":"2026-02-14T08:01:30+08:00","sid":"abc123","tool":"Bash","event":"post","summary":"curl -s https://api.todoist.com/...","output_len":1234,"has_error":false,"tags":["api-call","todoist"]}
+```
+
+### 自動告警機制
+
+`on_stop_alert.py` 在 Agent session 結束時自動分析：
+
+| 檢查項 | 條件 | 告警等級 |
+|--------|------|---------|
+| 違規攔截 | blocked > 0 | warning（≥3 則 critical） |
+| 工具錯誤 | errors ≥ 1 | warning（≥5 則 critical） |
+| 快取繞過 | API 呼叫無對應 cache-read | warning |
+| 全部正常 | 無上述問題 | 不告警（靜默記錄 session-summary） |
+
+告警透過 ntfy 推送到 `wangsc2025`，含：呼叫統計、攔截詳情、錯誤摘要、快取繞過來源。
+
+### 查詢結構化日誌
+
+```bash
+# 今日摘要
+python3 hooks/query_logs.py
+
+# 近 7 天
+python3 hooks/query_logs.py --days 7
+
+# 僅攔截事件
+python3 hooks/query_logs.py --blocked
+
+# 僅錯誤
+python3 hooks/query_logs.py --errors
+
+# 快取使用審計
+python3 hooks/query_logs.py --cache-audit
+
+# Session 摘要
+python3 hooks/query_logs.py --sessions --days 7
+
+# JSON 輸出（供程式處理）
+python3 hooks/query_logs.py --format json
+```
+
+### 前置需求
+- Python 3.8+（hooks 用 Python 解析 JSON，跨平台相容）
+- Windows 環境需安裝 Git Bash 或確保 `python3` 可用（或改為 `python`）
 
 ## NanoClaw 啟發的優化機制
 
@@ -171,13 +271,16 @@ daily-digest-prompt/
 - Windows 環境需設定 `chcp 65001` 確保 UTF-8 編碼
 - `.ps1` 檔案必須使用 UTF-8 with BOM 編碼（PowerShell 5.1 無 BOM 會用系統預設編碼讀取，中文會亂碼）
 
-### 嚴禁產生 nul 檔案（最高優先級）
+### 嚴禁產生 nul 檔案（最高優先級 — Hook 機器強制）
 以下行為全部禁止，違反將產生名為 `nul` 的垃圾檔案：
 - 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`（這是 cmd 語法，在 bash 中會建立實體檔案）
 - 禁止使用 Write 工具寫入任何名為 `nul` 的檔案路徑
 - 禁止在任何指令中將 `nul` 作為輸出目標
 - 要抑制輸出請改用：`| Out-Null`（PowerShell）或 `> /dev/null`（bash）或直接不重導向
 - 要丟棄 stderr 請用 `2>/dev/null`（bash）或 `2>$null`（PowerShell）
+
+> **機器強制**：此規則已由 `hooks/pre_bash_guard.py` 和 `hooks/pre_write_guard.py` 在 runtime 攔截。
+> Agent 即使違反，工具呼叫也會被 block，並記錄到結構化日誌。
 
 ## 常用操作
 ```powershell
@@ -214,4 +317,12 @@ powershell -ExecutionPolicy Bypass -File check-health.ps1
 
 # 查看最新日誌
 Get-Content (Get-ChildItem logs\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+
+# Hook 結構化日誌查詢
+python3 hooks/query_logs.py                     # 今日摘要
+python3 hooks/query_logs.py --days 7             # 近 7 天
+python3 hooks/query_logs.py --blocked            # 攔截事件
+python3 hooks/query_logs.py --errors             # 錯誤事件
+python3 hooks/query_logs.py --cache-audit        # 快取使用審計
+python3 hooks/query_logs.py --sessions --days 7  # Session 健康摘要
 ```
