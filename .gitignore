@@ -33,8 +33,11 @@ credentials.json
 token.json
 key/
 
-# Claude Code 本地設定
-.claude/
+# Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）
+.claude/settings.local.json
+
+# Hooks 暫存檔
+hooks_alert_temp.json
 
 # 編輯器
 .vscode/
