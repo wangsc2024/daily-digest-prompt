@@ -23,7 +23,7 @@ $ResultsDir = "$AgentDir\results"
 # Config
 $MaxPhase2Retries = 1
 $Phase1TimeoutSeconds = 300
-$Phase2TimeoutSeconds = 300
+$Phase2TimeoutSeconds = 420  # Assembly 實測最大 360s，加 60s buffer
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null

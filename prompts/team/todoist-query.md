@@ -54,14 +54,22 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### Tier 1：標籤路由（信心度 100%）
 
+> ^prefix 匹配：去掉 ^ 後與 Todoist labels 完全比對。多標籤命中多個映射時，合併 skills 和取最寬 allowedTools。
+
 | Todoist 標籤 | 映射 Skill | allowedTools | 信心度 |
 |-------------|-----------|-------------|--------|
-| `@code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
-| `@research` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
-| `@write` | 文件撰寫 | Read,Bash,Write | 100% |
-| `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | 100% |
-| `@ai` | hackernews-ai-digest | Read,Bash,Write | 100% |
-| `@knowledge` | knowledge-query | Read,Bash,Write | 100% |
+| `^Claude Code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^GitHub` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^研究` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
+| `^深度思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
+| `^邏輯思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
+| `^知識庫` | knowledge-query | Read,Bash,Write | 100% |
+| `^AI` | hackernews-ai-digest | Read,Bash,Write | 100% |
+| `^遊戲優化` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^遊戲開發` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^專案優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 
 ### Tier 2：內容關鍵字比對（信心度 80%）
 比對 SKILL_INDEX 速查表的觸發關鍵字。

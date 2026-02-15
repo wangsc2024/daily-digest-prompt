@@ -6,6 +6,7 @@ Blocks dangerous write patterns that previously relied on Agent self-discipline:
   Rule 1: Writing to 'nul' file (creates physical file on Windows)
   Rule 2: Writing to scheduler-state.json (PowerShell-only file)
   Rule 3: Writing to sensitive paths (.env, credentials, etc.)
+  Rule 4: Path traversal attacks (../ sequences escaping project directory)
 
 Blocked events are logged to logs/structured/YYYY-MM-DD.jsonl
 """
@@ -65,13 +66,36 @@ def main():
         sys.exit(0)
 
     # === Rule 3: Block writing to sensitive paths ===
-    sensitive_patterns = [".env", "credentials.json", "token.json"]
+    sensitive_patterns = [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"]
     for pattern in sensitive_patterns:
         if basename == pattern or file_path.endswith(pattern):
             reason = f"禁止寫入敏感檔案: {pattern}"
             log_blocked(session_id, tool_name, file_path, reason, "secret-guard")
             print(json.dumps({"decision": "block", "reason": reason}))
             sys.exit(0)
+
+    # === Rule 4: Block path traversal attacks ===
+    # Detect attempts to escape the project directory using ../
+    if file_path:
+        # Normalize path and check for traversal patterns
+        normalized = os.path.normpath(file_path)
+        project_root = os.path.normpath(os.getcwd())
+
+        # Check if path contains .. sequences that could escape project
+        if ".." in file_path:
+            # Resolve to absolute path and verify it's within project
+            try:
+                resolved = os.path.abspath(normalized)
+                if not resolved.startswith(project_root):
+                    reason = f"禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
+                    log_blocked(session_id, tool_name, file_path, reason, "traversal-guard")
+                    print(json.dumps({"decision": "block", "reason": reason}))
+                    sys.exit(0)
+            except (ValueError, OSError):
+                reason = f"禁止無效路徑: {file_path}"
+                log_blocked(session_id, tool_name, file_path, reason, "path-guard")
+                print(json.dumps({"decision": "block", "reason": reason}))
+                sys.exit(0)
 
     # All checks passed - allow (output JSON to avoid "not start with {" debug noise)
     print(json.dumps({"decision": "allow"}))

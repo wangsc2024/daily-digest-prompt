@@ -39,13 +39,14 @@ if ($FromHeartbeat) {
             if ($currentSchedule -and $currentSchedule.Name) {
                 $schedules += $currentSchedule
             }
-            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Description = ""; Interval = "" }
+            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Description = ""; Interval = ""; Timeout = 0 }
         }
         elseif ($currentSchedule) {
             if ($line -match '^\s{4}cron:\s*"(.+)"') { $currentSchedule.Cron = $Matches[1] }
             if ($line -match '^\s{4}script:\s*(\S+)') { $currentSchedule.Script = $Matches[1] }
             if ($line -match '^\s{4}description:\s*"(.+)"') { $currentSchedule.Description = $Matches[1] }
             if ($line -match '^\s{4}interval:\s*(\S+)') { $currentSchedule.Interval = $Matches[1] }
+            if ($line -match '^\s{4}timeout:\s*(\d+)') { $currentSchedule.Timeout = [int]$Matches[1] }
         }
     }
     if ($currentSchedule -and $currentSchedule.Name) { $schedules += $currentSchedule }
@@ -66,7 +67,8 @@ if ($FromHeartbeat) {
             $cronTime = "08:00"
         }
         $taskNameFromHB = "Claude_$($s.Name)"
-        Write-Host "  - $taskNameFromHB | $cronTime | $($s.Script) | $($s.Description)" -ForegroundColor White
+        $timeoutInfo = if ($s.Timeout -gt 0) { "$($s.Timeout)s" } else { "無限制" }
+        Write-Host "  - $taskNameFromHB | $cronTime | $($s.Script) | timeout=$timeoutInfo | $($s.Description)" -ForegroundColor White
 
         $scriptPath = "$AgentDir\$($s.Script)"
         if (-not (Test-Path $scriptPath)) {
@@ -101,7 +103,21 @@ if ($FromHeartbeat) {
             Write-Host "    間隔模式：每 ${intervalMinutes} 分鐘，持續 ${durationHours} 小時" -ForegroundColor DarkCyan
         }
 
-        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RunOnlyIfNetworkAvailable
+        $settingsParams = @{
+            AllowStartIfOnBatteries    = $true
+            DontStopIfGoingOnBatteries = $true
+            StartWhenAvailable         = $true
+            RunOnlyIfNetworkAvailable  = $true
+        }
+        if ($s.Timeout -gt 0) {
+            $settingsParams.ExecutionTimeLimit = New-TimeSpan -Seconds $s.Timeout
+            Write-Host "    超時限制：$($s.Timeout)s ($([math]::Round($s.Timeout / 60, 1)) min)" -ForegroundColor DarkCyan
+        }
+        if ($s.Interval) {
+            $settingsParams.MultipleInstances = "IgnoreNew"
+            Write-Host "    防重疊：IgnoreNew" -ForegroundColor DarkCyan
+        }
+        $settings = New-ScheduledTaskSettingsSet @settingsParams
 
         Register-ScheduledTask -TaskName $taskNameFromHB -Action $action -Trigger $trigger `
             -Settings $settings -Description $s.Description -RunLevel Highest | Out-Null

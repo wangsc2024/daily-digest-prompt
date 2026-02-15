@@ -193,10 +193,10 @@ daily-digest-prompt/
 
 | Hook | 類型 | Matcher | 用途 |
 |------|------|---------|------|
-| `pre_bash_guard.py` | PreToolUse | Bash | 攔截 nul 重導向、scheduler-state 寫入、危險刪除、force push |
-| `pre_write_guard.py` | PreToolUse | Write, Edit | 攔截 nul 檔案建立、scheduler-state 寫入、敏感檔案寫入 |
+| `pre_bash_guard.py` | PreToolUse | Bash | 攔截 nul 重導向、scheduler-state 寫入、危險刪除、force push、敏感環境變數讀取、機密外洩 |
+| `pre_write_guard.py` | PreToolUse | Write, Edit | 攔截 nul 檔案建立、scheduler-state 寫入、敏感檔案寫入、路徑遍歷攻擊 |
 | `post_tool_logger.py` | PostToolUse | *（所有工具） | 結構化 JSONL 日誌，自動標籤分類 |
-| `on_stop_alert.py` | Stop | — | Session 結束時分析日誌，異常時自動 ntfy 告警 |
+| `on_stop_alert.py` | Stop | — | Session 結束時分析日誌，異常時自動 ntfy 告警（使用安全暫存檔） |
 
 ### 強制規則對照表（Prompt 自律 → Hook 強制）
 
@@ -205,8 +205,11 @@ daily-digest-prompt/
 | 禁止 `> nul` 重導向 | Prompt 寫「禁止」，Agent 自律 | `pre_bash_guard.py` 在執行前攔截，回傳 block reason |
 | 禁止寫入 `nul` 檔案 | Prompt 寫「禁止」，Agent 自律 | `pre_write_guard.py` 攔截 file_path 為 nul 的 Write |
 | scheduler-state.json 只讀 | Prompt 寫「Agent 只讀」 | Hook 攔截所有對此檔案的寫入/編輯/重導向 |
-| 敏感檔案保護 | .gitignore 排除 | Hook 攔截 .env/credentials/token 的寫入 |
+| 敏感檔案保護 | .gitignore 排除 | Hook 攔截 .env/credentials/token/secrets/.htpasswd 的寫入 |
 | force push 保護 | 開發者口頭約定 | Hook 攔截 `git push --force` 到 main/master |
+| 路徑遍歷防護 | 無 | `pre_write_guard.py` 攔截 `../` 逃逸專案目錄的路徑 |
+| 敏感環境變數保護 | 無 | `pre_bash_guard.py` 攔截 echo/printenv/env 讀取 TOKEN/SECRET/KEY/PASSWORD |
+| 機密外洩防護 | 無 | `pre_bash_guard.py` 攔截 curl/wget 傳送敏感變數 |
 
 ### 結構化日誌系統
 

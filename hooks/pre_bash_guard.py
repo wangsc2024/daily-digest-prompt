@@ -6,6 +6,9 @@ Blocks dangerous patterns that previously relied on Agent self-discipline:
   Rule 1: nul redirects (> nul, 2>nul) - creates physical 'nul' file on Windows
   Rule 2: Agent writing to scheduler-state.json (PowerShell-only file)
   Rule 3: Destructive operations (rm -rf /)
+  Rule 4: Force push to main/master
+  Rule 5: Command injection via shell metacharacters in sensitive contexts
+  Rule 6: Sensitive environment variable extraction
 
 Blocked events are logged to logs/structured/YYYY-MM-DD.jsonl
 """
@@ -78,6 +81,34 @@ def main():
     ) or re.search(r"git\s+push\s+-f\s+.*\s+(main|master)(\s|$)", command):
         reason = "禁止 force push 到 main/master 分支"
         log_blocked(session_id, command, reason, "git-guard")
+        print(json.dumps({"decision": "block", "reason": reason}))
+        sys.exit(0)
+
+    # === Rule 5: Block attempts to read sensitive environment variables ===
+    # Detect attempts to exfiltrate secrets via curl, wget, or network commands
+    sensitive_env_patterns = [
+        r"echo\s+\$[A-Z_]*TOKEN",
+        r"echo\s+\$[A-Z_]*SECRET",
+        r"echo\s+\$[A-Z_]*KEY",
+        r"echo\s+\$[A-Z_]*PASSWORD",
+        r"echo\s+\$[A-Z_]*CREDENTIAL",
+        r"printenv\s+.*TOKEN",
+        r"printenv\s+.*SECRET",
+        r"printenv\s+.*KEY",
+        r"env\s*\|\s*grep\s+.*(TOKEN|SECRET|KEY|PASSWORD)",
+    ]
+    for pattern in sensitive_env_patterns:
+        if re.search(pattern, command, re.IGNORECASE):
+            reason = "禁止讀取敏感環境變數"
+            log_blocked(session_id, command, reason, "env-guard")
+            print(json.dumps({"decision": "block", "reason": reason}))
+            sys.exit(0)
+
+    # === Rule 6: Block potential exfiltration of secrets via network ===
+    # Detect curl/wget with suspicious payloads containing secrets
+    if re.search(r"curl.*(-d|--data).*\$(TOKEN|SECRET|KEY|PASSWORD)", command, re.IGNORECASE):
+        reason = "禁止透過網路傳送敏感變數"
+        log_blocked(session_id, command, reason, "exfiltration-guard")
         print(json.dumps({"decision": "block", "reason": reason}))
         sys.exit(0)
 

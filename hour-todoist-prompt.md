@@ -74,9 +74,19 @@
 
 若無任何可處理項目 → 進入步驟 2.5。
 
+### 2.9 Skill 同步檢查
+依 `config/routing.yaml` 的 `sync_check` 規則：
+1. 收集所有任務的 labels（去重）
+2. 比對 `label_routing.mappings` 的 key 列表（去掉 ^ 前綴）
+3. 未匹配的標籤 → 記錄為路由缺口
+4. 讀取 `context/auto-tasks-today.json` 的 `warned_labels`（若有）
+   - 今日已警告過的標籤 → 跳過
+   - 新發現的 → 加入 warned_labels 並輸出：`⚠️ 未匹配標籤：[label1, label2]`
+5. 用 Write 更新 `context/auto-tasks-today.json`（加入新的 warned_labels）
+
 ---
 
-## 步驟 2.5-2.8：自動任務（無待辦時觸發）
+## 步驟 2.5-2.8：自動任務（無待辦時 或 今日任務全部完成後 觸發）
 
 依 `config/frequency-limits.yaml` 執行：
 
@@ -101,7 +111,8 @@
 ## 步驟 3：優先級排名 + 執行方案規劃
 
 依 `config/scoring.yaml` 計算綜合分數並排名：
-- 公式：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成`
+- 公式：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間緊迫度 × 標籤數量加成 × 重複懲罰`
+- 新增因素：時間緊迫度（overdue=1.5/today=1.3/tomorrow=1.1）、標籤數量（0-3+）、重複懲罰（同標籤已完成 ≥2 則 ×0.85）
 - 依綜合分由高到低執行，每次最多取前 `max_tasks_per_run` 項
 
 針對每個可處理項目：
@@ -149,6 +160,29 @@ rm -f task_prompt_refine.md
 
 ### 4.5 失敗處理
 任務保持 open、降低 priority、設 due_string = "tomorrow"、添加失敗評論。
+
+---
+
+## 步驟 4.6：完成後自動任務觸發檢查
+
+### 觸發條件
+自動任務在以下任一條件滿足時觸發：
+1. **原有條件**：步驟 2 無任何可處理項目（直接進入 2.5）
+2. **新增條件**：步驟 4 所有任務執行完畢後，檢查剩餘待辦
+
+### 執行流程（僅在步驟 4 有成功完成任務時執行）
+1. 重新查詢 Todoist API（不使用快取，需即時數據）：
+   ```bash
+   curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
+     -H "Authorization: Bearer $TODOIST_API_TOKEN"
+   ```
+2. 對結果執行過濾 A（截止日期）+ 過濾 B（已關閉 ID，含本次剛關閉的 ID）
+3. 對剩餘任務執行步驟 2 的三層路由
+4. 若可處理項目 = 0 → 進入步驟 2.5-2.8（自動任務）
+5. 若仍有可處理項目 → 跳到步驟 5（通知），不觸發自動任務
+
+### 輸出摘要
+`📊 完成後檢查：API 回傳 N 筆 → 過濾後 M 筆 → 可處理 K 筆 → {觸發自動任務 / 仍有 K 筆待辦}`
 
 ---
 

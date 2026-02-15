@@ -21,6 +21,7 @@ import sys
 import json
 import os
 import subprocess
+import tempfile
 from datetime import datetime
 from collections import Counter
 
@@ -203,7 +204,11 @@ def build_alert_message(analysis: dict) -> tuple:
 
 
 def send_ntfy_alert(title: str, message: str, severity: str):
-    """Send ntfy alert notification."""
+    """Send ntfy alert notification.
+
+    Security: Uses tempfile.NamedTemporaryFile to avoid race conditions
+    and ensure cleanup even on exceptions.
+    """
     priority = 5 if severity == "critical" else 4
     tags = ["rotating_light", "shield"] if severity == "critical" else ["warning", "shield"]
 
@@ -215,16 +220,25 @@ def send_ntfy_alert(title: str, message: str, severity: str):
         "tags": tags,
     }
 
-    payload_file = "hooks_alert_temp.json"
+    # Use tempfile for secure temporary file handling
+    # delete=False required for Windows (can't read while open)
+    fd = None
     try:
-        with open(payload_file, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False)
+        fd = tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.json',
+            prefix='ntfy_alert_',
+            encoding='utf-8',
+            delete=False
+        )
+        json.dump(payload, fd, ensure_ascii=False)
+        fd.close()  # Close before subprocess reads it (Windows requirement)
 
         subprocess.run(
             [
                 "curl", "-s",
                 "-H", "Content-Type: application/json; charset=utf-8",
-                "-d", f"@{payload_file}",
+                "-d", f"@{fd.name}",
                 "https://ntfy.sh",
             ],
             capture_output=True,
@@ -233,8 +247,12 @@ def send_ntfy_alert(title: str, message: str, severity: str):
     except Exception:
         pass
     finally:
-        if os.path.exists(payload_file):
-            os.remove(payload_file)
+        # Ensure cleanup regardless of success/failure
+        if fd and os.path.exists(fd.name):
+            try:
+                os.unlink(fd.name)
+            except OSError:
+                pass
 
 
 def write_session_summary(analysis: dict, alert_sent: bool, severity: str):
