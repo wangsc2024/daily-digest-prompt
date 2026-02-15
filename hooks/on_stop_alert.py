@@ -3,14 +3,15 @@
 Stop Hook - Session-end health check + auto-alert via ntfy.
 
 When the Agent session ends, this hook:
-  1. Reads NEW entries from today's structured log (since last analysis)
+  1. Reads entries from today's structured log for THIS session only
   2. Analyzes: blocked events, errors, cache bypass violations
   3. Writes session summary to logs/structured/session-summary.jsonl
   4. If issues detected, sends ntfy alert to wangsc2025
 
-Uses offset tracking (.last_analyzed_offset) to avoid re-counting
-events from previous sessions. Only new entries since the last
-analysis trigger alerts.
+Session isolation: Filters log entries by session_id to prevent
+false positives from concurrent sessions (e.g., team mode where
+multiple claude -p processes run in parallel). Falls back to
+offset-based analysis if session_id is unavailable.
 
 Alert severity:
   - critical: blocked events OR 5+ errors
@@ -54,8 +55,35 @@ def _write_offset(date_str: str, offset: int):
         json.dump({"date": date_str, "offset": offset}, f)
 
 
+def _parse_all_entries(log_file: str) -> list:
+    """Parse all entries from a JSONL log file."""
+    if not os.path.exists(log_file):
+        return []
+    entries = []
+    with open(log_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass
+    return entries
+
+
+def read_session_entries(today: str, sid_prefix: str) -> list:
+    """Read entries for a specific session from today's log.
+
+    Filters by session ID prefix (first 12 chars) to isolate
+    this session's entries from concurrent sessions.
+    """
+    log_file = os.path.join("logs", "structured", f"{today}.jsonl")
+    all_entries = _parse_all_entries(log_file)
+    return [e for e in all_entries if e.get("sid", "").startswith(sid_prefix)]
+
+
 def read_todays_log() -> tuple:
-    """Read only NEW entries from today's structured log.
+    """Read only NEW entries from today's structured log (offset-based fallback).
 
     Returns (new_entries, total_line_count) where new_entries only
     contains lines added since the last analysis.
@@ -67,7 +95,6 @@ def read_todays_log() -> tuple:
         return ([], 0)
 
     # Read all lines
-    all_lines = []
     with open(log_file, "r", encoding="utf-8") as f:
         all_lines = f.readlines()
 
@@ -100,9 +127,19 @@ def analyze_entries(entries: list) -> dict:
     skill_reads = [e for e in entries if "skill-read" in e.get("tags", [])]
     sub_agents = [e for e in entries if "sub-agent" in e.get("tags", [])]
 
-    # Detect cache bypass: API source called without preceding cache read
+    # Detect cache bypass: only data-serving READ API calls require cache check.
+    # Excluded from bypass detection:
+    #   - api-write: POST/PUT/DELETE operations (close task, import, etc.)
+    #   - Utility endpoints: health checks, stats, dedup listings
+    UTILITY_URL_PATTERNS = ["/api/health", "/api/stats", "/api/notes/tags",
+                            "notes?limit=100"]
+    api_data_reads = [
+        e for e in api_calls
+        if "api-write" not in e.get("tags", [])
+        and not any(p in e.get("summary", "").lower() for p in UTILITY_URL_PATTERNS)
+    ]
     api_sources = set()
-    for entry in api_calls:
+    for entry in api_data_reads:
         for tag in entry.get("tags", []):
             if tag in ("todoist", "pingtung-news", "hackernews", "knowledge", "gmail"):
                 api_sources.add(tag)
@@ -255,13 +292,15 @@ def send_ntfy_alert(title: str, message: str, severity: str):
                 pass
 
 
-def write_session_summary(analysis: dict, alert_sent: bool, severity: str):
+def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
+                          session_id: str = ""):
     """Write session summary to summary log."""
     summary_file = os.path.join("logs", "structured", "session-summary.jsonl")
     os.makedirs(os.path.dirname(summary_file), exist_ok=True)
 
     summary = {
         "ts": datetime.now().astimezone().isoformat(),
+        "sid": session_id[:12] if session_id else "",
         "total_calls": analysis["total_calls"],
         "api_calls": analysis["api_calls"],
         "cache_reads": analysis["cache_reads"],
@@ -280,34 +319,50 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str):
 
 
 def main():
-    # Read stdin (Stop hook receives session info, but we don't need it)
+    # Read stdin - Stop hook receives session info as JSON
+    session_id = ""
     try:
-        sys.stdin.read()
-    except Exception:
+        raw = sys.stdin.read()
+        if raw and raw.strip():
+            input_data = json.loads(raw)
+            session_id = input_data.get("session_id", "")
+    except (json.JSONDecodeError, Exception):
         pass
 
     today = datetime.now().strftime("%Y-%m-%d")
-    new_entries, total_count = read_todays_log()
 
-    # Always update offset, even if no new entries
-    _write_offset(today, total_count)
+    if session_id:
+        # Session-isolated analysis (preferred): only analyze THIS session's entries
+        sid_prefix = session_id[:12]
+        entries = read_session_entries(today, sid_prefix)
+    else:
+        # Fallback: offset-based analysis (for backward compatibility)
+        entries, total_count = read_todays_log()
+        _write_offset(today, total_count)
 
-    if not new_entries:
-        # No new entries since last analysis - record healthy, no alert
+    if not entries:
         write_session_summary(
-            analyze_entries([]), alert_sent=False, severity="healthy"
+            analyze_entries([]), alert_sent=False, severity="healthy",
+            session_id=session_id,
         )
+        print("{}")
         sys.exit(0)
 
-    analysis = analyze_entries(new_entries)
+    analysis = analyze_entries(entries)
     alert = build_alert_message(analysis)
 
     if alert:
         severity, title, message = alert
         send_ntfy_alert(title, message, severity)
-        write_session_summary(analysis, alert_sent=True, severity=severity)
+        write_session_summary(
+            analysis, alert_sent=True, severity=severity,
+            session_id=session_id,
+        )
     else:
-        write_session_summary(analysis, alert_sent=False, severity="healthy")
+        write_session_summary(
+            analysis, alert_sent=False, severity="healthy",
+            session_id=session_id,
+        )
 
     print("{}")
     sys.exit(0)

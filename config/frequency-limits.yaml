@@ -2,7 +2,8 @@
 # 自動任務頻率限制（無 Todoist 待辦時觸發）
 # 修改此文件可調整次數上限，不需碰 prompt
 
-version: 2
+version: 3
+
 tracking_file: "context/auto-tasks-today.json"
 
 # 自動任務觸發條件
@@ -15,9 +16,17 @@ trigger_modes:
 history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
+# 選取策略：純輪轉（round-robin）
+# 每日 ~11 個 auto-task slots，但 13 個任務合計 36 次上限
+# 若用順序掃描，後面的任務永遠不會執行
+# 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
+selection_strategy: "round_robin"
+# next_execution_order 存在 tracking_file 中，跨日不重置
+# 每次找到可執行任務後指針 +1，繞完一圈回到起點
+
 # 歸零邏輯：
-#   - tracking_file 不存在 → 建立初始檔案（所有計數為 0）
-#   - tracking_file 的 date 欄位 ≠ 今天 → 歸零重建（計數全部重置、closed_task_ids 清空）
+#   - tracking_file 不存在 → 建立初始檔案（所有計數為 0，next_execution_order 為 1）
+#   - tracking_file 的 date 欄位 ≠ 今天 → 歸零重建（計數重置、closed_task_ids 清空，但 next_execution_order 保留）
 #   - tracking_file 的 date 欄位 = 今天 → 沿用目前計數值
 
 # 初始檔案格式
@@ -25,39 +34,186 @@ initial_schema: |
   {
     "date": "YYYY-MM-DD",
     "shurangama_count": 0,
+    "jiaoguangzong_count": 0,
+    "fahua_count": 0,
+    "jingtu_count": 0,
+    "tech_research_count": 0,
+    "ai_deep_research_count": 0,
+    "unsloth_research_count": 0,
+    "ai_github_research_count": 0,
+    "ai_smart_city_count": 0,
+    "ai_sysdev_count": 0,
+    "skill_audit_count": 0,
     "log_audit_count": 0,
     "git_push_count": 0,
     "closed_task_ids": [],
-    "warned_labels": []
+    "warned_labels": [],
+    "next_execution_order": 1
   }
 
-# 自動任務定義
+# ============================================================
+# 自動任務定義（execution_order 為輪轉排序依據）
+# ============================================================
 tasks:
+
+  # --- 佛學研究群組（共 12 次/日）---
   shurangama:
     name: "楞嚴經研究"
-    daily_limit: 3
+    daily_limit: 5
     counter_field: "shurangama_count"
     template: "templates/auto-tasks/shurangama-research.md"
     history_type: "shurangama"
-    execution_order: 1  # 優先執行
+    execution_order: 1
     skill: knowledge-query
 
+  jiaoguangzong:
+    name: "教觀綱宗研究"
+    daily_limit: 3
+    counter_field: "jiaoguangzong_count"
+    template: "templates/auto-tasks/buddhist-research.md"
+    template_params:
+      subject: "教觀綱宗"
+      author: "智者大師（智顗）"
+      search_terms: ["教觀綱宗", "天台宗", "五時八教", "四教儀"]
+      tags: ["教觀綱宗", "佛學", "天台宗"]
+      study_path: "概論 → 五時判教 → 八教分類 → 化法四教（藏通別圓）→ 化儀四教 → 觀法修持 → 判教實例"
+    history_type: "jiaoguangzong"
+    execution_order: 2
+    skill: knowledge-query
+
+  fahua:
+    name: "法華經研究"
+    daily_limit: 2
+    counter_field: "fahua_count"
+    template: "templates/auto-tasks/buddhist-research.md"
+    template_params:
+      subject: "法華經"
+      author: "鳩摩羅什 譯"
+      search_terms: ["法華經", "妙法蓮華經", "一佛乘", "開權顯實"]
+      tags: ["法華經", "佛學", "天台宗"]
+      study_path: "經典概論 → 方便品（開權顯實）→ 譬喻品（三車火宅）→ 信解品 → 藥草喻品 → 化城喻品 → 壽量品 → 觀世音菩薩普門品 → 一佛乘義理"
+    history_type: "fahua"
+    execution_order: 3
+    skill: knowledge-query
+
+  jingtu:
+    name: "淨土宗研究"
+    daily_limit: 2
+    counter_field: "jingtu_count"
+    template: "templates/auto-tasks/buddhist-research.md"
+    template_params:
+      subject: "淨土宗"
+      author: "善導大師 等"
+      search_terms: ["淨土宗", "阿彌陀經", "念佛法門", "極樂世界", "善導大師"]
+      tags: ["淨土宗", "佛學", "念佛"]
+      study_path: "淨土三經概論 → 阿彌陀經要義 → 觀無量壽經十六觀 → 無量壽經四十八願 → 善導大師五正行 → 念佛法門修持 → 淨土十疑論 → 臨終正念"
+    history_type: "jingtu"
+    execution_order: 4
+    skill: knowledge-query
+
+  # --- AI / 技術研究群組（共 13 次/日）---
+  tech_research:
+    name: "每日任務技術研究"
+    daily_limit: 5
+    counter_field: "tech_research_count"
+    template: "templates/auto-tasks/tech-research.md"
+    history_type: "tech_research"
+    execution_order: 5
+    skills: [knowledge-query]
+    description: "分析今日 Todoist 已完成任務所需技術，選擇一項深入研究並寫入 RAG 知識庫"
+
+  ai_deep_research:
+    name: "AI 深度研究計畫"
+    daily_limit: 4
+    counter_field: "ai_deep_research_count"
+    template: "templates/auto-tasks/ai-deep-research.md"
+    history_type: "ai_deep_research"
+    execution_order: 6
+    skills: [knowledge-query, hackernews-ai-digest]
+    description: "每日規劃一個 AI 技術深度研究，分 4 階段完成（規劃→蒐集→分析→報告）"
+    stages:
+      1: "規劃：選定主題、定義研究問題、設計方法論"
+      2: "蒐集：WebSearch + WebFetch 取得 5+ 篇資料"
+      3: "分析：交叉比對、找出共識與分歧、提煉洞見"
+      4: "報告：撰寫完整研究報告並匯入知識庫"
+
+  unsloth_research:
+    name: "Unsloth 研究"
+    daily_limit: 2
+    counter_field: "unsloth_research_count"
+    template: "templates/auto-tasks/unsloth-research.md"
+    history_type: "unsloth_research"
+    execution_order: 7
+    skills: [knowledge-query]
+    description: "研究 Unsloth LLM fine-tuning 框架的最新技術、最佳實踐、與其他工具比較"
+
+  ai_github_research:
+    name: "AI GitHub 熱門專案研究"
+    daily_limit: 2
+    counter_field: "ai_github_research_count"
+    template: "templates/auto-tasks/ai-github-research.md"
+    history_type: "ai_github_research"
+    execution_order: 8
+    skills: [knowledge-query]
+    description: "研究 AI 相關 GitHub 熱門專案，分析架構與應用，將報告寫入 RAG 知識庫"
+
+  ai_smart_city:
+    name: "AI 智慧城市研究"
+    daily_limit: 2
+    counter_field: "ai_smart_city_count"
+    template: "templates/auto-tasks/ai-smart-city-research.md"
+    history_type: "ai_smart_city"
+    execution_order: 9
+    skills: [knowledge-query]
+    description: "研究 AI 應用於智慧城市（交通、能源、公共安全、環境監測等），將報告寫入 RAG 知識庫"
+
+  ai_sysdev:
+    name: "AI 系統開發研究"
+    daily_limit: 2
+    counter_field: "ai_sysdev_count"
+    template: "templates/auto-tasks/ai-sysdev-research.md"
+    history_type: "ai_sysdev"
+    execution_order: 10
+    skills: [knowledge-query]
+    description: "研究 AI 應用於系統開發（AI-assisted coding、自動測試、架構優化、DevOps 智能化），將報告寫入 RAG 知識庫"
+
+  # --- 系統優化群組 ---
+  skill_audit:
+    name: "Skill 審查優化"
+    daily_limit: 2
+    counter_field: "skill_audit_count"
+    template: "templates/auto-tasks/skill-audit.md"
+    history_type: "skill_audit"
+    execution_order: 11
+    skills: [knowledge-query, skill-scanner]
+    description: "審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證"
+
+  # --- 系統維護群組（共 5 次/日）---
   log_audit:
     name: "系統 Log 審查"
     daily_limit: 1
     counter_field: "log_audit_count"
     template: "templates/auto-tasks/log-audit.md"
     history_type: "log_audit"
-    execution_order: 2
+    execution_order: 12
     skills: [scheduler-state, knowledge-query]
 
   git_push:
     name: "專案推送 GitHub"
-    daily_limit: 2
+    daily_limit: 4
     counter_field: "git_push_count"
     template: "templates/auto-tasks/git-push.md"
     history_type: "git_push"
-    execution_order: 3
+    execution_order: 13
+
+# ============================================================
+# 每日上限摘要
+# ============================================================
+# 佛學研究：楞嚴經(5) + 教觀綱宗(3) + 法華經(2) + 淨土宗(2) = 12
+# AI/技術：任務技術(5) + AI深度(4) + Unsloth(2) + AI GitHub(2) + AI智慧城市(2) + AI系統開發(2) = 17
+# 系統優化：Skill審查(2) = 2
+# 系統維護：Log審查(1) + Git推送(4) = 5
+# 合計：36 次/日
 
 # 歷史追蹤寫入規則
 history:

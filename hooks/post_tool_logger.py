@@ -61,6 +61,11 @@ def classify_bash(command: str) -> tuple:
     if "curl" in command:
         tags.append("api-call")
         tags.extend(detect_api_sources(command))
+        # Distinguish read vs write API calls for cache bypass detection
+        if any(m in command for m in ["-X POST", "-X PUT", "-X DELETE", "-X PATCH"]):
+            tags.append("api-write")
+        else:
+            tags.append("api-read")
     if "rm " in command:
         tags.append("file-delete")
     if "git " in command:

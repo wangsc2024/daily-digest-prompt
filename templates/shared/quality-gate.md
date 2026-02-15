@@ -13,16 +13,22 @@
 
 同時執行外部驗證（不完全依賴子 Agent 自評）：
 
-### @code 任務（標籤 @code 或 allowedTools 含 Edit）
+### 程式碼任務（標籤 ^Claude Code / ^GitHub / ^專案優化 / ^網站優化 / ^UI/UX，或 allowedTools 含 Edit）
 1. `git status` 檢查是否有新增/修改的檔案
 2. 若有 Python 檔案 → `python -m py_compile <file>` 語法檢查
 3. 若有測試檔案 → 執行測試套件
 4. 記錄：ext_changes_exist、ext_syntax_ok、ext_tests_ok
 
-### @research 任務（標籤 @research 或 allowedTools 含 WebSearch）
+### 研究任務（標籤 ^研究 / ^深度思維 / ^邏輯思維，或 allowedTools 含 WebSearch）
 1. 檢查 artifacts_produced 中的產物是否存在
 2. 輸出內容非空且超過 100 字
 3. 記錄：ext_artifacts_ok
+
+### 遊戲任務（標籤 ^遊戲優化 / ^遊戲開發）
+1. 遊戲可啟動且無 console 錯誤（grep -r "console.error" 或語法檢查）
+2. 主要遊戲機制運作正常（遊戲循環、碰撞偵測、狀態機完整）
+3. 觸控與鍵盤操控皆已綁定事件
+4. 記錄：ext_game_ok、ext_touch_ok、ext_no_errors
 
 ### 一般任務
 1. exit code = 0 → ext_exit_ok = true

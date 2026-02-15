@@ -1,0 +1,42 @@
+# config/dedup-policy.yaml
+# 研究去重策略（所有研究模板共用）
+# 修改此文件可調整去重行為，不需碰模板
+
+version: 1
+
+# 研究註冊表
+registry_file: "context/research-registry.json"
+
+# 保留天數：registry 中超過此天數的 entry 自動清除
+retention_days: 7
+
+# 冷卻天數：同一具體主題（topic 完全相同）至少間隔此天數
+topic_cooldown_days: 3
+
+# 飽和閾值：KB 同主題方向已有 ≥ 此數量的筆記時，建議換方向
+# 注意：這是「建議」而非「強制」— 避免封殺有深度脈絡的系列研究（如楞嚴經）
+saturation_threshold: 3
+
+# 去重查詢參數
+search:
+  # hybrid search 的 topK（統一配置，模板不再各自硬編碼）
+  default_topK: 15
+  # 佛學系列因研究脈絡明確，可用更大 topK
+  buddhist_topK: 20
+
+# 判定規則（供模板內 sub-agent 遵循）
+rules:
+  # 規則 1：registry 中 topic_cooldown_days 天內有完全相同 topic → 必須換主題
+  - name: "topic_cooldown"
+    action: "must_change_topic"
+    description: "近期已研究過完全相同的主題"
+
+  # 規則 2：registry 中 retention_days 天內同 task_type 有 ≥ saturation_threshold 個 topic → 建議換方向
+  - name: "type_saturation"
+    action: "suggest_change_direction"
+    description: "該類型研究方向已充足，優先探索其他面向"
+
+  # 規則 3：KB hybrid search 結果中 ≥ saturation_threshold 篇含相同核心關鍵字 → 建議換方向
+  - name: "kb_saturation"
+    action: "suggest_change_direction"
+    description: "知識庫同方向筆記已足夠，建議深入不同子主題"

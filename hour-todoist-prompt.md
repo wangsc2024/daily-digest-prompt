@@ -88,32 +88,40 @@
 
 ## 步驟 2.5-2.8：自動任務（無待辦時 或 今日任務全部完成後 觸發）
 
-依 `config/frequency-limits.yaml` 執行：
+依 `config/frequency-limits.yaml` 執行（共 13 種自動任務，36 次/日上限）。
 
 ### 2.5 頻率限制檢查
 讀取 `context/auto-tasks-today.json`，依 frequency-limits.yaml 的歸零邏輯判斷日期。
-若三項都已達上限 → 跳到步驟 5。
+若全部自動任務都已達上限 → 跳到步驟 5。
 
-### 2.6 楞嚴經研究（shurangama_count < 3）
-讀取 `templates/auto-tasks/shurangama-research.md`，依其指示建立 task_prompt.md 並執行子 Agent。
-完成後更新 frequency tracking + history。
+### 2.6 純輪轉選取自動任務（round-robin）
+每日僅 ~11 個 auto-task slots，但 13 個任務合計 36 次上限。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
 
-### 2.7 系統 Log 審查（log_audit_count < 1）
-讀取 `templates/auto-tasks/log-audit.md`，依其指示執行審查流程。
-完成後更新 frequency tracking + history。
+**選取演算法**：
+1. 從 `context/auto-tasks-today.json` 讀取 `next_execution_order`（跨日保留的指針）
+2. 以此指針為起點，按 execution_order 順序（到最後繞回第 1 個）逐一檢查
+3. 找到第一個 `計數 < daily_limit` 的任務 → 載入其 `template` 模板檔案
+4. 若模板有 `template_params`（如教觀綱宗、法華經、淨土宗）→ 替換 `{{SUBJECT}}`、`{{AUTHOR}}`、`{{SEARCH_TERMS}}`、`{{TAGS}}`、`{{STUDY_PATH}}`
+5. 依模板指示建立 `task_prompt.md` 並執行子 Agent
+6. 完成後更新 `context/auto-tasks-today.json`：計數 +1、`next_execution_order` 推進到下一個
+7. 同步更新 `state/todoist-history.json`
+8. 清理 `task_prompt.md`
 
-### 2.8 專案推送 GitHub（git_push_count < 2）
-讀取 `templates/auto-tasks/git-push.md`，依其指示執行 git 操作。
-完成後更新 frequency tracking + history。
+### 2.7 每次僅執行 1 個
+每觸發一次步驟 2.5-2.8，僅執行 **1 個** 自動任務。
+
+### 2.8 全部達上限
+繞一圈（13 個任務）都已達上限 → 跳到步驟 5（通知：今日自動任務已達上限）。
 
 ---
 
 ## 步驟 3：優先級排名 + 執行方案規劃
 
 依 `config/scoring.yaml` 計算綜合分數並排名：
-- 公式：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間緊迫度 × 標籤數量加成 × 重複懲罰`
-- 新增因素：時間緊迫度（overdue=1.5/today=1.3/tomorrow=1.1）、標籤數量（0-3+）、重複懲罰（同標籤已完成 ≥2 則 ×0.85）
+- 公式：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間接近度 × 標籤數量加成 × 重複懲罰`
+- 新增因素：時間接近度（overdue=1.5/today=1.3/tomorrow=1.1）、標籤數量（0-3+）、重複懲罰（同標籤已完成 ≥2 則 ×0.85）
 - 依綜合分由高到低執行，每次最多取前 `max_tasks_per_run` 項
+- **同分排序**（Tiebreaker）：截止時間較早者 → priority 較高者 → 標籤數量較多者 → Task ID 字典序
 
 針對每個可處理項目：
 1. **理解任務 + Skill 匹配**：讀取所有匹配的 SKILL.md，判斷是否可串聯
@@ -125,11 +133,16 @@
 ## 步驟 4：自動執行任務
 
 ### 4.1 建立 Prompt 檔案
-依 `config/routing.yaml` 中的 `template` 欄位選取模板：
-- 有 Skill 匹配 → 讀取 `templates/sub-agent/skill-task.md`
-- 知識庫/RAG 研究 → 讀取 `templates/sub-agent/research-task.md`
-- @code 標籤 → 讀取 `templates/sub-agent/code-task.md`
-- 無 Skill 匹配 → 讀取 `templates/sub-agent/general-task.md`
+依 `config/routing.yaml` 的 `template_resolution` 規則選取模板。
+
+**模板優先級**（多標籤命中不同模板時，取優先級最高者）：
+1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
+2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`
+3. `templates/sub-agent/research-task.md` — `^研究`/`^深度思維`/`^邏輯思維`
+4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
+5. `templates/sub-agent/general-task.md` — 無 Skill 匹配
+
+**修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
 
 用 Write 工具建立 `task_prompt.md`，依模板填入任務資料。
 

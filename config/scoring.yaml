@@ -48,6 +48,19 @@ recency_penalty:
   overlap_2: 0.85    # 今日同標籤已完成 2 項：×0.85
   overlap_3_plus: 0.7  # 今日同標籤已完成 3+ 項：×0.7
 
+# 同分排序規則（Tiebreaker）
+tiebreaker:
+  description: "綜合分數相同時，依以下順序決定排名"
+  order:
+    - factor: "due_time_asc"
+      description: "截止時間較早者優先（09:00 > 20:00）"
+    - factor: "priority_desc"
+      description: "Todoist priority 較高者優先（p1 > p2）"
+    - factor: "label_count_desc"
+      description: "標籤數量較多者優先（代表更被重視）"
+    - factor: "task_id_asc"
+      description: "Task ID 字典序（最終確定性排序，消除隨機性）"
+
 # 排名輸出格式
 output_format: |
   | 排名 | 任務 | 優先級 | 信心度 | 時間 | 標籤數 | 重複 | 綜合分 | 匹配 Skill |

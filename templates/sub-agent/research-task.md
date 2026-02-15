@@ -15,6 +15,18 @@
 ## 任務
 {研究主題和目標}
 
+## 研究註冊表檢查（跨任務去重）
+
+用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
+用 Read 讀取 `context/research-registry.json`：
+- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
+- 存在 → 列出近 7 天內的 entries（所有 task_type）
+
+**判定規則（必須遵守）：**
+1. 若 registry 中 3 天內有 topic 與本次候選主題完全相同 → **必須換主題**
+2. 若 registry 中 7 天內有 ≥3 個相似的 topic → 優先探索不同方向
+3. 列出「近期已研究主題」供去重查詢交叉比對
+
 ## 去重查詢（研究前必做，兩階段）
 
 ### 前置：快取狀態確認
@@ -74,6 +86,22 @@ rm kb_notes.json
 - 至少搜尋 3 組關鍵詞，引用至少 2 個來源
 - 成功匯入知識庫（imported >= 1）
 - 筆記超過 300 字
+
+## 寫入後：更新研究註冊表
+
+用 Read 讀取 `context/research-registry.json`（不存在則建立空 registry）。
+用 Write 更新，加入本次 entry：
+```json
+{
+  "date": "今天日期（YYYY-MM-DD）",
+  "task_type": "todoist_research",
+  "topic": "本次研究主題",
+  "kb_note_title": "匯入的筆記標題",
+  "kb_imported": true或false,
+  "tags": ["研究相關標籤"]
+}
+```
+同時移除超過 7 天的舊 entry。
 
 ## 品質自評迴圈
 1. 筆記結構是否完整？引用是否足夠？

@@ -88,28 +88,32 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 讀取或初始化追蹤檔案
 用 Read 讀取 `context/auto-tasks-today.json`。
-- 不存在 → 建立初始檔案（計數全 0）
-- `date` 不等於今天 → 歸零重建
+- 不存在 → 建立初始檔案（計數全 0，`next_execution_order` = 1）
+- `date` 不等於今天 → 歸零重建（計數歸零，但 **保留 `next_execution_order`** 確保跨日輪轉公平）
 - `date` 等於今天 → 沿用
 
-初始格式：
-```json
-{
-  "date": "YYYY-MM-DD",
-  "shurangama_count": 0,
-  "log_audit_count": 0,
-  "git_push_count": 0,
-  "closed_task_ids": []
-}
-```
+初始格式依 `config/frequency-limits.yaml` 的 `initial_schema` 定義（含所有 counter 欄位）。
 
-### 決定可執行的自動任務
+### 決定可執行的自動任務（純輪轉 round-robin）
+讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針），從該位置開始找第一個未達上限的：
 
-| 自動任務 | 每日上限 | 欄位 |
-|---------|---------|------|
-| 楞嚴經研究 | 3 次 | `shurangama_count` |
-| 系統 Log 審查 | 1 次 | `log_audit_count` |
-| 專案推送 GitHub | 2 次 | `git_push_count` |
+| 群組 | 自動任務 | 每日上限 | 欄位 |
+|------|---------|---------|------|
+| 佛學 | 楞嚴經研究 | 5 次 | `shurangama_count` |
+| 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong_count` |
+| 佛學 | 法華經研究 | 2 次 | `fahua_count` |
+| 佛學 | 淨土宗研究 | 2 次 | `jingtu_count` |
+| AI/技術 | 每日任務技術研究 | 5 次 | `tech_research_count` |
+| AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research_count` |
+| AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research_count` |
+| AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research_count` |
+| AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city_count` |
+| AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev_count` |
+| 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
+| 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
+| 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
+
+合計上限：36 次/日
 
 ---
 
@@ -117,29 +121,32 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 3.1 優先級排名（有任務時）
 
-**計算公式**：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間緊迫度 × 標籤數量加成 × 重複懲罰`
+**計算公式**：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間接近度 × 標籤數量加成 × 重複懲罰`
 
 | 因素 | 計分規則 |
 |------|---------|
 | Todoist priority | p1(priority=4)=4分, p2=3, p3=2, p4=1 |
 | 路由信心度 | Tier 1=1.0, Tier 2=0.8, Tier 3=0.6 |
 | 描述加成 | 有 description=1.2, 無=1.0 |
-| 時間緊迫度 | overdue=1.5, today=1.3, tomorrow=1.1, this_week=1.0, no_due=0.9 |
+| 時間接近度 | overdue=1.5, today=1.3, tomorrow=1.1, this_week=1.0, no_due=0.9 |
 | 標籤數量 | 0=1.0, 1=1.05, 2=1.1, 3+=1.15 |
 | 重複懲罰 | 今日已完成同標籤 ≥2=×0.85, ≥3=×0.7（查 closed_task_ids 的 labels） |
 
 取前 3 名（每次最多 3 項）。
+**同分排序**（Tiebreaker）：截止時間較早者 → priority 較高者 → 標籤數量較多者 → Task ID 字典序。
 
 ### 3.2 為每個任務產生 prompt 檔案
 
-依匹配結果選用模板，用 Write 建立 `results/todoist-task-{rank}.md`：
+依 `config/routing.yaml` 的 `template_resolution` 規則選用模板，用 Write 建立 `results/todoist-task-{rank}.md`：
 
-**模板選擇**（從 `templates/sub-agent/` 讀取對應模板，不要自行編寫）：
-- `^Claude Code`/`^GitHub`/`^專案優化` 標籤 → 讀取 `templates/sub-agent/code-task.md`
-- `^研究`/`^深度思維` 或含知識庫/RAG → 讀取 `templates/sub-agent/research-task.md`
-- `^遊戲優化`/`^遊戲開發` → 讀取 `templates/sub-agent/game-task.md`
-- 有匹配 Skill → 讀取 `templates/sub-agent/skill-task.md`
-- 無匹配 → 讀取 `templates/sub-agent/general-task.md`
+**模板優先級**（多標籤命中不同模板時，取優先級最高者。從 `templates/sub-agent/` 讀取，不要自行編寫）：
+1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
+2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`
+3. `templates/sub-agent/research-task.md` — `^研究`/`^深度思維`/`^邏輯思維`
+4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
+5. `templates/sub-agent/general-task.md` — 無匹配
+
+**修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
 
 用讀取到的模板內容，替換其中的變數（任務描述、Skill 路徑等），寫入 `results/todoist-task-{rank}.md`。
 
@@ -226,9 +233,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "auto",
   "tasks": [],
   "auto_tasks": {
-    "shurangama": { "enabled": true, "current_count": 1, "limit": 3 },
-    "log_audit": { "enabled": false, "current_count": 1, "limit": 1 },
-    "git_push": { "enabled": true, "current_count": 0, "limit": 2 }
+    "next_task": { "key": "shurangama", "name": "楞嚴經研究", "current_count": 1, "limit": 5 },
+    "all_exhausted": false,
+    "summary": { "total_limit": 36, "total_used": 5, "remaining": 31 }
   },
   "filter_summary": {
     "api_total": 5,
@@ -256,9 +263,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "idle",
   "tasks": [],
   "auto_tasks": {
-    "shurangama": { "enabled": false, "current_count": 3, "limit": 3 },
-    "log_audit": { "enabled": false, "current_count": 1, "limit": 1 },
-    "git_push": { "enabled": false, "current_count": 2, "limit": 2 }
+    "next_task": null,
+    "all_exhausted": true,
+    "summary": { "total_limit": 36, "total_used": 36, "remaining": 0 }
   },
   "filter_summary": { "api_total": 0, "after_date_filter": 0, "after_closed_filter": 0, "processable": 0, "skipped": 0 },
   "sync_warnings": {

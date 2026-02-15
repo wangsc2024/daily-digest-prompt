@@ -26,9 +26,9 @@
 - 若檔案不存在 → 該任務標記為 failed
 
 **plan_type = "auto"**：
-- 讀取 `results/todoist-shurangama.json`（若存在）
-- 讀取 `results/todoist-logaudit.json`（若存在）
-- 讀取 `results/todoist-gitpush.json`（若存在）
+- 讀取所有 `results/todoist-auto-*.json`（自動任務結果，可能有多種類型）
+- 結果檔案命名格式：`todoist-auto-{task_key}.json`（如 `todoist-auto-shurangama.json`）
+- 相容舊格式：也檢查 `results/todoist-shurangama.json`、`todoist-logaudit.json`、`todoist-gitpush.json`
 
 **plan_type = "idle"**：
 - 無 Phase 2 結果
@@ -99,7 +99,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 4. 若可處理項目 = 0 且自動任務未達上限：
    - 讀取 `context/auto-tasks-today.json` 檢查頻率
    - 依 config/frequency-limits.yaml 輸出可執行的自動任務
-   - 記錄到通知中：`🔄 今日任務全部完成，觸發自動任務：[楞嚴經/Log審查/Git push]`
+   - 記錄到通知中：`🔄 今日任務全部完成，建議下次執行自動任務：[任務名稱]`
    - **注意**：團隊模式下，自動任務不在此步驟執行，僅記錄建議（下次排程執行）
 5. 若仍有可處理項目 → 輸出「仍有 N 筆可處理待辦，不觸發自動任務」
 
@@ -109,11 +109,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 讀取 `context/auto-tasks-today.json`，根據 Phase 2 結果更新：
 
-| 結果檔案存在 | 更新欄位 |
-|------------|---------|
-| todoist-shurangama.json | `shurangama_count` +1 |
-| todoist-logaudit.json | `log_audit_count` +1 |
-| todoist-gitpush.json | `git_push_count` +1 |
+對每個存在的 `results/todoist-auto-*.json` 結果檔案：
+1. 從結果 JSON 中讀取 `type` 欄位（如 `shurangama`、`tech_research`）
+2. 查找 `config/frequency-limits.yaml` 中對應的 `counter_field`
+3. 將該欄位 +1
 
 用 Write 覆寫整個 JSON。
 
@@ -129,11 +128,12 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 {
   "date": "今天日期",
   "timestamp": "ISO 8601",
-  "type": "shurangama 或 log_audit 或 git_push",
-  "topic": "研究主題（楞嚴經）或 null",
-  "findings": "審查發現數（Log 審查）或 null",
+  "type": "任務類型（如 shurangama, tech_research, ai_deep_research 等）",
+  "topic": "研究主題（若適用）或 null",
+  "findings": "審查發現數（Log/Skill 審查）或 null",
   "fixes": "修正數或 null",
   "commit_hash": "commit hash（Git push）或 null",
+  "note_id": "知識庫筆記 ID（研究類）或 null",
   "status": "success 或 failed 或 no_changes"
 }
 ```
@@ -145,11 +145,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 ```json
 {
   "date": "今天日期",
-  "shurangama_count": 從 auto-tasks-today.json,
-  "log_audit_count": 從 auto-tasks-today.json,
-  "git_push_count": 從 auto-tasks-today.json,
-  "todoist_completed": 本次完成數,
-  "total_executions": 累計或 1
+  "auto_task_counts": "從 auto-tasks-today.json 複製所有 *_count 欄位",
+  "todoist_completed": "本次完成數",
+  "total_executions": "累計或 1"
 }
 ```
 
@@ -190,9 +188,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 📋 Todoist 自動任務報告（團隊模式）
 
 🔧 自動任務
-- 楞嚴經研究：主題 / 成功/失敗
-- Log 審查：發現 N 個問題，修正 M 個 / 跳過
-- Git 推送：commit hash / 無變更 / 跳過
+- [任務名稱]：[主題/結果摘要] / 成功/失敗
+ （依實際執行的自動任務類型列出）
+
+📊 今日自動任務進度：已用 N / 上限 36
 
 ⚡ 團隊並行模式
 ```
@@ -228,6 +227,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ```bash
 rm -f results/todoist-plan.json results/todoist-task-*.md results/todoist-result-*.json
+rm -f results/todoist-auto-*.json
 rm -f results/todoist-shurangama.json results/todoist-logaudit.json results/todoist-gitpush.json
 ```
 

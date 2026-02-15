@@ -1,6 +1,6 @@
-# 子 Agent 模板 D：@code 程式碼任務（Plan-Then-Execute）
+# 子 Agent 模板 D：程式碼任務（Plan-Then-Execute）
 
-> 使用時機：僅限標籤為 @code 的任務
+> 使用時機：標籤為 ^Claude Code / ^GitHub / ^專案優化 / ^網站優化 / ^UI/UX 的任務
 > 主 Agent 建立 task_prompt.md 時，用實際資料替換 {placeholder}
 
 ```

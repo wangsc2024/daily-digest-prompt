@@ -1,6 +1,6 @@
 # 專案推送 GitHub 流程
 
-> 觸發條件：Todoist 無可處理項目且 git_push_count < 2
+> 觸發條件：Todoist 無可處理項目且 git_push_count < 4
 > 由主 Agent 直接執行，不需子 Agent
 
 ## 步驟

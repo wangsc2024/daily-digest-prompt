@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 13 個 Skill 的速查表（名稱、觸發關鍵字、用途）
+- 14 個 Skill 速查表（13 核心 + 1 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -49,6 +49,7 @@
 | `config/scoring.yaml` | TaskSense 優先級計分 | hour-todoist-prompt.md |
 | `config/notification.yaml` | ntfy 通知配置 | hour-todoist-prompt.md、assemble-digest.md |
 | `config/digest-format.md` | 摘要輸出排版模板 | daily-digest-prompt.md、assemble-digest.md |
+| `config/dedup-policy.yaml` | 研究去重策略（冷卻天數、飽和閾值） | 所有研究模板 |
 | `templates/shared/preamble.md` | 共用前言（nul 禁令 + Skill-First） | 所有 prompt |
 
 ## 架構
@@ -69,6 +70,7 @@ daily-digest-prompt/
     frequency-limits.yaml         # 自動任務頻率限制（楞嚴經/Log審查/Git push）
     scoring.yaml                  # TaskSense 優先級計分規則
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
+    dedup-policy.yaml             # 研究去重策略（冷卻天數、飽和閾值、跨任務去重）
     digest-format.md              # 摘要輸出排版模板
 
   # 模板層（按需載入，不預載進 context window）
@@ -121,6 +123,7 @@ daily-digest-prompt/
   context/
     digest-memory.json            # 摘要記憶（連續天數、待辦統計等）
     auto-tasks-today.json         # 自動任務頻率追蹤（每日歸零）
+    research-registry.json        # 研究主題註冊表（跨任務去重，7 天滾動）
   cache/                          # API 回應快取（TTL 定義在 config/cache-policy.yaml）
     todoist.json / pingtung-news.json / hackernews.json / knowledge.json / gmail.json
   state/
@@ -133,7 +136,8 @@ daily-digest-prompt/
     todoist/ pingtung-news/ hackernews-ai-digest/ atomic-habits/
     learning-mastery/ pingtung-policy-expert/ knowledge-query/
     ntfy-notify/ digest-memory/ api-cache/ scheduler-state/
-    gmail/ skill-scanner/         # 共 14 個 Skill（各含 SKILL.md）
+    gmail/ skill-scanner/
+    game-design/                  # 共 14 個 Skill（13 核心 + 1 工具，各含 SKILL.md）
 
   # 日誌
   logs/

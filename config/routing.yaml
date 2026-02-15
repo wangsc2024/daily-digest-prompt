@@ -26,6 +26,22 @@ label_routing:
     例：任務 labels=["遊戲優化", "知識庫"] → 命中 "^遊戲優化" 和 "^知識庫"。
     多標籤命中多個映射時，合併所有 skills 和使用最寬 allowedTools。
 
+  # 模板衝突解決規則（多標籤命中不同模板時）
+  template_resolution:
+    rule: "多標籤命中不同模板時，按優先級取最具體者（數字越小越優先）"
+    priority_order:
+      1: "templates/sub-agent/game-task.md"       # 遊戲任務最具體
+      2: "templates/sub-agent/code-task.md"       # 程式開發次之
+      3: "templates/sub-agent/research-task.md"   # 研究任務
+      4: "templates/sub-agent/skill-task.md"      # 一般 Skill 任務（最泛用）
+
+  # 修飾標籤（不參與模板選擇，僅合併 skills/tools）
+  modifier_labels:
+    - label: "知識庫"
+      behavior: "合併 skills（加入 knowledge-query）和 allowedTools（加入 Write），但不參與模板競爭"
+      description: "跨切面修飾 — 代表「結果寫入知識庫」，不決定任務類型"
+      fallback: "若為任務唯一標籤且無其他 Tier 命中，使用 templates/sub-agent/skill-task.md"
+
   mappings:
     "^Claude Code":
       skills: ["程式開發（Plan-Then-Execute）"]
@@ -46,7 +62,7 @@ label_routing:
     "^知識庫":
       skills: ["knowledge-query"]
       allowed_tools: "Read,Bash,Write"
-      template: "templates/sub-agent/skill-task.md"
+      template: null  # modifier label — 不參與模板選擇，由其他標籤決定模板；若為唯一標籤則 fallback 到 skill-task.md
     "^AI":
       skills: ["hackernews-ai-digest"]
       allowed_tools: "Read,Bash,Write"

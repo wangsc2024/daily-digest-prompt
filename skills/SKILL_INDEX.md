@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（12 個核心 Skill + 1 個工具 Skill）
+## 速查表（13 個核心 Skill + 1 個工具 Skill）
 
 ### 核心 Skill（每日摘要/Todoist Agent 使用）
 
@@ -20,12 +20,13 @@
 | 10 | api-cache | API 回應快取與降級 | 快取、cache、降級 |
 | 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度 |
 | 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件 |
+| 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、HTML5、遊戲品質 |
 
 ### 工具 Skill（按需使用）
 
 | # | Skill | 用途 | 觸發關鍵字 |
 |---|-------|------|-----------|
-| 13 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全、掃描、scan、audit、稽核 |
+| 14 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全、掃描、scan、audit、稽核 |
 
 **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
@@ -44,14 +45,28 @@
 
 Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 
-| Todoist 標籤 | 映射 Skill | allowedTools |
-|-------------|-----------|-------------|
-| `@code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep |
-| `@research` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch |
-| `@write` | 文件撰寫 | Read,Bash,Write |
-| `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write |
-| `@ai` | hackernews-ai-digest | Read,Bash,Write |
-| `@knowledge` | knowledge-query | Read,Bash,Write |
+> **^prefix 匹配邏輯**：去掉 `^` 後與 Todoist labels 完全比對。多標籤命中多個映射時，合併 skills 和取最寬 allowedTools。
+>
+> **模板衝突解決**：多標籤命中不同模板時，按優先級取最具體者：game-task(1) > code-task(2) > research-task(3) > skill-task(4)。
+>
+> **修飾標籤**：`知識庫` 為跨切面修飾標籤 — 僅合併 skills/tools，不參與模板選擇。
+
+| Todoist 標籤 | 映射 Skill | allowedTools | 模板 |
+|-------------|-----------|-------------|------|
+| `^Claude Code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^GitHub` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^研究` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^深度思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^邏輯思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^知識庫` | knowledge-query | Read,Bash,Write | skill-task.md |
+| `^AI` | hackernews-ai-digest | Read,Bash,Write | skill-task.md |
+| `^遊戲優化` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^遊戲開發` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^專案優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | skill-task.md |
+| `@write` | 文件撰寫 | Read,Bash,Write | skill-task.md |
 
 **路由優先順序**：標籤（100%）> 內容關鍵字（80%）> LLM 語義判斷（60%）
 
@@ -64,6 +79,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 ├── 涉及「待辦/任務/todo」？ → todoist + (可選) knowledge-query
 ├── 涉及「屏東/新聞/縣政」？ → pingtung-news + pingtung-policy-expert（必搭）
 ├── 涉及「AI/技術/LLM」？   → hackernews-ai-digest
+├── 涉及「遊戲/game」？     → game-design + (可選) knowledge-query
 ├── 涉及「習慣/行為」？     → atomic-habits
 ├── 涉及「學習/技巧」？     → learning-mastery
 ├── 涉及「知識/筆記/研究」？ → knowledge-query
@@ -131,6 +147,7 @@ digest-memory（讀取）→ api-cache（包裝所有 API）→ [主要流程] �
 | 知識庫 | knowledge-query | `localhost:3000` |
 | ntfy | ntfy-notify | `ntfy.sh` |
 | Gmail | gmail | `gmail.googleapis.com/gmail/v1` |
+| Cloudflare Pages | game-design | `pages.cloudflare.com`（自動部署） |
 
 ---
 

@@ -1,6 +1,6 @@
 # 楞嚴經自動研究 Prompt 模板
 
-> 觸發條件：Todoist 無可處理項目且 shurangama_count < 3
+> 觸發條件：Todoist 無可處理項目且 shurangama_count < 5
 > 主 Agent 用此模板內容建立 task_prompt.md，透過 `claude -p` 執行
 
 ```
@@ -13,6 +13,18 @@
 
 ## 任務
 對楞嚴經（大佛頂首楞嚴經）進行一次深度研究。
+
+## 第零步：研究註冊表檢查（跨任務去重）
+
+用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
+用 Read 讀取 `context/research-registry.json`：
+- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
+- 存在 → 列出近 7 天內的 entries（所有 task_type）
+
+**判定規則（必須遵守）：**
+1. 若 registry 中 3 天內有 topic 與本次候選主題完全相同 → **必須換主題**
+2. 若 registry 中 7 天內 task_type="shurangama" 已有 ≥3 個不同 topic → 優先探索較少涵蓋的面向
+3. 列出「近期已研究主題」供第一步 KB 去重時交叉比對
 
 ## 第一步：查詢知識庫已有研究（必做，兩階段去重）
 
@@ -71,6 +83,22 @@ rm kb_notes.json
 - 必須用 Write 建立 JSON，不可用 inline JSON
 - source 填 "import"
 - 知識庫未啟動則跳過匯入，改為將研究結果直接輸出
+
+## 第四步之後：更新研究註冊表
+
+用 Read 讀取 `context/research-registry.json`（不存在則建立空 registry）。
+用 Write 更新，加入本次 entry：
+```json
+{
+  "date": "今天日期（YYYY-MM-DD）",
+  "task_type": "shurangama",
+  "topic": "本次研究主題（如：三科七大）",
+  "kb_note_title": "匯入的筆記標題",
+  "kb_imported": true或false,
+  "tags": ["楞嚴經", "佛學", "本次主題名稱"]
+}
+```
+同時移除超過 7 天的舊 entry。
 
 ## 品質自評迴圈
 完成研究和匯入後，自檢：
