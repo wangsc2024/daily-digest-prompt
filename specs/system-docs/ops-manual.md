@@ -44,7 +44,7 @@
 | 系統設計文件（SSD） | `specs/system-docs/ssd.md` | 架構設計與元件定義（COMP-xxx / IF-xxx / DS-xxx） |
 | 專案指引 | `CLAUDE.md` | 專案慣例、架構說明、常用指令 |
 | 排程定義 | `HEARTBEAT.md` | 宣告式排程元資料 |
-| Skill 索引 | `skills/SKILL_INDEX.md` | 13 個 Skill 的速查表與路由引擎 |
+| Skill 索引 | `skills/SKILL_INDEX.md` | 14 個 Skill 的速查表與路由引擎 |
 
 ---
 
@@ -87,7 +87,7 @@
 |------|------|------|------|
 | 每日摘要（單一模式） | `run-agent.ps1` | 3-4 分鐘 | 單一 Agent 循序執行所有步驟，含自動重試 1 次 |
 | **每日摘要（團隊模式）** | `run-agent-team.ps1` | **約 1 分鐘** | **推薦**。Phase 1 並行 5 個 Agent 擷取資料 + Phase 2 組裝 |
-| Todoist 任務規劃（單一模式） | `run-todoist-agent.ps1` | 視任務而定 | 30 分鐘超時保護，執行後自動清理 |
+| Todoist 任務規劃（單一模式） | `run-todoist-agent.ps1` | 視任務而定 | 35 分鐘超時保護，執行後自動清理 |
 | **Todoist 任務規劃（團隊模式）** | `run-todoist-agent-team.ps1` | 視任務而定 | **推薦**。並行模式處理 Todoist 任務 |
 
 **單一模式 vs 團隊模式比較**：
@@ -424,11 +424,11 @@ Get-Content "D:\Source\daily-digest-prompt\.claude\settings.json" | python -m js
 
 | 排程名稱 | 觸發時間 | 腳本 | 超時 | 重試 | 說明 |
 |---------|---------|------|------|------|------|
-| `Claude_daily-digest-am` | 每日 08:00 | `run-agent-team.ps1` | 300s | 1 次 | 每日摘要 - 早 |
-| `Claude_daily-digest-mid` | 每日 11:15 | `run-agent-team.ps1` | 300s | 1 次 | 每日摘要 - 午 |
-| `Claude_daily-digest-pm` | 每日 21:15 | `run-agent-team.ps1` | 300s | 1 次 | 每日摘要 - 晚 |
-| `Claude_todoist-single` | 每小時整點 02:00-23:00 | `run-todoist-agent.ps1` | 1800s | 0 次 | Todoist 單一模式 |
-| `Claude_todoist-team` | 每小時半點 02:30-23:30 | `run-todoist-agent-team.ps1` | 1200s | 0 次 | Todoist 團隊模式 |
+| `Claude_daily-digest-am` | 每日 08:00 | `run-agent-team.ps1` | 900s | 1 次 | 每日摘要 - 早 |
+| `Claude_daily-digest-mid` | 每日 11:15 | `run-agent-team.ps1` | 900s | 1 次 | 每日摘要 - 午 |
+| `Claude_daily-digest-pm` | 每日 21:15 | `run-agent-team.ps1` | 900s | 1 次 | 每日摘要 - 晚 |
+| `Claude_todoist-single` | 每小時整點 02:00-23:00 | `run-todoist-agent.ps1` | 3600s | 0 次 | Todoist 單一模式 |
+| `Claude_todoist-team` | 每小時半點 02:30-23:30 | `run-todoist-agent-team.ps1` | 2400s | 0 次 | Todoist 團隊模式 |
 
 > **雙軌比較**：兩種 Todoist 模式時間錯開 30 分鐘，比較效能與成功率。
 > - **single-mode**：一個 claude 完成查詢+執行+通知，CLI 啟動快（~20s）
@@ -442,7 +442,7 @@ todoist-single:
     cron: "0 2-23 * * *"       # -> -Daily -At 02:00 + RepetitionInterval 60m
     interval: 60m               # -> RepetitionDuration 21 hours (2-23)
     script: run-todoist-agent.ps1
-    timeout: 1800
+    timeout: 3600
 ```
 
 ### 4.2 建立排程
@@ -554,7 +554,7 @@ Mode: parallel (Phase 1 x5 + Phase 2 x1)
 [Phase1] Started: hackernews (Job 3)
 [Phase1] Started: gmail (Job 4)
 [Phase1] Started: security (Job 5)
-[Phase1] Waiting for 5 agents (timeout: 180s)...
+[Phase1] Waiting for 5 agents (timeout: 300s)...
 [Phase1] todoist OK: status=success, source=api
 [Phase1] news OK: status=success, source=api
 [Phase1] hackernews OK: status=success, source=api
@@ -604,15 +604,15 @@ pwsh -ExecutionPolicy Bypass -File D:\Source\daily-digest-prompt\run-todoist-age
 **預期輸出**：
 ```
 === Todoist Agent start: 2026-02-15 09:00:01 ===
---- calling Claude Code (timeout: 1800s) ---
+--- calling Claude Code (timeout: 2100s) ---
 ... (Agent 查詢 Todoist、路由任務、執行任務)
 === done (success): 2026-02-15 09:05:30 ===
 ```
 
 **注意事項**：
-- Todoist Agent 有 30 分鐘超時保護（`$MaxDurationSeconds = 1800`）
+- Todoist Agent 有 35 分鐘超時保護（`$MaxDurationSeconds = 2100`）
 - 超時後會強制終止並記錄 `timeout` 狀態
-- 每次最多執行 2 項任務（定義在 `config/scoring.yaml` 的 `max_tasks_per_run: 2`）
+- 每次最多執行 3 項任務（定義在 `config/scoring.yaml` 的 `max_tasks_per_run: 3`）
 
 ### 5.3 健康狀態檢查
 
@@ -934,7 +934,7 @@ steps:
 
 | 層級 | 信心度 | 觸發條件 | 說明 |
 |------|--------|---------|------|
-| Tier 1：標籤路由 | 100% | Todoist 標籤（@code, @research 等） | 最高優先，直接映射 Skill |
+| Tier 1：標籤路由 | 100% | Todoist 標籤（`^` 前綴，如 ^code, ^research 等） | 最高優先，直接映射 Skill |
 | Tier 2：關鍵字路由 | 80% | 任務內容含特定關鍵字 | 比對 SKILL_INDEX 觸發詞 |
 | Tier 3：語義路由 | 60% | LLM 分析任務描述 | 最低優先，兜底處理 |
 
@@ -944,21 +944,21 @@ steps:
 ```yaml
 label_routing:
   mappings:
-    "@code":
+    "^Claude Code":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
 ```
 
-修改後（新增 @learn 標籤）：
+修改後（新增 ^learn 標籤）：
 ```yaml
 label_routing:
   mappings:
-    "@code":
+    "^Claude Code":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
-    "@learn":
+    "^learn":
       skills: ["learning-mastery", "knowledge-query"]
       allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
       template: "templates/sub-agent/research-task.md"
@@ -968,6 +968,24 @@ label_routing:
 - `pre_filter.exclude_categories` 定義的類型（實體行動、人際互動等）優先於所有路由層
 - 新增標籤後需在 Todoist 中對應設定
 - `template` 路徑指向 `templates/sub-agent/` 下的模板檔案
+
+**routing.yaml v2 新增功能**：
+
+1. **Tier 1 前綴**：`^`（非 `@`），匹配邏輯：去掉 `^` 後完全比對 Todoist labels
+2. **前置過濾（pre_filter）**：在路由前排除實體行動、人際互動、個人事務
+3. **三層模板選擇**：
+   - 第一層：task_type_labels 覆寫（研究/深度思維 → 一律使用 research-task.md）
+   - 第二層：template_resolution 優先級（game(1) > code(2) > research(3) > skill(4)）
+   - 第三層：modifier_labels（知識庫 — 合併 skills/tools 但不參與模板選擇）
+4. **Skill 同步檢查（sync_check）**：偵測未匹配標籤，24h 去重
+
+**新增標籤映射範例**：
+```yaml
+"^遊戲優化":
+  skills: ["game-design"]
+  allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+  template: "templates/sub-agent/game-task.md"
+```
 
 ### 6.4 快取策略（cache-policy.yaml）
 
@@ -1003,72 +1021,103 @@ sources:
 - `degradation_max_age_hours: 24` 表示 API 故障時最多使用 24 小時前的快取
 - Todoist Agent 不使用快取（需即時資料），僅 daily-digest 使用
 
-### 6.5 自動任務頻率限制（frequency-limits.yaml）
+### 6.5 自動任務頻率限制（frequency-limits.yaml v3）
 
-**檔案路徑**：`D:\Source\daily-digest-prompt\config\frequency-limits.yaml`
+自動任務在 Todoist 無可處理項目時觸發，分為 5 群組共 14 個任務。
 
-**可調整欄位**：
+**觸發條件**（雙觸發模式）：
+1. 三層路由篩選後無可處理任務
+2. 執行完畢後重新查詢 Todoist，可處理項目 = 0
 
-| 欄位 | 說明 | 預設值 |
-|------|------|--------|
-| `tasks.shurangama.daily_limit` | 楞嚴經研究每日上限 | 3 |
-| `tasks.log_audit.daily_limit` | 系統 Log 審查每日上限 | 1 |
-| `tasks.git_push.daily_limit` | Git Push 每日上限 | 2 |
-| `history.max_auto_tasks` | 歷史記錄陣列上限 | 200 |
+| 配置項 | 路徑 | 說明 |
+|--------|------|------|
+| 頻率限制 | `config/frequency-limits.yaml` | 14 個任務定義與每日上限 |
+| 頻率追蹤 | `context/auto-tasks-today.json` | 當日執行計數（每日歸零） |
+| 去重策略 | `config/dedup-policy.yaml` | 研究任務去重規則 |
+| 歷史記錄 | `state/todoist-history.json` | 自動任務執行歷史 |
+
+**自動任務一覽**：
+
+| 群組 | 任務 | 每日上限 | 執行順序 | 模板 |
+|------|------|---------|---------|------|
+| 佛學研究 | 楞嚴經研究 | 5 | 1 | shurangama-research.md |
+| 佛學研究 | 教觀綱宗研究 | 3 | 2 | buddhist-research.md |
+| 佛學研究 | 法華經研究 | 2 | 3 | buddhist-research.md |
+| 佛學研究 | 淨土宗研究 | 2 | 4 | buddhist-research.md |
+| AI/技術 | 每日任務技術研究 | 5 | 5 | tech-research.md |
+| AI/技術 | AI 深度研究計畫 | 4 | 6 | ai-deep-research.md |
+| AI/技術 | Unsloth 研究 | 2 | 7 | unsloth-research.md |
+| AI/技術 | AI GitHub 熱門專案 | 2 | 8 | ai-github-research.md |
+| AI/技術 | AI 智慧城市 | 2 | 9 | ai-smart-city-research.md |
+| AI/技術 | AI 系統開發 | 2 | 10 | ai-sysdev-research.md |
+| 系統優化 | Skill 審查優化 | 2 | 11 | skill-audit.md |
+| 系統維護 | 系統 Log 審查 | 1 | 12 | log-audit.md |
+| 系統維護 | 專案推送 GitHub | 4 | 13 | git-push.md |
+| 遊戲創意 | 創意遊戲優化 | 2 | 14 | creative-game-optimize.md |
+| **合計** | **14 個任務** | **38 次/日** | — | — |
+
+**選取策略**：
+- `round_robin`（純輪轉）：維護 `next_execution_order` 指針
+- 每次找到可執行任務後指針 +1，繞完一圈回到起點
+- 指針跨日保留（計數歸零但指針不歸零），確保所有任務都有機會
 
 **修改範例：增加楞嚴經研究上限**
 
-修改前：
+修改前（`config/frequency-limits.yaml`）：
 ```yaml
-tasks:
-  shurangama:
-    name: "楞嚴經研究"
-    daily_limit: 3
-```
-
-修改後：
-```yaml
-tasks:
   shurangama:
     name: "楞嚴經研究"
     daily_limit: 5
 ```
 
-**注意事項**：
-- 頻率追蹤檔 `context/auto-tasks-today.json` 每日自動歸零
-- 全部達上限時直接跳到通知步驟
-- 歸零邏輯：`date` 欄位不等於今天時自動重置所有計數
+修改後：
+```yaml
+  shurangama:
+    name: "楞嚴經研究"
+    daily_limit: 8
+```
 
-### 6.6 優先級計分（scoring.yaml）
+**注意事項**：
+- 頻率追蹤檔 `context/auto-tasks-today.json` 每日自動歸零（但 `next_execution_order` 保留）
+- 修改上限後下次排程自動生效，無需重啟
+- 14 個任務合計 38 次/日，足夠 22 個 auto-task slots（雙軌每日約 44 次執行）
+
+### 6.6 優先級計分（scoring.yaml v2）
 
 **檔案路徑**：`D:\Source\daily-digest-prompt\config\scoring.yaml`
 
-**計分公式**：`綜合分數 = Todoist 優先級分 * 信心度乘數 * 描述加成`
+**計分公式**（6 因子）：`綜合分數 = Todoist 優先級分 * 信心度乘數 * 描述加成 * 時間接近度加成 * 標籤數量加成 * 近期重複懲罰`
 
 **可調整欄位**：
 
 | 欄位 | 說明 | 預設值 |
 |------|------|--------|
-| `max_tasks_per_run` | 每次最多執行任務數 | 2 |
+| `max_tasks_per_run` | 每次最多執行任務數 | 3 |
 | `priority_scores` | Todoist 優先級對應分數 | p1=4, p2=3, p3=2, p4=1 |
 | `confidence_multipliers` | 路由層級信心度乘數 | tier1=1.0, tier2=0.8, tier3=0.6 |
 | `description_bonus` | 有描述欄位的加成 | 有=1.2, 無=1.0 |
+| `time_proximity_bonus` | 截止時間接近度加成 | 逾期=1.5, 今天=1.3, 明天=1.1, 本週=1.0, 無期限=0.9 |
+| `label_count_bonus` | 標籤數量加成 | 0 標籤=1.0, 1 標籤=1.05, 2 標籤=1.1, 3+ 標籤=1.15 |
+| `recency_penalty` | 同標籤近期完成懲罰 | 0-1 項=1.0, 2 項=0.85, 3+ 項=0.7 |
 
-**修改範例：每次最多處理 3 項任務**
+**Tiebreaker 規則**（分數相同時）：截止時間 asc → priority desc → 標籤數量 desc → Task ID asc
+
+**修改範例：調整每次最多處理任務數**
 
 修改前：
-```yaml
-max_tasks_per_run: 2
-```
-
-修改後：
 ```yaml
 max_tasks_per_run: 3
 ```
 
+修改後：
+```yaml
+max_tasks_per_run: 4
+```
+
 **注意事項**：
-- 增加 `max_tasks_per_run` 會延長 Agent 單次執行時間，注意 Todoist Agent 有 30 分鐘超時
+- 增加 `max_tasks_per_run` 會延長 Agent 單次執行時間，注意 Todoist Agent 有 35 分鐘超時
 - 計分結果決定任務執行順序，高分優先
+- 6 因子公式相比舊版 3 因子，更能區分相近優先級的任務
 
 ### 6.7 通知配置（notification.yaml）
 
@@ -1118,6 +1167,52 @@ default_topic: "my-new-topic"
 **注意事項**：
 - 此檔案僅影響輸出排版，不影響資料擷取邏輯
 - Agent 讀取此檔案後會將實際資料替換描述文字
+
+### 6.9 去重策略（dedup-policy.yaml）
+
+所有研究類自動任務共用去重策略，避免重複研究相同主題。
+
+| 配置項 | 預設值 | 說明 |
+|--------|--------|------|
+| `retention_days` | 7 | 研究註冊表保留天數 |
+| `topic_cooldown_days` | 3 | 同 topic 最少間隔天數 |
+| `saturation_threshold` | 3 | 同方向筆記達此數量建議換方向 |
+| `search.default_topK` | 15 | hybrid search 預設 topK |
+| `search.buddhist_topK` | 20 | 佛學系列 topK |
+
+**三層防重複機制**：
+
+1. **研究註冊表**（`context/research-registry.json`）：
+   - 每次研究前讀取，完成後寫入
+   - 7 天滾動 window，自動清除過期 entry
+   - 跨任務共享（楞嚴經和 AI 研究都寫入同一 registry）
+
+2. **知識庫 hybrid search**：
+   - score > 0.85 視為重複，跳過匯入
+   - 保留原有機制不變
+
+3. **集中策略規則**：
+   - `topic_cooldown`：同 topic 3 天內 → 必須換主題
+   - `type_saturation`：同 task_type 7 天內 ≥3 topic → 建議換方向
+   - `kb_saturation`：KB 同方向 ≥3 篇 → 建議換方向
+
+**修改範例**：增加冷卻天數
+
+```yaml
+# 修改前
+topic_cooldown_days: 3
+
+# 修改後
+topic_cooldown_days: 5
+```
+
+**故障排除**：
+
+| 問題 | 可能原因 | 解決 |
+|------|---------|------|
+| 同主題連續出現 | registry.json 損壞或為空 | 用 Read 工具檢查檔案格式 |
+| 研究主題單一 | saturation_threshold 過低 | 調高到 5 |
+| registry 無限成長 | retention_days 清除邏輯未觸發 | 檢查模板中的清除步驟 |
 
 ---
 
@@ -1328,7 +1423,7 @@ on_stop_alert.py 啟動
 - **解決方案**：根據錯誤類型修復（外部服務問題/配置錯誤/Skill 問題）
 - **預防措施**：定期執行健康檢查
 
-#### 問題：timeout（超過 30 分鐘）
+#### 問題：timeout（超過 35 分鐘）
 
 - **可能原因**：Agent 陷入迴圈或外部 API 極慢回應
 - **排查步驟**：
@@ -1344,8 +1439,25 @@ on_stop_alert.py 啟動
 - **解決方案**：
   - 外部 API 慢 -> 快取降級會自動處理
   - Agent 迴圈 -> 檢查對應 Prompt 邏輯是否有遞迴
-  - 超時保護已內建於 `run-todoist-agent.ps1`（`$MaxDurationSeconds = 1800`）
+  - 超時保護已內建於 `run-todoist-agent.ps1`（`$MaxDurationSeconds = 2100`）
 - **預防措施**：監控趨勢分析中的平均耗時，異常升高時主動排查
+
+#### 雙層 Timeout 判斷
+
+系統有兩層 timeout 保護，排查時需區分：
+
+| 層級 | 來源 | 作用 | 典型值 |
+|------|------|------|--------|
+| 外層 | HEARTBEAT.md → Task Scheduler | 整個 PowerShell 進程的最大執行時間 | 900s / 3600s / 2400s |
+| 內層 | 腳本 $*TimeoutSeconds | 個別 Claude Agent Job 的 Wait-Job timeout | 300s / 420s / 2100s |
+
+**判斷流程**：
+1. 查看 `state/scheduler-state.json` 的 status 欄位
+   - `timeout` → 是內層 timeout（Job 超時被 Stop-Job）
+   - `failed` + error 含 "killed" → 可能是外層 timeout（Task Scheduler 殺進程）
+2. 對比日誌時間戳：若日誌最後條目與 scheduler-state timestamp 差距 > 內層 timeout，則為外層 timeout
+3. 內層 timeout：增加腳本內的 `$MaxDurationSeconds` 或 `$Phase*TimeoutSeconds`
+4. 外層 timeout：修改 HEARTBEAT.md 的 timeout 值，重新執行 `setup-scheduler.ps1 -FromHeartbeat`
 
 ### 8.2 外部服務連線問題
 
@@ -1716,7 +1828,7 @@ on_stop_alert.py 啟動
   - Phase 1 超時的 agent 會被強制終止，其 `sections` 狀態標記為 `failed`
   - Phase 2 組裝時會跳過失敗的區塊
   - 下次執行通常自動恢復
-- **預防措施**：Phase 1 超時設為 180 秒（`$Phase1TimeoutSeconds = 180`），可在 `run-agent-team.ps1` 中調整
+- **預防措施**：Phase 1 超時設為 300 秒（`$Phase1TimeoutSeconds = 300`），可在 `run-agent-team.ps1` 中調整
 
 #### 問題：results/*.json 未建立
 
@@ -1827,7 +1939,8 @@ $target = "D:\Source\daily-digest-prompt\skills"
 # 列出需更新的 Skill
 $skills = @("todoist", "pingtung-news", "pingtung-policy-expert", "hackernews-ai-digest",
             "atomic-habits", "learning-mastery", "knowledge-query", "ntfy-notify",
-            "digest-memory", "api-cache", "scheduler-state", "gmail", "skill-scanner")
+            "digest-memory", "api-cache", "scheduler-state", "gmail", "skill-scanner",
+            "game-design")
 
 foreach ($skill in $skills) {
     if (Test-Path "$source\$skill\SKILL.md") {

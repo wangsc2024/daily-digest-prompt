@@ -9,10 +9,12 @@
 #   .\query-logs.ps1 -Mode todoist
 #   .\query-logs.ps1 -Mode trend -Days 14
 #   .\query-logs.ps1 -Mode summary -Format json
+#   .\query-logs.ps1 -Mode health-score
+#   .\query-logs.ps1 -Mode health-score -Days 3 -Format json
 # ============================================
 
 param(
-    [ValidateSet("summary", "detail", "errors", "todoist", "trend")]
+    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score")]
     [string]$Mode = "summary",
 
     [int]$Days = 7,
@@ -616,12 +618,251 @@ function Show-Trend {
 }
 
 # ============================================
+# Mode: health-score
+# ============================================
+function Show-HealthScore {
+    $runs = Get-Runs -FilterDays $Days -FilterAgent $Agent
+
+    # === 計算各維度分數 ===
+
+    # 1. 成功率 (weight: 30)
+    $total = $runs.Count
+    if ($total -gt 0) {
+        $successCount = @($runs | Where-Object { $_.status -eq "success" }).Count
+        $successRate = $successCount / $total
+        $successScore = [math]::Min(30, [math]::Round($successRate * 30, 0))
+    }
+    else {
+        $successRate = 0
+        $successScore = 0
+    }
+
+    # 2. 錯誤率 (weight: 20) — 從 session-summary.jsonl
+    $summaryFile = "$AgentDir\logs\structured\session-summary.jsonl"
+    $totalErrors = 0
+    $totalBlocked = 0
+    $sessionCount = 0
+    $totalApiCalls = 0
+    $totalCacheReads = 0
+    if (Test-Path $summaryFile) {
+        $cutoff = (Get-Date).AddDays(-$Days).ToString("yyyy-MM-ddTHH:mm:ss")
+        $sessions = @(Get-Content -Path $summaryFile -Encoding UTF8 | ForEach-Object {
+            try { $_ | ConvertFrom-Json } catch { $null }
+        } | Where-Object { $_ -and $_.ts -ge $cutoff })
+
+        $sessionCount = $sessions.Count
+        $totalErrors = ($sessions | Measure-Object -Property errors -Sum -ErrorAction SilentlyContinue).Sum
+        $totalBlocked = ($sessions | Measure-Object -Property blocked -Sum -ErrorAction SilentlyContinue).Sum
+        $totalApiCalls = ($sessions | Measure-Object -Property api_calls -Sum -ErrorAction SilentlyContinue).Sum
+        $totalCacheReads = ($sessions | Measure-Object -Property cache_reads -Sum -ErrorAction SilentlyContinue).Sum
+    }
+
+    $errorScore = switch ($true) {
+        ($totalErrors -eq 0) { 20; break }
+        ($totalErrors -le 2) { 15; break }
+        ($totalErrors -le 5) { 10; break }
+        default              { 0 }
+    }
+
+    # 3. 攔截事件 (weight: 15)
+    $blockedScore = switch ($true) {
+        ($totalBlocked -eq 0) { 15; break }
+        ($totalBlocked -le 2) { 10; break }
+        default               { 0 }
+    }
+
+    # 4. 快取命中率 (weight: 15)
+    $totalCacheOps = $totalApiCalls + $totalCacheReads
+    $cacheHitRate = if ($totalCacheOps -gt 0) { $totalCacheReads / $totalCacheOps } else { 1.0 }
+    $cacheScore = [math]::Min(15, [math]::Round($cacheHitRate * 15, 0))
+
+    # 5. 耗時穩定度 (weight: 10)
+    $durations = @($runs | ForEach-Object { $_.duration_seconds } | Where-Object { $_ -gt 0 })
+    if ($durations.Count -ge 3) {
+        $avg = ($durations | Measure-Object -Average).Average
+        $variance = ($durations | ForEach-Object { [math]::Pow($_ - $avg, 2) } | Measure-Object -Average).Average
+        $stddev = [math]::Sqrt($variance)
+        $cv = if ($avg -gt 0) { $stddev / $avg } else { 0 }
+        $durationScore = switch ($true) {
+            ($cv -lt 0.3) { 10; break }
+            ($cv -lt 0.5) { 7; break }
+            default       { 3 }
+        }
+    }
+    else {
+        $cv = 0
+        $durationScore = 5  # 資料不足給中間分
+    }
+
+    # 6. 連續天數 (weight: 10)
+    $memFile = "$AgentDir\context\digest-memory.json"
+    $streak = 0
+    if (Test-Path $memFile) {
+        $mem = Get-Content -Path $memFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction SilentlyContinue
+        if ($mem) { $streak = [int]($mem.run_count) }
+    }
+    $streakScore = switch ($true) {
+        ($streak -ge 14) { 10; break }
+        ($streak -ge 7)  { 8; break }
+        ($streak -ge 3)  { 5; break }
+        default          { 3 }
+    }
+
+    # === 總分 ===
+    $totalScore = $successScore + $errorScore + $blockedScore + $cacheScore + $durationScore + $streakScore
+
+    # === 分數等級 ===
+    $grade = switch ($true) {
+        ($totalScore -ge 90) { "優秀"; break }
+        ($totalScore -ge 75) { "良好"; break }
+        ($totalScore -ge 60) { "尚可"; break }
+        ($totalScore -ge 40) { "不佳"; break }
+        default              { "嚴重" }
+    }
+    $gradeColor = switch ($true) {
+        ($totalScore -ge 75) { "Green"; break }
+        ($totalScore -ge 60) { "Yellow"; break }
+        default              { "Red" }
+    }
+
+    # === JSON 輸出 ===
+    if ($Format -eq "json") {
+        @{
+            period = "近 $Days 天"
+            total_score = $totalScore
+            grade = $grade
+            dimensions = @{
+                success_rate = @{ score = $successScore; max = 30; value = [math]::Round($successRate * 100, 1) }
+                error_rate = @{ score = $errorScore; max = 20; count = $totalErrors }
+                blocked_events = @{ score = $blockedScore; max = 15; count = $totalBlocked }
+                cache_hit_rate = @{ score = $cacheScore; max = 15; value = [math]::Round($cacheHitRate * 100, 1) }
+                duration_stability = @{ score = $durationScore; max = 10 }
+                streak_continuity = @{ score = $streakScore; max = 10; days = $streak }
+            }
+        } | ConvertTo-Json -Depth 5
+        return
+    }
+
+    # === Table 輸出 ===
+    Write-Header "系統健康評分（近 $Days 天）"
+
+    # 總分視覺化
+    $barLen = [math]::Floor($totalScore / 5)
+    $bar = [string]::new([char]0x2588, $barLen)
+    $empty = [string]::new([char]0x2591, (20 - $barLen))
+    Write-Host "  總分: " -NoNewline -ForegroundColor White
+    Write-Host "$bar$empty" -NoNewline -ForegroundColor $gradeColor
+    Write-Host " $totalScore/100 ($grade)" -ForegroundColor $gradeColor
+
+    Write-Host ""
+    Write-Section "各維度明細"
+    Write-Host "  維度             | 得分  | 滿分  | 數值" -ForegroundColor Gray
+    Write-Host "  -----------------|-------|-------|------" -ForegroundColor Gray
+
+    $dims = @(
+        @{ name = "排程成功率"; score = $successScore; max = 30; val = "$([math]::Round($successRate * 100, 1))%" }
+        @{ name = "工具錯誤率"; score = $errorScore; max = 20; val = "$totalErrors 次" }
+        @{ name = "違規攔截數"; score = $blockedScore; max = 15; val = "$totalBlocked 次" }
+        @{ name = "快取命中率"; score = $cacheScore; max = 15; val = "$([math]::Round($cacheHitRate * 100, 1))%" }
+        @{ name = "耗時穩定度"; score = $durationScore; max = 10; val = if ($durations.Count -ge 3) { "CV=$([math]::Round($cv * 100, 0))%" } else { "資料不足" } }
+        @{ name = "連續執行數"; score = $streakScore; max = 10; val = "$streak 天" }
+    )
+
+    foreach ($d in $dims) {
+        $nameStr = $d.name.PadRight(12)
+        $scoreStr = "$($d.score)".PadLeft(5)
+        $maxStr = "$($d.max)".PadLeft(5)
+        $dimColor = if ($d.score -ge $d.max * 0.8) { "Green" } elseif ($d.score -ge $d.max * 0.5) { "Yellow" } else { "Red" }
+        Write-Host "  $nameStr   | " -NoNewline -ForegroundColor White
+        Write-Host "$scoreStr" -NoNewline -ForegroundColor $dimColor
+        Write-Host " | $maxStr | $($d.val)" -ForegroundColor White
+    }
+
+    # === 日對日比較 ===
+    Write-Host ""
+    Write-Section "日對日比較"
+
+    $todayStr = (Get-Date).ToString("yyyy-MM-dd")
+    $yesterdayStr = (Get-Date).AddDays(-1).ToString("yyyy-MM-dd")
+
+    $todayRuns = @($runs | Where-Object { try { $_.timestamp -like "$todayStr*" } catch { $false } })
+    $yesterdayRuns = @($runs | Where-Object { try { $_.timestamp -like "$yesterdayStr*" } catch { $false } })
+
+    $todayTotal = $todayRuns.Count
+    $yesterdayTotal = $yesterdayRuns.Count
+    $todaySuccess = @($todayRuns | Where-Object { $_.status -eq "success" }).Count
+    $yesterdaySuccess = @($yesterdayRuns | Where-Object { $_.status -eq "success" }).Count
+    $todayRate = if ($todayTotal -gt 0) { [math]::Round(($todaySuccess / $todayTotal) * 100, 1) } else { 0 }
+    $yesterdayRate = if ($yesterdayTotal -gt 0) { [math]::Round(($yesterdaySuccess / $yesterdayTotal) * 100, 1) } else { 0 }
+
+    $todayAvgDur = if ($todayRuns.Count -gt 0) { [math]::Round(($todayRuns | Measure-Object -Property duration_seconds -Average).Average, 0) } else { 0 }
+    $yesterdayAvgDur = if ($yesterdayRuns.Count -gt 0) { [math]::Round(($yesterdayRuns | Measure-Object -Property duration_seconds -Average).Average, 0) } else { 0 }
+
+    function Format-Delta {
+        param([double]$Today, [double]$Yesterday, [string]$Unit, [bool]$LowerIsBetter = $false)
+        $delta = $Today - $Yesterday
+        if ($Yesterday -eq 0 -and $Today -eq 0) { return "(持平)" }
+        $sign = if ($delta -gt 0) { "+" } else { "" }
+
+        # 判斷趨勢：數值上升對指標是好是壞
+        $isImprovement = ($delta -gt 0 -and -not $LowerIsBetter) -or ($delta -lt 0 -and $LowerIsBetter)
+        if ($delta -eq 0) {
+            $arrow = "(持平)"
+        }
+        elseif ($isImprovement) {
+            $arrow = "(++)"
+        }
+        else {
+            $arrow = "(--)"
+        }
+
+        return "${sign}${delta}${Unit} $arrow"
+    }
+
+    Write-Host "  執行次數:  $yesterdayTotal -> $todayTotal  $(Format-Delta $todayTotal $yesterdayTotal '')" -ForegroundColor White
+    Write-Host "  成功率:    $yesterdayRate% -> $todayRate%  $(Format-Delta $todayRate $yesterdayRate '%')" -ForegroundColor White
+    Write-Host "  平均耗時:  ${yesterdayAvgDur}s -> ${todayAvgDur}s  $(Format-Delta $todayAvgDur $yesterdayAvgDur 's' $true)" -ForegroundColor White
+
+    # === 洞察建議 ===
+    Write-Host ""
+    Write-Section "洞察建議"
+    $hasInsight = $false
+
+    if ($successRate -lt 0.9 -and $total -gt 3) {
+        Write-Host "  [!] 成功率低於 90%，建議檢查近期失敗原因" -ForegroundColor Yellow
+        $hasInsight = $true
+    }
+    if ($totalBlocked -gt 0) {
+        Write-Host "  [!] 偵測到 $totalBlocked 次違規攔截，請檢查 Agent 行為" -ForegroundColor Yellow
+        $hasInsight = $true
+    }
+    if ($totalErrors -ge 5) {
+        Write-Host "  [!] 錯誤次數偏高 ($totalErrors 次)，建議檢查 API 穩定性" -ForegroundColor Yellow
+        $hasInsight = $true
+    }
+    if ($cacheHitRate -lt 0.3 -and $totalCacheOps -gt 5) {
+        Write-Host "  [!] 快取命中率偏低 ($([math]::Round($cacheHitRate * 100, 1))%)，建議檢查 TTL 設定" -ForegroundColor Yellow
+        $hasInsight = $true
+    }
+    if ($streak -ge 30) {
+        Write-Host "  [OK] 連續報到超過 30 天，系統運作穩定" -ForegroundColor Green
+        $hasInsight = $true
+    }
+    if (-not $hasInsight) {
+        Write-Host "  [OK] 系統運行正常，無特殊建議" -ForegroundColor Green
+    }
+
+    Write-Host ""
+}
+
+# ============================================
 # Main dispatch
 # ============================================
 switch ($Mode) {
-    "summary" { Show-Summary }
-    "detail"  { Show-Detail }
-    "errors"  { Show-Errors }
-    "todoist" { Show-Todoist }
-    "trend"   { Show-Trend }
+    "summary"      { Show-Summary }
+    "detail"       { Show-Detail }
+    "errors"       { Show-Errors }
+    "todoist"      { Show-Todoist }
+    "trend"        { Show-Trend }
+    "health-score" { Show-HealthScore }
 }

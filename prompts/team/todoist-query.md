@@ -231,6 +231,14 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 ```
 
 ### 無可處理任務時（plan_type = "auto"）：
+
+**重要：自動任務 prompt 檔案產出**
+1. 從 `config/frequency-limits.yaml` 的 `tasks.<key>.template` 取得模板路徑
+2. 用 Read 讀取模板內容
+3. 若模板含 `template_params`（如法華經、教觀綱宗），將變數替換（subject、author、search_terms、tags、study_path）
+4. 用 Write 寫入 `results/todoist-task-auto.md`
+5. 在 prompt 結尾加上結果寫入指示：完成後用 Write 建立 `results/todoist-result-auto.json`（格式同 todoist-task prompt 的結果 JSON，`type` 為 `auto_task`）
+
 ```json
 {
   "agent": "todoist-query",
@@ -240,6 +248,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "tasks": [],
   "auto_tasks": {
     "next_task": { "key": "shurangama", "name": "楞嚴經研究", "current_count": 1, "limit": 5 },
+    "prompt_file": "results/todoist-task-auto.md",
     "all_exhausted": false,
     "summary": { "total_limit": 36, "total_used": 5, "remaining": 31 }
   },

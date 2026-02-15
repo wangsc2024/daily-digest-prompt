@@ -47,6 +47,7 @@ initial_schema: |
     "log_audit_count": 0,
     "git_push_count": 0,
     "creative_game_count": 0,
+    "qa_optimize_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -218,6 +219,17 @@ tasks:
     skills: [game-design, knowledge-query]
     description: "以創意思維優化 D:\\Source\\game 目錄下的遊戲，提升遊戲體驗和品質"
 
+  # --- 專案品質優化群組（共 2 次/日）---
+  qa_optimize:
+    name: "QA System 品質與安全優化"
+    daily_limit: 2
+    counter_field: "qa_optimize_count"
+    template: "templates/auto-tasks/qa-system-optimize.md"
+    history_type: "qa_optimize"
+    execution_order: 15
+    skills: [knowledge-query]
+    description: "以最嚴格資訊安全標準漸進式優化 D:\\Source\\qa_system，每次基於前次成果持續改進"
+
 # ============================================================
 # 每日上限摘要
 # ============================================================
@@ -226,7 +238,8 @@ tasks:
 # 系統優化：Skill審查(2) = 2
 # 系統維護：Log審查(1) + Git推送(4) = 5
 # 遊戲創意：創意遊戲優化(2) = 2
-# 合計：38 次/日
+# 專案品質：QA優化(2) = 2
+# 合計：40 次/日
 
 # 歷史追蹤寫入規則
 history:

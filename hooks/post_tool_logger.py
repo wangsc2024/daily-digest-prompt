@@ -42,6 +42,21 @@ ERROR_KEYWORDS = [
     "503",
 ]
 
+# Only detect errors for tools that produce execution output (not file content)
+ERROR_DETECT_TOOLS = {"Bash", "Write", "Edit"}
+
+# Benign patterns that contain error keywords but aren't actual errors
+BENIGN_PATTERNS = [
+    "erroraction", "error_msg", "errormsg", "silentlycontinue",
+    "error_keywords",       # variable name in own source code
+    "has_error",            # JSON field name
+    "error_count",          # JSON field name
+    "error-handling",       # documentation
+    "on_error", "onerror",  # callback/event names
+    "stderr",               # stream name
+    "no error", "0 error",  # no-error context
+]
+
 
 def detect_api_sources(text: str) -> list:
     """Detect which API sources are referenced in a command/path."""
@@ -61,8 +76,11 @@ def classify_bash(command: str) -> tuple:
     if "curl" in command:
         tags.append("api-call")
         tags.extend(detect_api_sources(command))
-        # Distinguish read vs write API calls for cache bypass detection
-        if any(m in command for m in ["-X POST", "-X PUT", "-X DELETE", "-X PATCH"]):
+        # Distinguish read vs write API calls
+        # curl -d / --data implies POST even without -X POST
+        if any(m in command for m in ["-X POST", "-X PUT", "-X DELETE", "-X PATCH",
+                                       " -d ", " -d@", " --data", " --data-binary",
+                                       " --data-raw"]):
             tags.append("api-write")
         else:
             tags.append("api-read")
@@ -174,21 +192,12 @@ def main():
         summary = str(tool_input)[:200]
         tags = [tool_name.lower()]
 
-    # Detect errors in output
+    # Detect errors in output (only for execution tools, not file-content tools)
     has_error = False
-    if tool_output:
+    if tool_name in ERROR_DETECT_TOOLS and tool_output:
         lower_output = tool_output[:2000].lower()
         if any(kw in lower_output for kw in ERROR_KEYWORDS):
-            # Reduce false positives: ignore "error" in file paths and common benign contexts
-            if not any(
-                benign in lower_output
-                for benign in [
-                    "erroraction",
-                    "error_msg",
-                    "errormsg",
-                    "silentlycontinue",
-                ]
-            ):
+            if not any(benign in lower_output for benign in BENIGN_PATTERNS):
                 has_error = True
                 tags.append("error")
 

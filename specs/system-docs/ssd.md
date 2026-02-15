@@ -19,7 +19,7 @@
 
 | SSD 章節 | 覆蓋的 SRD 需求 |
 |---------|----------------|
-| 2. 元件清單 | FR-DIG-001~009, FR-TOD-001~008, FR-NTF-001~003, FR-MEM-001~004, FR-CAC-001~004, FR-SEC-001~004, FR-SKL-001~004 |
+| 2. 元件清單 | FR-DIG-001~009, FR-TOD-001~009, FR-NTF-001~003, FR-MEM-001~004, FR-CAC-001~004, FR-SEC-001~004, FR-SKL-001~004 |
 | 3. 核心架構原則 | NFR-MAINT-001, NFR-SEC-001~003, NFR-AVAIL-001~003, NFR-PERF-001~006, NFR-COMP-001~003 |
 | 4. 資料結構 | FR-MEM-001~004, FR-CAC-001~004, FR-SEC-002 |
 | 5. 介面規格 | 所有 EXT-* 外部整合需求 |
@@ -65,19 +65,20 @@ graph TB
         CFG5["notification.yaml"]
         CFG6["frequency-limits.yaml"]
         CFG7["digest-format.md"]
+        CFG8["dedup-policy.yaml"]
     end
 
     subgraph L3["Template 層（按需載入模板）"]
         TPL1["shared/preamble.md"]
         TPL2["shared/quality-gate.md"]
         TPL3["shared/done-cert.md"]
-        TPL4["sub-agent/*.md<br/>4 個任務模板"]
-        TPL5["auto-tasks/*.md<br/>3 個自動任務模板"]
+        TPL4["sub-agent/*.md<br/>5 個任務模板"]
+        TPL5["auto-tasks/*.md<br/>14 個自動任務模板"]
     end
 
     subgraph L4["Skill 層（行為指引）"]
         SKL0["SKILL_INDEX.md<br/>路由引擎"]
-        SKL1["12 個核心 Skill"]
+        SKL1["13 個核心 Skill"]
         SKL2["1 個工具 Skill"]
     end
 
@@ -86,6 +87,7 @@ graph TB
         HK2["pre_write_guard.py"]
         HK3["post_tool_logger.py"]
         HK4["on_stop_alert.py"]
+        HK5["hook_utils.py（共用工具）"]
     end
 
     subgraph L6["Script 層（執行腳本）"]
@@ -164,7 +166,7 @@ graph TB
 |------|---------|------|-------|
 | COMP-TEAM-TOD-001 | `prompts/team/todoist-query.md` | 查詢 + 篩選 + 路由 + 計畫 | Phase 1 |
 | COMP-TEAM-TOD-002 | `prompts/team/todoist-assemble.md` | 關閉 + 更新 + 通知 | Phase 3 |
-| COMP-TEAM-TOD-003 | `prompts/team/todoist-auto-*.md` | 自動任務 (3 種) | Phase 2 |
+| COMP-TEAM-TOD-003 | `prompts/team/todoist-auto-*.md` | 自動任務 (14 種) | Phase 2 |
 
 ### 2.3 Config 層元件
 
@@ -205,30 +207,47 @@ graph TB
 | 屬性 | 值 |
 |------|-----|
 | 檔案路徑 | `config/routing.yaml` |
-| 版本 | version: 1 |
-| 結構 | pre_filter → label_routing → keyword_routing → semantic_routing → output_format |
+| 版本 | version: 2 |
+| 結構 | pre_filter → label_routing → keyword_routing → semantic_routing → sync_check → output_format |
 | 引用者 | COMP-PRM-002 (hour-todoist-prompt.md) |
 | 覆蓋 FR | FR-TOD-002 |
+
+**前置過濾（pre_filter）**：排除實體行動/人際互動/個人事務（無法由 Agent 處理的任務類型）。
 
 **三層路由詳細**：
 
 | 層級 | 信心度 | 匹配方式 | 項目數 |
 |------|--------|---------|--------|
 | 前置過濾 | -- | 排除類別比對（實體行動/人際互動/個人事務） | 3 類 |
-| Tier 1 標籤 | 100% | Todoist 標籤直接映射（@code, @research 等） | 6 個標籤 |
+| Tier 1 標籤 | 100% | Todoist 標籤直接映射（`^` 前綴，13 個標籤） | 13 個標籤 |
 | Tier 2 關鍵字 | 80% | SKILL_INDEX 觸發關鍵字比對 | 7 組關鍵字 |
 | Tier 3 語義 | 60% | LLM 語義分析（可處理/不可處理類型） | 2 類 |
 
-**Tier 1 標籤映射**：
+**三層模板選擇機制**：
+
+1. **task_type_labels 覆寫**（最高優先）：研究/深度思維 → research-task.md
+2. **template_resolution 優先級**：game(1) > code(2) > research(3) > skill(4)
+3. **modifier_labels**：知識庫 — 合併 skills/tools 但不參與模板選擇
+
+**Tier 1 標籤映射（v2，`^` 前綴，13 個）**：
 
 | 標籤 | 映射 Skill | allowedTools | 模板 |
 |------|-----------|-------------|------|
-| @code | 程式開發 | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
-| @research | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
-| @write | 文件撰寫 | Read,Bash,Write | skill-task.md |
-| @news | pingtung-news + policy-expert | Read,Bash,Write | skill-task.md |
-| @ai | hackernews-ai-digest | Read,Bash,Write | skill-task.md |
-| @knowledge | knowledge-query | Read,Bash,Write | skill-task.md |
+| ^code (Claude Code) | 程式開發 | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^research (研究) | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| ^deep-thinking (深度思維) | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| ^knowledge (知識庫) | knowledge-query | (modifier — 合併至其他模板) | — |
+| ^ai (AI) | hackernews-ai-digest | Read,Bash,Write | skill-task.md |
+| ^game-optimize (遊戲優化) | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| ^game-dev (遊戲開發) | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| ^project-optimize (專案優化) | 程式開發 | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^web-optimize (網站優化) | 程式開發 | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^ui (UI) | frontend-design | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^ui-ux (UI/UX) | frontend-design | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^logic (邏輯思維) | 程式開發 | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| ^github (GitHub) | git-workflow | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+
+**sync_check**：偵測未匹配標籤（24h 去重，warned_labels 追蹤），確保新增標籤不被靜默忽略。
 
 #### COMP-CFG-003：快取策略
 
@@ -256,18 +275,23 @@ graph TB
 | 屬性 | 值 |
 |------|-----|
 | 檔案路徑 | `config/scoring.yaml` |
-| 版本 | version: 1 |
-| 公式 | `綜合分數 = Todoist 優先級分 x 信心度乘數 x 描述加成` |
-| 每次最大執行數 | `max_tasks_per_run: 2` |
+| 版本 | version: 2 |
+| 公式 | `綜合分數 = 優先級分 × 信心度 × 描述加成 × 時間接近度 × 標籤數量加成 × 近期重複懲罰` |
+| 每次最大執行數 | `max_tasks_per_run: 3` |
 | 覆蓋 FR | FR-TOD-003 |
 
-**計分參數**：
+**6 因子計分參數**：
 
 | 參數 | 值 |
 |------|-----|
 | 優先級分 | p1=4, p2=3, p3=2, p4=1 |
 | 信心度乘數 | Tier1=1.0, Tier2=0.8, Tier3=0.6 |
 | 描述加成 | 有 description=1.2, 無=1.0 |
+| 時間接近度 (time_proximity_bonus) | overdue=1.5, today=1.3, tomorrow=1.1, this_week=1.0, no_due=0.9 |
+| 標籤數量加成 (label_count_bonus) | 0=1.0, 1=1.05, 2=1.1, 3+=1.15 |
+| 近期重複懲罰 (recency_penalty) | overlap_0_1=1.0, overlap_2=0.85, overlap_3+=0.7 |
+
+**Tiebreaker**（同分排序）：due_time_asc → priority_desc → label_count_desc → task_id_asc
 
 #### COMP-CFG-005：通知配置
 
@@ -308,13 +332,29 @@ graph TB
 | 重置策略 | daily（每日歸零） |
 | 覆蓋 FR | FR-TOD-008, FR-MEM-004 |
 
-**自動任務限制**：
+**自動任務限制（14 種）**：
 
 | 任務 | 每日上限 | 計數欄位 | 模板 | 執行順序 |
 |------|---------|---------|------|---------|
-| 楞嚴經研究 | 3 | `shurangama_count` | `templates/auto-tasks/shurangama-research.md` | 1 |
-| 系統 Log 審查 | 1 | `log_audit_count` | `templates/auto-tasks/log-audit.md` | 2 |
-| 專案推送 GitHub | 2 | `git_push_count` | `templates/auto-tasks/git-push.md` | 3 |
+| 楞嚴經研究 | 5 | `shurangama_count` | `shurangama-research.md` | 1 |
+| 教觀綱宗研究 | 3 | `jiaoguangzong_count` | `buddhist-research.md` | 2 |
+| 法華經研究 | 2 | `fahua_count` | `buddhist-research.md` | 3 |
+| 淨土宗研究 | 2 | `jingtu_count` | `buddhist-research.md` | 4 |
+| 每日任務技術研究 | 5 | `tech_research_count` | `tech-research.md` | 5 |
+| AI 深度研究計畫 | 4 | `ai_deep_research_count` | `ai-deep-research.md` | 6 |
+| Unsloth 研究 | 2 | `unsloth_research_count` | `unsloth-research.md` | 7 |
+| AI GitHub 熱門專案 | 2 | `ai_github_research_count` | `ai-github-research.md` | 8 |
+| AI 智慧城市 | 2 | `ai_smart_city_count` | `ai-smart-city-research.md` | 9 |
+| AI 系統開發 | 2 | `ai_sysdev_count` | `ai-sysdev-research.md` | 10 |
+| Skill 審查優化 | 2 | `skill_audit_count` | `skill-audit.md` | 11 |
+| 系統 Log 審查 | 1 | `log_audit_count` | `log-audit.md` | 12 |
+| 專案推送 GitHub | 4 | `git_push_count` | `git-push.md` | 13 |
+| 創意遊戲優化 | 2 | `creative_game_count` | `creative-game-optimize.md` | 14 |
+| **合計** | **38** | — | — | — |
+
+**選取策略**：
+- `selection_strategy`: round_robin（純輪轉）
+- `next_execution_order` 跨日保留（計數歸零但指針不歸零）
 
 #### COMP-CFG-007：摘要格式模板
 
@@ -327,6 +367,30 @@ graph TB
 
 **12 區塊排版順序**：
 1. 連續報到資訊 -- 2. 系統健康度 -- 3. 今日待辦 -- 4. 本週屏東新聞 -- 5. AI 技術動態 -- 6. 今日習慣提示 -- 7. 今日學習技巧 -- 8. 知識庫回顧 -- 9. 今日郵件摘要（團隊模式限定）-- 10. 安全審查（團隊模式限定）-- 11. 佛學禪語 -- 12. Skill 使用報告
+
+#### COMP-CFG-008：去重策略
+
+| 屬性 | 值 |
+|------|-----|
+| 檔案路徑 | `config/dedup-policy.yaml` |
+| 版本 | version: 1 |
+| 註冊表路徑 | `context/research-registry.json` |
+| 覆蓋 FR | FR-TOD-008 |
+
+| 欄位 | 值 | 說明 |
+|------|---|------|
+| version | 1 | 配置版本 |
+| registry_file | context/research-registry.json | 研究註冊表路徑 |
+| retention_days | 7 | 超過此天數的 entry 自動清除 |
+| topic_cooldown_days | 3 | 同 topic 最少間隔天數 |
+| saturation_threshold | 3 | 同方向筆記 >= 此數量建議換方向 |
+| search.default_topK | 15 | hybrid search 預設 topK |
+| search.buddhist_topK | 20 | 佛學系列用更大 topK |
+
+**判定規則**：
+- `topic_cooldown`：近 3 天有完全相同 topic → 必須換主題
+- `type_saturation`：同 task_type 7 天內 >=3 topic → 建議換方向
+- `kb_saturation`：KB hybrid search >=3 篇含相同核心關鍵字 → 建議換方向
 
 ### 2.4 Template 層元件
 
@@ -350,8 +414,8 @@ graph TB
 
 | 任務類型 | 驗證項目 | 驗證方式 |
 |---------|---------|---------|
-| @code | 變更存在、語法正確、測試通過 | git status, py_compile, pytest |
-| @research | 產出物存在、內容超過 100 字 | 檔案檢查 |
+| ^code | 變更存在、語法正確、測試通過 | git status, py_compile, pytest |
+| ^research | 產出物存在、內容超過 100 字 | 檔案檢查 |
 | 一般 | exit code = 0 | 指令回傳碼 |
 
 #### COMP-TPL-002：DONE 認證格式
@@ -367,9 +431,27 @@ graph TB
 | 編號 | 檔案路徑 | 適用場景 | 觸發條件 |
 |------|---------|---------|---------|
 | COMP-TPL-003 | `templates/sub-agent/skill-task.md` | 有 Skill 匹配的任務 | 路由匹配到 Skill |
-| COMP-TPL-004 | `templates/sub-agent/research-task.md` | 知識庫/RAG 研究 | @research 或關鍵字 |
-| COMP-TPL-005 | `templates/sub-agent/code-task.md` | @code 任務（Plan-Then-Execute） | @code 標籤 |
+| COMP-TPL-004 | `templates/sub-agent/research-task.md` | 知識庫/RAG 研究 | ^research 或關鍵字 |
+| COMP-TPL-005 | `templates/sub-agent/code-task.md` | ^code 任務（Plan-Then-Execute） | ^code 標籤 |
 | COMP-TPL-006 | `templates/sub-agent/general-task.md` | 無 Skill 匹配 | Tier 3 語義路由 |
+| COMP-TPL-SUB-005 | `templates/sub-agent/game-task.md` | 遊戲設計與優化任務（模板 E） | 遊戲/game 標籤 |
+
+#### 自動任務模板（COMP-TPL-AUTO）
+
+| 編號 | 模板 | 用途 | 參數化 |
+|------|------|------|--------|
+| COMP-TPL-AUTO-001 | `shurangama-research.md` | 楞嚴經研究（4 步驟含 KB 去重） | 否 |
+| COMP-TPL-AUTO-002 | `log-audit.md` | 系統 Log 審查（8 步驟含修正） | 否 |
+| COMP-TPL-AUTO-003 | `git-push.md` | GitHub 推送流程 | 否 |
+| COMP-TPL-AUTO-004 | `buddhist-research.md` | 通用佛學研究（教觀綱宗/法華經/淨土宗共用） | 是（template_params） |
+| COMP-TPL-AUTO-005 | `tech-research.md` | 每日任務技術研究 | 否 |
+| COMP-TPL-AUTO-006 | `ai-deep-research.md` | AI 深度研究計畫（4 階段） | 否 |
+| COMP-TPL-AUTO-007 | `unsloth-research.md` | Unsloth LLM fine-tuning 研究 | 否 |
+| COMP-TPL-AUTO-008 | `ai-github-research.md` | AI GitHub 熱門專案研究 | 否 |
+| COMP-TPL-AUTO-009 | `ai-smart-city-research.md` | AI 智慧城市研究 | 否 |
+| COMP-TPL-AUTO-010 | `ai-sysdev-research.md` | AI 系統開發研究 | 否 |
+| COMP-TPL-AUTO-011 | `skill-audit.md` | Skill 審查優化 | 否 |
+| COMP-TPL-AUTO-012 | `creative-game-optimize.md` | 創意遊戲優化 | 否 |
 
 #### COMP-TPL-007：精練模板
 
@@ -386,12 +468,12 @@ graph TB
 | 屬性 | 值 |
 |------|-----|
 | 檔案路徑 | `skills/SKILL_INDEX.md` |
-| 核心 Skill 數 | 12 |
+| 核心 Skill 數 | 13 |
 | 工具 Skill 數 | 1 |
 | 鏈式組合模式 | 5 種（A~E） |
 | 覆蓋 FR | FR-SKL-001 ~ FR-SKL-004 |
 
-**12 個核心 Skill**：
+**13 個核心 Skill**：
 
 | # | Skill 名稱 | 用途 | 觸發關鍵字 | 外部服務 |
 |---|-----------|------|-----------|---------|
@@ -407,7 +489,8 @@ graph TB
 | 10 | api-cache | API 快取 | 快取、cache | (本地 JSON) |
 | 11 | scheduler-state | 排程狀態 | 狀態、健康度 | (本地 JSON, 唯讀) |
 | 12 | gmail | 郵件讀取 | gmail、email | gmail.googleapis.com |
-| 13 | skill-scanner | 安全掃描 | 安全、掃描 | (本地工具) |
+| 13 | game-design | 遊戲設計與優化 | 遊戲, game, HTML5, Cloudflare Pages | (Cloudflare Pages) |
+| 14 | skill-scanner | 安全掃描 | 安全、掃描 | (本地工具) |
 
 **5 種鏈式組合模式**：
 
@@ -510,6 +593,14 @@ graph TB
 | warning | blocked 1-2 或 errors 1-4 或 cache_bypassed | 4 | `["warning", "shield"]` |
 | healthy | 無上述問題 | (不告警) | -- |
 
+#### COMP-HK-005：共用工具模組
+
+| 屬性 | 值 |
+|------|-----|
+| 檔案路徑 | `hooks/hook_utils.py` |
+| 角色 | 共用工具模組（路徑解析、日誌目錄建立等） |
+| 引用者 | 被所有 hooks 引用 |
+
 ### 2.7 Script 層元件
 
 #### COMP-SCR-001：每日摘要單一模式腳本
@@ -530,7 +621,7 @@ graph TB
 | 檔案路徑 | `run-agent-team.ps1` |
 | 執行引擎 | pwsh (PowerShell 7) |
 | Phase 1 | 5 個並行 Agent（Start-Job），Timeout = 300s |
-| Phase 2 | 1 個組裝 Agent，Timeout = 300s，重試 1 次（間隔 60s） |
+| Phase 2 | 1 個組裝 Agent，Timeout = 420s（Assembly 實測最大 360s + 60s buffer），重試 1 次（間隔 60s） |
 | 狀態寫入 | `state/scheduler-state.json`（agent: `daily-digest-team`，含 sections） |
 | 覆蓋 NFR | NFR-PERF-002 ~ NFR-PERF-004, NFR-AVAIL-002 |
 
@@ -550,7 +641,7 @@ graph TB
 |------|-----|
 | 檔案路徑 | `run-todoist-agent.ps1` |
 | 執行引擎 | pwsh (PowerShell 7) |
-| Timeout | `$MaxDurationSeconds = 1800`（30 分鐘） |
+| Timeout | `$MaxDurationSeconds = 2100`（35 分鐘，配合 max_tasks_per_run=3） |
 | 重試 | 0（不重試） |
 | 覆蓋 NFR | NFR-PERF-005 |
 
@@ -567,17 +658,17 @@ graph TB
 
 **動態 Timeout 計算**（`$TimeoutBudget`）：
 
-| 任務類型 | 預算（秒） |
-|---------|-----------|
-| research（WebSearch/WebFetch） | 600 |
-| code（Edit/Glob/Grep） | 900 |
-| skill（簡單 Skill） | 300 |
-| general | 300 |
-| auto（楞嚴經/Log 審查） | 600 |
-| gitpush | 180 |
-| buffer（CLI 啟動 + 安全緩衝） | 120 |
+| 任務類型 | Timeout | 判斷條件 |
+|---------|---------|---------|
+| research | 600s (10min) | allowedTools 含 WebSearch/WebFetch |
+| code | 900s (15min) | allowedTools 含 Edit/Glob/Grep |
+| skill | 300s (5min) | 一般 Skill 任務 |
+| general | 300s (5min) | 一般任務 |
+| auto | 600s (10min) | 自動任務 |
+| gitpush | 180s (3min) | Git push |
+| buffer | 120s | CLI 啟動 + 安全緩衝 |
 
-**Phase 2 Timeout 公式**：`buffer + max(各並行任務的 timeout)`
+**Phase 2 Timeout 公式**：`buffer(120s) + max(各並行任務的 timeout)`
 
 #### COMP-SCR-005：排程設定腳本
 
@@ -603,11 +694,11 @@ graph TB
 
 | 排程名稱 | Cron | 腳本 | Timeout | 重試 |
 |---------|------|------|---------|------|
-| daily-digest-am | `0 8 * * *` | run-agent-team.ps1 | 300s | 1 |
-| daily-digest-mid | `15 11 * * *` | run-agent-team.ps1 | 300s | 1 |
-| daily-digest-pm | `15 21 * * *` | run-agent-team.ps1 | 300s | 1 |
-| todoist-single | `0 2-23 * * *` (每小時) | run-todoist-agent.ps1 | 1800s | 0 |
-| todoist-team | `30 2-23 * * *` (每小時:30) | run-todoist-agent-team.ps1 | 1200s | 0 |
+| daily-digest-am | `0 8 * * *` | run-agent-team.ps1 | 900s | 1 |
+| daily-digest-mid | `15 11 * * *` | run-agent-team.ps1 | 900s | 1 |
+| daily-digest-pm | `15 21 * * *` | run-agent-team.ps1 | 900s | 1 |
+| todoist-single | `0 2-23 * * *` (每小時) | run-todoist-agent.ps1 | 3600s | 0 |
+| todoist-team | `30 2-23 * * *` (每小時:30) | run-todoist-agent-team.ps1 | 2400s | 0 |
 
 ---
 
@@ -656,13 +747,13 @@ graph LR
 **Config 層**（結構化配置）：
 - 職責：定義所有可變的數據型邏輯
 - 格式：YAML（支援注釋、層級清晰）或 Markdown（LLM 最自然的理解格式）
-- 7 個配置文件覆蓋：管線步驟、路由規則、快取 TTL、計分公式、通知格式、頻率限制、摘要排版
+- 8 個配置文件覆蓋：管線步驟、路由規則、快取 TTL、計分公式、通知格式、頻率限制、摘要排版、去重策略
 - 修改即生效：下次排程執行自動套用新配置
 
 **Template 層**（按需載入模板）：
 - 職責：提供可重用的結構化文件片段
 - 載入時機：僅在需要時 Read，不預載進 context window
-- 類別：共用前言（1 份，一處定義）、品質閘門（1 份）、子 Agent 模板（4 種）、自動任務（3 種）
+- 類別：共用前言（1 份，一處定義）、品質閘門（1 份）、子 Agent 模板（5 種）、自動任務（14 種）
 - Token 節約：避免 13 個 Skill + 8 個模板同時佔用 context window
 
 **Skill 層**（行為指引）：
@@ -844,7 +935,7 @@ schedules:
   daily-digest-am:
     cron: "0 8 * * *"
     script: run-agent-team.ps1
-    timeout: 300
+    timeout: 900
     retry: 1
     description: "每日摘要 - 早（08:00）"
 
@@ -852,7 +943,7 @@ schedules:
     cron: "0 2-23 * * *"
     interval: 60m
     script: run-todoist-agent.ps1
-    timeout: 1800
+    timeout: 3600
     retry: 0
     description: "Todoist 單一模式（每小時整點）"
 ---
@@ -884,6 +975,23 @@ HEARTBEAT.md 定義了兩種 Todoist 模式，時間錯開 30 分鐘：
 | team-mode | -- | Phase 1 查詢 → Phase 2 並行 → Phase 3 組裝 |
 
 此設計允許在生產環境中同時運行兩種模式，比較效能與成功率，為後續架構決策提供數據支撐。
+
+#### 雙層 Timeout 保護
+
+系統採用雙層 timeout 設計：
+
+- **外層（HEARTBEAT / Task Scheduler）**：整個 PowerShell 進程的最大執行時間
+  - 每日摘要：900s（15 分鐘）
+  - Todoist 單一模式：3600s（60 分鐘）
+  - Todoist 團隊模式：2400s（40 分鐘）
+- **內層（PowerShell Wait-Job）**：個別 Claude Agent Job 的最大執行時間
+  - 每日摘要 Phase 1：300s（5 分鐘）
+  - 每日摘要 Phase 2（Assembly）：420s（7 分鐘）
+  - Todoist 單一模式：2100s（35 分鐘）
+  - Todoist 團隊 Phase 1：300s，Phase 2：動態計算，Phase 3：180s
+
+外層 > 內層是必要條件（外層留 buffer 給腳本日誌和狀態寫入）。
+例：Todoist 單一模式 2100s（內層）< 3600s（外層），中間 1500s 為重試和狀態寫入預留。
 
 ### 3.4 工具級觀測（Tool-Level Instrumentation）
 
@@ -990,7 +1098,7 @@ flowchart LR
         direction TB
         Init["初始化<br/>建立目錄"]
         P1["Phase 1<br/>Start-Job x5"]
-        Wait["Wait-Job<br/>Timeout 300s"]
+        Wait["Wait-Job<br/>Timeout 300s (Phase 1)<br/>420s (Phase 2)"]
         Collect["收集結果<br/>檢查 status"]
         P2["Phase 2<br/>直接執行"]
         State["Update-State<br/>寫入 scheduler-state"]
@@ -1047,15 +1155,15 @@ flowchart TD
         Q["todoist-query.md<br/>查詢 → 篩選 → 路由 → 計分<br/>→ 生成 todoist-plan.json"]
     end
 
-    subgraph Phase2["Phase 2：並行執行 (動態 Timeout)"]
+    subgraph Phase2["Phase 2：並行執行 (Timeout 動態計算)"]
         direction LR
-        T1["task-1<br/>或 shurangama"]
-        T2["task-2<br/>或 logaudit"]
-        T3["...<br/>或 gitpush"]
+        T1["task-1<br/>或 auto-task-1"]
+        T2["task-2<br/>或 auto-task-2"]
+        T3["...<br/>或 auto-task-N"]
     end
 
-    subgraph Phase3["Phase 3：組裝 (180s, 1 重試)"]
-        A["todoist-assemble.md<br/>關閉任務 → 更新狀態 → 通知"]
+    subgraph Phase3["Phase 3：組裝 (180s, MaxPhase3Retries=1, 管道執行)"]
+        A["todoist-assemble.md<br/>關閉任務 → 更新狀態 → 通知<br/>（管道方式執行，非 Start-Job）"]
     end
 
     Phase1 -->|"plan_type=tasks"| Phase2
@@ -1069,7 +1177,7 @@ flowchart TD
 | plan_type | 含義 | Phase 2 行為 |
 |-----------|------|-------------|
 | tasks | 有可處理的 Todoist 待辦 | 並行執行 N 個任務 Agent |
-| auto | 無待辦，執行自動任務 | 並行執行楞嚴經/Log審查/gitpush |
+| auto | 無待辦，執行自動任務 | 並行執行自動任務（14 種輪轉） |
 | idle | 所有自動任務已達上限 | 跳過 Phase 2 |
 
 **動態 Timeout 計算**：
@@ -1198,15 +1306,27 @@ $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
 {
   "date": "2026-02-15",
   "shurangama_count": 0,
+  "jiaoguangzong_count": 0,
+  "fahua_count": 0,
+  "jingtu_count": 0,
+  "tech_research_count": 0,
+  "ai_deep_research_count": 0,
+  "unsloth_research_count": 0,
+  "ai_github_research_count": 0,
+  "ai_smart_city_count": 0,
+  "ai_sysdev_count": 0,
+  "skill_audit_count": 0,
   "log_audit_count": 0,
   "git_push_count": 0,
+  "creative_game_count": 0,
+  "next_execution_order": 1,
   "closed_task_ids": ["6g2JQggXJQrHPCJ5", "6fxjQwgq59wg39M5"]
 }
 ```
 
 **歸零邏輯**：
-- 檔案不存在 → 建立初始檔案（所有計數為 0）
-- `date` != 今天 → 歸零重建（計數重置、`closed_task_ids` 清空）
+- 檔案不存在 → 建立初始檔案（所有計數為 0，`next_execution_order` = 1）
+- `date` != 今天 → 歸零重建（計數重置、`closed_task_ids` 清空，但 `next_execution_order` 跨日保留）
 - `date` == 今天 → 沿用目前計數值
 
 ### 4.2 快取資料
@@ -1275,8 +1395,19 @@ $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
   ],
   "auto_tasks": {
     "shurangama": { "enabled": true },
+    "jiaoguangzong": { "enabled": false },
+    "fahua": { "enabled": false },
+    "jingtu": { "enabled": false },
+    "tech_research": { "enabled": true },
+    "ai_deep_research": { "enabled": false },
+    "unsloth_research": { "enabled": false },
+    "ai_github_research": { "enabled": false },
+    "ai_smart_city": { "enabled": false },
+    "ai_sysdev": { "enabled": false },
+    "skill_audit": { "enabled": false },
     "log_audit": { "enabled": false },
-    "git_push": { "enabled": true }
+    "git_push": { "enabled": true },
+    "creative_game": { "enabled": false }
   }
 }
 ```
@@ -1339,6 +1470,28 @@ $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
   "cache_bypassed": [],
   "status": "healthy | warning | critical",
   "alert_sent": false
+}
+```
+
+#### DATA-011：研究註冊表（research-registry.json）
+
+| 屬性 | 值 |
+|------|-----|
+| 檔案路徑 | `context/research-registry.json` |
+| 寫入者 | Agent（auto-task / sub-agent 完成研究後） |
+| 讀取者 | Agent（研究前去重檢查） |
+| 生命週期 | 持久化（7 天滾動 window，超過自動清除） |
+| 覆蓋 FR | FR-TOD-008 |
+
+**Entry Schema**：
+```json
+{
+  "date": "YYYY-MM-DD",
+  "task_type": "shurangama | creative_game | tech_research | ...",
+  "topic": "研究主題完整描述",
+  "kb_note_title": "匯入知識庫的筆記標題",
+  "kb_imported": true,
+  "tags": ["標籤1", "標籤2"]
 }
 ```
 
@@ -1550,7 +1703,7 @@ sequenceDiagram
         PS->>A5: Start-Job
     end
 
-    PS->>PS: Wait-Job (Timeout 300s)
+    PS->>PS: Wait-Job (Phase 1: Timeout 300s)
 
     A1->>PS: results/todoist.json
     A2->>PS: results/news.json
@@ -1578,10 +1731,10 @@ flowchart TD
     Filter --> Route["三層路由<br/>前置過濾 → Tier 1 → Tier 2 → Tier 3"]
     Route --> HasTasks{有可處理?}
 
-    HasTasks -->|是| Score["TaskSense 計分<br/>取前 2 項"]
+    HasTasks -->|是| Score["TaskSense 計分<br/>取前 3 項"]
     HasTasks -->|否| AutoCheck{自動任務<br/>是否達上限?}
 
-    AutoCheck -->|未達上限| Auto["執行自動任務<br/>楞嚴經(3) / Log(1) / Git(2)"]
+    AutoCheck -->|未達上限| Auto["執行自動任務<br/>14 種輪轉（合計 38/日）"]
     AutoCheck -->|已達上限| Notify["通知：今日已達上限"]
 
     Score --> SubAgent["建立子 Agent Prompt<br/>依模板填入任務資料"]
@@ -1614,7 +1767,7 @@ flowchart TD
 | Claude Code CLI | latest | `npm install -g @anthropic-ai/claude-code` | 必要 |
 | Python | 3.8+ | Microsoft Store 或官方安裝包 | 必要（Hooks 用） |
 | Node.js | LTS | `winget install OpenJS.NodeJS.LTS` | 必要（Claude CLI 依賴） |
-| Git | latest | `winget install Git.Git` | 選用（@code 任務、git push 用） |
+| Git | latest | `winget install Git.Git` | 選用（^code 任務、git push 用） |
 
 ### 7.2 環境變數
 
@@ -1731,6 +1884,7 @@ flowchart TD
 | FR-TOD-006 精練迴圈 | COMP-TPL-007, COMP-TPL-001 |
 | FR-TOD-007 完成/失敗處理 | 8.3 節 Back-Pressure |
 | FR-TOD-008 自動任務 | COMP-CFG-006, COMP-TPL (auto-tasks) |
+| FR-TOD-009 研究去重 | COMP-CFG-008, DATA-011 |
 | FR-NTF-001 摘要推播 | COMP-CFG-005, IF-005 |
 | FR-NTF-002 Todoist 通知 | COMP-CFG-005, IF-005 |
 | FR-NTF-003 Harness 告警 | COMP-HK-004, IF-005 |
@@ -1758,9 +1912,9 @@ flowchart TD
 | NFR-PERF-001 單一模式 <= 300s | COMP-SCR-001 |
 | NFR-PERF-002 團隊模式 <= 120s | COMP-SCR-002 |
 | NFR-PERF-003 Phase 1 <= 300s | COMP-SCR-002 ($Phase1TimeoutSeconds) |
-| NFR-PERF-004 Phase 2 <= 300s | COMP-SCR-002 ($Phase2TimeoutSeconds) |
-| NFR-PERF-005 Todoist <= 1800s | COMP-SCR-003, COMP-SCR-004 |
-| NFR-PERF-006 每次最多 2 項 | COMP-CFG-004 (max_tasks_per_run) |
+| NFR-PERF-004 Phase 2 <= 420s | COMP-SCR-002 ($Phase2TimeoutSeconds) |
+| NFR-PERF-005 Todoist <= 2100s (single) / 動態 (team) | COMP-SCR-003, COMP-SCR-004 |
+| NFR-PERF-006 每次最多 3 項 | COMP-CFG-004 (max_tasks_per_run) |
 | NFR-AVAIL-001 排程可靠性 | COMP-HEARTBEAT, COMP-SCR-005 |
 | NFR-AVAIL-002 失敗重試 | COMP-SCR-001~004, 8.1 節 |
 | NFR-AVAIL-003 API 降級 | COMP-CFG-003, 8.2 節 |
@@ -1782,10 +1936,10 @@ flowchart TD
 | COMP-PRM-002 | Prompt | `hour-todoist-prompt.md` | Markdown |
 | COMP-PRM-003 | Prompt | `templates/shared/preamble.md` | Markdown |
 | COMP-TEAM-001~006 | Prompt | `prompts/team/*.md` | Markdown |
-| COMP-CFG-001~007 | Config | `config/*.yaml`, `config/digest-format.md` | YAML/Markdown |
+| COMP-CFG-001~008 | Config | `config/*.yaml`, `config/digest-format.md`, `config/dedup-policy.yaml` | YAML/Markdown |
 | COMP-TPL-001~007 | Template | `templates/shared/*.md`, `templates/sub-agent/*.md` | Markdown |
 | COMP-SKL-000 | Skill | `skills/SKILL_INDEX.md` | Markdown |
-| COMP-HK-001~004 | Hook | `hooks/*.py` | Python |
+| COMP-HK-001~005 | Hook | `hooks/*.py` | Python |
 | COMP-SCR-001~005 | Script | `*.ps1` | PowerShell |
 | COMP-HEARTBEAT | Config | `HEARTBEAT.md` | Markdown/YAML |
 
@@ -1803,9 +1957,10 @@ flowchart TD
 | DATA-008 | (子 Agent 輸出中) | 子 Agent | JSON (inline) |
 | DATA-009 | `logs/structured/YYYY-MM-DD.jsonl` | Hook | JSONL |
 | DATA-010 | `logs/structured/session-summary.jsonl` | Hook | JSONL |
+| DATA-011 | `context/research-registry.json` | Agent | JSON |
 
 ---
 
 *文件結束*
 
-*本文件依據 SRD 中定義的所有 FR/NFR 需求、`CLAUDE.md` 專案指引、`config/` 目錄下 7 個配置文件、`hooks/` 目錄下 4 個 Python 腳本、5 個 PowerShell 執行腳本、`HEARTBEAT.md` 排程定義、`skills/SKILL_INDEX.md` 及 `templates/` 目錄下所有模板的實際內容撰寫。所有數值均從原始檔案提取，未做推測或假設。*
+*本文件依據 SRD 中定義的所有 FR/NFR 需求、`CLAUDE.md` 專案指引、`config/` 目錄下 8 個配置文件、`hooks/` 目錄下 5 個 Python 腳本、5 個 PowerShell 執行腳本、`HEARTBEAT.md` 排程定義、`skills/SKILL_INDEX.md` 及 `templates/` 目錄下所有模板的實際內容撰寫。所有數值均從原始檔案提取，未做推測或假設。*

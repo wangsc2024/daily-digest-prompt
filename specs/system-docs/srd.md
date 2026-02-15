@@ -42,15 +42,19 @@
 
 **Skill-First 策略**：本專案的最高設計原則——所有行為都由 Skill 指引，禁止自行拼湊已有 Skill 覆蓋的邏輯。
 
-**TaskSense**：Todoist 任務優先級計分機制，公式為 `綜合分數 = Todoist 優先級分 x 信心度 x 描述加成`。定義見 `config/scoring.yaml`。
+**TaskSense**：Todoist 任務優先級計分機制（v2），公式為 `綜合分數 = Todoist 優先級分 x 信心度 x 描述加成 x 時間接近度 x 標籤數量加成 x 近期重複懲罰`（6 因子）。同分時依 Tiebreaker 規則排序（截止時間 -> priority -> 標籤數量 -> Task ID）。定義見 `config/scoring.yaml`。
 
 **TTL (Time To Live)**：快取有效期限，各 API 來源有不同的 TTL 設定，定義於 `config/cache-policy.yaml`。
 
-**三層路由**：Todoist 任務篩選機制，依序為 Tier 1 標籤路由（信心度 100%）、Tier 2 關鍵字路由（信心度 80%）、Tier 3 LLM 語義判斷（信心度 60%）。定義見 `config/routing.yaml`。
+**三層路由**：Todoist 任務篩選機制，依序為 Tier 1 標籤路由（信心度 100%，`^` 前綴匹配）、Tier 2 關鍵字路由（信心度 80%）、Tier 3 LLM 語義判斷（信心度 60%）。Tier 1 新增三層模板選擇機制：(1) task_type_labels 覆寫（最高優先）、(2) template_resolution 優先級排序、(3) modifier_labels 跨切面修飾。定義見 `config/routing.yaml`（v2）。
+
+**研究去重**：防止自動研究任務重複相同主題的三層機制：(1) 研究註冊表（`context/research-registry.json`，7 天滾動 window），(2) 知識庫 hybrid search（score > 0.85 視為重複），(3) 集中策略（`config/dedup-policy.yaml`，含主題冷卻與飽和閾值）。
 
 **降級 (Degradation)**：API 呼叫失敗時，自動使用過期但仍在降級時限（24 小時）內的快取資料繼續執行，避免整體流程中斷。
 
 **精練迴圈 (Refinement Loop)**：子 Agent 任務未通過品質閘門時，最多重試 3 次的迭代修正流程。每次精練聚焦於殘留問題，而非重新執行。
+
+**雙層 Timeout**：HEARTBEAT.md 定義的 timeout 是 Windows Task Scheduler 的外層保護（進程級，整個 PowerShell 腳本的最大執行時間），腳本內的 `Wait-Job -Timeout` 是內層保護（Job 級，個別 Claude Agent 的最大執行時間）。兩層共同保護系統免於無限執行。
 
 **薄層調度器**：Prompt 的設計原則——Prompt 只含角色宣告、步驟骨架、容錯語義，數據型邏輯全部外部化到 YAML 配置與 Markdown 模板。
 
@@ -59,7 +63,7 @@
 | 文件 | 路徑 | 說明 |
 |------|------|------|
 | 專案指引 | `CLAUDE.md` | 專案架構、執行流程、技術棧、慣例 |
-| Skill 索引 | `skills/SKILL_INDEX.md` | 13 個 Skill 速查表與路由引擎 |
+| Skill 索引 | `skills/SKILL_INDEX.md` | 14 個 Skill 速查表與路由引擎 |
 | 排程定義 | `HEARTBEAT.md` | 排程觸發時間與超時設定 |
 | 管線配置 | `config/pipeline.yaml` | 每日摘要管線步驟定義 |
 | 路由配置 | `config/routing.yaml` | Todoist 三層路由規則 |
@@ -67,6 +71,7 @@
 | 計分規則 | `config/scoring.yaml` | TaskSense 優先級計分 |
 | 通知配置 | `config/notification.yaml` | ntfy 通知設定 |
 | 頻率限制 | `config/frequency-limits.yaml` | 自動任務頻率上限 |
+| 去重策略 | `config/dedup-policy.yaml` | 研究任務去重規則 |
 | 摘要格式 | `config/digest-format.md` | 摘要輸出排版模板 |
 | 共用前言 | `templates/shared/preamble.md` | nul 禁令 + Skill-First 規則 |
 | 品質閘門 | `templates/shared/quality-gate.md` | 驗證閘門流程 |
@@ -101,7 +106,7 @@
 Daily Digest Prompt 是一套全自動的每日資訊彙整與任務規劃系統，核心目標：
 
 1. **每日自動化摘要**：定時彙整待辦事項、在地新聞（含政策解讀）、AI 技術動態、習慣提示、學習技巧與禪語，透過推播通知送達使用者。
-2. **每小時任務規劃**：自動查詢 Todoist 待辦、篩選可由 CLI 處理的項目、執行任務並回報結果。無待辦時執行自動任務（楞嚴經研究、Log 審查、Git 推送）。
+2. **每小時任務規劃**：自動查詢 Todoist 待辦、篩選可由 CLI 處理的項目、執行任務並回報結果。無待辦時執行自動任務（14 個自動任務，涵蓋佛學研究、AI/技術研究、系統維護等 5 群組，合計 38 次/日上限）。
 3. **跨次記憶**：受 NanoClaw 架構啟發，實現連續天數追蹤、待辦完成率統計、Skill 使用統計等跨次持久化。
 4. **容錯降級**：API 快取 + 過期降級機制，確保單一外部服務故障不影響整體摘要產出。
 5. **機器強制安全**：透過 Hooks 在 runtime 攔截危險操作，從 Agent 自律升級到 Harness 強制。
@@ -121,7 +126,7 @@ flowchart TB
         HOOKS["Hooks 機器強制層"]
         CACHE["API 快取層"]
         MEMORY["跨次記憶"]
-        SKILLS["Skill 引擎 (13 Skills)"]
+        SKILLS["Skill 引擎 (14 Skills)"]
     end
 
     subgraph External["外部服務"]
@@ -340,11 +345,11 @@ flowchart TB
 
 | 排程名稱 | 觸發時間 | 腳本 | 超時 | 說明 |
 |---------|---------|------|------|------|
-| daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 300s | 每日摘要 - 早 |
-| daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 300s | 每日摘要 - 午 |
-| daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 300s | 每日摘要 - 晚 |
-| todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 1800s | Todoist 單一模式 |
-| todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 1200s | Todoist 團隊模式 |
+| daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 900s | 每日摘要 - 早 |
+| daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 900s | 每日摘要 - 午 |
+| daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s | 每日摘要 - 晚 |
+| todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s | Todoist 單一模式 |
+| todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2400s | Todoist 團隊模式 |
 
 **整合方式**：
 - 設定工具：`setup-scheduler.ps1 -FromHeartbeat`（從 `HEARTBEAT.md` 讀取排程定義）
@@ -393,7 +398,7 @@ flowchart TB
 
 ### 3.8 GitHub
 
-**角色**：版本控制與自動推送。Todoist Agent 的自動任務之一（Git push），以及 @code 標籤任務的版本管理。
+**角色**：版本控制與自動推送。Todoist Agent 的自動任務之一（Git push），以及 ^code 標籤任務的版本管理。
 
 **功能需求**：
 - `git add` / `git commit` / `git push`
@@ -523,7 +528,7 @@ flowchart TB
 - **前置條件**：以下文件存在且可讀取：`templates/shared/preamble.md`、`skills/SKILL_INDEX.md`、`config/pipeline.yaml`、`config/cache-policy.yaml`。
 - **處理邏輯**：
   1. 讀取 `templates/shared/preamble.md`（nul 禁令 + Skill-First 核心規則）
-  2. 讀取 `skills/SKILL_INDEX.md`（12 個核心 Skill + 1 個工具 Skill 的速查表與路由引擎）
+  2. 讀取 `skills/SKILL_INDEX.md`（13 個核心 Skill + 1 個工具 Skill 的速查表與路由引擎）
   3. 讀取 `config/pipeline.yaml` 取得 init / steps / finalize 三階段定義
   4. 讀取 `config/cache-policy.yaml` 取得各 API 的 TTL 與降級時限
   5. 依 `pipeline.yaml` 的 `init` 區段執行：載入 Skill 索引、讀取記憶、載入快取策略、讀取排程狀態（唯讀）
@@ -621,7 +626,7 @@ flowchart TB
 - **前置條件**：`steps` 階段已完成（成功或帶有錯誤記錄）。
 - **處理邏輯**：
   1. 讀取 `config/digest-format.md` 取得排版模板
-  2. 依模板填入各步驟結果，12 個區塊依序為：
+  2. 依模板填入各步驟結果，13 個區塊依序為：
      - 連續報到資訊（由 digest-memory 提供）
      - 系統健康度（由 scheduler-state 提供）
      - 今日待辦
@@ -667,8 +672,8 @@ flowchart TB
 - **觸發條件**：FR-TOD-001 完成且有過濾後的任務。
 - **前置條件**：已載入 `config/routing.yaml`。
 - **處理邏輯**（詳見 `config/routing.yaml`）：
-  1. **前置過濾**：排除實體行動（買東西、運動等）、人際互動（打電話、開會等）、個人事務（繳費、看醫生等），即使帶有 @code 等標籤仍跳過
-  2. **Tier 1 標籤路由**（信心度 100%）：比對 labels，支援 @code / @research / @write / @news / @ai / @knowledge，匹配即確定可處理並跳過 Tier 2/3
+  1. **前置過濾（pre_filter）**：排除實體行動（買東西、運動等）、人際互動（打電話、開會等）、個人事務（繳費、看醫生等），即使帶有 ^code 等標籤仍跳過
+  2. **Tier 1 標籤路由**（信心度 100%）：比對 labels，`^` 前綴匹配（如 ^code / ^research / ^write / ^news / ^ai / ^knowledge），匹配即確定可處理並跳過 Tier 2/3。新增三層模板選擇：(1) task_type_labels 覆寫（最高優先）、(2) template_resolution 優先級排序、(3) modifier_labels 跨切面修飾。另有 sync_check 偵測未在 routing.yaml 定義的標籤並告警
   3. **Tier 2 關鍵字路由**（信心度 80%）：比對 `skills/SKILL_INDEX.md` 觸發關鍵字，關鍵字命中任何 Skill 即提升為可處理
   4. **Tier 3 LLM 語義判斷**（信心度 60%）：Tier 1/2 未匹配時，根據任務描述語義分析是否屬於可處理類型
   5. 輸出格式：`可處理：[任務ID] 任務名稱 -- Tier N (信心度 XX%) | 匹配 Skill: [...]` 或 `跳過：[任務ID] 任務名稱 -- 跳過原因`
@@ -681,13 +686,17 @@ flowchart TB
 - **觸發條件**：FR-TOD-002 完成且有可處理任務。
 - **前置條件**：已載入 `config/scoring.yaml`。
 - **處理邏輯**（詳見 `config/scoring.yaml`）：
-  1. 計算公式：`綜合分數 = Todoist 優先級分 x 信心度乘數 x 描述加成`
+  1. 計算公式：`綜合分數 = Todoist 優先級分 x 信心度乘數 x 描述加成 x 時間接近度 x 標籤數量加成 x 近期重複懲罰`（6 因子）
   2. 優先級分：p1=4, p2=3, p3=2, p4=1
   3. 信心度乘數：Tier 1=1.0, Tier 2=0.8, Tier 3=0.6
   4. 描述加成：有 description=1.2, 無 description=1.0
-  5. 依綜合分由高到低排列，每次最多取前 2 項（`max_tasks_per_run: 2`）
+  5. 時間接近度：截止時間越近分數越高
+  6. 標籤數量加成：標籤越多加成越高
+  7. 近期重複懲罰：近期已處理過的同類任務降分
+  8. 同分 Tiebreaker：截止時間 -> priority -> 標籤數量 -> Task ID
+  9. 依綜合分由高到低排列，每次最多取前 3 項（`max_tasks_per_run: 3`）
 - **預期輸出**：排名表（含排名、任務名、優先級、信心度、綜合分、匹配 Skill）。
-- **驗收條件**：排名正確反映計分公式結果，不超過每次最大執行數 2 項。
+- **驗收條件**：排名正確反映計分公式結果，不超過每次最大執行數 3 項。
 
 #### FR-TOD-004：子 Agent 任務執行
 
@@ -698,7 +707,7 @@ flowchart TB
   1. 依 `config/routing.yaml` 的 `template` 欄位選取模板：
      - 有 Skill 匹配 -> `templates/sub-agent/skill-task.md`
      - 知識庫/RAG 研究 -> `templates/sub-agent/research-task.md`（含 KB 去重）
-     - @code 標籤 -> `templates/sub-agent/code-task.md`（Plan-Then-Execute）
+     - ^code 標籤 -> `templates/sub-agent/code-task.md`（Plan-Then-Execute）
      - 無 Skill 匹配 -> `templates/sub-agent/general-task.md`
   2. 用 Write 工具建立 `task_prompt.md`，依模板填入任務資料
   3. 以 `cat task_prompt.md | claude -p --allowedTools "工具清單" 2>&1` 執行（timeout 600000ms）
@@ -714,8 +723,8 @@ flowchart TB
 - **處理邏輯**：
   1. 解析 DONE 認證：從 `task_result.txt` 中提取 `===DONE_CERT_BEGIN===` 與 `===DONE_CERT_END===` 之間的 JSON
   2. 外部驗證：
-     - @code 任務：`git status` 檢查變更、`python -m py_compile` 語法檢查、測試套件
-     - @research 任務：檢查產出物是否存在、輸出超過 100 字
+     - ^code 任務：`git status` 檢查變更、`python -m py_compile` 語法檢查、測試套件
+     - ^research 任務：檢查產出物是否存在、輸出超過 100 字
      - 一般任務：exit code 檢查
   3. 綜合判定：`通過 = (status == "DONE") AND (quality_score >= 3) AND (remaining_issues 為空) AND (外部驗證全部通過)`
 - **預期輸出**：通過/未通過判定結果。
@@ -757,19 +766,44 @@ flowchart TB
 
 #### FR-TOD-008：自動任務執行
 
-- **描述**：無可處理的 Todoist 待辦時，依頻率限制執行自動任務。
-- **觸發條件**：FR-TOD-002 篩選後無可處理項目。
-- **前置條件**：已載入 `config/frequency-limits.yaml`。
+- **描述**：無可處理的 Todoist 待辦時（或今日任務全部完成後），依頻率限制執行自動任務。
+- **觸發條件**（雙觸發模式）：
+  1. 步驟 2 三層路由篩選後無任何可處理任務
+  2. 步驟 4 執行完畢後重新查詢 Todoist，可處理項目 = 0
+- **前置條件**：已載入 `config/frequency-limits.yaml`（v3）。
 - **處理邏輯**（詳見 `config/frequency-limits.yaml`）：
-  1. 讀取 `context/auto-tasks-today.json`，依歸零邏輯判斷日期（不存在 -> 建立初始檔案；date != 今天 -> 歸零重建；date == 今天 -> 沿用計數）
-  2. 依 execution_order 順序嘗試執行：
-     - **楞嚴經研究**（每日上限 3 次）：讀取 `templates/auto-tasks/shurangama-research.md`，含 KB 去重
-     - **系統 Log 審查**（每日上限 1 次）：讀取 `templates/auto-tasks/log-audit.md`
-     - **專案推送 GitHub**（每日上限 2 次）：讀取 `templates/auto-tasks/git-push.md`
-  3. 全部達上限 -> 直接跳到通知步驟
-  4. 完成後更新 `context/auto-tasks-today.json` 計數 + `state/todoist-history.json` 歷史
+  1. 讀取 `context/auto-tasks-today.json`，依歸零邏輯判斷日期
+  2. 依 round-robin 策略，從 `next_execution_order` 指針開始，找到第一個未達上限的任務
+  3. 14 個自動任務分 5 群組：
+
+     | 群組 | 任務 | 每日上限 | 模板 |
+     |------|------|---------|------|
+     | 佛學研究 | 楞嚴經(5), 教觀綱宗(3), 法華經(2), 淨土宗(2) | 12 | shurangama-research.md / buddhist-research.md |
+     | AI/技術 | 每日任務技術(5), AI深度(4), Unsloth(2), AI GitHub(2), AI智慧城市(2), AI系統開發(2) | 17 | tech-research.md / ai-deep-research.md / 等 |
+     | 系統優化 | Skill審查(2) | 2 | skill-audit.md |
+     | 系統維護 | Log審查(1), Git推送(4) | 5 | log-audit.md / git-push.md |
+     | 遊戲創意 | 創意遊戲優化(2) | 2 | creative-game-optimize.md |
+
+  4. 選取策略：純輪轉（round-robin），`next_execution_order` 跨日保留
+  5. 完成後更新計數 + 歷史 + next_execution_order 指針 +1
+  6. 全部達上限 -> 直接跳到通知步驟
 - **預期輸出**：自動任務執行結果（或全部達上限的跳過記錄）。
-- **驗收條件**：頻率限制正確執行，各任務不超過每日上限。
+- **驗收條件**：14 個任務頻率限制正確執行；round-robin 指針正確遞增；跨日歸零（但指針保留）。
+
+#### FR-TOD-009：研究去重
+
+- **描述**：所有研究類任務執行前，須檢查是否與近期研究重複。
+- **前置條件**：已載入 `config/dedup-policy.yaml`。
+- **處理邏輯**（三層防重複）：
+  1. 讀取 `context/research-registry.json`（跨任務 7 天滾動 window）
+  2. 判定規則：
+     - 同 topic 3 天內（topic_cooldown_days）-> 必須換主題
+     - 同 task_type 7 天內 >= 3 topic（saturation_threshold）-> 建議換方向
+  3. 查詢知識庫 hybrid search，score > 0.85 視為重複 -> 跳過匯入
+  4. 完成後寫入 registry（date, task_type, topic, kb_note_title, kb_imported）
+  5. 同時清除超過 7 天（retention_days）的舊 entry
+- **預期輸出**：去重判定結果（通過/需換主題/需換方向）。
+- **驗收條件**：同 topic 3 天冷卻正確執行；registry 自動清理；KB 去重分數閾值正確。
 
 ### 4.3 通知功能群 (FR-NTF-xxx)
 
@@ -873,7 +907,8 @@ flowchart TB
 - **處理邏輯**：
   - 追蹤檔案：`context/auto-tasks-today.json`
   - 歸零策略：每日歸零——`date` != 今天時重置所有計數與 `closed_task_ids`
-  - 計數欄位：`shurangama_count`（上限 3）、`log_audit_count`（上限 1）、`git_push_count`（上限 2）
+  - 計數欄位：14 個——`shurangama_count`(5), `jiaoguangzong_count`(3), `fahua_count`(2), `jingtu_count`(2), `tech_research_count`(5), `ai_deep_research_count`(4), `unsloth_research_count`(2), `ai_github_research_count`(2), `ai_smart_city_count`(2), `ai_sysdev_count`(2), `skill_audit_count`(2), `log_audit_count`(1), `git_push_count`(4), `creative_game_count`(2)
+  - 新增欄位：`next_execution_order`（round-robin 指針，跨日保留）、`warned_labels`（sync_check 24h 去重）
   - 歷史追蹤：`state/todoist-history.json`（auto_tasks 上限 200 條，daily_summary 上限 30 條）
 - **預期輸出**：更新後的頻率追蹤檔案與歷史記錄。
 - **驗收條件**：各自動任務未超過每日上限；跨日正確歸零。
@@ -1021,7 +1056,7 @@ flowchart TB
 - **觸發條件**：Agent 需要判斷使用哪個 Skill 時。
 - **前置條件**：已載入 `skills/SKILL_INDEX.md`。
 - **處理邏輯**（詳見 `skills/SKILL_INDEX.md`）：
-  - 12 個核心 Skill + 1 個工具 Skill 的速查表
+  - 13 個核心 Skill + 1 個工具 Skill 的速查表
   - 路由決策樹（無標籤任務的關鍵字 -> Skill 映射）
   - 外部服務對應表（服務 -> Skill -> API 端點）
   - 路由優先順序：標籤（100%）> 關鍵字（80%）> 語義（60%）
@@ -1037,7 +1072,7 @@ flowchart TB
   - 模式 A（新聞深度解讀鏈）：pingtung-news -> pingtung-policy-expert -> knowledge-query -> ntfy-notify
   - 模式 B（任務智慧執行鏈）：todoist -> knowledge-query -> [執行] -> todoist -> ntfy-notify
   - 模式 C（研究與學習鏈）：hackernews-ai-digest -> knowledge-query -> learning-mastery -> ntfy-notify
-  - 模式 D（無待辦自動任務鏈）：todoist -> [D1: 楞嚴經] -> [D2: Log 審查] -> ntfy-notify
+  - 模式 D（無待辦自動任務鏈）：todoist -> [round-robin 選取自動任務] -> knowledge-query（研究去重）-> ntfy-notify
   - 模式 E（全流程保護鏈）：digest-memory -> api-cache -> [主要流程] -> digest-memory
 - **預期輸出**：Skill 鏈式組合正確串聯。
 - **驗收條件**：各 Skill 的輸出正確傳遞為下一個 Skill 的輸入。
@@ -1049,7 +1084,7 @@ flowchart TB
 - **前置條件**：FR-SEC-002 結構化日誌已啟用。
 - **處理邏輯**：
   - 統計 `skill-read` 標籤出現次數與對應 Skill 名稱
-  - 摘要中「Skill 使用報告」區塊：`本次使用 N/12 個 Skill`
+  - 摘要中「Skill 使用報告」區塊：`本次使用 N/13 個 Skill`
 - **預期輸出**：摘要中的 Skill 使用統計。
 - **驗收條件**：統計數據正確反映實際 Skill 使用情況。
 
@@ -1061,10 +1096,10 @@ flowchart TB
 
 #### NFR-PERF-001：單一模式執行時間
 
-- **描述**：每日摘要 Agent 單一模式（`run-agent.ps1`）整體執行時間不超過 5 分鐘。
+- **描述**：每日摘要 Agent 單一模式（`run-agent.ps1`）無腳本級 timeout，依賴 HEARTBEAT 外層保護。失敗自動重試 1 次（間隔 120 秒）。
 - **度量指標**：`state/scheduler-state.json` 中 `duration_seconds`。
-- **目標值**：<= 300 秒。
-- **來源**：`HEARTBEAT.md` 的 daily-digest timeout: 300。
+- **目標值**：無腳本級 timeout（依賴 HEARTBEAT 外層 900s 保護）。
+- **來源**：`HEARTBEAT.md` 的 daily-digest timeout: 900（外層）；`run-agent.ps1` 的重試邏輯。
 
 #### NFR-PERF-002：團隊模式執行時間
 
@@ -1084,22 +1119,22 @@ flowchart TB
 
 - **描述**：團隊模式 Phase 2（組裝 Agent）的執行超時。
 - **度量指標**：PowerShell 腳本控制。
-- **目標值**：300 秒。
-- **來源**：`run-agent-team.ps1` 的 `$Phase2TimeoutSeconds = 300`。
+- **目標值**：420 秒（Assembly 實測最大 360s + 60s buffer）。
+- **來源**：`run-agent-team.ps1` 的 `$Phase2TimeoutSeconds = 420`。
 
 #### NFR-PERF-005：Todoist Agent Timeout
 
-- **描述**：Todoist 任務規劃 Agent 的單次執行超時。
-- **度量指標**：PowerShell `Wait-Job -Timeout` 參數。
+- **描述**：Todoist 任務規劃 Agent 的單次執行超時（雙層 Timeout）。
+- **度量指標**：PowerShell `Wait-Job -Timeout` 參數（內層）與 HEARTBEAT timeout（外層）。
 - **目標值**：
-  - 單一模式：1800 秒（30 分鐘）— `run-todoist-agent.ps1` 的 `$MaxDurationSeconds = 1800`
-  - 團隊模式：1200 秒（20 分鐘）— `HEARTBEAT.md` 的 `todoist-team.timeout: 1200`
+  - 單一模式：腳本 $MaxDurationSeconds = 2100s（35 分鐘，內層），HEARTBEAT 外層 = 3600s
+  - 團隊模式：HEARTBEAT 外層 = 2400s，Phase 1 = 300s，Phase 2 = 動態計算，Phase 3 = 180s
 
 #### NFR-PERF-006：每次最大任務執行數
 
 - **描述**：Todoist Agent 每次最多執行的任務數量，避免單次耗時過長。
 - **度量指標**：`config/scoring.yaml` 中 `max_tasks_per_run`。
-- **目標值**：2 項。
+- **目標值**：3 項。
 - **來源**：`config/scoring.yaml`。
 
 ### 5.2 可用性 (NFR-AVAIL)
@@ -1286,12 +1321,13 @@ flowchart TB
 | FR-DIG-009 | 佛學禪語 | 檢查摘要「佛學禪語」區塊 | 區塊存在且含禪語 |
 | FR-TOD-001 | 任務查詢與過濾 | 檢查過濾摘要輸出 | 過濾邏輯正確，無循環任務重複 |
 | FR-TOD-002 | 三層路由篩選 | 檢查篩選輸出格式 | 每筆任務有路由層級與信心度 |
-| FR-TOD-003 | 優先級計分 | 檢查排名表 | 綜合分正確且不超過 2 項 |
+| FR-TOD-003 | 優先級計分 | 檢查排名表 | 綜合分正確且不超過 3 項 |
 | FR-TOD-004 | 子 Agent 執行 | 檢查子 Agent 輸出含 DONE_CERT | 正確選取模板並輸出認證 |
 | FR-TOD-005 | 品質驗證閘門 | 檢查通過/未通過判定 | 自評 + 外部驗證都正確執行 |
 | FR-TOD-006 | 精練迴圈 | 檢查迭代次數 | 不超過 3 次；聚焦殘留問題 |
 | FR-TOD-007 | 完成與失敗處理 | 檢查 Todoist 任務狀態 | 通過=關閉+評論；失敗=延遲+降級 |
-| FR-TOD-008 | 自動任務 | 檢查頻率追蹤檔 | 各任務未超過每日上限 |
+| FR-TOD-008 | 自動任務 | 檢查頻率追蹤檔 | 14 個任務未超過每日上限；round-robin 正確 |
+| FR-TOD-009 | 研究去重 | 檢查 research-registry.json | 同 topic 3 天冷卻；KB 去重 score > 0.85 |
 | FR-NTF-001 | 摘要推播 | 檢查 curl 回應 | HTTP 200 |
 | FR-NTF-002 | Todoist 結果通知 | 檢查通知內容 | 含統計數據與正確 tags |
 | FR-NTF-003 | Harness 告警 | 檢查 session-summary.jsonl | 異常時有告警記錄 |
@@ -1319,9 +1355,9 @@ flowchart TB
 | NFR-PERF-001 | 單一模式執行時間 | `scheduler-state.json` duration | <= 300 秒 |
 | NFR-PERF-002 | 團隊模式執行時間 | `scheduler-state.json` duration | <= 120 秒 |
 | NFR-PERF-003 | Phase 1 Timeout | PowerShell Wait-Job 監控 | <= 300 秒 |
-| NFR-PERF-004 | Phase 2 Timeout | PowerShell 監控 | <= 300 秒 |
-| NFR-PERF-005 | Todoist Timeout | PowerShell Wait-Job 監控 | 單一 <= 1800s / 團隊 <= 1200s |
-| NFR-PERF-006 | 每次最大任務數 | scoring.yaml 配置 | <= 2 項 |
+| NFR-PERF-004 | Phase 2 Timeout | PowerShell 監控 | <= 420 秒 |
+| NFR-PERF-005 | Todoist Timeout | PowerShell Wait-Job 監控 | 單一 <= 2100s（腳本）/ 3600s（HEARTBEAT）\| 團隊 <= 2400s（HEARTBEAT） |
+| NFR-PERF-006 | 每次最大任務數 | scoring.yaml 配置 | <= 3 項 |
 
 ---
 

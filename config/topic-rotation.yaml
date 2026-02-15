@@ -1,0 +1,46 @@
+# 主題輪替策略配置
+# 用途：習慣提示（atomic-habits）與學習技巧（learning-mastery）的主題選擇
+# 解決問題：每日 3 次摘要時，純星期輪替導致同日重複相同主題
+version: 1
+
+# 輪替策略：用完所有主題後才重複（避免偏食）
+strategy: no_repeat_until_all_used
+
+# 同日去重：同一天多次執行時，不重複選擇已用主題
+same_day_dedup: true
+
+# 跨日優先：優先選擇最久未使用的主題
+cross_day_priority: least_recently_used
+
+# 歷史記錄長度：保留最近 14 筆（覆蓋 2 週，確保完整輪替週期）
+history_size: 14
+
+# 習慣提示主題（對應 atomic-habits SKILL.md 提示庫）
+habits_topics:
+  - "身份認同"
+  - "兩分鐘法則"
+  - "環境設計"
+  - "習慣堆疊"
+  - "絕不錯過兩次"
+  - "複利效應"
+  - "系統優於目標"
+
+# 學習技巧主題（對應 learning-mastery SKILL.md 提示庫）
+learning_topics:
+  - "提取練習"
+  - "費曼技巧"
+  - "知識連結"
+  - "間隔複習"
+  - "類比遷移"
+  - "刻意練習"
+  - "學習反思"
+
+# 演算法說明：
+# 1. 讀取 digest-memory.json 中的 topics_history 和 last_topic / last_topic_date
+# 2. 排除 last_topic（避免連續重複）
+# 3. 同日去重：若 last_topic_date == 今日，則排除 last_topic（已在步驟 2 排除）
+# 4. 從 7 個主題中篩選候選：
+#    a. 優先選擇 topics_history 中「未出現」的主題
+#    b. 若全部都出現過：選 topics_history 中最早出現的（索引最前 = 最久未用）
+# 5. 若排除過多導致無可選主題：僅排除 last_topic，從剩餘 6 個中選最久未用
+# 6. 降級：config 不存在時退回星期輪替（SKILL.md 原始邏輯）

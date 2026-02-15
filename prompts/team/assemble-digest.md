@@ -65,13 +65,13 @@
 **使用 Skill**：`atomic-habits`
 
 1. 讀取 `skills/atomic-habits/SKILL.md`
-2. 根據今天星期幾，選取對應的《原子習慣》每日提示
+2. 讀取 `config/topic-rotation.yaml` + `context/digest-memory.json`，依 SKILL.md 中的主題選擇演算法，選取不重複的《原子習慣》每日提示
 
 ## 4. 生成今日學習技巧（不可跳過）
 **使用 Skill**：`learning-mastery`
 
 1. 讀取 `skills/learning-mastery/SKILL.md`
-2. 根據今天星期幾，選取對應的《深度學習的技術》每日技巧
+2. 讀取 `config/topic-rotation.yaml` + `context/digest-memory.json`，依 SKILL.md 中的主題選擇演算法，選取不重複的《深度學習的技術》每日技巧
 3. 輸出格式：📚 今日學習技巧：【主題】+ 提示內容 + 出處
 
 ## 5. 查詢知識庫 + 智慧匯入

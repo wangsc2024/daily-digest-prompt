@@ -1,0 +1,31 @@
+# 健康分數計算規則（文件驅動，修改此處不需動腳本）
+version: 1
+
+# 分數區間
+ranges:
+  - { min: 90, label: "優秀", stars: 5 }
+  - { min: 75, label: "良好", stars: 4 }
+  - { min: 60, label: "尚可", stars: 3 }
+  - { min: 40, label: "不佳", stars: 2 }
+  - { min: 0, label: "嚴重", stars: 1 }
+
+# 各維度權重（合計 100）
+dimensions:
+  success_rate:
+    weight: 30
+    description: "排程成功率"
+  error_rate:
+    weight: 20
+    description: "工具錯誤率"
+  blocked_events:
+    weight: 15
+    description: "違規攔截事件"
+  cache_hit_rate:
+    weight: 15
+    description: "快取命中率"
+  duration_stability:
+    weight: 10
+    description: "耗時穩定度"
+  streak_continuity:
+    weight: 10
+    description: "連續執行天數"

@@ -19,7 +19,20 @@ triggers:
 
 ## 執行方式
 
-不需呼叫外部 API。根據今天的日期（星期幾）輪替選取，與原子習慣提示錯開主題。
+不需呼叫外部 API。從以下提示庫中，依主題選擇演算法選取一則，確保同日多次執行不重複。
+
+### 主題選擇演算法（取代純星期輪替）
+
+1. 讀取 `config/topic-rotation.yaml` 取得輪替策略
+2. 讀取 `context/digest-memory.json` 的 `learning.topics_history`、`learning.last_topic`、`learning.last_topic_date`
+3. 從提示庫 7 個主題中依規則選擇：
+   - 排除 `last_topic`（避免連續重複）
+   - 同日去重：若 `last_topic_date` == 今日日期，則該主題已排除（步驟上方已處理）
+   - 優先選擇 `topics_history` 中**未出現**的主題
+   - 若全部都出現過：選 `topics_history` 中最早出現的（最久未用）
+4. 若排除過多導致無可選主題：僅排除 `last_topic`，從剩餘 6 個中選最久未用
+
+> **降級**：若 `config/topic-rotation.yaml` 不存在，退回星期輪替（根據今天星期幾選取對應主題）。
 
 ## 提示庫
 

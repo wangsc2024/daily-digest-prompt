@@ -1,18 +1,20 @@
 feature: system-docs
 frozen: false
-version: "1.0.0"
+version: "1.1.0"
 created: "2026-02-15"
 last_verified: "2026-02-15"
+last_updated: "2026-02-15"
+update_summary: "D01-D12 差異修正：timeout 雙層概念、自動任務 3→14、路由 v2、計分 v2、去重系統、Skill 13+1"
 documents:
   srd:
     file: srd.md
     status: completed
-    lines: 1330
+    lines: 1366
   ssd:
     file: ssd.md
     status: completed
-    lines: 1811
+    lines: 1966
   ops-manual:
     file: ops-manual.md
     status: completed
-    lines: 2160
+    lines: 2282

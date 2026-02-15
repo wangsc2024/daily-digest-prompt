@@ -1,120 +1,140 @@
 #!/usr/bin/env python3
 """
-PreToolUse:Bash Guard - Machine-enforced rules for Bash commands.
+PreToolUse:Bash Guard — Bash 指令機器強制攔截。
 
-Blocks dangerous patterns that previously relied on Agent self-discipline:
-  Rule 1: nul redirects (> nul, 2>nul) - creates physical 'nul' file on Windows
-  Rule 2: Agent writing to scheduler-state.json (PowerShell-only file)
-  Rule 3: Destructive operations (rm -rf /)
-  Rule 4: Force push to main/master
-  Rule 5: Command injection via shell metacharacters in sensitive contexts
-  Rule 6: Sensitive environment variable extraction
+攔截規則：
+  1. nul 重導向（> nul, 2>nul）— Windows 上會建立實體 nul 檔案
+  2. Agent 寫入 scheduler-state.json — 該檔案由 PowerShell 腳本獨佔維護
+  3. 刪除根目錄（rm -rf /）
+  4. Force push 到 main/master
+  5. 讀取敏感環境變數（TOKEN/SECRET/KEY/PASSWORD）
+  6. 透過網路傳送敏感變數
 
-Blocked events are logged to logs/structured/YYYY-MM-DD.jsonl
+規則來源：config/hook-rules.yaml（不可用時回退至內建預設值）。
+攔截事件記錄至 logs/structured/YYYY-MM-DD.jsonl。
 """
-import sys
-import json
-import os
 import re
-from datetime import datetime
+
+from hook_utils import load_yaml_rules, log_blocked_event, read_stdin_json, output_decision
 
 
-def log_blocked(session_id: str, command: str, reason: str, guard_tag: str):
-    """Write blocked event to structured JSONL log."""
-    log_dir = os.path.join("logs", "structured")
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d") + ".jsonl")
+# YAML 不可用時的內建預設規則
+FALLBACK_BASH_RULES = [
+    {
+        "id": "nul-redirect",
+        "pattern": r"(>|2>)\s*nul(\s|$|;|&|\|)",
+        "flags": "IGNORECASE",
+        "reason": "禁止 nul 重導向（會建立 nul 實體檔案）。請改用 > /dev/null 2>&1",
+        "guard_tag": "nul-guard",
+    },
+    {
+        "id": "scheduler-state-write",
+        "contains": "scheduler-state.json",
+        "pattern": r"(>|>>|tee\s|cp\s.*scheduler|mv\s.*scheduler|echo\s.*>.*scheduler)",
+        "reason": "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）",
+        "guard_tag": "state-guard",
+    },
+    {
+        "id": "destructive-delete",
+        "patterns": [
+            r"rm\s+-[rR]f\s+/(\s|$)",
+            r"rm\s+-[rR]f\s+~",
+            r"rm\s+-[rR]f\s+\.(\s|$|/)",
+            r"rm\s+-[rR]f\s+\*",
+        ],
+        "reason": "禁止破壞性刪除操作（根目錄/家目錄/當前目錄/萬用字元）",
+        "guard_tag": "safety-guard",
+    },
+    {
+        "id": "force-push",
+        "patterns": [
+            r"git\s+push\s+.*--force.*\s+(main|master)(\s|$)",
+            r"git\s+push\s+-f\s+.*\s+(main|master)(\s|$)",
+        ],
+        "reason": "禁止 force push 到 main/master 分支",
+        "guard_tag": "git-guard",
+    },
+    {
+        "id": "sensitive-env",
+        "patterns": [
+            r"echo\s+\$[A-Z_]*(TOKEN|SECRET|KEY|PASSWORD|CREDENTIAL)",
+            r"printenv\s+.*(TOKEN|SECRET|KEY|PASSWORD)",
+            r"env\s*\|\s*grep\s+.*(TOKEN|SECRET|KEY|PASSWORD)",
+        ],
+        "flags": "IGNORECASE",
+        "reason": "禁止讀取敏感環境變數",
+        "guard_tag": "env-guard",
+    },
+    {
+        "id": "exfiltration",
+        "pattern": r"curl.*(-d|--data).*\$(TOKEN|SECRET|KEY|PASSWORD)",
+        "flags": "IGNORECASE",
+        "reason": "禁止透過網路傳送敏感變數",
+        "guard_tag": "exfiltration-guard",
+    },
+]
 
-    entry = {
-        "ts": datetime.now().astimezone().isoformat(),
-        "sid": (session_id or "")[:12],
-        "tool": "Bash",
-        "event": "blocked",
-        "reason": reason,
-        "summary": command[:200],
-        "tags": ["blocked", guard_tag],
-    }
-    with open(log_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+def load_bash_rules():
+    """從 YAML 載入 bash 規則，失敗時回退至內建預設值。"""
+    return load_yaml_rules("bash_rules", FALLBACK_BASH_RULES)
+
+
+def _get_patterns(rule):
+    """從規則取得 pattern 清單（支援單一 pattern 或多個 patterns）。"""
+    patterns = rule.get("patterns", [])
+    single = rule.get("pattern")
+    if single and not patterns:
+        return [single]
+    return patterns
+
+
+def _get_re_flags(rule):
+    """從規則取得 regex flags。"""
+    return re.IGNORECASE if rule.get("flags") == "IGNORECASE" else 0
+
+
+def check_bash_command(command, rules=None):
+    """檢查 bash 指令是否命中攔截規則。
+
+    Returns:
+        (blocked, reason, guard_tag) — 未命中時 reason 與 guard_tag 為 None。
+    """
+    if rules is None:
+        rules = load_bash_rules()
+
+    for rule in rules:
+        # 前置條件：指令必須包含指定字串才繼續檢查
+        contains = rule.get("contains")
+        if contains and contains not in command:
+            continue
+
+        re_flags = _get_re_flags(rule)
+        patterns = _get_patterns(rule)
+
+        if any(re.search(p, command, re_flags) for p in patterns):
+            reason = rule.get("reason", "Blocked by rule: " + rule.get("id", "unknown"))
+            guard_tag = rule.get("guard_tag", rule.get("id", "unknown"))
+            return True, reason, guard_tag
+
+    return False, None, None
 
 
 def main():
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, Exception):
-        # Can't parse input - allow (don't break the agent)
-        sys.exit(0)
+    data = read_stdin_json()
+    if data is None:
+        output_decision("allow")
 
     command = data.get("tool_input", {}).get("command", "")
     session_id = data.get("session_id", "")
 
-    # === Rule 1: Block nul redirects ===
-    # Matches: > nul, 2>nul, 2> nul, >>nul, > NUL (any case)
-    # These create a physical file named 'nul' on Windows (not /dev/null)
-    if re.search(r"(>|2>)\s*nul(\s|$|;|&|\|)", command, re.IGNORECASE):
-        reason = "禁止 nul 重導向（會建立 nul 實體檔案）。請改用 > /dev/null 2>&1"
-        log_blocked(session_id, command, reason, "nul-guard")
-        print(json.dumps({"decision": "block", "reason": reason}))
-        sys.exit(0)
+    blocked, reason, guard_tag = check_bash_command(command)
 
-    # === Rule 2: Block writing to scheduler-state.json ===
-    # This file is maintained by PowerShell scripts only; Agent should only read it.
-    if "scheduler-state.json" in command and re.search(
-        r"(>|>>|tee\s|cp\s.*scheduler|mv\s.*scheduler|echo\s.*>.*scheduler)",
-        command,
-    ):
-        reason = "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
-        log_blocked(session_id, command, reason, "state-guard")
-        print(json.dumps({"decision": "block", "reason": reason}))
-        sys.exit(0)
+    if blocked:
+        log_blocked_event(session_id, "Bash", command, reason, guard_tag)
+        output_decision("block", reason)
 
-    # === Rule 3: Block destructive recursive delete on root ===
-    if re.search(r"rm\s+-[rR]f\s+/(\s|$)", command):
-        reason = "禁止刪除根目錄"
-        log_blocked(session_id, command, reason, "safety-guard")
-        print(json.dumps({"decision": "block", "reason": reason}))
-        sys.exit(0)
-
-    # === Rule 4: Block force push to main/master ===
-    if re.search(
-        r"git\s+push\s+.*--force.*\s+(main|master)(\s|$)", command
-    ) or re.search(r"git\s+push\s+-f\s+.*\s+(main|master)(\s|$)", command):
-        reason = "禁止 force push 到 main/master 分支"
-        log_blocked(session_id, command, reason, "git-guard")
-        print(json.dumps({"decision": "block", "reason": reason}))
-        sys.exit(0)
-
-    # === Rule 5: Block attempts to read sensitive environment variables ===
-    # Detect attempts to exfiltrate secrets via curl, wget, or network commands
-    sensitive_env_patterns = [
-        r"echo\s+\$[A-Z_]*TOKEN",
-        r"echo\s+\$[A-Z_]*SECRET",
-        r"echo\s+\$[A-Z_]*KEY",
-        r"echo\s+\$[A-Z_]*PASSWORD",
-        r"echo\s+\$[A-Z_]*CREDENTIAL",
-        r"printenv\s+.*TOKEN",
-        r"printenv\s+.*SECRET",
-        r"printenv\s+.*KEY",
-        r"env\s*\|\s*grep\s+.*(TOKEN|SECRET|KEY|PASSWORD)",
-    ]
-    for pattern in sensitive_env_patterns:
-        if re.search(pattern, command, re.IGNORECASE):
-            reason = "禁止讀取敏感環境變數"
-            log_blocked(session_id, command, reason, "env-guard")
-            print(json.dumps({"decision": "block", "reason": reason}))
-            sys.exit(0)
-
-    # === Rule 6: Block potential exfiltration of secrets via network ===
-    # Detect curl/wget with suspicious payloads containing secrets
-    if re.search(r"curl.*(-d|--data).*\$(TOKEN|SECRET|KEY|PASSWORD)", command, re.IGNORECASE):
-        reason = "禁止透過網路傳送敏感變數"
-        log_blocked(session_id, command, reason, "exfiltration-guard")
-        print(json.dumps({"decision": "block", "reason": reason}))
-        sys.exit(0)
-
-    # All checks passed - allow (output JSON to avoid "not start with {" debug noise)
-    print(json.dumps({"decision": "allow"}))
-    sys.exit(0)
+    output_decision("allow")
 
 
 if __name__ == "__main__":

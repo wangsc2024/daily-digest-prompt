@@ -39,6 +39,16 @@
         ]
       }
     ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/post_tool_logger.py"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

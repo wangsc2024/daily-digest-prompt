@@ -40,11 +40,13 @@ triggers:
   "habits": {
     "streak_days": 14,
     "last_topic": "環境設計",
+    "last_topic_date": "2026-02-11",
     "topics_history": ["身份認同", "習慣堆疊", "環境設計"]
   },
   "learning": {
     "streak_days": 14,
     "last_topic": "間隔重複",
+    "last_topic_date": "2026-02-11",
     "topics_history": ["費曼技巧", "刻意練習", "間隔重複"]
   },
   "skill_usage": {
@@ -89,22 +91,23 @@ triggers:
 4. `todoist`：本次查詢到的待辦統計
 5. `habits.streak_days`：若昨日有執行（last_run 在 24-48 小時內），+1；否則重置為 1
 6. `habits.last_topic`：本次使用的習慣提示主題
-7. `habits.topics_history`：保留最近 7 筆
-8. `learning`：同上邏輯
-9. `digest_summary`：本次摘要的一句話總結
-10. `skill_usage`：本次 Skill 使用統計
+7. `habits.topics_history`：保留最近 14 筆（覆蓋 2 週完整輪替週期）
+8. `habits.last_topic_date`：本次使用主題的日期（格式 YYYY-MM-DD），用於同日去重
+9. `learning`：同上邏輯（`topics_history` 14 筆 + `last_topic_date`）
+10. `digest_summary`：本次摘要的一句話總結
+11. `skill_usage`：本次 Skill 使用統計
     - `total_skills`：專案定義的 Skill 總數（目前固定 12）
     - `used_skills`：本次實際使用的 Skill 數量
     - `cache_hits`：快取命中次數（從 api-cache 追蹤取得）
     - `api_calls`：API 實際呼叫次數
     - `cache_degraded`：降級使用過期快取次數（新增欄位）
     - `knowledge_imports`：本次匯入知識庫的筆記數
-11. `knowledge`：知識庫健康資訊
+12. `knowledge`：知識庫健康資訊
     - `total_notes`：從 `/api/stats` 取得的筆記總數（查詢失敗則保留前次值）
     - `imports_today`：本次摘要匯入的筆記數
     - `top_tags`：從 `/api/notes/tags` 取得的前 5 大標籤（查詢失敗則保留前次值）
-12. `trends`（可選，v2 新增）：最近 7 天趨勢資料，每天一筆
-13. `insights`（可選，v2 新增）：Agent 自動提煉的跨天觀察
+13. `trends`（可選，v2 新增）：最近 7 天趨勢資料，每天一筆
+14. `insights`（可選，v2 新增）：Agent 自動提煉的跨天觀察
 
 ### trends 區塊格式（可選）
 ```json

@@ -1,31 +1,53 @@
-# 執行日誌（自動產生，排程清理）
+# ============================================================
+# Daily Digest Prompt - .gitignore
+# ============================================================
+
+# --- 執行時產生的資料（每次執行都會變動）---
 logs/
-
-# ntfy 推播暫存檔
-ntfy_temp.json
-
-# 執行時產生的資料檔（跨次記憶、快取、狀態）
-context/digest-memory.json
 cache/
+results/
 state/scheduler-state.json
 state/todoist-history.json
+context/digest-memory.json
+context/auto-tasks-today.json
+context/research-registry.json
 
-# Agent Team 並行結果（Phase 1 產出，Phase 2 清理）
-results/
+# --- 暫存檔（子 Agent / 自動任務產生）---
+task_prompt.md
+import_note.json
+ntfy_temp.json
+hooks_alert_temp.json
+tmp_*
+temp_*
 
-# Windows 誤產生的 nul 檔案
+# --- 備份檔 ---
+*.bak
+
+# --- 大型二進位 / 測試產物 ---
+*.pdf
+*.png
+
+# --- 參考文件（非系統核心，不需版控）---
+AgentTeams-*.md
+ClaudeCodeTeamAgent.md
+
+# --- Windows 誤產生 ---
 nul
 
-# Python
+# --- 工具快取 ---
+.ruff_cache/
+.pytest_cache/
+.playwright-mcp/
+htmlcov/
+
+# --- Python ---
 __pycache__/
 *.pyc
 *.pyo
 .venv/
-.pytest_cache/
 .coverage
-htmlcov/
 
-# Secrets (security)
+# --- Secrets ---
 .env
 .env.*
 secrets/
@@ -33,13 +55,10 @@ credentials.json
 token.json
 key/
 
-# Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）
+# --- Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）---
 .claude/settings.local.json
 
-# Hooks 暫存檔
-hooks_alert_temp.json
-
-# 編輯器
+# --- 編輯器 ---
 .vscode/
 *.swp
 *.swo

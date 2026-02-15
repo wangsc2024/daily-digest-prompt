@@ -1,0 +1,82 @@
+version: 1
+
+# Bash 命令攔截規則（對應 hooks/pre_bash_guard.py）
+bash_rules:
+  - id: nul-redirect
+    description: "禁止 nul 重導向"
+    pattern: '(>|2>)\s*nul(\s|$|;|&|\|)'
+    flags: IGNORECASE
+    reason: "禁止 nul 重導向（會建立 nul 實體檔案）。請改用 > /dev/null 2>&1"
+    guard_tag: nul-guard
+
+  - id: scheduler-state-write
+    description: "禁止 Agent 寫入 scheduler-state.json"
+    contains: "scheduler-state.json"
+    pattern: '(>|>>|tee\s|cp\s.*scheduler|mv\s.*scheduler|echo\s.*>.*scheduler)'
+    reason: "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
+    guard_tag: state-guard
+
+  - id: destructive-delete
+    description: "禁止破壞性刪除"
+    patterns:
+      - 'rm\s+-[rR]f\s+/(\s|$)'
+      - 'rm\s+-[rR]f\s+~'
+      - 'rm\s+-[rR]f\s+\.(\s|$|/)'
+      - 'rm\s+-[rR]f\s+\*'
+    reason: "禁止破壞性刪除操作（根目錄/家目錄/當前目錄/萬用字元）"
+    guard_tag: safety-guard
+
+  - id: force-push
+    description: "禁止 force push 到 main/master"
+    patterns:
+      - 'git\s+push\s+.*--force.*\s+(main|master)(\s|$)'
+      - 'git\s+push\s+-f\s+.*\s+(main|master)(\s|$)'
+    reason: "禁止 force push 到 main/master 分支"
+    guard_tag: git-guard
+
+  - id: sensitive-env
+    description: "禁止讀取敏感環境變數"
+    patterns:
+      - 'echo\s+\$[A-Z_]*(TOKEN|SECRET|KEY|PASSWORD|CREDENTIAL)'
+      - 'printenv\s+.*(TOKEN|SECRET|KEY|PASSWORD)'
+      - 'env\s*\|\s*grep\s+.*(TOKEN|SECRET|KEY|PASSWORD)'
+    flags: IGNORECASE
+    reason: "禁止讀取敏感環境變數"
+    guard_tag: env-guard
+
+  - id: exfiltration
+    description: "禁止透過網路傳送敏感變數"
+    pattern: 'curl.*(-d|--data).*\$(TOKEN|SECRET|KEY|PASSWORD)'
+    flags: IGNORECASE
+    reason: "禁止透過網路傳送敏感變數"
+    guard_tag: exfiltration-guard
+
+# 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）
+write_rules:
+  - id: nul-file
+    description: "禁止寫入 nul 檔案"
+    check: basename_equals
+    value: "nul"
+    case_insensitive: true
+    reason: "禁止寫入 nul 檔案（Windows 上會建立實體檔案）"
+    guard_tag: nul-guard
+
+  - id: scheduler-state
+    description: "禁止 Agent 寫入 scheduler-state.json"
+    check: path_contains
+    value: "scheduler-state.json"
+    reason: "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
+    guard_tag: state-guard
+
+  - id: sensitive-files
+    description: "禁止寫入敏感檔案"
+    check: basename_in
+    values: [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"]
+    reason_template: "禁止寫入敏感檔案: {matched}"
+    guard_tag: secret-guard
+
+  - id: path-traversal
+    description: "禁止路徑遍歷攻擊"
+    check: path_traversal
+    reason_template: "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
+    guard_tag: traversal-guard

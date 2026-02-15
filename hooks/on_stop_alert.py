@@ -4,9 +4,10 @@ Stop Hook - Session-end health check + auto-alert via ntfy.
 
 When the Agent session ends, this hook:
   1. Reads entries from today's structured log for THIS session only
-  2. Analyzes: blocked events, errors, cache bypass violations
+  2. Analyzes: blocked events, errors
   3. Writes session summary to logs/structured/session-summary.jsonl
   4. If issues detected, sends ntfy alert to wangsc2025
+  5. Rotates logs older than 7 days
 
 Session isolation: Filters log entries by session_id to prevent
 false positives from concurrent sessions (e.g., team mode where
@@ -14,16 +15,17 @@ multiple claude -p processes run in parallel). Falls back to
 offset-based analysis if session_id is unavailable.
 
 Alert severity:
-  - critical: blocked events OR 5+ errors
-  - warning: 1-4 errors OR cache bypass detected
+  - critical: blocked ≥3 OR errors ≥5
+  - warning: blocked 1-2 OR errors 1-4
   - info (no alert): everything healthy
 """
 import sys
 import json
 import os
+import re
 import subprocess
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import Counter
 
 NTFY_TOPIC = "wangsc2025"
@@ -277,6 +279,48 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         f.write(json.dumps(summary, ensure_ascii=False) + "\n")
 
 
+def _rotate_logs(retention_days=7):
+    """刪除超過保留天數的結構化日誌與過期 session-summary 條目。"""
+    log_dir = os.path.join("logs", "structured")
+    if not os.path.isdir(log_dir):
+        return
+    cutoff = (datetime.now() - timedelta(days=retention_days)).strftime("%Y-%m-%d")
+
+    # Rotate dated JSONL files (YYYY-MM-DD.jsonl)
+    for fname in os.listdir(log_dir):
+        if re.match(r"\d{4}-\d{2}-\d{2}\.jsonl$", fname):
+            if fname[:10] < cutoff:
+                try:
+                    os.remove(os.path.join(log_dir, fname))
+                except OSError:
+                    pass
+
+    # Trim session-summary.jsonl: keep only entries within retention window
+    summary_file = os.path.join(log_dir, "session-summary.jsonl")
+    if not os.path.exists(summary_file):
+        return
+    try:
+        with open(summary_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        kept = []
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                ts = entry.get("ts", "")[:10]
+                if ts >= cutoff:
+                    kept.append(line)
+            except json.JSONDecodeError:
+                pass
+        with open(summary_file, "w", encoding="utf-8") as f:
+            for line in kept:
+                f.write(line + "\n")
+    except OSError:
+        pass
+
+
 def main():
     # Read stdin - Stop hook receives session info as JSON
     session_id = ""
@@ -323,6 +367,7 @@ def main():
             session_id=session_id,
         )
 
+    _rotate_logs()
     print("{}")
     sys.exit(0)
 

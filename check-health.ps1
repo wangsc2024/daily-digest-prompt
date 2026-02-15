@@ -236,5 +236,85 @@ else {
     }
 }
 
+# --- Hooks Structured Logs ---
+Write-Host ""
+Write-Host "[Hooks 結構化日誌]" -ForegroundColor Yellow
+
+$StructuredDir = "$AgentDir\logs\structured"
+if (-not (Test-Path $StructuredDir)) {
+    Write-Host "  結構化日誌目錄不存在" -ForegroundColor Gray
+}
+else {
+    # 今日 JSONL
+    $todayFile = "$StructuredDir\$(Get-Date -Format 'yyyy-MM-dd').jsonl"
+    if (Test-Path $todayFile) {
+        $entries = @(Get-Content -Path $todayFile -Encoding UTF8 | ForEach-Object {
+            try { $_ | ConvertFrom-Json } catch { $null }
+        } | Where-Object { $_ })
+
+        $totalCalls = $entries.Count
+        $apiCalls = @($entries | Where-Object { $_.tags -contains "api-call" }).Count
+        $cacheReads = @($entries | Where-Object { $_.tags -contains "cache-read" }).Count
+        $cacheWrites = @($entries | Where-Object { $_.tags -contains "cache-write" }).Count
+        $blocked = @($entries | Where-Object { $_.tags -contains "blocked" }).Count
+        $errors = @($entries | Where-Object { $_.tags -contains "error" }).Count
+        $skillReads = @($entries | Where-Object { $_.tags -contains "skill-read" }).Count
+
+        Write-Host "  今日工具呼叫: $totalCalls 次" -ForegroundColor White
+        Write-Host "  API 呼叫: $apiCalls | 快取讀取: $cacheReads | 快取寫入: $cacheWrites" -ForegroundColor White
+        Write-Host "  Skill 讀取: $skillReads" -ForegroundColor White
+
+        if ($blocked -gt 0) {
+            Write-Host "  攔截事件: $blocked 次" -ForegroundColor Red
+            # 顯示攔截詳情
+            $blockedEntries = @($entries | Where-Object { $_.tags -contains "blocked" })
+            foreach ($b in $blockedEntries | Select-Object -First 3) {
+                $summary = if ($b.summary) { $b.summary } else { $b.tool }
+                Write-Host "    - $($b.ts): $summary" -ForegroundColor Red
+            }
+        }
+        else {
+            Write-Host "  攔截事件: 0 次" -ForegroundColor Green
+        }
+
+        if ($errors -gt 0) {
+            Write-Host "  錯誤事件: $errors 次" -ForegroundColor Red
+        }
+        else {
+            Write-Host "  錯誤事件: 0 次" -ForegroundColor Green
+        }
+    }
+    else {
+        Write-Host "  今日無結構化日誌" -ForegroundColor Gray
+    }
+
+    # Session Summary（近 7 天）
+    $summaryFile = "$StructuredDir\session-summary.jsonl"
+    if (Test-Path $summaryFile) {
+        $cutoff = (Get-Date).AddDays(-7).ToString("yyyy-MM-ddTHH:mm:ss")
+        $summaries = @(Get-Content -Path $summaryFile -Encoding UTF8 | ForEach-Object {
+            try { $_ | ConvertFrom-Json } catch { $null }
+        } | Where-Object { $_ -and $_.ts -ge $cutoff })
+
+        if ($summaries.Count -gt 0) {
+            Write-Host ""
+            Write-Host "  [近 7 天 Session 健康趨勢]" -ForegroundColor Yellow
+            $totalSessions = $summaries.Count
+            $healthySessions = @($summaries | Where-Object { $_.blocked -eq 0 -and $_.errors -eq 0 }).Count
+            $healthRate = [math]::Round(($healthySessions / $totalSessions) * 100, 1)
+            Write-Host "  Session 數量: $totalSessions | 健康率: $healthRate%" -ForegroundColor White
+
+            $totalBlocked = ($summaries | Measure-Object -Property blocked -Sum -ErrorAction SilentlyContinue).Sum
+            $totalErrors = ($summaries | Measure-Object -Property errors -Sum -ErrorAction SilentlyContinue).Sum
+            if ($totalBlocked -gt 0) {
+                Write-Host "  累計攔截: $totalBlocked 次" -ForegroundColor Yellow
+            }
+            if ($totalErrors -gt 0) {
+                Write-Host "  累計錯誤: $totalErrors 次" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

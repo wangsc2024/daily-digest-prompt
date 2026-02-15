@@ -207,12 +207,17 @@ if ($plan.plan_type -eq "tasks") {
     $Phase2TimeoutSeconds += $maxTaskTimeout
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Auto-tasks: use the longest enabled task's budget
-    $maxAutoTimeout = 0
-    if ($plan.auto_tasks.shurangama.enabled) { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["auto"]) }
-    if ($plan.auto_tasks.log_audit.enabled)  { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["auto"]) }
-    if ($plan.auto_tasks.git_push.enabled)   { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["gitpush"]) }
-    $Phase2TimeoutSeconds += $maxAutoTimeout
+    # Auto-tasks: determine timeout from the selected task
+    $nextTask = $plan.auto_tasks.next_task
+    if ($null -ne $nextTask) {
+        $taskKey = $nextTask.key
+        if ($taskKey -eq "git_push") {
+            $Phase2TimeoutSeconds += $TimeoutBudget["gitpush"]
+        }
+        else {
+            $Phase2TimeoutSeconds += $TimeoutBudget["auto"]
+        }
+    }
 }
 # plan_type == "idle" → stays at buffer only (no Phase 2 work)
 
@@ -252,39 +257,71 @@ if ($plan.plan_type -eq "tasks") {
     }
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Scenario B: Execute auto-tasks in parallel
-    $autoTasks = @(
-        @{ Name = "shurangama"; Field = "shurangama"; Prompt = "$AgentDir\prompts\team\todoist-auto-shurangama.md" },
-        @{ Name = "logaudit";   Field = "log_audit";  Prompt = "$AgentDir\prompts\team\todoist-auto-logaudit.md" },
-        @{ Name = "gitpush";    Field = "git_push";   Prompt = "$AgentDir\prompts\team\todoist-auto-gitpush.md" }
-    )
+    # Scenario B: Execute the auto-task selected by Phase 1
+    $nextTask = $plan.auto_tasks.next_task
 
-    foreach ($auto in $autoTasks) {
-        # Check if enabled in plan
-        $autoConfig = $plan.auto_tasks | Select-Object -ExpandProperty $auto.Field -ErrorAction SilentlyContinue
-        if ($null -eq $autoConfig -or -not $autoConfig.enabled) {
-            Write-Log "[Phase2] Skipped: $($auto.Name) (disabled or at limit)"
-            $sections[$auto.Name] = "skipped"
-            continue
+    if ($null -eq $nextTask) {
+        Write-Log "[Phase2] No auto-task selected (all exhausted or error)"
+    }
+    else {
+        $taskKey = $nextTask.key
+        $taskName = $nextTask.name
+
+        # Dedicated team prompts for all 14 auto-tasks
+        $dedicatedPrompts = @{
+            # 佛學研究（4）
+            "shurangama"           = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
+            "jiaoguangzong"        = "$AgentDir\prompts\team\todoist-auto-jiaoguangzong.md"
+            "fahua"                = "$AgentDir\prompts\team\todoist-auto-fahua.md"
+            "jingtu"               = "$AgentDir\prompts\team\todoist-auto-jingtu.md"
+            # AI/技術研究（6）
+            "tech_research"        = "$AgentDir\prompts\team\todoist-auto-tech-research.md"
+            "ai_deep_research"     = "$AgentDir\prompts\team\todoist-auto-ai-deep-research.md"
+            "unsloth_research"     = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
+            "ai_github_research"   = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
+            "ai_smart_city"        = "$AgentDir\prompts\team\todoist-auto-ai-smart-city.md"
+            "ai_sysdev"            = "$AgentDir\prompts\team\todoist-auto-ai-sysdev.md"
+            # 系統優化（1）
+            "skill_audit"          = "$AgentDir\prompts\team\todoist-auto-skill-audit.md"
+            # 系統維護（2）
+            "log_audit"            = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
+            "git_push"             = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
+            # 遊戲創意（1）
+            "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
         }
-        if (-not (Test-Path $auto.Prompt)) {
-            Write-Log "[Phase2] Prompt not found: $($auto.Prompt)"
-            $sections[$auto.Name] = "failed"
-            continue
+
+        # Choose prompt: dedicated team prompt if available, otherwise generic from Phase 1
+        $genericPrompt = "$ResultsDir\todoist-task-auto.md"
+
+        if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
+            $promptToUse = $dedicatedPrompts[$taskKey]
+            Write-Log "[Phase2] Using dedicated prompt for $taskKey"
+        }
+        elseif (Test-Path $genericPrompt) {
+            $promptToUse = $genericPrompt
+            Write-Log "[Phase2] Using generic prompt from Phase 1 for $taskKey"
+        }
+        else {
+            Write-Log "[Phase2] No prompt found for $taskKey (checked dedicated and generic)"
+            $sections["auto-$taskKey"] = "failed"
+            $promptToUse = $null
         }
 
-        $promptContent = Get-Content -Path $auto.Prompt -Raw -Encoding UTF8
+        if ($null -ne $promptToUse) {
+            $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
 
-        $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt)
-            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            $OutputEncoding = [System.Text.Encoding]::UTF8
-            $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>&1
-        } -ArgumentList $promptContent
+            $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt)
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+                $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>&1
+            } -ArgumentList $promptContent
 
-        $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $auto.Name
-        $phase2Jobs += $job
-        Write-Log "[Phase2] Started: $($auto.Name) (Job $($job.Id))"
+            $agentName = "auto-$taskKey"
+            $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
+            $phase2Jobs += $job
+            Write-Log "[Phase2] Started: $agentName ($taskName) (Job $($job.Id))"
+        }
     }
 }
 else {
