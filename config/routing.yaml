@@ -2,7 +2,7 @@
 # Todoist 任務三層路由規則
 # 修改此文件可調整任務篩選和 Skill 匹配，不需碰 prompt
 
-version: 1
+version: 2
 
 # 前置過濾（最先執行，優先於所有路由層）
 pre_filter:
@@ -14,35 +14,74 @@ pre_filter:
       examples: ["打電話", "開會", "面談", "聚餐", "拜訪"]
     - name: "個人事務"
       examples: ["繳費（非自動化）", "看醫生", "接送"]
-  rule: "即使任務帶有 @code、@research 等標籤，若內容本質為上述類型，仍跳過"
+  rule: "即使任務帶有可處理標籤，若內容本質為上述類型，仍跳過"
 
 # Tier 1：標籤路由（信心度 100%）
 label_routing:
   confidence: 100
   description: "Todoist 標籤直接映射到 Skill，匹配即可處理，跳過 Tier 2/3"
+
+  label_match_rule: |
+    ^prefix 匹配邏輯：Todoist 任務的 labels 陣列中，若任一 label 完全等於 ^prefix 去掉 ^ 後的文字，即算命中。
+    例：任務 labels=["遊戲優化", "知識庫"] → 命中 "^遊戲優化" 和 "^知識庫"。
+    多標籤命中多個映射時，合併所有 skills 和使用最寬 allowedTools。
+
   mappings:
-    "@code":
+    "^Claude Code":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
-    "@research":
+    "^GitHub":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "^研究":
       skills: ["deep-research", "knowledge-query"]
       allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
       template: "templates/sub-agent/research-task.md"
-    "@write":
-      skills: ["文件撰寫"]
+    "^深度思維":
+      skills: ["deep-research", "knowledge-query"]
+      allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
+      template: "templates/sub-agent/research-task.md"
+    "^知識庫":
+      skills: ["knowledge-query"]
       allowed_tools: "Read,Bash,Write"
       template: "templates/sub-agent/skill-task.md"
+    "^AI":
+      skills: ["hackernews-ai-digest"]
+      allowed_tools: "Read,Bash,Write"
+      template: "templates/sub-agent/skill-task.md"
+    "^遊戲優化":
+      skills: ["game-design"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/game-task.md"
+    "^遊戲開發":
+      skills: ["game-design"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/game-task.md"
+    "^專案優化":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "^網站優化":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "^UI/UX":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "^邏輯思維":
+      skills: ["deep-research", "knowledge-query"]
+      allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
+      template: "templates/sub-agent/research-task.md"
+    # 保留舊標籤（Todoist 可能未來使用）
     "@news":
       skills: ["pingtung-news", "pingtung-policy-expert"]
       allowed_tools: "Read,Bash,Write"
       template: "templates/sub-agent/skill-task.md"
-    "@ai":
-      skills: ["hackernews-ai-digest"]
-      allowed_tools: "Read,Bash,Write"
-      template: "templates/sub-agent/skill-task.md"
-    "@knowledge":
-      skills: ["knowledge-query"]
+    "@write":
+      skills: ["文件撰寫"]
       allowed_tools: "Read,Bash,Write"
       template: "templates/sub-agent/skill-task.md"
 
@@ -66,6 +105,16 @@ keyword_routing:
       skills: ["ntfy-notify"]
     - keywords: ["程式碼", "檔案操作", "自動化"]
       skills: []  # 依任務內容判斷 allowedTools
+    - keywords: ["遊戲", "game", "遊戲設計", "遊戲品質", "HTML5"]
+      skills: ["game-design"]
+    - keywords: ["深度思維", "洞見", "報告", "分析", "反思"]
+      skills: ["knowledge-query"]
+    - keywords: ["Cloudflare", "Pages", "部署", "網站", "CDN"]
+      skills: ["game-design"]
+    - keywords: ["GitHub", "開源", "trending", "repository"]
+      skills: []
+    - keywords: ["專案", "重構", "效能", "performance"]
+      skills: []
 
 # Tier 3：LLM 語義判斷（信心度 60%）
 semantic_routing:
@@ -78,3 +127,15 @@ semantic_routing:
 output_format:
   processable: "✅ 可處理：[任務ID] 任務名稱 — 路由層級: Tier N (信心度 XX%) | 匹配 Skill: [skill1, skill2]"
   skipped: "⏭️ 跳過：  [任務ID] 任務名稱 — 跳過原因"
+
+# Skill 同步檢查（偵測未匹配的標籤）
+sync_check:
+  enabled: true
+  description: "在路由後，檢查是否有 Todoist 標籤不在 label_routing 映射中"
+  rule: |
+    遍歷所有任務的 labels：
+    1. 若某 label 不在 label_routing.mappings 的 key 列表中（去掉 ^ 比對）→ 記錄為「未匹配標籤」
+    2. 輸出警告：⚠️ 發現未匹配標籤：[label1, label2]（無 Skill 路由）
+    3. 建議：考慮新增 Skill 或更新 routing.yaml
+  frequency: "每次執行都檢查，但同一標籤 24 小時內只提醒一次"
+  tracking_field: "context/auto-tasks-today.json → warned_labels"

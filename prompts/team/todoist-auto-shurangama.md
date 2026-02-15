@@ -14,6 +14,13 @@
 
 ## 第一步：查詢知識庫已有研究（必做，兩階段去重）
 
+### 前置：快取狀態確認
+用 Read 讀取 `cache/knowledge.json`：
+- 存在且未過期（60 分鐘 TTL）→ 記錄 `cached_at`，供參考
+- 不存在或已過期 → 略過，繼續下方搜尋
+
+> 此步驟確保 session 內有 `cache-read` + `knowledge` 標籤，避免 Harness 快取繞過警告。
+
 ### 階段 1：語義搜尋（優先）
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \

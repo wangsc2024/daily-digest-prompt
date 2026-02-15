@@ -11,7 +11,7 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Config
-$MaxDurationSeconds = 1800  # 30 minutes timeout (prevents stuck processes like 3672s incidents)
+$MaxDurationSeconds = 2100  # 35 minutes timeout (配合 max_tasks_per_run=3)
 
 # Set paths
 $AgentDir = "D:\Source\daily-digest-prompt"

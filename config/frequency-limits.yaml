@@ -2,8 +2,16 @@
 # 自動任務頻率限制（無 Todoist 待辦時觸發）
 # 修改此文件可調整次數上限，不需碰 prompt
 
-version: 1
+version: 2
 tracking_file: "context/auto-tasks-today.json"
+
+# 自動任務觸發條件
+trigger_modes:
+  - name: "無可處理項目"
+    description: "步驟 2 三層路由篩選後無任何可處理任務"
+  - name: "今日任務全部完成"
+    description: "步驟 4 執行完畢後重新查詢 Todoist，可處理項目 = 0"
+    note: "單一模式在步驟 4.6 判斷；團隊模式在 Phase 3 assembly 判斷"
 history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
@@ -19,7 +27,8 @@ initial_schema: |
     "shurangama_count": 0,
     "log_audit_count": 0,
     "git_push_count": 0,
-    "closed_task_ids": []
+    "closed_task_ids": [],
+    "warned_labels": []
   }
 
 # 自動任務定義

@@ -52,3 +52,7 @@ todoist_report: |
   🔧 Skill 使用統計
   - 路由：標籤 N 項 / 關鍵字 N 項 / 語義 N 項
   - 本次匹配 N 個 Skill，實際使用 M 個
+
+  ⚠️ Skill 同步提醒（如有未匹配標籤）
+  - 未匹配標籤：[列表]
+  - 建議更新 config/routing.yaml

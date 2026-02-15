@@ -76,6 +76,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### Tier 3：LLM 語義判斷（信心度 60%）
 
+### 2.9 Skill 同步檢查
+收集所有任務的 labels（去重），比對 Tier 1 映射的 key 列表（去掉 ^）。
+未匹配的標籤加入 plan JSON 的 `sync_warnings` 欄位。
+
 ---
 
 ## 步驟 2.5：頻率限制檢查（無待辦時前置步驟）
@@ -113,23 +117,27 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 3.1 優先級排名（有任務時）
 
-**計算公式**：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成`
+**計算公式**：`綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間緊迫度 × 標籤數量加成 × 重複懲罰`
 
 | 因素 | 計分規則 |
 |------|---------|
 | Todoist priority | p1(priority=4)=4分, p2=3, p3=2, p4=1 |
 | 路由信心度 | Tier 1=1.0, Tier 2=0.8, Tier 3=0.6 |
 | 描述加成 | 有 description=1.2, 無=1.0 |
+| 時間緊迫度 | overdue=1.5, today=1.3, tomorrow=1.1, this_week=1.0, no_due=0.9 |
+| 標籤數量 | 0=1.0, 1=1.05, 2=1.1, 3+=1.15 |
+| 重複懲罰 | 今日已完成同標籤 ≥2=×0.85, ≥3=×0.7（查 closed_task_ids 的 labels） |
 
-取前 2 名（每次最多 2 項）。
+取前 3 名（每次最多 3 項）。
 
 ### 3.2 為每個任務產生 prompt 檔案
 
 依匹配結果選用模板，用 Write 建立 `results/todoist-task-{rank}.md`：
 
 **模板選擇**（從 `templates/sub-agent/` 讀取對應模板，不要自行編寫）：
-- `@code` 標籤 → 讀取 `templates/sub-agent/code-task.md`
-- `@research` 或含知識庫/RAG → 讀取 `templates/sub-agent/research-task.md`
+- `^Claude Code`/`^GitHub`/`^專案優化` 標籤 → 讀取 `templates/sub-agent/code-task.md`
+- `^研究`/`^深度思維` 或含知識庫/RAG → 讀取 `templates/sub-agent/research-task.md`
+- `^遊戲優化`/`^遊戲開發` → 讀取 `templates/sub-agent/game-task.md`
 - 有匹配 Skill → 讀取 `templates/sub-agent/skill-task.md`
 - 無匹配 → 讀取 `templates/sub-agent/general-task.md`
 
@@ -200,6 +208,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "skipped_tasks": [
     { "task_id": "xyz", "content": "跳過的任務", "reason": "實體行動" }
   ],
+  "sync_warnings": {
+    "unmatched_labels": [],
+    "suggestion": null
+  },
   "skills_used": ["todoist", "api-cache"],
   "error": null
 }
@@ -225,6 +237,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
     "processable": 0,
     "skipped": 3
   },
+  "sync_warnings": {
+    "unmatched_labels": [],
+    "suggestion": null
+  },
   "skipped_tasks": [],
   "skills_used": ["todoist", "api-cache"],
   "error": null
@@ -245,6 +261,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
     "git_push": { "enabled": false, "current_count": 2, "limit": 2 }
   },
   "filter_summary": { "api_total": 0, "after_date_filter": 0, "after_closed_filter": 0, "processable": 0, "skipped": 0 },
+  "sync_warnings": {
+    "unmatched_labels": [],
+    "suggestion": null
+  },
   "skipped_tasks": [],
   "skills_used": ["todoist", "api-cache"],
   "error": null
