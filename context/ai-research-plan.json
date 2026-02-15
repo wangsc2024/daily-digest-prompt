@@ -1,0 +1,21 @@
+{
+  "date": "2026-02-15",
+  "topic": "LLM 推理能力的突破與 Test-Time Compute Scaling",
+  "research_questions": [
+    "Test-Time Compute Scaling 的理論基礎是什麼？如何透過增加推理時的運算量來提升模型表現？",
+    "目前主流的推理模型（OpenAI o1/o3、DeepSeek-R1、Claude Extended Thinking）各自的技術路線有何差異？",
+    "Chain-of-Thought、Tree-of-Thought、Graph-of-Thought 等推理框架的效能比較與適用場景為何？"
+  ],
+  "methodology": "文獻回顧 + 技術比較分析：蒐集 2025-2026 年推理模型相關論文與技術報告，比較不同推理策略的優劣勢，提煉實務應用建議",
+  "keywords": [
+    "Test-Time Compute",
+    "Reasoning Tokens",
+    "Chain-of-Thought Scaling",
+    "OpenAI o1 o3",
+    "DeepSeek-R1",
+    "Extended Thinking",
+    "Inference-Time Scaling",
+    "LLM Reasoning"
+  ],
+  "stage_completed": 1
+}

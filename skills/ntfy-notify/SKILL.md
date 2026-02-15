@@ -1,11 +1,13 @@
 ---
 name: ntfy-notify
-version: "2.0.0"
+version: "2.0.1"
 description: |
   透過 ntfy.sh 發送任務完成通知。當用戶說「完成後通知 xxx」、
   「做完通知 xxx」、「完成後提醒 xxx」時，xxx 即為 ntfy topic，
-  任務完成後使用 Python requests 發送通知到 ntfy.sh/xxx。
+  任務完成後使用 JSON 檔案 + curl 發送通知到 ntfy.sh/xxx。
+  Use when: 任務完成推播、即時提醒、通知發送、排程結果通知、告警推播。
 allowed-tools: Bash, Read, Write
+cache-ttl: 0min
 triggers:
   - "通知"
   - "提醒"

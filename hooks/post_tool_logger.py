@@ -55,6 +55,13 @@ BENIGN_PATTERNS = [
     "on_error", "onerror",  # callback/event names
     "stderr",               # stream name
     "no error", "0 error",  # no-error context
+    "0 failed",             # success context (e.g., "imported 5, 0 failed")
+    "error_tools",          # JSON field name in analysis
+    "error_detect",         # variable/config name
+    "failed_count",         # JSON field name
+    "exit code 0",          # successful exit
+    "errors: []",           # empty errors array
+    "errors: 0",            # zero errors
 ]
 
 

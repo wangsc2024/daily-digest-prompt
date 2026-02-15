@@ -1,11 +1,13 @@
 ---
 name: task-manager
-version: "1.0.0"
+version: "1.1.0"
 description: |
   標準化新增自動任務、排程任務及單次任務的完整流程。
   消除手動觸碰 6-7 個檔案的遺漏風險，提供自動驗證。
-  Use when: 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理。
+  Use when: 使用者手動要求新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理。
+  Note: 此為互動式工具 Skill，由使用者手動觸發，不透過 Todoist 自動路由。
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+cache-ttl: N/A
 triggers:
   - "新增任務"
   - "新增自動任務"
@@ -18,6 +20,15 @@ triggers:
 
 # Task Manager Skill — 任務新增標準化
 
+## 使用場景
+
+此 Skill 為**互動式工具**，在以下場景由使用者手動觸發：
+- 使用者在 Claude Code 對話中要求新增自動任務（模式 A）
+- 使用者要求新增 Windows Task Scheduler 排程（模式 B）
+- 使用者要求單次執行某個任務（模式 C）
+
+**不適用場景**：Todoist 自動路由、自動化排程。此 Skill 不在 routing.yaml 中映射。
+
 ## 模式判定
 
 根據使用者意圖自動選擇模式：
@@ -25,12 +36,12 @@ triggers:
 | 關鍵字 | 模式 | 說明 |
 |--------|------|------|
 | 「自動任務」「auto-task」「round-robin」「每天執行N次」 | **模式 A** | 自動任務，daily_limit 1-5 |
-| 「排程」「定時」「cron」「每小時」「每天」且為循環 | **模式 B** | 排程任務，循環執行 ≥2 次 |
+| 「排程」「定時」「cron」「每小時」「每天」且為循環 | **模式 B** | 排程任務，循環執行 >=2 次 |
 | 「單次」「一次」「立即執行」「只跑一次」 | **模式 C** | 單次任務，恰好 1 次 |
 
 模式 C 細分：
-- 有指定時間 → **C-2**（定時單次）
-- 無指定時間 → **C-1**（立即執行）
+- 有指定時間 -> **C-2**（定時單次）
+- 無指定時間 -> **C-1**（立即執行）
 
 ---
 
@@ -38,8 +49,8 @@ triggers:
 
 | 類型 | 定義 | 執行次數 | 觸發方式 | 需觸碰的核心檔案 |
 |------|------|---------|---------|----------------|
-| **自動任務** | 無 Todoist 待辦時 round-robin 執行 | 每日 ≤ 5 次 | Todoist Agent 空閒時自動觸發 | frequency-limits.yaml + 2 模板 + PS1 映射 |
-| **排程任務** | Windows Task Scheduler 定時循環觸發 | 循環（≥2 次） | cron 定時 | HEARTBEAT.md + run-*.ps1 + setup-scheduler |
+| **自動任務** | 無 Todoist 待辦時 round-robin 執行 | 每日 <= 5 次 | Todoist Agent 空閒時自動觸發 | frequency-limits.yaml + 2 模板 + PS1 映射 |
+| **排程任務** | Windows Task Scheduler 定時循環觸發 | 循環（>=2 次） | cron 定時 | HEARTBEAT.md + run-*.ps1 + setup-scheduler |
 | **單次任務** | 僅執行 1 次即完成 | 恰好 1 次 | 立即或定時單次 | prompt 檔案 + `claude -p` 或 Windows 一次性排程 |
 
 ---
@@ -112,10 +123,10 @@ team_prompt_path: "prompts/team/todoist-auto-{task_key 轉 hyphen}.md"
 路徑：`templates/auto-tasks/{task_key_hyphen}.md`
 
 **依任務類型選擇基底模板**（讀取 `skills/task-manager/templates/` 中的模板）：
-- 研究類 → 組合 `_base.md` + `_research.md`
-- 程式碼類 → 組合 `_base.md` + `_code.md`
-- 維護類 → 組合 `_base.md` + `_maintenance.md`
-- 其他 → 僅用 `_base.md`
+- 研究類 -> 組合 `_base.md` + `_research.md`
+- 程式碼類 -> 組合 `_base.md` + `_code.md`
+- 維護類 -> 組合 `_base.md` + `_maintenance.md`
+- 其他 -> 僅用 `_base.md`
 
 **必備段落**（無論哪種類型）：
 - nul 禁令
@@ -210,7 +221,7 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
 ### Step 6：輸出變更摘要
 
 ```
-✅ 新增自動任務完成：
+新增自動任務完成：
   - 任務: {task_name} (key: {task_key})
   - 每日上限: {daily_limit}
   - 執行順序: {execution_order}
@@ -220,7 +231,7 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
   - PS1 映射: 已更新
   - 驗證: 6/6 通過
 
-⚠️ 需人工確認：
+需人工確認：
   - CLAUDE.md 架構段落（自動任務數量已變更）
   - SKILL_INDEX.md（若涉及新 Skill）
 ```
@@ -260,30 +271,30 @@ retry: 0 或 1  # 失敗是否自動重試
 
 若有 interval，加入 `interval: {interval}`。
 
-#### 2.2 若需新腳本 → Write 建立 run-{name}.ps1
+#### 2.2 若需新腳本 -> Write 建立 run-{name}.ps1
 
 基於現有 `run-agent-team.ps1` 或 `run-todoist-agent-team.ps1` 結構：
 - 設定 `$AgentDir`、`$LogDir`
 - 確保建立 `logs\structured\` 目錄
-- 讀取 prompt → `claude -p` 執行
+- 讀取 prompt -> `claude -p` 執行
 - 記錄狀態到 `scheduler-state.json`
 
-#### 2.3 若需新 prompt → Write 建立
+#### 2.3 若需新 prompt -> Write 建立
 
 基於 `skills/task-manager/templates/_base.md` 組合。
 
 ### Step 3：驗證 + 指令輸出
 
 ```
-✅ 排程任務已定義：
+排程任務已定義：
   - 名稱: {schedule_name}
   - Cron: {cron}
   - 腳本: {script}
 
-📌 執行以下指令註冊排程：
+執行以下指令註冊排程：
   .\setup-scheduler.ps1 -FromHeartbeat
 
-📌 驗證排程已建立：
+驗證排程已建立：
   schtasks /query /tn "Claude_{schedule_name}" /v
 ```
 
@@ -336,10 +347,22 @@ schtasks /delete /tn "Claude_Once_{name}" /f
 | `_maintenance.md` | 系統維護類擴充 | + 日誌分析 + 狀態更新 |
 
 **組合規則**：
-- 研究類（群組含「研究」）→ `_base.md` + `_research.md`
-- 程式碼類（群組含「系統優化」「專案品質」或 skills 含 code 相關）→ `_base.md` + `_code.md`
-- 維護類（群組含「系統維護」）→ `_base.md` + `_maintenance.md`
-- 其他 → 僅 `_base.md`
+- 研究類（群組含「研究」）-> `_base.md` + `_research.md`
+- 程式碼類（群組含「系統優化」「專案品質」或 skills 含 code 相關）-> `_base.md` + `_code.md`
+- 維護類（群組含「系統維護」）-> `_base.md` + `_maintenance.md`
+- 其他 -> 僅 `_base.md`
+
+---
+
+## 錯誤處理與降級
+
+| 錯誤情境 | 處理方式 |
+|----------|---------|
+| frequency-limits.yaml 無法解析 | 中止操作，輸出 YAML 錯誤訊息，不寫入任何檔案 |
+| execution_order 計算衝突 | 自動遞增至下一個可用值 |
+| 模板目錄不存在 | 自動建立目錄，並用 _base.md 作為最小模板 |
+| PS1 映射區塊找不到 | 輸出警告，建議使用者手動加入映射，不強行修改 |
+| YAML 驗證失敗 | 回復原始內容，輸出差異比對，標記為 PARTIAL |
 
 ---
 

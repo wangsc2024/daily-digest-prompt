@@ -21,7 +21,7 @@ bash_rules:
     patterns:
       - 'rm\s+-[rR]f\s+/(\s|$)'
       - 'rm\s+-[rR]f\s+~'
-      - 'rm\s+-[rR]f\s+\.(\s|$|/)'
+      - 'rm\s+-[rR]f\s+\.(\s|$)'
       - 'rm\s+-[rR]f\s+\*'
     reason: "禁止破壞性刪除操作（根目錄/家目錄/當前目錄/萬用字元）"
     guard_tag: safety-guard

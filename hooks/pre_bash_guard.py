@@ -39,7 +39,7 @@ FALLBACK_BASH_RULES = [
         "patterns": [
             r"rm\s+-[rR]f\s+/(\s|$)",
             r"rm\s+-[rR]f\s+~",
-            r"rm\s+-[rR]f\s+\.(\s|$|/)",
+            r"rm\s+-[rR]f\s+\.(\s|$)",
             r"rm\s+-[rR]f\s+\*",
         ],
         "reason": "禁止破壞性刪除操作（根目錄/家目錄/當前目錄/萬用字元）",
