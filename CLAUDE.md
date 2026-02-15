@@ -28,72 +28,116 @@
 - **積極用**（有機會就用）：knowledge-query、gmail
 - **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時
 
+## 文件驅動架構設計原則
+
+| 原則 | 說明 |
+|------|------|
+| **Prompt 是薄層調度器** | Prompt 只含角色宣告、步驟骨架、容錯語義；數據型邏輯全部外部化 |
+| **配置用 YAML、模板用 Markdown** | YAML 支援注釋、層級清晰；Markdown 是 LLM 最自然的理解格式 |
+| **按需載入** | 子 Agent 模板、自動任務 prompt 只在觸發時才 Read，不預載進 context window |
+| **單一定義處** | nul 禁令、Skill-First 規則只在 `templates/shared/preamble.md` 定義一次 |
+| **改配置不改 prompt** | 調 TTL → 改 `config/cache-policy.yaml`；調路由 → 改 `config/routing.yaml` |
+
+### 配置文件速查
+
+| 文件 | 用途 | 引用者 |
+|------|------|--------|
+| `config/pipeline.yaml` | 每日摘要管線步驟 | daily-digest-prompt.md |
+| `config/routing.yaml` | Todoist 三層路由規則 | hour-todoist-prompt.md |
+| `config/cache-policy.yaml` | 各 API 快取 TTL | daily-digest-prompt.md |
+| `config/frequency-limits.yaml` | 自動任務頻率限制 | hour-todoist-prompt.md |
+| `config/scoring.yaml` | TaskSense 優先級計分 | hour-todoist-prompt.md |
+| `config/notification.yaml` | ntfy 通知配置 | hour-todoist-prompt.md、assemble-digest.md |
+| `config/digest-format.md` | 摘要輸出排版模板 | daily-digest-prompt.md、assemble-digest.md |
+| `templates/shared/preamble.md` | 共用前言（nul 禁令 + Skill-First） | 所有 prompt |
+
 ## 架構
+
+本專案採用**文件驅動架構**：Prompt 是薄層調度器，所有可變邏輯抽入結構化配置文件與模板，按需載入。
 
 ```
 daily-digest-prompt/
-  daily-digest-prompt.md          # 每日摘要 Agent prompt（核心指令）
-  hour-todoist-prompt.md          # Todoist 任務規劃 Agent prompt
+  # Prompt 層（薄層調度器，讀配置 → 按管線執行）
+  daily-digest-prompt.md          # 每日摘要 Agent（~80 行，引用 config/ + templates/）
+  hour-todoist-prompt.md          # Todoist 任務規劃 Agent（~140 行，引用 config/ + templates/）
+
+  # 配置層（數據型配置，修改無需動 prompt）
+  config/
+    pipeline.yaml                 # 每日摘要管線：步驟順序、Skill 依賴、後處理
+    routing.yaml                  # Todoist 三層路由：標籤映射、關鍵字映射、排除清單
+    cache-policy.yaml             # 快取策略：各 API 的 TTL、降級時限
+    frequency-limits.yaml         # 自動任務頻率限制（楞嚴經/Log審查/Git push）
+    scoring.yaml                  # TaskSense 優先級計分規則
+    notification.yaml             # ntfy 通知配置（topic、標籤、模板）
+    digest-format.md              # 摘要輸出排版模板
+
+  # 模板層（按需載入，不預載進 context window）
+  templates/
+    shared/
+      preamble.md                 # 共用前言（nul 禁令 + Skill-First，一處定義）
+      done-cert.md                # DONE_CERT 格式定義
+      quality-gate.md             # 驗證閘門規則（迭代精修）
+    sub-agent/                    # 子 Agent 任務模板（Todoist 路由後按需載入）
+      skill-task.md               # 模板 A：有 Skill 匹配的任務
+      research-task.md            # 模板 B：知識庫研究任務（含 KB 去重）
+      code-task.md                # 模板 D：@code 任務（Plan-Then-Execute）
+      general-task.md             # 模板 C：無 Skill 匹配的一般任務
+      refinement.md               # 品質閘門精修 prompt
+    auto-tasks/                   # 自動任務 prompt（無可處理項目時按需載入）
+      shurangama-research.md      # 楞嚴經研究（4 步驟含 KB 去重）
+      log-audit.md                # 系統 Log 審查（8 步驟含修正）
+      git-push.md                 # GitHub 推送流程
+
+  # 執行腳本
   run-agent.ps1                   # 每日摘要執行腳本（單一模式，含重試）
   run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式）
-  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本（單一模式）
-  run-todoist-agent-team.ps1      # Todoist 任務規劃執行腳本（團隊並行模式）
+  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本
   setup-scheduler.ps1             # 排程設定工具
   check-health.ps1                # 健康檢查報告工具（快速一覽）
   scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
   query-logs.ps1                  # 執行成果查詢工具（5 種模式）
+
+  # Hooks 機器強制層
   .claude/
     settings.json                 # Hooks 設定（PreToolUse/PostToolUse/Stop）
-  hooks/                          # Claude Code Hooks（機器強制層）
+  hooks/
     pre_bash_guard.py             # PreToolUse:Bash - 攔截 nul 重導向、危險操作
     pre_write_guard.py            # PreToolUse:Write/Edit - 攔截 nul 寫入、敏感檔案
     post_tool_logger.py           # PostToolUse:* - 結構化 JSONL 日誌（自動標籤）
     on_stop_alert.py              # Stop - Session 結束時健康檢查 + ntfy 自動告警
     query_logs.py                 # 結構化日誌查詢工具（CLI）
-  prompts/team/                   # 團隊模式 Agent prompts
+
+  # 團隊模式 Agent prompts
+  prompts/team/
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
     fetch-hackernews.md           # Phase 1: HN AI 新聞資料擷取
     fetch-gmail.md                # Phase 1: Gmail 郵件擷取
     fetch-security.md             # Phase 1: Cisco AI Defense 安全審查
     assemble-digest.md            # Phase 2: 摘要組裝 + 通知 + 狀態
-    todoist-query.md              # Todoist Team Phase 1: 查詢+過濾+路由+規劃
-    todoist-auto-shurangama.md    # Todoist Team Phase 2b: 楞嚴經研究
-    todoist-auto-logaudit.md      # Todoist Team Phase 2b: Log 審查
-    todoist-auto-gitpush.md       # Todoist Team Phase 2b: Git push
-    todoist-assemble.md           # Todoist Team Phase 3: 關閉+更新+通知
   results/                        # 團隊模式 Phase 1 結果（Phase 2 清理）
-  context/                        # 跨次記憶（持久化）
+
+  # 持久化資料
+  context/
     digest-memory.json            # 摘要記憶（連續天數、待辦統計等）
     auto-tasks-today.json         # 自動任務頻率追蹤（每日歸零）
-  cache/                          # API 回應快取
-    todoist.json                  # Todoist 快取（TTL: 30 分鐘）
-    pingtung-news.json            # 屏東新聞快取（TTL: 6 小時）
-    hackernews.json               # HN 快取（TTL: 2 小時）
-    knowledge.json                # 知識庫快取（TTL: 1 小時）
-    gmail.json                    # Gmail 快取（TTL: 30 分鐘）
-  state/                          # 排程執行狀態
-    scheduler-state.json          # 執行記錄（最近 200 筆，含 log_file）
-    todoist-history.json          # Todoist 自動任務歷史（楞嚴經/Log審查/Git push）
-  skills/                         # 專案內 skill 指引（自包含）
+  cache/                          # API 回應快取（TTL 定義在 config/cache-policy.yaml）
+    todoist.json / pingtung-news.json / hackernews.json / knowledge.json / gmail.json
+  state/
+    scheduler-state.json          # 執行記錄（最近 200 筆，PowerShell 獨佔寫入）
+    todoist-history.json          # Todoist 自動任務歷史
+
+  # Skills（行為指引，自包含）
+  skills/
     SKILL_INDEX.md                # Skill 索引與路由引擎（Agent 首先載入）
-    todoist/SKILL.md              # Todoist API 查詢今日待辦
-    pingtung-news/SKILL.md        # 屏東新聞 MCP 查詢
-    hackernews-ai-digest/SKILL.md # HN AI 新聞摘要（curl 簡化版）
-    atomic-habits/SKILL.md        # 原子習慣每日提示
-    learning-mastery/SKILL.md     # 深度學習技術每日技巧
-    pingtung-policy-expert/SKILL.md # 屏東新聞政策背景解讀
-    knowledge-query/SKILL.md      # 個人知識庫查詢（可選）
-    ntfy-notify/SKILL.md          # ntfy 通知發送
-    digest-memory/SKILL.md        # 摘要記憶持久化
-    api-cache/SKILL.md            # HTTP 回應快取
-    scheduler-state/SKILL.md      # 排程狀態管理
-    gmail/SKILL.md                # Gmail 郵件讀取（OAuth2）
-    skill-scanner/SKILL.md        # AI 技能安全掃描（Cisco AI Defense）
-  logs/                           # 執行日誌（自動清理 7 天）
+    todoist/ pingtung-news/ hackernews-ai-digest/ atomic-habits/
+    learning-mastery/ pingtung-policy-expert/ knowledge-query/
+    ntfy-notify/ digest-memory/ api-cache/ scheduler-state/
+    gmail/ skill-scanner/         # 共 14 個 Skill（各含 SKILL.md）
+
+  # 日誌
+  logs/
     structured/                   # 結構化 JSONL 日誌（hooks 自動產生）
-      YYYY-MM-DD.jsonl            # 每日工具呼叫記錄（自動標籤）
-      session-summary.jsonl       # Session 健康摘要（Stop hook 產生）
 ```
 
 ## 執行流程
@@ -101,14 +145,13 @@ daily-digest-prompt/
 ### 每日摘要（daily-digest-prompt.md）
 1. Windows Task Scheduler 觸發 `run-agent.ps1`
 2. 腳本自動建立 context/、cache/、state/ 目錄
-3. 腳本讀取 `daily-digest-prompt.md` 作為 prompt
+3. 腳本讀取 `daily-digest-prompt.md` 作為 prompt（~80 行薄層調度器）
 4. 透過 `claude -p --allowedTools "Read,Bash,Write"` 執行
-5. **Agent 首先載入 `skills/SKILL_INDEX.md`（Skill-First）**
-6. 載入記憶（digest-memory）與快取機制（api-cache）
-7. 依序執行各步驟，每步嚴格依照對應 SKILL.md 操作
-8. 主動觸發 Skill 鏈式組合（如：新聞 → 政策解讀 → 知識庫匯入）
-9. 整理摘要（含連續報到、健康度、Skill 使用報告）→ ntfy 推播 → 寫入記憶（Agent）；狀態由 PowerShell 腳本寫入
-10. 若執行失敗，腳本自動重試一次（間隔 2 分鐘）
+5. Agent 載入共用前言（`templates/shared/preamble.md`）+ Skill 索引
+6. 讀取 `config/pipeline.yaml` 取得管線定義 + `config/cache-policy.yaml` 取得快取 TTL
+7. 依 pipeline.yaml 的 `init` → `steps` → `finalize` 順序執行，每步依對應 SKILL.md 操作
+8. 摘要格式依 `config/digest-format.md` 排版 → ntfy 推播 → 寫入記憶
+9. 若執行失敗，腳本自動重試一次（間隔 2 分鐘）
 
 ### 每日摘要 - 團隊並行模式（run-agent-team.ps1）
 1. Windows Task Scheduler 觸發 `run-agent-team.ps1`
@@ -121,23 +164,17 @@ daily-digest-prompt/
 8. Phase 2 失敗可自動重試一次（間隔 60 秒）
 9. 預期耗時約 1 分鐘（單一模式約 3-4 分鐘）
 
-### Todoist 任務規劃 - 單一模式（hour-todoist-prompt.md）
-1. 手動觸發 `run-todoist-agent.ps1`（保留作為備用）
-2. 單一 Agent 完成全部流程：查詢 → 篩選 → 執行 → 關閉 → 通知
-
-### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
-1. Windows Task Scheduler 觸發 `run-todoist-agent-team.ps1`（每 30 分鐘，02:00-23:00）
-2. **Phase 1**：查詢 Agent（todoist-query.md）查詢 Todoist + 過濾 + 路由 + 頻率檢查
-3. 輸出執行計畫 `results/todoist-plan.json` + 任務 prompt 檔案
-4. PowerShell 讀取計畫，決定 Phase 2 組合
-5. **Phase 2**（並行）：
-   - 情境 A（有任務）：並行執行最多 2 個 Todoist 任務
-   - 情境 B（無任務）：並行執行自動任務（楞嚴經研究 + Log 審查 + Git push）
-   - 情境 C（全達上限）：直接跳到 Phase 3
-6. **Phase 3**：組裝 Agent（todoist-assemble.md）關閉任務 + 更新頻率/歷史 + ntfy 通知
-7. Phase 3 失敗可自動重試一次（間隔 60 秒）
-8. **自動任務頻率限制**：楞嚴經 3 次/日、Log 審查 1 次/日、Git push 2 次/日
-9. **研究任務 KB 去重機制**：楞嚴經研究 Agent 在研究前先查詢知識庫已有筆記，避免重複
+### Todoist 任務規劃（hour-todoist-prompt.md）
+1. Windows Task Scheduler 觸發 `run-todoist-agent.ps1`
+2. Agent 載入共用前言 + Skill 索引（~140 行薄層調度器）
+3. 讀取 `config/routing.yaml` 取得三層路由規則 + `config/frequency-limits.yaml` 取得頻率限制
+4. 查詢 Todoist → 依 routing.yaml 路由 → 按 `config/scoring.yaml` 計分排序
+5. 子 Agent 模板從 `templates/sub-agent/` 按需載入（不預載）
+6. 無可處理項目時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
+7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
+8. 通知格式依 `config/notification.yaml`
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：楞嚴經 3 次/日、Log 審查 1 次/日、Git push 2 次/日
+10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
 
 ## 技術棧
 - **執行環境**: PowerShell 7 (pwsh)
@@ -251,23 +288,9 @@ python3 hooks/query_logs.py --format json
 - 失敗時自動重試一次（間隔 2 分鐘）
 - `check-health.ps1` 提供近 7 天健康度報告
 
-## 使用的 Skills（專案內自包含）
-- `skills/SKILL_INDEX.md` - **Skill 索引與路由引擎**（Agent 啟動首先載入）
-- `skills/todoist/SKILL.md` - Todoist REST API 查詢今日待辦
-- `skills/pingtung-news/SKILL.md` - MCP 服務查詢屏東縣政府新聞
-- `skills/hackernews-ai-digest/SKILL.md` - Hacker News API 篩選 AI 新聞（curl 簡化版）
-- `skills/atomic-habits/SKILL.md` - 《原子習慣》每日提示（依星期輪替）
-- `skills/learning-mastery/SKILL.md` - 《深度學習的技術》每日學習技巧（依星期輪替）
-- `skills/pingtung-policy-expert/SKILL.md` - 屏東施政背景解讀（強化新聞區塊）
-- `skills/knowledge-query/SKILL.md` - 個人知識庫查詢（localhost:3000，可選）
-- `skills/ntfy-notify/SKILL.md` - ntfy 推播通知（Write 建 UTF-8 JSON + curl 發送）
-- `skills/digest-memory/SKILL.md` - 摘要記憶持久化（跨次追蹤）
-- `skills/api-cache/SKILL.md` - HTTP 回應快取（降級保護）
-- `skills/scheduler-state/SKILL.md` - 排程狀態管理（執行記錄）
-- `skills/gmail/SKILL.md` - Gmail 郵件讀取（OAuth2 認證，可選）
-- `skills/skill-scanner/SKILL.md` - Cisco AI Defense Skill Scanner（技能安全掃描）
+## Skills（專案內自包含，共 14 個）
 
-> Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含，不依賴外部路徑。
+完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 
 ## ntfy 通知注意事項
 - Windows 環境必須用 JSON 檔案方式發送，不可用 inline JSON 字串（會亂碼）

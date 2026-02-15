@@ -1,0 +1,48 @@
+# config/scoring.yaml
+# TaskSense 優先級計分規則
+# 修改此文件可調整排名邏輯，不需碰 prompt
+
+version: 1
+
+formula: "綜合分數 = Todoist 優先級分 × 信心度 × 描述加成"
+max_tasks_per_run: 2  # 每次最多執行 2 項，避免單次耗時過長
+
+# Todoist priority 對應分數
+priority_scores:
+  4: 4  # p1 (priority=4) = 4 分
+  3: 3  # p2 = 3 分
+  2: 2  # p3 = 2 分
+  1: 1  # p4 = 1 分
+
+# 路由層級信心度乘數
+confidence_multipliers:
+  tier1: 1.0   # 標籤路由（100%）
+  tier2: 0.8   # 關鍵字路由（80%）
+  tier3: 0.6   # 語義判斷（60%）
+
+# 描述加成
+description_bonus:
+  has_description: 1.2  # 有 description 欄位
+  no_description: 1.0   # 無 description 欄位
+
+# 排名輸出格式
+output_format: |
+  | 排名 | 任務 | 優先級 | 信心度 | 綜合分 | 匹配 Skill |
+  |------|------|--------|--------|--------|-----------|
+  | 1 | ... | p1 🔴 | 100% | 4.8 | @code |
+  | 2 | ... | p2 🟡 | 80% | 2.4 | knowledge-query |
+
+# allowedTools 決策表
+allowed_tools_table:
+  read_only: "Read,Bash"
+  create_files: "Read,Bash,Write"
+  edit_files: "Read,Bash,Edit"
+  full_dev: "Read,Bash,Write,Edit"
+  web_search: "Read,Bash,WebSearch,WebFetch"
+  full_dev_with_search: "Read,Bash,Write,Edit,Glob,Grep"
+  research_kb: "Read,Bash,Write,WebSearch,WebFetch"
+
+# 強制規則
+rules:
+  - "任務描述含「知識庫」或「RAG」→ allowedTools 必須包含 Write"
+  - "依綜合分由高到低執行"

@@ -2,12 +2,8 @@
 你的唯一任務是查詢今日郵件並將結果寫入 results/gmail.json。
 不要發送通知、不要寫記憶、不要做其他事。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
-
-## Skill-First 規則
-必須先讀取 SKILL.md，嚴格依照指示操作。
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（nul 禁令 + Skill-First）。
 
 ## 執行步驟
 

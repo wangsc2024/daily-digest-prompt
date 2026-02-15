@@ -73,7 +73,8 @@ def main():
             print(json.dumps({"decision": "block", "reason": reason}))
             sys.exit(0)
 
-    # All checks passed - allow
+    # All checks passed - allow (output JSON to avoid "not start with {" debug noise)
+    print(json.dumps({"decision": "allow"}))
     sys.exit(0)
 
 

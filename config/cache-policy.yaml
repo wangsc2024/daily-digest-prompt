@@ -1,0 +1,46 @@
+# config/cache-policy.yaml
+# 統一快取策略 — 所有 Agent 共用
+# 操作流程仍依 skills/api-cache/SKILL.md，此文件僅定義 TTL 數值
+
+version: 1
+cache_dir: "cache/"
+degradation_max_age_hours: 24  # 降級使用過期快取的最大時效
+degradation_label: "⚠️ 資料來自快取（{time}）"
+
+sources:
+  todoist:
+    file: "cache/todoist.json"
+    ttl_minutes: 30
+    note: "Todoist Agent 不使用快取（需即時資料），僅 daily-digest 使用"
+
+  pingtung-news:
+    file: "cache/pingtung-news.json"
+    ttl_minutes: 360  # 6 小時
+
+  hackernews:
+    file: "cache/hackernews.json"
+    ttl_minutes: 120  # 2 小時
+
+  knowledge:
+    file: "cache/knowledge.json"
+    ttl_minutes: 60  # 1 小時
+
+  gmail:
+    file: "cache/gmail.json"
+    ttl_minutes: 30
+
+# 快取檔案結構（所有來源統一格式）
+schema: |
+  {
+    "cached_at": "ISO-8601 UTC",
+    "ttl_minutes": N,
+    "source": "來源名稱",
+    "data": { ... 原始 API 回應 ... }
+  }
+
+# 快取命中追蹤（Agent 執行期間維護計數器）
+tracking:
+  cache_hits: "每次從快取取得有效資料時 +1"
+  api_calls: "每次執行外部 curl 呼叫時 +1"
+  cache_degraded: "API 失敗且使用過期快取時 +1"
+  write_to: "context/digest-memory.json → skill_usage 區塊"

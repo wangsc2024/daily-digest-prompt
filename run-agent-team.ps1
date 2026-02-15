@@ -22,7 +22,7 @@ $ResultsDir = "$AgentDir\results"
 
 # Config
 $MaxPhase2Retries = 1
-$Phase1TimeoutSeconds = 180
+$Phase1TimeoutSeconds = 300
 $Phase2TimeoutSeconds = 300
 
 # Create directories

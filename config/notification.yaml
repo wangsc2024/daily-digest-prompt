@@ -1,0 +1,54 @@
+# config/notification.yaml
+# ntfy 通知配置
+# 修改此文件可調整通知行為，不需碰 prompt
+
+version: 1
+default_topic: "wangsc2025"
+service_url: "https://ntfy.sh"
+max_message_length: 500
+
+# 發送步驟（Windows 環境必須用 JSON 檔案方式）
+send_steps:
+  1: "用 Write 工具建立 ntfy_temp.json（UTF-8）"
+  2: 'curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh'
+  3: "rm ntfy_temp.json"
+
+# 通知 tags 映射
+tag_mappings:
+  # 每日摘要
+  digest_success: ["white_check_mark", "memo"]
+  digest_warning: ["warning", "memo"]
+
+  # Todoist Agent
+  todoist_success: ["white_check_mark"]
+  todoist_no_tasks_auto_done: ["books", "wrench"]  # 無待辦 + 自動任務完成
+  todoist_no_tasks: ["information_source"]          # 無待辦 + 自動任務失敗/跳過
+  todoist_all_failed: ["warning"]
+
+  # 系統告警（on_stop_alert.py）
+  security_alert: ["warning", "skull_and_crossbones"]
+
+# Todoist Agent 通知內容模板
+todoist_report: |
+  📋 Todoist 自動執行報告
+
+  📊 統計
+  - 待辦總數：N 項
+  - 已執行：N 項（成功 N / 失敗 N）
+  - 已跳過：N 項
+  - 驗證通過率：XX%
+  - 平均迭代次數：N.N 次
+  - 一次通過率：XX%
+
+  ✅ 已完成（含迭代品質）
+  1. [任務名稱] — Tier N (信心度 XX%) | Skill: [...] | 迭代: N/3 | 品質: N/5
+
+  ❌ 執行失敗（如有，含精練追蹤）
+  1. [任務名稱] — 迭代: N/3 次 | 最終: {cert_status} | 殘留: [...] | 處置: 降級+延遲至明天
+
+  ⏭️ 已跳過（如有）
+  - [任務名稱]：跳過原因
+
+  🔧 Skill 使用統計
+  - 路由：標籤 N 項 / 關鍵字 N 項 / 語義 N 項
+  - 本次匹配 N 個 Skill，實際使用 M 個

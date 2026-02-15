@@ -1,0 +1,135 @@
+# config/pipeline.yaml
+# 每日摘要 Agent 管線定義
+# 修改此文件可調整執行步驟，不需碰 prompt
+
+version: 1
+agent: daily-digest
+
+# 初始化階段（固定，不可跳過）
+init:
+  - action: read_skill_index
+    file: skills/SKILL_INDEX.md
+
+  - action: read_memory
+    skill: digest-memory
+    skill_file: skills/digest-memory/SKILL.md
+    data_file: context/digest-memory.json
+    on_missing: first_run
+
+  - action: load_cache_policy
+    skill: api-cache
+    skill_file: skills/api-cache/SKILL.md
+    config_ref: config/cache-policy.yaml
+
+  - action: read_state
+    file: state/scheduler-state.json
+    mode: readonly  # Agent 只讀，PowerShell 腳本負責寫入
+
+# 主要步驟（依序執行，失敗不中斷整體流程）
+steps:
+  - id: todoist
+    name: "查詢 Todoist 今日待辦"
+    skills: [todoist, api-cache]
+    skill_files:
+      - skills/todoist/SKILL.md
+    cache_key: todoist
+    output_section: "✅ 今日待辦"
+
+  - id: news
+    name: "查詢本週屏東新聞（含政策解讀）"
+    skills: [pingtung-news, pingtung-policy-expert, api-cache]
+    skill_files:
+      - skills/pingtung-news/SKILL.md
+      - skills/pingtung-policy-expert/SKILL.md
+    chain: [pingtung-news, pingtung-policy-expert, knowledge-query]
+    cache_key: pingtung-news
+    output_section: "📰 本週屏東新聞"
+    post_actions:
+      - rag_enhance: true  # 用知識庫搜尋相關政策筆記
+      - mark_import_candidates:
+          conditions:
+            - "預算破億"
+            - "新建設啟用"
+            - "首創計畫"
+            - "縣長出席"
+      - score_citizen_impact: true  # 以 10 分制標記民眾有感度
+
+  - id: hackernews
+    name: "查詢 AI 技術動態"
+    skills: [hackernews-ai-digest, api-cache]
+    skill_files:
+      - skills/hackernews-ai-digest/SKILL.md
+    cache_key: hackernews
+    output_section: "🤖 AI 技術動態"
+    post_actions:
+      - rag_enhance: true
+      - mark_import_candidates:
+          condition: "score >= 300"
+      - write_to_rag: true  # 將結果寫入 RAG 知識庫
+
+  - id: habits
+    name: "生成今日習慣提示"
+    skills: [atomic-habits]
+    skill_files:
+      - skills/atomic-habits/SKILL.md
+    output_section: "💡 今日習慣提示"
+
+  - id: learning
+    name: "生成今日學習技巧"
+    skills: [learning-mastery]
+    skill_files:
+      - skills/learning-mastery/SKILL.md
+    required: true  # 不可跳過
+    output_section: "📚 今日學習技巧"
+
+  - id: knowledge
+    name: "查詢知識庫 + 智慧匯入"
+    skills: [knowledge-query, api-cache]
+    skill_files:
+      - skills/knowledge-query/SKILL.md
+    cache_key: knowledge
+    output_section: "📝 知識庫回顧"
+    sub_actions:
+      - query_recent_notes: true
+      - query_stats: true  # curl localhost:3000/api/stats，記錄 total_notes
+      - smart_import:
+          check_candidates_from: [news, hackernews]
+          dedup_method: hybrid_search
+          dedup_threshold: 0.85  # score > 0.85 表示重複，跳過
+          on_no_candidates: "記錄「知識庫匯入：0 則」，仍算通過驗證"
+          on_import_fail: "不影響整體流程"
+
+  - id: zen
+    name: "生成佛學禪語"
+    skills: []  # 無對應 Skill，直接生成
+    output_section: "☸️ 佛學禪語"
+
+# 收尾階段
+finalize:
+  - action: compile_digest
+    format_file: config/digest-format.md
+
+  - action: send_notification
+    skill: ntfy-notify
+    skill_file: skills/ntfy-notify/SKILL.md
+    config_ref: config/notification.yaml
+
+  - action: update_memory
+    skill: digest-memory
+    skill_file: skills/digest-memory/SKILL.md
+    data_file: context/digest-memory.json
+
+  - action: verify
+    description: "Evidence-Based 最終驗證（每項需有實際執行證據）"
+    checks:
+      - id: api_cache_compliance
+        rule: "每個 API 呼叫前都先查了快取"
+      - id: policy_analysis_present
+        rule: "至少 1 則新聞有政策解讀（摘要含「政策背景」區塊）"
+      - id: knowledge_import_attempted
+        rule: "有嘗試匯入判斷（無值得匯入也算通過）"
+      - id: memory_updated
+        rule: "digest-memory.json 的 last_run 為今天"
+        verify_method: "用 Read 讀回確認"
+      - id: notification_sent
+        rule: "ntfy curl 回應 HTTP 200"

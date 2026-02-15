@@ -2,30 +2,19 @@
 你的任務是查詢 Todoist 今日待辦、過濾、路由篩選、檢查自動任務頻率，最後輸出執行計畫。
 不要執行任務、不要關閉任務、不要發送通知。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（nul 禁令 + Skill-First）。
 
-## Skill-First 規則
-必須先讀取 SKILL.md，嚴格依照指示操作。
-
----
-
-## 步驟 0：載入 Skill 引擎
-
-用 Read 讀取 `skills/SKILL_INDEX.md`，建立對所有 Skill 的認知。
-特別注意：
-- 速查表中的觸發關鍵字 → 步驟 2 篩選任務時比對
-- 能力矩陣 → 步驟 3 選擇 allowedTools 時參考
+## 效率規則（必遵守）
+- **禁止使用 TodoWrite**：本 Agent 有 180 秒時限，TodoWrite 每次浪費 10 秒
+- **不需讀取 SKILL.md**：路由規則已內嵌，直接操作即可
+- **最小工具呼叫**：減少不必要的 Bash/Read 呼叫
 
 ---
 
 ## 步驟 1：查詢 Todoist 今日待辦
-**使用 Skill**：`todoist`
 
-1. 讀取 `skills/todoist/SKILL.md`
-2. 讀取 `skills/api-cache/SKILL.md`
-3. 檢查快取 `cache/todoist.json`（30 分鐘 TTL）
+1. 檢查快取 `cache/todoist.json`（30 分鐘 TTL）
    - 有效 → 使用快取，跳到過濾
    - 過期/不存在 → 呼叫 API
 4. 呼叫 Todoist API v1：
@@ -130,19 +119,15 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 依匹配結果選用模板，用 Write 建立 `results/todoist-task-{rank}.md`：
 
-**模板選擇**：
-- `@code` 標籤 → 模板 D（Plan-Then-Execute）
-- `@research` 或含知識庫/RAG → 模板 B（研究+知識庫）
-- 有匹配 Skill → 模板 A（Skill 驅動）
-- 無匹配 → 模板 C（一般任務）
+**模板選擇**（從 `templates/sub-agent/` 讀取對應模板，不要自行編寫）：
+- `@code` 標籤 → 讀取 `templates/sub-agent/code-task.md`
+- `@research` 或含知識庫/RAG → 讀取 `templates/sub-agent/research-task.md`
+- 有匹配 Skill → 讀取 `templates/sub-agent/skill-task.md`
+- 無匹配 → 讀取 `templates/sub-agent/general-task.md`
 
-**每個 prompt 必須包含**：
-1. Skill-First 規則（列出匹配的 SKILL.md 路徑）
-2. 任務描述
-3. 執行步驟
-4. 品質自評迴圈
-5. DONE 認證輸出（===DONE_CERT_BEGIN=== ... ===DONE_CERT_END===）
-6. **結果寫入指示**：完成後用 Write 建立 `results/todoist-result-{rank}.json`
+用讀取到的模板內容，替換其中的變數（任務描述、Skill 路徑等），寫入 `results/todoist-task-{rank}.md`。
+
+**每個 prompt 結尾加上結果寫入指示**：完成後用 Write 建立 `results/todoist-result-{rank}.json`
 
 **結果 JSON 格式（寫入 prompt 中指示子 Agent 產出）**：
 ```json

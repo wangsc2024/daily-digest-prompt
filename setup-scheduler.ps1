@@ -57,10 +57,11 @@ if ($FromHeartbeat) {
 
     Write-Host "從 HEARTBEAT.md 讀取到 $($schedules.Count) 個排程：" -ForegroundColor Cyan
     foreach ($s in $schedules) {
-        # 從 cron 提取時間（簡易：取分鐘和小時）
-        if ($s.Cron -match '^\d+\s+(\d+)') {
-            $hour = $Matches[1]
-            $cronTime = "{0:D2}:00" -f [int]$hour
+        # 從 cron 提取時間（分鐘 + 小時）
+        if ($s.Cron -match '^(\d+)\s+(\d+)') {
+            $minute = [int]$Matches[1]
+            $hour = [int]$Matches[2]
+            $cronTime = "{0:D2}:{1:D2}" -f $hour, $minute
         } else {
             $cronTime = "08:00"
         }

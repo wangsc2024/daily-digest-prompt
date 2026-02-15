@@ -291,6 +291,7 @@ def main():
     else:
         write_session_summary(analysis, alert_sent=False, severity="healthy")
 
+    print("{}")
     sys.exit(0)
 
 

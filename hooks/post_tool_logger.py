@@ -148,6 +148,7 @@ def main():
     try:
         data = json.load(sys.stdin)
     except (json.JSONDecodeError, Exception):
+        print("{}")
         sys.exit(0)
 
     tool_name = data.get("tool_name", "unknown")
@@ -206,6 +207,7 @@ def main():
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+    print("{}")
     sys.exit(0)
 
 

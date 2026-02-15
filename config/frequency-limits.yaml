@@ -1,0 +1,59 @@
+# config/frequency-limits.yaml
+# 自動任務頻率限制（無 Todoist 待辦時觸發）
+# 修改此文件可調整次數上限，不需碰 prompt
+
+version: 1
+tracking_file: "context/auto-tasks-today.json"
+history_file: "state/todoist-history.json"
+reset_policy: "daily"  # 每日歸零（跨日自動重置）
+
+# 歸零邏輯：
+#   - tracking_file 不存在 → 建立初始檔案（所有計數為 0）
+#   - tracking_file 的 date 欄位 ≠ 今天 → 歸零重建（計數全部重置、closed_task_ids 清空）
+#   - tracking_file 的 date 欄位 = 今天 → 沿用目前計數值
+
+# 初始檔案格式
+initial_schema: |
+  {
+    "date": "YYYY-MM-DD",
+    "shurangama_count": 0,
+    "log_audit_count": 0,
+    "git_push_count": 0,
+    "closed_task_ids": []
+  }
+
+# 自動任務定義
+tasks:
+  shurangama:
+    name: "楞嚴經研究"
+    daily_limit: 3
+    counter_field: "shurangama_count"
+    template: "templates/auto-tasks/shurangama-research.md"
+    history_type: "shurangama"
+    execution_order: 1  # 優先執行
+    skill: knowledge-query
+
+  log_audit:
+    name: "系統 Log 審查"
+    daily_limit: 1
+    counter_field: "log_audit_count"
+    template: "templates/auto-tasks/log-audit.md"
+    history_type: "log_audit"
+    execution_order: 2
+    skills: [scheduler-state, knowledge-query]
+
+  git_push:
+    name: "專案推送 GitHub"
+    daily_limit: 2
+    counter_field: "git_push_count"
+    template: "templates/auto-tasks/git-push.md"
+    history_type: "git_push"
+    execution_order: 3
+
+# 歷史追蹤寫入規則
+history:
+  max_auto_tasks: 200   # auto_tasks 陣列上限，超過移除最舊的
+  max_daily_summary: 30  # daily_summary 陣列上限
+
+# 全部達上限時
+all_exhausted_action: "直接跳到通知步驟（通知：今日自動任務已達上限）"

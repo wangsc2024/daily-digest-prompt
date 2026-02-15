@@ -1,0 +1,80 @@
+# config/routing.yaml
+# Todoist 任務三層路由規則
+# 修改此文件可調整任務篩選和 Skill 匹配，不需碰 prompt
+
+version: 1
+
+# 前置過濾（最先執行，優先於所有路由層）
+pre_filter:
+  description: "以下類型任務無論是否有標籤，一律跳過"
+  exclude_categories:
+    - name: "實體行動"
+      examples: ["買東西", "運動", "打掃", "出門", "取件"]
+    - name: "人際互動"
+      examples: ["打電話", "開會", "面談", "聚餐", "拜訪"]
+    - name: "個人事務"
+      examples: ["繳費（非自動化）", "看醫生", "接送"]
+  rule: "即使任務帶有 @code、@research 等標籤，若內容本質為上述類型，仍跳過"
+
+# Tier 1：標籤路由（信心度 100%）
+label_routing:
+  confidence: 100
+  description: "Todoist 標籤直接映射到 Skill，匹配即可處理，跳過 Tier 2/3"
+  mappings:
+    "@code":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "@research":
+      skills: ["deep-research", "knowledge-query"]
+      allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
+      template: "templates/sub-agent/research-task.md"
+    "@write":
+      skills: ["文件撰寫"]
+      allowed_tools: "Read,Bash,Write"
+      template: "templates/sub-agent/skill-task.md"
+    "@news":
+      skills: ["pingtung-news", "pingtung-policy-expert"]
+      allowed_tools: "Read,Bash,Write"
+      template: "templates/sub-agent/skill-task.md"
+    "@ai":
+      skills: ["hackernews-ai-digest"]
+      allowed_tools: "Read,Bash,Write"
+      template: "templates/sub-agent/skill-task.md"
+    "@knowledge":
+      skills: ["knowledge-query"]
+      allowed_tools: "Read,Bash,Write"
+      template: "templates/sub-agent/skill-task.md"
+
+# Tier 2：內容關鍵字比對（信心度 80%）
+keyword_routing:
+  confidence: 80
+  description: "比對 SKILL_INDEX 速查表的觸發關鍵字"
+  rule: "關鍵字命中任何 Skill → 自動提升為「可處理」（Skill 的存在本身就代表能力）"
+  mappings:
+    - keywords: ["屏東", "新聞", "縣政"]
+      skills: ["pingtung-news", "pingtung-policy-expert"]
+    - keywords: ["AI", "LLM", "GPT", "技術"]
+      skills: ["hackernews-ai-digest"]
+    - keywords: ["知識庫", "筆記", "RAG"]
+      skills: ["knowledge-query"]
+    - keywords: ["習慣", "行為改變"]
+      skills: ["atomic-habits"]
+    - keywords: ["學習", "技巧"]
+      skills: ["learning-mastery"]
+    - keywords: ["通知", "提醒"]
+      skills: ["ntfy-notify"]
+    - keywords: ["程式碼", "檔案操作", "自動化"]
+      skills: []  # 依任務內容判斷 allowedTools
+
+# Tier 3：LLM 語義判斷（信心度 60%）
+semantic_routing:
+  confidence: 60
+  description: "Tier 1/2 都未匹配時，根據任務描述進行語義分析"
+  processable: ["程式碼開發", "檔案操作", "研究查詢", "自動化", "文件撰寫"]
+  not_processable: ["實體行動（買東西、運動）", "人際互動（打電話、開會）", "個人事務（繳費、看醫生）"]
+
+# 篩選結果輸出格式
+output_format:
+  processable: "✅ 可處理：[任務ID] 任務名稱 — 路由層級: Tier N (信心度 XX%) | 匹配 Skill: [skill1, skill2]"
+  skipped: "⏭️ 跳過：  [任務ID] 任務名稱 — 跳過原因"

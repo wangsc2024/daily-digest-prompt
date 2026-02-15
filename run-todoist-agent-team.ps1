@@ -21,11 +21,21 @@ $LogDir = "$AgentDir\logs"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"
 
-# Config
-$Phase1TimeoutSeconds = 180
-$Phase2TimeoutSeconds = 600
+# Config (Phase 2 timeout is dynamic, calculated after Phase 1)
+$Phase1TimeoutSeconds = 300
 $Phase3TimeoutSeconds = 180
 $MaxPhase3Retries = 1
+
+# Dynamic timeout budgets per task type
+$TimeoutBudget = @{
+    "research" = 600   # WebSearch/WebFetch tasks: 10 min
+    "code"     = 900   # Edit/Glob/Grep tasks: 15 min
+    "skill"    = 300   # Simple skill tasks: 5 min
+    "general"  = 300   # General tasks: 5 min
+    "auto"     = 600   # Auto-tasks (shurangama/log-audit): 10 min
+    "gitpush"  = 180   # Git push: 3 min
+    "buffer"   = 120   # CLI startup + safety buffer
+}
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -172,6 +182,41 @@ catch {
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan parse error" -Sections @{ query = "failed" }
     exit 1
 }
+
+# ============================================
+# Dynamic Phase 2 Timeout Calculation
+# ============================================
+$Phase2TimeoutSeconds = $TimeoutBudget["buffer"]  # Start with buffer
+
+if ($plan.plan_type -eq "tasks") {
+    # Determine max timeout from task types (parallel = max, not sum)
+    $maxTaskTimeout = 0
+    foreach ($task in $plan.tasks) {
+        $tools = $task.allowed_tools
+        if ($tools -match "Edit|Glob|Grep") {
+            $taskTimeout = $TimeoutBudget["code"]
+        }
+        elseif ($tools -match "WebSearch|WebFetch") {
+            $taskTimeout = $TimeoutBudget["research"]
+        }
+        else {
+            $taskTimeout = $TimeoutBudget["skill"]
+        }
+        if ($taskTimeout -gt $maxTaskTimeout) { $maxTaskTimeout = $taskTimeout }
+    }
+    $Phase2TimeoutSeconds += $maxTaskTimeout
+}
+elseif ($plan.plan_type -eq "auto") {
+    # Auto-tasks: use the longest enabled task's budget
+    $maxAutoTimeout = 0
+    if ($plan.auto_tasks.shurangama.enabled) { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["auto"]) }
+    if ($plan.auto_tasks.log_audit.enabled)  { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["auto"]) }
+    if ($plan.auto_tasks.git_push.enabled)   { $maxAutoTimeout = [Math]::Max($maxAutoTimeout, $TimeoutBudget["gitpush"]) }
+    $Phase2TimeoutSeconds += $maxAutoTimeout
+}
+# plan_type == "idle" → stays at buffer only (no Phase 2 work)
+
+Write-Log "[Dynamic] Phase2 timeout = ${Phase2TimeoutSeconds}s (plan_type=$($plan.plan_type))"
 
 # ============================================
 # Phase 2: Parallel Execution

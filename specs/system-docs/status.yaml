@@ -1,0 +1,18 @@
+feature: system-docs
+frozen: false
+version: "1.0.0"
+created: "2026-02-15"
+last_verified: "2026-02-15"
+documents:
+  srd:
+    file: srd.md
+    status: completed
+    lines: 1330
+  ssd:
+    file: ssd.md
+    status: completed
+    lines: 1811
+  ops-manual:
+    file: ops-manual.md
+    status: completed
+    lines: 2160
