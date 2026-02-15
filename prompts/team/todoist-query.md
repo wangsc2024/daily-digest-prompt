@@ -113,8 +113,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 | 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
 | 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_count` |
+| 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize_count` |
 
-合計上限：38 次/日
+合計上限：40 次/日
 
 ---
 

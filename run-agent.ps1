@@ -56,8 +56,14 @@ function Update-State {
     }
 
     if (Test-Path $StateFile) {
-        $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
-        $state = $stateJson | ConvertFrom-Json
+        try {
+            $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
+            $state = $stateJson | ConvertFrom-Json
+        } catch {
+            Write-Log "[WARN] scheduler-state.json corrupted, backing up and rebuilding..."
+            Copy-Item $StateFile "$StateFile.corrupted.$(Get-Date -Format 'yyyyMMdd_HHmmss')" -ErrorAction SilentlyContinue
+            $state = @{ runs = @() }
+        }
     }
     else {
         $state = @{ runs = @() }

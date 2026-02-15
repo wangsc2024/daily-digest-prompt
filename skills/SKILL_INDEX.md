@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（13 個核心 Skill + 1 個工具 Skill）
+## 速查表（14 個核心 Skill + 1 個工具 Skill）
 
 ### 核心 Skill（每日摘要/Todoist Agent 使用）
 
@@ -21,12 +21,13 @@
 | 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度 |
 | 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件 |
 | 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、HTML5、遊戲品質 |
+| 14 | task-manager | 新增自動/排程/單次任務標準化 | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理 |
 
 ### 工具 Skill（按需使用）
 
 | # | Skill | 用途 | 觸發關鍵字 |
 |---|-------|------|-----------|
-| 14 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全、掃描、scan、audit、稽核 |
+| 15 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全、掃描、scan、audit、稽核 |
 
 **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

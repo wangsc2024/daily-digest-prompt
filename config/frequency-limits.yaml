@@ -17,7 +17,7 @@ history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
 # 選取策略：純輪轉（round-robin）
-# 每日 ~11 個 auto-task slots，但 14 個任務合計 38 次上限
+# 每日 ~11 個 auto-task slots，但 15 個任務合計 40 次上限
 # 若用順序掃描，後面的任務永遠不會執行
 # 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
 selection_strategy: "round_robin"
@@ -201,12 +201,14 @@ tasks:
     skills: [scheduler-state, knowledge-query]
 
   git_push:
-    name: "專案推送 GitHub"
+    name: "專案推送 GitHub + 知識庫同步"
     daily_limit: 4
     counter_field: "git_push_count"
     template: "templates/auto-tasks/git-push.md"
     history_type: "git_push"
     execution_order: 13
+    skills: [knowledge-query]
+    description: "同步知識庫至網站並推送 daily-digest-prompt + shurangama-web 至 GitHub"
 
   # --- 遊戲創意群組（共 2 次/日）---
   creative_game_optimize:

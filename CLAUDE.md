@@ -28,6 +28,42 @@
 - **積極用**（有機會就用）：knowledge-query、gmail
 - **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時
 
+## 🤝 Agent Team & 子 Agent 策略（積極並行）
+
+本專案的核心價值在於**並行加速**。Agent 應積極善用團隊模式與子 Agent，而非串行逐步執行。
+
+### 核心原則
+1. **團隊模式優先**：有團隊版腳本（`*-team.ps1`）時，一律優先使用團隊模式，單一模式僅作備用
+2. **主動拆分並行**：遇到 2 個以上獨立任務時，主動用 Task 工具（subagent_type）啟動多個子 Agent 並行處理，不要串行等待
+3. **保護主 Context Window**：研究、搜尋、程式碼分析等大量輸出的工作，委派給子 Agent（Explore / general-purpose），避免撐爆主 Agent 的上下文
+4. **子 Agent 專責分工**：每個子 Agent 只做一件事，職責明確，結果透過檔案（`results/*.json`）或直接回傳交接
+
+### 何時啟動子 Agent
+| 情境 | 做法 |
+|------|------|
+| 多個 API 呼叫互不依賴 | 並行啟動多個子 Agent 同時呼叫（如 Todoist + 新聞 + HN） |
+| 研究 / 探索任務 | 用 `subagent_type=Explore` 深度搜尋，主 Agent 繼續其他工作 |
+| 程式碼修改 + 測試 | 修改後用子 Agent 跑測試，主 Agent 同步處理下一項任務 |
+| 多檔案分析 | 各檔案交給獨立子 Agent 分析，最後匯整結果 |
+| 耗時操作（build / lint / 大型搜尋） | 用 `run_in_background=true` 背景執行，不阻塞主流程 |
+
+### 何時用 Agent Team（TeamCreate）
+| 情境 | 做法 |
+|------|------|
+| 複雜多步驟任務（3+ 步驟且有依賴關係） | 建立 Team，用任務清單協調分工 |
+| 需要多個 Agent 持續協作（非一次性） | Team 模式提供持久化任務追蹤與成員通訊 |
+| 前端 + 後端 / 研究 + 實作 同步進行 | 不同 Agent 各司其職，Team Lead 統籌 |
+
+### 禁止行為
+- **禁止串行處理可並行的獨立任務**：有 3 個 API 要呼叫就啟動 3 個子 Agent，不要一個一個等
+- **禁止主 Agent 獨攬所有工作**：能委派的就委派，主 Agent 專注在調度與決策
+- **禁止忽略 background 模式**：耗時超過 30 秒的操作應考慮背景執行
+
+### 本專案的並行模式參考
+- **每日摘要**：Phase 1 五路並行擷取 → Phase 2 單一組裝（`run-agent-team.ps1`）
+- **Todoist 任務**：Phase 1 查詢規劃 → Phase 2 N 路並行執行 → Phase 3 組裝通知（`run-todoist-agent-team.ps1`）
+- **互動式開發**：主動用 Task 工具的 `subagent_type` 並行處理研究、測試、分析等獨立工作
+
 ## 文件驅動架構設計原則
 
 | 原則 | 說明 |
@@ -69,7 +105,7 @@ daily-digest-prompt/
     pipeline.yaml                 # 每日摘要管線：步驟順序、Skill 依賴、後處理
     routing.yaml                  # Todoist 三層路由：標籤映射、關鍵字映射、排除清單
     cache-policy.yaml             # 快取策略：各 API 的 TTL、降級時限
-    frequency-limits.yaml         # 自動任務頻率限制（14 個任務，38 次/日上限）
+    frequency-limits.yaml         # 自動任務頻率限制（15 個任務，40 次/日上限）
     scoring.yaml                  # TaskSense 優先級計分規則
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
     dedup-policy.yaml             # 研究去重策略（冷卻天數、飽和閾值、跨任務去重）
@@ -208,7 +244,7 @@ daily-digest-prompt/
 6. 無可處理項目或全部完成時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
 7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
 8. 通知格式依 `config/notification.yaml`
-9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：14 個任務，合計 38 次/日上限，round-robin 輪轉
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：15 個任務，合計 40 次/日上限，round-robin 輪轉
 10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
 
 ### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
@@ -335,12 +371,12 @@ python hooks/query_logs.py --format json
 - `check-health.ps1` 提供近 7 天健康度報告
 
 ### 4. 自動任務輪轉（round-robin）
-- 14 個自動任務定義在 `config/frequency-limits.yaml`，合計 38 次/日上限
-- 5 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)
+- 15 個自動任務定義在 `config/frequency-limits.yaml`，合計 40 次/日上限
+- 6 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)
 - 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
 - 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成
 
-## Skills（專案內自包含，共 14 個）
+## Skills（專案內自包含，共 15 個）
 
 完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 

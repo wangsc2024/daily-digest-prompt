@@ -213,13 +213,27 @@ def main():
         "tags": tags,
     }
 
-    # Write to JSONL
+    # Write to JSONL (with disk protection)
     log_dir = os.path.join("logs", "structured")
-    os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d") + ".jsonl")
 
-    with open(log_file, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+
+        # Emergency rotation: if log file exceeds 50MB, rename and start fresh
+        if os.path.exists(log_file):
+            log_size = os.path.getsize(log_file)
+            if log_size > 50 * 1024 * 1024:  # 50MB
+                rotated = log_file + ".rotated"
+                # Keep only the latest rotated copy to avoid unbounded growth
+                if os.path.exists(rotated):
+                    os.remove(rotated)
+                os.rename(log_file, rotated)
+
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except OSError:
+        pass  # Silent fail — do not disrupt Agent workflow
 
     print("{}")
     sys.exit(0)

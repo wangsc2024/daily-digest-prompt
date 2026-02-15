@@ -23,6 +23,7 @@ $ResultsDir = "$AgentDir\results"
 
 # Config (Phase 2 timeout is dynamic, calculated after Phase 1)
 $Phase1TimeoutSeconds = 300
+$MaxPhase1Retries = 1     # Phase 1 query: max 2 attempts (30s interval)
 $Phase3TimeoutSeconds = 180
 $MaxPhase3Retries = 1
 
@@ -33,7 +34,7 @@ $TimeoutBudget = @{
     "skill"    = 300   # Simple skill tasks: 5 min
     "general"  = 300   # General tasks: 5 min
     "auto"     = 600   # Auto-tasks (shurangama/log-audit): 10 min
-    "gitpush"  = 180   # Git push: 3 min
+    "gitpush"  = 360   # Git push + KB sync + npm generate: 6 min
     "buffer"   = 120   # CLI startup + safety buffer
 }
 
@@ -76,8 +77,14 @@ function Update-State {
     }
 
     if (Test-Path $StateFile) {
-        $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
-        $state = $stateJson | ConvertFrom-Json
+        try {
+            $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
+            $state = $stateJson | ConvertFrom-Json
+        } catch {
+            Write-Log "[WARN] scheduler-state.json corrupted, backing up and rebuilding..."
+            Copy-Item $StateFile "$StateFile.corrupted.$(Get-Date -Format 'yyyyMMdd_HHmmss')" -ErrorAction SilentlyContinue
+            $state = @{ runs = @() }
+        }
     }
     else {
         $state = @{ runs = @() }
@@ -125,37 +132,51 @@ if (-not (Test-Path $queryPrompt)) {
 
 $queryContent = Get-Content -Path $queryPrompt -Raw -Encoding UTF8
 $phase1Success = $false
+$phase1Attempt = 0
 
-try {
-    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($prompt)
-        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-        $OutputEncoding = [System.Text.Encoding]::UTF8
-        $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
-    } -ArgumentList $queryContent
-
-    $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
-
-    if ($null -eq $completed) {
-        $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
-        if ($partialOutput) { foreach ($line in $partialOutput) { Write-Log "  [query] $line" } }
-        Stop-Job $job
-        Write-Log "[Phase1] TIMEOUT after ${Phase1TimeoutSeconds}s"
+while ($phase1Attempt -le $MaxPhase1Retries) {
+    if ($phase1Attempt -gt 0) {
+        $p1Backoff = 30 + (Get-Random -Minimum 0 -Maximum 10)
+        Write-Log "[Phase1] Retry attempt $($phase1Attempt + 1) in ${p1Backoff}s..."
+        Start-Sleep -Seconds $p1Backoff
     }
-    else {
-        $output = Receive-Job $job
-        # Log last 10 lines
-        $outputLines = @($output)
-        $startIdx = [Math]::Max(0, $outputLines.Count - 10)
-        for ($i = $startIdx; $i -lt $outputLines.Count; $i++) {
-            Write-Log "  [query] $($outputLines[$i])"
+
+    Write-Log "[Phase1] Running query agent (attempt $($phase1Attempt + 1))..."
+
+    try {
+        $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+            param($prompt)
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+            $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
+        } -ArgumentList $queryContent
+
+        $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
+
+        if ($null -eq $completed) {
+            $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
+            if ($partialOutput) { foreach ($line in $partialOutput) { Write-Log "  [query] $line" } }
+            Stop-Job $job
+            Write-Log "[Phase1] TIMEOUT after ${Phase1TimeoutSeconds}s"
         }
-        if ($job.State -eq 'Completed') { $phase1Success = $true }
+        else {
+            $output = Receive-Job $job
+            # Log last 10 lines
+            $outputLines = @($output)
+            $startIdx = [Math]::Max(0, $outputLines.Count - 10)
+            for ($i = $startIdx; $i -lt $outputLines.Count; $i++) {
+                Write-Log "  [query] $($outputLines[$i])"
+            }
+            if ($job.State -eq 'Completed') { $phase1Success = $true }
+        }
+        Remove-Job $job -Force
     }
-    Remove-Job $job -Force
-}
-catch {
-    Write-Log "[Phase1] Error: $_"
+    catch {
+        Write-Log "[Phase1] Error: $_"
+    }
+
+    if ($phase1Success) { break }
+    $phase1Attempt++
 }
 
 $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
@@ -267,7 +288,7 @@ elseif ($plan.plan_type -eq "auto") {
         $taskKey = $nextTask.key
         $taskName = $nextTask.name
 
-        # Dedicated team prompts for all 14 auto-tasks
+        # Dedicated team prompts for all 15 auto-tasks
         $dedicatedPrompts = @{
             # 佛學研究（4）
             "shurangama"           = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
@@ -288,6 +309,8 @@ elseif ($plan.plan_type -eq "auto") {
             "git_push"             = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
             # 遊戲創意（1）
             "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
+            # 專案品質（1）
+            "qa_optimize"          = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
         }
 
         # Choose prompt: dedicated team prompt if available, otherwise generic from Phase 1
@@ -389,8 +412,11 @@ $attempt = 0
 
 while ($attempt -le $MaxPhase3Retries) {
     if ($attempt -gt 0) {
-        Write-Log "[Phase3] Retry attempt $($attempt + 1) in 60s..."
-        Start-Sleep -Seconds 60
+        $backoff = [math]::Min(60 * [math]::Pow(2, $attempt), 300)
+        $jitter = Get-Random -Minimum 0 -Maximum 15
+        $waitSec = [int]($backoff + $jitter)
+        Write-Log "[Phase3] Retry attempt $($attempt + 1) in ${waitSec}s (backoff=${backoff}+jitter=${jitter})..."
+        Start-Sleep -Seconds $waitSec
     }
 
     Write-Log "[Phase3] Running assembly agent (attempt $($attempt + 1))..."

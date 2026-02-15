@@ -64,8 +64,14 @@ function Update-State {
     }
 
     if (Test-Path $StateFile) {
-        $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
-        $state = $stateJson | ConvertFrom-Json
+        try {
+            $stateJson = Get-Content -Path $StateFile -Raw -Encoding UTF8
+            $state = $stateJson | ConvertFrom-Json
+        } catch {
+            Write-Log "[WARN] scheduler-state.json corrupted, backing up and rebuilding..."
+            Copy-Item $StateFile "$StateFile.corrupted.$(Get-Date -Format 'yyyyMMdd_HHmmss')" -ErrorAction SilentlyContinue
+            $state = @{ runs = @() }
+        }
     }
     else {
         $state = @{ runs = @() }
@@ -216,8 +222,11 @@ $attempt = 0
 
 while ($attempt -le $MaxPhase2Retries) {
     if ($attempt -gt 0) {
-        Write-Log "[Phase2] Retry attempt $($attempt + 1) in 60s..."
-        Start-Sleep -Seconds 60
+        $backoff = [math]::Min(60 * [math]::Pow(2, $attempt), 300)
+        $jitter = Get-Random -Minimum 0 -Maximum 15
+        $waitSec = [int]($backoff + $jitter)
+        Write-Log "[Phase2] Retry attempt $($attempt + 1) in ${waitSec}s (backoff=${backoff}+jitter=${jitter})..."
+        Start-Sleep -Seconds $waitSec
     }
 
     Write-Log "[Phase2] Running assembly agent (attempt $($attempt + 1))..."
