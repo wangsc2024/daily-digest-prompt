@@ -112,8 +112,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
 | 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
 | 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
+| 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_count` |
 
-合計上限：36 次/日
+合計上限：38 次/日
 
 ---
 
@@ -137,16 +138,21 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 3.2 為每個任務產生 prompt 檔案
 
-依 `config/routing.yaml` 的 `template_resolution` 規則選用模板，用 Write 建立 `results/todoist-task-{rank}.md`：
+依 `config/routing.yaml` 的模板選擇規則（三層優先級），用 Write 建立 `results/todoist-task-{rank}.md`：
 
-**模板優先級**（多標籤命中不同模板時，取優先級最高者。從 `templates/sub-agent/` 讀取，不要自行編寫）：
+**第一層：任務類型標籤覆寫**（最高優先。從 `templates/sub-agent/` 讀取模板，不要自行編寫）：
+- 任務含 `研究` 標籤 → 一律使用 `templates/sub-agent/research-task.md`
+- 任務含 `深度思維` 標籤 → 一律使用 `templates/sub-agent/research-task.md`
+- Skills 和 allowedTools 仍從所有命中標籤合併
+
+**第二層：模板優先級**（無任務類型標籤覆寫時）：
 1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
 2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`
-3. `templates/sub-agent/research-task.md` — `^研究`/`^深度思維`/`^邏輯思維`
+3. `templates/sub-agent/research-task.md` — `^邏輯思維`
 4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
 5. `templates/sub-agent/general-task.md` — 無匹配
 
-**修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
+**第三層：修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
 
 用讀取到的模板內容，替換其中的變數（任務描述、Skill 路徑等），寫入 `results/todoist-task-{rank}.md`。
 

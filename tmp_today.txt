@@ -1,0 +1,9 @@
+=== Today tasks (0) ===
+
+TARGET TASK NOT FOUND IN TODAY FILTER!
+  Task exists: 運用 RAG 知識庫的內容，以讓人更愛玩、更持續玩為目標，優化 d:/source/game 目錄中今天新增加的遊戲
+  Due: {'date': '2026-02-16T10:00:00', 'timezone': None, 'string': 'every day at 10:00', 'lang': 'en', 'is_recurring': True}
+  Is completed: False
+  Task 2 exists: 運用 RAG 知識庫的內容，以讓人更愛玩、更持續玩為目標，優化 d:/source/game 目錄中今天新增加的遊戲
+  Due: {'date': '2026-02-16T20:00:00', 'timezone': None, 'string': 'every day at 20:00', 'lang': 'en', 'is_recurring': True}
+  Is completed: False

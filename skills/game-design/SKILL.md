@@ -1,11 +1,19 @@
 ---
 name: game-design
+version: "1.0.0"
 description: |
   遊戲設計與優化 — HTML5/JS 遊戲品質提升、UX 最佳化、Cloudflare Pages 部署。
   Use when: 遊戲、game、遊戲優化、遊戲設計、HTML5、遊戲品質、Cloudflare Pages。
-  Triggers: "遊戲", "game", "遊戲優化", "遊戲設計", "HTML5 遊戲", "遊戲品質", "Cloudflare Pages"
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 cache-ttl: 0min
+triggers:
+  - "遊戲"
+  - "game"
+  - "遊戲優化"
+  - "遊戲設計"
+  - "HTML5 遊戲"
+  - "遊戲品質"
+  - "Cloudflare Pages"
 ---
 
 # 遊戲設計與優化

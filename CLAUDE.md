@@ -61,13 +61,15 @@ daily-digest-prompt/
   # Prompt 層（薄層調度器，讀配置 → 按管線執行）
   daily-digest-prompt.md          # 每日摘要 Agent（~80 行，引用 config/ + templates/）
   hour-todoist-prompt.md          # Todoist 任務規劃 Agent（~140 行，引用 config/ + templates/）
+  daily-gmail-prompt.md           # Gmail Agent（獨立排程）
+  HEARTBEAT.md                    # 排程元資料（cron 定義，供 setup-scheduler.ps1 讀取）
 
   # 配置層（數據型配置，修改無需動 prompt）
   config/
     pipeline.yaml                 # 每日摘要管線：步驟順序、Skill 依賴、後處理
     routing.yaml                  # Todoist 三層路由：標籤映射、關鍵字映射、排除清單
     cache-policy.yaml             # 快取策略：各 API 的 TTL、降級時限
-    frequency-limits.yaml         # 自動任務頻率限制（楞嚴經/Log審查/Git push）
+    frequency-limits.yaml         # 自動任務頻率限制（14 個任務，38 次/日上限）
     scoring.yaml                  # TaskSense 優先級計分規則
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
     dedup-policy.yaml             # 研究去重策略（冷卻天數、飽和閾值、跨任務去重）
@@ -83,18 +85,35 @@ daily-digest-prompt/
       skill-task.md               # 模板 A：有 Skill 匹配的任務
       research-task.md            # 模板 B：知識庫研究任務（含 KB 去重）
       code-task.md                # 模板 D：@code 任務（Plan-Then-Execute）
+      game-task.md                # 模板 E：遊戲設計任務（品質分析→修改）
       general-task.md             # 模板 C：無 Skill 匹配的一般任務
       refinement.md               # 品質閘門精修 prompt
-    auto-tasks/                   # 自動任務 prompt（無可處理項目時按需載入）
+    auto-tasks/                   # 自動任務 prompt（無可處理項目或全部完成時按需載入）
+      # 佛學研究（12 次/日）
       shurangama-research.md      # 楞嚴經研究（4 步驟含 KB 去重）
+      buddhist-research.md        # 通用佛學模板（教觀綱宗/法華經/淨土宗共用）
+      # AI/技術研究（17 次/日）
+      tech-research.md            # 每日任務技術研究（分析已完成任務所需技術）
+      ai-deep-research.md         # AI 深度研究計畫（4 階段）
+      unsloth-research.md         # Unsloth LLM fine-tuning 研究
+      ai-github-research.md       # AI GitHub 熱門專案研究
+      ai-smart-city-research.md   # AI 智慧城市研究
+      ai-sysdev-research.md       # AI 系統開發研究
+      # 系統優化（2 次/日）
+      skill-audit.md              # Skill 品質審查 + 優化
+      # 系統維護（5 次/日）
       log-audit.md                # 系統 Log 審查（8 步驟含修正）
       git-push.md                 # GitHub 推送流程
+      # 遊戲創意（2 次/日）
+      creative-game-optimize.md   # 創意遊戲優化（D:\Source\game 目錄）
 
   # 執行腳本
   run-agent.ps1                   # 每日摘要執行腳本（單一模式，含重試）
-  run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式）
-  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本
-  setup-scheduler.ps1             # 排程設定工具
+  run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式，推薦）
+  run-todoist-agent.ps1           # Todoist 任務規劃執行腳本（單一模式）
+  run-todoist-agent-team.ps1      # Todoist 任務規劃執行腳本（3 階段並行，推薦）
+  run-gmail-agent.ps1             # Gmail Agent 執行腳本
+  setup-scheduler.ps1             # 排程設定工具（支援 HEARTBEAT.md 批次建立）
   check-health.ps1                # 健康檢查報告工具（快速一覽）
   scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
   query-logs.ps1                  # 執行成果查詢工具（5 種模式）
@@ -111,13 +130,20 @@ daily-digest-prompt/
 
   # 團隊模式 Agent prompts
   prompts/team/
+    # 每日摘要團隊模式（Phase 1 → Phase 2）
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
     fetch-hackernews.md           # Phase 1: HN AI 新聞資料擷取
     fetch-gmail.md                # Phase 1: Gmail 郵件擷取
     fetch-security.md             # Phase 1: Cisco AI Defense 安全審查
     assemble-digest.md            # Phase 2: 摘要組裝 + 通知 + 狀態
-  results/                        # 團隊模式 Phase 1 結果（Phase 2 清理）
+    # Todoist 團隊模式（Phase 1 → Phase 2 → Phase 3）
+    todoist-query.md              # Phase 1: Todoist 查詢 + 路由 + 計分 + 規劃
+    todoist-assemble.md           # Phase 3: 組裝結果 + 關閉任務 + 通知
+    todoist-auto-shurangama.md    # Phase 2: 自動楞嚴經研究
+    todoist-auto-logaudit.md      # Phase 2: 自動 Log 審查
+    todoist-auto-gitpush.md       # Phase 2: 自動 Git 推送
+  results/                        # 團隊模式中間結果（完成後清理）
 
   # 持久化資料
   context/
@@ -125,7 +151,7 @@ daily-digest-prompt/
     auto-tasks-today.json         # 自動任務頻率追蹤（每日歸零）
     research-registry.json        # 研究主題註冊表（跨任務去重，7 天滾動）
   cache/                          # API 回應快取（TTL 定義在 config/cache-policy.yaml）
-    todoist.json / pingtung-news.json / hackernews.json / knowledge.json / gmail.json
+    todoist.json / pingtung-news.json / hackernews.json / gmail.json
   state/
     scheduler-state.json          # 執行記錄（最近 200 筆，PowerShell 獨佔寫入）
     todoist-history.json          # Todoist 自動任務歷史
@@ -138,6 +164,11 @@ daily-digest-prompt/
     ntfy-notify/ digest-memory/ api-cache/ scheduler-state/
     gmail/ skill-scanner/
     game-design/                  # 共 14 個 Skill（13 核心 + 1 工具，各含 SKILL.md）
+
+  # 規格與文件
+  specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
+  docs/                           # 研究文件與優化計畫
+  tests/                          # 測試套件（Todoist API/Gmail 格式測試）
 
   # 日誌
   logs/
@@ -161,24 +192,33 @@ daily-digest-prompt/
 1. Windows Task Scheduler 觸發 `run-agent-team.ps1`
 2. **Phase 1**：用 `Start-Job` 同時啟動 5 個 `claude -p`（Todoist + 新聞 + HN + Gmail + 安全審查）
 3. 各 Agent 獨立執行快取檢查 + API 呼叫，結果寫入 `results/*.json`
-4. 等待全部完成（timeout 180s），收集各 Agent 狀態
-5. **Phase 2**：啟動組裝 Agent 讀取 `results/*.json`
+4. 等待全部完成（timeout 300s），收集各 Agent 狀態
+5. **Phase 2**：啟動組裝 Agent 讀取 `results/*.json`（timeout 420s）
 6. 組裝 Agent 加上政策解讀、習慣提示、學習技巧、知識庫查詢、禪語
 7. 整理完整摘要 → ntfy 推播 → 更新記憶/狀態 → 清理 results/
 8. Phase 2 失敗可自動重試一次（間隔 60 秒）
 9. 預期耗時約 1 分鐘（單一模式約 3-4 分鐘）
 
-### Todoist 任務規劃（hour-todoist-prompt.md）
-1. Windows Task Scheduler 觸發 `run-todoist-agent.ps1`
+### Todoist 任務規劃 - 單一模式（run-todoist-agent.ps1）
+1. Windows Task Scheduler 觸發 `run-todoist-agent.ps1`（timeout 2100s）
 2. Agent 載入共用前言 + Skill 索引（~140 行薄層調度器）
 3. 讀取 `config/routing.yaml` 取得三層路由規則 + `config/frequency-limits.yaml` 取得頻率限制
 4. 查詢 Todoist → 依 routing.yaml 路由 → 按 `config/scoring.yaml` 計分排序
 5. 子 Agent 模板從 `templates/sub-agent/` 按需載入（不預載）
-6. 無可處理項目時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
+6. 無可處理項目或全部完成時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
 7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
 8. 通知格式依 `config/notification.yaml`
-9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：楞嚴經 3 次/日、Log 審查 1 次/日、Git push 2 次/日
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：14 個任務，合計 38 次/日上限，round-robin 輪轉
 10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
+
+### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
+1. Windows Task Scheduler 觸發 `run-todoist-agent-team.ps1`
+2. **Phase 1**：1 個查詢 Agent（Todoist 查詢 + 過濾 + 路由 + 規劃，timeout 300s）
+3. 輸出計畫類型：`tasks`（有待辦）/ `auto`（觸發自動任務）/ `idle`（跳過）
+4. **Phase 2**：N 個並行執行 Agent（依計畫分配，動態 timeout 按任務類型計算）
+   - research: 600s、code: 900s、skill/general: 300s、auto: 600s、gitpush: 180s
+5. **Phase 3**：1 個組裝 Agent（關閉任務 + 更新狀態 + 推播通知，timeout 180s）
+6. Phase 3 失敗可自動重試一次（間隔 60 秒）
 
 ## 技術棧
 - **執行環境**: PowerShell 7 (pwsh)
@@ -244,34 +284,33 @@ daily-digest-prompt/
 |--------|------|---------|
 | 違規攔截 | blocked > 0 | warning（≥3 則 critical） |
 | 工具錯誤 | errors ≥ 1 | warning（≥5 則 critical） |
-| 快取繞過 | API 呼叫無對應 cache-read | warning |
 | 全部正常 | 無上述問題 | 不告警（靜默記錄 session-summary） |
 
-告警透過 ntfy 推送到 `wangsc2025`，含：呼叫統計、攔截詳情、錯誤摘要、快取繞過來源。
+告警透過 ntfy 推送到 `wangsc2025`，含：呼叫統計、攔截詳情、錯誤摘要。
 
 ### 查詢結構化日誌
 
 ```bash
 # 今日摘要
-python3 hooks/query_logs.py
+python hooks/query_logs.py
 
 # 近 7 天
-python3 hooks/query_logs.py --days 7
+python hooks/query_logs.py --days 7
 
 # 僅攔截事件
-python3 hooks/query_logs.py --blocked
+python hooks/query_logs.py --blocked
 
 # 僅錯誤
-python3 hooks/query_logs.py --errors
+python hooks/query_logs.py --errors
 
 # 快取使用審計
-python3 hooks/query_logs.py --cache-audit
+python hooks/query_logs.py --cache-audit
 
 # Session 摘要
-python3 hooks/query_logs.py --sessions --days 7
+python hooks/query_logs.py --sessions --days 7
 
 # JSON 輸出（供程式處理）
-python3 hooks/query_logs.py --format json
+python hooks/query_logs.py --format json
 ```
 
 ### 前置需求
@@ -291,9 +330,15 @@ python3 hooks/query_logs.py --format json
 - API 故障時自動降級使用過期快取（24 小時內）
 
 ### 3. 排程狀態管理
-- `run-agent.ps1` 記錄每次執行狀態到 `state/scheduler-state.json`
-- 失敗時自動重試一次（間隔 2 分鐘）
+- 各 `run-*.ps1` 腳本記錄每次執行狀態到 `state/scheduler-state.json`
+- 失敗時自動重試一次（間隔依腳本不同：60s～120s）
 - `check-health.ps1` 提供近 7 天健康度報告
+
+### 4. 自動任務輪轉（round-robin）
+- 14 個自動任務定義在 `config/frequency-limits.yaml`，合計 38 次/日上限
+- 5 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)
+- 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
+- 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成
 
 ## Skills（專案內自包含，共 14 個）
 
@@ -324,13 +369,25 @@ python3 hooks/query_logs.py --format json
 > **機器強制**：此規則已由 `hooks/pre_bash_guard.py` 和 `hooks/pre_write_guard.py` 在 runtime 攔截。
 > Agent 即使違反，工具呼叫也會被 block，並記錄到結構化日誌。
 
+## 排程配置
+
+排程定義集中在 `HEARTBEAT.md`，支援批次建立：
+
+| 排程 | 觸發時間 | 腳本 | 模式 |
+|------|---------|------|------|
+| daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 團隊並行 |
+| daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 團隊並行 |
+| daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 團隊並行 |
+| todoist-single | 每小時整點 02-23 | run-todoist-agent.ps1 | 單一 |
+| todoist-team | 每小時半點 02-23 | run-todoist-agent-team.ps1 | 3 階段並行 |
+
 ## 常用操作
 ```powershell
-# 手動執行每日摘要（單一模式）
-pwsh -ExecutionPolicy Bypass -File run-agent.ps1
-
 # 手動執行每日摘要（團隊並行模式，推薦）
 pwsh -ExecutionPolicy Bypass -File run-agent-team.ps1
+
+# 手動執行每日摘要（單一模式，備用）
+pwsh -ExecutionPolicy Bypass -File run-agent.ps1
 
 # 手動執行 Todoist 任務規劃（團隊並行模式，推薦）
 pwsh -ExecutionPolicy Bypass -File run-todoist-agent-team.ps1
@@ -338,8 +395,11 @@ pwsh -ExecutionPolicy Bypass -File run-todoist-agent-team.ps1
 # 手動執行 Todoist 任務規劃（單一模式，備用）
 pwsh -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 
-# 設定排程（可自訂時間）
-.\setup-scheduler.ps1 -Time "08:00"
+# 從 HEARTBEAT.md 批次建立排程
+.\setup-scheduler.ps1 -FromHeartbeat
+
+# 設定排程（傳統方式）
+.\setup-scheduler.ps1 -Time "08:00" -Script "run-agent-team.ps1"
 
 # 查看排程狀態
 schtasks /query /tn ClaudeDailyDigest /v
@@ -364,10 +424,10 @@ pwsh -ExecutionPolicy Bypass -File check-health.ps1
 Get-Content (Get-ChildItem logs\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
 
 # Hook 結構化日誌查詢
-python3 hooks/query_logs.py                     # 今日摘要
-python3 hooks/query_logs.py --days 7             # 近 7 天
-python3 hooks/query_logs.py --blocked            # 攔截事件
-python3 hooks/query_logs.py --errors             # 錯誤事件
-python3 hooks/query_logs.py --cache-audit        # 快取使用審計
-python3 hooks/query_logs.py --sessions --days 7  # Session 健康摘要
+python hooks/query_logs.py                     # 今日摘要
+python hooks/query_logs.py --days 7             # 近 7 天
+python hooks/query_logs.py --blocked            # 攔截事件
+python hooks/query_logs.py --errors             # 錯誤事件
+python hooks/query_logs.py --cache-audit        # 快取使用審計
+python hooks/query_logs.py --sessions --days 7  # Session 健康摘要
 ```

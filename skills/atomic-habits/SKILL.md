@@ -1,9 +1,15 @@
 ---
 name: atomic-habits
+version: "1.0.0"
 description: |
   《原子習慣》每日提示。依星期輪替核心方法論，幫助建立持久好習慣。
   Use when: 習慣、行為改變、原子習慣、每日提示、習慣堆疊。
 allowed-tools: Read
+triggers:
+  - "習慣"
+  - "行為改變"
+  - "原子習慣"
+  - "習慣堆疊"
 ---
 
 # 原子習慣每日提示（每日摘要專用）

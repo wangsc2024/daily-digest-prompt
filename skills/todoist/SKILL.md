@@ -1,12 +1,21 @@
 ---
 name: todoist
+version: "2.0.0"
 description: |
   Todoist 待辦事項整合 - 查詢、新增、完成、刪除任務。支援專案、標籤、優先級、截止日期等完整功能。
-  Use when: 管理待辦事項、查詢今日任務、新增刪除任務、過濾優先級，or when user mentions todoist, 待辦, todo, 任務.
-  Triggers: "todoist", "待辦事項", "todo", "任務", "今日任務", "過期任務", "新增任務", "完成任務", "task"
-version: 2.0.0
+  Use when: 管理待辦事項、查詢今日任務、新增刪除任務、過濾優先級。
 allowed-tools: Bash, Read, Write
 cache-ttl: 30min
+triggers:
+  - "todoist"
+  - "待辦事項"
+  - "todo"
+  - "任務"
+  - "今日任務"
+  - "過期任務"
+  - "新增任務"
+  - "完成任務"
+  - "task"
 ---
 
 # Todoist 待辦事項整合

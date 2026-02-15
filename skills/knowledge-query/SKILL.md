@@ -1,10 +1,18 @@
 ---
 name: knowledge-query
+version: "1.0.0"
 description: |
   個人知識庫查詢與匯入。查詢 localhost:3000 知識庫筆記，或將研究成果匯入。
   Use when: 知識庫、筆記、搜尋筆記、匯入、研究成果、知識查詢。
 allowed-tools: Bash, Read, Write
 cache-ttl: 60min
+triggers:
+  - "知識庫"
+  - "筆記"
+  - "搜尋筆記"
+  - "匯入"
+  - "研究成果"
+  - "知識查詢"
 ---
 
 # 知識庫查詢與匯入

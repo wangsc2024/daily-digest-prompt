@@ -1,9 +1,15 @@
 ---
 name: scheduler-state
+version: "1.0.0"
 description: |
   排程狀態管理。追蹤執行記錄，提供健康度報告。Agent 唯讀，PowerShell 腳本負責寫入。
   Use when: 狀態、健康度、執行記錄、排程狀態。
 allowed-tools: Read
+triggers:
+  - "狀態"
+  - "健康度"
+  - "執行記錄"
+  - "排程狀態"
 ---
 
 # Scheduler State Skill - 排程狀態管理

@@ -26,9 +26,20 @@ label_routing:
     例：任務 labels=["遊戲優化", "知識庫"] → 命中 "^遊戲優化" 和 "^知識庫"。
     多標籤命中多個映射時，合併所有 skills 和使用最寬 allowedTools。
 
-  # 模板衝突解決規則（多標籤命中不同模板時）
+  # 任務類型標籤（最高優先 — 覆寫 template_resolution）
+  # 這些標籤明確表示「任務類型」而非「研究主題」，出現時一律使用指定模板
+  # Skills 和 allowedTools 仍從所有命中標籤合併
+  task_type_labels:
+    - label: "研究"
+      template_override: "templates/sub-agent/research-task.md"
+      description: "任務含此標籤 → 無論其他標籤的模板優先級，一律使用研究模板"
+    - label: "深度思維"
+      template_override: "templates/sub-agent/research-task.md"
+      description: "深度思維本質為研究分析，覆寫 code-task 等模板"
+
+  # 模板衝突解決規則（多標籤命中不同模板時，且無 task_type_labels 覆寫）
   template_resolution:
-    rule: "多標籤命中不同模板時，按優先級取最具體者（數字越小越優先）"
+    rule: "無 task_type_labels 覆寫時，按優先級取最具體者（數字越小越優先）"
     priority_order:
       1: "templates/sub-agent/game-task.md"       # 遊戲任務最具體
       2: "templates/sub-agent/code-task.md"       # 程式開發次之
@@ -83,6 +94,10 @@ label_routing:
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
+    "^UI":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
     "^UI/UX":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
@@ -91,15 +106,6 @@ label_routing:
       skills: ["deep-research", "knowledge-query"]
       allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
       template: "templates/sub-agent/research-task.md"
-    # 保留舊標籤（Todoist 可能未來使用）
-    "@news":
-      skills: ["pingtung-news", "pingtung-policy-expert"]
-      allowed_tools: "Read,Bash,Write"
-      template: "templates/sub-agent/skill-task.md"
-    "@write":
-      skills: ["文件撰寫"]
-      allowed_tools: "Read,Bash,Write"
-      template: "templates/sub-agent/skill-task.md"
 
 # Tier 2：內容關鍵字比對（信心度 80%）
 keyword_routing:

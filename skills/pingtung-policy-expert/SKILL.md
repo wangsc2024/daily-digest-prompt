@@ -1,10 +1,18 @@
 ---
 name: pingtung-policy-expert
+version: "1.0.0"
 description: |
   屏東縣政策專家。為屏東新聞加上施政背景分析與政策解讀。
   Use when: 政策、施政、長照、托育、交通、產業、治水、屏東政策背景。
   Must pair with: pingtung-news
 allowed-tools: Read
+triggers:
+  - "政策"
+  - "施政"
+  - "長照"
+  - "托育"
+  - "產業"
+  - "屏東政策"
 ---
 
 # 屏東縣政策專家 — 新聞政策解讀（每日摘要專用）

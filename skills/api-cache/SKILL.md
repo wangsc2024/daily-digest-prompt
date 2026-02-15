@@ -1,9 +1,15 @@
 ---
 name: api-cache
+version: "1.0.0"
 description: |
   HTTP 回應快取與降級。快取 API 回應避免限速，故障時自動降級使用過期快取。
   Use when: 快取、cache、降級、API 故障。
 allowed-tools: Bash, Read, Write
+triggers:
+  - "快取"
+  - "cache"
+  - "降級"
+  - "API 故障"
 ---
 
 # API Cache Skill - HTTP 回應快取

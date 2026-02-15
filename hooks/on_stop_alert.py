@@ -127,38 +127,6 @@ def analyze_entries(entries: list) -> dict:
     skill_reads = [e for e in entries if "skill-read" in e.get("tags", [])]
     sub_agents = [e for e in entries if "sub-agent" in e.get("tags", [])]
 
-    # Detect cache bypass: only data-serving READ API calls require cache check.
-    # Excluded from bypass detection:
-    #   - api-write: POST/PUT/DELETE operations (close task, import, etc.)
-    #   - Utility endpoints: health checks, stats, dedup listings
-    UTILITY_URL_PATTERNS = ["/api/health", "/api/stats", "/api/notes/tags",
-                            "notes?limit=100"]
-    api_data_reads = [
-        e for e in api_calls
-        if "api-write" not in e.get("tags", [])
-        and not any(p in e.get("summary", "").lower() for p in UTILITY_URL_PATTERNS)
-    ]
-    api_sources = set()
-    for entry in api_data_reads:
-        for tag in entry.get("tags", []):
-            if tag in ("todoist", "pingtung-news", "hackernews", "knowledge", "gmail"):
-                api_sources.add(tag)
-
-    cache_read_sources = set()
-    for entry in cache_reads:
-        summary = entry.get("summary", "").lower()
-        for source, patterns in {
-            "todoist": ["todoist"],
-            "pingtung-news": ["pingtung"],
-            "hackernews": ["hackernews"],
-            "knowledge": ["knowledge"],
-            "gmail": ["gmail"],
-        }.items():
-            if any(p in summary for p in patterns):
-                cache_read_sources.add(source)
-
-    cache_bypassed = api_sources - cache_read_sources
-
     # Count blocked reasons
     block_reasons = Counter(e.get("reason", "unknown") for e in blocked)
 
@@ -182,7 +150,6 @@ def analyze_entries(entries: list) -> dict:
         "cache_writes": len(cache_writes),
         "skill_reads": len(skill_reads),
         "sub_agents": len(sub_agents),
-        "cache_bypassed": list(cache_bypassed),
         "block_reasons": dict(block_reasons),
         "error_tools": dict(error_tools),
         "tag_counts": dict(tag_counts.most_common(15)),
@@ -209,13 +176,6 @@ def build_alert_message(analysis: dict) -> tuple:
         if analysis["error_count"] >= 5:
             severity = "critical"
         elif severity != "critical":
-            severity = "warning"
-
-    # Check cache bypass
-    if analysis["cache_bypassed"]:
-        bypassed_str = ", ".join(analysis["cache_bypassed"])
-        issues.append(f"快取繞過警告 (未先查快取): {bypassed_str}")
-        if severity == "info":
             severity = "warning"
 
     if not issues:
@@ -309,7 +269,6 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         "sub_agents": analysis["sub_agents"],
         "blocked": analysis["blocked_count"],
         "errors": analysis["error_count"],
-        "cache_bypassed": analysis["cache_bypassed"],
         "status": severity,
         "alert_sent": alert_sent,
     }

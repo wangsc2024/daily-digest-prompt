@@ -1,9 +1,16 @@
 ---
 name: learning-mastery
+version: "1.0.0"
 description: |
   《深度學習的技術》每日學習提示。依星期輪替五層學習框架技巧。
   Use when: 學習、技巧、費曼、刻意練習、間隔複習、深度學習的技術。
 allowed-tools: Read
+triggers:
+  - "學習"
+  - "費曼"
+  - "刻意練習"
+  - "間隔複習"
+  - "深度學習的技術"
 ---
 
 # 深度學習的技術 — 每日學習提示（每日摘要專用）

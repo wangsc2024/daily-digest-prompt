@@ -88,14 +88,14 @@
 
 ## 步驟 2.5-2.8：自動任務（無待辦時 或 今日任務全部完成後 觸發）
 
-依 `config/frequency-limits.yaml` 執行（共 13 種自動任務，36 次/日上限）。
+依 `config/frequency-limits.yaml` 執行（共 14 種自動任務，38 次/日上限）。
 
 ### 2.5 頻率限制檢查
 讀取 `context/auto-tasks-today.json`，依 frequency-limits.yaml 的歸零邏輯判斷日期。
 若全部自動任務都已達上限 → 跳到步驟 5。
 
 ### 2.6 純輪轉選取自動任務（round-robin）
-每日僅 ~11 個 auto-task slots，但 13 個任務合計 36 次上限。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
+每日僅 ~11 個 auto-task slots，但 14 個任務合計 38 次上限。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
 
 **選取演算法**：
 1. 從 `context/auto-tasks-today.json` 讀取 `next_execution_order`（跨日保留的指針）
@@ -111,7 +111,7 @@
 每觸發一次步驟 2.5-2.8，僅執行 **1 個** 自動任務。
 
 ### 2.8 全部達上限
-繞一圈（13 個任務）都已達上限 → 跳到步驟 5（通知：今日自動任務已達上限）。
+繞一圈（14 個任務）都已達上限 → 跳到步驟 5（通知：今日自動任務已達上限）。
 
 ---
 
@@ -133,16 +133,21 @@
 ## 步驟 4：自動執行任務
 
 ### 4.1 建立 Prompt 檔案
-依 `config/routing.yaml` 的 `template_resolution` 規則選取模板。
+依 `config/routing.yaml` 的模板選擇規則（三層優先級）：
 
-**模板優先級**（多標籤命中不同模板時，取優先級最高者）：
+**第一層：任務類型標籤覆寫**（最高優先）：
+- 任務含 `研究` 標籤 → 一律使用 `templates/sub-agent/research-task.md`
+- 任務含 `深度思維` 標籤 → 一律使用 `templates/sub-agent/research-task.md`
+- Skills 和 allowedTools 仍從所有命中標籤合併（如 `^Claude Code` 的程式開發 skill 也會合併）
+
+**第二層：模板優先級**（無任務類型標籤覆寫時）：
 1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
 2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`
-3. `templates/sub-agent/research-task.md` — `^研究`/`^深度思維`/`^邏輯思維`
+3. `templates/sub-agent/research-task.md` — `^邏輯思維`
 4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
 5. `templates/sub-agent/general-task.md` — 無 Skill 匹配
 
-**修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
+**第三層：修飾標籤**（`知識庫`）：不參與模板選擇，僅合併 skills（加入 knowledge-query）和 allowedTools（加入 Write）。若「知識庫」為唯一標籤且無其他 Tier 命中 → fallback 使用 `skill-task.md`。
 
 用 Write 工具建立 `task_prompt.md`，依模板填入任務資料。
 

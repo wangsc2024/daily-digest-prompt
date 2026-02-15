@@ -17,7 +17,7 @@ history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
 # 選取策略：純輪轉（round-robin）
-# 每日 ~11 個 auto-task slots，但 13 個任務合計 36 次上限
+# 每日 ~11 個 auto-task slots，但 14 個任務合計 38 次上限
 # 若用順序掃描，後面的任務永遠不會執行
 # 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
 selection_strategy: "round_robin"
@@ -46,6 +46,7 @@ initial_schema: |
     "skill_audit_count": 0,
     "log_audit_count": 0,
     "git_push_count": 0,
+    "creative_game_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -206,6 +207,17 @@ tasks:
     history_type: "git_push"
     execution_order: 13
 
+  # --- 遊戲創意群組（共 2 次/日）---
+  creative_game_optimize:
+    name: "創意遊戲優化"
+    daily_limit: 2
+    counter_field: "creative_game_count"
+    template: "templates/auto-tasks/creative-game-optimize.md"
+    history_type: "creative_game"
+    execution_order: 14
+    skills: [game-design, knowledge-query]
+    description: "以創意思維優化 D:\\Source\\game 目錄下的遊戲，提升遊戲體驗和品質"
+
 # ============================================================
 # 每日上限摘要
 # ============================================================
@@ -213,7 +225,8 @@ tasks:
 # AI/技術：任務技術(5) + AI深度(4) + Unsloth(2) + AI GitHub(2) + AI智慧城市(2) + AI系統開發(2) = 17
 # 系統優化：Skill審查(2) = 2
 # 系統維護：Log審查(1) + Git推送(4) = 5
-# 合計：36 次/日
+# 遊戲創意：創意遊戲優化(2) = 2
+# 合計：38 次/日
 
 # 歷史追蹤寫入規則
 history:

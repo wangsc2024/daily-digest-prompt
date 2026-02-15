@@ -1,10 +1,19 @@
 ---
 name: hackernews-ai-digest
+version: "1.0.0"
 description: |
   Hacker News AI 新聞摘要。篩選 AI/LLM/ML 相關熱門文章，產出中文摘要。
   Use when: AI 新聞、LLM、GPT、Claude、機器學習、技術動態、Hacker News。
 allowed-tools: Bash, Read, Write
 cache-ttl: 120min
+triggers:
+  - "AI 新聞"
+  - "LLM"
+  - "GPT"
+  - "Claude"
+  - "機器學習"
+  - "Hacker News"
+  - "技術動態"
 ---
 
 # Hacker News AI 新聞摘要（每日摘要簡化版）
