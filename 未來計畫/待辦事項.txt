@@ -1,0 +1,10 @@
+skill 直接優化但需要更嚴格的指令
+排程可以由系統安排
+持久記憶功能
+系統內部報告不宜放至知識庫
+知識探索網站字太小
+agent 長記憶方案
+https://langfuse.com/blog/2025-03-19-ai-agent-comparison
+加入 llamaindex+mistral 3.2 small
+
+
