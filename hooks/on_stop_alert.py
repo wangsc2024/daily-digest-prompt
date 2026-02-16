@@ -127,6 +127,7 @@ def analyze_entries(entries: list) -> dict:
     cache_reads = [e for e in entries if "cache-read" in e.get("tags", [])]
     cache_writes = [e for e in entries if "cache-write" in e.get("tags", [])]
     skill_reads = [e for e in entries if "skill-read" in e.get("tags", [])]
+    skill_modified = [e for e in entries if "skill-modified" in e.get("tags", [])]
     sub_agents = [e for e in entries if "sub-agent" in e.get("tags", [])]
 
     # Count blocked reasons
@@ -134,6 +135,15 @@ def analyze_entries(entries: list) -> dict:
 
     # Count error tools
     error_tools = Counter(e.get("tool", "unknown") for e in errors)
+
+    # Extract modified SKILL.md paths
+    skill_modified_paths = []
+    for e in skill_modified:
+        summary = e.get("summary", "")
+        # Extract file path from summary (format: "path (XXX chars)" or just "path")
+        path_match = re.search(r"^(.*?)(?:\s+\(|$)", summary)
+        if path_match:
+            skill_modified_paths.append(path_match.group(1))
 
     # Tag frequency
     all_tags = []
@@ -151,6 +161,9 @@ def analyze_entries(entries: list) -> dict:
         "cache_reads": len(cache_reads),
         "cache_writes": len(cache_writes),
         "skill_reads": len(skill_reads),
+        "skill_modified": skill_modified,
+        "skill_modified_count": len(skill_modified),
+        "skill_modified_paths": skill_modified_paths,
         "sub_agents": len(sub_agents),
         "block_reasons": dict(block_reasons),
         "error_tools": dict(error_tools),
@@ -161,6 +174,7 @@ def analyze_entries(entries: list) -> dict:
 def build_alert_message(analysis: dict) -> tuple:
     """Build alert message. Returns (severity, title, message) or None if healthy."""
     issues = []
+    info_items = []  # Non-critical informational items
     severity = "info"
 
     # Check blocked events
@@ -180,10 +194,31 @@ def build_alert_message(analysis: dict) -> tuple:
         elif severity != "critical":
             severity = "warning"
 
+    # Check SKILL.md modifications (informational, not an error)
+    if analysis["skill_modified_count"] > 0:
+        info_items.append(f"⚠️ 已修改 SKILL.md ({analysis['skill_modified_count']} 個檔案):")
+        for path in analysis["skill_modified_paths"]:
+            info_items.append(f"  - {path}")
+        if not issues:  # Only if no errors/blocks, make this a warning
+            severity = "warning"
+
+    # If only SKILL.md modifications (no errors/blocks), send as info notification
+    if not issues and info_items:
+        # Build message for info-level SKILL.md notification
+        header = (
+            f"工具呼叫: {analysis['total_calls']} | "
+            f"API: {analysis['api_calls']} | "
+            f"快取讀取: {analysis['cache_reads']}"
+        )
+        title = "SKILL.md 修改通知"
+        message = header + "\n\n" + "\n".join(info_items)
+        message += "\n\n建議執行: git diff skills/*/SKILL.md"
+        return "info", title, message
+
     if not issues:
         return None
 
-    # Build message
+    # Build message for warning/critical alerts
     header = (
         f"工具呼叫: {analysis['total_calls']} | "
         f"API: {analysis['api_calls']} | "
@@ -198,7 +233,10 @@ def build_alert_message(analysis: dict) -> tuple:
     }
     title = title_map.get(severity, "Harness 報告")
 
-    message = header + "\n\n" + "\n".join(issues)
+    all_items = issues + ([""] + info_items if info_items else [])
+    message = header + "\n\n" + "\n".join(all_items)
+    if info_items:
+        message += "\n\n建議執行: git diff skills/*/SKILL.md"
     return severity, title, message
 
 
@@ -208,8 +246,15 @@ def send_ntfy_alert(title: str, message: str, severity: str):
     Security: Uses tempfile.NamedTemporaryFile to avoid race conditions
     and ensure cleanup even on exceptions.
     """
-    priority = 5 if severity == "critical" else 4
-    tags = ["rotating_light", "shield"] if severity == "critical" else ["warning", "shield"]
+    priority_map = {"critical": 5, "warning": 4, "info": 3}
+    priority = priority_map.get(severity, 3)
+
+    tags_map = {
+        "critical": ["rotating_light", "shield"],
+        "warning": ["warning", "shield"],
+        "info": ["information_source", "pencil2"],  # SKILL.md 修改通知
+    }
+    tags = tags_map.get(severity, ["information_source"])
 
     payload = {
         "topic": NTFY_TOPIC,
@@ -268,6 +313,7 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         "cache_reads": analysis["cache_reads"],
         "cache_writes": analysis["cache_writes"],
         "skill_reads": analysis["skill_reads"],
+        "skill_modified": analysis.get("skill_modified_count", 0),
         "sub_agents": analysis["sub_agents"],
         "blocked": analysis["blocked_count"],
         "errors": analysis["error_count"],

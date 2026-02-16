@@ -101,6 +101,23 @@ class TestSchedulerStateWrite:
         assert not blocked, f"Should not block: {command}"
 
 
+class TestSchedulerStateRegression:
+    """回歸：讀取 scheduler-state 時使用 2>&1 不應被誤判為寫入。"""
+
+    @pytest.mark.parametrize("command", [
+        "ls -la state/scheduler-state.json 2>&1",
+        "cd /d/Source/daily-digest-prompt && ls -la state/scheduler-state.json 2>&1",
+        "cd d:/Source/daily-digest-prompt && python -c \"import json; open('state/scheduler-state.json','r')\"",
+        # 2026-02-16 誤判案例：Python 讀取 scheduler-state.json 被誤判為寫入
+        "cd d:/Source/daily-digest-prompt && python -c \"\nimport json\nwith open('state/scheduler-state.json','r',encoding='utf-8') as f:\n    data = json.load(f)\nruns = data.get('runs',[])\n\"",
+        # 單純的 ls 查看操作不應被攔截
+        "ls -la state/scheduler-state.json",
+    ])
+    def test_read_with_redirect_allowed(self, command):
+        blocked, reason, _ = check_bash_command(command)
+        assert not blocked, f"Read-only + 2>&1 should be allowed: {command!r} (reason={reason})"
+
+
 class TestDestructiveDelete:
     """規則：destructive-delete — 攔截 rm -rf /。"""
 

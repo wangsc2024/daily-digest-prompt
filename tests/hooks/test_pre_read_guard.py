@@ -6,7 +6,12 @@ import pytest
 # Add hooks dir to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "hooks"))
 
-from pre_read_guard import check_read_path, FALLBACK_READ_RULES, _is_within_project
+from pre_read_guard import (
+    check_read_path,
+    FALLBACK_READ_RULES,
+    _is_within_project,
+    _normalize_windows_path,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -103,6 +108,20 @@ class TestSensitiveFiles:
         blocked, reason, tag = check_read_path(path, rules, project_root)
         assert blocked is False
 
+    @pytest.mark.parametrize("filename", [
+        ".env.example",
+        ".env.sample",
+        ".env.template",
+        "credentials.example",
+        "credentials.sample",
+    ])
+    def test_example_files_always_allowed(self, filename, rules, project_root):
+        """範例檔案不應被攔截（不含真實憑證）。"""
+        # 測試專案外的範例檔案也應該被允許
+        path = f"C:/external/{filename}"
+        blocked, reason, tag = check_read_path(path, rules, project_root)
+        assert blocked is False, f"Example file should always be allowed: {filename}"
+
 
 # ---------------------------------------------------------------------------
 # Windows credentials tests
@@ -181,6 +200,50 @@ class TestIsWithinProject:
         os.makedirs(project, exist_ok=True)
         attack_path = os.path.join(project, "..", "other", "secret.txt")
         assert _is_within_project(attack_path, project) is False
+
+
+# ---------------------------------------------------------------------------
+# Regression: false positives (2026-02-16 harness alert)
+# ---------------------------------------------------------------------------
+class TestRegressionFalsePositives:
+    """回歸：Unix-style 路徑與 .env.example 不應被誤攔。"""
+
+    def test_normalize_windows_path_converts_drive_letter(self):
+        """Git Bash 路徑 /d/Source/foo 應轉為 D:\\Source\\foo。"""
+        out = _normalize_windows_path("/d/Source/daily-digest-prompt/.env.example")
+        assert out.replace("\\", "/").lower() == "d:/source/daily-digest-prompt/.env.example"
+
+    def test_unix_style_path_within_project(self):
+        """Unix-style 路徑 /d/Source/... 在專案內應視為 within project。"""
+        cwd = os.getcwd()
+        if len(cwd) >= 2 and cwd[1] == ":":
+            drive = cwd[0].upper()
+            rest = cwd[2:].replace("\\", "/")
+            unix_style = f"/{drive.lower()}/{rest}/.env.example"
+            assert _is_within_project(unix_style, cwd), (
+                f"Path {unix_style!r} should be within {cwd!r}"
+            )
+
+    def test_env_example_allowed_within_project(self, tmp_path):
+        """專案內的 .env.example、.env.sample 應允許讀取。"""
+        project_root = str(tmp_path / "project")
+        os.makedirs(project_root, exist_ok=True)
+        for basename in (".env.example", ".env.sample"):
+            path = os.path.join(project_root, basename)
+            blocked, reason, _ = check_read_path(path, project_root=project_root)
+            assert not blocked, f"Should allow reading {basename} inside project: {reason}"
+
+    def test_env_example_allowed_unix_style_path(self):
+        """Unix-style 路徑指向專案內 .env.example 時應允許（不誤攔）。"""
+        cwd = os.getcwd()
+        if len(cwd) >= 2 and cwd[1] == ":":
+            drive = cwd[0].upper()
+            rest = cwd[2:].replace("\\", "/")
+            unix_style_path = f"/{drive.lower()}/{rest}/.env.example"
+            blocked, reason, _ = check_read_path(unix_style_path, project_root=cwd)
+            assert not blocked, (
+                f"Unix-style path to .env.example should be allowed: {reason}"
+            )
 
 
 # ---------------------------------------------------------------------------

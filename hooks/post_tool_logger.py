@@ -7,6 +7,7 @@ with automatic tagging for:
   - API calls (source detection: todoist, pingtung, hackernews, knowledge, ntfy, gmail)
   - Cache operations (read/write)
   - Skill reads (SKILL.md access)
+  - Skill modifications (SKILL.md Write/Edit) — tagged with 'skill-modified'
   - Memory operations (digest-memory, auto-tasks-today)
   - Sub-agent spawning
   - Errors detected in output
@@ -129,6 +130,8 @@ def classify_write(tool_input: dict) -> tuple:
         tags.append("sub-agent-prompt")
     if "todoist-history" in path:
         tags.append("history-write")
+    if "SKILL.md" in path or path.endswith("SKILL.md"):
+        tags.append("skill-modified")  # 高優先級事件
 
     return summary, tags
 
@@ -170,6 +173,8 @@ def classify_edit(tool_input: dict) -> tuple:
         tags.append("markdown-edit")
     if path.endswith(".json"):
         tags.append("json-edit")
+    if "SKILL.md" in path or path.endswith("SKILL.md"):
+        tags.append("skill-modified")  # 高優先級事件
 
     return summary, tags
 

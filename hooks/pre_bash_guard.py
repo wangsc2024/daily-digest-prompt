@@ -29,8 +29,8 @@ FALLBACK_BASH_RULES = [
     },
     {
         "id": "scheduler-state-write",
-        "contains": "scheduler-state.json",
-        "pattern": r"(>|>>|tee\s|cp\s.*scheduler|mv\s.*scheduler|echo\s.*>.*scheduler)",
+        # 移除 contains 預檢查，改用精確的寫入操作匹配（排除 ls/cat/grep/python read 等只讀操作）
+        "pattern": r"(?<![0-9&])>\s*[^&].*scheduler-state\.json|>>\s*.*scheduler-state\.json|(tee|cp|mv)\s+.*scheduler-state\.json|echo\s+.*>\s*.*scheduler-state\.json",
         "reason": "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）",
         "guard_tag": "state-guard",
     },

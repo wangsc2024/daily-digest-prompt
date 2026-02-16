@@ -46,13 +46,15 @@ FALLBACK_WRITE_RULES = [
         "reason_template": "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})",
         "guard_tag": "traversal-guard",
     },
-    {
-        "id": "skill-md-protect",
-        "check": "basename_equals",
-        "value": "SKILL.md",
-        "reason": "SKILL.md 為系統行為定義，不可在執行期間修改",
-        "guard_tag": "skill-protect",
-    },
+    # 註解：SKILL.md 保護規則已移除，因為會阻擋用戶明確要求的合法修改
+    # 改依賴 Git 版本控制作為安全網
+    # {
+    #     "id": "skill-md-protect",
+    #     "check": "basename_equals",
+    #     "value": "SKILL.md",
+    #     "reason": "SKILL.md 為系統行為定義，不可在執行期間修改",
+    #     "guard_tag": "skill-protect",
+    # },
 ]
 
 

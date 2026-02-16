@@ -25,8 +25,10 @@ FALLBACK_READ_RULES = [
         "patterns": [
             r"\.ssh",
             r"\.gnupg",
-            r"credentials",
-            r"\.env",
+            r"credentials(?!\.example|\.sample)",  # 不匹配範例檔案
+            # 僅匹配 .env 或 .env.local，明確排除 .env.example / .env.sample / .env.template
+            r"\.env(?!\.example|\.sample|\.template)",
+            r"\.env\.local",
             r"/etc/shadow",
             r"/etc/passwd",
             r"\.aws/credentials",
@@ -64,10 +66,24 @@ def load_read_rules():
     return load_yaml_rules("read_rules", FALLBACK_READ_RULES)
 
 
+def _normalize_windows_path(file_path):
+    """將 Git Bash/MSYS 風格路徑 /d/Source/... 轉為 D:\\Source\\...。"""
+    if not file_path or not file_path.startswith("/"):
+        return file_path
+    m = re.match(r"^/([a-zA-Z])/(.*)", file_path)
+    if m:
+        drive = m.group(1).upper()
+        rest = m.group(2).replace("/", os.sep)
+        return f"{drive}:{os.sep}{rest}"
+    return file_path
+
+
 def _is_within_project(file_path, project_root):
     """檢查路徑是否在專案目錄內（專案內路徑不攔截 .env 等）。"""
     try:
-        resolved = os.path.abspath(os.path.normpath(file_path))
+        # 先轉換 Unix-style drive path (/d/... -> D:\...)，否則 Windows 上會誤判
+        normalized_input = _normalize_windows_path(file_path)
+        resolved = os.path.abspath(os.path.normpath(normalized_input))
         norm_root = os.path.normpath(project_root)
         return resolved.startswith(norm_root)
     except (ValueError, OSError):
