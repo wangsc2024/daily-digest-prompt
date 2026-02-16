@@ -21,9 +21,9 @@
 | 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度、執行記錄、排程狀態、成功率、系統狀態、scheduler、平均耗時 |
 | 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件、信箱、未讀、收件匣、inbox、Google 信箱、重要郵件、郵件摘要 |
 | 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、遊戲設計、HTML5 遊戲、遊戲品質、Canvas 遊戲、JavaScript 遊戲、遊戲部署、遊戲效能 |
-| 14 | system-insight | 系統自省分析（執行品質/Skill 使用/失敗模式） | 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、system-insight、自省 |
+| 14 | system-insight | 系統自省分析（執行品質/Skill 使用/失敗模式） | 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、system-insight、自省、洞察、趨勢分析、統計報告、執行品質 |
 | 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋 |
-| 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator |
+| 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator、清理、重複筆記、品質檢查、知識庫清理、筆記統計 |
 | 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進 |
 
 ### 工具 Skill（按需使用，互動式觸發）

@@ -1,10 +1,11 @@
 ---
 name: system-insight
-version: "1.0.0"
+version: "1.1.0"
 description: |
   系統自省引擎。分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出結構化洞察報告。
-  Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查。
+  Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢。
 allowed-tools: Read, Write, Bash, Glob, Grep
+cache-ttl: N/A
 triggers:
   - "系統分析"
   - "執行報告"
@@ -13,6 +14,10 @@ triggers:
   - "健康檢查"
   - "system-insight"
   - "自省"
+  - "洞察"
+  - "趨勢分析"
+  - "統計報告"
+  - "執行品質"
 ---
 
 # System Insight Skill（系統自省引擎）
@@ -87,6 +92,12 @@ triggers:
 
 ### 步驟 4：異常時通知
 若有 critical 等級的 alert → 透過 ntfy 發送系統洞察警告。
+
+## 錯誤處理
+- 若 JSONL 日誌不存在或為空 → 跳過該資料源，metrics 中標記 `"data_source": "partial"`
+- 若 scheduler-state.json 不存在 → daily_success_rate 設為 null，加入 alert
+- 若 auto-tasks-today.json 或 research-registry.json 不存在 → 對應指標設為 null
+- 所有 JSON 解析失敗 → 記錄錯誤、跳過該來源，不中斷整體分析
 
 ## 注意事項
 - 僅讀取日誌和狀態檔案，不修改任何配置

@@ -54,6 +54,30 @@ SCHEMAS = {
     "dedup-policy.yaml": {
         "required_keys": ["version"],
     },
+    "pipeline.yaml": {
+        "required_keys": ["version", "init", "steps", "finalize"],
+        "list_fields": {
+            "steps": ["id", "name"],
+        },
+    },
+    "topic-rotation.yaml": {
+        "required_keys": ["version", "strategy", "habits_topics", "learning_topics"],
+    },
+    "health-scoring.yaml": {
+        "required_keys": ["version", "ranges", "dimensions"],
+    },
+    "audit-scoring.yaml": {
+        "required_keys": ["version", "weight_profiles", "grade_thresholds", "dimensions"],
+    },
+    "benchmark.yaml": {
+        "required_keys": ["version", "metrics"],
+        "list_fields": {
+            "metrics": ["name", "target", "weight"],
+        },
+    },
+    "timeouts.yaml": {
+        "required_keys": ["version"],
+    },
 }
 
 

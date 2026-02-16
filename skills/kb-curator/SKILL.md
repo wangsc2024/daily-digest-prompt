@@ -1,10 +1,11 @@
 ---
 name: kb-curator
-version: "1.0.0"
+version: "1.1.0"
 description: |
   知識庫治理工具。去重、品質評分、過期清理、主題分佈分析。
-  Use when: 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈。
+  Use when: 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、知識庫清理。
 allowed-tools: Read, Write, Bash
+cache-ttl: 0min
 triggers:
   - "知識庫治理"
   - "KB 去重"
@@ -12,6 +13,11 @@ triggers:
   - "過期清理"
   - "主題分佈"
   - "kb-curator"
+  - "清理"
+  - "重複筆記"
+  - "品質檢查"
+  - "知識庫清理"
+  - "筆記統計"
 ---
 
 # KB Curator Skill（知識庫治理工具）
@@ -64,8 +70,30 @@ print(json.dumps(dupes, ensure_ascii=False, indent=2))
 - 識別過度集中的主題（佔比 > 30%）
 - 識別覆蓋不足的主題
 
+## 執行流程
+
+1. 先確認知識庫服務可用：`curl -s http://localhost:3000/api/health`
+2. 依序執行模組 A → B → C → D（可選擇只執行部分模組）
+3. 彙整結果為 JSON 報告
+4. 若為自動任務，將報告匯入知識庫（透過 knowledge-query Skill）
+
 ## 輸出格式
-產出 JSON 報告至標準輸出或指定檔案。
+
+```json
+{
+  "generated_at": "ISO timestamp",
+  "total_notes": 150,
+  "duplicates": {"exact": 2, "similar": 5, "details": [...]},
+  "quality": {"avg_score": 3.2, "low_quality_count": 10},
+  "expired": {"candidates": 3, "details": [...]},
+  "distribution": {"top_tags": {...}, "over_concentrated": [...], "under_represented": [...]}
+}
+```
+
+## 錯誤處理
+- 知識庫服務未啟動 → 記錄錯誤並結束，不中斷 Agent 主流程
+- API 回應超時 → 重試 1 次（間隔 5 秒），仍失敗則跳過
+- 筆記數量為 0 → 輸出空報告，不報錯
 
 ## 安全邊界
 - 僅分析和建議，不自動刪除任何筆記

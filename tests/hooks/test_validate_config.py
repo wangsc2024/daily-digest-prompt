@@ -159,6 +159,36 @@ class TestSyntheticConfigs:
                 "service_url": "https://ntfy.sh",
             },
             "dedup-policy.yaml": {"version": 1},
+            "pipeline.yaml": {
+                "version": 1,
+                "init": [],
+                "steps": [{"id": "s1", "name": "Step 1"}],
+                "finalize": [],
+            },
+            "topic-rotation.yaml": {
+                "version": 1,
+                "strategy": "no_repeat_until_all_used",
+                "habits_topics": ["topic1"],
+                "learning_topics": ["topic1"],
+            },
+            "health-scoring.yaml": {
+                "version": 1,
+                "ranges": [{"min": 0, "label": "test"}],
+                "dimensions": {"test": {"weight": 100}},
+            },
+            "audit-scoring.yaml": {
+                "version": 1,
+                "weight_profiles": {"balanced": {}},
+                "grade_thresholds": {"A": {"min": 80}},
+                "dimensions": {"security": {}},
+            },
+            "benchmark.yaml": {
+                "version": 1,
+                "metrics": [
+                    {"name": "m1", "target": ">= 90%", "weight": 100},
+                ],
+            },
+            "timeouts.yaml": {"version": 1},
         }
 
         for filename, data in configs.items():
@@ -207,3 +237,171 @@ class TestSchemaCoverage:
     def test_all_schemas_have_required_keys(self):
         for name, schema in SCHEMAS.items():
             assert "required_keys" in schema, f"{name} missing required_keys"
+
+    def test_schema_count_matches_config_files(self):
+        """SCHEMAS should cover all 13 config YAML files."""
+        assert len(SCHEMAS) == 13
+
+    def test_pipeline_covered(self):
+        assert "pipeline.yaml" in SCHEMAS
+
+    def test_topic_rotation_covered(self):
+        assert "topic-rotation.yaml" in SCHEMAS
+
+    def test_health_scoring_covered(self):
+        assert "health-scoring.yaml" in SCHEMAS
+
+    def test_audit_scoring_covered(self):
+        assert "audit-scoring.yaml" in SCHEMAS
+
+    def test_benchmark_covered(self):
+        assert "benchmark.yaml" in SCHEMAS
+
+    def test_timeouts_covered(self):
+        assert "timeouts.yaml" in SCHEMAS
+
+
+# ---------------------------------------------------------------------------
+# New schema-specific validation tests
+# ---------------------------------------------------------------------------
+class TestPipelineSchema:
+    """Tests specific to pipeline.yaml schema validation."""
+
+    def test_pipeline_missing_steps(self, tmp_path):
+        """pipeline.yaml without 'steps' should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        # Only create pipeline.yaml with missing keys
+        data = {"version": 1, "init": []}
+        with open(os.path.join(config_dir, "pipeline.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        pipeline_errors = [e for e in errors if "pipeline" in e]
+        assert any("steps" in e for e in pipeline_errors)
+
+    def test_pipeline_steps_missing_id(self, tmp_path):
+        """pipeline.yaml steps without 'id' should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "init": [],
+            "steps": [{"name": "No ID step"}],
+            "finalize": [],
+        }
+        with open(os.path.join(config_dir, "pipeline.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        pipeline_errors = [e for e in errors if "pipeline" in e]
+        assert any("id" in e for e in pipeline_errors)
+
+
+class TestBenchmarkSchema:
+    """Tests specific to benchmark.yaml schema validation."""
+
+    def test_benchmark_metrics_missing_weight(self, tmp_path):
+        """benchmark.yaml metrics without 'weight' should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "metrics": [{"name": "m1", "target": ">= 90%"}],
+        }
+        with open(os.path.join(config_dir, "benchmark.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        benchmark_errors = [e for e in errors if "benchmark" in e]
+        assert any("weight" in e for e in benchmark_errors)
+
+    def test_benchmark_metrics_missing_name(self, tmp_path):
+        """benchmark.yaml metrics without 'name' should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "metrics": [{"target": ">= 90%", "weight": 10}],
+        }
+        with open(os.path.join(config_dir, "benchmark.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        benchmark_errors = [e for e in errors if "benchmark" in e]
+        assert any("name" in e for e in benchmark_errors)
+
+
+class TestTopicRotationSchema:
+    """Tests specific to topic-rotation.yaml schema validation."""
+
+    def test_topic_rotation_missing_habits(self, tmp_path):
+        """topic-rotation.yaml without habits_topics should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "strategy": "no_repeat",
+            "learning_topics": ["topic1"],
+        }
+        with open(os.path.join(config_dir, "topic-rotation.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        rotation_errors = [e for e in errors if "topic-rotation" in e]
+        assert any("habits_topics" in e for e in rotation_errors)
+
+
+class TestAuditScoringSchema:
+    """Tests specific to audit-scoring.yaml schema validation."""
+
+    def test_audit_missing_dimensions(self, tmp_path):
+        """audit-scoring.yaml without dimensions should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "weight_profiles": {"balanced": {}},
+            "grade_thresholds": {"A": {"min": 80}},
+        }
+        with open(os.path.join(config_dir, "audit-scoring.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        audit_errors = [e for e in errors if "audit" in e]
+        assert any("dimensions" in e for e in audit_errors)
+
+    def test_audit_missing_weight_profiles(self, tmp_path):
+        """audit-scoring.yaml without weight_profiles should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "grade_thresholds": {"A": {"min": 80}},
+            "dimensions": {"security": {}},
+        }
+        with open(os.path.join(config_dir, "audit-scoring.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        audit_errors = [e for e in errors if "audit" in e]
+        assert any("weight_profiles" in e for e in audit_errors)
+
+
+class TestHealthScoringSchema:
+    """Tests specific to health-scoring.yaml schema validation."""
+
+    def test_health_missing_ranges(self, tmp_path):
+        """health-scoring.yaml without ranges should fail."""
+        import yaml
+        config_dir = str(tmp_path)
+        data = {
+            "version": 1,
+            "dimensions": {"test": {"weight": 100}},
+        }
+        with open(os.path.join(config_dir, "health-scoring.yaml"), "w",
+                  encoding="utf-8") as f:
+            yaml.dump(data, f)
+        errors, warnings = validate_config(config_dir)
+        health_errors = [e for e in errors if "health" in e]
+        assert any("ranges" in e for e in health_errors)
