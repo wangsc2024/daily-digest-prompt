@@ -1,21 +1,23 @@
 {
-  "date": "2026-02-15",
-  "topic": "LLM 推理能力的突破與 Test-Time Compute Scaling",
+  "date": "2026-02-16",
+  "topic": "搜尋增強推理（Search-Augmented Reasoning）— PRM、MCTS 與 STaR 在 LLM 推理中的協同架構",
   "research_questions": [
-    "Test-Time Compute Scaling 的理論基礎是什麼？如何透過增加推理時的運算量來提升模型表現？",
-    "目前主流的推理模型（OpenAI o1/o3、DeepSeek-R1、Claude Extended Thinking）各自的技術路線有何差異？",
-    "Chain-of-Thought、Tree-of-Thought、Graph-of-Thought 等推理框架的效能比較與適用場景為何？"
+    "Process Reward Models（PRM）如何實現逐步推理監督？與 Outcome Reward Models（ORM）的效果差異為何？",
+    "Monte Carlo Tree Search（MCTS）如何與大型語言模型結合，實現推理路徑的探索與回溯？代表性實作案例有哪些？",
+    "Self-Taught Reasoner（STaR）的自我改進循環如何運作？對小模型推理能力的蒸餾效果如何？"
   ],
-  "methodology": "文獻回顧 + 技術比較分析：蒐集 2025-2026 年推理模型相關論文與技術報告，比較不同推理策略的優劣勢，提煉實務應用建議",
+  "methodology": "技術深潛法：聚焦三大核心技術（PRM / MCTS / STaR），蒐集原始論文、開源實作、基準測試數據，透過架構比較和效能分析建構技術全景圖",
   "keywords": [
-    "Test-Time Compute",
-    "Reasoning Tokens",
-    "Chain-of-Thought Scaling",
-    "OpenAI o1 o3",
-    "DeepSeek-R1",
-    "Extended Thinking",
-    "Inference-Time Scaling",
-    "LLM Reasoning"
+    "Process Reward Model PRM",
+    "Outcome Reward Model ORM comparison",
+    "Monte Carlo Tree Search LLM reasoning",
+    "Self-Taught Reasoner STaR",
+    "search augmented reasoning LLM 2026",
+    "inference time compute optimization",
+    "step-level reward model verification",
+    "reasoning path exploration backtracking",
+    "搜尋增強推理 大型語言模型",
+    "推理驗證 過程獎勵模型"
   ],
   "stage_completed": 1
 }
