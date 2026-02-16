@@ -62,6 +62,7 @@
 ### 本專案的並行模式參考
 - **每日摘要**：Phase 1 五路並行擷取 → Phase 2 單一組裝（`run-agent-team.ps1`）
 - **Todoist 任務**：Phase 1 查詢規劃 → Phase 2 N 路並行執行 → Phase 3 組裝通知（`run-todoist-agent-team.ps1`）
+- **系統審查**：Phase 1 四路並行評估 → Phase 2 組裝修正報告（`run-system-audit-team.ps1`）
 - **互動式開發**：主動用 Task 工具的 `subagent_type` 並行處理研究、測試、分析等獨立工作
 
 ## 文件驅動架構設計原則
@@ -86,6 +87,12 @@
 | `config/notification.yaml` | ntfy 通知配置 | hour-todoist-prompt.md、assemble-digest.md |
 | `config/digest-format.md` | 摘要輸出排版模板 | daily-digest-prompt.md、assemble-digest.md |
 | `config/dedup-policy.yaml` | 研究去重策略（冷卻天數、飽和閾值） | 所有研究模板 |
+| `config/audit-scoring.yaml` | 系統審查 7 維度 38 子項計分規則 | system-audit Skill、run-system-audit-team.ps1 |
+| `config/benchmark.yaml` | 系統效能基準線（7 指標 + 參考專案比較） | system-insight Skill、品質閘門 |
+| `config/health-scoring.yaml` | 健康評分 6 維度權重（成功率、錯誤率等） | query-logs.ps1 -Mode health-score |
+| `config/hook-rules.yaml` | Hooks 規則外部化（Bash/Write guard 規則） | pre_bash_guard.py、pre_write_guard.py |
+| `config/timeouts.yaml` | 各 Agent 超時配置（單一/團隊模式 timeout） | run-todoist-agent-team.ps1 |
+| `config/topic-rotation.yaml` | 主題輪替演算法（LRU + 同日去重） | 研究任務（AI/佛學研究模板） |
 | `templates/shared/preamble.md` | 共用前言（nul 禁令 + Skill-First） | 所有 prompt |
 
 ## 架構
@@ -126,9 +133,9 @@ daily-digest-prompt/
       general-task.md             # 模板 C：無 Skill 匹配的一般任務
       refinement.md               # 品質閘門精修 prompt
     auto-tasks/                   # 自動任務 prompt（無可處理項目或全部完成時按需載入）
-      # 佛學研究（12 次/日）
-      shurangama-research.md      # 楞嚴經研究（4 步驟含 KB 去重）
-      buddhist-research.md        # 通用佛學模板（教觀綱宗/法華經/淨土宗共用）
+      # 佛學研究（12 次/日，4 個任務用 2 個模板）
+      shurangama-research.md      # 楞嚴經研究（5 次/日，專用模板）
+      buddhist-research.md        # 通用佛學模板（教觀綱宗 3 次 + 法華經 2 次 + 淨土宗 2 次，共用參數化模板）
       # AI/技術研究（17 次/日）
       tech-research.md            # 每日任務技術研究（分析已完成任務所需技術）
       ai-deep-research.md         # AI 深度研究計畫（4 階段）
@@ -151,16 +158,26 @@ daily-digest-prompt/
       # GitHub 靈感（1 次/日）
       github-scout.md             # GitHub 靈感蒐集（週三/週日）
 
+  **Note**: 以上 16 個唯一模板對應 18 個自動任務（buddhist-research.md 被 3 個任務共用）。
+  團隊模式 prompts 命名轉換規則：`templates/auto-tasks/<name>.md` → `prompts/team/todoist-auto-<name>.md`。
+  部分簡化：去掉後綴（-research/-optimize）、合併連字號（log-audit → logaudit、git-push → gitpush）。
+
   # 執行腳本
   run-agent.ps1                   # 每日摘要執行腳本（單一模式，含重試）
   run-agent-team.ps1              # 每日摘要執行腳本（團隊並行模式，推薦）
   run-todoist-agent.ps1           # Todoist 任務規劃執行腳本（單一模式）
   run-todoist-agent-team.ps1      # Todoist 任務規劃執行腳本（3 階段並行，推薦）
   run-gmail-agent.ps1             # Gmail Agent 執行腳本
+  run-system-audit.ps1            # 每日系統審查執行腳本（單一模式，備用）
+  run-system-audit-team.ps1       # 每日系統審查執行腳本（團隊並行模式，推薦）
   setup-scheduler.ps1             # 排程設定工具（支援 HEARTBEAT.md 批次建立）
   check-health.ps1                # 健康檢查報告工具（快速一覽）
   scan-skills.ps1                 # 技能安全掃描工具（Cisco AI Defense）
   query-logs.ps1                  # 執行成果查詢工具（5 種模式）
+  check-token.ps1                 # Todoist Token 驗證工具
+  cleanup-tasks.ps1               # Todoist 任務清理工具
+  fix-todoist-task.ps1            # Todoist 任務修正工具
+  temp_query.ps1                  # 臨時查詢腳本（開發用）
 
   # Hooks 機器強制層
   .claude/
@@ -177,14 +194,20 @@ daily-digest-prompt/
 
   # 團隊模式 Agent prompts
   prompts/team/
-    # 每日摘要團隊模式（Phase 1 → Phase 2）
+    # 每日摘要團隊模式（Phase 1 → Phase 2，共 6 個）
     fetch-todoist.md              # Phase 1: Todoist 資料擷取
     fetch-news.md                 # Phase 1: 屏東新聞資料擷取
     fetch-hackernews.md           # Phase 1: HN AI 新聞資料擷取
     fetch-gmail.md                # Phase 1: Gmail 郵件擷取
     fetch-security.md             # Phase 1: Cisco AI Defense 安全審查
     assemble-digest.md            # Phase 2: 摘要組裝 + 通知 + 狀態
-    # Todoist 團隊模式（Phase 1 → Phase 2 → Phase 3）
+    # 系統審查團隊模式（Phase 1 → Phase 2，共 5 個）
+    fetch-audit-dim1-5.md         # Phase 1: 維度 1（資訊安全）+ 維度 5（技術棧）
+    fetch-audit-dim2-6.md         # Phase 1: 維度 2（系統架構）+ 維度 6（系統文件）
+    fetch-audit-dim3-7.md         # Phase 1: 維度 3（系統品質）+ 維度 7（系統完成度）
+    fetch-audit-dim4.md           # Phase 1: 維度 4（系統工作流）
+    assemble-audit.md             # Phase 2: 組裝結果 + 自動修正 + 報告 + RAG
+    # Todoist 團隊模式（Phase 1 → Phase 2 → Phase 3，共 20 個）
     todoist-query.md              # Phase 1: Todoist 查詢 + 路由 + 計分 + 規劃
     todoist-assemble.md           # Phase 3: 組裝結果 + 關閉任務 + 通知
     todoist-auto-shurangama.md    # Phase 2: 自動楞嚴經研究
@@ -444,14 +467,54 @@ python hooks/query_logs.py --format json
 
 | 排程 | 觸發時間 | 腳本 | 模式 |
 |------|---------|------|------|
+| system-audit | 每日 00:40 | run-system-audit-team.ps1 | 團隊並行審查 |
 | daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 團隊並行 |
 | daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 團隊並行 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 團隊並行 |
 | todoist-single | 每小時整點 02-23 | run-todoist-agent.ps1 | 單一 |
 | todoist-team | 每小時半點 02-23 | run-todoist-agent-team.ps1 | 3 階段並行 |
 
+### 每日系統審查 - 團隊並行模式（run-system-audit-team.ps1，推薦）
+
+每日 00:40 自動執行系統審查，使用 `system-audit` Skill 評估 7 個維度、38 個子項：
+
+1. Windows Task Scheduler 觸發 `run-system-audit-team.ps1`
+2. **Phase 1**：用 `Start-Job` 同時啟動 4 個 `claude -p` 並行審查
+   - Agent 1: 評估維度 1（資訊安全）+ 維度 5（技術棧），輸出 `results/audit-dim1-5.json`
+   - Agent 2: 評估維度 2（系統架構）+ 維度 6（系統文件），輸出 `results/audit-dim2-6.json`
+   - Agent 3: 評估維度 3（系統品質）+ 維度 7（系統完成度），輸出 `results/audit-dim3-7.json`
+   - Agent 4: 評估維度 4（系統工作流），輸出 `results/audit-dim4.json`
+3. 等待全部完成（timeout 600s），收集各 Agent 狀態
+4. **Phase 2**：啟動組裝 Agent 讀取 Phase 1 的 4 個 JSON（timeout 1200s）
+5. 組裝 Agent 計算加權總分 → 識別問題 → 自動修正（最多 5 項）→ 生成報告 → 寫入 RAG → 更新狀態
+6. Phase 2 失敗可自動重試一次（間隔 60 秒）
+7. 預期耗時約 15-20 分鐘（單一模式需 25-30 分鐘）
+
+**輸出**：
+- 審查報告：`docs/系統審查報告_YYYYMMDD_HHMM.md`
+- 狀態檔案：`state/last-audit.json`（含總分、等級、7 維度分數）
+- 知識庫：自動匯入 RAG (localhost:3000)，含 metadata
+- Phase 1 日誌：`logs/audit-phase1-YYYYMMDD_HHMMSS.log`
+- Phase 2 日誌：`logs/audit-phase2-YYYYMMDD_HHMMSS.log`
+- 中間結果：`results/audit-dim*.json`（完成後自動清理）
+
+**手動觸發**：
+```powershell
+# 團隊並行模式（推薦）
+pwsh -ExecutionPolicy Bypass -File run-system-audit-team.ps1
+
+# 單一模式（備用）
+pwsh -ExecutionPolicy Bypass -File run-system-audit.ps1
+```
+
 ## 常用操作
 ```powershell
+# 手動執行每日系統審查（團隊並行模式，推薦）
+pwsh -ExecutionPolicy Bypass -File run-system-audit-team.ps1
+
+# 手動執行每日系統審查（單一模式，備用）
+pwsh -ExecutionPolicy Bypass -File run-system-audit.ps1
+
 # 手動執行每日摘要（團隊並行模式，推薦）
 pwsh -ExecutionPolicy Bypass -File run-agent-team.ps1
 
@@ -464,7 +527,7 @@ pwsh -ExecutionPolicy Bypass -File run-todoist-agent-team.ps1
 # 手動執行 Todoist 任務規劃（單一模式，備用）
 pwsh -ExecutionPolicy Bypass -File run-todoist-agent.ps1
 
-# 從 HEARTBEAT.md 批次建立排程
+# 從 HEARTBEAT.md 批次建立排程（需管理員權限）
 .\setup-scheduler.ps1 -FromHeartbeat
 
 # 設定排程（傳統方式）

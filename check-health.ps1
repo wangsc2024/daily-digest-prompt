@@ -314,6 +314,54 @@ else {
             }
         }
     }
+
+    # SKILL.md 修改歷史（近 7 天）
+    Write-Host ""
+    Write-Host "  [SKILL.md 修改記錄]" -ForegroundColor Yellow
+
+    $cutoff7d = (Get-Date).AddDays(-7).ToString("yyyy-MM-dd")
+    $skillModifications = @()
+
+    # 掃描近 7 天的 JSONL 日誌
+    for ($i = 0; $i -lt 7; $i++) {
+        $date = (Get-Date).AddDays(-$i).ToString("yyyy-MM-dd")
+        $logFile = "$StructuredDir\$date.jsonl"
+        if (Test-Path $logFile) {
+            $dayEntries = @(Get-Content -Path $logFile -Encoding UTF8 | ForEach-Object {
+                try { $_ | ConvertFrom-Json } catch { $null }
+            } | Where-Object { $_ -and ($_.tags -contains "skill-modified") })
+
+            foreach ($entry in $dayEntries) {
+                # Extract file path from summary (format: "path (XXX chars)" or just "path")
+                $summary = $entry.summary
+                $pathMatch = $summary -match '^(.*?)(?:\s+\(|$)'
+                if ($pathMatch) {
+                    $path = $matches[1]
+                    $skillModifications += [PSCustomObject]@{
+                        Date = $entry.ts.Substring(0, 16)  # YYYY-MM-DDTHH:MM
+                        Path = $path
+                        Tool = $entry.tool
+                    }
+                }
+            }
+        }
+    }
+
+    if ($skillModifications.Count -gt 0) {
+        Write-Host "  近 7 天共修改 $($skillModifications.Count) 次：" -ForegroundColor White
+        $skillModifications | Sort-Object -Property Date -Descending | Select-Object -First 10 | ForEach-Object {
+            $shortPath = $_.Path -replace '.*[\\/]skills[\\/]', 'skills/'
+            Write-Host "    $($_.Date) | $shortPath" -ForegroundColor Cyan
+        }
+        if ($skillModifications.Count -gt 10) {
+            Write-Host "    ... 以及其他 $($skillModifications.Count - 10) 筆修改" -ForegroundColor Gray
+        }
+        Write-Host ""
+        Write-Host "  建議檢查: git diff skills/*/SKILL.md" -ForegroundColor Magenta
+    }
+    else {
+        Write-Host "  近 7 天無 SKILL.md 修改" -ForegroundColor Green
+    }
 }
 
 Write-Host ""

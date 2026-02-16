@@ -62,6 +62,384 @@ triggers:
 
 ---
 
+## 使用方式
+
+本 Skill 支援兩種執行模式：互動式手動審查與排程自動審查。
+
+### 方式 1：互動式手動審查（推薦用於深度分析）
+
+**觸發方式**：
+直接對 Agent 說出觸發語句（如「系統審查」），Agent 會依照本檔案的「操作步驟」（Phase 0-8）進行完整審查。
+
+**特點**：
+- ✅ 完整互動：可隨時提問、調整範圍、討論改善方案
+- ✅ 深度分析：Agent 會詳細解釋每個維度的問題與建議
+- ✅ 客製化：可指定權重模型（balanced / security_first / startup）
+- ✅ 即時產出：產出報告到 `reports/audit-{system}-{date}.md`
+
+**適用情境**：
+- 新專案啟動前的基準評估
+- 重大變更後的完整性驗證
+- 技術債務盤點
+- 交付前的品質閘門
+
+---
+
+### 方式 2：自動排程 - 團隊並行模式（推薦用於定期追蹤）
+
+**架構設計**：
+採用 Agent Team 並行架構，將 7 個維度拆分為 4 個並行 Agent，再由 1 個組裝 Agent 整合結果。相較於單一 Agent 串行執行（15-30 分鐘），團隊模式可縮短至 **15-20 分鐘**。
+
+```
+Phase 1: 並行審查（4 個 Agent，各 600s timeout）
+  ├─ Agent 1: 維度 1（資訊安全）+ 維度 5（技術棧）→ results/audit-dim1-5.json
+  ├─ Agent 2: 維度 2（系統架構）+ 維度 6（系統文件）→ results/audit-dim2-6.json
+  ├─ Agent 3: 維度 3（系統品質）+ 維度 7（系統完成度）→ results/audit-dim3-7.json
+  └─ Agent 4: 維度 4（系統工作流）→ results/audit-dim4.json
+
+Phase 2: 組裝與修正（1 個 Agent，1200s timeout）
+  1. 讀取 Phase 1 的 4 個 JSON 結果
+  2. 計算加權總分（依 config/audit-scoring.yaml 權重模型）
+  3. 識別問題項目（分數 <70 或較上次退步 >5 分）
+  4. 自動修正（最多 5 項，優先處理簡單問題）
+  5. 重新審查修正項目（驗證改善效果）
+  6. 生成結構化報告（依 templates/audit-report.md 模板）
+  7. 寫入知識庫（POST localhost:3000/api/notes）
+  8. 更新執行狀態（state/scheduler-state.json）
+  9. 清理中間檔案（results/*.json）
+```
+
+**實作步驟**：
+
+#### Step 1: 建立 Team Mode Prompts（5 個檔案）
+
+在專案根目錄建立 `prompts/team/` 目錄，並建立以下 5 個 prompt 檔案：
+
+**1. `fetch-audit-dim1-5.md`**（Phase 1 Agent 1）
+```markdown
+# Phase 1: 審查維度 1+5
+
+## 角色
+你是系統審查 Phase 1 的 Agent 1，負責評估 2 個維度。
+
+## 任務
+評估以下 2 個維度：
+- **維度 1**：資訊安全（6 個子項）
+- **維度 5**：技術棧（5 個子項）
+
+## 操作步驟
+1. Read skills/system-audit/SKILL.md（取得評分規則）
+2. Read config/audit-scoring.yaml（取得權重與校準規則）
+3. 依照 SKILL.md 的 Phase 1（維度 1）和 Phase 5（維度 5）逐項評估
+4. 每個子項產出：分數（0-100）、證據、給分理由
+5. Write results/audit-dim1-5.json（JSON 格式）
+
+## 輸出格式
+```json
+{
+  "dimension_1": {
+    "name": "資訊安全",
+    "weight": 20,
+    "sub_items": [
+      {"id": "1.1", "name": "機密管理", "score": 75, "evidence": "...", "reason": "..."},
+      {"id": "1.2", "name": "輸入驗證", "score": 60, "evidence": "...", "reason": "..."}
+      // ... 共 6 項
+    ],
+    "avg_score": 68.3
+  },
+  "dimension_5": {
+    "name": "技術棧",
+    "weight": 10,
+    "sub_items": [
+      // ... 共 5 項
+    ],
+    "avg_score": 72.0
+  },
+  "agent_id": "dim1-5",
+  "timestamp": "2026-02-16T00:45:00+08:00"
+}
+```
+
+## 重要規則
+- 每個子項必須有具體證據（檔案路徑、Grep 結果、Bash 輸出）
+- 禁止模糊語言（「看起來不錯」「應該有」）
+- 遵守校準規則（如：無測試 → 品質上限 50）
+```
+
+**2. `fetch-audit-dim2-6.md`**（Phase 1 Agent 2，結構同上，負責維度 2+6）
+
+**3. `fetch-audit-dim3-7.md`**（Phase 1 Agent 3，結構同上，負責維度 3+7）
+
+**4. `fetch-audit-dim4.md`**（Phase 1 Agent 4，結構同上，負責維度 4）
+
+**5. `assemble-audit.md`**（Phase 2 組裝 Agent）
+```markdown
+# Phase 2: 組裝審查報告
+
+## 角色
+你是系統審查 Phase 2 的組裝 Agent，負責整合 Phase 1 的結果並產出最終報告。
+
+## 任務
+整合 Phase 1 的 4 個 JSON 結果，計算加權總分，自動修正問題，產出報告。
+
+## 操作步驟
+
+### Step 1: 讀取 Phase 1 結果
+1. Read results/audit-dim1-5.json
+2. Read results/audit-dim2-6.json
+3. Read results/audit-dim3-7.json
+4. Read results/audit-dim4.json
+
+### Step 2: 計算加權總分
+1. Read config/audit-scoring.yaml（取得權重模型，預設 balanced）
+2. 計算各維度平均分
+3. 依權重計算加權總分：
+   ```
+   總分 = Σ(維度平均分 × 維度權重)
+   ```
+4. 判定等級（S/A/B/C/D/F）
+
+### Step 3: 識別問題項目
+標記以下項目為待修正：
+- 分數 < 70（C 級以下）
+- 較上次審查退步 > 5 分（需讀取上次報告比對）
+- 觸發校準上限的子項（如：無測試 → 品質上限 50）
+
+### Step 4: 自動修正（最多 5 項）
+依以下原則選擇修正項目：
+1. **優先修正簡單問題**（預估 <5 分鐘可完成）：
+   - 新增缺失的配置檔（如 .gitignore）
+   - 補充文件注釋
+   - 更新過時的文件
+2. **跳過複雜問題**（需人工介入）：
+   - 重構架構
+   - 新增測試
+   - 修正程式碼邏輯
+
+修正後立即重新審查該子項，確認改善效果。
+
+### Step 5: 生成報告
+1. Read templates/audit-report.md（取得報告模板）
+2. 填入各維度分數、證據、建議
+3. 計算 TOP 5 改善建議（依影響度排序）
+4. Write reports/audit-{專案名稱}-{日期}.md
+
+### Step 6: 寫入知識庫
+將報告摘要寫入知識庫：
+```bash
+curl -s -X POST http://localhost:3000/api/notes \
+  -H "Content-Type: application/json" \
+  -d @note.json
+```
+其中 note.json：
+```json
+{
+  "title": "系統審查 - {專案名稱} - {日期}",
+  "content": "{報告摘要（Markdown 格式）}",
+  "tags": ["系統審查", "品質評估", "{專案名稱}"],
+  "source": "import"
+}
+```
+
+### Step 7: 更新執行狀態
+**注意**：`state/scheduler-state.json` 由 PowerShell 腳本獨佔寫入，Agent 只讀。
+僅在記憶體中記錄本次審查結果，供腳本稍後寫入。
+
+### Step 8: 清理中間檔案
+```bash
+rm -f results/audit-dim*.json
+```
+
+## 輸出
+- reports/audit-{專案名稱}-{日期}.md（完整報告）
+- 知識庫新增一筆系統審查記錄
+- 清理 results/ 目錄
+```
+
+#### Step 2: 建立 PowerShell 執行腳本
+
+建立 `run-system-audit-team.ps1`：
+
+```powershell
+#Requires -Version 7.0
+# 系統審查 - 團隊並行模式執行腳本
+
+param(
+    [int]$Phase1Timeout = 600,  # Phase 1 各 Agent timeout（秒）
+    [int]$Phase2Timeout = 1200, # Phase 2 組裝 Agent timeout（秒）
+    [int]$MaxRetries = 1
+)
+
+$ErrorActionPreference = "Stop"
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+
+$AgentDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$LogDir = Join-Path $AgentDir "logs"
+$ResultsDir = Join-Path $AgentDir "results"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = Join-Path $LogDir "system-audit-team_$Timestamp.log"
+
+# 確保目錄存在
+@($LogDir, $ResultsDir, "$LogDir\structured") | ForEach-Object {
+    if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+}
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Time = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogMessage = "[$Time] [$Level] $Message"
+    Write-Host $LogMessage
+    Add-Content -Path $LogFile -Value $LogMessage -Encoding UTF8
+}
+
+Write-Log "===== 系統審查 - 團隊並行模式開始 ====="
+
+# Phase 1: 並行審查（4 個 Agent）
+$phase1Prompts = @(
+    @{ Name = "dim1-5"; Prompt = "$AgentDir\prompts\team\fetch-audit-dim1-5.md" },
+    @{ Name = "dim2-6"; Prompt = "$AgentDir\prompts\team\fetch-audit-dim2-6.md" },
+    @{ Name = "dim3-7"; Prompt = "$AgentDir\prompts\team\fetch-audit-dim3-7.md" },
+    @{ Name = "dim4"; Prompt = "$AgentDir\prompts\team\fetch-audit-dim4.md" }
+)
+
+$phase1Jobs = @()
+foreach ($p in $phase1Prompts) {
+    Write-Log "啟動 Phase 1 Agent: $($p.Name)"
+    $job = Start-Job -ScriptBlock {
+        param($AgentDir, $PromptFile, $Timeout)
+        $OutputEncoding = [System.Text.UTF8Encoding]::new()
+        Set-Location $AgentDir
+        claude -p (Get-Content $PromptFile -Raw -Encoding UTF8) --allowedTools "Read,Bash,Glob,Grep,Write"
+    } -ArgumentList $AgentDir, $p.Prompt, $Phase1Timeout -WorkingDirectory $AgentDir
+    $phase1Jobs += @{ Job = $job; Name = $p.Name }
+}
+
+Write-Log "等待 Phase 1 完成（timeout ${Phase1Timeout}s）..."
+$phase1Jobs | ForEach-Object {
+    $job = $_.Job
+    $name = $_.Name
+    $completed = Wait-Job -Job $job -Timeout $Phase1Timeout
+    if ($completed) {
+        $output = Receive-Job -Job $job
+        Write-Log "Phase 1 Agent [$name] 完成"
+    } else {
+        Write-Log "Phase 1 Agent [$name] 超時，強制停止" "WARN"
+        Stop-Job -Job $job
+    }
+    Remove-Job -Job $job -Force
+}
+
+# 檢查 Phase 1 結果
+$phase1Results = @()
+foreach ($p in $phase1Prompts) {
+    $resultFile = Join-Path $ResultsDir "audit-$($p.Name).json"
+    if (Test-Path $resultFile) {
+        Write-Log "Phase 1 結果已產出: $resultFile"
+        $phase1Results += $resultFile
+    } else {
+        Write-Log "Phase 1 結果缺失: $resultFile" "ERROR"
+    }
+}
+
+if ($phase1Results.Count -ne 4) {
+    Write-Log "Phase 1 失敗，結果不完整（$($phase1Results.Count)/4）" "ERROR"
+    exit 1
+}
+
+# Phase 2: 組裝報告
+Write-Log "啟動 Phase 2: 組裝 Agent"
+$phase2Prompt = Join-Path $AgentDir "prompts\team\assemble-audit.md"
+
+$phase2Job = Start-Job -ScriptBlock {
+    param($AgentDir, $PromptFile)
+    $OutputEncoding = [System.Text.UTF8Encoding]::new()
+    Set-Location $AgentDir
+    claude -p (Get-Content $PromptFile -Raw -Encoding UTF8) --allowedTools "Read,Bash,Write"
+} -ArgumentList $AgentDir, $phase2Prompt -WorkingDirectory $AgentDir
+
+$phase2Completed = Wait-Job -Job $phase2Job -Timeout $Phase2Timeout
+if ($phase2Completed) {
+    $output = Receive-Job -Job $phase2Job
+    Write-Log "Phase 2 組裝完成"
+    Remove-Job -Job $phase2Job -Force
+} else {
+    Write-Log "Phase 2 超時，嘗試重試一次..." "WARN"
+    Stop-Job -Job $phase2Job
+    Remove-Job -Job $phase2Job -Force
+
+    # 重試一次
+    Start-Sleep -Seconds 60
+    $phase2Job = Start-Job -ScriptBlock {
+        param($AgentDir, $PromptFile)
+        $OutputEncoding = [System.Text.UTF8Encoding]::new()
+        Set-Location $AgentDir
+        claude -p (Get-Content $PromptFile -Raw -Encoding UTF8) --allowedTools "Read,Bash,Write"
+    } -ArgumentList $AgentDir, $phase2Prompt -WorkingDirectory $AgentDir
+
+    $phase2Completed = Wait-Job -Job $phase2Job -Timeout $Phase2Timeout
+    if ($phase2Completed) {
+        Write-Log "Phase 2 重試成功"
+        Receive-Job -Job $phase2Job | Out-Null
+    } else {
+        Write-Log "Phase 2 重試失敗" "ERROR"
+        Stop-Job -Job $phase2Job
+    }
+    Remove-Job -Job $phase2Job -Force
+}
+
+Write-Log "===== 系統審查 - 團隊並行模式結束 ====="
+```
+
+#### Step 3: 設定 Windows Task Scheduler
+
+使用專案的 `setup-scheduler.ps1` 工具：
+
+```powershell
+# 方式 1：從 HEARTBEAT.md 批次建立（推薦）
+.\setup-scheduler.ps1 -FromHeartbeat
+
+# 方式 2：手動建立單一排程
+.\setup-scheduler.ps1 -Time "00:40" -Script "run-system-audit-team.ps1"
+```
+
+或在 `HEARTBEAT.md` 中定義：
+
+```yaml
+system-audit:
+  cron: "40 0 * * *"
+  script: run-system-audit-team.ps1
+  timeout: 1800
+  retry: 1
+  description: "每日系統審查 - 團隊模式（00:40）"
+```
+
+**特點**：
+- ⚡ 快速：15-20 分鐘完成（相較單一模式的 30 分鐘）
+- 🔄 自動化：排程執行，無需人工介入
+- 🛠️ 自動修正：自動修正簡單問題（最多 5 項）
+- 📊 趨勢追蹤：可比對歷史報告，追蹤進步情況
+- 📚 知識庫整合：自動將報告寫入知識庫（localhost:3000）
+
+**適用情境**：
+- 定期品質檢查（建議每日或每週一次）
+- 持續追蹤改善進度
+- CI/CD 整合（Pull Request 前自動審查）
+
+---
+
+### 兩種方式的比較
+
+| 項目 | 互動式手動審查 | 自動排程 - 團隊模式 |
+|------|---------------|-------------------|
+| **執行時間** | 15-30 分鐘 | 15-20 分鐘 |
+| **互動性** | 高（可隨時提問） | 無（全自動） |
+| **深度** | 深（可詳細討論） | 標準（依規則評分） |
+| **自動修正** | 需手動 | 自動修正簡單問題（最多 5 項） |
+| **報告輸出** | reports/*.md | reports/*.md + 知識庫 |
+| **適用情境** | 深度分析、技術債盤點 | 定期追蹤、CI/CD |
+
+---
+
 ## 操作步驟
 
 ### Phase 0：準備

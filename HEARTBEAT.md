@@ -21,6 +21,13 @@ schedules:
     retry: 1
     description: "每日摘要 - 晚（21:15）"
 
+  system-audit:
+    cron: "40 0 * * *"
+    script: run-system-audit-team.ps1
+    timeout: 1800
+    retry: 1
+    description: "每日系統審查 - 團隊模式（00:40）"
+
   todoist-single:
     cron: "0 2-23 * * *"
     interval: 60m
@@ -50,6 +57,7 @@ schedules:
 | daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 早 |
 | daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 午 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
+| system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2400s (40min) | Todoist 團隊模式 |
 
