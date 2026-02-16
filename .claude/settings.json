@@ -27,6 +27,15 @@
             "command": "python hooks/pre_write_guard.py"
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/pre_read_guard.py"
+          }
+        ]
       }
     ],
     "PostToolUse": [

@@ -16,6 +16,10 @@ triggers:
   - "單次執行"
   - "task-manager"
   - "任務管理"
+  - "add task"
+  - "新增排程"
+  - "自動任務管理"
+  - "round-robin"
 ---
 
 # Task Manager Skill — 任務新增標準化

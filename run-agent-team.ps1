@@ -15,7 +15,7 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Set paths
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 $LogDir = "$AgentDir\logs"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"

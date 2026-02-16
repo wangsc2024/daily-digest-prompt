@@ -46,6 +46,13 @@ FALLBACK_WRITE_RULES = [
         "reason_template": "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})",
         "guard_tag": "traversal-guard",
     },
+    {
+        "id": "skill-md-protect",
+        "check": "basename_equals",
+        "value": "SKILL.md",
+        "reason": "SKILL.md 為系統行為定義，不可在執行期間修改",
+        "guard_tag": "skill-protect",
+    },
 ]
 
 

@@ -14,11 +14,16 @@ context/research-registry.json
 
 # --- 暫存檔（子 Agent / 自動任務產生）---
 task_prompt.md
+task_result.txt
 import_note.json
 ntfy_temp.json
 hooks_alert_temp.json
 tmp_*
 temp_*
+
+# --- 根目錄暫存文件 ---
+強化方案.md
+table_render_*.png
 
 # --- 備份檔 ---
 *.bak

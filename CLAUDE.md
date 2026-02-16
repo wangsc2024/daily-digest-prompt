@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 14 個 Skill 速查表（13 核心 + 1 工具，名稱、觸發關鍵字、用途）
+- 20 個 Skill 速查表（17 核心 + 3 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -105,7 +105,8 @@ daily-digest-prompt/
     pipeline.yaml                 # 每日摘要管線：步驟順序、Skill 依賴、後處理
     routing.yaml                  # Todoist 三層路由：標籤映射、關鍵字映射、排除清單
     cache-policy.yaml             # 快取策略：各 API 的 TTL、降級時限
-    frequency-limits.yaml         # 自動任務頻率限制（15 個任務，40 次/日上限）
+    frequency-limits.yaml         # 自動任務頻率限制（18 個任務，45 次/日上限）
+    benchmark.yaml                # 系統效能基準線（目標門檻、參考專案比較）
     scoring.yaml                  # TaskSense 優先級計分規則
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
     dedup-policy.yaml             # 研究去重策略（冷卻天數、飽和閾值、跨任務去重）
@@ -142,6 +143,13 @@ daily-digest-prompt/
       git-push.md                 # GitHub 推送流程
       # 遊戲創意（2 次/日）
       creative-game-optimize.md   # 創意遊戲優化（D:\Source\game 目錄）
+      # 專案品質（2 次/日）
+      qa-system-optimize.md       # QA 系統優化
+      # 系統自省（4 次/日）
+      system-insight.md           # 系統洞察分析
+      self-heal.md                # 自愈迴圈
+      # GitHub 靈感（1 次/日）
+      github-scout.md             # GitHub 靈感蒐集（週三/週日）
 
   # 執行腳本
   run-agent.ps1                   # 每日摘要執行腳本（單一模式，含重試）
@@ -159,9 +167,12 @@ daily-digest-prompt/
     settings.json                 # Hooks 設定（PreToolUse/PostToolUse/Stop）
   hooks/
     pre_bash_guard.py             # PreToolUse:Bash - 攔截 nul 重導向、危險操作
-    pre_write_guard.py            # PreToolUse:Write/Edit - 攔截 nul 寫入、敏感檔案
-    post_tool_logger.py           # PostToolUse:* - 結構化 JSONL 日誌（自動標籤）
+    pre_write_guard.py            # PreToolUse:Write/Edit - 攔截 nul 寫入、敏感檔案、SKILL.md 保護
+    pre_read_guard.py             # PreToolUse:Read - 攔截敏感路徑讀取（.ssh、.env 等）
+    post_tool_logger.py           # PostToolUse:* - 結構化 JSONL 日誌（自動標籤 + 50MB 輪轉）
     on_stop_alert.py              # Stop - Session 結束時健康檢查 + ntfy 自動告警
+    hook_utils.py                 # 共用模組（YAML 載入、日誌記錄、Injection Patterns）
+    validate_config.py            # YAML Schema 驗證工具（獨立或 check-health 呼叫）
     query_logs.py                 # 結構化日誌查詢工具（CLI）
 
   # 團隊模式 Agent prompts
@@ -177,8 +188,23 @@ daily-digest-prompt/
     todoist-query.md              # Phase 1: Todoist 查詢 + 路由 + 計分 + 規劃
     todoist-assemble.md           # Phase 3: 組裝結果 + 關閉任務 + 通知
     todoist-auto-shurangama.md    # Phase 2: 自動楞嚴經研究
+    todoist-auto-jiaoguangzong.md # Phase 2: 自動教觀綱宗研究
+    todoist-auto-fahua.md         # Phase 2: 自動法華經研究
+    todoist-auto-jingtu.md        # Phase 2: 自動淨土宗研究
+    todoist-auto-tech-research.md # Phase 2: 自動技術研究
+    todoist-auto-ai-deep-research.md # Phase 2: 自動 AI 深度研究
+    todoist-auto-unsloth.md       # Phase 2: 自動 Unsloth 研究
+    todoist-auto-ai-github.md     # Phase 2: 自動 AI GitHub 研究
+    todoist-auto-ai-smart-city.md # Phase 2: 自動 AI 智慧城市研究
+    todoist-auto-ai-sysdev.md     # Phase 2: 自動 AI 系統開發研究
+    todoist-auto-skill-audit.md   # Phase 2: 自動 Skill 審查
     todoist-auto-logaudit.md      # Phase 2: 自動 Log 審查
     todoist-auto-gitpush.md       # Phase 2: 自動 Git 推送
+    todoist-auto-creative-game.md # Phase 2: 自動創意遊戲優化
+    todoist-auto-qa-optimize.md   # Phase 2: 自動 QA 優化
+    todoist-auto-system-insight.md # Phase 2: 自動系統洞察
+    todoist-auto-self-heal.md     # Phase 2: 自動自愈迴圈
+    todoist-auto-github-scout.md  # Phase 2: 自動 GitHub 靈感蒐集
   results/                        # 團隊模式中間結果（完成後清理）
 
   # 持久化資料
@@ -198,8 +224,10 @@ daily-digest-prompt/
     todoist/ pingtung-news/ hackernews-ai-digest/ atomic-habits/
     learning-mastery/ pingtung-policy-expert/ knowledge-query/
     ntfy-notify/ digest-memory/ api-cache/ scheduler-state/
-    gmail/ skill-scanner/
-    game-design/                  # 共 14 個 Skill（13 核心 + 1 工具，各含 SKILL.md）
+    gmail/ game-design/ system-insight/ web-research/
+    kb-curator/ github-scout/     # 共 17 核心 Skill
+    task-manager/ skill-scanner/
+    system-audit/                 # 共 3 工具 Skill（合計 20 個，各含 SKILL.md）
 
   # 規格與文件
   specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
@@ -244,7 +272,7 @@ daily-digest-prompt/
 6. 無可處理項目或全部完成時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
 7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
 8. 通知格式依 `config/notification.yaml`
-9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：15 個任務，合計 40 次/日上限，round-robin 輪轉
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：18 個任務，合計 45 次/日上限，round-robin 輪轉
 10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
 
 ### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
@@ -252,7 +280,7 @@ daily-digest-prompt/
 2. **Phase 1**：1 個查詢 Agent（Todoist 查詢 + 過濾 + 路由 + 規劃，timeout 300s）
 3. 輸出計畫類型：`tasks`（有待辦）/ `auto`（觸發自動任務）/ `idle`（跳過）
 4. **Phase 2**：N 個並行執行 Agent（依計畫分配，動態 timeout 按任務類型計算）
-   - research: 600s、code: 900s、skill/general: 300s、auto: 600s、gitpush: 180s
+   - research: 600s、code: 900s、skill/general: 300s、auto: 600s、gitpush: 360s
 5. **Phase 3**：1 個組裝 Agent（關閉任務 + 更新狀態 + 推播通知，timeout 180s）
 6. Phase 3 失敗可自動重試一次（間隔 60 秒）
 
@@ -274,8 +302,10 @@ daily-digest-prompt/
 | Hook | 類型 | Matcher | 用途 |
 |------|------|---------|------|
 | `pre_bash_guard.py` | PreToolUse | Bash | 攔截 nul 重導向、scheduler-state 寫入、危險刪除、force push、敏感環境變數讀取、機密外洩 |
-| `pre_write_guard.py` | PreToolUse | Write, Edit | 攔截 nul 檔案建立、scheduler-state 寫入、敏感檔案寫入、路徑遍歷攻擊 |
-| `post_tool_logger.py` | PostToolUse | *（所有工具） | 結構化 JSONL 日誌，自動標籤分類 |
+| `pre_write_guard.py` | PreToolUse | Write, Edit | 攔截 nul 檔案建立、scheduler-state 寫入、敏感檔案寫入、路徑遍歷攻擊、SKILL.md 修改保護 |
+| `pre_read_guard.py` | PreToolUse | Read | 攔截敏感系統路徑（.ssh/.gnupg）、敏感檔案（.env/credentials）、Windows 憑據路徑 |
+| `post_tool_logger.py` | PostToolUse | *（所有工具） | 結構化 JSONL 日誌，自動標籤分類，50MB 緊急輪轉 |
+| `validate_config.py` | 工具（非 Hook） | — | YAML 配置 Schema 驗證（可由 check-health.ps1 呼叫或獨立執行） |
 | `on_stop_alert.py` | Stop | — | Session 結束時分析日誌，異常時自動 ntfy 告警（使用安全暫存檔） |
 
 ### 強制規則對照表（Prompt 自律 → Hook 強制）
@@ -290,6 +320,9 @@ daily-digest-prompt/
 | 路徑遍歷防護 | 無 | `pre_write_guard.py` 攔截 `../` 逃逸專案目錄的路徑 |
 | 敏感環境變數保護 | 無 | `pre_bash_guard.py` 攔截 echo/printenv/env 讀取 TOKEN/SECRET/KEY/PASSWORD |
 | 機密外洩防護 | 無 | `pre_bash_guard.py` 攔截 curl/wget 傳送敏感變數 |
+| SKILL.md 修改保護 | 無 | `pre_write_guard.py` 攔截所有對 SKILL.md 的 Write/Edit 操作 |
+| 敏感路徑讀取保護 | 無 | `pre_read_guard.py` 攔截 .ssh/.gnupg/.env/credentials 等路徑的讀取 |
+| Prompt Injection 防護 | 無 | 三處 prompt 模板加入消毒指引（todoist-query + research-task + fetch-hackernews） |
 
 ### 結構化日誌系統
 
@@ -371,12 +404,12 @@ python hooks/query_logs.py --format json
 - `check-health.ps1` 提供近 7 天健康度報告
 
 ### 4. 自動任務輪轉（round-robin）
-- 15 個自動任務定義在 `config/frequency-limits.yaml`，合計 40 次/日上限
-- 6 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)
+- 18 個自動任務定義在 `config/frequency-limits.yaml`，合計 45 次/日上限
+- 8 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)、系統自省(4)、GitHub靈感(1)
 - 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
 - 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成
 
-## Skills（專案內自包含，共 15 個）
+## Skills（專案內自包含，共 20 個）
 
 完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 

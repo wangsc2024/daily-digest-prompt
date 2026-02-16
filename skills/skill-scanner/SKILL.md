@@ -5,6 +5,7 @@ description: |
   Cisco AI Defense Skill Scanner — 掃描專案內所有 Skill，偵測安全風險（注入、資料洩露、權限提升等）。
   Use when: 安全掃描、Skill 審查、安全稽核。
 allowed-tools: Bash, Read
+cache-ttl: N/A
 triggers:
   - "安全掃描"
   - "skill 掃描"
@@ -12,6 +13,10 @@ triggers:
   - "audit skills"
   - "安全稽核"
   - "掃描技能"
+  - "安全檢查"
+  - "漏洞掃描"
+  - "Cisco AI Defense"
+  - "YARA"
 ---
 
 # Skill Scanner — AI Agent 技能安全掃描

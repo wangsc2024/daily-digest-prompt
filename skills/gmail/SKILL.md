@@ -16,6 +16,9 @@ triggers:
   - "收件匣"
   - "inbox"
   - "mail"
+  - "Google 信箱"
+  - "重要郵件"
+  - "郵件摘要"
 ---
 
 # Gmail 郵件讀取整合

@@ -14,6 +14,12 @@ triggers:
   - "機器學習"
   - "Hacker News"
   - "技術動態"
+  - "HN"
+  - "人工智慧"
+  - "深度學習"
+  - "AI動態"
+  - "ML"
+  - "Transformer"
 ---
 
 # Hacker News AI 新聞摘要（每日摘要簡化版）

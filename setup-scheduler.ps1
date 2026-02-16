@@ -9,7 +9,7 @@ param(
     [switch]$FromHeartbeat
 )
 
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 
 # ============================================
 # -FromHeartbeat: 從 HEARTBEAT.md 讀取並批次建立排程

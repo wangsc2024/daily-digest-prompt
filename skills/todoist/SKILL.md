@@ -16,6 +16,10 @@ triggers:
   - "新增任務"
   - "完成任務"
   - "task"
+  - "to-do list"
+  - "待辦清單"
+  - "to-do"
+  - "待辦"
 ---
 
 # Todoist 待辦事項整合

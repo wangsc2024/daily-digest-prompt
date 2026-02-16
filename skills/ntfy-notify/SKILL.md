@@ -16,6 +16,10 @@ triggers:
   - "做完通知"
   - "完成後提醒"
   - "處理完提醒"
+  - "推播"
+  - "ntfy"
+  - "訊息推送"
+  - "告警"
 ---
 
 # ntfy 通知 (ntfy Notification Skill)

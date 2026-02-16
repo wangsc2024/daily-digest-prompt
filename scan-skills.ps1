@@ -23,7 +23,7 @@ param(
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 $SkillsDir = "$AgentDir\skills"
 $ScannerExe = "D:\Python311\Scripts\skill-scanner.exe"
 

@@ -1,0 +1,56 @@
+# config/timeouts.yaml
+# 集中管理所有 timeout 值（秒）
+# 修改此文件可調整各階段超時，不需動 .ps1 腳本
+version: 1
+
+# 每日摘要 - 團隊模式 (run-agent-team.ps1)
+daily_digest_team:
+  phase1_timeout: 300       # Phase 1: 並行資料擷取
+  phase2_timeout: 420       # Phase 2: 摘要組裝
+  phase2_max_retries: 1     # Phase 2 重試次數
+  retry_base_interval: 60   # 重試基礎間隔（指數退避）
+  retry_max_interval: 300   # 重試最大間隔
+  retry_jitter_max: 15      # 重試隨機抖動上限
+
+# 每日摘要 - 單一模式 (run-agent.ps1)
+daily_digest_single:
+  timeout: 900              # 總超時
+  max_retries: 1            # 重試次數
+  retry_interval: 120       # 重試間隔
+
+# Todoist 任務 - 團隊模式 (run-todoist-agent-team.ps1)
+todoist_team:
+  phase1_timeout: 300       # Phase 1: 查詢+路由+規劃
+  phase1_max_retries: 1     # Phase 1 重試次數
+  phase1_retry_delay_min: 30  # Phase 1 重試最小延遲
+  phase1_retry_delay_max: 40  # Phase 1 重試最大延遲
+  phase3_timeout: 180       # Phase 3: 組裝+通知
+  phase3_max_retries: 1     # Phase 3 重試次數
+  phase3_retry_base: 60     # Phase 3 重試基礎間隔
+  phase3_retry_max: 300     # Phase 3 重試最大間隔
+  # Phase 2 動態 timeout（按任務類型）
+  task_timeouts:
+    research: 600
+    code: 900
+    skill: 300
+    general: 300
+    auto: 600
+    gitpush: 180
+
+# Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
+todoist_single:
+  timeout: 2100             # 總超時
+
+# Gmail Agent (run-gmail-agent.ps1)
+gmail:
+  timeout: 600              # 總超時
+  max_retries: 1            # 重試次數
+  retry_interval: 120       # 重試間隔
+
+# HEARTBEAT.md 排程超時
+scheduler:
+  daily_digest_am: 3600     # 08:00 摘要
+  daily_digest_mid: 900     # 11:15 摘要
+  daily_digest_pm: 3600     # 21:15 摘要
+  todoist_single: 2400      # 整點 Todoist
+  todoist_team: 2700        # 半點 Todoist

@@ -1,12 +1,10 @@
 你是 Skill 品質審查工程師，全程使用正體中文。
 你的任務是審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證。
-完成後將結果寫入 `results/todoist-skill-audit.json`。
+完成後將結果寫入 `results/todoist-auto-skill-audit.json`。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
-## Skill-First 規則
 必須先讀取以下 SKILL.md：
 - `skills/SKILL_INDEX.md`
 - `skills/knowledge-query/SKILL.md`
@@ -101,7 +99,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第八步：寫入結果 JSON
-用 Write 建立 `results/todoist-skill-audit.json`：
+用 Write 建立 `results/todoist-auto-skill-audit.json`：
 ```json
 {
   "agent": "todoist-skill-audit",

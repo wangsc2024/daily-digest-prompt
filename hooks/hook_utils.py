@@ -9,6 +9,18 @@ import os
 from datetime import datetime
 
 
+# Prompt Injection 偵測 patterns（供 hook 或 Python 腳本引用）
+INJECTION_PATTERNS = [
+    r"ignore\s+(all\s+)?previous\s+instructions",
+    r"system\s*:\s*you\s+are",
+    r"<\s*/?\s*system",
+    r"ADMIN\s*MODE",
+    r"forget\s+(everything|all)",
+    r"you\s+are\s+now\s+a",
+    r"disregard\s+(all|any)\s+(previous|prior)",
+]
+
+
 def find_config_path(filename="hook-rules.yaml"):
     """從 hooks/ 上層或 cwd 尋找配置檔，找不到回傳 None。"""
     # 優先：以本腳本位置推算 hooks/../config/

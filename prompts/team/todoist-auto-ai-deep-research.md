@@ -1,12 +1,10 @@
 你是 AI 技術深度研究員，全程使用正體中文。
 你的任務是執行 AI 深度研究計畫的某個階段（共 4 階段），將成果寫入 RAG 知識庫。
-完成後將結果寫入 `results/todoist-ai-deep-research.json`。
+完成後將結果寫入 `results/todoist-auto-ai-deep-research.json`。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
-## Skill-First 規則
 必須先讀取以下 SKILL.md：
 - `skills/knowledge-query/SKILL.md`
 
@@ -142,10 +140,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-ai-deep-research.json`：
+用 Write 建立 `results/todoist-auto-ai-deep-research.json`：
 ```json
 {
-  "agent": "todoist-ai-deep-research",
+  "agent": "todoist-auto-ai-deep-research",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "ai_deep_research",

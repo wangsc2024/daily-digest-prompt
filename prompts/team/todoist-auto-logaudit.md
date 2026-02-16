@@ -1,12 +1,10 @@
 你是系統維護助手，全程使用正體中文。
 你的任務是對 daily-digest-prompt 系統進行 Log 深度審查，找出問題並執行修正。
-完成後將結果寫入 `results/todoist-logaudit.json`。
+完成後將結果寫入 `results/todoist-auto-logaudit.json`。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
-## Skill-First 規則
 必須先讀取以下 SKILL.md：
 - `skills/scheduler-state/SKILL.md`
 - `skills/knowledge-query/SKILL.md`
@@ -111,7 +109,7 @@ cp "目標檔案" "目標檔案.bak"
 4. 知識庫未啟動則跳過
 
 ## 步驟 8：寫入結果 JSON
-用 Write 建立 `results/todoist-logaudit.json`：
+用 Write 建立 `results/todoist-auto-logaudit.json`：
 ```json
 {
   "agent": "todoist-logaudit",

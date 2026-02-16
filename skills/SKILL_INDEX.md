@@ -2,32 +2,37 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（13 個核心 Skill + 2 個工具 Skill）
+## 速查表（17 個核心 Skill + 3 個工具 Skill = 20 個）
 
 ### 核心 Skill（每日摘要/Todoist Agent 使用）
 
 | # | Skill | 用途 | 觸發關鍵字 |
 |---|-------|------|-----------|
-| 1 | todoist | 待辦事項查詢/新增/完成 | 待辦、任務、todo、todoist |
-| 2 | pingtung-news | 屏東新聞查詢 | 屏東、新聞、縣政、周春米 |
-| 3 | pingtung-policy-expert | 施政背景解讀（depends-on: pingtung-news） | 政策、施政、長照、托育、產業、醫療、交通、農業、觀光、治水、教育 |
-| 4 | hackernews-ai-digest | HN AI 新聞篩選 | AI、LLM、GPT、技術動態 |
-| 5 | atomic-habits | 原子習慣每日提示 | 習慣、行為改變 |
-| 6 | learning-mastery | 深度學習技術每日技巧 | 學習、費曼、間隔複習 |
-| 7 | knowledge-query | 知識庫查詢與匯入 | 知識庫、筆記、研究 |
-| 8 | ntfy-notify | 推播通知 | 通知、提醒、notify、完成後通知、做完通知、完成後提醒 |
-| 9 | digest-memory | 摘要記憶持久化 | 記憶、連續天數 |
-| 10 | api-cache | API 回應快取與降級 | 快取、cache、降級 |
-| 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度 |
-| 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件 |
-| 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、HTML5、遊戲品質 |
+| 1 | todoist | 待辦事項查詢/新增/完成 | todoist、待辦事項、todo、任務、to-do list、待辦清單、待辦 |
+| 2 | pingtung-news | 屏東新聞查詢 | 屏東新聞、屏東縣政、周春米、縣府公告、屏東最新消息、屏東縣長、新聞稿、地方新聞 |
+| 3 | pingtung-policy-expert | 施政背景解讀（depends-on: pingtung-news） | 政策、施政、長照、托育、產業、醫療、交通、農業、觀光、治水、教育、施政報告、政策解讀、社會福利 |
+| 4 | hackernews-ai-digest | HN AI 新聞篩選 | AI 新聞、LLM、GPT、Claude、機器學習、HN、人工智慧、深度學習、ML、Transformer |
+| 5 | atomic-habits | 原子習慣每日提示 | 習慣、行為改變、原子習慣、好習慣、壞習慣、行為設計、James Clear、身份認同、兩分鐘法則 |
+| 6 | learning-mastery | 深度學習技術每日技巧 | 學習、費曼、刻意練習、間隔複習、學習方法、學習技巧、記憶法、楊大輝、提取練習 |
+| 7 | knowledge-query | 知識庫查詢與匯入 | 知識庫、筆記、搜尋筆記、匯入、KB、knowledge base、查詢筆記、知識管理 |
+| 8 | ntfy-notify | 推播通知 | 通知、提醒、notify、完成後通知、做完通知、完成後提醒、推播、ntfy、訊息推送、告警 |
+| 9 | digest-memory | 摘要記憶持久化 | 記憶、連續天數、上次執行、跨次追蹤、連續報到、streak、執行統計、趨勢 |
+| 10 | api-cache | API 回應快取與降級 | 快取、cache、降級、API 故障、快取策略、TTL、cache hit、快取命中 |
+| 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度、執行記錄、排程狀態、成功率、系統狀態、scheduler、平均耗時 |
+| 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件、信箱、未讀、收件匣、inbox、Google 信箱、重要郵件、郵件摘要 |
+| 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、遊戲設計、HTML5 遊戲、遊戲品質、Canvas 遊戲、JavaScript 遊戲、遊戲部署、遊戲效能 |
+| 14 | system-insight | 系統自省分析（執行品質/Skill 使用/失敗模式） | 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、system-insight、自省 |
+| 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋 |
+| 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator |
+| 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進 |
 
 ### 工具 Skill（按需使用，互動式觸發）
 
 | # | Skill | 用途 | 觸發關鍵字 |
 |---|-------|------|-----------|
-| 14 | task-manager | 新增自動/排程/單次任務標準化（互動式） | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理 |
-| 15 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全、掃描、scan、audit、稽核 |
+| 18 | task-manager | 新增自動/排程/單次任務標準化（互動式） | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理、add task、round-robin |
+| 19 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全掃描、skill 掃描、security scan、安全稽核、安全檢查、漏洞掃描、Cisco AI Defense、YARA |
+| 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
 
 **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
@@ -67,6 +72,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^UI` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^Cloudflare` | game-design | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | skill-task.md |
 | `@write` | 文件撰寫 | Read,Bash,Write | skill-task.md |
 
@@ -86,6 +92,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 ├── 涉及「學習/技巧」？     -> learning-mastery
 ├── 涉及「知識/筆記/研究」？ -> knowledge-query
 ├── 涉及「郵件/email」？    -> gmail + api-cache
+├── 涉及「系統審查/評分」？ -> system-audit
 ├── 無可處理項目？          -> knowledge-query（楞嚴經研究 -> 匯入知識庫）
 ├── 需要「通知/提醒」？     -> ntfy-notify
 ├── 任何 API 呼叫？         -> api-cache（包裝所有外部 API）

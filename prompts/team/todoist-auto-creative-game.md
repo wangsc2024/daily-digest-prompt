@@ -3,13 +3,11 @@
 你是遊戲創意優化專家，全程使用正體中文。
 你的任務是以創意思維優化 D:\Source\game 目錄下的遊戲，提升遊戲體驗和品質。
 重點是「創意」— 不是修 bug，而是加入讓人眼前一亮的新元素。
-完成後將結果寫入 `results/todoist-creative-game.json`。
+完成後將結果寫入 `results/todoist-auto-creative-game.json`。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
-## Skill-First 規則
 必須先讀取以下 SKILL.md，嚴格依照指示操作：
 - `skills/game-design/SKILL.md`
 - `skills/knowledge-query/SKILL.md`
@@ -83,7 +81,7 @@
 若未通過：修正 → 重新驗證（最多自修正 2 次）。
 
 ## 寫入結果 JSON
-用 Write 建立 `results/todoist-creative-game.json`：
+用 Write 建立 `results/todoist-auto-creative-game.json`：
 ```json
 {
   "agent": "todoist-creative-game",

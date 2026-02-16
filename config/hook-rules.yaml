@@ -80,3 +80,45 @@ write_rules:
     check: path_traversal
     reason_template: "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
     guard_tag: traversal-guard
+
+  - id: skill-md-protect
+    description: "禁止 Agent 修改 SKILL.md 檔案"
+    check: basename_equals
+    value: "SKILL.md"
+    reason: "SKILL.md 為系統行為定義，不可在執行期間修改"
+    guard_tag: skill-protect
+
+# 檔案讀取攔截規則（對應 hooks/pre_read_guard.py）
+read_rules:
+  - id: sensitive-path
+    description: "禁止讀取敏感系統路徑"
+    check: path_match
+    patterns:
+      - '\.ssh'
+      - '\.gnupg'
+      - 'credentials'
+      - '\.env'
+      - '/etc/shadow'
+      - '/etc/passwd'
+      - '\.aws/credentials'
+      - '\.kube/config'
+    reason: "禁止讀取敏感系統檔案"
+    guard_tag: read-guard
+
+  - id: sensitive-read-files
+    description: "禁止讀取敏感檔案"
+    check: basename_in
+    values: [".env", ".env.local", "credentials.json", "token.json",
+             "secrets.json", ".htpasswd", "id_rsa", "id_ed25519"]
+    reason_template: "禁止讀取敏感檔案: {matched}"
+    guard_tag: secret-read-guard
+
+  - id: windows-credentials
+    description: "禁止讀取 Windows 憑據路徑"
+    check: path_match
+    patterns:
+      - 'AppData.*Roaming.*Microsoft.*Credentials'
+      - 'AppData.*Roaming.*Microsoft.*Protect'
+      - 'Windows.*System32.*config.*SAM'
+    reason: "禁止讀取 Windows 系統憑據"
+    guard_tag: win-cred-guard

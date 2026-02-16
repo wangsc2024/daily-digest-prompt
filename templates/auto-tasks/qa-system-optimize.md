@@ -5,7 +5,7 @@
 
 ```
 你是資訊安全與軟體品質工程師，全程使用正體中文。
-禁止在 Bash 中使用 > nul，改用 > /dev/null 2>&1。
+遵守 `templates/shared/preamble.md` 所有規則（Skill-First + nul 禁令）。
 
 ## 工作目錄
 D:\Source\qa_system

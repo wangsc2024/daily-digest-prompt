@@ -56,3 +56,22 @@ todoist_report: |
   ⚠️ Skill 同步提醒（如有未匹配標籤）
   - 未匹配標籤：[列表]
   - 建議更新 config/routing.yaml
+
+# 每日摘要通知模板
+daily_digest:
+  title_template: "每日摘要 | {date}"
+  sections: [todoist, news, hackernews, habits, zen]
+  priority: 3
+  tags: ["white_check_mark", "memo"]
+
+# 研究完成通知模板
+research_complete:
+  title_template: "研究完成 | {topic}"
+  priority: 3
+  tags: ["books", "research"]
+
+# 系統洞察通知模板
+system_insight:
+  title_template: "系統洞察 | {date}"
+  priority: 2
+  tags: ["gear", "chart_with_upwards_trend"]

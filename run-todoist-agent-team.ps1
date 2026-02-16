@@ -16,7 +16,7 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Set paths
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 $LogDir = "$AgentDir\logs"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"
@@ -288,7 +288,7 @@ elseif ($plan.plan_type -eq "auto") {
         $taskKey = $nextTask.key
         $taskName = $nextTask.name
 
-        # Dedicated team prompts for all 15 auto-tasks
+        # Dedicated team prompts for all 18 auto-tasks
         $dedicatedPrompts = @{
             # 佛學研究（4）
             "shurangama"           = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
@@ -311,6 +311,11 @@ elseif ($plan.plan_type -eq "auto") {
             "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
             # 專案品質（1）
             "qa_optimize"          = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
+            # 系統自省（2）
+            "system_insight"       = "$AgentDir\prompts\team\todoist-auto-system-insight.md"
+            "self_heal"            = "$AgentDir\prompts\team\todoist-auto-self-heal.md"
+            # GitHub 靈感（1）
+            "github_scout"         = "$AgentDir\prompts\team\todoist-auto-github-scout.md"
         }
 
         # Choose prompt: dedicated team prompt if available, otherwise generic from Phase 1

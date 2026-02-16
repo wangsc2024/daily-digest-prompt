@@ -5,11 +5,18 @@ description: |
   HTTP 回應快取與降級。快取 API 回應避免限速，故障時自動降級使用過期快取。
   Use when: 快取、cache、降級、API 故障。
 allowed-tools: Bash, Read, Write
+cache-ttl: N/A
 triggers:
   - "快取"
   - "cache"
   - "降級"
   - "API 故障"
+  - "快取策略"
+  - "TTL"
+  - "降級服務"
+  - "API 快取"
+  - "cache hit"
+  - "快取命中"
 ---
 
 # API Cache Skill - HTTP 回應快取

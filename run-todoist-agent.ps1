@@ -14,7 +14,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $MaxDurationSeconds = 2100  # 35 minutes timeout (配合 max_tasks_per_run=3)
 
 # Set paths
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 $LogDir = "$AgentDir\logs"
 $PromptFile = "$AgentDir\hour-todoist-prompt.md"
 $StateFile = "$AgentDir\state\scheduler-state.json"

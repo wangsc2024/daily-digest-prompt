@@ -1,0 +1,356 @@
+# config/audit-scoring.yaml
+# 系統審查評分規則 — system-audit Skill 使用
+# 修改此文件可調整評分標準，不需碰 SKILL.md
+
+version: 1
+
+# ============================================================
+# 權重配置（3 種模式，合計 = 100）
+# ============================================================
+weight_profiles:
+  # 預設 — 均衡考量（適用多數系統）
+  balanced:
+    information_security: 20
+    system_architecture: 18
+    system_quality: 18
+    system_workflow: 15
+    technology_stack: 10
+    system_documentation: 10
+    system_completeness: 9
+
+  # 安全優先 — 金融/醫療/政府系統
+  security_first:
+    information_security: 30
+    system_architecture: 15
+    system_quality: 18
+    system_workflow: 12
+    technology_stack: 8
+    system_documentation: 10
+    system_completeness: 7
+
+  # 快速迭代 — 新創/MVP/原型系統
+  startup:
+    information_security: 12
+    system_architecture: 15
+    system_quality: 15
+    system_workflow: 18
+    technology_stack: 12
+    system_documentation: 8
+    system_completeness: 20
+
+default_profile: "balanced"
+
+# ============================================================
+# 等級定義（加權總分對應等級）
+# ============================================================
+grade_thresholds:
+  S:
+    min: 90
+    label: "卓越"
+    description: "業界標竿等級，極少數系統能達到"
+  A:
+    min: 80
+    label: "優秀"
+    description: "超越多數同類系統，具備企業級品質"
+  B:
+    min: 70
+    label: "良好"
+    description: "具備專業水準，仍有提升空間"
+  C:
+    min: 55
+    label: "及格"
+    description: "基本可用但有明顯改善空間"
+  D:
+    min: 40
+    label: "待改善"
+    description: "多項缺陷需優先處理"
+  F:
+    min: 0
+    label: "不及格"
+    description: "嚴重不足，需全面檢討"
+
+# ============================================================
+# 校準規則（防止 AI 打分偏高）
+# ============================================================
+calibration:
+  baseline: |
+    一般中小型系統的典型得分應在 50-70 之間。
+    只有具備完整 CI/CD、高覆蓋率、企業級安全的系統才配 80+。
+    滿分 100 代表理論完美，現實中幾乎不存在。
+  hard_caps:
+    - condition: "無任何自動化測試"
+      dimension: "system_quality"
+      max_score: 50
+    - condition: "無安全掃描且無 Hook/Guard"
+      dimension: "information_security"
+      max_score: 60
+    - condition: "無架構文件（無 README 或設計文件）"
+      dimension: "system_documentation"
+      max_score: 40
+    - condition: "TODO/FIXME/HACK 合計超過 20 處"
+      dimension: "system_completeness"
+      max_score: 50
+    - condition: "無重試或降級機制"
+      dimension: "system_workflow"
+      max_score: 55
+    - condition: "硬編碼密碼或 Token 存在於程式碼中"
+      dimension: "information_security"
+      max_score: 30
+  evidence_policy: |
+    每個子項必須有至少 1 項具體證據（檔案路徑、指令輸出、Grep 結果）。
+    不可用「看起來不錯」「應該有」等模糊語言。
+    缺乏證據的子項一律不得高於 40 分。
+
+# ============================================================
+# N/A 規則
+# ============================================================
+na_policy:
+  description: "僅在該項確實不適用於目標系統時可標記 N/A"
+  requires_justification: true
+  weight_redistribution: "將該項權重按比例分配給同維度其他子項"
+  max_na_per_dimension: 2  # 每個維度最多 2 個 N/A，超過需特別說明
+
+# ============================================================
+# 維度定義與子項（7 維度 × 38 子項）
+# ============================================================
+dimensions:
+
+  # --- 維度 1：資訊安全（6 子項）---
+  information_security:
+    label: "資訊安全"
+    weight_key: "information_security"
+    sub_items:
+      - id: "1.1"
+        name: "機密管理"
+        full_score_criteria: "無硬編碼密碼/Token，使用環境變數或 Secret Manager，.gitignore 排除敏感檔案"
+        evidence: "Grep 掃描 password|secret|token|api_key（排除 .md/.yaml 說明文件），確認 .gitignore 含 .env"
+        zero_criteria: "程式碼中有明文密碼或 Token"
+      - id: "1.2"
+        name: "輸入驗證"
+        full_score_criteria: "所有外部輸入有驗證/sanitize，防止注入攻擊"
+        evidence: "Grep 搜尋 API 端點/表單處理，檢查參數驗證邏輯"
+        zero_criteria: "無任何輸入驗證"
+      - id: "1.3"
+        name: "存取控制"
+        full_score_criteria: "Hook/Guard 攔截敏感操作，allowedTools 權限最小化，敏感檔案有保護規則"
+        evidence: "檢查 hooks 設定、allowedTools 限縮、write guard 規則"
+        zero_criteria: "無任何存取控制機制"
+      - id: "1.4"
+        name: "依賴安全"
+        full_score_criteria: "無已知漏洞依賴，有鎖定檔案（lock file）"
+        evidence: "檢查 requirements.txt/package-lock.json，嘗試 pip audit 或 npm audit"
+        zero_criteria: "依賴未鎖定且有已知漏洞"
+      - id: "1.5"
+        name: "傳輸安全"
+        full_score_criteria: "所有外部 API 呼叫使用 HTTPS，無明文傳輸"
+        evidence: "Grep 搜尋 http://（排除 localhost/127.0.0.1）的外部呼叫"
+        zero_criteria: "外部 API 使用 HTTP 明文傳輸"
+      - id: "1.6"
+        name: "日誌安全"
+        full_score_criteria: "日誌不含敏感資訊，有結構化日誌系統"
+        evidence: "抽樣檢查 logs/ 目錄，確認無 Token/密碼洩露"
+        zero_criteria: "日誌中有敏感資訊洩露"
+
+  # --- 維度 2：系統架構（6 子項）---
+  system_architecture:
+    label: "系統架構"
+    weight_key: "system_architecture"
+    sub_items:
+      - id: "2.1"
+        name: "關注點分離"
+        full_score_criteria: "清晰的分層/模組化（config/template/code/test 分離），各層職責單一"
+        evidence: "目錄結構分析，各層是否有明確邊界"
+        zero_criteria: "所有程式碼混在單一檔案或目錄"
+      - id: "2.2"
+        name: "配置外部化"
+        full_score_criteria: "所有可變邏輯抽入配置檔，修改配置無需動核心程式碼"
+        evidence: "統計 config/ 涵蓋的可變參數比例，確認修改配置不需改 prompt/script"
+        zero_criteria: "所有參數硬編碼在程式碼中"
+      - id: "2.3"
+        name: "耦合度"
+        full_score_criteria: "模組間低耦合，無循環依賴，介面清晰"
+        evidence: "分析 import/require/Read 關係，檢查是否有交叉引用或隱性耦合"
+        zero_criteria: "模組間高度耦合，改一處需連動多處"
+      - id: "2.4"
+        name: "可擴展性"
+        full_score_criteria: "新增功能有標準化流程（如 task-manager），擴展無需修改核心架構"
+        evidence: "是否有標準化新增工具，新增步驟文件化，開放-封閉原則"
+        zero_criteria: "新增功能需修改核心程式碼多處"
+      - id: "2.5"
+        name: "容錯設計"
+        full_score_criteria: "重試機制、快取降級策略、錯誤邊界、back-pressure 完整"
+        evidence: "檢查重試邏輯、降級路徑、失敗處理程式碼"
+        zero_criteria: "無任何容錯機制，一個錯誤導致整體崩潰"
+      - id: "2.6"
+        name: "單一定義處（DRY）"
+        full_score_criteria: "無重複定義，共用邏輯集中管理（如 preamble.md、hook_utils.py）"
+        evidence: "Grep 搜尋重複的配置片段或硬編碼常數"
+        zero_criteria: "大量複製貼上，同一邏輯散佈多處"
+
+  # --- 維度 3：系統品質（6 子項）---
+  system_quality:
+    label: "系統品質"
+    weight_key: "system_quality"
+    sub_items:
+      - id: "3.1"
+        name: "測試覆蓋率"
+        full_score_criteria: "核心邏輯有單元測試，覆蓋率 ≥ 80%，含邊界測試"
+        evidence: "pytest --co 統計測試數量，pytest --cov 取覆蓋率"
+        zero_criteria: "無任何自動化測試"
+      - id: "3.2"
+        name: "程式碼品質"
+        full_score_criteria: "無 lint 錯誤，遵循一致的編碼風格，命名規範統一"
+        evidence: "執行 linter（pylint/eslint/flake8），檢查格式一致性"
+        zero_criteria: "大量 lint 錯誤，風格混亂"
+      - id: "3.3"
+        name: "錯誤處理"
+        full_score_criteria: "所有外部呼叫有 try-catch/錯誤碼判斷，錯誤有分級和回報機制"
+        evidence: "Grep 搜尋外部 API 呼叫附近的錯誤處理程式碼"
+        zero_criteria: "外部呼叫無錯誤處理，失敗時靜默忽略"
+      - id: "3.4"
+        name: "品質驗證機制"
+        full_score_criteria: "有品質閘門（quality gate）、完成認證（DONE_CERT）、迭代精修機制"
+        evidence: "檢查 quality-gate.md、done-cert.md 是否存在且被模板引用"
+        zero_criteria: "無任何品質驗證，產出未經檢查直接發布"
+      - id: "3.5"
+        name: "監控與可觀測性"
+        full_score_criteria: "結構化日誌（JSONL）、健康檢查腳本、異常自動告警"
+        evidence: "檢查日誌系統、health-check 腳本、ntfy/告警整合"
+        zero_criteria: "無日誌、無監控、無告警"
+      - id: "3.6"
+        name: "效能基準"
+        full_score_criteria: "有效能指標追蹤（耗時、快取命中率），timeout 設定合理"
+        evidence: "檢查 timeout 配置、平均耗時追蹤、快取統計"
+        zero_criteria: "無效能監控，無 timeout 保護"
+
+  # --- 維度 4：系統工作流（5 子項）---
+  system_workflow:
+    label: "系統工作流"
+    weight_key: "system_workflow"
+    sub_items:
+      - id: "4.1"
+        name: "自動化程度"
+        full_score_criteria: "核心流程全自動化（排程 → 執行 → 通知），無需人工介入"
+        evidence: "檢查排程配置（cron/Task Scheduler）、腳本自動化覆蓋範圍"
+        zero_criteria: "所有流程需手動執行"
+      - id: "4.2"
+        name: "並行效率"
+        full_score_criteria: "獨立任務並行執行（多 Agent/多 Job），非串行等待"
+        evidence: "檢查團隊模式/並行腳本（Start-Job/Task 工具），並行比例"
+        zero_criteria: "所有任務串行執行，無並行機制"
+      - id: "4.3"
+        name: "失敗恢復"
+        full_score_criteria: "失敗自動重試、降級策略完整、back-pressure 機制"
+        evidence: "檢查重試邏輯（retry count）、降級路徑、失敗任務處理"
+        zero_criteria: "失敗後無恢復，需手動重跑"
+      - id: "4.4"
+        name: "狀態追蹤"
+        full_score_criteria: "執行歷史可查詢、狀態持久化、跨次記憶"
+        evidence: "檢查 state/*.json、context/*.json、歷史查詢工具"
+        zero_criteria: "無執行歷史，每次執行完即遺忘"
+      - id: "4.5"
+        name: "排程管理"
+        full_score_criteria: "排程集中定義（HEARTBEAT.md）、可批次管理、易於擴展"
+        evidence: "檢查排程配置集中度、setup 工具、擴展流程"
+        zero_criteria: "排程散佈各處，無統一管理"
+
+  # --- 維度 5：系統使用的技術（5 子項）---
+  technology_stack:
+    label: "技術棧"
+    weight_key: "technology_stack"
+    sub_items:
+      - id: "5.1"
+        name: "技術成熟度"
+        full_score_criteria: "使用穩定的主流技術（非實驗性），社群活躍，文件完善"
+        evidence: "列出核心依賴的版本與穩定性狀態"
+        zero_criteria: "使用已棄用或極不穩定的技術"
+      - id: "5.2"
+        name: "版本管理"
+        full_score_criteria: "依賴版本鎖定（lock file），有明確更新策略"
+        evidence: "檢查 lock 檔案、版本固定方式（== vs >= vs ^）"
+        zero_criteria: "無版本鎖定，依賴隨意浮動"
+      - id: "5.3"
+        name: "工具鏈完整性"
+        full_score_criteria: "開發/測試/部署工具鏈完整（lint + test + build + deploy）"
+        evidence: "列舉工具鏈覆蓋的階段，缺少哪些環節"
+        zero_criteria: "僅有手動開發，無工具輔助"
+      - id: "5.4"
+        name: "跨平台相容性"
+        full_score_criteria: "明確的平台支援聲明，平台差異有條件處理"
+        evidence: "檢查平台相關的 if/switch（如 Windows vs Linux 路徑差異）"
+        zero_criteria: "僅在單一平台測試，無相容處理"
+      - id: "5.5"
+        name: "技術債務"
+        full_score_criteria: "無過時依賴、無棄用 API、無已知 workaround"
+        evidence: "搜尋 deprecated 標記、過時 API 呼叫、HACK/workaround 註解"
+        zero_criteria: "大量技術債務且無清理計畫"
+
+  # --- 維度 6：系統文件（5 子項）---
+  system_documentation:
+    label: "系統文件"
+    weight_key: "system_documentation"
+    sub_items:
+      - id: "6.1"
+        name: "架構文件"
+        full_score_criteria: "有系統架構說明，模組職責清晰，層次關係明確"
+        evidence: "檢查 CLAUDE.md/README.md 架構段落、specs/system-docs/"
+        zero_criteria: "完全無架構說明"
+      - id: "6.2"
+        name: "操作手冊"
+        full_score_criteria: "有完整的操作指南，含安裝/設定/執行/疑難排解"
+        evidence: "檢查 ops-manual.md 或等效文件，常用操作是否文件化"
+        zero_criteria: "無操作指南，新人無法上手"
+      - id: "6.3"
+        name: "API / 介面文件"
+        full_score_criteria: "所有外部介面有文件說明（參數、回傳值、錯誤碼）"
+        evidence: "檢查 SKILL.md 的 API 說明、OpenAPI spec（若適用）"
+        zero_criteria: "外部介面完全無文件"
+      - id: "6.4"
+        name: "配置說明"
+        full_score_criteria: "配置檔有注釋說明用途與預設值，覆蓋率 > 80%"
+        evidence: "抽樣檢查 config/*.yaml 注釋行佔比"
+        zero_criteria: "配置無注釋，參數用途不明"
+      - id: "6.5"
+        name: "變更記錄"
+        full_score_criteria: "有 changelog 或一致的 git commit 規範，版本可追溯"
+        evidence: "檢查 git log 格式一致性、是否有 CHANGELOG.md"
+        zero_criteria: "commit message 雜亂無章且無 changelog"
+
+  # --- 維度 7：系統完成度（5 子項）---
+  system_completeness:
+    label: "系統完成度"
+    weight_key: "system_completeness"
+    sub_items:
+      - id: "7.1"
+        name: "功能完成度"
+        full_score_criteria: "規劃功能全部實作，TODO/FIXME/HACK 合計 < 5"
+        evidence: "Grep 搜尋 TODO/FIXME/HACK/XXX 數量並列舉"
+        zero_criteria: "大量功能未實作，TODO > 50"
+      - id: "7.2"
+        name: "邊界處理"
+        full_score_criteria: "邊界案例有處理（空值、超時、異常輸入、大量資料）"
+        evidence: "抽樣檢查核心函式的邊界處理（null check、timeout、length limit）"
+        zero_criteria: "無邊界處理，異常輸入導致崩潰"
+      - id: "7.3"
+        name: "部署就緒"
+        full_score_criteria: "可一鍵部署/設定，無手動步驟殘留"
+        evidence: "檢查 setup 腳本完整性，是否有未自動化的手動步驟"
+        zero_criteria: "部署步驟全靠口述，無腳本化"
+      - id: "7.4"
+        name: "整合完整性"
+        full_score_criteria: "各模組間整合正確，端到端流程可通"
+        evidence: "執行端到端驗證或檢查整合測試結果"
+        zero_criteria: "模組間整合未經測試，拼裝後無法運行"
+      - id: "7.5"
+        name: "生產穩定性"
+        full_score_criteria: "正式環境運行穩定，近 7 天成功率 > 95%"
+        evidence: "檢查 scheduler-state.json 或等效執行記錄的成功率"
+        zero_criteria: "頻繁崩潰，成功率 < 50%"
+
+# ============================================================
+# 輸出格式設定
+# ============================================================
+output:
+  report_template: "templates/audit-report.md"
+  score_precision: 0  # 分數取整數（無小數）
+  weighted_formula: "加權總分 = Σ (維度分數 × 維度權重 / 100)"

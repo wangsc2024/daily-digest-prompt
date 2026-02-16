@@ -102,6 +102,10 @@ label_routing:
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
+    "^Cloudflare":
+      skills: ["game-design"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
     "^邏輯思維":
       skills: ["deep-research", "knowledge-query"]
       allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
@@ -156,7 +160,9 @@ sync_check:
   description: "在路由後，檢查是否有 Todoist 標籤不在 label_routing 映射中"
   rule: |
     遍歷所有任務的 labels：
-    1. 若某 label 不在 label_routing.mappings 的 key 列表中（去掉 ^ 比對）→ 記錄為「未匹配標籤」
+    1. 若某 label 同時不在以下兩處 → 記錄為「未匹配標籤」：
+       a. label_routing.mappings 的 key 列表中（去掉 ^ 比對）
+       b. keyword_routing.mappings 中任一 keywords 陣列中（完全比對）
     2. 輸出警告：⚠️ 發現未匹配標籤：[label1, label2]（無 Skill 路由）
     3. 建議：考慮新增 Skill 或更新 routing.yaml
   frequency: "每次執行都檢查，但同一標籤 24 小時內只提醒一次"

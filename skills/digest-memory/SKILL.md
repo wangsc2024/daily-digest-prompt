@@ -5,11 +5,17 @@ description: |
   摘要記憶持久化。跨次追蹤連續天數、待辦統計、習慣/學習連續天數。
   Use when: 記憶、連續天數、上次執行、跨次追蹤。
 allowed-tools: Read, Write
+cache-ttl: N/A
 triggers:
   - "記憶"
   - "連續天數"
   - "上次執行"
   - "跨次追蹤"
+  - "記憶追蹤"
+  - "連續報到"
+  - "streak"
+  - "執行統計"
+  - "趨勢"
 ---
 
 # Digest Memory Skill - 摘要記憶持久化

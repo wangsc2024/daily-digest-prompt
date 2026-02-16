@@ -2,12 +2,10 @@
 你的任務是讀取所有 Phase 1+2 結果，關閉已完成的 Todoist 任務，更新頻率計數與歷史追蹤，最後發送 ntfy 通知。
 不要重新查詢 Todoist API、不要重新執行任務。
 
-## 重要禁令
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
-- 禁止用 Write 工具建立名為 nul 的檔案
+## 共用規則
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
-## Skill-First 規則
-必須先讀取 SKILL.md：
+必須先讀取以下 SKILL.md：
 - `skills/todoist/SKILL.md`（關閉任務、新增評論）
 - `skills/ntfy-notify/SKILL.md`（發送通知）
 
@@ -28,7 +26,6 @@
 **plan_type = "auto"**：
 - 讀取所有 `results/todoist-auto-*.json`（自動任務結果，可能有多種類型）
 - 結果檔案命名格式：`todoist-auto-{task_key}.json`（如 `todoist-auto-shurangama.json`）
-- 相容舊格式：也檢查 `results/todoist-shurangama.json`、`todoist-logaudit.json`、`todoist-gitpush.json`
 
 **plan_type = "idle"**：
 - 無 Phase 2 結果
@@ -228,7 +225,6 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 ```bash
 rm -f results/todoist-plan.json results/todoist-task-*.md results/todoist-result-*.json
 rm -f results/todoist-auto-*.json
-rm -f results/todoist-shurangama.json results/todoist-logaudit.json results/todoist-gitpush.json
 ```
 
 ---

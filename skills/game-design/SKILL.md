@@ -14,6 +14,11 @@ triggers:
   - "HTML5 遊戲"
   - "遊戲品質"
   - "Cloudflare Pages"
+  - "Canvas 遊戲"
+  - "JavaScript 遊戲"
+  - "遊戲部署"
+  - "遊戲效能"
+  - "HTML5"
 ---
 
 # 遊戲設計與優化

@@ -8,7 +8,7 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$AgentDir = "D:\Source\daily-digest-prompt"
+$AgentDir = $PSScriptRoot
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $MemoryFile = "$AgentDir\context\digest-memory.json"
 $CacheDir = "$AgentDir\cache"
