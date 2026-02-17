@@ -4,6 +4,16 @@
 
 version: 2
 
+# 設計說明：
+# - routing.yaml 中的標籤：Todoist 任務分類標籤（用戶手動添加到任務上）
+# - SKILL.md 中的 triggers：Skill 啟動關鍵字（用於內容匹配）
+# - 兩者服務於不同目的，不需要一一對應
+#
+# 例子：
+# - 任務帶有「遊戲開發」標籤 → routing.yaml 路由到 game-design Skill
+# - 任務描述包含「遊戲」關鍵字 → game-design Skill 的 triggers 匹配
+# - 「遊戲開發」和「遊戲」是不同層面的觸發條件，各司其職
+
 # 前置過濾（最先執行，優先於所有路由層）
 pre_filter:
   description: "以下類型任務無論是否有標籤，一律跳過"

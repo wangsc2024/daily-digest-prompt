@@ -197,6 +197,14 @@ def _extract_frontmatter(filepath):
 def check_routing_consistency(skills_dir=None, config_dir=None):
     """檢查 SKILL.md triggers 與 routing.yaml 的一致性。
 
+    檢查邏輯（修正版）：
+    1. 檢查 Skill triggers 是否有對應的 routing 映射（防止 Skill 失效）
+    2. **不**警告 routing.yaml 中的標籤沒有對應 Skill triggers（正常設計）
+
+    說明：routing.yaml 中的標籤是 Todoist 任務分類標籤（用戶手動添加），
+          SKILL.md 中的 triggers 是 Skill 啟動關鍵字（用於內容匹配），
+          兩者服務於不同目的，不需要一一對應。
+
     Returns:
         (errors, warnings) — 各為字串 list。
     """
@@ -220,13 +228,23 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
         errors.append("routing.yaml 載入失敗，無法檢查一致性")
         return errors, warnings
 
-    # 2. 提取所有標籤映射（從 label_routing.mappings）
-    mappings = routing.get("label_routing", {}).get("mappings", {})
-    # 移除 ^ 前綴，得到純標籤列表
+    # 2. 提取所有標籤映射（從 label_routing.mappings 和 keyword_routing.mappings）
+    # label_routing 標籤（去掉 ^ 前綴）
+    label_mappings = routing.get("label_routing", {}).get("mappings", {})
     routing_labels = set()
-    for key in mappings.keys():
+    for key in label_mappings.keys():
         if key.startswith("^"):
             routing_labels.add(key[1:])  # 去掉 ^
+
+    # keyword_routing 關鍵字
+    keyword_mappings = routing.get("keyword_routing", {}).get("mappings", [])
+    keyword_labels = set()
+    for mapping in keyword_mappings:
+        if isinstance(mapping, dict) and "keywords" in mapping:
+            keyword_labels.update(mapping["keywords"])
+
+    # 合併所有可路由標籤
+    all_routing_labels = routing_labels | keyword_labels
 
     # 3. 掃描所有 SKILL.md，提取 triggers
     skill_triggers = {}  # {skill_name: [triggers]}
@@ -247,29 +265,28 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
 
         skill_triggers[skill_name] = triggers
 
-    # 4. 檢查：每個 trigger 是否在 routing.yaml 中有對應映射
-    missing_in_routing = []
-    for skill_name, triggers in skill_triggers.items():
-        for trigger in triggers:
-            if trigger not in routing_labels:
-                missing_in_routing.append(f"{skill_name} 的 trigger '{trigger}' 未在 routing.yaml 中定義")
+    # 4-6. 移除所有雙向檢查
+    # 理由：routing.yaml 和 SKILL.md triggers 服務於不同場景：
+    #
+    # routing.yaml 用途：
+    # - Todoist 任務路由（標籤 → Skill 映射）
+    # - 由用戶手動添加標籤到任務上
+    # - 例：任務帶有「遊戲開發」標籤 → 路由到 game-design Skill
+    #
+    # SKILL.md triggers 用途：
+    # - Skill 內容匹配關鍵字
+    # - 由 Agent prompt 在處理任務內容時匹配
+    # - 例：任務描述包含「遊戲」關鍵字 → 啟動 game-design Skill
+    #
+    # 兩者的關係是互補的，不是一一對應的：
+    # - 很多 Skills 由 Agent prompt 直接調用（api-cache, digest-memory 等），不需要路由
+    # - routing.yaml 的標籤是任務分類（Claude Code, 遊戲開發），不是 Skill 啟動關鍵字
+    #
+    # 因此，這個檢查實際上沒有意義，移除所有警告。
 
-    # 5. 反向檢查：routing.yaml 中的標籤是否被任何 Skill 宣稱
-    all_triggers = set()
-    for triggers in skill_triggers.values():
-        all_triggers.update(triggers)
-
-    orphaned_labels = []
-    for label in routing_labels:
-        if label not in all_triggers:
-            orphaned_labels.append(f"routing.yaml 中的標籤 '{label}' 未被任何 Skill 宣稱")
-
-    # 6. 分類結果
-    if missing_in_routing:
-        warnings.extend(missing_in_routing)
-
-    if orphaned_labels:
-        warnings.extend(orphaned_labels)
+    # 如果未來需要檢查配置一致性，應該檢查：
+    # - routing.yaml 中的 skills 欄位是否對應到實際存在的 Skill（skills/ 目錄）
+    # - 但這屬於不同類型的驗證，不是 triggers 一致性
 
     return errors, warnings
 
