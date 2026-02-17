@@ -1,0 +1,224 @@
+# config/retro-games.yaml
+# 經典復古遊戲清單與優先級管理
+# 修改此文件可調整遊戲清單，不需碰 prompt
+
+version: 1
+
+# 追蹤檔案（與 research-registry.json 共用去重機制）
+tracking_file: "context/research-registry.json"
+
+# 冷卻天數：同一遊戲創建後多久才能再創建（允許迭代優化）
+cooldown_days: 7
+
+# 擴展遊戲清單（第二批）- 當第一批全部完成後可啟用
+tier2_games_available: false
+tier2_games:
+  - id: galaga
+    name_zh: "小蜜蜂加強版"
+    name_en: "Galaga"
+    difficulty: 3
+    core_mechanics: "雙機編隊、俯衝攻擊、獎勵關卡"
+    tech_highlights: "陣型移動進階版、捕獲機制、雙機系統"
+    estimated_hours: 5
+
+  - id: mario_bros
+    name_zh: "瑪利歐兄弟"
+    name_en: "Mario Bros"
+    difficulty: 4
+    core_mechanics: "平台跳躍、敵人擊倒、獎勵幣"
+    tech_highlights: "平台碰撞、跳躍物理、敵人 AI"
+    estimated_hours: 8
+
+  - id: centipede
+    name_zh: "蜈蚣"
+    name_en: "Centipede"
+    difficulty: 3
+    core_mechanics: "射擊蜈蚣分段、蘑菇障礙、蜘蛛跳躍"
+    tech_highlights: "分段碰撞、路徑尋路、蘑菇網格"
+    estimated_hours: 6
+
+  - id: defender
+    name_zh: "防衛者"
+    name_en: "Defender"
+    difficulty: 4
+    core_mechanics: "橫向捲軸射擊、營救人類、智能炸彈"
+    tech_highlights: "捲軸系統、雷達、多種敵人"
+    estimated_hours: 7
+
+  - id: qbert
+    name_zh: "Q伯特"
+    name_en: "Q*bert"
+    difficulty: 3
+    core_mechanics: "斜向跳躍、改變方塊顏色、躲避敵人"
+    tech_highlights: "等角投影、斜向移動、圓盤傳送"
+    estimated_hours: 5
+
+# 遊戲定義（三個優先級層）
+games:
+
+  # ===== Tier 1: 低難度（1-2 星）- 優先創建 =====
+  tier1_easy:
+    - id: space_invaders
+      name_zh: "小蜜蜂"
+      name_en: "Space Invaders"
+      difficulty: 2
+      core_mechanics: "左右移動射擊、外星人陣列漸進逼近、護盾系統"
+      tech_highlights: "AABB碰撞、子彈物件池、陣型移動算法"
+      estimated_hours: 4
+      reference_url: "https://en.wikipedia.org/wiki/Space_Invaders"
+
+    - id: breakout
+      name_zh: "打磚塊"
+      name_en: "Breakout"
+      difficulty: 2
+      core_mechanics: "接球板控制、球物理反彈、磚塊消除與掉落道具"
+      tech_highlights: "圓形碰撞、物理反彈角度、磚塊網格"
+      estimated_hours: 3
+      reference_url: "https://en.wikipedia.org/wiki/Breakout_(video_game)"
+
+    - id: pong
+      name_zh: "乒乓"
+      name_en: "Pong"
+      difficulty: 1
+      core_mechanics: "雙人對打、球反彈、AI 對手"
+      tech_highlights: "簡單物理、AI 預測、分數系統"
+      estimated_hours: 2
+      reference_url: "https://en.wikipedia.org/wiki/Pong"
+
+  # ===== Tier 2: 中難度（3 星）- 次優先 =====
+  tier2_medium:
+    - id: pacman
+      name_zh: "吃豆人"
+      name_en: "Pac-Man"
+      difficulty: 3
+      core_mechanics: "迷宮尋路、Ghost AI 追逐、豆子消除與能量豆"
+      tech_highlights: "Grid-based 移動、Pathfinding AI（Blinky/Pinky/Inky/Clyde）、狀態機"
+      estimated_hours: 6
+      reference_url: "https://en.wikipedia.org/wiki/Pac-Man"
+
+    - id: tetris
+      name_zh: "俄羅斯方塊"
+      name_en: "Tetris"
+      difficulty: 3
+      core_mechanics: "方塊下落旋轉、消行、加速、Next 預覽"
+      tech_highlights: "矩陣運算、SRS 旋轉算法（Super Rotation System）、行消除動畫"
+      estimated_hours: 5
+      reference_url: "https://en.wikipedia.org/wiki/Tetris"
+
+    - id: frogger
+      name_zh: "小精靈"
+      name_en: "Frogger"
+      difficulty: 3
+      core_mechanics: "過馬路躲車、跳荷葉渡河、時間限制"
+      tech_highlights: "碰撞偵測、車流生成算法、關卡設計"
+      estimated_hours: 5
+      reference_url: "https://en.wikipedia.org/wiki/Frogger"
+
+    - id: digdug
+      name_zh: "挖金礦"
+      name_en: "Dig Dug"
+      difficulty: 3
+      core_mechanics: "地底挖掘、充氣打怪、岩石掉落"
+      tech_highlights: "地形破壞、敵人 AI、碰撞偵測、岩石物理"
+      estimated_hours: 6
+      reference_url: "https://en.wikipedia.org/wiki/Dig_Dug"
+
+  # ===== Tier 3: 高難度（4 星）- 延後創建 =====
+  tier3_hard:
+    - id: asteroids
+      name_zh: "外星人"
+      name_en: "Asteroids"
+      difficulty: 4
+      core_mechanics: "太空船旋轉射擊、小行星碎裂、環繞邊界、UFO"
+      tech_highlights: "向量運算、慣性物理、環繞邊界、粒子系統"
+      estimated_hours: 6
+      reference_url: "https://en.wikipedia.org/wiki/Asteroids_(video_game)"
+
+    - id: donkey_kong
+      name_zh: "大金剛"
+      name_en: "Donkey Kong"
+      difficulty: 4
+      core_mechanics: "平台跳躍、躲桶子、爬梯子、救公主"
+      tech_highlights: "跳躍物理、平台碰撞、關卡設計、梯子機制"
+      estimated_hours: 8
+      reference_url: "https://en.wikipedia.org/wiki/Donkey_Kong_(video_game)"
+
+    - id: bomberman
+      name_zh: "炸彈超人"
+      name_en: "Bomberman"
+      difficulty: 4
+      core_mechanics: "放炸彈炸磚、道具蒐集、敵人 AI、連鎖爆炸"
+      tech_highlights: "爆炸範圍計算、Grid-based 移動、道具系統、AI"
+      estimated_hours: 8
+      reference_url: "https://en.wikipedia.org/wiki/Bomberman"
+
+# ============================================================
+# 創意改良方向（Agent 可選 1-2 個）
+# ============================================================
+creative_directions:
+
+  visual:
+    - "粒子系統爆炸效果（火花、煙霧、碎片）"
+    - "螢幕震動與色彩閃爍（擊中時視覺回饋）"
+    - "漸層色彩主題切換（復古 / 霓虹 / 極簡）"
+    - "CRT 濾鏡復古風格（掃描線、曲面失真）"
+    - "動態背景（星空移動、漸層動畫）"
+
+  audio:
+    - "Web Audio API 8-bit 音效合成（方波、三角波、噪音）"
+    - "動態背景音樂（隨難度 / 關卡變化）"
+    - "音效與視覺同步（如爆炸音效配合粒子效果）"
+    - "ADSR 包絡設計（攻擊、衰減、延續、釋放）"
+    - "多音軌混音系統（背景音樂 + 音效分離控制）"
+
+  gameplay:
+    - "關卡編輯器（用戶自訂地圖、磚塊排列）"
+    - "道具系統擴展（加速、減速、護盾、多重子彈）"
+    - "成就解鎖系統（累計分數、連擊、完美通關）"
+    - "Boss 關卡設計（血量系統、攻擊模式）"
+    - "難度階梯（Easy / Normal / Hard 三種模式）"
+
+  ux:
+    - "觸控手勢操控（滑動、雙擊、長按）"
+    - "引導教學動畫（首次遊玩提示、操控說明）"
+    - "暫停 / 繼續流暢動畫（淡入淡出、縮放）"
+    - "多語言支援（繁中 / 英文切換）"
+    - "響應式設計進階（橫向 / 直向自適應）"
+
+  performance:
+    - "物件池徹底優化（零 GC 壓力、預分配）"
+    - "OffscreenCanvas 多執行緒渲染（Web Workers）"
+    - "預載畫面進度條（資源載入可視化）"
+    - "requestAnimationFrame 時間補償（不同刷新率一致體驗）"
+    - "WebGL 渲染加速（適用於大量粒子）"
+
+  social:
+    - "本地最高分排行榜（localStorage 持久化）"
+    - "每日挑戰模式（固定種子、限時高分）"
+    - "分享截圖功能（Canvas toDataURL + 社交分享）"
+    - "回放系統（記錄操作序列、重播）"
+    - "全球排行榜整合（Cloudflare KV 或 D1）"
+
+# ============================================================
+# 版本號規則（供 Agent 參考）
+# ============================================================
+version_rules:
+  creation: "v1.0"  # 創建時初始版本
+  minor_update: "+0.1"  # 小改良（視覺/音效微調、bug 修正）
+  major_update: "+1.0"  # 大改版（新玩法機制、架構重構）
+
+  examples:
+    - "視覺粒子效果優化：v1.0 → v1.1"
+    - "音效系統整合：v1.1 → v1.2"
+    - "新增道具系統：v1.5 → v2.0"
+    - "重構碰撞引擎：v2.3 → v3.0"
+
+# ============================================================
+# 備註
+# ============================================================
+notes:
+  - "所有遊戲必須純 HTML5/JS/CSS，可部署到 Cloudflare Pages"
+  - "禁止使用外部圖片資源，全部使用 Canvas 程式化繪製"
+  - "音效使用 Web Audio API 合成，避免音檔"
+  - "參考 skills/game-design/SKILL.md 的品質標準"
+  - "每次創建/優化後將心得寫入知識庫（localhost:3000）"

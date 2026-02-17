@@ -213,6 +213,19 @@ def main():
                 has_error = True
                 tags.append("error")
 
+    # Team mode tagging (Phase 2.3: structured logging enhancement)
+    if os.environ.get("CLAUDE_TEAM_MODE") == "1":
+        tags.append("team-mode")
+
+        # Phase tagging (based on prompt filename patterns in summary)
+        summary_lower = summary.lower()
+        if "fetch-" in summary_lower:
+            tags.append("phase1")
+        elif "assemble" in summary_lower or "todoist-assemble" in summary_lower:
+            tags.append("phase2")
+        elif "todoist-query" in summary_lower:
+            tags.append("phase1-query")
+
     # Build log entry
     entry = {
         "ts": datetime.now().astimezone().isoformat(),

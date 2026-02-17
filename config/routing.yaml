@@ -110,6 +110,14 @@ label_routing:
       skills: ["deep-research", "knowledge-query"]
       allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
       template: "templates/sub-agent/research-task.md"
+    "^系統審查":
+      skills: ["system-audit"]
+      allowed_tools: "Read,Bash,Glob,Grep,Write"
+      template: "templates/sub-agent/skill-task.md"
+    "^品質評估":
+      skills: ["system-audit"]
+      allowed_tools: "Read,Bash,Glob,Grep,Write"
+      template: "templates/sub-agent/skill-task.md"
 
 # Tier 2：內容關鍵字比對（信心度 80%）
 keyword_routing:

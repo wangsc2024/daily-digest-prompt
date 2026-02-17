@@ -75,3 +75,13 @@ system_insight:
   title_template: "系統洞察 | {date}"
   priority: 2
   tags: ["gear", "chart_with_upwards_trend"]
+
+# Harness 告警配置（on_stop_alert.py）
+harness_alerts:
+  # 團隊模式整合
+  team_mode_wait_seconds: 30   # 等待所有 Agent 完成的時間窗口（秒）
+
+  # 通知抑制（避免疲勞）
+  suppression:
+    max_alerts_per_hour: 5     # 每小時最多 5 則告警
+    cooldown_minutes: 30       # 相同問題 30 分鐘冷卻期

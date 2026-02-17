@@ -20,22 +20,22 @@ daily_digest_single:
 
 # Todoist 任務 - 團隊模式 (run-todoist-agent-team.ps1)
 todoist_team:
-  phase1_timeout: 300       # Phase 1: 查詢+路由+規劃
-  phase1_max_retries: 1     # Phase 1 重試次數
-  phase1_retry_delay_min: 30  # Phase 1 重試最小延遲
-  phase1_retry_delay_max: 40  # Phase 1 重試最大延遲
-  phase3_timeout: 180       # Phase 3: 組裝+通知
-  phase3_max_retries: 1     # Phase 3 重試次數
-  phase3_retry_base: 60     # Phase 3 重試基礎間隔
-  phase3_retry_max: 300     # Phase 3 重試最大間隔
+  phase1_timeout: 300        # Phase 1: 查詢+路由+規劃
+  phase1_max_retries: 1      # Phase 1 重試次數（降為 1，避免過長等待）
+  phase1_retry_delay_base: 30  # Phase 1 重試間隔基數（秒）
+  phase1_retry_delay_jitter: 10  # Phase 1 隨機抖動
+  phase3_timeout: 180        # Phase 3: 組裝+通知
+  phase3_max_retries: 1      # Phase 3 重試次數
+  phase3_retry_base: 60      # Phase 3 重試基礎間隔
+  phase3_retry_max: 300      # Phase 3 重試最大間隔
   # Phase 2 動態 timeout（按任務類型）
-  task_timeouts:
-    research: 600
-    code: 900
-    skill: 300
-    general: 300
-    auto: 600
-    gitpush: 180
+  phase2_timeout_by_type:
+    research: 600   # 研究任務（10 分鐘）
+    code: 900       # 程式任務（15 分鐘）
+    skill: 300      # Skill 任務（5 分鐘）
+    general: 300    # 一般任務（5 分鐘）
+    auto: 600       # 自動任務（10 分鐘）
+    gitpush: 360    # Git 推送（6 分鐘）
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:
@@ -47,8 +47,15 @@ gmail:
   max_retries: 1            # 重試次數
   retry_interval: 120       # 重試間隔
 
+# 系統審查 - 團隊模式 (run-system-audit-team.ps1)
+audit_team:
+  phase1_timeout: 600       # Phase 1: 審查 Agent（10 分鐘）
+  phase2_timeout: 1200      # Phase 2: 組裝+修正（20 分鐘）
+  phase2_max_retries: 1     # Phase 2 重試次數
+
 # HEARTBEAT.md 排程超時
 scheduler:
+  system_audit: 2400        # 00:40 系統審查
   daily_digest_am: 3600     # 08:00 摘要
   daily_digest_mid: 900     # 11:15 摘要
   daily_digest_pm: 3600     # 21:15 摘要

@@ -15,6 +15,7 @@
 ### 步驟 2：檢查快取
 依 api-cache SKILL.md 指示，用 Read 讀取 `cache/todoist.json`。
 - 若存在且 cached_at 在 30 分鐘內 → 使用快取資料，跳到步驟 4
+- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
 - 若不存在或已過期 → 進入步驟 3
 
 ### 步驟 3：呼叫 Todoist API（僅當日）
@@ -28,6 +29,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 > **注意**：需先設定環境變數 `TODOIST_API_TOKEN`。PowerShell 腳本會自動傳遞此環境變數。
 
 - 成功 → 用 Write 寫入快取 `cache/todoist.json`（依 api-cache 格式：`{"cached_at":"ISO","ttl_minutes":30,"source":"todoist","data":回應}`）
+  - **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - 失敗 → 嘗試用 Read 讀取過期快取（24 小時內），source 標記 "cache_degraded"
 
 ### 步驟 4：寫入結果

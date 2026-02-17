@@ -131,11 +131,27 @@ foreach ($agent in $fetchAgents) {
     $agentName = $agent.Name
 
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($Content)
+        param($Content, $agentName, $logDir, $timestamp)
+
+        # 明確設定 Process 級別環境變數（會傳遞到子 process）
+        [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
-        $Content | claude -p --allowedTools "Read,Bash,Write" 2>&1
-    } -ArgumentList $promptContent
+
+        $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
+        $output = $Content | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+
+        # 執行成功且 stderr 為空 → 刪除
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+            $stderrSize = (Get-Item $stderrFile).Length
+            if ($stderrSize -eq 0) {
+                Remove-Item $stderrFile -Force
+            }
+        }
+
+        return $output
+    } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp
 
     $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
     $jobs += $job
@@ -233,7 +249,21 @@ while ($attempt -le $MaxPhase2Retries) {
     $phase2Start = Get-Date
 
     try {
-        $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $OutputEncoding = [System.Text.Encoding]::UTF8
+
+        $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
+        $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+
+        # 執行成功且 stderr 為空 → 刪除
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+            $stderrSize = (Get-Item $stderrFile).Length
+            if ($stderrSize -eq 0) {
+                Remove-Item $stderrFile -Force
+            }
+        }
+
+        $output | ForEach-Object {
             Write-Log "  [assemble] $_"
         }
 

@@ -15,6 +15,7 @@
 ### 步驟 2：檢查快取
 依 api-cache SKILL.md 指示，用 Read 讀取 `cache/pingtung-news.json`。
 - 若存在且 cached_at 在 6 小時內 → 使用快取資料，跳到步驟 4
+- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
 - 若不存在或已過期 → 進入步驟 3
 
 ### 步驟 3：呼叫 MCP 服務（含重試）
@@ -30,6 +31,7 @@ curl -s --max-time 10 -X POST https://ptnews-mcp.pages.dev/mcp \
 若回傳含 `"error"` 或為空，等 2 秒後重試。
 
 - 成功 → 解析 result.content[0].text 中的新聞 JSON → 用 Write 寫入快取 `cache/pingtung-news.json`
+  - **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - 全部重試失敗 → 嘗試用 Read 讀取過期快取，source 標記 "cache_degraded"
 
 ### 步驟 4：寫入結果

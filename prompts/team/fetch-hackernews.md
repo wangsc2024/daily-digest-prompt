@@ -15,6 +15,7 @@
 ### 步驟 2：檢查快取
 依 api-cache SKILL.md 指示，用 Read 讀取 `cache/hackernews.json`。
 - 若存在且 cached_at 在 2 小時內 → 使用快取資料，跳到步驟 5
+- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
 - 若不存在或已過期 → 進入步驟 3
 
 ### 步驟 3：取得熱門文章
@@ -40,7 +41,8 @@ AI, LLM, GPT, Claude, OpenAI, Anthropic, Gemini, DeepSeek, machine learning, dee
 
 取前 3-5 則匹配文章。翻譯標題為正體中文，保留技術術語原文。
 
-成功後用 Write 寫入快取 `cache/hackernews.json`。
+成功後用 Write 寫入快取 `cache/hackernews.json`：
+- **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 ### 步驟 5：寫入結果
 用 Write 工具建立 `results/hackernews.json`，格式：

@@ -119,9 +119,9 @@ else {
     Write-Host "  上次摘要: $($mem.digest_summary)" -ForegroundColor White
 }
 
-# --- Cache State ---
+# --- Cache Effectiveness (Phase 2.4) ---
 Write-Host ""
-Write-Host "[快取狀態]" -ForegroundColor Yellow
+Write-Host "[快取效益分析]" -ForegroundColor Yellow
 
 if (-not (Test-Path $CacheDir)) {
     Write-Host "  快取目錄不存在" -ForegroundColor Gray
@@ -133,12 +133,30 @@ else {
     }
     else {
         foreach ($f in $cacheFiles) {
-            $age = [math]::Round(((Get-Date) - $f.LastWriteTime).TotalMinutes, 0)
-            $sizeKB = [math]::Round($f.Length / 1024, 1)
-            $freshness = if ($age -le 30) { "新鮮" } elseif ($age -le 360) { "有效" } else { "過期" }
-            $color = if ($freshness -eq "新鮮") { "Green" } elseif ($freshness -eq "有效") { "Yellow" } else { "Red" }
-            Write-Host "  $($f.Name): ${sizeKB}KB, ${age} 分鐘前更新 " -NoNewline -ForegroundColor White
-            Write-Host "($freshness)" -ForegroundColor $color
+            try {
+                $cache = Get-Content $f.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+                $cachedAt = [DateTime]::Parse($cache.cached_at)
+                $nowUtc = (Get-Date).ToUniversalTime()
+                $ageMinutes = [math]::Round(($nowUtc - $cachedAt).TotalMinutes, 1)
+                $ttl = if ($cache.ttl_minutes) { $cache.ttl_minutes } else { 30 }
+                $sizeKB = [math]::Round($f.Length / 1024, 1)
+
+                $valid = $ageMinutes -le $ttl
+                $status = if ($valid) { "有效" } else { "過期" }
+                $color = if ($valid) { "Green" } else { "Red" }
+
+                $sourceName = $f.BaseName
+                Write-Host "  $sourceName (${sizeKB}KB): " -NoNewline -ForegroundColor White
+                Write-Host "年齡 $ageMinutes 分鐘 / TTL $ttl 分鐘 " -NoNewline -ForegroundColor White
+                Write-Host "($status)" -ForegroundColor $color
+            }
+            catch {
+                # JSON 損壞或格式錯誤
+                $sizeKB = [math]::Round($f.Length / 1024, 1)
+                $age = [math]::Round(((Get-Date) - $f.LastWriteTime).TotalMinutes, 0)
+                Write-Host "  $($f.Name) (${sizeKB}KB): ${age} 分鐘前更新 " -NoNewline -ForegroundColor White
+                Write-Host "(格式錯誤)" -ForegroundColor Red
+            }
         }
     }
 }

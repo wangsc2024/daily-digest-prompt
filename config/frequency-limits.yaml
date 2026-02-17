@@ -222,7 +222,7 @@ tasks:
     history_type: "creative_game"
     execution_order: 14
     skills: [game-design, knowledge-query]
-    description: "以創意思維優化 D:\\Source\\game 目錄下的遊戲，提升遊戲體驗和品質"
+    description: "階段一：依優先級創建 10 個經典復古小遊戲（Space Invaders、Pac-Man、Tetris 等）；階段二：90% 優化復古遊戲 + 10% 優化佛學遊戲"
 
   # --- 專案品質優化群組（共 2 次/日）---
   qa_optimize:

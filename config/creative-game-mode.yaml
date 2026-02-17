@@ -1,0 +1,98 @@
+# config/creative-game-mode.yaml
+# 創意遊戲自動任務模式切換
+# 修改此文件可調整執行階段，不需碰 prompt
+
+version: 1
+
+# ============================================================
+# 執行模式（兩階段）
+# ============================================================
+# Stage 1: creation（創建階段）
+#   - 優先創建未完成的復古遊戲
+#   - 依優先級：tier1_easy → tier2_medium → tier3_hard
+#   - tier1+tier2 完成後自動切換到 optimization
+#
+# Stage 2: optimization（優化階段）
+#   - 90% 優化復古遊戲 + 10% 優化佛學遊戲
+#   - 每 10 次執行，1 次選擇佛學遊戲優化
+#   - 使用 LRU（Least Recently Used）策略選擇復古遊戲
+# ============================================================
+
+stage: "creation"  # 初始為創建階段（creation / optimization / paused）
+
+# ============================================================
+# 創建階段配置（stage=creation 時生效）
+# ============================================================
+creation:
+  # 優先級順序（先易後難）
+  priority_order:
+    - "tier1_easy"      # 優先創建 1-2 星遊戲（Pong, Space Invaders, Breakout）
+    - "tier2_medium"    # 其次創建 3 星遊戲（Pac-Man, Tetris, Frogger, Dig Dug）
+    - "tier3_hard"      # 最後創建 4 星遊戲（Asteroids, Donkey Kong, Bomberman）
+
+  # 難度過濾（初期跳過高難度遊戲）
+  skip_difficulty_above: 3  # 跳過難度 > 3 星的遊戲（初期不碰 tier3）
+
+  # 自動切換優化階段
+  auto_switch_to_optimization: true  # tier1+tier2 全部完成後自動切換
+  switch_trigger: "tier1_tier2_complete"  # 觸發條件
+
+  # 階段完成追蹤（自動更新，不需手動修改）
+  tier1_complete: false
+  tier2_complete: false
+  tier3_complete: false
+
+# ============================================================
+# 優化階段配置（stage=optimization 時生效）
+# ============================================================
+optimization:
+  # 復古 vs 佛學遊戲比例
+  retro_ratio: 0.9     # 90% 選擇復古遊戲優化
+  buddhist_ratio: 0.1  # 10% 選擇佛學遊戲優化
+
+  # 輪轉週期（確保佛學遊戲不被遺忘）
+  rotation_cycle: 10   # 每 10 次執行為一個週期
+  buddhist_at_position: [10]  # 週期中第 10 次執行佛學遊戲
+
+  # LRU 策略配置（復古遊戲選擇）
+  lru_enabled: true    # 啟用 LRU（Least Recently Used）策略
+  ignore_cooldown_when_saturated: true  # 所有遊戲都在 cooldown 期內時忽略限制
+
+  # 佛學遊戲清單（D:\Source\game 目錄中的現有遊戲）
+  buddhist_games:
+    - id: "mala-meditation"
+      name_zh: "念珠冥想"
+    - id: "mindful-memory"
+      name_zh: "正念記憶"
+    - id: "six-roots-zen"
+      name_zh: "六根禪"
+    - id: "zen-ink-flow"
+      name_zh: "禪意墨流"
+    - id: "zen-rhythm"
+      name_zh: "禪韻"
+
+# ============================================================
+# 計數器追蹤
+# ============================================================
+tracking_file: "context/auto-tasks-today.json"
+counter_field: "creative_game_count"
+
+# 每日歸零邏輯（與 frequency-limits.yaml 一致）
+reset_policy: "daily"  # 每日歸零 counter，但 stage 不重置
+
+# ============================================================
+# 除錯與監控
+# ============================================================
+debug:
+  log_stage_decisions: true  # 記錄階段切換決策
+  log_game_selection: true   # 記錄遊戲選擇邏輯
+
+# ============================================================
+# 備註
+# ============================================================
+notes:
+  - "stage 欄位由 Agent 自動更新（tier1+tier2 完成後改為 optimization）"
+  - "tier1_complete / tier2_complete / tier3_complete 由 Agent 自動追蹤"
+  - "若需暫停創建任務，手動將 stage 改為 paused"
+  - "若需重新啟用第二批遊戲，修改 retro-games.yaml 的 tier2_games_available 為 true"
+  - "優化階段的計數器（counter % 10）在 auto-tasks-today.json 中追蹤"

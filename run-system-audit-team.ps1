@@ -104,12 +104,27 @@ $phase1Prompts = @(
 
 foreach ($agent in $phase1Prompts) {
     $job = Start-Job -ScriptBlock {
-        param($promptFile, $agentDir, $agentName)
+        param($promptFile, $agentDir, $agentName, $logDir, $timestamp)
+
+        # 明確設定 Process 級別環境變數（會傳遞到子 process）
+        [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
         Set-Location $agentDir
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
 
         Write-Host "[$agentName] Starting audit..." -ForegroundColor Cyan
-        $output = claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write" 2>&1
+
+        $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
+        $output = claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write" 2>$stderrFile
+
+        # 執行成功且 stderr 為空 → 刪除
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+            $stderrSize = (Get-Item $stderrFile).Length
+            if ($stderrSize -eq 0) {
+                Remove-Item $stderrFile -Force
+            }
+        }
 
         Write-Host "[$agentName] Completed" -ForegroundColor Green
         return @{
@@ -117,7 +132,7 @@ foreach ($agent in $phase1Prompts) {
             Output = $output
             ExitCode = $LASTEXITCODE
         }
-    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name -WorkingDirectory $AgentDir
+    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp -WorkingDirectory $AgentDir
 
     $phase1Jobs += @{
         Job = $job
@@ -198,11 +213,28 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
 
     try {
         $job = Start-Job -ScriptBlock {
-            param($promptFile, $agentDir)
+            param($promptFile, $agentDir, $logDir, $timestamp)
+
+            # 明確設定 Process 級別環境變數（會傳遞到子 process）
+            [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
             Set-Location $agentDir
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
-            claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write,Edit" 2>&1
-        } -ArgumentList $phase2Prompt, $AgentDir -WorkingDirectory $AgentDir
+
+            $stderrFile = "$logDir\assemble-stderr-$timestamp.log"
+            $output = claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write,Edit" 2>$stderrFile
+
+            # 執行成功且 stderr 為空 → 刪除
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                $stderrSize = (Get-Item $stderrFile).Length
+                if ($stderrSize -eq 0) {
+                    Remove-Item $stderrFile -Force
+                }
+            }
+
+            return $output
+        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp -WorkingDirectory $AgentDir
 
         $completed = Wait-Job -Job $job -Timeout $Phase2TimeoutSeconds
 

@@ -10,24 +10,29 @@ degradation_label: "⚠️ 資料來自快取（{time}）"
 sources:
   todoist:
     file: "cache/todoist.json"
-    ttl_minutes: 30
+    ttl_minutes: 45  # 30 → 45（覆蓋整點+半點 30 分鐘間隔）
+    degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
     note: "Todoist Agent 不使用快取（需即時資料），僅 daily-digest 使用"
 
   pingtung-news:
     file: "cache/pingtung-news.json"
-    ttl_minutes: 360  # 6 小時
+    ttl_minutes: 360  # 維持 6 小時（避免重大新聞延遲）
+    degraded_ttl_minutes: 2880  # 降級使用時限（48 小時）
 
   hackernews:
     file: "cache/hackernews.json"
-    ttl_minutes: 120  # 2 小時
+    ttl_minutes: 180  # 120 → 180（3 小時，HN 更新較頻繁但可接受）
+    degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
   knowledge:
     file: "cache/knowledge.json"
-    ttl_minutes: 60  # 1 小時
+    ttl_minutes: 60  # 維持 1 小時
+    degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
   gmail:
     file: "cache/gmail.json"
-    ttl_minutes: 30
+    ttl_minutes: 360  # 30 → 360（6 小時，郵件即時性需求）
+    degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
 # 快取檔案結構（所有來源統一格式）
 schema: |

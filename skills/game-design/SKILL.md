@@ -2,8 +2,10 @@
 name: game-design
 version: "1.0.0"
 description: |
-  遊戲設計與優化 — HTML5/JS 遊戲品質提升、UX 最佳化、Cloudflare Pages 部署。
-  Use when: 遊戲、game、遊戲優化、遊戲設計、HTML5、遊戲品質、Cloudflare Pages。
+  遊戲設計與優化 — HTML5/JS 遊戲品質提升、復古遊戲創建、UX 最佳化、Cloudflare Pages 部署。
+  支援兩大方向：1) 經典復古遊戲現代化（Space Invaders/Pac-Man/Tetris 等）
+              2) 創意主題遊戲優化（佛學/正念等主題遊戲）
+  Use when: 遊戲、game、遊戲優化、遊戲設計、HTML5、復古遊戲、經典遊戲、Cloudflare Pages。
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 cache-ttl: 0min
 triggers:
@@ -32,6 +34,26 @@ HTML5/JavaScript 遊戲品質提升、UX 最佳化與 Cloudflare Pages 部署指
 - Cloudflare Pages 靜態網站部署
 - 遊戲效能分析（FPS、記憶體、載入時間）
 - 程式碼品質審查（針對遊戲邏輯特性）
+
+## 經典復古遊戲技術實作要點
+
+| 遊戲 | 核心技術 | 碰撞類型 | 難點 |
+|------|---------|---------|------|
+| Space Invaders | 陣列移動、子彈池 | AABB | 護盾像素級碰撞 |
+| Breakout | 球物理、反彈角度 | 圓形+AABB | 角度計算精度 |
+| Pac-Man | Grid 移動、Ghost AI | Grid-based | Pathfinding 演算法 |
+| Tetris | 矩陣運算、旋轉 | Grid-based | SRS 旋轉系統 |
+| Pong | 簡單物理、AI 預測 | AABB | AI 難度調整 |
+| Frogger | 碰撞偵測、車流 | AABB | 時間壓力設計 |
+| Dig Dug | 地形破壞、敵人 AI | Grid-based | 地形動態更新 |
+
+## 創意現代化方向
+- 視覺：粒子效果、螢幕震動、色彩主題切換、CRT 濾鏡
+- 音效：Web Audio API 8-bit 音效合成、動態背景音樂
+- 玩法：關卡編輯器、道具系統、成就解鎖、Boss 關卡
+- UX：觸控優化、手勢操控、引導動畫、多語言
+- 效能：物件池優化、OffscreenCanvas、預載進度條
+- 社交：本地排行榜、每日挑戰、分享截圖
 
 ## 品質標準（強制 — 過去品質不佳，以下為必達標準）
 
@@ -90,3 +112,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 - [ ] 無明顯效能問題（肉眼可見卡頓）
 - [ ] 遊戲有完整狀態流程（載入→遊戲→結束）
 - [ ] 部署 URL 可存取（若有部署步驟）
+
+## 復古遊戲品質檢查（額外項目）
+- [ ] 遊戲機制忠於原作經典玩法
+- [ ] 有明確的遊戲結束條件（勝利/失敗）
+- [ ] 分數系統正確計算與顯示
+- [ ] 至少有 1 個創意改良（非單純複製）
+- [ ] 首次遊玩 30 秒內能理解玩法（無需說明書）

@@ -145,11 +145,27 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
 
     try {
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt)
+            param($prompt, $logDir, $timestamp)
+
+            # 明確設定 Process 級別環境變數（會傳遞到子 process）
+            [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
-            $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
-        } -ArgumentList $queryContent
+
+            $stderrFile = "$logDir\query-stderr-$timestamp.log"
+            $output = $prompt | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+
+            # 執行成功且 stderr 為空 → 刪除
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                $stderrSize = (Get-Item $stderrFile).Length
+                if ($stderrSize -eq 0) {
+                    Remove-Item $stderrFile -Force
+                }
+            }
+
+            return $output
+        } -ArgumentList $queryContent, $LogDir, $Timestamp
 
         $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
 
@@ -264,14 +280,31 @@ if ($plan.plan_type -eq "tasks") {
         $taskPrompt = Get-Content -Path "$AgentDir\$promptFile" -Raw -Encoding UTF8
         $taskTools = $task.allowed_tools
 
+        $taskName = "task-$($task.rank)"
+
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $tools)
+            param($prompt, $tools, $taskName, $logDir, $timestamp)
+
+            # 明確設定 Process 級別環境變數（會傳遞到子 process）
+            [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
-            $prompt | claude -p --allowedTools $tools 2>&1
-        } -ArgumentList $taskPrompt, $taskTools
 
-        $taskName = "task-$($task.rank)"
+            $stderrFile = "$logDir\$taskName-stderr-$timestamp.log"
+            $output = $prompt | claude -p --allowedTools $tools 2>$stderrFile
+
+            # 執行成功且 stderr 為空 → 刪除
+            if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                $stderrSize = (Get-Item $stderrFile).Length
+                if ($stderrSize -eq 0) {
+                    Remove-Item $stderrFile -Force
+                }
+            }
+
+            return $output
+        } -ArgumentList $taskPrompt, $taskTools, $taskName, $LogDir, $Timestamp
+
         $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $taskName
         $phase2Jobs += $job
         Write-Log "[Phase2] Started: $taskName (Job $($job.Id)) - $($task.content)"
@@ -338,14 +371,31 @@ elseif ($plan.plan_type -eq "auto") {
         if ($null -ne $promptToUse) {
             $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
 
+            $agentName = "auto-$taskKey"
+
             $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                param($prompt)
+                param($prompt, $agentName, $logDir, $timestamp)
+
+                # 明確設定 Process 級別環境變數（會傳遞到子 process）
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+
                 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                 $OutputEncoding = [System.Text.Encoding]::UTF8
-                $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>&1
-            } -ArgumentList $promptContent
 
-            $agentName = "auto-$taskKey"
+                $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
+                $output = $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>$stderrFile
+
+                # 執行成功且 stderr 為空 → 刪除
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                    $stderrSize = (Get-Item $stderrFile).Length
+                    if ($stderrSize -eq 0) {
+                        Remove-Item $stderrFile -Force
+                    }
+                }
+
+                return $output
+            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp
+
             $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
             $phase2Jobs += $job
             Write-Log "[Phase2] Started: $agentName ($taskName) (Job $($job.Id))"
@@ -428,7 +478,21 @@ while ($attempt -le $MaxPhase3Retries) {
     $phase3Start = Get-Date
 
     try {
-        $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $OutputEncoding = [System.Text.Encoding]::UTF8
+
+        $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
+        $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+
+        # 執行成功且 stderr 為空 → 刪除
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+            $stderrSize = (Get-Item $stderrFile).Length
+            if ($stderrSize -eq 0) {
+                Remove-Item $stderrFile -Force
+            }
+        }
+
+        $output | ForEach-Object {
             Write-Log "  [assemble] $_"
         }
 

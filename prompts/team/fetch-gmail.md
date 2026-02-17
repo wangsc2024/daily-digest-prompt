@@ -15,6 +15,7 @@
 ### 步驟 2：檢查快取
 依 api-cache SKILL.md 指示，用 Read 讀取 `cache/gmail.json`。
 - 若存在且 cached_at 在 30 分鐘內 → 使用快取資料，跳到步驟 4
+- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
 - 若不存在或已過期 → 進入步驟 3
 
 ### 步驟 3：查詢 Gmail（今日郵件）
@@ -25,6 +26,7 @@ cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py search 
 ```
 
 - 成功 → 用 Write 寫入快取 `cache/gmail.json`（依 api-cache 格式：`{"cached_at":"ISO","ttl_minutes":30,"source":"gmail","data":回應}`）
+  - **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - 失敗（如 token 過期、服務不可用）→ 嘗試用 Read 讀取過期快取（24 小時內），source 標記 "cache_degraded"
 - 若完全無法取得資料 → 標記 status 為 "failed"，不影響整體流程
 

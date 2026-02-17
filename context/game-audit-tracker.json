@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "games": {},
+  "priority_algorithm": "oldest_first_or_lowest_score",
+  "games_per_audit": 2,
+  "last_scan_date": null
+}
