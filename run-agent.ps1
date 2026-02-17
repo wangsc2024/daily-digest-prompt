@@ -43,16 +43,28 @@ function Update-State {
     param(
         [string]$Status,
         [int]$Duration,
-        [string]$ErrorMsg
+        [string]$ErrorMsg,
+        [string]$TerminationMode = ""  # GOAL, ERROR, TIMEOUT, MAX_TURNS, ABORTED
     )
 
+    # 自動推斷 TerminationMode（如果未提供）
+    if (-not $TerminationMode) {
+        if ($Status -eq "success") {
+            $TerminationMode = "GOAL"
+        }
+        else {
+            $TerminationMode = "ERROR"
+        }
+    }
+
     $run = @{
-        timestamp        = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
-        agent            = "daily-digest"
-        status           = $Status
-        duration_seconds = $Duration
-        error            = $ErrorMsg
-        log_file         = (Split-Path -Leaf $LogFile)
+        timestamp         = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
+        agent             = "daily-digest"
+        status            = $Status
+        termination_mode  = $TerminationMode
+        duration_seconds  = $Duration
+        error             = $ErrorMsg
+        log_file          = (Split-Path -Leaf $LogFile)
     }
 
     if (Test-Path $StateFile) {

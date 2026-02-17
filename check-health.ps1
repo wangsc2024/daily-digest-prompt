@@ -71,10 +71,47 @@ else {
         }
         Write-Host "  平均耗時: ${avgDuration} 秒" -ForegroundColor White
 
+        # Termination Mode 分佈（如果有記錄）
+        $withTerminationMode = @($recentRuns | Where-Object { $_.termination_mode })
+        if ($withTerminationMode.Count -gt 0) {
+            $goalCount = @($withTerminationMode | Where-Object { $_.termination_mode -eq "GOAL" }).Count
+            $errorCount = @($withTerminationMode | Where-Object { $_.termination_mode -eq "ERROR" }).Count
+            $timeoutCount = @($withTerminationMode | Where-Object { $_.termination_mode -eq "TIMEOUT" }).Count
+            $maxTurnsCount = @($withTerminationMode | Where-Object { $_.termination_mode -eq "MAX_TURNS" }).Count
+            $abortedCount = @($withTerminationMode | Where-Object { $_.termination_mode -eq "ABORTED" }).Count
+
+            $total = $withTerminationMode.Count
+            Write-Host ""
+            Write-Host "  [終止模式分佈] (近 7 天，共 $total 筆)" -ForegroundColor Cyan
+            if ($goalCount -gt 0) {
+                $pct = [math]::Round(($goalCount / $total) * 100, 1)
+                Write-Host "    GOAL (成功):     $goalCount 次 ($pct%)" -ForegroundColor Green
+            }
+            if ($errorCount -gt 0) {
+                $pct = [math]::Round(($errorCount / $total) * 100, 1)
+                Write-Host "    ERROR (錯誤):    $errorCount 次 ($pct%)" -ForegroundColor Red
+            }
+            if ($timeoutCount -gt 0) {
+                $pct = [math]::Round(($timeoutCount / $total) * 100, 1)
+                Write-Host "    TIMEOUT (超時):  $timeoutCount 次 ($pct%)" -ForegroundColor Yellow
+            }
+            if ($maxTurnsCount -gt 0) {
+                $pct = [math]::Round(($maxTurnsCount / $total) * 100, 1)
+                Write-Host "    MAX_TURNS:       $maxTurnsCount 次 ($pct%)" -ForegroundColor Yellow
+            }
+            if ($abortedCount -gt 0) {
+                $pct = [math]::Round(($abortedCount / $total) * 100, 1)
+                Write-Host "    ABORTED (中止):  $abortedCount 次 ($pct%)" -ForegroundColor Magenta
+            }
+        }
+
+        Write-Host ""
+
         # Last failure
         $lastFailed = $recentRuns | Where-Object { $_.status -eq "failed" } | Select-Object -Last 1
         if ($lastFailed) {
-            Write-Host "  最近失敗: $($lastFailed.timestamp) - $($lastFailed.error)" -ForegroundColor Red
+            $terminationInfo = if ($lastFailed.termination_mode) { " ($($lastFailed.termination_mode))" } else { "" }
+            Write-Host "  最近失敗: $($lastFailed.timestamp)$terminationInfo - $($lastFailed.error)" -ForegroundColor Red
         }
         else {
             Write-Host "  最近失敗: 無" -ForegroundColor Green
@@ -380,6 +417,92 @@ else {
     else {
         Write-Host "  近 7 天無 SKILL.md 修改" -ForegroundColor Green
     }
+}
+
+# --- Skill 品質評分 ---
+Write-Host ""
+Write-Host "[Skill 品質評分]" -ForegroundColor Yellow
+
+try {
+    # 呼叫 validate_config.py --check-skills --json
+    $validatePath = "$AgentDir\hooks\validate_config.py"
+    if (Test-Path $validatePath) {
+        $jsonOutput = python $validatePath --check-skills --json 2>&1 | Out-String
+        $result = $jsonOutput | ConvertFrom-Json
+
+        if ($result.skill_scores) {
+            $scores = $result.skill_scores
+            $skillNames = $scores.PSObject.Properties.Name
+            $total = $skillNames.Count
+
+            # 計算統計
+            $allScores = @()
+            $lowScoreSkills = @()
+            foreach ($name in $skillNames) {
+                $score = $scores.$name.score
+                $allScores += $score
+                if ($score -lt 80) {
+                    $lowScoreSkills += $name
+                }
+            }
+
+            $avgScore = if ($total -gt 0) { ($allScores | Measure-Object -Average).Average } else { 0 }
+            $avgScore = [math]::Round($avgScore, 1)
+
+            Write-Host "  總數: $total 個 Skill | 平均分: $avgScore/100" -ForegroundColor White
+
+            if ($lowScoreSkills.Count -gt 0) {
+                Write-Host "  低分 Skill (< 80): $($lowScoreSkills.Count) 個" -ForegroundColor Red
+                foreach ($name in $lowScoreSkills | Select-Object -First 5) {
+                    $skillData = $scores.$name
+                    Write-Host "    - $name ($($skillData.score)/100)" -ForegroundColor Yellow
+                    foreach ($err in $skillData.errors) {
+                        Write-Host "        ❌ $err" -ForegroundColor Red
+                    }
+                    foreach ($warn in $skillData.warnings) {
+                        Write-Host "        ⚠️ $warn" -ForegroundColor Yellow
+                    }
+                }
+            }
+            else {
+                Write-Host "  ✓ 所有 Skill 品質良好（≥ 80 分）" -ForegroundColor Green
+            }
+
+            # 顯示前 3 高分和後 3 低分
+            $sortedSkills = $skillNames | Sort-Object { $scores.$_.score } -Descending
+            $top3 = $sortedSkills | Select-Object -First 3
+            $bottom3 = $sortedSkills | Select-Object -Last 3
+
+            if ($total -ge 3) {
+                Write-Host ""
+                Write-Host "  Top 3:" -ForegroundColor Cyan
+                foreach ($name in $top3) {
+                    $score = $scores.$name.score
+                    $status = if ($score -eq 100) { "✓" } else { "⚠️" }
+                    Write-Host "    $status $name ($score/100)" -ForegroundColor White
+                }
+
+                if ($total -ge 6 -and $avgScore -lt 100) {
+                    Write-Host ""
+                    Write-Host "  Bottom 3:" -ForegroundColor Magenta
+                    foreach ($name in $bottom3) {
+                        $score = $scores.$name.score
+                        $status = if ($score -lt 80) { "❌" } elseif ($score -lt 95) { "⚠️" } else { "○" }
+                        Write-Host "    $status $name ($score/100)" -ForegroundColor White
+                    }
+                }
+            }
+        }
+        else {
+            Write-Host "  無法取得評分資料" -ForegroundColor Gray
+        }
+    }
+    else {
+        Write-Host "  validate_config.py 不存在" -ForegroundColor Gray
+    }
+}
+catch {
+    Write-Host "  評分檢查失敗: $_" -ForegroundColor Red
 }
 
 Write-Host ""

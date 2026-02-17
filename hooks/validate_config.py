@@ -274,6 +274,84 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
     return errors, warnings
 
 
+def validate_skill_quality(skills_dir=None):
+    """檢查所有 SKILL.md 的品質並評分。
+
+    Returns:
+        dict: {skill_name: {"score": int, "errors": [...], "warnings": [...]}}
+    """
+    import glob
+
+    if skills_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        skills_dir = os.path.join(os.path.dirname(script_dir), "skills")
+
+    results = {}
+    skill_files = glob.glob(os.path.join(skills_dir, "*/SKILL.md"))
+
+    for skill_file in skill_files:
+        skill_name = os.path.basename(os.path.dirname(skill_file))
+        errors = []
+        warnings = []
+
+        # 1. 提取 frontmatter
+        frontmatter = _extract_frontmatter(skill_file)
+        if frontmatter is None:
+            errors.append("frontmatter 解析失敗")
+            results[skill_name] = {"score": 0, "errors": errors, "warnings": warnings}
+            continue
+
+        # 2. 檢查必要欄位（errors）
+        required_fields = ["name", "version", "description", "triggers", "allowed-tools"]
+        for field in required_fields:
+            if field not in frontmatter:
+                errors.append(f"缺少必要欄位：{field}")
+
+        # 3. 檢查 triggers 陣列是否非空
+        triggers = frontmatter.get("triggers", [])
+        if not isinstance(triggers, list):
+            errors.append("triggers 應為陣列")
+        elif len(triggers) == 0:
+            errors.append("triggers 陣列為空")
+        elif len(triggers) == 1:
+            warnings.append("triggers 僅 1 個元素，建議至少 2 個")
+
+        # 4. 檢查 description 品質
+        description = frontmatter.get("description", "")
+        if isinstance(description, str):
+            if len(description.strip()) == 0:
+                errors.append("description 為空")
+            elif len(description.strip()) < 20:
+                warnings.append("description 過短（< 20 字元）")
+
+        # 5. 檢查段落結構（至少 3 個段落）
+        try:
+            with open(skill_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # 移除 frontmatter 後的內容
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                markdown_content = parts[2].strip()
+                # 簡單計算段落數（以 ## 或 # 標題為段落分隔）
+                headers = [line for line in markdown_content.split("\n") if line.startswith("#")]
+                if len(headers) < 3:
+                    warnings.append(f"段落結構簡單（僅 {len(headers)} 個標題，建議至少 3 個）")
+        except Exception:
+            warnings.append("無法讀取 Markdown 內容")
+
+        # 6. 計算分數：100 - 15*errors - 5*warnings
+        score = max(0, 100 - 15 * len(errors) - 5 * len(warnings))
+
+        results[skill_name] = {
+            "score": score,
+            "errors": errors,
+            "warnings": warnings
+        }
+
+    return results
+
+
 def main():
     # Ensure UTF-8 output on Windows
     if hasattr(sys.stdout, "reconfigure"):
@@ -287,29 +365,68 @@ def main():
         errors.extend(routing_errors)
         warnings.extend(routing_warnings)
 
+    # 新增：Skill 品質評分
+    skill_scores = None
+    if "--check-skills" in sys.argv or "--all" in sys.argv:
+        skill_scores = validate_skill_quality()
+        # 計算統計
+        total_skills = len(skill_scores)
+        avg_score = sum(s["score"] for s in skill_scores.values()) / total_skills if total_skills > 0 else 0
+        low_score_skills = [name for name, data in skill_scores.items() if data["score"] < 80]
+
+        if low_score_skills:
+            warnings.append(f"發現 {len(low_score_skills)} 個低分 Skill（< 80）：{', '.join(low_score_skills)}")
+
+
     if "--json" in sys.argv:
-        print(json.dumps({
+        output = {
             "errors": errors,
             "warnings": warnings,
             "valid": len(errors) == 0,
-        }, ensure_ascii=False, indent=2))
+        }
+        if skill_scores is not None:
+            output["skill_scores"] = skill_scores
+        print(json.dumps(output, ensure_ascii=False, indent=2))
     else:
+        # Skill 品質評分輸出（如果有執行）
+        if skill_scores is not None:
+            print("\n[Skill 品質評分]")
+            sorted_skills = sorted(skill_scores.items(), key=lambda x: x[1]["score"], reverse=True)
+            for skill_name, data in sorted_skills:
+                score = data["score"]
+                status = "✓" if score == 100 else ("⚠️" if score >= 80 else "❌")
+                print(f"  - {skill_name} ({score}/100) {status}")
+
+                # 顯示錯誤和警告
+                for err in data["errors"]:
+                    print(f"      ❌ {err}")
+                for warn in data["warnings"]:
+                    print(f"      ⚠️ {warn}")
+
+            total = len(skill_scores)
+            avg = sum(s["score"] for s in skill_scores.values()) / total if total > 0 else 0
+            print(f"\n  平均分：{avg:.1f}/100 （共 {total} 個 Skill）")
+
         if warnings:
-            print("⚠️ 警告：")
+            print("\n⚠️ 警告：")
             for w in warnings:
                 print(f"  - {w}")
         if errors:
-            print("❌ 錯誤：")
+            print("\n❌ 錯誤：")
             for e in errors:
                 print(f"  - {e}")
             sys.exit(1)
         else:
             checks_done = len(SCHEMAS)
+            check_names = [f"{len(SCHEMAS)} 個配置檔"]
             if "--check-routing" in sys.argv or "--all" in sys.argv:
                 checks_done += 1
-                print(f"✅ 全部 {checks_done} 項檢查通過（{len(SCHEMAS)} 個配置檔 + Routing 一致性）")
-            else:
-                print(f"✅ 全部 {checks_done} 個配置檔驗證通過")
+                check_names.append("Routing 一致性")
+            if "--check-skills" in sys.argv or "--all" in sys.argv:
+                checks_done += 1
+                check_names.append("Skill 品質")
+
+            print(f"\n✅ 全部 {checks_done} 項檢查通過（{' + '.join(check_names)}）")
 
     sys.exit(0 if not errors else 1)
 
