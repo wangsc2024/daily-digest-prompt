@@ -12,6 +12,8 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 
 # Config
 $MaxDurationSeconds = 2100  # 35 minutes timeout (配合 max_tasks_per_run=3)
+$MaxRetries = 3              # 最大重試次數（指數退避）
+$InitialDelaySeconds = 5     # 首次重試延遲（之後指數增長：5s → 10s → 20s）
 
 # Set paths
 $AgentDir = $PSScriptRoot
@@ -102,52 +104,76 @@ if (-not $claudePath) {
     exit 1
 }
 
-# Call Claude Code (with timeout protection)
-Write-Log "--- calling Claude Code (timeout: ${MaxDurationSeconds}s) ---"
+# Call Claude Code (with retry and timeout protection)
 $success = $false
-$timedOut = $false
+$attempt = 0
 
-try {
-    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($prompt)
-        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-        $OutputEncoding = [System.Text.Encoding]::UTF8
-        $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
-    } -ArgumentList $PromptContent
+while ($attempt -le $MaxRetries) {
+    if ($attempt -gt 0) {
+        # 指數退避：delay = InitialDelay * 2^(attempt-1)
+        # 第1次重試：5 * 2^0 = 5s
+        # 第2次重試：5 * 2^1 = 10s
+        # 第3次重試：5 * 2^2 = 20s
+        $delay = $InitialDelaySeconds * [Math]::Pow(2, $attempt - 1)
 
-    $completed = $job | Wait-Job -Timeout $MaxDurationSeconds
+        # 加入隨機 jitter（±20%），避免多個實例同時重試
+        $jitterRange = $delay * 0.2
+        $jitter = Get-Random -Minimum (-$jitterRange) -Maximum $jitterRange
+        $actualDelay = [Math]::Max(1, [Math]::Round($delay + $jitter, 1))
 
-    if ($null -eq $completed) {
-        # Timeout: retrieve partial output, then kill
-        $timedOut = $true
-        $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
-        if ($partialOutput) {
-            foreach ($line in $partialOutput) {
-                Write-Log $line
-            }
-        }
-        Stop-Job $job
-        Write-Log "[TIMEOUT] Claude exceeded ${MaxDurationSeconds}s (30 min), forcefully terminated"
+        Write-Log "[RETRY] Attempt $($attempt + 1)/$($MaxRetries + 1) after exponential backoff ($actualDelay seconds)..."
+        Start-Sleep -Seconds $actualDelay
     }
-    else {
-        # Completed within timeout
-        $output = Receive-Job $job
-        foreach ($line in $output) {
-            Write-Log $line
-        }
 
-        if ($job.State -eq 'Completed') {
-            $success = $true
+    Write-Log "--- calling Claude Code (attempt $($attempt + 1), timeout: ${MaxDurationSeconds}s) ---"
+    $timedOut = $false
+
+    try {
+        $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+            param($prompt)
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+            $prompt | claude -p --allowedTools "Read,Bash,Write" 2>&1
+        } -ArgumentList $PromptContent
+
+        $completed = $job | Wait-Job -Timeout $MaxDurationSeconds
+
+        if ($null -eq $completed) {
+            # Timeout: retrieve partial output, then kill
+            $timedOut = $true
+            $partialOutput = Receive-Job $job -ErrorAction SilentlyContinue
+            if ($partialOutput) {
+                foreach ($line in $partialOutput) {
+                    Write-Log $line
+                }
+            }
+            Stop-Job $job
+            Write-Log "[TIMEOUT] Claude exceeded ${MaxDurationSeconds}s, forcefully terminated"
         }
         else {
-            Write-Log "[WARN] Job ended with state: $($job.State)"
+            # Completed within timeout
+            $output = Receive-Job $job
+            foreach ($line in $output) {
+                Write-Log $line
+            }
+
+            if ($job.State -eq 'Completed') {
+                $success = $true
+                Remove-Job $job -Force
+                break
+            }
+            else {
+                Write-Log "[WARN] Job ended with state: $($job.State)"
+            }
         }
+
+        Remove-Job $job -Force
+    }
+    catch {
+        Write-Log "[ERROR] Claude failed: $_"
     }
 
-    Remove-Job $job -Force
-}
-catch {
-    Write-Log "[ERROR] Claude failed: $_"
+    $attempt++
 }
 
 # Calculate duration

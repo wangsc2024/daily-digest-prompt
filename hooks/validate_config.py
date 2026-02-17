@@ -164,12 +164,128 @@ def validate_config(config_dir=None):
     return errors, warnings
 
 
+def _extract_frontmatter(filepath):
+    """從 Markdown 檔案提取 YAML frontmatter。
+
+    Returns:
+        dict 或 None（解析失敗時）
+    """
+    try:
+        import yaml
+    except ImportError:
+        return None
+
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # 檢查是否以 --- 開頭
+        if not content.startswith("---"):
+            return None
+
+        # 提取兩個 --- 之間的內容
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None
+
+        frontmatter_yaml = parts[1]
+        return yaml.safe_load(frontmatter_yaml)
+    except Exception:
+        return None
+
+
+def check_routing_consistency(skills_dir=None, config_dir=None):
+    """檢查 SKILL.md triggers 與 routing.yaml 的一致性。
+
+    Returns:
+        (errors, warnings) — 各為字串 list。
+    """
+    import glob
+
+    if skills_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        skills_dir = os.path.join(os.path.dirname(script_dir), "skills")
+
+    if config_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        config_dir = os.path.join(os.path.dirname(script_dir), "config")
+
+    errors = []
+    warnings = []
+
+    # 1. 載入 routing.yaml
+    routing_path = os.path.join(config_dir, "routing.yaml")
+    routing = _load_yaml(routing_path)
+    if routing is None:
+        errors.append("routing.yaml 載入失敗，無法檢查一致性")
+        return errors, warnings
+
+    # 2. 提取所有標籤映射（從 label_routing.mappings）
+    mappings = routing.get("label_routing", {}).get("mappings", {})
+    # 移除 ^ 前綴，得到純標籤列表
+    routing_labels = set()
+    for key in mappings.keys():
+        if key.startswith("^"):
+            routing_labels.add(key[1:])  # 去掉 ^
+
+    # 3. 掃描所有 SKILL.md，提取 triggers
+    skill_triggers = {}  # {skill_name: [triggers]}
+    skill_files = glob.glob(os.path.join(skills_dir, "*/SKILL.md"))
+
+    for skill_file in skill_files:
+        frontmatter = _extract_frontmatter(skill_file)
+        if frontmatter is None:
+            warnings.append(f"{os.path.basename(os.path.dirname(skill_file))}/SKILL.md: frontmatter 解析失敗")
+            continue
+
+        skill_name = frontmatter.get("name", "unknown")
+        triggers = frontmatter.get("triggers", [])
+
+        if not isinstance(triggers, list):
+            warnings.append(f"{skill_name}: triggers 應為陣列")
+            continue
+
+        skill_triggers[skill_name] = triggers
+
+    # 4. 檢查：每個 trigger 是否在 routing.yaml 中有對應映射
+    missing_in_routing = []
+    for skill_name, triggers in skill_triggers.items():
+        for trigger in triggers:
+            if trigger not in routing_labels:
+                missing_in_routing.append(f"{skill_name} 的 trigger '{trigger}' 未在 routing.yaml 中定義")
+
+    # 5. 反向檢查：routing.yaml 中的標籤是否被任何 Skill 宣稱
+    all_triggers = set()
+    for triggers in skill_triggers.values():
+        all_triggers.update(triggers)
+
+    orphaned_labels = []
+    for label in routing_labels:
+        if label not in all_triggers:
+            orphaned_labels.append(f"routing.yaml 中的標籤 '{label}' 未被任何 Skill 宣稱")
+
+    # 6. 分類結果
+    if missing_in_routing:
+        warnings.extend(missing_in_routing)
+
+    if orphaned_labels:
+        warnings.extend(orphaned_labels)
+
+    return errors, warnings
+
+
 def main():
     # Ensure UTF-8 output on Windows
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
     errors, warnings = validate_config()
+
+    # 新增：Routing 一致性檢查
+    if "--check-routing" in sys.argv or "--all" in sys.argv:
+        routing_errors, routing_warnings = check_routing_consistency()
+        errors.extend(routing_errors)
+        warnings.extend(routing_warnings)
 
     if "--json" in sys.argv:
         print(json.dumps({
@@ -188,7 +304,12 @@ def main():
                 print(f"  - {e}")
             sys.exit(1)
         else:
-            print(f"✅ 全部 {len(SCHEMAS)} 個配置檔驗證通過")
+            checks_done = len(SCHEMAS)
+            if "--check-routing" in sys.argv or "--all" in sys.argv:
+                checks_done += 1
+                print(f"✅ 全部 {checks_done} 項檢查通過（{len(SCHEMAS)} 個配置檔 + Routing 一致性）")
+            else:
+                print(f"✅ 全部 {checks_done} 個配置檔驗證通過")
 
     sys.exit(0 if not errors else 1)
 

@@ -16,9 +16,9 @@ $LogDir = "$AgentDir\logs"
 $PromptFile = "$AgentDir\daily-digest-prompt.md"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 
-# Config
-$MaxRetries = 1
-$RetryDelaySeconds = 120
+# Config - 指數退避重試參數
+$MaxRetries = 3
+$InitialDelaySeconds = 5  # 首次重試延遲（之後指數增長：5s → 10s → 20s）
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -111,8 +111,19 @@ $success = $false
 
 while ($attempt -le $MaxRetries) {
     if ($attempt -gt 0) {
-        Write-Log "[RETRY] Attempt $($attempt + 1) after $RetryDelaySeconds seconds delay..."
-        Start-Sleep -Seconds $RetryDelaySeconds
+        # 指數退避：delay = InitialDelay * 2^(attempt-1)
+        # 第1次重試：5 * 2^0 = 5s
+        # 第2次重試：5 * 2^1 = 10s
+        # 第3次重試：5 * 2^2 = 20s
+        $delay = $InitialDelaySeconds * [Math]::Pow(2, $attempt - 1)
+
+        # 加入隨機 jitter（±20%），避免多個實例同時重試
+        $jitterRange = $delay * 0.2
+        $jitter = Get-Random -Minimum (-$jitterRange) -Maximum $jitterRange
+        $actualDelay = [Math]::Max(1, [Math]::Round($delay + $jitter, 1))
+
+        Write-Log "[RETRY] Attempt $($attempt + 1)/$($MaxRetries + 1) after exponential backoff ($actualDelay seconds)..."
+        Start-Sleep -Seconds $actualDelay
     }
 
     Write-Log "--- calling Claude Code (attempt $($attempt + 1)) ---"

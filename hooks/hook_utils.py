@@ -93,10 +93,20 @@ def read_stdin_json():
         return None
 
 
-def output_decision(decision, reason=None):
-    """輸出 Hook 決策 JSON 並結束。"""
+def output_decision(decision, reason=None, protocol_version="1.0"):
+    """輸出 Hook 決策 JSON 並結束（含協議版本）。
+
+    Args:
+        decision: "allow" 或 "block"
+        reason: 選填的原因說明
+        protocol_version: 協議版本號（預設 "1.0"）
+    """
     import sys
-    result = {"decision": decision}
+    result = {
+        "protocol_version": protocol_version,
+        "decision": decision,
+        "timestamp": datetime.now().isoformat()
+    }
     if reason:
         result["reason"] = reason
     print(json.dumps(result))
