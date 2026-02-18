@@ -142,10 +142,12 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 讀取 `context/auto-tasks-today.json`，根據 Phase 2 結果更新：
 
-對每個存在的 `results/todoist-auto-*.json` 結果檔案：
+對每個存在的 `results/todoist-auto-*.json` 結果檔案（可能有 1-3 個）：
 1. 從結果 JSON 中讀取 `type` 欄位（如 `shurangama`、`tech_research`）
 2. 查找 `config/frequency-limits.yaml` 中對應的 `counter_field`
 3. 將該欄位 +1
+
+更新 `next_execution_order`：讀取 plan JSON 的 `auto_tasks.next_tasks` 陣列，取最後一個任務的 `execution_order`（從 frequency-limits.yaml 查），指針設為下一個位置（若超過 18 則回到 1）。
 
 用 Write 覆寫整個 JSON。
 
@@ -156,7 +158,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 用 Read 讀取 `state/todoist-history.json`（不存在則初始化 `{"auto_tasks":[],"daily_summary":[]}`）。
 
 ### 4.1 auto_tasks（plan_type = "auto" 時）
-對每個 Phase 2 結果，在 `auto_tasks` 末尾加入：
+對每個 Phase 2 結果（可能有 1-3 個 `results/todoist-auto-*.json`），在 `auto_tasks` 末尾各加入一筆：
 ```json
 {
   "date": "今天日期",
@@ -220,11 +222,13 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 ```
 📋 Todoist 自動任務報告（團隊模式）
 
-🔧 自動任務
-- [任務名稱]：[主題/結果摘要] / 成功/失敗
- （依實際執行的自動任務類型列出）
+🔧 自動任務（本次 N 項並行）
+1. [任務名稱]：[主題/結果摘要] / 成功/失敗
+2. [任務名稱]：[主題/結果摘要] / 成功/失敗
+3. [任務名稱]：[主題/結果摘要] / 成功/失敗
+ （依實際執行的自動任務數量列出 1-3 項）
 
-📊 今日自動任務進度：已用 N / 上限 38
+📊 今日自動任務進度：已用 N / 上限 45
 
 ⚡ 團隊並行模式
 ```
@@ -260,7 +264,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ```bash
 rm -f results/todoist-plan.json results/todoist-task-*.md results/todoist-result-*.json
-rm -f results/todoist-auto-*.json
+rm -f results/todoist-auto-*.json results/todoist-task-auto-*.md
 ```
 
 ---

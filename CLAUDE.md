@@ -295,7 +295,7 @@ daily-digest-prompt/
 6. 無可處理項目或全部完成時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
 7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
 8. 通知格式依 `config/notification.yaml`
-9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：18 個任務，合計 45 次/日上限，round-robin 輪轉
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：18 個任務，合計 45 次/日上限，round-robin 輪轉，每次觸發最多並行 3 個（`max_auto_per_run: 3`）
 10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
 
 ### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
@@ -428,6 +428,7 @@ python hooks/query_logs.py --format json
 
 ### 4. 自動任務輪轉（round-robin）
 - 18 個自動任務定義在 `config/frequency-limits.yaml`，合計 45 次/日上限
+- 每次觸發最多並行 `max_auto_per_run`（預設 3）個自動任務
 - 8 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)、系統自省(4)、GitHub靈感(1)
 - 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
 - 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成

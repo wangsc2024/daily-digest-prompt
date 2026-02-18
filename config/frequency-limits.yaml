@@ -21,6 +21,8 @@ reset_policy: "daily"  # 每日歸零（跨日自動重置）
 # 若用順序掃描，後面的任務永遠不會執行
 # 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
 selection_strategy: "round_robin"
+# 每次觸發最多執行幾個自動任務（從指針位置連續選取）
+max_auto_per_run: 3
 # next_execution_order 存在 tracking_file 中，跨日不重置
 # 每次找到可執行任務後指針 +1，繞完一圈回到起點
 

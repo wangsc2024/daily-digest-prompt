@@ -100,8 +100,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 初始格式依 `config/frequency-limits.yaml` 的 `initial_schema` 定義（含所有 counter 欄位）。
 
-### 決定可執行的自動任務（純輪轉 round-robin）
-讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針），從該位置開始找第一個未達上限的：
+### 決定可執行的自動任務（純輪轉 round-robin，每次最多 3 個）
+讀取 `config/frequency-limits.yaml` 的 `max_auto_per_run`（預設 3）。
+讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針），從該位置開始依序找未達上限的任務，最多選取 `max_auto_per_run` 個：
 
 | 群組 | 自動任務 | 每日上限 | 欄位 |
 |------|---------|---------|------|
@@ -124,7 +125,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal_count` |
 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout_count` |
 
-合計上限：45 次/日
+合計上限：45 次/日（每次觸發最多執行 `max_auto_per_run` 個，預設 3）
 
 ---
 
@@ -242,12 +243,13 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 無可處理任務時（plan_type = "auto"）：
 
-**重要：自動任務 prompt 檔案產出**
+**重要：自動任務 prompt 檔案產出**（最多 3 個）
+對每個選中的自動任務：
 1. 從 `config/frequency-limits.yaml` 的 `tasks.<key>.template` 取得模板路徑
 2. 用 Read 讀取模板內容
 3. 若模板含 `template_params`（如法華經、教觀綱宗），將變數替換（subject、author、search_terms、tags、study_path）
-4. 用 Write 寫入 `results/todoist-task-auto.md`
-5. 在 prompt 結尾加上結果寫入指示：完成後用 Write 建立 `results/todoist-auto-generic.json`（格式同 todoist-task prompt 的結果 JSON，`type` 為 `auto_task`）
+4. 用 Write 寫入 `results/todoist-task-auto-{key}.md`（如 `results/todoist-task-auto-shurangama.md`）
+5. 在 prompt 結尾加上結果寫入指示：完成後用 Write 建立 `results/todoist-auto-{key}.json`（格式同 todoist-task prompt 的結果 JSON，`type` 為 `auto_task`）
 
 ```json
 {
@@ -257,10 +259,13 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "auto",
   "tasks": [],
   "auto_tasks": {
-    "next_task": { "key": "shurangama", "name": "楞嚴經研究", "current_count": 1, "limit": 5 },
-    "prompt_file": "results/todoist-task-auto.md",
+    "next_tasks": [
+      { "key": "shurangama", "name": "楞嚴經研究", "current_count": 1, "limit": 5, "prompt_file": "results/todoist-task-auto-shurangama.md" },
+      { "key": "tech_research", "name": "每日任務技術研究", "current_count": 0, "limit": 5, "prompt_file": "results/todoist-task-auto-tech_research.md" },
+      { "key": "log_audit", "name": "系統 Log 審查", "current_count": 0, "limit": 1, "prompt_file": "results/todoist-task-auto-log_audit.md" }
+    ],
     "all_exhausted": false,
-    "summary": { "total_limit": 36, "total_used": 5, "remaining": 31 }
+    "summary": { "total_limit": 45, "total_used": 5, "remaining": 40 }
   },
   "filter_summary": {
     "api_total": 5,
@@ -288,9 +293,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "idle",
   "tasks": [],
   "auto_tasks": {
-    "next_task": null,
+    "next_tasks": [],
     "all_exhausted": true,
-    "summary": { "total_limit": 36, "total_used": 36, "remaining": 0 }
+    "summary": { "total_limit": 45, "total_used": 45, "remaining": 0 }
   },
   "filter_summary": { "api_total": 0, "after_date_filter": 0, "after_closed_filter": 0, "processable": 0, "skipped": 0 },
   "sync_warnings": {

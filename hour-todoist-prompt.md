@@ -94,21 +94,25 @@
 讀取 `context/auto-tasks-today.json`，依 frequency-limits.yaml 的歸零邏輯判斷日期。
 若全部自動任務都已達上限 → 跳到步驟 5。
 
-### 2.6 純輪轉選取自動任務（round-robin）
+### 2.6 純輪轉選取自動任務（round-robin，每次最多 3 個）
 每日僅 ~11 個 auto-task slots，但 18 個任務合計 45 次上限。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
 
-**選取演算法**：
+**選取演算法**（讀取 `config/frequency-limits.yaml` 的 `max_auto_per_run`，預設 3）：
 1. 從 `context/auto-tasks-today.json` 讀取 `next_execution_order`（跨日保留的指針）
 2. 以此指針為起點，按 execution_order 順序（到最後繞回第 1 個）逐一檢查
-3. 找到第一個 `計數 < daily_limit` 的任務 → 載入其 `template` 模板檔案
-4. 若模板有 `template_params`（如教觀綱宗、法華經、淨土宗）→ 替換 `{{SUBJECT}}`、`{{AUTHOR}}`、`{{SEARCH_TERMS}}`、`{{TAGS}}`、`{{STUDY_PATH}}`
-5. 依模板指示建立 `task_prompt.md` 並執行子 Agent
-6. 完成後更新 `context/auto-tasks-today.json`：計數 +1、`next_execution_order` 推進到下一個
+3. 找到 `計數 < daily_limit` 的任務 → 加入本次執行清單
+4. 持續掃描直到收集滿 `max_auto_per_run` 個任務，或繞完一圈（18 個全部達上限）
+5. 對每個選中的任務：
+   - 載入其 `template` 模板檔案
+   - 若模板有 `template_params`（如教觀綱宗、法華經、淨土宗）→ 替換 `{{SUBJECT}}`、`{{AUTHOR}}`、`{{SEARCH_TERMS}}`、`{{TAGS}}`、`{{STUDY_PATH}}`
+   - 依模板指示建立 `task_prompt_{N}.md` 並執行子 Agent
+6. 全部完成後更新 `context/auto-tasks-today.json`：各計數 +1、`next_execution_order` 推進到最後一個已執行任務的下一個
 7. 同步更新 `state/todoist-history.json`
-8. 清理 `task_prompt.md`
+8. 清理 `task_prompt_*.md`
 
-### 2.7 每次僅執行 1 個
-每觸發一次步驟 2.5-2.8，僅執行 **1 個** 自動任務。
+### 2.7 每次最多執行 3 個
+每觸發一次步驟 2.5-2.8，最多執行 **`max_auto_per_run`（預設 3）** 個自動任務。
+若可用任務不足 3 個（部分已達上限），則執行實際可用數量。
 
 ### 2.8 全部達上限
 繞一圈（18 個任務）都已達上限 → 跳到步驟 5（通知：今日自動任務已達上限）。

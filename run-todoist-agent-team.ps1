@@ -282,16 +282,21 @@ if ($plan.plan_type -eq "tasks") {
     $Phase2TimeoutSeconds += $maxTaskTimeout
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Auto-tasks: determine timeout from the selected task
-    $nextTask = $plan.auto_tasks.next_task
-    if ($null -ne $nextTask) {
-        $taskKey = $nextTask.key
-        if ($taskKey -eq "git_push") {
-            $Phase2TimeoutSeconds += $TimeoutBudget["gitpush"]
+    # Auto-tasks: determine timeout from all selected tasks (parallel = max, not sum)
+    $nextTasks = $plan.auto_tasks.next_tasks
+    if ($null -ne $nextTasks -and $nextTasks.Count -gt 0) {
+        $maxAutoTimeout = 0
+        foreach ($nextTask in $nextTasks) {
+            $taskKey = $nextTask.key
+            if ($taskKey -eq "git_push") {
+                $autoTimeout = $TimeoutBudget["gitpush"]
+            }
+            else {
+                $autoTimeout = $TimeoutBudget["auto"]
+            }
+            if ($autoTimeout -gt $maxAutoTimeout) { $maxAutoTimeout = $autoTimeout }
         }
-        else {
-            $Phase2TimeoutSeconds += $TimeoutBudget["auto"]
-        }
+        $Phase2TimeoutSeconds += $maxAutoTimeout
     }
 }
 # plan_type == "idle" → stays at buffer only (no Phase 2 work)
@@ -350,15 +355,14 @@ if ($plan.plan_type -eq "tasks") {
     }
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Scenario B: Execute the auto-task selected by Phase 1
-    $nextTask = $plan.auto_tasks.next_task
+    # Scenario B: Execute auto-tasks selected by Phase 1 (up to 3 in parallel)
+    $nextTasks = $plan.auto_tasks.next_tasks
 
-    if ($null -eq $nextTask) {
+    if ($null -eq $nextTasks -or $nextTasks.Count -eq 0) {
         Write-Log "[Phase2] No auto-task selected (all exhausted or error)"
     }
     else {
-        $taskKey = $nextTask.key
-        $taskName = $nextTask.name
+        Write-Log "[Phase2] Auto-tasks to execute: $($nextTasks.Count)"
 
         # Dedicated team prompts for all 18 auto-tasks
         $dedicatedPrompts = @{
@@ -390,55 +394,60 @@ elseif ($plan.plan_type -eq "auto") {
             "github_scout"         = "$AgentDir\prompts\team\todoist-auto-github-scout.md"
         }
 
-        # Choose prompt: dedicated team prompt if available, otherwise generic from Phase 1
-        $genericPrompt = "$ResultsDir\todoist-task-auto.md"
+        foreach ($nextTask in $nextTasks) {
+            $taskKey = $nextTask.key
+            $taskName = $nextTask.name
 
-        if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
-            $promptToUse = $dedicatedPrompts[$taskKey]
-            Write-Log "[Phase2] Using dedicated prompt for $taskKey"
-        }
-        elseif (Test-Path $genericPrompt) {
-            $promptToUse = $genericPrompt
-            Write-Log "[Phase2] Using generic prompt from Phase 1 for $taskKey"
-        }
-        else {
-            Write-Log "[Phase2] No prompt found for $taskKey (checked dedicated and generic)"
-            $sections["auto-$taskKey"] = "failed"
-            $promptToUse = $null
-        }
+            # Choose prompt: dedicated team prompt > generic from Phase 1 > skip
+            $genericPrompt = "$ResultsDir\todoist-task-auto-$taskKey.md"
 
-        if ($null -ne $promptToUse) {
-            $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
+            if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
+                $promptToUse = $dedicatedPrompts[$taskKey]
+                Write-Log "[Phase2] Using dedicated prompt for $taskKey"
+            }
+            elseif (Test-Path $genericPrompt) {
+                $promptToUse = $genericPrompt
+                Write-Log "[Phase2] Using generic prompt from Phase 1 for $taskKey"
+            }
+            else {
+                Write-Log "[Phase2] No prompt found for $taskKey (checked dedicated and generic)"
+                $sections["auto-$taskKey"] = "failed"
+                $promptToUse = $null
+            }
 
-            $agentName = "auto-$taskKey"
+            if ($null -ne $promptToUse) {
+                $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
 
-            $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                param($prompt, $agentName, $logDir, $timestamp, $traceId)
+                $agentName = "auto-$taskKey"
 
-                # 明確設定 Process 級別環境變數（會傳遞到子 process）
-                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
-                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                    param($prompt, $agentName, $logDir, $timestamp, $traceId)
 
-                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                $OutputEncoding = [System.Text.Encoding]::UTF8
+                    # 明確設定 Process 級別環境變數（會傳遞到子 process）
+                    [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                    [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
-                $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
-                $output = $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>$stderrFile
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    $OutputEncoding = [System.Text.Encoding]::UTF8
 
-                # 執行成功且 stderr 為空 → 刪除
-                if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
-                    $stderrSize = (Get-Item $stderrFile).Length
-                    if ($stderrSize -eq 0) {
-                        Remove-Item $stderrFile -Force
+                    $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
+                    $output = $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>$stderrFile
+
+                    # 執行成功且 stderr 為空 → 刪除
+                    if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                        $stderrSize = (Get-Item $stderrFile).Length
+                        if ($stderrSize -eq 0) {
+                            Remove-Item $stderrFile -Force
+                        }
                     }
-                }
 
-                return $output
-            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
+                    return $output
+                } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
 
-            $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
-            $phase2Jobs += $job
-            Write-Log "[Phase2] Started: $agentName ($taskName) (Job $($job.Id))"
+                $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
+                $phase2Jobs += $job
+                Write-Log "[Phase2] Started: $agentName ($taskName) (Job $($job.Id))"
+            }
         }
     }
 }
