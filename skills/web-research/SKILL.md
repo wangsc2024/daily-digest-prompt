@@ -1,12 +1,14 @@
 ---
 name: web-research
-version: "1.1.0"
+version: "1.1.1"
 description: |
   網路研究標準化框架。統一研究流程：搜尋→篩選→摘要→品質評分→KB 匯入。
   適用於所有需要 WebSearch/WebFetch 的研究型自動任務。
   Use when: 研究任務、WebSearch、WebFetch、來源品質評估、研究報告、技術調查、趨勢分析、深度研究。
-allowed-tools: Read, Write, Bash, WebSearch, WebFetch
+allowed-tools: Bash, Read, Write, WebSearch, WebFetch
 cache-ttl: N/A
+depends-on:
+  - knowledge-query
 triggers:
   - "研究"
   - "WebSearch"
@@ -127,7 +129,7 @@ triggers:
 
 若研究成果值得保存（depth >= adequate），依 knowledge-query Skill 匯入知識庫。
 
-匯入前去重：
+匯入前去重（使用 hybrid search，閾值 0.85 基於經驗校準）：
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json" \
@@ -135,6 +137,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 ```
 - 若有 score > 0.85 的結果 -> 視為重複，不匯入（但可更新已有筆記）
 - 若無重複 -> 按 knowledge-query SKILL.md 的匯入步驟執行
+
+> **閾值說明**：0.85 為 hybrid search（BM25 + 向量）的經驗閾值。
+> hybrid search 的分數已正規化到 0-1 範圍，0.85 以上通常代表高度語意相似。
+> 若向量模型更換，建議重新校準此閾值。
 
 ### 步驟 6：研究註冊表更新
 

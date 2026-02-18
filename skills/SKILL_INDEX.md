@@ -22,7 +22,7 @@
 | 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件、信箱、未讀、收件匣、inbox、Google 信箱、重要郵件、郵件摘要 |
 | 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、遊戲設計、HTML5 遊戲、遊戲品質、Canvas 遊戲、JavaScript 遊戲、遊戲部署、遊戲效能 |
 | 14 | system-insight | 系統自省分析（執行品質/Skill 使用/失敗模式） | 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、system-insight、自省、洞察、趨勢分析、統計報告、執行品質 |
-| 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分/KB匯入） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋、技術調查、趨勢分析、深度研究、資料蒐集、文獻回顧、調研 |
+| 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分/KB匯入，depends-on: knowledge-query） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋、技術調查、趨勢分析、深度研究、資料蒐集、文獻回顧、調研 |
 | 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator、清理、重複筆記、品質檢查、知識庫清理、筆記統計 |
 | 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進、架構借鑑、開源分析、GitHub trending、trending repos、專案靈感、改進建議 |
 
@@ -33,7 +33,7 @@
 | 18 | task-manager | 新增自動/排程/單次任務標準化（互動式） | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理、add task、round-robin |
 | 19 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全掃描、skill 掃描、security scan、安全稽核、安全檢查、漏洞掃描、Cisco AI Defense、YARA |
 | 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
-| 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（標籤/優先級/截止日期） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務 |
+| 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（標籤/優先級/截止日期，depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
 
 **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

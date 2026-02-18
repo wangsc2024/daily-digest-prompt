@@ -1,0 +1,40 @@
+{
+  "date": "2026-02-19",
+  "topic": "AI Agent 自主科學發現與 Reflective Agent 架構 — Test-Time Reasoning、Self-Verification 與 Generator-Verifier-Reviser 迴圈",
+  "research_questions": [
+    "Test-Time Reasoning（推理時運算）如何從理論突破走向 2026 年的實際應用？DeepSeek-R1 與 Claude Extended Thinking 的架構差異為何？",
+    "DeepMind Aletheia 的 Generator-Verifier-Reviser 三體迴圈如何實現自主科學發現？其架構設計對通用 AI Agent 有何啟示？",
+    "Reflective Agent 的 Self-Verification 機制（Process Reward Models、Self-Critique Loops、ReTool）如何系統性地提升 Agent 輸出品質？實踐中的成本與延遲權衡為何？"
+  ],
+  "methodology": "四階段系統性研究：(1) 規劃：定義研究範圍與問題 (2) 蒐集：WebSearch + WebFetch 取得最新論文、技術部落格、開源實作 (3) 分析：比較架構差異、歸納設計模式、評估實用性 (4) 報告：結構化 Markdown 報告，含技術架構圖、比較表格、實踐建議",
+  "keywords": [
+    "Test-Time Reasoning",
+    "Reflective Agent",
+    "Self-Verification",
+    "Process Reward Models",
+    "Generator-Verifier-Reviser",
+    "DeepMind Aletheia",
+    "Self-Critique Loop",
+    "ReTool",
+    "Chain-of-Thought Verification",
+    "Inference-Time Compute Scaling"
+  ],
+  "stage_completed": 1,
+  "related_but_different": {
+    "existing_kb": [
+      "AI Agent 開發框架（SDK 比較，非自驗證架構）",
+      "世界模型（物理模擬，非推理驗證）",
+      "Mechanistic Interpretability（事後解釋，非即時自修正）",
+      "Chat 系統 Function Calling（工具調用，非自主推理）"
+    ],
+    "registry_topics_avoided": [
+      "AI 世界模型",
+      "小模型蒸餾技術",
+      "AI Agent 開發框架與 Tool Use",
+      "AI 驅動的文件自動化",
+      "AI 智慧醫療",
+      "Chat 對話系統 Function Calling",
+      "Crawl4AI"
+    ]
+  }
+}

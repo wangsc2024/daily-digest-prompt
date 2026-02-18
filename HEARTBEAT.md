@@ -44,6 +44,27 @@ schedules:
     retry: 0
     description: "Todoist 團隊模式（每小時半點）"
 
+  kb-backup:
+    cron: "0 1 * * *"
+    script: kb-backup.ps1
+    timeout: 120
+    retry: 0
+    description: "知識庫 SQLite 備份（每日 01:00）"
+
+  kb-git-backup:
+    cron: "30 1 * * *"
+    script: kb-git-backup.ps1
+    timeout: 300
+    retry: 0
+    description: "知識庫加密 Git 備份（每日 01:30）"
+
+  kb-export:
+    cron: "0 2 * * 0"
+    script: kb-export.ps1
+    timeout: 120
+    retry: 0
+    description: "知識庫 JSON 匯出（每週日 02:00）"
+
 ---
 
 # Heartbeat 排程定義
@@ -60,6 +81,9 @@ schedules:
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2700s (45min) | Todoist 團隊模式 |
+| kb-backup | 每日 01:00 | kb-backup.ps1 | 120s (2min) | 知識庫 SQLite 備份 |
+| kb-git-backup | 每日 01:30 | kb-git-backup.ps1 | 300s (5min) | 知識庫加密 Git 備份 |
+| kb-export | 每週日 02:00 | kb-export.ps1 | 120s (2min) | 知識庫 JSON 匯出 |
 
 ## Todoist 驅動任務（由每小時排程撿起）
 

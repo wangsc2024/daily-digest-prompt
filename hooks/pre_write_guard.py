@@ -152,7 +152,7 @@ def check_write_path(file_path, rules=None, project_root=None):
 def main():
     data = read_stdin_json()
     if data is None:
-        output_decision("allow")
+        return output_decision("allow")
 
     tool_name = data.get("tool_name", "Write")
     file_path = data.get("tool_input", {}).get("file_path", "")
@@ -162,9 +162,9 @@ def main():
 
     if blocked:
         log_blocked_event(session_id, tool_name, file_path, reason, guard_tag)
-        output_decision("block", reason)
+        return output_decision("block", reason)
 
-    output_decision("allow")
+    return output_decision("allow")
 
 
 if __name__ == "__main__":

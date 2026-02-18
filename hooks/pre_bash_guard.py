@@ -138,6 +138,34 @@ FALLBACK_BASH_RULES = [
         "reason": "禁止透過 wget 傳送敏感資料",
         "guard_tag": "exfiltration-guard",
     },
+    {
+        "id": "exfiltration-subshell",
+        "description": "禁止透過子 shell ($() / ``) 方式外洩敏感檔案",
+        "patterns": [
+            r"(curl|wget)\s.*(\$\(|`)cat\s+.*\.(env|htpasswd)",
+            r"(curl|wget)\s.*(\$\(|`)cat\s+.*(credentials|secrets|token)\.json",
+            r"(curl|wget)\s.*(\$\(|`)cat\s+.*(id_rsa|id_ed25519)",
+        ],
+        "flags": "IGNORECASE",
+        "reason": "禁止透過子 shell ($() / ``) 方式外洩敏感檔案內容",
+        "guard_tag": "exfiltration-guard",
+    },
+    {
+        "id": "exfiltration-base64",
+        "description": "禁止透過 base64 編碼後外洩敏感檔案",
+        "patterns": [
+            r"base64\s+\.env\b.*\|\s*(curl|wget)",
+            r"base64\s+(credentials|secrets|token)\.json.*\|\s*(curl|wget)",
+            r"base64\s+(id_rsa|id_ed25519).*\|\s*(curl|wget)",
+            r"base64\s+\.htpasswd.*\|\s*(curl|wget)",
+            r"cat\s+.*\.(env|htpasswd)\s*\|.*base64.*\|\s*(curl|wget)",
+            r"cat\s+.*(credentials|secrets|token)\.json\s*\|.*base64.*\|\s*(curl|wget)",
+            r"cat\s+.*(id_rsa|id_ed25519)\s*\|.*base64.*\|\s*(curl|wget)",
+        ],
+        "flags": "IGNORECASE",
+        "reason": "禁止透過 base64 編碼後將敏感檔案內容傳送到外部網路",
+        "guard_tag": "exfiltration-guard",
+    },
 ]
 
 
@@ -190,7 +218,7 @@ def check_bash_command(command, rules=None):
 def main():
     data = read_stdin_json()
     if data is None:
-        output_decision("allow")
+        return output_decision("allow")
 
     command = data.get("tool_input", {}).get("command", "")
     session_id = data.get("session_id", "")
@@ -199,9 +227,9 @@ def main():
 
     if blocked:
         log_blocked_event(session_id, "Bash", command, reason, guard_tag)
-        output_decision("block", reason)
+        return output_decision("block", reason)
 
-    output_decision("allow")
+    return output_decision("allow")
 
 
 if __name__ == "__main__":

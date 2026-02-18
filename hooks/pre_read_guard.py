@@ -142,7 +142,7 @@ def check_read_path(file_path, rules=None, project_root=None):
 def main():
     data = read_stdin_json()
     if data is None:
-        output_decision("allow")
+        return output_decision("allow")
 
     file_path = data.get("tool_input", {}).get("file_path", "")
     session_id = data.get("session_id", "")
@@ -151,9 +151,9 @@ def main():
 
     if blocked:
         log_blocked_event(session_id, "Read", file_path, reason, guard_tag)
-        output_decision("block", reason)
+        return output_decision("block", reason)
 
-    output_decision("allow")
+    return output_decision("allow")
 
 
 if __name__ == "__main__":

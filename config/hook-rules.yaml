@@ -143,6 +143,32 @@ bash_rules:
     guard_tag: exfiltration-guard
     priority: critical  # 資料外洩風險
 
+  - id: exfiltration-subshell
+    description: "禁止透過子 shell ($() / ``) 方式外洩敏感檔案"
+    patterns:
+      - '(curl|wget)\s.*(\$\(|`)cat\s+.*\.(env|htpasswd)'
+      - '(curl|wget)\s.*(\$\(|`)cat\s+.*(credentials|secrets|token)\.json'
+      - '(curl|wget)\s.*(\$\(|`)cat\s+.*(id_rsa|id_ed25519)'
+    flags: IGNORECASE
+    reason: "禁止透過子 shell ($() / ``) 方式外洩敏感檔案內容"
+    guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
+
+  - id: exfiltration-base64
+    description: "禁止透過 base64 編碼後外洩敏感檔案"
+    patterns:
+      - 'base64\s+\.env\b.*\|\s*(curl|wget)'
+      - 'base64\s+(credentials|secrets|token)\.json.*\|\s*(curl|wget)'
+      - 'base64\s+(id_rsa|id_ed25519).*\|\s*(curl|wget)'
+      - 'base64\s+\.htpasswd.*\|\s*(curl|wget)'
+      - 'cat\s+.*\.(env|htpasswd)\s*\|.*base64.*\|\s*(curl|wget)'
+      - 'cat\s+.*(credentials|secrets|token)\.json\s*\|.*base64.*\|\s*(curl|wget)'
+      - 'cat\s+.*(id_rsa|id_ed25519)\s*\|.*base64.*\|\s*(curl|wget)'
+    flags: IGNORECASE
+    reason: "禁止透過 base64 編碼後將敏感檔案內容傳送到外部網路"
+    guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
+
 # ============================================
 # 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）
 # ============================================

@@ -1,13 +1,15 @@
 ---
 name: todoist-task-creator
-version: "1.0.0"
+version: "1.0.1"
 description: |
   互動式新增符合系統排程路由規則的 Todoist 任務。
   確保標籤、優先級、截止日期正確設定，使任務被 Todoist Agent 自動識別與執行。
   Use when: 新增 Todoist 排程任務、建立可自動執行的待辦、add todoist task、新增待辦排程。
   Note: 此為互動式工具 Skill，由使用者在 Claude Code 對話中手動觸發。
-allowed-tools: Read, Bash, Write
+allowed-tools: Bash, Read, Write
 cache-ttl: N/A
+depends-on:
+  - todoist
 triggers:
   - "新增 Todoist 任務"
   - "建立排程任務"
@@ -102,9 +104,9 @@ triggers:
 
 以下任務**無論標籤設定**，排程系統均會跳過。如用戶試圖建立此類任務，需提醒：
 
-- ❌ 實體行動：買東西、運動、打掃、出門、取件
-- ❌ 人際互動：打電話、開會、面談、聚餐、拜訪
-- ❌ 個人事務：繳費（非自動化）、看醫生、接送
+- 實體行動：買東西、運動、打掃、出門、取件
+- 人際互動：打電話、開會、面談、聚餐、拜訪
+- 個人事務：繳費（非自動化）、看醫生、接送
 
 ---
 
