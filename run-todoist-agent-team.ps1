@@ -396,7 +396,7 @@ elseif ($plan.plan_type -eq "auto") {
             "log_audit"              = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
             "git_push"               = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
             # 遊戲創意（1）
-            "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
+            "creative_game"          = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
             # 專案品質（1）
             "qa_optimize"            = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
             # 系統自省（2）
