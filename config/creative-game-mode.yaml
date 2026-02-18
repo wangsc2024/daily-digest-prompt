@@ -75,7 +75,7 @@ optimization:
 # 計數器追蹤
 # ============================================================
 tracking_file: "context/auto-tasks-today.json"
-counter_field: "creative_game_count"
+counter_field: "creative_game_optimize_count"
 
 # 每日歸零邏輯（與 frequency-limits.yaml 一致）
 reset_policy: "daily"  # 每日歸零 counter，但 stage 不重置

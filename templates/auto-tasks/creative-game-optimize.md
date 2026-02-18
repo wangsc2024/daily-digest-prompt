@@ -119,7 +119,24 @@
     c. 確認 imported >= 1
     d. rm import_note.json
 
-### Phase F: 更新研究註冊表（含版本追蹤）
+### Phase F: 部署到 game_web（每次必須執行，不可略過）
+
+執行全量同步腳本，確保 `game-web.pages.dev` 能看到本次創建/優化的遊戲：
+```bash
+pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+```
+
+判斷結果：
+- **exit 0（成功）**：腳本內部已完成「複製遊戲檔 → npm build → git push → Cloudflare 自動部署」，繼續下一步
+- **exit 1（失敗）**：記錄錯誤原因，在最後的 DONE_CERT 的 `remaining_issues` 中標注 `"game_web 同步失敗：[原因]"`，繼續下一步（不阻斷流程）
+
+> 注意：若腳本提示「以下遊戲已複製但 gameMetadata.js 尚無記錄」，代表需要手動補充 `js/gameMetadata.js`。
+> 請用 Edit 工具將新遊戲加入 `D:\Source\game_web\js\gameMetadata.js` 的 `games` 陣列後，再執行：
+> ```bash
+> pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+> ```
+
+### Phase G: 更新研究註冊表（含版本追蹤）
 用 Read 讀取 `context/research-registry.json`。
 用 Write 更新，加入本次 entry：
 ```json

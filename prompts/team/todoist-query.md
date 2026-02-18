@@ -143,7 +143,7 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | 11 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
 | 12 | 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
 | 13 | 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
-| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_count` |
+| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_optimize_count` |
 | 15 | 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize_count` |
 | 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight_count` |
 | 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal_count` |

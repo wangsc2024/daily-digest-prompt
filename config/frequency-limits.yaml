@@ -51,7 +51,7 @@ initial_schema: |
     "skill_audit_count": 0,
     "log_audit_count": 0,
     "git_push_count": 0,
-    "creative_game_count": 0,
+    "creative_game_optimize_count": 0,
     "qa_optimize_count": 0,
     "system_insight_count": 0,
     "self_heal_count": 0,
@@ -222,9 +222,9 @@ tasks:
   creative_game_optimize:
     name: "創意遊戲優化"
     daily_limit: 2
-    counter_field: "creative_game_count"
+    counter_field: "creative_game_optimize_count"
     template: "templates/auto-tasks/creative-game-optimize.md"
-    history_type: "creative_game"
+    history_type: "creative_game_optimize"
     execution_order: 14
     skills: [game-design, knowledge-query]
     description: "階段一：依優先級創建 10 個經典復古小遊戲（Space Invaders、Pac-Man、Tetris 等）；階段二：90% 優化復古遊戲 + 10% 優化佛學遊戲"

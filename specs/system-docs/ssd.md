@@ -349,7 +349,7 @@ graph TB
 | Skill 審查優化 | 2 | `skill_audit_count` | `skill-audit.md` | 11 |
 | 系統 Log 審查 | 1 | `log_audit_count` | `log-audit.md` | 12 |
 | 專案推送 GitHub | 4 | `git_push_count` | `git-push.md` | 13 |
-| 創意遊戲優化 | 2 | `creative_game_count` | `creative-game-optimize.md` | 14 |
+| 創意遊戲優化 | 2 | `creative_game_optimize_count` | `creative-game-optimize.md` | 14 |
 | **合計** | **38** | — | — | — |
 
 **選取策略**：
@@ -1318,7 +1318,7 @@ $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
   "skill_audit_count": 0,
   "log_audit_count": 0,
   "git_push_count": 0,
-  "creative_game_count": 0,
+  "creative_game_optimize_count": 0,
   "next_execution_order": 1,
   "closed_task_ids": ["6g2JQggXJQrHPCJ5", "6fxjQwgq59wg39M5"]
 }

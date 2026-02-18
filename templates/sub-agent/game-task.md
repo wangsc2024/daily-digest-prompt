@@ -62,10 +62,26 @@
 14. 效能相關程式碼檢查
 15. 依 SKILL.md 程式碼審查清單逐項自檢
 
-### Phase F: 部署（若任務包含部署需求）
-16. 依 SKILL.md 的部署流程操作
-17. git add + commit + push
-18. 等待 Cloudflare Pages 自動部署
+### Phase F: 部署
+16. 判斷任務是否包含部署/同步需求（描述含「同步」、「部署」、「game_web」、「Pages」、「GitHub」）：
+
+    **A. 需要同步到 game_web（優先判斷）**
+    若任務描述含「同步遊戲」、「game_web」、「game-web.pages.dev」：
+    ```bash
+    pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+    ```
+    腳本會自動完成：複製遊戲 → 更新提示 → npm build → git push game_web → Cloudflare Pages 自動部署。
+    若腳本提示 gameMetadata.js 需補充，用 Edit 工具加入後重新執行。
+
+    **B. 只需 push game/ repo**
+    若任務只在 `D:\Source\game` 修改且無需更新 game_web：
+    ```bash
+    cd D:/Source/game && git add -A && git commit -m "feat: [遊戲名] 優化" && git push
+    ```
+
+    **C. 無部署需求** → 跳過此步驟
+
+17. 等待 Cloudflare Pages 自動部署完成（約 1-2 分鐘）
 
 ### Phase G: 知識庫回寫
 19. 將本次修改心得整理為筆記

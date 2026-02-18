@@ -146,6 +146,23 @@
 
 同時移除超過 7 天的舊 entry。
 
+### Phase F.5: 部署到 game_web（每次必須執行，不可略過）
+
+執行全量同步，確保 game-web.pages.dev 能看到本次創建/優化的遊戲：
+```bash
+pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+```
+
+判斷結果：
+- **腳本成功（exit 0）** → 繼續；腳本內部已完成 npm build + git push game_web
+- **腳本提示「gameMetadata.js 尚無記錄」** → 用 Edit 工具將新遊戲加入
+  `D:\Source\game_web\js\gameMetadata.js`（參考現有條目格式），然後重新執行一次
+- **腳本失敗（exit 1）** → 記錄錯誤到結果 JSON 的 `remaining_issues`，繼續後續步驟
+
+記錄部署結果（供 Phase G 的結果 JSON 使用）：
+- 部署成功 → `game_web_synced: true`
+- 部署失敗 → `game_web_synced: false`，並記錄錯誤訊息
+
 ## 品質自評迴圈
 1. 創意是否有實質的體驗提升？（不只是技術改動）
 2. 實作品質是否達到 SKILL.md 標準？
@@ -168,6 +185,7 @@
   "artifacts": ["D:\\Source\\game\\[game_id]\\index.html", "..."],
   "kb_imported": true或false,
   "kb_note_title": "匯入的筆記標題",
+  "game_web_synced": true或false,
   "quality_score": 1到5,
   "self_assessment": "一句話自評",
   "summary": "一句話摘要",

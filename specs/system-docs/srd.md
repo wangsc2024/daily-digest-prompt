@@ -907,7 +907,7 @@ flowchart TB
 - **處理邏輯**：
   - 追蹤檔案：`context/auto-tasks-today.json`
   - 歸零策略：每日歸零——`date` != 今天時重置所有計數與 `closed_task_ids`
-  - 計數欄位：14 個——`shurangama_count`(5), `jiaoguangzong_count`(3), `fahua_count`(2), `jingtu_count`(2), `tech_research_count`(5), `ai_deep_research_count`(4), `unsloth_research_count`(2), `ai_github_research_count`(2), `ai_smart_city_count`(2), `ai_sysdev_count`(2), `skill_audit_count`(2), `log_audit_count`(1), `git_push_count`(4), `creative_game_count`(2)
+  - 計數欄位：14 個——`shurangama_count`(5), `jiaoguangzong_count`(3), `fahua_count`(2), `jingtu_count`(2), `tech_research_count`(5), `ai_deep_research_count`(4), `unsloth_research_count`(2), `ai_github_research_count`(2), `ai_smart_city_count`(2), `ai_sysdev_count`(2), `skill_audit_count`(2), `log_audit_count`(1), `git_push_count`(4), `creative_game_optimize_count`(2)
   - 新增欄位：`next_execution_order`（round-robin 指針，跨日保留）、`warned_labels`（sync_check 24h 去重）
   - 歷史追蹤：`state/todoist-history.json`（auto_tasks 上限 200 條，daily_summary 上限 30 條）
 - **預期輸出**：更新後的頻率追蹤檔案與歷史記錄。

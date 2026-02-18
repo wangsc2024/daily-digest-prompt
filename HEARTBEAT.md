@@ -1,18 +1,18 @@
 ---
 schedules:
-  daily-digest-am:
-    cron: "0 8 * * *"
+  daily-digest-0615:
+    cron: "15 6 * * *"
     script: run-agent-team.ps1
     timeout: 900
     retry: 1
-    description: "每日摘要 - 早（08:00）"
+    description: "每日摘要 - 早（06:15）"
 
-  daily-digest-mid:
-    cron: "15 11 * * *"
+  daily-digest-1645:
+    cron: "45 16 * * *"
     script: run-agent-team.ps1
     timeout: 900
     retry: 1
-    description: "每日摘要 - 午（11:15）"
+    description: "每日摘要 - 傍晚（16:45）"
 
   daily-digest-pm:
     cron: "15 21 * * *"
@@ -54,8 +54,8 @@ schedules:
 
 | 排程名稱 | 觸發時間 | 腳本 | 超時 | 說明 |
 |---------|---------|------|------|------|
-| daily-digest-am | 每日 08:00 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 早 |
-| daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 午 |
+| daily-digest-0615 | 每日 06:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 早 |
+| daily-digest-1645 | 每日 16:45 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 傍晚 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
