@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/notification.schema.json",
+  "title": "Notification Configuration",
+  "description": "ntfy 通知配置",
+  "type": "object",
+  "required": ["version", "default_topic", "service_url"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "配置版本號"
+    },
+    "default_topic": {
+      "type": "string",
+      "minLength": 1,
+      "description": "預設 ntfy topic"
+    },
+    "service_url": {
+      "type": "string",
+      "pattern": "^https://[a-z0-9.-]+$",
+      "description": "ntfy 服務 URL"
+    },
+    "max_message_length": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 10000,
+      "description": "訊息最大長度"
+    },
+    "send_steps": {
+      "type": "object",
+      "description": "發送步驟（Windows 環境必須用 JSON 檔案方式）",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 5
+      },
+      "minProperties": 1
+    },
+    "tag_mappings": {
+      "type": "object",
+      "description": "通知 tags 映射",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minItems": 1
+      },
+      "minProperties": 1
+    },
+    "todoist_report": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Todoist Agent 通知內容模板（多行字串）"
+    },
+    "daily_digest": {
+      "type": "object",
+      "description": "每日摘要通知模板",
+      "required": ["title_template", "sections", "priority", "tags"],
+      "properties": {
+        "title_template": {
+          "type": "string",
+          "minLength": 5,
+          "description": "標題模板（可含 {date} 等變數）"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["todoist", "news", "hackernews", "habits", "zen", "gmail"]
+          },
+          "minItems": 1,
+          "description": "摘要章節順序"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "通知優先級（1=min, 5=max）"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "通知標籤清單"
+        }
+      },
+      "additionalProperties": false
+    },
+    "research_complete": {
+      "type": "object",
+      "description": "研究完成通知模板",
+      "required": ["title_template", "priority", "tags"],
+      "properties": {
+        "title_template": {
+          "type": "string",
+          "minLength": 5
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "system_insight": {
+      "type": "object",
+      "description": "系統洞察通知模板",
+      "required": ["title_template", "priority", "tags"],
+      "properties": {
+        "title_template": {
+          "type": "string",
+          "minLength": 5
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "harness_alerts": {
+      "type": "object",
+      "description": "Harness 告警配置（on_stop_alert.py）",
+      "required": ["team_mode_wait_seconds", "suppression"],
+      "properties": {
+        "team_mode_wait_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300,
+          "description": "等待所有 Agent 完成的時間窗口（秒）"
+        },
+        "suppression": {
+          "type": "object",
+          "required": ["max_alerts_per_hour", "cooldown_minutes"],
+          "properties": {
+            "max_alerts_per_hour": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "每小時最多告警次數"
+            },
+            "cooldown_minutes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1440,
+              "description": "相同問題冷卻期（分鐘）"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

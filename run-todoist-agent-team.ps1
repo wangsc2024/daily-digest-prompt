@@ -106,7 +106,11 @@ function Update-State {
 # Start execution
 # ============================================
 $startTime = Get-Date
+
+# Generate trace ID for distributed tracing
+$traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Todoist Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+Write-Log "Trace ID: $traceId"
 Write-Log "Mode: parallel (Phase 1 x1 + Phase 2 xN + Phase 3 x1)"
 
 # Check if claude is installed
@@ -115,6 +119,39 @@ if (-not $claudePath) {
     Write-Log "[ERROR] claude not found, install: npm install -g @anthropic-ai/claude-code"
     Update-State -Status "failed" -Duration 0 -ErrorMsg "claude not found" -Sections @{}
     exit 1
+}
+
+# ============================================
+# Phase 0: Circuit Breaker 預檢查
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 0: Circuit Breaker precheck ==="
+
+# 載入預檢查工具
+$utilsPath = "$AgentDir\circuit-breaker-utils.ps1"
+if (Test-Path $utilsPath) {
+    . $utilsPath
+    Write-Log "[預檢查] 已載入 circuit-breaker-utils.ps1"
+
+    # 檢查 Todoist API 狀態
+    $todoistState = Test-CircuitBreaker "todoist"
+
+    if ($todoistState -eq "open") {
+        Write-Log "[預檢查] ✗ Todoist API 為 OPEN 狀態，Circuit Breaker 啟動"
+        Write-Log "[預檢查] Todoist 為核心 API，跳過本次執行"
+        $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+        Update-State -Status "skipped" -Duration $totalDuration -ErrorMsg "todoist circuit breaker open" -Sections @{ todoist = "circuit_open" }
+        exit 0
+    }
+    elseif ($todoistState -eq "half_open") {
+        Write-Log "[預檢查] ⚠ Todoist API 為 HALF_OPEN 狀態，將正常執行（試探模式）"
+    }
+    else {
+        Write-Log "[預檢查] ✓ Todoist API 為 CLOSED 狀態，正常執行"
+    }
+}
+else {
+    Write-Log "[WARN] circuit-breaker-utils.ps1 不存在，跳過預檢查"
 }
 
 # ============================================
@@ -145,10 +182,11 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
 
     try {
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $logDir, $timestamp)
+            param($prompt, $logDir, $timestamp, $traceId)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+            [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -165,7 +203,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             }
 
             return $output
-        } -ArgumentList $queryContent, $LogDir, $Timestamp
+        } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId
 
         $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
 
@@ -283,10 +321,11 @@ if ($plan.plan_type -eq "tasks") {
         $taskName = "task-$($task.rank)"
 
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $tools, $taskName, $logDir, $timestamp)
+            param($prompt, $tools, $taskName, $logDir, $timestamp, $traceId)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+            [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -303,7 +342,7 @@ if ($plan.plan_type -eq "tasks") {
             }
 
             return $output
-        } -ArgumentList $taskPrompt, $taskTools, $taskName, $LogDir, $Timestamp
+        } -ArgumentList $taskPrompt, $taskTools, $taskName, $LogDir, $Timestamp, $traceId
 
         $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $taskName
         $phase2Jobs += $job
@@ -374,10 +413,11 @@ elseif ($plan.plan_type -eq "auto") {
             $agentName = "auto-$taskKey"
 
             $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                param($prompt, $agentName, $logDir, $timestamp)
+                param($prompt, $agentName, $logDir, $timestamp, $traceId)
 
                 # 明確設定 Process 級別環境變數（會傳遞到子 process）
                 [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
                 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                 $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -394,7 +434,7 @@ elseif ($plan.plan_type -eq "auto") {
                 }
 
                 return $output
-            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp
+            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
 
             $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
             $phase2Jobs += $job
@@ -480,6 +520,9 @@ while ($attempt -le $MaxPhase3Retries) {
     try {
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
+
+        # Set trace ID for Phase 3 (same as Phase 1 & 2)
+        $env:DIGEST_TRACE_ID = $traceId
 
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile

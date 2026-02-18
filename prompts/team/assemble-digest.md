@@ -47,6 +47,96 @@
 
 ---
 
+## 1.5 更新 API 健康狀態（Circuit Breaker）
+
+此步驟讀取 Phase 1 的結構化日誌，統計各 API 呼叫結果，並更新 `state/api-health.json`。
+
+### 步驟
+
+1. **讀取今日結構化日誌**：
+   用 Bash 讀取今日的 JSONL 日誌：
+   ```bash
+   TODAY=$(date +%Y-%m-%d)
+   cat "logs/structured/$TODAY.jsonl" 2>/dev/null || echo "{}"
+   ```
+
+2. **建立 Python 腳本更新 Circuit Breaker 狀態**：
+   用 Write 建立暫存檔 `update_circuit_breaker.py`：
+   ```python
+   #!/usr/bin/env python3
+   import json
+   import sys
+   from datetime import datetime
+
+   # 導入 agent_guardian
+   sys.path.insert(0, "hooks")
+   from agent_guardian import CircuitBreaker
+
+   # 讀取 JSONL 日誌
+   jsonl_lines = sys.stdin.read().strip().split("\n")
+
+   # 統計各 API 的成功/失敗
+   api_results = {}  # {api_source: [True/False, ...]}
+
+   for line in jsonl_lines:
+       if not line or line == "{}":
+           continue
+       try:
+           record = json.loads(line)
+           # 只處理 Phase 1 的 API 呼叫（tags 含對應 API）
+           tags = record.get("tags", [])
+           has_error = record.get("has_error", False)
+           error_category = record.get("error_category")
+
+           # 判斷 API 來源
+           api_source = None
+           if "todoist" in tags:
+               api_source = "todoist"
+           elif "pingtung-news" in tags:
+               api_source = "pingtung-news"
+           elif "hackernews" in tags:
+               api_source = "hackernews"
+           elif "gmail" in tags:
+               api_source = "gmail"
+
+           if api_source and "api-call" in tags:
+               # 判斷成功/失敗（只有 server_error, network_error 才算 circuit breaker 失敗）
+               is_failure = error_category in ["server_error", "network_error"]
+
+               if api_source not in api_results:
+                   api_results[api_source] = []
+               api_results[api_source].append(not is_failure)  # True=成功
+       except:
+           pass
+
+   # 更新 circuit breaker 狀態
+   breaker = CircuitBreaker("state/api-health.json")
+
+   for api_source, results in api_results.items():
+       # 取最後一次結果（最新的呼叫）
+       last_result = results[-1] if results else True
+       breaker.record_result(api_source, success=last_result)
+
+   print(f"Updated circuit breaker for {len(api_results)} APIs")
+   ```
+
+3. **執行 Python 腳本**：
+   ```bash
+   TODAY=$(date +%Y-%m-%d)
+   cat "logs/structured/$TODAY.jsonl" 2>/dev/null | python update_circuit_breaker.py
+   rm -f update_circuit_breaker.py
+   ```
+
+   > **注意**：Windows 環境必須使用 `python`（非 `python3`），因 Windows Store 的 `python3` 是空殼。
+
+4. **檢查降級狀態**（可選）：
+   讀取 `state/api-health.json`，若有 API 處於 `open` 狀態，在後續摘要中加註：
+   - `"todoist"` open → 「⚠️ Todoist API 暫時故障」
+   - `"pingtung-news"` open → 「⚠️ 屏東新聞 API 暫時故障」
+   - 等等
+
+---
+
 ## 2. 屏東新聞政策解讀 + RAG 增強
 **使用 Skill**：`pingtung-policy-expert` + `knowledge-query`
 
@@ -109,12 +199,55 @@
 
 ---
 
+## 6.5 檢查 API 健康狀態（降級標記）
+
+讀取 `state/api-health.json`，檢查各 API 的 Circuit Breaker 狀態。若發現 open 或 half_open 狀態，準備降級標記用於步驟 7。
+
+### 降級標記規則
+
+用 Python 腳本檢查狀態：
+```python
+import json
+
+# 讀取 api-health.json
+with open('state/api-health.json', 'r', encoding='utf-8') as f:
+    health = json.load(f)
+
+# 檢查每個 API
+degraded_apis = []
+for api_name in ['todoist', 'pingtung-news', 'hackernews', 'gmail']:
+    api_state = health.get(api_name, {})
+    state = api_state.get('state', 'closed')
+
+    if state in ['open', 'half_open']:
+        degraded_apis.append(api_name)
+        print(f"⚠️ {api_name} API 暫時故障（state={state}），使用快取資料")
+
+# 輸出結果供步驟 7 使用
+if degraded_apis:
+    print(f"\n降級 API 清單：{', '.join(degraded_apis)}")
+else:
+    print("\n所有 API 正常運作")
+```
+
+### 降級標記對照表
+
+| API 名稱 | 摘要區塊 | 降級標記文字 |
+|---------|---------|-------------|
+| todoist | 📝 Todoist 待辦 | ⚠️ Todoist API 暫時故障，使用快取資料 |
+| pingtung-news | 📰 屏東新聞 | ⚠️ 屏東新聞 API 暫時故障，使用快取資料 |
+| hackernews | 🔥 Hacker News AI 動態 | ⚠️ Hacker News API 暫時故障，使用快取資料 |
+| gmail | 📧 Gmail 郵件 | ⚠️ Gmail API 暫時故障，使用快取資料 |
+
+---
+
 ## 7. 整理摘要
 
 讀取 `config/digest-format.md`，依模板格式組裝完整摘要。
-資料來源：各 results/*.json（Phase 1）+ 步驟 2-6 的本地 Skill 輸出。
+資料來源：各 results/*.json（Phase 1）+ 步驟 2-6.5 的本地 Skill 輸出。
 - 執行模式標記為「團隊並行（Phase 1 x5 + Phase 2 x1）」
 - 若 results/security.json 有 HIGH 或 CRITICAL：ntfy 通知加 warning tag
+- **降級標記整合**：若步驟 6.5 識別出降級 API，在對應摘要區塊開頭加上降級標記（參考步驟 6.5 的對照表）
 
 ---
 

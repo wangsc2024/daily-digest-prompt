@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/dedup-policy.schema.json",
+  "title": "Research Deduplication Policy Configuration",
+  "description": "研究去重策略（所有研究模板共用）",
+  "type": "object",
+  "required": [
+    "version",
+    "registry_file",
+    "retention_days",
+    "topic_cooldown_days",
+    "saturation_threshold",
+    "search",
+    "rules"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "配置版本號"
+    },
+    "registry_file": {
+      "type": "string",
+      "pattern": "^context/.+\\.json$",
+      "description": "研究註冊表檔案路徑"
+    },
+    "retention_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 365,
+      "description": "registry 中超過此天數的 entry 自動清除"
+    },
+    "topic_cooldown_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "description": "同一具體主題至少間隔此天數"
+    },
+    "saturation_threshold": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "KB 同主題方向已有 ≥ 此數量的筆記時，建議換方向"
+    },
+    "search": {
+      "type": "object",
+      "description": "去重查詢參數",
+      "required": ["default_topK"],
+      "properties": {
+        "default_topK": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "hybrid search 的預設 topK"
+        },
+        "buddhist_topK": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "佛學系列研究的 topK（可用更大值）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "array",
+      "description": "判定規則（供模板內 sub-agent 遵循）",
+      "items": {
+        "type": "object",
+        "required": ["name", "action", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "topic_cooldown",
+              "type_saturation",
+              "kb_saturation"
+            ],
+            "description": "規則名稱"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "must_change_topic",
+              "suggest_change_direction",
+              "warn",
+              "block"
+            ],
+            "description": "觸發規則時的動作"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "description": "規則說明"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

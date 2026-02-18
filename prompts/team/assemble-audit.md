@@ -35,6 +35,17 @@ Phase 1 的 4 個 Agent 已完成審查，各自輸出 JSON 到 `results/` 目�
 讀取前次審查結果（如存在）：
 - `state/last-audit.json`
 
+### Step 1.5: 更新 API 健康狀態（Circuit Breaker）
+
+此步驟讀取 Phase 1 的結構化日誌，統計各 API 呼叫結果，並更新 `state/api-health.json`。
+
+**執行方式**（系統審查不涉及外部 API，此步驟僅為架構一致性保留）：
+```bash
+# 系統審查不呼叫外部 API，此步驟可跳過
+# 若未來新增 API 依賴，使用以下模板更新 circuit breaker
+echo "System audit: no external APIs, skipping circuit breaker update"
+```
+
 ### Step 2: 計算總分
 
 依 balanced weight profile 計算加權總分：

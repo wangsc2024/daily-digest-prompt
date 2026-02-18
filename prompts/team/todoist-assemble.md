@@ -42,6 +42,42 @@
 
 ---
 
+## 步驟 1.6：更新 API 健康狀態（Circuit Breaker）
+
+此步驟讀取 Phase 1 的結構化日誌，統計 Todoist API 呼叫結果，並更新 `state/api-health.json`。
+
+**執行方式**（使用內嵌 Python 腳本）：
+```bash
+TODAY=$(date +%Y-%m-%d)
+cat "logs/structured/$TODAY.jsonl" 2>/dev/null | python -c "
+import json
+import sys
+sys.path.insert(0, 'hooks')
+from agent_guardian import CircuitBreaker
+
+api_results = []
+for line in sys.stdin:
+    if not line.strip():
+        continue
+    try:
+        record = json.loads(line)
+        tags = record.get('tags', [])
+        error_category = record.get('error_category')
+        if 'todoist' in tags and 'api-call' in tags:
+            is_failure = error_category in ['server_error', 'network_error']
+            api_results.append(not is_failure)
+    except:
+        pass
+
+if api_results:
+    breaker = CircuitBreaker('state/api-health.json')
+    breaker.record_result('todoist', success=api_results[-1])
+    print(f'Updated todoist circuit breaker: {api_results[-1]}')
+"
+```
+
+---
+
 ## 步驟 2：關閉 Todoist 任務（僅 plan_type = "tasks" 時）
 
 對每個 Phase 2 結果中 status = "success" 的任務：

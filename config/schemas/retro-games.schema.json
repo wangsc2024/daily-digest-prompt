@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "tracking_file", "cooldown_days", "games"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "tracking_file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cooldown_days": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tier2_games_available": {
+      "type": "boolean"
+    },
+    "tier2_games": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/game"
+      }
+    },
+    "games": {
+      "type": "object",
+      "required": ["tier1_easy", "tier2_medium", "tier3_hard"],
+      "properties": {
+        "tier1_easy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/game"
+          }
+        },
+        "tier2_medium": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/game"
+          }
+        },
+        "tier3_hard": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/game"
+          }
+        }
+      }
+    },
+    "creative_directions": {
+      "type": "object",
+      "properties": {
+        "visual": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "audio": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "gameplay": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ux": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "performance": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "social": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "version_rules": {
+      "type": "object",
+      "properties": {
+        "creation": { "type": "string" },
+        "minor_update": { "type": "string" },
+        "major_update": { "type": "string" },
+        "examples": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "game": {
+      "type": "object",
+      "required": ["id", "name_zh", "name_en", "difficulty", "core_mechanics", "tech_highlights", "estimated_hours"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "name_zh": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name_en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "core_mechanics": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tech_highlights": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estimated_hours": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reference_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    }
+  }
+}

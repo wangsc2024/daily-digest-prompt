@@ -1,9 +1,9 @@
 ---
 name: digest-memory
-version: "1.0.0"
+version: "1.1.0"
 description: |
-  摘要記憶持久化。跨次追蹤連續天數、待辦統計、習慣/學習連續天數。
-  Use when: 記憶、連續天數、上次執行、跨次追蹤。
+  摘要記憶持久化。跨次追蹤連續天數、待辦統計、習慣/學習連續天數、Skill 使用率、趨勢洞察。
+  Use when: 記憶、連續天數、上次執行、跨次追蹤、連續報到、streak、執行統計、趨勢、記憶追蹤。
 allowed-tools: Read, Write
 cache-ttl: N/A
 triggers:
@@ -56,7 +56,7 @@ triggers:
     "topics_history": ["費曼技巧", "刻意練習", "間隔重複"]
   },
   "skill_usage": {
-    "total_skills": 12,
+    "total_skills": 20,
     "used_skills": 10,
     "cache_hits": 2,
     "api_calls": 3,
@@ -80,7 +80,7 @@ triggers:
 
 若記憶存在，在摘要最上方加入「連續報到」區塊：
 ```
-🔄 連續報到第 N 天
+連續報到第 N 天
 - 昨日待辦：完成 M/N 項（未完成：XXX）
 - 習慣提示連續 N 天
 - 學習技巧連續 N 天
@@ -102,7 +102,7 @@ triggers:
 9. `learning`：同上邏輯（`topics_history` 14 筆 + `last_topic_date`）
 10. `digest_summary`：本次摘要的一句話總結
 11. `skill_usage`：本次 Skill 使用統計
-    - `total_skills`：專案定義的 Skill 總數（目前固定 12）
+    - `total_skills`：專案定義的 Skill 總數（目前為 20，含 17 核心 + 3 工具）
     - `used_skills`：本次實際使用的 Skill 數量
     - `cache_hits`：快取命中次數（從 api-cache 追蹤取得）
     - `api_calls`：API 實際呼叫次數

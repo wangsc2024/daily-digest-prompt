@@ -419,6 +419,79 @@ else {
     }
 }
 
+# --- Configuration Validation ---
+Write-Host ""
+Write-Host "[配置驗證]" -ForegroundColor Yellow
+
+try {
+    $validatePath = "$AgentDir\hooks\validate_config.py"
+    if (Test-Path $validatePath) {
+        # 執行配置驗證
+        $jsonOutput = python $validatePath --json 2>&1 | Out-String
+        $result = $jsonOutput | ConvertFrom-Json
+
+        $totalConfigs = 13  # 目前有 13 個配置檔
+        $errorCount = $result.errors.Count
+        $warnCount = $result.warnings.Count
+        $isValid = $result.valid
+
+        # 顯示驗證統計
+        $jsonSchemaUsed = $result.validation_stats.json_schema_used
+        $simpleUsed = $result.validation_stats.simple_validation_used
+
+        Write-Host "  總配置檔: $totalConfigs 個" -ForegroundColor White
+        Write-Host "  JSON Schema 驗證: $jsonSchemaUsed 個 | 簡單驗證: $simpleUsed 個" -ForegroundColor White
+
+        if ($isValid) {
+            Write-Host "  驗證結果: " -NoNewline -ForegroundColor White
+            Write-Host "✓ 全部通過" -ForegroundColor Green
+        }
+        else {
+            Write-Host "  驗證結果: " -NoNewline -ForegroundColor White
+            Write-Host "✗ 發現問題" -ForegroundColor Red
+
+            if ($errorCount -gt 0) {
+                Write-Host ""
+                Write-Host "  錯誤 ($errorCount):" -ForegroundColor Red
+                foreach ($err in $result.errors | Select-Object -First 5) {
+                    Write-Host "    ❌ $err" -ForegroundColor Red
+                }
+                if ($errorCount -gt 5) {
+                    Write-Host "    ... 以及其他 $($errorCount - 5) 個錯誤" -ForegroundColor Gray
+                }
+            }
+
+            if ($warnCount -gt 0) {
+                Write-Host ""
+                Write-Host "  警告 ($warnCount):" -ForegroundColor Yellow
+                foreach ($warn in $result.warnings | Select-Object -First 3) {
+                    Write-Host "    ⚠️ $warn" -ForegroundColor Yellow
+                }
+                if ($warnCount -gt 3) {
+                    Write-Host "    ... 以及其他 $($warnCount - 3) 個警告" -ForegroundColor Gray
+                }
+            }
+        }
+
+        # 如果簡單驗證數量 > 0，提示可以升級
+        if ($simpleUsed -gt 0) {
+            Write-Host ""
+            Write-Host "  💡 有 $simpleUsed 個配置檔尚未使用 JSON Schema 驗證" -ForegroundColor Magenta
+            Write-Host "     建議：檢查是否已建立對應的 .schema.json 檔案" -ForegroundColor Magenta
+        }
+
+        # 提示遷移功能
+        Write-Host ""
+        Write-Host "  遷移工具: python $validatePath --migrate" -ForegroundColor Cyan
+    }
+    else {
+        Write-Host "  validate_config.py 不存在" -ForegroundColor Gray
+    }
+}
+catch {
+    Write-Host "  配置驗證失敗: $_" -ForegroundColor Red
+}
+
 # --- Skill 品質評分 ---
 Write-Host ""
 Write-Host "[Skill 品質評分]" -ForegroundColor Yellow

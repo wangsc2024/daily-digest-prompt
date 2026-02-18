@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "daily_digest_team": {
+      "$ref": "#/definitions/team_timeouts"
+    },
+    "daily_digest_single": {
+      "$ref": "#/definitions/single_timeouts"
+    },
+    "todoist_team": {
+      "type": "object",
+      "properties": {
+        "phase1_timeout": { "type": "integer", "minimum": 1 },
+        "phase1_max_retries": { "type": "integer", "minimum": 0 },
+        "phase1_retry_delay_base": { "type": "integer", "minimum": 0 },
+        "phase1_retry_delay_jitter": { "type": "integer", "minimum": 0 },
+        "phase3_timeout": { "type": "integer", "minimum": 1 },
+        "phase3_max_retries": { "type": "integer", "minimum": 0 },
+        "phase3_retry_base": { "type": "integer", "minimum": 0 },
+        "phase3_retry_max": { "type": "integer", "minimum": 1 },
+        "phase2_timeout_by_type": {
+          "type": "object",
+          "properties": {
+            "research": { "type": "integer", "minimum": 1 },
+            "code": { "type": "integer", "minimum": 1 },
+            "skill": { "type": "integer", "minimum": 1 },
+            "general": { "type": "integer", "minimum": 1 },
+            "auto": { "type": "integer", "minimum": 1 },
+            "gitpush": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "todoist_single": {
+      "$ref": "#/definitions/single_timeouts"
+    },
+    "gmail": {
+      "$ref": "#/definitions/retryable_timeouts"
+    },
+    "audit_team": {
+      "type": "object",
+      "properties": {
+        "phase1_timeout": { "type": "integer", "minimum": 1 },
+        "phase2_timeout": { "type": "integer", "minimum": 1 },
+        "phase2_max_retries": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "properties": {
+        "system_audit": { "type": "integer", "minimum": 1 },
+        "daily_digest_am": { "type": "integer", "minimum": 1 },
+        "daily_digest_mid": { "type": "integer", "minimum": 1 },
+        "daily_digest_pm": { "type": "integer", "minimum": 1 },
+        "todoist_single": { "type": "integer", "minimum": 1 },
+        "todoist_team": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "definitions": {
+    "team_timeouts": {
+      "type": "object",
+      "properties": {
+        "phase1_timeout": { "type": "integer", "minimum": 1 },
+        "phase2_timeout": { "type": "integer", "minimum": 1 },
+        "phase2_max_retries": { "type": "integer", "minimum": 0 },
+        "retry_base_interval": { "type": "integer", "minimum": 0 },
+        "retry_max_interval": { "type": "integer", "minimum": 1 },
+        "retry_jitter_max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "single_timeouts": {
+      "type": "object",
+      "properties": {
+        "timeout": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "retryable_timeouts": {
+      "type": "object",
+      "properties": {
+        "timeout": { "type": "integer", "minimum": 1 },
+        "max_retries": { "type": "integer", "minimum": 0 },
+        "retry_interval": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

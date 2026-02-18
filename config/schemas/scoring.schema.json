@@ -1,0 +1,243 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/scoring.schema.json",
+  "title": "TaskSense Scoring Configuration",
+  "description": "TaskSense 優先級計分規則 v2",
+  "type": "object",
+  "required": [
+    "version",
+    "formula",
+    "max_tasks_per_run",
+    "priority_scores",
+    "confidence_multipliers",
+    "description_bonus",
+    "time_proximity_bonus",
+    "label_count_bonus",
+    "recency_penalty",
+    "tiebreaker"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 2,
+      "description": "配置版本號（目前為 2）"
+    },
+    "formula": {
+      "type": "string",
+      "minLength": 10,
+      "description": "計分公式說明"
+    },
+    "max_tasks_per_run": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "每次執行最多處理的任務數量"
+    },
+    "priority_scores": {
+      "type": "object",
+      "description": "Todoist priority 對應分數（1-4 對應 p4-p1）",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "minProperties": 4,
+      "maxProperties": 4
+    },
+    "confidence_multipliers": {
+      "type": "object",
+      "description": "路由層級信心度乘數",
+      "required": ["tier1", "tier2", "tier3"],
+      "properties": {
+        "tier1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "標籤路由信心度（100%）"
+        },
+        "tier2": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "關鍵字路由信心度（80%）"
+        },
+        "tier3": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "語義判斷信心度（60%）"
+        }
+      },
+      "additionalProperties": false
+    },
+    "description_bonus": {
+      "type": "object",
+      "description": "描述加成（有無 description 欄位）",
+      "required": ["has_description", "no_description"],
+      "properties": {
+        "has_description": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 2.0,
+          "description": "有 description 欄位的加成"
+        },
+        "no_description": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.5,
+          "description": "無 description 欄位的係數"
+        }
+      },
+      "additionalProperties": false
+    },
+    "time_proximity_bonus": {
+      "type": "object",
+      "description": "時間接近度加成（依截止日期距離）",
+      "required": ["overdue", "today", "tomorrow", "this_week", "no_due"],
+      "properties": {
+        "overdue": {
+          "type": "number",
+          "minimum": 1.0,
+          "description": "已逾期加成"
+        },
+        "today": {
+          "type": "number",
+          "minimum": 1.0,
+          "description": "今天到期加成"
+        },
+        "tomorrow": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.0,
+          "description": "明天到期加成"
+        },
+        "this_week": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.0,
+          "description": "本週內到期加成"
+        },
+        "no_due": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.5,
+          "description": "無截止日期係數"
+        }
+      },
+      "additionalProperties": false
+    },
+    "label_count_bonus": {
+      "type": "object",
+      "description": "標籤數量加成（標籤越多代表越被重視）",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 1.0,
+        "maximum": 2.0
+      },
+      "minProperties": 3
+    },
+    "recency_penalty": {
+      "type": "object",
+      "description": "近期重複懲罰（避免同類任務連續佔用）",
+      "required": ["enabled", "description"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "是否啟用懲罰機制"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "description": "懲罰機制說明"
+        },
+        "overlap_0_1": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.0,
+          "description": "今日同標籤已完成 0-1 項的係數"
+        },
+        "overlap_2": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.0,
+          "description": "今日同標籤已完成 2 項的係數"
+        },
+        "overlap_3_plus": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.0,
+          "description": "今日同標籤已完成 3+ 項的係數"
+        }
+      }
+    },
+    "tiebreaker": {
+      "type": "object",
+      "description": "同分排序規則",
+      "required": ["description", "order"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "description": "排序規則說明"
+        },
+        "order": {
+          "type": "array",
+          "description": "排序因子順序",
+          "items": {
+            "type": "object",
+            "required": ["factor", "description"],
+            "properties": {
+              "factor": {
+                "type": "string",
+                "enum": [
+                  "due_time_asc",
+                  "due_time_desc",
+                  "priority_asc",
+                  "priority_desc",
+                  "label_count_asc",
+                  "label_count_desc",
+                  "task_id_asc",
+                  "task_id_desc"
+                ],
+                "description": "排序因子名稱"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 5,
+                "description": "因子說明"
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_format": {
+      "type": "string",
+      "minLength": 50,
+      "description": "排名輸出格式（Markdown 表格）"
+    },
+    "allowed_tools_table": {
+      "type": "object",
+      "description": "allowedTools 決策表",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(Read|Bash|Write|Edit|Glob|Grep|WebSearch|WebFetch)(,(Read|Bash|Write|Edit|Glob|Grep|WebSearch|WebFetch))*$",
+        "description": "允許的工具清單（逗號分隔）"
+      },
+      "minProperties": 1
+    },
+    "rules": {
+      "type": "array",
+      "description": "強制規則清單",
+      "items": {
+        "type": "string",
+        "minLength": 10
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

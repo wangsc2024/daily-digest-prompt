@@ -86,7 +86,50 @@ $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $phase1LogFile = "$LogDir\audit-phase1-$timestamp.log"
 $phase2LogFile = "$LogDir\audit-phase2-$timestamp.log"
 
+# Generate trace ID for distributed tracing
+$traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== System Audit Team Mode Started ===" "INFO"
+Write-Log "Trace ID: $traceId" "INFO"
+
+# ============================================
+# Phase 0: Circuit Breaker 預檢查
+# ============================================
+
+Write-Log "Phase 0: Circuit Breaker precheck..." "INFO"
+
+# 載入預檢查工具
+$utilsPath = "$AgentDir\circuit-breaker-utils.ps1"
+$knowledgeAvailable = $true
+
+if (Test-Path $utilsPath) {
+    . $utilsPath
+    Write-Log "  Loaded circuit-breaker-utils.ps1" "INFO"
+
+    # 檢查 knowledge API 狀態（用於 RAG 寫入）
+    $knowledgeState = Test-CircuitBreaker "knowledge"
+
+    if ($knowledgeState -eq "open") {
+        Write-Log "  ✗ Knowledge API is OPEN - RAG import will be skipped" "WARN"
+        $knowledgeAvailable = $false
+    }
+    elseif ($knowledgeState -eq "half_open") {
+        Write-Log "  ⚠ Knowledge API is HALF_OPEN - RAG import will proceed (trial)" "WARN"
+    }
+    else {
+        Write-Log "  ✓ Knowledge API is CLOSED - RAG import will proceed" "INFO"
+    }
+}
+else {
+    Write-Log "  circuit-breaker-utils.ps1 not found, skipping precheck" "WARN"
+}
+
+# Set environment variable to inform Phase 2 assembly agent
+if ($knowledgeAvailable) {
+    $env:KNOWLEDGE_API_AVAILABLE = "1"
+}
+else {
+    $env:KNOWLEDGE_API_AVAILABLE = "0"
+}
 
 # ============================================
 # Phase 1: Parallel Audit (4 Agents)
@@ -104,9 +147,10 @@ $phase1Prompts = @(
 
 foreach ($agent in $phase1Prompts) {
     $job = Start-Job -ScriptBlock {
-        param($promptFile, $agentDir, $agentName, $logDir, $timestamp)
+        param($promptFile, $agentDir, $agentName, $logDir, $timestamp, $traceId)
 
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
+        [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
 
         Set-Location $agentDir
@@ -132,7 +176,7 @@ foreach ($agent in $phase1Prompts) {
             Output = $output
             ExitCode = $LASTEXITCODE
         }
-    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp -WorkingDirectory $AgentDir
+    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp, $traceId -WorkingDirectory $AgentDir
 
     $phase1Jobs += @{
         Job = $job
@@ -213,10 +257,11 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
 
     try {
         $job = Start-Job -ScriptBlock {
-            param($promptFile, $agentDir, $logDir, $timestamp)
+            param($promptFile, $agentDir, $logDir, $timestamp, $traceId)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+            [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
             Set-Location $agentDir
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -234,7 +279,7 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             }
 
             return $output
-        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp -WorkingDirectory $AgentDir
+        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp, $traceId -WorkingDirectory $AgentDir
 
         $completed = Wait-Job -Job $job -Timeout $Phase2TimeoutSeconds
 

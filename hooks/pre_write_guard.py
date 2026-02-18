@@ -13,7 +13,7 @@ PreToolUse:Write/Edit Guard — 檔案寫入機器強制攔截。
 """
 import os
 
-from hook_utils import load_yaml_rules, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision
 
 
 # YAML 不可用時的內建預設規則
@@ -60,7 +60,8 @@ FALLBACK_WRITE_RULES = [
 
 def load_write_rules():
     """從 YAML 載入寫入規則，失敗時回退至內建預設值。"""
-    return load_yaml_rules("write_rules", FALLBACK_WRITE_RULES)
+    rules = load_yaml_rules("write_rules", FALLBACK_WRITE_RULES)
+    return filter_rules_by_preset(rules, "write_rules")
 
 
 def _get_reason(rule, **format_kwargs):

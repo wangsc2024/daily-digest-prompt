@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "stage", "creation", "optimization", "tracking_file", "counter_field", "reset_policy"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["creation", "optimization", "paused"]
+    },
+    "creation": {
+      "type": "object",
+      "required": ["priority_order", "skip_difficulty_above", "auto_switch_to_optimization", "switch_trigger"],
+      "properties": {
+        "priority_order": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["tier1_easy", "tier2_medium", "tier3_hard"]
+          }
+        },
+        "skip_difficulty_above": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "auto_switch_to_optimization": {
+          "type": "boolean"
+        },
+        "switch_trigger": {
+          "type": "string"
+        },
+        "tier1_complete": {
+          "type": "boolean"
+        },
+        "tier2_complete": {
+          "type": "boolean"
+        },
+        "tier3_complete": {
+          "type": "boolean"
+        }
+      }
+    },
+    "optimization": {
+      "type": "object",
+      "required": ["retro_ratio", "buddhist_ratio", "rotation_cycle", "buddhist_at_position", "lru_enabled", "ignore_cooldown_when_saturated", "buddhist_games"],
+      "properties": {
+        "retro_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "buddhist_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rotation_cycle": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "buddhist_at_position": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "lru_enabled": {
+          "type": "boolean"
+        },
+        "ignore_cooldown_when_saturated": {
+          "type": "boolean"
+        },
+        "buddhist_games": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name_zh"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name_zh": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "tracking_file": {
+      "type": "string",
+      "minLength": 1
+    },
+    "counter_field": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reset_policy": {
+      "type": "string",
+      "enum": ["daily", "weekly", "never"]
+    },
+    "debug": {
+      "type": "object",
+      "properties": {
+        "log_stage_decisions": {
+          "type": "boolean"
+        },
+        "log_game_selection": {
+          "type": "boolean"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

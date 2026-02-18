@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/routing.schema.json",
+  "title": "Todoist Task Routing Configuration",
+  "description": "Todoist 任務三層路由規則配置",
+  "type": "object",
+  "required": ["version", "pre_filter", "label_routing"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 2,
+      "description": "配置版本號（目前為 2）"
+    },
+    "pre_filter": {
+      "type": "object",
+      "required": ["description", "exclude_categories", "rule"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exclude_categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "examples"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "examples": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "label_routing": {
+      "type": "object",
+      "required": ["confidence", "description", "label_match_rule", "task_type_labels", "template_resolution", "modifier_labels", "mappings"],
+      "properties": {
+        "confidence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label_match_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_type_labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "template_override", "description"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "template_override": {
+                "type": "string",
+                "pattern": "^templates/.+\\.md$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "template_resolution": {
+          "type": "object",
+          "required": ["rule", "priority_order"],
+          "properties": {
+            "rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "priority_order": {
+              "type": "object",
+              "description": "優先級順序（數字 key → 模板路徑）",
+              "additionalProperties": {
+                "type": "string",
+                "pattern": "^templates/.+\\.md$"
+              },
+              "minProperties": 1
+            }
+          }
+        },
+        "modifier_labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "behavior", "description"],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "behavior": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fallback": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "mappings": {
+          "type": "object",
+          "description": "標籤映射（格式：^標籤名 → 配置）",
+          "patternProperties": {
+            "^\\^.+": {
+              "$ref": "#/$defs/labelMapping"
+            }
+          },
+          "minProperties": 1
+        }
+      }
+    },
+    "keyword_routing": {
+      "description": "Tier 2：關鍵字路由（可選，未來擴展）",
+      "type": "object"
+    },
+    "sync_check": {
+      "description": "Skill 同步機制（可選）",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "labelMapping": {
+      "type": "object",
+      "required": ["skills", "allowed_tools"],
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "allowed_tools": {
+          "type": "string",
+          "pattern": "^(Read|Bash|Write|Edit|Glob|Grep|WebSearch|WebFetch)(,(Read|Bash|Write|Edit|Glob|Grep|WebSearch|WebFetch))*$",
+          "description": "允許的工具清單（逗號分隔）"
+        },
+        "template": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^templates/.+\\.md$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "模板路徑（null 代表 modifier label）"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

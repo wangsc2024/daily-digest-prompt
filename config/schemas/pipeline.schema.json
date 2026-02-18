@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "agent", "init", "steps", "finalize"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "agent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "init": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file": {
+            "type": "string"
+          },
+          "skill": {
+            "type": "string"
+          },
+          "skill_file": {
+            "type": "string"
+          },
+          "data_file": {
+            "type": "string"
+          },
+          "config_ref": {
+            "type": "string"
+          },
+          "on_missing": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "skills"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skill_files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cache_key": {
+            "type": "string"
+          },
+          "output_section": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "chain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "post_actions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "sub_actions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "finalize": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "format_file": {
+            "type": "string"
+          },
+          "skill": {
+            "type": "string"
+          },
+          "skill_file": {
+            "type": "string"
+          },
+          "config_ref": {
+            "type": "string"
+          },
+          "data_file": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "rule": {
+                  "type": "string"
+                },
+                "verify_method": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

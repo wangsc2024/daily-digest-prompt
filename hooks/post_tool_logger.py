@@ -11,11 +11,19 @@ with automatic tagging for:
   - Memory operations (digest-memory, auto-tasks-today)
   - Sub-agent spawning
   - Errors detected in output
+  - Error classification (via agent_guardian.ErrorClassifier)
 """
 import sys
 import json
 import os
 from datetime import datetime
+
+# Import agent_guardian for error classification
+try:
+    from agent_guardian import ErrorClassifier
+    AGENT_GUARDIAN_AVAILABLE = True
+except ImportError:
+    AGENT_GUARDIAN_AVAILABLE = False
 
 
 # Source detection patterns for API calls
@@ -226,10 +234,26 @@ def main():
         elif "todoist-query" in summary_lower:
             tags.append("phase1-query")
 
+    # Error classification (for Bash + API calls)
+    error_classification = None
+    if AGENT_GUARDIAN_AVAILABLE and tool_name == "Bash":
+        classifier = ErrorClassifier()
+        command = tool_input.get("command", "")
+        exit_code = 1 if has_error else 0  # 簡化判定，實際 exit code 未傳入
+        error_classification = classifier.classify(tool_name, command, tool_output, exit_code)
+
+        # 加入分類標籤
+        if error_classification["category"] != "success":
+            tags.append(f"error-{error_classification['category']}")
+        if error_classification["api_source"]:
+            # api_source 已在前面 classify_bash 加入，這裡確保一致
+            pass
+
     # Build log entry
     entry = {
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
+        "trace_id": os.environ.get("DIGEST_TRACE_ID", ""),
         "tool": tool_name,
         "event": "post",
         "summary": summary,
@@ -237,6 +261,19 @@ def main():
         "has_error": has_error,
         "tags": tags,
     }
+
+    # Add error classification details if available
+    if error_classification:
+        entry["error_category"] = error_classification["category"]
+        entry["retry_intent"] = error_classification["retry_intent"]
+        entry["wait_seconds"] = error_classification["wait_seconds"]
+        entry["should_alert"] = error_classification["should_alert"]
+        if error_classification["api_source"]:
+            entry["api_source"] = error_classification["api_source"]
+
+    # Add parent_trace_id for sub-agent calls
+    if "sub-agent" in tags and entry["trace_id"]:
+        entry["parent_trace_id"] = entry["trace_id"]
 
     # Write to JSONL (with disk protection)
     log_dir = os.path.join("logs", "structured")

@@ -1,0 +1,22 @@
+{
+  "todoist": {
+    "state": "open",
+    "failures": 3,
+    "cooldown": "2026-02-17T20:32:32.579402"
+  },
+  "pingtung-news": {
+    "state": "closed",
+    "failures": 1,
+    "cooldown": null
+  },
+  "hackernews": {
+    "state": "closed",
+    "failures": 0,
+    "cooldown": null
+  },
+  "gmail": {
+    "state": "closed",
+    "failures": 0,
+    "cooldown": null
+  }
+}

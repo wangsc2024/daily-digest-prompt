@@ -11,10 +11,11 @@
 #   .\query-logs.ps1 -Mode summary -Format json
 #   .\query-logs.ps1 -Mode health-score
 #   .\query-logs.ps1 -Mode health-score -Days 3 -Format json
+#   .\query-logs.ps1 -Mode trace -TraceId abc123  # 追蹤特定 trace_id
 # ============================================
 
 param(
-    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score")]
+    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score", "trace")]
     [string]$Mode = "summary",
 
     [int]$Days = 7,
@@ -25,7 +26,9 @@ param(
     [string]$Agent = "all",
 
     [ValidateSet("table", "json")]
-    [string]$Format = "table"
+    [string]$Format = "table",
+
+    [string]$TraceId
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -856,6 +859,132 @@ function Show-HealthScore {
 }
 
 # ============================================
+# Mode: trace
+# ============================================
+function Show-Trace {
+    if (-not $TraceId) {
+        Write-Host "錯誤: -TraceId 參數為必填（使用 -Mode trace 時）" -ForegroundColor Red
+        return
+    }
+
+    Write-Header "分散式追蹤（Trace ID: $TraceId）"
+
+    $structuredLogDir = "$AgentDir\logs\structured"
+    if (-not (Test-Path $structuredLogDir)) {
+        Write-Host "  結構化日誌目錄不存在: $structuredLogDir" -ForegroundColor Gray
+        return
+    }
+
+    # 讀取所有 JSONL 檔案（近 7 天）
+    $cutoff = (Get-Date).AddDays(-$Days)
+    $logFiles = Get-ChildItem -Path $structuredLogDir -Filter "*.jsonl" -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -gt $cutoff } |
+        Sort-Object Name
+
+    if ($logFiles.Count -eq 0) {
+        Write-Host "  無結構化日誌檔案" -ForegroundColor Gray
+        return
+    }
+
+    # 解析 JSONL 並過濾 trace_id
+    $entries = @()
+    foreach ($logFile in $logFiles) {
+        $content = Get-Content -Path $logFile.FullName -Encoding UTF8 -ErrorAction SilentlyContinue
+        foreach ($line in $content) {
+            try {
+                $entry = $line | ConvertFrom-Json
+                if ($entry.trace_id -eq $TraceId) {
+                    $entries += $entry
+                }
+            } catch {
+                # 跳過無效 JSON
+                continue
+            }
+        }
+    }
+
+    if ($entries.Count -eq 0) {
+        Write-Host "  找不到匹配的 trace_id: $TraceId" -ForegroundColor Yellow
+        Write-Host "  建議: 檢查最近一次執行的日誌，確認 trace_id 是否正確" -ForegroundColor Gray
+        return
+    }
+
+    # JSON 輸出
+    if ($Format -eq "json") {
+        @{
+            trace_id = $TraceId
+            entries = $entries | Sort-Object -Property ts
+        } | ConvertTo-Json -Depth 5
+        return
+    }
+
+    # Table 輸出
+    Write-Section "執行流程（共 $($entries.Count) 個工具呼叫）"
+    $sorted = $entries | Sort-Object -Property ts
+
+    # 分析 Phase
+    $phase1Count = @($sorted | Where-Object { $_.tags -contains "phase1" }).Count
+    $phase2Count = @($sorted | Where-Object { $_.tags -contains "phase2" }).Count
+    $teamMode = @($sorted | Where-Object { $_.tags -contains "team-mode" }).Count -gt 0
+
+    if ($teamMode) {
+        Write-Host "  模式: 團隊並行模式" -ForegroundColor Cyan
+        Write-Host "  Phase 1 工具呼叫: $phase1Count" -ForegroundColor White
+        Write-Host "  Phase 2 工具呼叫: $phase2Count" -ForegroundColor White
+        Write-Host ""
+    }
+
+    Write-Host "  時間       | Tool  | 摘要                                  | 標籤" -ForegroundColor Gray
+    Write-Host "  -----------|-------|---------------------------------------|------" -ForegroundColor Gray
+
+    foreach ($e in $sorted) {
+        $time = try { ([datetime]::Parse($e.ts)).ToString("HH:mm:ss") } catch { "??:??:??" }
+        $tool = $e.tool.PadRight(6)
+        $summary = $e.summary
+        if ($summary.Length -gt 37) { $summary = $summary.Substring(0, 37) }
+        $summary = $summary.PadRight(37)
+
+        # 標籤處理（只顯示關鍵標籤）
+        $keyTags = @($e.tags | Where-Object { $_ -match "^(phase1|phase2|api-call|cache-read|cache-write|sub-agent|error|blocked|team-mode)$" })
+        $tagsStr = if ($keyTags.Count -gt 0) { $keyTags -join "," } else { "-" }
+
+        $color = "White"
+        if ($e.has_error) { $color = "Red" }
+        elseif ($e.tags -contains "blocked") { $color = "Yellow" }
+        elseif ($e.tags -contains "api-call") { $color = "Cyan" }
+
+        Write-Host "  $time | " -NoNewline -ForegroundColor White
+        Write-Host "$tool" -NoNewline -ForegroundColor White
+        Write-Host "| " -NoNewline -ForegroundColor White
+        Write-Host "$summary" -NoNewline -ForegroundColor $color
+        Write-Host "| $tagsStr" -ForegroundColor Gray
+    }
+
+    # 統計摘要
+    Write-Host ""
+    Write-Section "統計摘要"
+    $apiCalls = @($sorted | Where-Object { $_.tags -contains "api-call" }).Count
+    $cacheReads = @($sorted | Where-Object { $_.tags -contains "cache-read" }).Count
+    $errors = @($sorted | Where-Object { $_.has_error }).Count
+    $blocked = @($sorted | Where-Object { $_.tags -contains "blocked" }).Count
+
+    Write-Host "  API 呼叫: $apiCalls 次" -ForegroundColor White
+    Write-Host "  快取讀取: $cacheReads 次" -ForegroundColor White
+    if ($errors -gt 0) { Write-Host "  錯誤: $errors 次" -ForegroundColor Red }
+    if ($blocked -gt 0) { Write-Host "  攔截: $blocked 次" -ForegroundColor Yellow }
+
+    # 時間軸（首次呼叫 → 最後一次呼叫）
+    $firstTs = try { [datetime]::Parse($sorted[0].ts) } catch { $null }
+    $lastTs = try { [datetime]::Parse($sorted[-1].ts) } catch { $null }
+    if ($firstTs -and $lastTs) {
+        $duration = [math]::Round(($lastTs - $firstTs).TotalSeconds, 1)
+        Write-Host "  總耗時: ${duration}s（從首次呼叫到最後一次）" -ForegroundColor White
+    }
+
+    Write-Host ""
+}
+
+# ============================================
 # Main dispatch
 # ============================================
 switch ($Mode) {
@@ -865,4 +994,5 @@ switch ($Mode) {
     "todoist"      { Show-Todoist }
     "trend"        { Show-Trend }
     "health-score" { Show-HealthScore }
+    "trace"        { Show-Trace }
 }

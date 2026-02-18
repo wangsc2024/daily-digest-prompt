@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/cache-policy.schema.json",
+  "title": "Cache Policy Configuration",
+  "description": "統一快取策略配置，定義各 API 來源的 TTL 與降級行為",
+  "type": "object",
+  "required": ["version", "cache_dir", "degradation_max_age_hours", "sources"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "配置版本號（目前為 1）"
+    },
+    "cache_dir": {
+      "type": "string",
+      "pattern": "^cache/$",
+      "description": "快取目錄路徑"
+    },
+    "degradation_max_age_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 168,
+      "description": "降級使用過期快取的最大時效（小時，1-168）"
+    },
+    "degradation_label": {
+      "type": "string",
+      "minLength": 1,
+      "description": "降級標記模板（需包含 {time} 佔位符）"
+    },
+    "sources": {
+      "type": "object",
+      "description": "各 API 來源的快取配置",
+      "additionalProperties": false,
+      "properties": {
+        "todoist": {
+          "$ref": "#/$defs/cacheSource"
+        },
+        "pingtung-news": {
+          "$ref": "#/$defs/cacheSource"
+        },
+        "hackernews": {
+          "$ref": "#/$defs/cacheSource"
+        },
+        "knowledge": {
+          "$ref": "#/$defs/cacheSource"
+        },
+        "gmail": {
+          "$ref": "#/$defs/cacheSource"
+        }
+      },
+      "minProperties": 1
+    },
+    "schema": {
+      "type": "string",
+      "description": "快取檔案結構說明（可選，僅供參考）"
+    },
+    "tracking": {
+      "type": "object",
+      "description": "快取命中追蹤說明（可選，僅供參考）"
+    }
+  },
+  "$defs": {
+    "cacheSource": {
+      "type": "object",
+      "required": ["file", "ttl_minutes", "degraded_ttl_minutes"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^cache/.+\\.json$",
+          "description": "快取檔案路徑"
+        },
+        "ttl_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10080,
+          "description": "快取有效時間（分鐘，1-10080 即 7 天）"
+        },
+        "degraded_ttl_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 43200,
+          "description": "降級使用時限（分鐘，1-43200 即 30 天）"
+        },
+        "note": {
+          "type": "string",
+          "description": "額外說明（可選）"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

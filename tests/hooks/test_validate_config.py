@@ -20,7 +20,7 @@ class TestRealConfigs:
         """All project YAML configs should pass validation."""
         config_dir = os.path.join(
             os.path.dirname(__file__), "..", "..", "config")
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         assert errors == [], f"Config validation errors: {errors}"
 
     def test_all_config_files_exist(self):
@@ -115,7 +115,7 @@ class TestSyntheticConfigs:
     def test_missing_directory(self, tmp_path):
         """Non-existent config dir should yield warnings."""
         fake_dir = str(tmp_path / "nonexistent")
-        errors, warnings = validate_config(fake_dir)
+        errors, warnings, stats = validate_config(fake_dir)
         assert len(warnings) == len(SCHEMAS)
 
     def test_empty_yaml(self, tmp_path):
@@ -124,7 +124,7 @@ class TestSyntheticConfigs:
         for filename in SCHEMAS:
             with open(os.path.join(config_dir, filename), "w") as f:
                 f.write("")  # empty
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         # All files with required_keys should have errors
         assert len(errors) > 0
 
@@ -196,7 +196,7 @@ class TestSyntheticConfigs:
                       encoding="utf-8") as f:
                 yaml.dump(data, f, allow_unicode=True)
 
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         assert errors == [], f"Unexpected errors: {errors}"
 
     def test_json_output(self, tmp_path):
@@ -206,7 +206,7 @@ class TestSyntheticConfigs:
         with open(os.path.join(config_dir, "hook-rules.yaml"), "w") as f:
             f.write("version: 1\n")
 
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         result = {"errors": errors, "warnings": warnings,
                   "valid": len(errors) == 0}
         # Should be JSON-serializable
@@ -214,6 +214,14 @@ class TestSyntheticConfigs:
         parsed = json.loads(output)
         assert isinstance(parsed["errors"], list)
         assert isinstance(parsed["valid"], bool)
+
+    def test_stats_returned(self, tmp_path):
+        """validate_config should return stats dict as third element."""
+        config_dir = str(tmp_path)
+        errors, warnings, stats = validate_config(config_dir)
+        assert isinstance(stats, dict)
+        assert "json_schema_used" in stats
+        assert "simple_validation_used" in stats
 
 
 # ---------------------------------------------------------------------------
@@ -276,7 +284,7 @@ class TestPipelineSchema:
         with open(os.path.join(config_dir, "pipeline.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         pipeline_errors = [e for e in errors if "pipeline" in e]
         assert any("steps" in e for e in pipeline_errors)
 
@@ -293,7 +301,7 @@ class TestPipelineSchema:
         with open(os.path.join(config_dir, "pipeline.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         pipeline_errors = [e for e in errors if "pipeline" in e]
         assert any("id" in e for e in pipeline_errors)
 
@@ -312,7 +320,7 @@ class TestBenchmarkSchema:
         with open(os.path.join(config_dir, "benchmark.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         benchmark_errors = [e for e in errors if "benchmark" in e]
         assert any("weight" in e for e in benchmark_errors)
 
@@ -327,7 +335,7 @@ class TestBenchmarkSchema:
         with open(os.path.join(config_dir, "benchmark.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         benchmark_errors = [e for e in errors if "benchmark" in e]
         assert any("name" in e for e in benchmark_errors)
 
@@ -347,7 +355,7 @@ class TestTopicRotationSchema:
         with open(os.path.join(config_dir, "topic-rotation.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         rotation_errors = [e for e in errors if "topic-rotation" in e]
         assert any("habits_topics" in e for e in rotation_errors)
 
@@ -367,7 +375,7 @@ class TestAuditScoringSchema:
         with open(os.path.join(config_dir, "audit-scoring.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         audit_errors = [e for e in errors if "audit" in e]
         assert any("dimensions" in e for e in audit_errors)
 
@@ -383,7 +391,7 @@ class TestAuditScoringSchema:
         with open(os.path.join(config_dir, "audit-scoring.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         audit_errors = [e for e in errors if "audit" in e]
         assert any("weight_profiles" in e for e in audit_errors)
 
@@ -402,6 +410,6 @@ class TestHealthScoringSchema:
         with open(os.path.join(config_dir, "health-scoring.yaml"), "w",
                   encoding="utf-8") as f:
             yaml.dump(data, f)
-        errors, warnings = validate_config(config_dir)
+        errors, warnings, stats = validate_config(config_dir)
         health_errors = [e for e in errors if "health" in e]
         assert any("ranges" in e for e in health_errors)

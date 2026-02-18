@@ -1,23 +1,25 @@
 {
-  "date": "2026-02-17",
-  "topic": "AI 機械式可解釋性（Mechanistic Interpretability）— 從稀疏自編碼器到模型安全的逆向工程革命",
+  "date": "2026-02-18",
+  "topic": "AI 世界模型（World Models）— 從語言預測到物理世界模擬的典範轉移",
   "research_questions": [
-    "稀疏自編碼器（Sparse Autoencoders）如何解決神經網路的多語義性（Polysemanticity）與特徵疊加（Superposition）問題？",
-    "Anthropic 與 OpenAI 如何將機械式可解釋性應用於模型安全評估與行為修正？",
-    "機械式可解釋性在 2026 年的技術瓶頸與未來發展方向為何？"
+    "世界模型（World Models）的核心技術架構為何？與傳統語言模型（LLM）的根本差異在哪裡？",
+    "Google Genie 3、World Labs Marble、Runway 等主要世界模型的技術特色與應用場景有何異同？Yann LeCun 離開 Meta 創辦世界模型實驗室的戰略意義為何？",
+    "世界模型在機器人學、自動駕駛、遊戲開發、影片生成等領域的實際應用進展如何？2026 年的技術瓶頸與未來突破方向為何？"
   ],
-  "methodology": "文獻回顧（MIT Technology Review、Anthropic/OpenAI 官方研究、Alignment Forum）+ 技術分析（SAE 架構解析）+ 實務應用案例研究（Claude 4.5 安全評估、OpenAI 推理模型作弊偵測）+ 批判觀點整合",
+  "methodology": "文獻回顧（MIT Technology Review、Scientific American、Euronews）+ 技術架構分析（Genie 3 vs Marble vs Runway World Models）+ 產業應用案例研究（機器人/自駕/遊戲/影片）+ 學術論文交叉比對 + 批判觀點整合（LeCun JEPA 架構 vs 擴散模型路線）",
   "keywords": [
-    "mechanistic interpretability",
-    "sparse autoencoders",
-    "superposition",
-    "polysemanticity",
-    "monosemantic features",
-    "AI safety",
-    "chain-of-thought monitoring",
-    "Anthropic interpretability",
-    "enumerative safety",
-    "model transparency"
+    "world models",
+    "AI world simulation",
+    "Genie 3 Google DeepMind",
+    "World Labs Marble Fei-Fei Li",
+    "Yann LeCun world model lab",
+    "JEPA joint embedding predictive architecture",
+    "video generation world model",
+    "General Intuition world model",
+    "Runway world model",
+    "physical AI simulation",
+    "embodied AI",
+    "spatial intelligence"
   ],
   "stage_completed": 1
 }

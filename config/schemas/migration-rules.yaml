@@ -1,0 +1,193 @@
+# config/schemas/migration-rules.yaml
+# 配置版本遷移規則 — validate_config.py --migrate 使用
+# 修改此文件可調整遷移策略，不需動 Python 腳本
+
+# ============================================================
+# 遷移策略總則
+# ============================================================
+general:
+  backup_before_migrate: true  # 遷移前自動備份原檔案
+  backup_suffix: ".pre-v{old_version}.bak"
+  dry_run_default: true        # 預設為 dry-run 模式（僅顯示變更，不實際修改）
+  interactive_confirm: true    # 互動式確認每個變更
+
+# ============================================================
+# 各配置檔案的遷移規則
+# ============================================================
+
+# frequency-limits.yaml 遷移規則
+frequency-limits:
+  v1_to_v2:
+    description: "新增 execution_order 欄位（自動遞增）"
+    transformations:
+      - type: add_field
+        target: "tasks.*"  # 所有 tasks 下的項目
+        field: execution_order
+        value_strategy: auto_increment  # 按現有順序自動編號 1, 2, 3...
+
+  v2_to_v3:
+    description: "重命名 daily_limit 為 max_executions_per_day"
+    transformations:
+      - type: rename_field
+        target: "tasks.*"
+        old: daily_limit
+        new: max_executions_per_day
+
+# cache-policy.yaml 遷移規則
+cache-policy:
+  v1_to_v2:
+    description: "新增快取壓縮配置"
+    transformations:
+      - type: add_section
+        section: compression
+        content:
+          enabled: true
+          min_size_bytes: 1024
+          algorithm: "gzip"
+
+# scoring.yaml 遷移規則
+scoring:
+  v1_to_v2:
+    description: "計分公式版本 2（6 因子）"
+    transformations:
+      - type: update_field
+        target: formula_version
+        old: 1
+        new: 2
+      - type: add_field
+        target: factors
+        field: recency_penalty
+        value:
+          weight: 0.1
+          description: "新建任務懲罰（避免剛建立就被選中）"
+
+# routing.yaml 遷移規則
+routing:
+  v1_to_v2:
+    description: "Tier 1 標籤前綴從 @ 改為 ^"
+    transformations:
+      - type: replace_in_field
+        target: "label_routing.mappings.*.labels"
+        pattern: "^@"
+        replacement: "^"
+        regex: true
+
+# hook-rules.yaml 遷移規則
+hook-rules:
+  v1_to_v2:
+    description: "新增 priority 欄位（critical/high/medium）"
+    transformations:
+      - type: add_field
+        target: "bash_rules.*"
+        field: priority
+        value_strategy: infer_from_guard_tag  # 從 guard_tag 推斷
+        mapping:
+          nul-guard: "critical"
+          state-guard: "critical"
+          safety-guard: "critical"
+          git-guard: "critical"
+          env-guard: "high"
+          exfiltration-guard: "critical"
+      - type: add_field
+        target: "write_rules.*"
+        field: priority
+        value_strategy: infer_from_guard_tag
+        mapping:
+          nul-guard: "critical"
+          state-guard: "critical"
+          secret-guard: "critical"
+          traversal-guard: "high"
+      - type: add_field
+        target: "read_rules.*"
+        field: priority
+        value_strategy: infer_from_guard_tag
+        mapping:
+          read-guard: "high"
+          secret-read-guard: "critical"
+          win-cred-guard: "critical"
+
+# pipeline.yaml 遷移規則
+pipeline:
+  v1_to_v2:
+    description: "新增 timeout 欄位到每個 step"
+    transformations:
+      - type: add_field
+        target: "steps.*"
+        field: timeout
+        value_strategy: infer_from_id
+        mapping:
+          todoist: 300
+          news: 600
+          hackernews: 300
+          habits: 120
+          learning: 120
+          knowledge: 300
+          zen: 60
+
+# audit-scoring.yaml 遷移規則
+audit-scoring:
+  v1_to_v2:
+    description: "新增 quick_mode 配置"
+    transformations:
+      - type: add_section
+        section: quick_mode
+        content:
+          enabled: false
+          sample_ratio: 0.3  # 快速模式只評估 30% 子項
+          min_samples_per_dimension: 2
+
+# timeouts.yaml 遷移規則
+timeouts:
+  v1_to_v2:
+    description: "標準化 timeout 單位（統一使用秒）"
+    transformations:
+      - type: validate_units
+        ensure_all_in_seconds: true
+        warn_if_too_large: 7200  # 超過 2 小時警告
+
+# ============================================================
+# 遷移驗證規則
+# ============================================================
+validation:
+  post_migration_checks:
+    - name: "Schema 驗證"
+      description: "遷移後使用 JSON Schema 驗證新配置"
+      action: validate_with_schema
+
+    - name: "語法檢查"
+      description: "確認 YAML 可正常解析"
+      action: yaml_parse_test
+
+    - name: "完整性檢查"
+      description: "確認必要欄位都存在"
+      action: required_fields_check
+
+    - name: "回歸測試"
+      description: "若有測試套件，執行相關測試"
+      action: run_tests_if_exists
+      optional: true
+
+# ============================================================
+# 錯誤處理
+# ============================================================
+error_handling:
+  on_transform_error:
+    action: "rollback"  # 發生錯誤時回退到備份
+    notify: true        # 通知用戶
+
+  on_validation_fail:
+    action: "warn"      # 驗證失敗時警告但不回退（讓用戶決定）
+    allow_force: true   # 允許 --force 跳過驗證
+
+  on_backup_fail:
+    action: "abort"     # 備份失敗時中止遷移
+
+# ============================================================
+# 備註
+# ============================================================
+notes:
+  - "遷移規則僅在 validate_config.py --migrate 時使用"
+  - "預設為 dry-run 模式，需加 --apply 才實際修改檔案"
+  - "遷移前會自動備份原檔案（.pre-vN.bak）"
+  - "可用 --skip-backup 跳過備份（不建議）"
+  - "遷移後自動執行 JSON Schema 驗證"

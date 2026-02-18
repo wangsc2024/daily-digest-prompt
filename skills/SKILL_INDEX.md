@@ -16,8 +16,8 @@
 | 6 | learning-mastery | 深度學習技術每日技巧 | 學習、費曼、刻意練習、間隔複習、學習方法、學習技巧、記憶法、楊大輝、提取練習 |
 | 7 | knowledge-query | 知識庫查詢與匯入 | 知識庫、筆記、搜尋筆記、匯入、KB、knowledge base、查詢筆記、知識管理 |
 | 8 | ntfy-notify | 推播通知 | 通知、提醒、notify、完成後通知、做完通知、完成後提醒、推播、ntfy、訊息推送、告警 |
-| 9 | digest-memory | 摘要記憶持久化 | 記憶、連續天數、上次執行、跨次追蹤、連續報到、streak、執行統計、趨勢 |
-| 10 | api-cache | API 回應快取與降級 | 快取、cache、降級、API 故障、快取策略、TTL、cache hit、快取命中 |
+| 9 | digest-memory | 摘要記憶持久化 | 記憶、連續天數、上次執行、跨次追蹤、記憶追蹤、連續報到、streak、執行統計、趨勢 |
+| 10 | api-cache | API 回應快取與降級 | 快取、cache、降級、API 故障、快取策略、TTL、降級服務、API 快取、cache hit、快取命中 |
 | 11 | scheduler-state | 排程狀態追蹤（唯讀） | 狀態、健康度、執行記錄、排程狀態、成功率、系統狀態、scheduler、平均耗時 |
 | 12 | gmail | Gmail 郵件讀取 | gmail、email、郵件、信箱、未讀、收件匣、inbox、Google 信箱、重要郵件、郵件摘要 |
 | 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、遊戲設計、HTML5 遊戲、遊戲品質、Canvas 遊戲、JavaScript 遊戲、遊戲部署、遊戲效能 |

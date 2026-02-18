@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "bash_rules", "write_rules", "read_rules"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "presets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "enabled_priorities": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "allow_bypass": { "type": "boolean" }
+        }
+      }
+    },
+    "bash_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/bash_rule"
+      }
+    },
+    "write_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/write_rule"
+      }
+    },
+    "read_rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/read_rule"
+      }
+    }
+  },
+  "definitions": {
+    "bash_rule": {
+      "type": "object",
+      "required": ["id", "description", "reason", "guard_tag"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flags": {
+          "type": "string",
+          "enum": ["IGNORECASE", "MULTILINE", "DOTALL"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guard_tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        }
+      },
+      "oneOf": [
+        { "required": ["pattern"] },
+        { "required": ["patterns"] }
+      ]
+    },
+    "write_rule": {
+      "type": "object",
+      "required": ["id", "description", "check", "guard_tag"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check": {
+          "type": "string",
+          "enum": ["basename_equals", "path_contains", "basename_in", "path_traversal"]
+        },
+        "value": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "case_insensitive": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "reason_template": {
+          "type": "string"
+        },
+        "guard_tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        }
+      },
+      "oneOf": [
+        { "required": ["reason"] },
+        { "required": ["reason_template"] }
+      ]
+    },
+    "read_rule": {
+      "type": "object",
+      "required": ["id", "description", "check", "guard_tag"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check": {
+          "type": "string",
+          "enum": ["path_match", "basename_in"]
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string"
+        },
+        "reason_template": {
+          "type": "string"
+        },
+        "guard_tag": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        }
+      },
+      "oneOf": [
+        { "required": ["reason"] },
+        { "required": ["reason_template"] }
+      ]
+    }
+  }
+}

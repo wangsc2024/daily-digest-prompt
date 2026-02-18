@@ -65,6 +65,64 @@ def load_yaml_rules(section_key, fallback_rules):
         return fallback_rules
 
 
+def filter_rules_by_preset(rules, section_key="bash_rules"):
+    """根據環境變數 HOOK_SECURITY_PRESET 過濾規則。
+
+    讀取 hook-rules.yaml 的 presets 配置，根據當前 preset 的 enabled_priorities
+    過濾規則清單，僅保留符合優先級的規則。
+
+    Args:
+        rules: 規則清單（必須含 priority 欄位）
+        section_key: 規則區段名稱（用於日誌）
+
+    Returns:
+        過濾後的規則清單
+    """
+    # 讀取環境變數（預設 normal）
+    preset_name = os.environ.get("HOOK_SECURITY_PRESET", "normal").lower()
+
+    # 若未指定或為 normal，回傳所有規則
+    if preset_name == "normal":
+        return rules
+
+    # 載入 presets 配置
+    config_path = find_config_path()
+    if config_path is None:
+        return rules  # 無配置檔，回傳所有規則
+
+    try:
+        import yaml
+    except ImportError:
+        return rules
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        presets = config.get("presets", {})
+        if not isinstance(presets, dict):
+            return rules
+
+        preset_config = presets.get(preset_name)
+        if not preset_config or not isinstance(preset_config, dict):
+            # 未知 preset，回傳所有規則
+            return rules
+
+        enabled_priorities = preset_config.get("enabled_priorities", ["critical", "high", "medium", "low"])
+
+        # 過濾規則（保留符合優先級的規則）
+        filtered = [r for r in rules if r.get("priority", "medium") in enabled_priorities]
+
+        # 若過濾後為空（例如配置錯誤），回傳所有規則作為安全回退
+        if not filtered:
+            return rules
+
+        return filtered
+    except Exception:
+        # 載入失敗，回傳所有規則
+        return rules
+
+
 def log_blocked_event(session_id, tool, summary, reason, guard_tag):
     """將攔截事件寫入結構化 JSONL 日誌。"""
     log_dir = os.path.join("logs", "structured")

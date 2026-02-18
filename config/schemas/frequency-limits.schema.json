@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://daily-digest-prompt/schemas/frequency-limits.schema.json",
+  "title": "Auto Task Frequency Limits Configuration",
+  "description": "自動任務頻率限制配置（無 Todoist 待辦時觸發）",
+  "type": "object",
+  "required": ["version", "tracking_file", "trigger_modes", "history_file", "reset_policy", "selection_strategy", "tasks"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 3,
+      "description": "配置版本號（目前為 3）"
+    },
+    "tracking_file": {
+      "type": "string",
+      "pattern": "^context/.+\\.json$",
+      "description": "追蹤檔案路徑"
+    },
+    "trigger_modes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["無可處理項目", "今日任務全部完成"],
+            "description": "觸發模式名稱"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "description": "額外說明（可選）"
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 2
+    },
+    "history_file": {
+      "type": "string",
+      "pattern": "^state/.+\\.json$",
+      "description": "歷史記錄檔案路徑"
+    },
+    "reset_policy": {
+      "type": "string",
+      "enum": ["daily", "weekly", "monthly"],
+      "description": "重置策略"
+    },
+    "selection_strategy": {
+      "type": "string",
+      "enum": ["round_robin", "priority", "random"],
+      "description": "選取策略"
+    },
+    "initial_schema": {
+      "type": "string",
+      "description": "初始檔案格式說明（可選，僅供參考）"
+    },
+    "tasks": {
+      "type": "object",
+      "description": "自動任務定義",
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "$ref": "#/$defs/autoTask"
+        }
+      },
+      "minProperties": 1
+    }
+  },
+  "$defs": {
+    "autoTask": {
+      "type": "object",
+      "required": ["name", "daily_limit", "counter_field", "template", "history_type", "execution_order"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "任務顯示名稱"
+        },
+        "daily_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "每日執行次數上限（1-20）"
+        },
+        "counter_field": {
+          "type": "string",
+          "pattern": "^[a-z_]+_count$",
+          "description": "計數器欄位名稱（需以 _count 結尾）"
+        },
+        "template": {
+          "type": "string",
+          "pattern": "^templates/auto-tasks/.+\\.md$",
+          "description": "任務模板路徑"
+        },
+        "template_params": {
+          "type": "object",
+          "description": "模板參數（可選）",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "time": {
+              "type": "string",
+              "pattern": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+            }
+          }
+        },
+        "history_type": {
+          "type": "string",
+          "pattern": "^[a-z_]+$",
+          "description": "歷史記錄類型標識"
+        },
+        "execution_order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "輪轉排序依據（1-50）"
+        },
+        "skill": {
+          "type": "string",
+          "minLength": 1,
+          "description": "關聯的 Skill 名稱（可選，單數形式）"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "關聯的 Skills 清單（可選，複數形式）"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "任務詳細說明（可選）"
+        },
+        "stages": {
+          "type": "object",
+          "description": "多階段任務的階段定義（可選，key 為階段編號，value 為說明）",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "weight_profiles", "default_profile", "grade_thresholds", "calibration", "na_policy", "dimensions", "output"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "weight_profiles": {
+      "type": "object",
+      "required": ["balanced"],
+      "properties": {
+        "balanced": { "$ref": "#/definitions/weight_profile" },
+        "security_first": { "$ref": "#/definitions/weight_profile" },
+        "startup": { "$ref": "#/definitions/weight_profile" }
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/weight_profile"
+      }
+    },
+    "default_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "grade_thresholds": {
+      "type": "object",
+      "required": ["S", "A", "B", "C", "D", "F"],
+      "properties": {
+        "S": { "$ref": "#/definitions/grade_threshold" },
+        "A": { "$ref": "#/definitions/grade_threshold" },
+        "B": { "$ref": "#/definitions/grade_threshold" },
+        "C": { "$ref": "#/definitions/grade_threshold" },
+        "D": { "$ref": "#/definitions/grade_threshold" },
+        "F": { "$ref": "#/definitions/grade_threshold" }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "required": ["baseline", "hard_caps", "evidence_policy"],
+      "properties": {
+        "baseline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hard_caps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["condition", "dimension", "max_score"],
+            "properties": {
+              "condition": { "type": "string" },
+              "dimension": { "type": "string" },
+              "max_score": { "type": "integer", "minimum": 0, "maximum": 100 }
+            }
+          }
+        },
+        "evidence_policy": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "na_policy": {
+      "type": "object",
+      "required": ["description", "requires_justification", "weight_redistribution", "max_na_per_dimension"],
+      "properties": {
+        "description": { "type": "string" },
+        "requires_justification": { "type": "boolean" },
+        "weight_redistribution": { "type": "string" },
+        "max_na_per_dimension": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "required": ["information_security", "system_architecture", "system_quality", "system_workflow", "technology_stack", "system_documentation", "system_completeness"],
+      "properties": {
+        "information_security": { "$ref": "#/definitions/dimension" },
+        "system_architecture": { "$ref": "#/definitions/dimension" },
+        "system_quality": { "$ref": "#/definitions/dimension" },
+        "system_workflow": { "$ref": "#/definitions/dimension" },
+        "technology_stack": { "$ref": "#/definitions/dimension" },
+        "system_documentation": { "$ref": "#/definitions/dimension" },
+        "system_completeness": { "$ref": "#/definitions/dimension" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["report_template", "score_precision", "weighted_formula"],
+      "properties": {
+        "report_template": { "type": "string" },
+        "score_precision": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "weighted_formula": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "weight_profile": {
+      "type": "object",
+      "required": ["information_security", "system_architecture", "system_quality", "system_workflow", "technology_stack", "system_documentation", "system_completeness"],
+      "properties": {
+        "information_security": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "system_architecture": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "system_quality": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "system_workflow": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "technology_stack": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "system_documentation": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "system_completeness": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "grade_threshold": {
+      "type": "object",
+      "required": ["min", "label", "description"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "label": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "required": ["label", "weight_key", "sub_items"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "weight_key": { "type": "string", "minLength": 1 },
+        "sub_items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "full_score_criteria", "evidence", "zero_criteria"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[1-7]\\.[1-9][0-9]?$"
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "full_score_criteria": { "type": "string", "minLength": 1 },
+              "evidence": { "type": "string", "minLength": 1 },
+              "zero_criteria": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

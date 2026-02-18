@@ -95,7 +95,11 @@ function Update-State {
 # Start execution
 # ============================================
 $startTime = Get-Date
+
+# Generate trace ID for distributed tracing
+$traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+Write-Log "Trace ID: $traceId"
 Write-Log "Mode: parallel (Phase 1 x5 + Phase 2 x1)"
 
 # Check if claude is installed
@@ -107,10 +111,56 @@ if (-not $claudePath) {
 }
 
 # ============================================
-# Phase 1: Parallel Data Fetch (3 agents)
+# Phase 0: Circuit Breaker 預檢查
 # ============================================
 Write-Log ""
-Write-Log "=== Phase 1: Parallel fetch start ==="
+Write-Log "=== Phase 0: Circuit Breaker precheck ==="
+
+# 載入預檢查工具函式庫
+$utilsPath = "$AgentDir\circuit-breaker-utils.ps1"
+if (Test-Path $utilsPath) {
+    . $utilsPath
+    Write-Log "[預檢查] 已載入 circuit-breaker-utils.ps1"
+} else {
+    Write-Log "[WARN] circuit-breaker-utils.ps1 不存在，跳過預檢查"
+}
+
+# API 對照表（agent name → API name in api-health.json）
+$apiMapping = @{
+    "todoist"    = "todoist"
+    "news"       = "pingtung-news"
+    "hackernews" = "hackernews"
+    "gmail"      = "gmail"
+}
+
+# 執行預檢查
+$precheckResults = @{}
+if (Test-Path $utilsPath) {
+    foreach ($agentName in $apiMapping.Keys) {
+        $apiName = $apiMapping[$agentName]
+        $state = Test-CircuitBreaker $apiName
+        $precheckResults[$agentName] = $state
+
+        if ($state -eq "open") {
+            Write-Log "[預檢查] ✗ $apiName ($agentName) 為 OPEN 狀態，將跳過執行"
+        } elseif ($state -eq "half_open") {
+            Write-Log "[預檢查] ⚠ $apiName ($agentName) 為 HALF_OPEN 狀態，將正常執行（試探）"
+        } else {
+            Write-Log "[預檢查] ✓ $apiName ($agentName) 為 CLOSED 狀態，正常執行"
+        }
+    }
+} else {
+    # 預檢查工具不存在，全部假設為 closed
+    foreach ($agentName in $apiMapping.Keys) {
+        $precheckResults[$agentName] = "closed"
+    }
+}
+
+# ============================================
+# Phase 1: Parallel Data Fetch (含預檢查)
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 1: Parallel fetch start (with precheck) ==="
 
 $fetchAgents = @(
     @{ Name = "todoist";    Prompt = "$AgentDir\prompts\team\fetch-todoist.md";    Result = "$ResultsDir\todoist.json" },
@@ -127,14 +177,49 @@ foreach ($agent in $fetchAgents) {
         continue
     }
 
+    # 檢查預檢查結果（security agent 不在 API 對照表中，總是執行）
+    $agentName = $agent.Name
+    $precheckState = $precheckResults[$agentName]
+
+    if ($precheckState -eq "open") {
+        # API 為 open 狀態，建立降級結果並跳過執行
+        Write-Log "[Phase1] Skipped: $agentName (Circuit Breaker: OPEN) - 使用降級模式"
+
+        if (Test-Path $utilsPath) {
+            $apiName = $apiMapping[$agentName]
+            New-DegradedResult -APIName $apiName -OutputPath $agent.Result -State "open"
+        } else {
+            # fallback: 手動建立降級結果
+            $fallbackResult = @{
+                status = "cache_degraded"
+                source = "cache"
+                circuit_breaker = "open"
+                message = "Circuit Breaker 預檢查發現 API 為 open 狀態（fallback mode）"
+                timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz")
+                precheck_skipped = $true
+            }
+            $fallbackResult | ConvertTo-Json -Depth 10 | Set-Content $agent.Result -Encoding UTF8
+        }
+
+        continue  # 跳過這個 agent
+    }
+
+    # 正常執行（closed 或 half_open）
+    if ($precheckState -eq "half_open") {
+        Write-Log "[Phase1] Starting: $agentName (Circuit Breaker: HALF_OPEN, trial mode)"
+    } else {
+        Write-Log "[Phase1] Starting: $agentName (Circuit Breaker: CLOSED)"
+    }
+
     $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
     $agentName = $agent.Name
 
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($Content, $agentName, $logDir, $timestamp)
+        param($Content, $agentName, $logDir, $timestamp, $traceId)
 
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+        [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
 
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -151,7 +236,7 @@ foreach ($agent in $fetchAgents) {
         }
 
         return $output
-    } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp
+    } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
 
     $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
     $jobs += $job
@@ -251,6 +336,9 @@ while ($attempt -le $MaxPhase2Retries) {
     try {
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
+
+        # Set trace ID for Phase 2 (same as Phase 1)
+        $env:DIGEST_TRACE_ID = $traceId
 
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile

@@ -13,7 +13,7 @@ PreToolUse:Read Guard — 敏感路徑讀取攔截。
 import os
 import re
 
-from hook_utils import load_yaml_rules, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision
 
 
 # YAML 不可用時的內建預設規則
@@ -63,7 +63,8 @@ FALLBACK_READ_RULES = [
 
 def load_read_rules():
     """從 YAML 載入讀取規則，失敗時回退至內建預設值。"""
-    return load_yaml_rules("read_rules", FALLBACK_READ_RULES)
+    rules = load_yaml_rules("read_rules", FALLBACK_READ_RULES)
+    return filter_rules_by_preset(rules, "read_rules")
 
 
 def _normalize_windows_path(file_path):

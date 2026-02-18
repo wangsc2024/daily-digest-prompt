@@ -1,6 +1,32 @@
-version: 1
+version: 2
 
+# ============================================
+# 分層安全策略預設集（Presets）
+# ============================================
+# 透過環境變數 HOOK_SECURITY_PRESET 選擇策略
+# 預設：normal（未設定時）
+
+presets:
+  strict:
+    description: "嚴格模式 - 所有規則啟用，無例外（適用於生產環境）"
+    enabled_priorities: ["critical", "high", "medium", "low"]
+    allow_bypass: false
+
+  normal:
+    description: "正常模式 - 所有規則啟用（預設，適用於一般開發）"
+    enabled_priorities: ["critical", "high", "medium", "low"]
+    allow_bypass: false
+
+  permissive:
+    description: "寬容模式 - 僅 critical/high 規則啟用（適用於除錯或測試）"
+    enabled_priorities: ["critical", "high"]
+    allow_bypass: true
+
+# ============================================
 # Bash 命令攔截規則（對應 hooks/pre_bash_guard.py）
+# ============================================
+# priority: critical > high > medium > low
+
 bash_rules:
   - id: nul-redirect
     description: "禁止 nul 重導向"
@@ -8,6 +34,7 @@ bash_rules:
     flags: IGNORECASE
     reason: "禁止 nul 重導向（會建立 nul 實體檔案）。請改用 > /dev/null 2>&1"
     guard_tag: nul-guard
+    priority: critical  # 資料破壞風險
 
   - id: scheduler-state-write
     description: "禁止 Agent 寫入 scheduler-state.json"
@@ -15,6 +42,7 @@ bash_rules:
     pattern: '(?<![0-9&])>\s*[^&].*scheduler-state\.json|>>\s*.*scheduler-state\.json|(tee|cp|mv)\s+.*scheduler-state\.json|echo\s+.*>\s*.*scheduler-state\.json'
     reason: "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
     guard_tag: state-guard
+    priority: medium  # 狀態檔案保護
 
   - id: destructive-delete
     description: "禁止破壞性刪除"
@@ -25,6 +53,19 @@ bash_rules:
       - 'rm\s+-[rR]f\s+\*'
     reason: "禁止破壞性刪除操作（根目錄/家目錄/當前目錄/萬用字元）"
     guard_tag: safety-guard
+    priority: critical  # 資料破壞風險
+
+  - id: destructive-delete-windows
+    description: "禁止 Windows 風格的破壞性刪除操作"
+    patterns:
+      - 'del\s+/[sS]\s+/[qQ]?\s*[A-Za-z]:\\'
+      - 'rmdir\s+/[sS]\s+/[qQ]?\s*[A-Za-z]:\\'
+      - 'Remove-Item\s+.*-Recurse.*[A-Za-z]:\\'
+      - 'Remove-Item\s+.*[A-Za-z]:\\.*-Recurse'
+    flags: IGNORECASE
+    reason: "禁止 Windows 破壞性刪除操作（del /s, rmdir /s, Remove-Item -Recurse 針對磁碟根目錄）"
+    guard_tag: safety-guard
+    priority: critical  # 資料破壞風險
 
   - id: force-push
     description: "禁止 force push 到 main/master"
@@ -33,6 +74,7 @@ bash_rules:
       - 'git\s+push\s+-f\s+.*\s+(main|master)(\s|$)'
     reason: "禁止 force push 到 main/master 分支"
     guard_tag: git-guard
+    priority: critical  # Git 歷史破壞風險
 
   - id: sensitive-env
     description: "禁止讀取敏感環境變數"
@@ -43,6 +85,16 @@ bash_rules:
     flags: IGNORECASE
     reason: "禁止讀取敏感環境變數"
     guard_tag: env-guard
+    priority: high  # 敏感資料保護
+
+  - id: sensitive-env-set
+    description: "禁止透過 set 指令洩露環境變數"
+    patterns:
+      - '\bset\s*\|\s*grep\s+.*(TOKEN|SECRET|KEY|PASSWORD)'
+    flags: IGNORECASE
+    reason: "禁止透過 set 指令洩露敏感環境變數"
+    guard_tag: env-guard
+    priority: high  # 敏感資料保護
 
   - id: exfiltration
     description: "禁止透過網路傳送敏感變數"
@@ -50,8 +102,51 @@ bash_rules:
     flags: IGNORECASE
     reason: "禁止透過網路傳送敏感變數"
     guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
 
+  - id: exfiltration-file
+    description: "禁止透過 @file 方式外洩敏感檔案"
+    patterns:
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*\.env\b'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*credentials'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*token\.json'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*secrets\.json'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*\.htpasswd'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*id_rsa'
+      - 'curl\s.*(-d|--data|--data-binary|--data-raw|--data-urlencode)\s+@\s*id_ed25519'
+    flags: IGNORECASE
+    reason: "禁止透過 curl @file 方式外洩敏感檔案（.env, credentials, token, secrets 等）"
+    guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
+
+  - id: exfiltration-pipe
+    description: "禁止透過 pipe 方式外洩敏感檔案"
+    patterns:
+      - 'cat\s+.*\.(env|htpasswd)\s*\|.*curl'
+      - 'cat\s+.*(credentials|secrets|token)\.json\s*\|.*curl'
+      - 'cat\s+.*(id_rsa|id_ed25519)\s*\|.*curl'
+      - 'cat\s+.*\.(env|htpasswd)\s*\|.*(wget|nc\s)'
+      - 'cat\s+.*(credentials|secrets|token)\.json\s*\|.*(wget|nc\s)'
+    flags: IGNORECASE
+    reason: "禁止透過 pipe 方式將敏感檔案內容傳送到外部網路"
+    guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
+
+  - id: exfiltration-wget
+    description: "禁止透過 wget 外洩敏感資料"
+    patterns:
+      - 'wget\s.*--post-data.*\$(TOKEN|SECRET|KEY|PASSWORD)'
+      - 'wget\s.*--post-file\s*=?\s*\.env\b'
+      - 'wget\s.*--post-file\s*=?\s*(credentials|secrets|token)\.json'
+    flags: IGNORECASE
+    reason: "禁止透過 wget 傳送敏感資料"
+    guard_tag: exfiltration-guard
+    priority: critical  # 資料外洩風險
+
+# ============================================
 # 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）
+# ============================================
+
 write_rules:
   - id: nul-file
     description: "禁止寫入 nul 檔案"
@@ -60,6 +155,7 @@ write_rules:
     case_insensitive: true
     reason: "禁止寫入 nul 檔案（Windows 上會建立實體檔案）"
     guard_tag: nul-guard
+    priority: critical  # 資料破壞風險
 
   - id: scheduler-state
     description: "禁止 Agent 寫入 scheduler-state.json"
@@ -67,6 +163,7 @@ write_rules:
     value: "scheduler-state.json"
     reason: "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
     guard_tag: state-guard
+    priority: medium  # 狀態檔案保護
 
   - id: sensitive-files
     description: "禁止寫入敏感檔案"
@@ -74,12 +171,14 @@ write_rules:
     values: [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"]
     reason_template: "禁止寫入敏感檔案: {matched}"
     guard_tag: secret-guard
+    priority: high  # 敏感資料保護
 
   - id: path-traversal
     description: "禁止路徑遍歷攻擊"
     check: path_traversal
     reason_template: "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
     guard_tag: traversal-guard
+    priority: critical  # 安全攻擊防護
 
   # 註解：SKILL.md 保護規則已移除，因為會阻擋用戶明確要求的合法修改
   # 改依賴 Git 版本控制作為安全網
@@ -90,7 +189,10 @@ write_rules:
   #   reason: "SKILL.md 為系統行為定義，不可在執行期間修改"
   #   guard_tag: skill-protect
 
+# ============================================
 # 檔案讀取攔截規則（對應 hooks/pre_read_guard.py）
+# ============================================
+
 read_rules:
   - id: sensitive-path
     description: "禁止讀取敏感系統路徑"
@@ -108,6 +210,7 @@ read_rules:
       - '\.kube/config'
     reason: "禁止讀取敏感系統檔案"
     guard_tag: read-guard
+    priority: high  # 敏感資料保護
 
   - id: sensitive-read-files
     description: "禁止讀取敏感檔案"
@@ -116,6 +219,7 @@ read_rules:
              "secrets.json", ".htpasswd", "id_rsa", "id_ed25519"]
     reason_template: "禁止讀取敏感檔案: {matched}"
     guard_tag: secret-read-guard
+    priority: high  # 敏感資料保護
 
   - id: windows-credentials
     description: "禁止讀取 Windows 憑據路徑"
@@ -126,3 +230,4 @@ read_rules:
       - 'Windows.*System32.*config.*SAM'
     reason: "禁止讀取 Windows 系統憑據"
     guard_tag: win-cred-guard
+    priority: critical  # 系統安全風險
