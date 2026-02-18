@@ -95,7 +95,7 @@
 若全部自動任務都已達上限 → 跳到步驟 5。
 
 ### 2.6 純輪轉選取自動任務（round-robin，每次最多 3 個）
-每日僅 ~11 個 auto-task slots，但 18 個任務合計 45 次上限。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
+每日 ~11 個 auto-task slots × `max_auto_per_run`(3) = ~33 個執行機會（18 個任務合計 45 次上限）。為確保每個任務都有機會執行，使用 **純輪轉** 而非順序掃描。
 
 **選取演算法**（讀取 `config/frequency-limits.yaml` 的 `max_auto_per_run`，預設 3）：
 1. 從 `context/auto-tasks-today.json` 讀取 `next_execution_order`（跨日保留的指針）

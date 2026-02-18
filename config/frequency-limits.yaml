@@ -17,7 +17,8 @@ history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
 # 選取策略：純輪轉（round-robin）
-# 每日 ~11 個 auto-task slots，但 18 個任務合計 45 次上限
+# 每日 ~11 個 auto-task slots × max_auto_per_run(3) = ~33 個自動任務執行機會
+# 但 18 個任務合計 45 次上限，所以不會全用完
 # 若用順序掃描，後面的任務永遠不會執行
 # 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
 selection_strategy: "round_robin"

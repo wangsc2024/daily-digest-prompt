@@ -1080,7 +1080,7 @@ sources:
 **注意事項**：
 - 頻率追蹤檔 `context/auto-tasks-today.json` 每日自動歸零（但 `next_execution_order` 保留）
 - 修改上限後下次排程自動生效，無需重啟
-- 14 個任務合計 38 次/日，足夠 22 個 auto-task slots（雙軌每日約 44 次執行）
+- 18 個任務合計 45 次/日，每次觸發最多並行 3 個（`max_auto_per_run: 3`），~11 個 auto-task slots × 3 = ~33 個執行機會（雙軌每日約 44 次觸發）
 
 ### 6.6 優先級計分（scoring.yaml v2）
 
