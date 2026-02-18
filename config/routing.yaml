@@ -149,7 +149,7 @@ keyword_routing:
       skills: ["ntfy-notify"]
     - keywords: ["程式碼", "檔案操作", "自動化"]
       skills: []  # 依任務內容判斷 allowedTools
-    - keywords: ["遊戲", "game", "遊戲設計", "遊戲品質", "HTML5"]
+    - keywords: ["遊戲", "game", "遊戲設計", "遊戲品質", "HTML5", "遊戲同步", "game_web", "同步遊戲"]
       skills: ["game-design"]
     - keywords: ["深度思維", "洞見", "報告", "分析", "反思"]
       skills: ["knowledge-query"]

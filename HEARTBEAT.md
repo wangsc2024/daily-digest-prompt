@@ -61,6 +61,16 @@ schedules:
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2400s (40min) | Todoist 團隊模式 |
 
+## Todoist 驅動任務（由每小時排程撿起）
+
+| 任務名稱 | Todoist 到期時間 | 實際執行排程 | 標籤 | 說明 |
+|---------|----------------|------------|------|------|
+| 遊戲同步：game → game_web → GitHub | 每日 11:20 | todoist-team 11:30 撿起 | 網站優化, 遊戲開發 | 同步今日新增遊戲並部署 |
+
+> **說明：** Todoist 任務 11:20 到期 → 11:30 的 todoist-team 排程查詢後執行。
+> Claude Agent 會讀取任務描述，按 MAINTENANCE.md 規範執行同步流程。
+> 同步輔助腳本：`D:\Source\game_web\sync-games.ps1`（非 AI 步驟用）
+
 ## 雙軌比較說明
 
 兩種 Todoist 模式時間錯開 30 分鐘，比較效能與成功率：
