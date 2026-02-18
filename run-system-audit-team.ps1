@@ -86,6 +86,13 @@ $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $phase1LogFile = "$LogDir\audit-phase1-$timestamp.log"
 $phase2LogFile = "$LogDir\audit-phase2-$timestamp.log"
 
+# ─── 生產環境安全策略 ───
+# 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+}
+Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)" "INFO"
+
 # Generate trace ID for distributed tracing
 $traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== System Audit Team Mode Started ===" "INFO"
@@ -302,6 +309,14 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
         if ($outputStr -match "審查完成|Step 8.*清理|知識庫.*成功|state/last-audit.json.*已更新") {
             Write-Log "Phase 2 completed successfully" "INFO"
             $phase2Success = $true
+
+            # ─── Circuit Breaker 自動更新（knowledge API）───
+            if ($knowledgeAvailable) {
+                if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
+                    Update-CircuitBreaker -ApiName "knowledge" -Success $true
+                    Write-Log "Circuit Breaker knowledge 更新: success（Phase 2 完成）" "INFO"
+                }
+            }
         } else {
             Write-Log "Phase 2 completed but may have issues" "WARN"
             if ($phase2Attempt -eq $maxPhase2Attempts) {

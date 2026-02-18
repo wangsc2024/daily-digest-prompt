@@ -4,7 +4,7 @@ version: "1.1.0"
 description: |
   知識庫治理工具。去重、品質評分、過期清理、主題分佈分析。
   Use when: 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、知識庫清理。
-allowed-tools: Read, Write, Bash
+allowed-tools: Bash, Read, Write
 cache-ttl: 0min
 triggers:
   - "知識庫治理"

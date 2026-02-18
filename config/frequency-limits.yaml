@@ -17,12 +17,17 @@ history_file: "state/todoist-history.json"
 reset_policy: "daily"  # 每日歸零（跨日自動重置）
 
 # 選取策略：純輪轉（round-robin）
-# 每日 ~11 個 auto-task slots，但 18 個任務合計 45 次上限
+# 每日 ~11 次 team-mode 執行可消化全部 45 次自動任務（4 個/次，~13:30 前完成）
 # 若用順序掃描，後面的任務永遠不會執行
 # 純輪轉：維護 next_execution_order 指針，跨日保留，確保所有任務都有機會
 selection_strategy: "round_robin"
 # next_execution_order 存在 tracking_file 中，跨日不重置
-# 每次找到可執行任務後指針 +1，繞完一圈回到起點
+# 每次選出 N 個任務後，指針推進到「最後一個被選中任務的 execution_order + 1」
+
+# 每次觸發最多執行的自動任務數
+max_auto_per_run:
+  single_mode: 1    # hour-todoist-prompt.md：串行，保持 1（串行 4 個超出 2100s timeout）
+  team_mode: 4      # run-todoist-agent-team.ps1：並行 Phase 2，最多同時啟動 4 個 Agent
 
 # 歸零邏輯：
 #   - tracking_file 不存在 → 建立初始檔案（所有計數為 0，next_execution_order 為 1）

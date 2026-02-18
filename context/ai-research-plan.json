@@ -21,5 +21,177 @@
     "embodied AI",
     "spatial intelligence"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "Genie 3: A new frontier for world models — Google DeepMind",
+      "url": "https://deepmind.google/blog/genie-3-a-new-frontier-for-world-models/",
+      "key_points": [
+        "720p 解析度、24fps 即時互動、數分鐘一致性維持",
+        "自迴歸逐幀生成架構，視覺記憶回溯達一分鐘",
+        "物理特性自學習（水、光照、環境互動），非硬編碼",
+        "支援文字指令即時修改環境（天氣、時間等 promptable world events）",
+        "目前為有限研究預覽階段"
+      ]
+    },
+    {
+      "title": "World Models Race 2026: How LeCun, DeepMind, and World Labs Are Redefining the Path to AGI — Introl Blog",
+      "url": "https://introl.com/blog/world-models-race-agi-2026",
+      "key_points": [
+        "三大競爭者對比：AMI Labs（LeCun, €3B估值）、Genie 3（DeepMind）、Marble（World Labs, $5B估值）",
+        "技術路線分歧：JEPA 抽象表示 vs 自迴歸視頻生成 vs 可編輯 3D 環境",
+        "NVIDIA Cosmos 基礎設施：9000 兆 tokens 訓練、200 萬次下載",
+        "世界模型推理需 8-32 GPU（LLM 僅 1-8），訓練需數萬 GPU",
+        "LLM 幻覺問題的數學證明（2024）：統計模式預測無法實現物理真實"
+      ]
+    },
+    {
+      "title": "Yann LeCun's new venture is a contrarian bet against large language models — MIT Technology Review",
+      "url": "https://www.technologyreview.com/2026/01/22/1131661/yann-lecuns-new-venture-ami-labs/",
+      "key_points": [
+        "LeCun 離開 Meta 12 年後創辦 AMI Labs（巴黎），尋求 €5 億融資",
+        "基於 I-JEPA 架構：無標籤抽象視覺學習，模仿人類直覺物理認知",
+        "CEO 為 Alex LeBrun（前 Nabla），LeCun 擔任執行主席",
+        "核心主張：擴展 LLM 不會產生通用智能，世界模型才是正確路線",
+        "JEPA 非生成式 AI，而是學習世界的抽象表示"
+      ]
+    },
+    {
+      "title": "The Waymo World Model: A New Frontier For Autonomous Driving Simulation — Waymo Blog",
+      "url": "https://waymo.com/blog/2026/02/the-waymo-world-model-a-new-frontier-for-autonomous-driving-simulation",
+      "key_points": [
+        "基於 Genie 3 架構，專門化為自動駕駛場景",
+        "多模態輸出：同時生成相機影像和 LiDAR 點雲資料",
+        "三種控制機制：駕駛動作、場景佈局、自然語言調整",
+        "可模擬極罕見事件（龍捲風、大象出現等），突破真實資料稀缺限制",
+        "超越 3D Gaussian Splats 等重建方法的一致性和泛化能力"
+      ]
+    },
+    {
+      "title": "World models could unlock the next revolution in artificial intelligence — Scientific American",
+      "url": "https://www.scientificamerican.com/article/world-models-could-unlock-the-next-revolution-in-artificial-intelligence/",
+      "key_points": [
+        "世界模型本質：維持持續更新的物理環境內部地圖，追蹤物體在時空中的狀態",
+        "4D 系統（3D 空間 + 時間）：NeRF → NeoVerse/TeleWorld 4D 重建",
+        "LLM 的根本限制：無法即時更新理解、GPT-4 部署後不從經驗學習",
+        "Meta Orion AR 眼鏡依賴 4D 世界模型實現穩定虛擬物件放置",
+        "AGI 需要解決即時世界理解問題，世界模型是架構必要條件"
+      ]
+    },
+    {
+      "title": "Runway GWM-1: World Model Simulates Reality in Real Time — Bonega AI",
+      "url": "https://bonega.ai/en/blog/runway-gwm-1-general-world-model-real-time-simulation",
+      "key_points": [
+        "GWM-1 建構持久內部環境表示，非傳統逐幀視訊生成",
+        "三個專用變體：GWM Worlds（可探索環境）、GWM Avatars（音訊驅動角色）、GWM Robotics（機器人訓練資料）",
+        "720p/24fps，最長 2 分鐘，即時互動",
+        "物體持久性：轉身後物件位置不變、物理一致、光照隨相機移動",
+        "基於 Gen-4.5 構建，Video Arena 排行榜第一名（超越 Veo 3 和 Sora 2）"
+      ]
+    },
+    {
+      "title": "2026年AI世界模型四大巔峰架構：Genie 3、混元 1.5、Marble 與 Gen-3C — 人人都是產品經理",
+      "url": "https://www.woshipm.com/ai/6327265.html",
+      "key_points": [
+        "Genie 3 採純自迴歸 Transformer 路徑，110 億參數",
+        "混元 1.5 使用混合專家模型 + 因果注意力 + 少步蒸餾，16fps 延遲 <1 秒",
+        "螞蟻靈波 LingBot-World 開源，10 分鐘級生成，可轉化為場景點雲",
+        "2026 世界模型三大硬指標：因果連貫性、幾何穩定性、物理邏輯",
+        "中國廠商在開源世界模型領域積極佈局"
+      ]
+    }
+  ],
+  "analysis": {
+    "consensus": [
+      {
+        "point": "世界模型是通往 AGI 的必要架構",
+        "evidence": "7/7 來源一致認為純語言模型無法實現通用智能。Scientific American 明確指出「AGI 需要解決即時世界理解問題」；MIT Tech Review 引述 LeCun「擴展 LLM 不會產生通用智能」；Introl Blog 引用 2024 年數學證明「統計模式預測無法實現物理真實」。",
+        "sources_count": 7
+      },
+      {
+        "point": "720p/24fps 已成為 2026 年世界模型的技術基準線",
+        "evidence": "Genie 3（DeepMind）和 GWM-1（Runway）皆達到 720p/24fps 即時互動標準。混元 1.5 達 16fps 但延遲 <1 秒。此規格代表世界模型從「靜態圖像生成」跨入「即時互動模擬」的質變。",
+        "sources_count": 4
+      },
+      {
+        "point": "物理一致性是核心技術挑戰",
+        "evidence": "中國來源總結三大硬指標：因果連貫性、幾何穩定性、物理邏輯。Genie 3 強調「物理特性自學習」；GWM-1 突出「物體持久性」（轉身後物件位置不變）；Waymo 用世界模型模擬「極罕見物理事件」。所有團隊都在解決同一個核心問題。",
+        "sources_count": 5
+      },
+      {
+        "point": "自動駕駛是最成熟且最具商業價值的應用場景",
+        "evidence": "Waymo 已將 Genie 3 架構專門化為自駕模擬，支援多模態輸出（視覺+LiDAR），可生成極端場景（龍捲風、動物闖入）。此領域有明確商業模型、充足資料集、安全驗證需求，推動世界模型從研究走向產品。",
+        "sources_count": 3
+      },
+      {
+        "point": "多技術路線並存，尚未收斂為單一典範",
+        "evidence": "至少三條主要路線：自迴歸 Transformer（Genie 3, 110B）、JEPA 抽象表示（AMI Labs）、混合專家+因果注意力（混元 1.5）。加上 Runway 的持久環境表示和 World Labs 的可編輯 3D 環境，技術百花齊放。",
+        "sources_count": 6
+      }
+    ],
+    "divergence": [
+      {
+        "point": "根本哲學路線之爭：生成式 vs 表示式",
+        "side_a": "DeepMind（Genie 3）和 Runway（GWM-1）走「生成式」路線 — 直接生成像素/幀，產出可見的視覺內容",
+        "side_b": "LeCun（AMI Labs）走「表示式」路線 — JEPA 學習世界的抽象表示而非生成內容，模仿人類直覺物理認知",
+        "implication": "這不只是技術分歧，而是對「智能本質」的哲學分歧：智能是否需要「看見」世界？"
+      },
+      {
+        "point": "開源 vs 閉源策略",
+        "side_a": "中國廠商（螞蟻靈波 LingBot-World）積極開源，NVIDIA Cosmos 提供公共基礎設施（200 萬次下載）",
+        "side_b": "西方三大實驗室（AMI Labs、DeepMind、World Labs）以閉源研究為主，估值高達 $3-5B",
+        "implication": "開源世界模型可能像 LLM 時代的 Llama 一樣重塑競爭格局"
+      },
+      {
+        "point": "語言介面的必要性",
+        "side_a": "Genie 3 支援文字指令即時修改環境（promptable world events），Waymo 支援自然語言場景調整",
+        "side_b": "JEPA 完全不依賴語言，認為語言是理解世界的瓶頸而非助力",
+        "implication": "影響人機互動範式：語言控制更直覺，但可能限制模型對非語言物理的理解"
+      }
+    ],
+    "insights": [
+      {
+        "insight": "LLM 幻覺的數學不可解性為世界模型提供了理論基礎",
+        "detail": "2024 年的數學證明指出統計模式預測在本質上無法實現物理真實，這不是工程問題而是原理性限制。這意味著無論 LLM 規模多大，都需要世界模型作為補充架構才能通往 AGI。",
+        "significance": "high",
+        "source": "Introl Blog"
+      },
+      {
+        "insight": "計算成本鴻溝將決定商業化路線",
+        "detail": "世界模型推理需 8-32 GPU（LLM 僅 1-8），訓練需數萬 GPU。NVIDIA Cosmos 9000 兆 tokens 訓練量是 GPT-4 的量級跳躍。這意味著世界模型短期內只會以 API 服務形式存在（如 Waymo 模擬平台），而非本地部署。",
+        "significance": "high",
+        "source": "Introl Blog"
+      },
+      {
+        "insight": "4D 時空模型是質變而非量變",
+        "detail": "從 3D 靜態重建（NeRF）到 4D 動態模擬（NeoVerse/TeleWorld）代表根本性突破。Meta Orion AR 眼鏡依賴 4D 世界模型實現穩定虛擬物件放置。時間維度的加入意味著模型需要理解因果關係，而非僅重現空間結構。",
+        "significance": "high",
+        "source": "Scientific American"
+      },
+      {
+        "insight": "NVIDIA Cosmos 正成為世界模型的 CUDA — 基礎設施壟斷者",
+        "detail": "9000 兆 tokens 訓練、200 萬次下載。正如 CUDA 在 LLM 時代扮演的角色，Cosmos 可能成為世界模型時代的基礎設施壟斷者。任何世界模型團隊都需要 NVIDIA 的支援。",
+        "significance": "medium",
+        "source": "Introl Blog"
+      },
+      {
+        "insight": "混合架構代表實用主義路線的崛起",
+        "detail": "混元 1.5 的混合專家模型+因果注意力+少步蒸餾，不走純路線而是混合多種技術。16fps 延遲 <1 秒的效能/品質平衡，代表中國團隊走「夠用就好」的實用化路線，與西方追求理論突破形成對比。",
+        "significance": "medium",
+        "source": "人人都是產品經理"
+      },
+      {
+        "insight": "「可程式化物理世界」開啟全新計算範式",
+        "detail": "Genie 3 的 promptable world events（文字指令修改天氣、時間）和 GWM-1 的環境持久性，意味著我們正在從「程式化資訊世界」（軟體工程）走向「程式化物理世界」（世界工程）。這不只是 AI 進步，而是計算範式的典範轉移。",
+        "significance": "high",
+        "source": "DeepMind + Runway"
+      },
+      {
+        "insight": "世界模型可能重演 LLM 的開源 vs 閉源之爭",
+        "detail": "螞蟻靈波 LingBot-World 開源（10 分鐘級生成+場景點雲轉化），走差異化路線。如同 Llama 開源推動了 LLM 普及化，開源世界模型可能在特定垂直領域（如工業模擬、遊戲開發）率先突破。",
+        "significance": "medium",
+        "source": "人人都是產品經理"
+      }
+    ]
+  },
+  "stage_completed": 3
 }

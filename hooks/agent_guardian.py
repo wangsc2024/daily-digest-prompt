@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Agent Guardian - Error Classification & Circuit Breaker
+Agent Guardian - Error Classification, Circuit Breaker & Loop Detection
 
 綜合模組整合三大守護機制：
   1. ErrorClassifier: 分類錯誤並返回重試策略
   2. CircuitBreaker: API 可用性追蹤與狀態管理
-  3. LoopDetector: 偵測工具呼叫迴圈（未來實施）
+  3. LoopDetector: 偵測工具呼叫迴圈（跨進程狀態持久化，整合於 post_tool_logger.py）
 
 使用方式：
-  from agent_guardian import ErrorClassifier, CircuitBreaker
+  from agent_guardian import ErrorClassifier, CircuitBreaker, LoopDetector
 
   classifier = ErrorClassifier()
   result = classifier.classify("Bash", "curl ...", output, exit_code)
@@ -16,6 +16,11 @@ Agent Guardian - Error Classification & Circuit Breaker
   breaker = CircuitBreaker("state/api-health.json")
   state = breaker.check_health("todoist")
   breaker.record_result("todoist", success=True)
+
+  # 跨進程使用（PostToolUse hook）：
+  detector = LoopDetector(warning_mode=True, initial_state=saved_state)
+  result = detector.check_loop(tool, params, output)
+  saved_state = detector.get_state()  # 寫回 state/loop-state-{sid}.json
 """
 import json
 import os
@@ -397,17 +402,37 @@ class LoopDetector:
         r"api-health\.json$",
     ]
 
-    def __init__(self, warning_mode: bool = True):
+    def __init__(self, warning_mode: bool = True, initial_state: dict = None):
         """
         初始化迴圈偵測器。
 
         Args:
           warning_mode: True=僅警告，False=阻斷執行（預設為 True，2 週觀察期）
+          initial_state: 從 JSON 還原的跨進程持久化狀態（PostToolUse hook 使用）
         """
         self.warning_mode = warning_mode
-        self.tool_hash_window = deque(maxlen=self.TOOL_HASH_THRESHOLD)
-        self.content_hash_window = deque(maxlen=self.CONTENT_HASH_THRESHOLD)
-        self.session_call_count = 0
+        if initial_state:
+            self.session_call_count = initial_state.get("session_call_count", 0)
+            self.tool_hash_window = deque(
+                initial_state.get("tool_hash_window", []),
+                maxlen=self.TOOL_HASH_THRESHOLD
+            )
+            self.content_hash_window = deque(
+                initial_state.get("content_hash_window", []),
+                maxlen=self.CONTENT_HASH_THRESHOLD
+            )
+        else:
+            self.tool_hash_window = deque(maxlen=self.TOOL_HASH_THRESHOLD)
+            self.content_hash_window = deque(maxlen=self.CONTENT_HASH_THRESHOLD)
+            self.session_call_count = 0
+
+    def get_state(self) -> dict:
+        """序列化當前狀態為字典，供跨進程持久化使用。"""
+        return {
+            "session_call_count": self.session_call_count,
+            "tool_hash_window": list(self.tool_hash_window),
+            "content_hash_window": list(self.content_hash_window),
+        }
 
     def check_loop(
         self,

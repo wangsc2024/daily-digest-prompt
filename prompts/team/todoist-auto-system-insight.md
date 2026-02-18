@@ -17,7 +17,7 @@
 3. 若有 critical alert → 用 ntfy 通知（依 `skills/ntfy-notify/SKILL.md`）
 
 ## 輸出
-完成後用 Write 建立 `results/todoist-system-insight.json`：
+完成後用 Write 建立 `results/todoist-auto-system-insight.json`：
 ```json
 {
   "task_type": "auto",

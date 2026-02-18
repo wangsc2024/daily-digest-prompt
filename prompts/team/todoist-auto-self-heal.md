@@ -12,7 +12,7 @@
 讀取 `templates/auto-tasks/self-heal.md`，依其完整步驟執行。
 
 ## 輸出
-完成後用 Write 建立 `results/todoist-self-heal.json`：
+完成後用 Write 建立 `results/todoist-auto-self-heal.json`：
 ```json
 {
   "task_type": "auto",

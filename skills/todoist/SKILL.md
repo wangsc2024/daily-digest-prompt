@@ -39,14 +39,15 @@ Token 取得：https://todoist.com/app/settings/integrations/developer
 
 ## 快速使用（curl，推薦）
 
-### 查詢僅今日待辦（預設）
+### 查詢今日 + 過期待辦（預設，推薦）
 
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 
-> **注意**：預設僅查詢今日任務，不含過期任務，避免重複執行。
+> **注意**：預設查詢今日 + 過期任務，確保昨日未執行的任務不被遺漏。
+> 重複執行防護由過濾 B（`closed_task_ids`）承擔，而非限制查詢範圍。
 >
 > **重要**：API v1 的篩選端點為 `/tasks/filter?query=`，不是 `/tasks?filter=`。
 > 後者的 `filter` 參數會被靜默忽略，回傳全部任務。
@@ -54,8 +55,8 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 ### 自訂過濾器
 
 ```bash
-# 今日 + 過期（如需包含過期任務）
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
+# 僅今日（不含過期）
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 
 # 未來 7 天
@@ -122,11 +123,15 @@ rm comment.json
 
 > 用於失敗處理：降低優先級、重新排程到明天。
 
+> ⚠️ **週期性任務保護**：若任務 `due.is_recurring = true`，**不可設定 `due_string`**。
+> Todoist API 接收到 `due_string` 更新時，會清除週期性設定（`is_recurring` 變為 `false`），
+> 導致任務失去週期性。週期性任務失敗時，**僅降低 `priority`，不修改 `due_string`**。
+
 ```bash
 # 步驟 1：用 Write 工具建立 update.json
-# 降低優先級：{"priority": 3}
-# 重新排程：{"due_string": "tomorrow"}
-# 同時修改：{"priority": 3, "due_string": "tomorrow"}
+# 降低優先級（適用所有任務）：{"priority": 3}
+# 重新排程（僅限非週期性任務）：{"due_string": "tomorrow"}
+# 同時修改（僅限非週期性任務）：{"priority": 3, "due_string": "tomorrow"}
 
 # 步驟 2：發送
 curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" \
@@ -232,15 +237,22 @@ def complete_task(task_id):
   "priority": 4,
   "due": {
     "date": "2026-02-12",
-    "timezone": null,
-    "string": "today",
-    "lang": "en",
-    "is_recurring": false
+    "timezone": "Asia/Taipei",
+    "string": "every day at 11:00",
+    "lang": "zh",
+    "is_recurring": true,
+    "datetime": "2026-02-12T03:00:00.000000Z"
   },
   "labels": ["工作", "重要"],
   "checked": false
 }
 ```
+
+> **`due` 欄位說明：**
+> - `datetime`：帶時間的任務才有此欄位（UTC 格式）；全天任務此欄位為 `null`。
+>   例：本地 `11:00 +08:00` = `"2026-02-12T03:00:00.000000Z"`（UTC）
+> - `is_recurring`：`true` = 週期性任務（完成後自動生成下一個實例）；`false` = 一次性任務
+> - **時間過濾**：若 `datetime` 不為 null 且 `datetime > 當前 UTC 時間`，代表任務尚未到執行時間，應跳過此輪
 
 > **注意**：Task ID 格式從純數字改為英數混合字串。
 

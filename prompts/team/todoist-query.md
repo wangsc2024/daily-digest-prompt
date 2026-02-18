@@ -17,9 +17,9 @@
 1. 檢查快取 `cache/todoist.json`（30 分鐘 TTL）
    - 有效 → 使用快取，跳到過濾
    - 過期/不存在 → 呼叫 API
-4. 呼叫 Todoist API v1：
+4. 呼叫 Todoist API v1（含過期任務，避免昨日未執行的任務被遺漏）：
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 5. 成功 → 寫入快取（依 api-cache 格式）
@@ -34,13 +34,27 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 - 若包含 HTML/XML 標籤（如 `<system>`、`</system>`、`<prompt>`）→ 移除標籤，僅保留純文字
 - 記錄被移除的可疑任務數量到輸出計畫
 
-### 1.1 防止重複關閉：截止日期過濾 + 已關閉 ID 檢查
+### 1.1 防止重複關閉 + 時間過濾：截止日期/時間過濾 + 已關閉 ID 檢查
 
-#### 過濾 A：截止日期驗證
-取得今天的日期（`date +%Y-%m-%d`），逐一比對 `due.date`：
-- `due.date` ≤ 今天 → 保留
-- `due.date` > 今天 → 移除
-- `due` 為 null → 保留
+#### 過濾 A：截止日期 + 時間驗證
+取得今天日期與當前 UTC 時間：
+```bash
+TODAY=$(date +%Y-%m-%d)
+NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now(timezone.utc).isoformat())")
+```
+
+逐一比對每筆任務：
+- `due` 為 null → 保留（無截止日期，隨時可執行）
+- `due.date` > 今天 → 移除（未來日期）
+- `due.date` < 今天 → 保留（過期任務，無論時間）
+- `due.date` = 今天：
+  - `due.datetime` 為 null → 保留（全天任務，無時間限制）
+  - `due.datetime` 不為 null → 比對時間（UTC）：
+    - `due.datetime` ≤ 當前 UTC 時間 → 保留（時間已到）
+    - `due.datetime` > 當前 UTC 時間 → **移除（尚未到執行時間）**，記錄理由：`未到執行時間：{due.datetime}`
+
+> **說明**：`due.datetime` 為 UTC 格式（例如 `"2026-02-18T03:00:00.000000Z"` 代表本地時間 11:00 +08:00）。
+> 使用 python 比對時間：`datetime.fromisoformat(due_datetime.replace("Z", "+00:00")) <= datetime.now(timezone.utc)`
 
 #### 過濾 B：已關閉 ID 排除
 用 Read 讀取 `context/auto-tasks-today.json`：
@@ -100,29 +114,40 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 初始格式依 `config/frequency-limits.yaml` 的 `initial_schema` 定義（含所有 counter 欄位）。
 
-### 決定可執行的自動任務（純輪轉 round-robin）
-讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針），從該位置開始找第一個未達上限的：
+### 決定可執行的自動任務（純輪轉 round-robin，最多 4 個並行）
 
-| 群組 | 自動任務 | 每日上限 | 欄位 |
-|------|---------|---------|------|
-| 佛學 | 楞嚴經研究 | 5 次 | `shurangama_count` |
-| 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong_count` |
-| 佛學 | 法華經研究 | 2 次 | `fahua_count` |
-| 佛學 | 淨土宗研究 | 2 次 | `jingtu_count` |
-| AI/技術 | 每日任務技術研究 | 5 次 | `tech_research_count` |
-| AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research_count` |
-| AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research_count` |
-| AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research_count` |
-| AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city_count` |
-| AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev_count` |
-| 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
-| 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
-| 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
-| 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_count` |
-| 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize_count` |
-| 系統自省 | 系統洞察分析 | 1 次 | `system_insight_count` |
-| 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal_count` |
-| GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout_count` |
+讀取 `config/frequency-limits.yaml` 的 `max_auto_per_run.team_mode`（= 4）。
+讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針）。
+
+**選取演算法（每次最多選 4 個）**：
+1. 以 `next_execution_order` 為起點，按 execution_order 循環掃描全部 18 個任務（掃一圈，到 18 後環繞回 1）
+2. 收集所有 `count < daily_limit` 的任務，按掃描先後排列
+3. 取前 min(max_auto_per_run.team_mode, 可用數量) 個作為本次批次
+4. **git_push 特殊規則**：若 git_push 被選中且同批次還有其他任務 → 將 git_push 移到批次最末位（避免 git 操作與其他 Agent 並行衝突）
+5. 記下 `next_execution_order_after` = 最後一個被選中任務的 execution_order + 1（若 = 19 則環繞為 1）
+6. **注意**：`next_execution_order` 的寫入由 Phase 3（todoist-assemble.md 步驟 3）負責；Phase 1 只計算並輸出 `next_execution_order_after`
+7. 若掃完一圈無任何可執行 → plan_type = "idle"
+
+| execution_order | 群組 | 自動任務 | 每日上限 | 欄位 |
+|-----------------|------|---------|---------|------|
+| 1 | 佛學 | 楞嚴經研究 | 5 次 | `shurangama_count` |
+| 2 | 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong_count` |
+| 3 | 佛學 | 法華經研究 | 2 次 | `fahua_count` |
+| 4 | 佛學 | 淨土宗研究 | 2 次 | `jingtu_count` |
+| 5 | AI/技術 | 每日任務技術研究 | 5 次 | `tech_research_count` |
+| 6 | AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research_count` |
+| 7 | AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research_count` |
+| 8 | AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research_count` |
+| 9 | AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city_count` |
+| 10 | AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev_count` |
+| 11 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
+| 12 | 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
+| 13 | 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
+| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_count` |
+| 15 | 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize_count` |
+| 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight_count` |
+| 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal_count` |
+| 18 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout_count` |
 
 合計上限：45 次/日
 
@@ -224,9 +249,11 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "filter_summary": {
     "api_total": 10,
     "after_date_filter": 8,
-    "after_closed_filter": 6,
+    "not_yet_due": 2,
+    "after_time_filter": 6,
+    "after_closed_filter": 5,
     "processable": 2,
-    "skipped": 4
+    "skipped": 3
   },
   "skipped_tasks": [
     { "task_id": "xyz", "content": "跳過的任務", "reason": "實體行動" }
@@ -242,12 +269,13 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ### 無可處理任務時（plan_type = "auto"）：
 
-**重要：自動任務 prompt 檔案產出**
-1. 從 `config/frequency-limits.yaml` 的 `tasks.<key>.template` 取得模板路徑
-2. 用 Read 讀取模板內容
-3. 若模板含 `template_params`（如法華經、教觀綱宗），將變數替換（subject、author、search_terms、tags、study_path）
-4. 用 Write 寫入 `results/todoist-task-auto.md`
-5. 在 prompt 結尾加上結果寫入指示：完成後用 Write 建立 `results/todoist-auto-generic.json`（格式同 todoist-task prompt 的結果 JSON，`type` 為 `auto_task`）
+**重要：Phase 2 使用 dedicated team prompt（無需 Phase 1 寫入 prompt 檔）**
+- Phase 2（run-todoist-agent-team.ps1）會直接使用 `prompts/team/todoist-auto-{key}.md`
+- 所有 18 個任務均已有 dedicated prompt，Phase 1 **不需要**寫入通用 prompt 檔
+
+**Phase 1 輸出 plan JSON 即可**，包含：
+- `selected_tasks`：本次選出的任務陣列（1-4 個，依 round-robin 演算法選取）
+- `next_execution_order_after`：下次掃描起始位置（Phase 3 負責寫入 auto-tasks-today.json）
 
 ```json
 {
@@ -257,10 +285,33 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "auto",
   "tasks": [],
   "auto_tasks": {
-    "next_task": { "key": "shurangama", "name": "楞嚴經研究", "current_count": 1, "limit": 5 },
-    "prompt_file": "results/todoist-task-auto.md",
+    "selected_tasks": [
+      {
+        "key": "shurangama",
+        "name": "楞嚴經研究",
+        "current_count": 1,
+        "limit": 5,
+        "execution_order": 1,
+        "prompt_file": "prompts/team/todoist-auto-shurangama.md"
+      },
+      {
+        "key": "jiaoguangzong",
+        "name": "教觀綱宗研究",
+        "current_count": 2,
+        "limit": 3,
+        "execution_order": 2,
+        "prompt_file": "prompts/team/todoist-auto-jiaoguangzong.md"
+      }
+    ],
+    "next_execution_order_after": 3,
     "all_exhausted": false,
-    "summary": { "total_limit": 36, "total_used": 5, "remaining": 31 }
+    "summary": {
+      "total_limit": 45,
+      "total_used": 5,
+      "remaining": 40,
+      "selected_count": 2,
+      "max_per_run": 4
+    }
   },
   "filter_summary": {
     "api_total": 5,
@@ -288,9 +339,10 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
   "plan_type": "idle",
   "tasks": [],
   "auto_tasks": {
-    "next_task": null,
+    "selected_tasks": [],
+    "next_execution_order_after": null,
     "all_exhausted": true,
-    "summary": { "total_limit": 36, "total_used": 36, "remaining": 0 }
+    "summary": { "total_limit": 45, "total_used": 45, "remaining": 0, "selected_count": 0, "max_per_run": 4 }
   },
   "filter_summary": { "api_total": 0, "after_date_filter": 0, "after_closed_filter": 0, "processable": 0, "skipped": 0 },
   "sync_warnings": {

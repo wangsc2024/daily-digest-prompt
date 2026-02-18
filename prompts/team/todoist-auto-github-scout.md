@@ -12,7 +12,7 @@
 讀取 `templates/auto-tasks/github-scout.md`，依其完整步驟執行（含星期檢查）。
 
 ## 輸出
-完成後用 Write 建立 `results/todoist-github-scout.json`：
+完成後用 Write 建立 `results/todoist-auto-github-scout.json`：
 ```json
 {
   "task_type": "auto",

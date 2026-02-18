@@ -68,10 +68,13 @@ def load_read_rules():
 
 
 def _normalize_windows_path(file_path):
-    """將 Git Bash/MSYS 風格路徑 /d/Source/... 轉為 D:\\Source\\...。"""
+    """將 Git Bash/MSYS 風格路徑 /d/Source/... 轉為 D:\\Source\\...。
+
+    支援雙斜線變體（如 /d//Source/...），使用 /+ 消費一或多個分隔符。
+    """
     if not file_path or not file_path.startswith("/"):
         return file_path
-    m = re.match(r"^/([a-zA-Z])/(.*)", file_path)
+    m = re.match(r"^/([a-zA-Z])/+(.*)", file_path)
     if m:
         drive = m.group(1).upper()
         rest = m.group(2).replace("/", os.sep)

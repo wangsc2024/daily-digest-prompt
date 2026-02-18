@@ -110,11 +110,22 @@ rm comment.json
 ### 2.4 失敗任務處理
 對 status ≠ "success" 的任務：
 - 不關閉
+- 附加失敗評論
+
+**依 `is_recurring` 分兩種處理方式：**
+
+**情形 A：非週期性任務（`due.is_recurring = false` 或 `due` 為 null）**
 - 降低優先級（若 priority > 1）
 - 用 Write 建立 `update.json`：`{"priority": N-1, "due_string": "tomorrow"}`
 - `curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" -H "Authorization: Bearer $TODOIST_API_TOKEN" -H "Content-Type: application/json; charset=utf-8" -d @update.json`
 - `rm update.json`
-- 附加失敗評論
+
+**情形 B：週期性任務（`due.is_recurring = true`）**
+- 僅降低優先級，**不設 due_string**（避免覆蓋週期性設定）
+- 用 Write 建立 `update.json`：`{"priority": N-1}`
+- `curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" -H "Authorization: Bearer $TODOIST_API_TOKEN" -H "Content-Type: application/json; charset=utf-8" -d @update.json`
+- `rm update.json`
+- > ⚠️ 週期性任務不設 due_string，因 Todoist API 更新 due_string 會清除 is_recurring 設定。任務將在下次排程的到期日期自然重新出現。
 
 ---
 
@@ -122,9 +133,9 @@ rm comment.json
 
 **僅在 plan_type = "tasks" 且至少有 1 個 Phase 2 結果 status = "success" 時執行。**
 
-1. 重新查詢 Todoist 今日待辦：
+1. 重新查詢 Todoist 今日 + 過期待辦：
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
+curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
   -H "Authorization: Bearer $TODOIST_API_TOKEN"
 ```
 2. 對結果執行截止日期過濾 + 已關閉 ID 過濾（含本次步驟 2 剛關閉的 ID）
@@ -138,7 +149,7 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 
 ---
 
-## 步驟 3：更新頻率計數（僅 plan_type = "auto" 時）
+## 步驟 3：更新頻率計數與輪轉指針（僅 plan_type = "auto" 時）
 
 讀取 `context/auto-tasks-today.json`，根據 Phase 2 結果更新：
 
@@ -147,7 +158,11 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 2. 查找 `config/frequency-limits.yaml` 中對應的 `counter_field`
 3. 將該欄位 +1
 
-用 Write 覆寫整個 JSON。
+**同時更新輪轉指針**（重要，確保 round-robin 公平性）：
+4. 用 Read 讀取 `results/todoist-plan.json` 的 `auto_tasks.next_execution_order_after`
+5. 若該值不為 null，將 `context/auto-tasks-today.json` 的 `next_execution_order` 更新為此值
+
+用 Write 覆寫整個 JSON（包含所有計數欄位 + 更新後的 next_execution_order）。
 
 ---
 
@@ -224,9 +239,9 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
 - [任務名稱]：[主題/結果摘要] / 成功/失敗
  （依實際執行的自動任務類型列出）
 
-📊 今日自動任務進度：已用 N / 上限 38
+📊 今日自動任務進度：已用 N / 上限 45
 
-⚡ 團隊並行模式
+⚡ 團隊並行模式（本次 M 個並行）
 ```
 
 **plan_type = "idle"**：

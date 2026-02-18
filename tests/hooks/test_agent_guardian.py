@@ -401,5 +401,209 @@ class TestIntegration:
         assert breaker.check_health("todoist") == "closed"
 
 
+# ============================================
+# LoopDetector Tests
+# ============================================
+
+class TestLoopDetector:
+    """LoopDetector 測試套件"""
+
+    @pytest.fixture
+    def detector(self):
+        from agent_guardian import LoopDetector
+        return LoopDetector(warning_mode=True)
+
+    # === Whitelist Tests ===
+
+    def test_whitelist_skill_index(self, detector):
+        """白名單：SKILL_INDEX.md 多次讀取不觸發"""
+        for _ in range(10):
+            result = detector.check_loop("Read", "skills/SKILL_INDEX.md", "content")
+
+        assert result["loop_detected"] is False
+        assert result["reason"] == "Whitelisted operation"
+
+    def test_whitelist_cache_json(self, detector):
+        """白名單：cache/*.json 多次讀取不觸發"""
+        for _ in range(10):
+            result = detector.check_loop("Read", "cache/todoist.json", "data")
+
+        assert result["loop_detected"] is False
+
+    def test_whitelist_digest_memory(self, detector):
+        """白名單：digest-memory.json 多次讀取不觸發"""
+        for _ in range(10):
+            result = detector.check_loop("Read", "context/digest-memory.json", "{}")
+
+        assert result["loop_detected"] is False
+
+    # === Tool Hash Loop Detection ===
+
+    def test_tool_hash_loop_detected(self, detector):
+        """Tool Hash 迴圈：相同工具+參數連續 5 次（確保輸出不同避免 content_hash 觸發）"""
+        for i in range(4):
+            result = detector.check_loop("Bash", "curl https://api.example.com", f"output_{i}")
+            assert result["loop_detected"] is False, f"Should not detect loop at iteration {i+1}"
+
+        # 第 5 次應該觸發
+        result = detector.check_loop("Bash", "curl https://api.example.com", "output_4")
+        assert result["loop_detected"] is True
+        assert result["loop_type"] == "tool_hash"
+        assert result["warning_only"] is True  # warning_mode=True
+
+    def test_tool_hash_different_params_no_loop(self, detector):
+        """Tool Hash：不同參數不觸發迴圈（確保輸出不同避免 content_hash 觸發）"""
+        for i in range(10):
+            result = detector.check_loop("Read", f"file_{i}.txt", f"content_{i}")
+
+        assert result["loop_detected"] is False
+
+    # === Content Hash Loop Detection ===
+
+    def test_content_hash_loop_detected(self, detector):
+        """Content Hash 迴圈：相同輸出連續 3 次（確保工具/參數不同避免 tool_hash 觸發）"""
+        same_output = "Error: File not found"
+
+        for i in range(2):
+            result = detector.check_loop("Bash", f"cat file_{i}.txt", same_output)
+            assert result["loop_detected"] is False
+
+        # 第 3 次應該觸發
+        result = detector.check_loop("Bash", "cat file_2.txt", same_output)
+        assert result["loop_detected"] is True
+        assert result["loop_type"] == "content_hash"
+
+    def test_content_hash_different_output_no_loop(self, detector):
+        """Content Hash：不同輸出不觸發迴圈（確保工具/參數也不同避免 tool_hash 觸發）"""
+        for i in range(10):
+            result = detector.check_loop("Read", f"file_{i}.txt", f"output_{i}")
+
+        assert result["loop_detected"] is False
+
+    # === Excessive Turns Detection ===
+
+    def test_excessive_turns_detected(self, detector):
+        """Excessive Turns：超過 100 次呼叫"""
+        for i in range(100):
+            result = detector.check_loop("Read", f"file_{i}.txt", f"content_{i}")
+            assert result["loop_detected"] is False
+
+        # 第 101 次應該觸發
+        result = detector.check_loop("Read", "file_101.txt", "content_101")
+        assert result["loop_detected"] is True
+        assert result["loop_type"] == "excessive_turns"
+
+    # === Warning Mode Tests ===
+
+    def test_warning_mode_true(self):
+        """Warning Mode=True 僅警告，不阻斷"""
+        from agent_guardian import LoopDetector
+        detector = LoopDetector(warning_mode=True)
+
+        for _ in range(5):
+            detector.check_loop("Bash", "same command", "output")
+
+        result = detector.check_loop("Bash", "same command", "output")
+        assert result["loop_detected"] is True
+        assert result["warning_only"] is True
+
+    def test_warning_mode_false(self):
+        """Warning Mode=False 應阻斷"""
+        from agent_guardian import LoopDetector
+        detector = LoopDetector(warning_mode=False)
+
+        for _ in range(5):
+            detector.check_loop("Bash", "same command", "output")
+
+        result = detector.check_loop("Bash", "same command", "output")
+        assert result["loop_detected"] is True
+        assert result["warning_only"] is False
+
+    # === Edge Cases ===
+
+    def test_empty_output_no_content_hash(self, detector):
+        """空輸出不觸發 content hash 檢查，但會觸發 tool hash"""
+        for i in range(4):
+            result = detector.check_loop("Bash", "same command", "")
+            assert result["loop_detected"] is False
+
+        # 第 5 次應僅觸發 tool hash
+        result = detector.check_loop("Bash", "same command", "")
+        assert result["loop_detected"] is True
+        assert result["loop_type"] == "tool_hash"
+
+    def test_session_call_count_increments(self, detector):
+        """Session 計數器正確遞增"""
+        assert detector.session_call_count == 0
+
+        detector.check_loop("Read", "file.txt", "content")
+        assert detector.session_call_count == 1
+
+        detector.check_loop("Bash", "echo test", "test")
+        assert detector.session_call_count == 2
+
+    # === State Serialization Tests（跨進程持久化）===
+
+    def test_get_state_returns_serializable_dict(self, detector):
+        """get_state() 回傳可序列化的字典（供 JSON 持久化）"""
+        detector.check_loop("Read", "file.txt", "content")
+        state = detector.get_state()
+
+        assert isinstance(state, dict)
+        assert "session_call_count" in state
+        assert "tool_hash_window" in state
+        assert "content_hash_window" in state
+        assert isinstance(state["tool_hash_window"], list)
+        assert isinstance(state["content_hash_window"], list)
+        assert state["session_call_count"] == 1
+
+    def test_initial_state_restores_call_count(self):
+        """initial_state 正確還原 session_call_count（跨進程繼續計數）"""
+        from agent_guardian import LoopDetector
+
+        saved = {"session_call_count": 50, "tool_hash_window": [], "content_hash_window": []}
+        detector = LoopDetector(warning_mode=True, initial_state=saved)
+
+        assert detector.session_call_count == 50
+
+    def test_initial_state_restores_tool_hash_window(self):
+        """initial_state 正確還原 tool_hash_window（跨進程繼續偵測）"""
+        from agent_guardian import LoopDetector
+
+        # 模擬前一進程已累積 4 個相同 hash
+        fake_hash = "abcd1234"
+        saved = {
+            "session_call_count": 4,
+            "tool_hash_window": [fake_hash] * 4,
+            "content_hash_window": [],
+        }
+        detector = LoopDetector(warning_mode=True, initial_state=saved)
+
+        # 第 5 次相同呼叫（從前一進程的角度看）應觸發 tool_hash 迴圈
+        # 用與前一進程相同的 tool+params 產生相同 hash 不易，改驗窗口長度
+        assert len(detector.tool_hash_window) == 4
+
+    def test_get_state_roundtrip(self):
+        """get_state() → initial_state 完整往返，session_call_count 累加正確"""
+        from agent_guardian import LoopDetector
+
+        # 第一個進程：執行 3 次
+        d1 = LoopDetector(warning_mode=True)
+        for i in range(3):
+            d1.check_loop("Read", f"file_{i}.txt", f"output_{i}")
+        state1 = d1.get_state()
+
+        assert state1["session_call_count"] == 3
+
+        # 第二個進程：從第一個進程的狀態繼續
+        d2 = LoopDetector(warning_mode=True, initial_state=state1)
+        assert d2.session_call_count == 3
+
+        d2.check_loop("Read", "file_3.txt", "output_3")
+        state2 = d2.get_state()
+
+        assert state2["session_call_count"] == 4
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

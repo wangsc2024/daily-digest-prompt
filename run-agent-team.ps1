@@ -96,6 +96,13 @@ function Update-State {
 # ============================================
 $startTime = Get-Date
 
+# ─── 生產環境安全策略 ───
+# 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+}
+Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)"
+
 # Generate trace ID for distributed tracing
 $traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
@@ -302,6 +309,22 @@ $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
 Write-Log ""
 Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
 Write-Log "Results: todoist=$($sections['todoist']) | news=$($sections['news']) | hackernews=$($sections['hackernews']) | gmail=$($sections['gmail']) | security=$($sections['security'])"
+
+# ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
+if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
+    $apiMapping = @{
+        "todoist"     = "todoist"
+        "news"        = "pingtung-news"
+        "hackernews"  = "hackernews"
+        "gmail"       = "gmail"
+    }
+    foreach ($agentKey in $apiMapping.Keys) {
+        $apiName = $apiMapping[$agentKey]
+        $success = ($sections[$agentKey] -eq "success") -or ($sections[$agentKey] -eq "cache")
+        Update-CircuitBreaker -ApiName $apiName -Success $success
+    }
+    Write-Log "[Circuit Breaker] Phase 1 結果已更新（todoist/$($sections['todoist']), news/$($sections['news']), hn/$($sections['hackernews']), gmail/$($sections['gmail'])）"
+}
 
 # ============================================
 # Phase 2: Assembly (1 agent, with retry)

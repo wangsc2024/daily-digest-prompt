@@ -122,11 +122,11 @@ label_routing:
       template: "templates/sub-agent/research-task.md"
     "^系統審查":
       skills: ["system-audit"]
-      allowed_tools: "Read,Bash,Glob,Grep,Write"
+      allowed_tools: "Read,Bash,Write,Glob,Grep,WebSearch,WebFetch"
       template: "templates/sub-agent/skill-task.md"
     "^品質評估":
       skills: ["system-audit"]
-      allowed_tools: "Read,Bash,Glob,Grep,Write"
+      allowed_tools: "Read,Bash,Write,Glob,Grep,WebSearch,WebFetch"
       template: "templates/sub-agent/skill-task.md"
 
 # Tier 2：內容關鍵字比對（信心度 80%）

@@ -7,7 +7,7 @@ description: |
   產出量化報告與改善建議。加權總分 0-100，含校準規則防止虛假高分。
   Use when: 系統審查、品質評估、安全評分、架構評審、完成度檢查。
   Note: 互動式工具 Skill，由使用者手動觸發，不透過 Todoist 自動路由。
-allowed-tools: Read, Bash, Glob, Grep, Write, WebSearch
+allowed-tools: Bash, Read, Write, Glob, Grep, WebSearch, WebFetch
 cache-ttl: N/A
 triggers:
   - "系統審查"
@@ -924,6 +924,13 @@ system-audit:
 - `balanced`：均衡（預設）
 - `security_first`：安全優先（金融/醫療/政府）
 - `startup`：快速迭代（新創/MVP）
+
+## 錯誤處理
+
+- **目標路徑不存在**：提示使用者確認路徑，不繼續審查
+- **Grep/Glob 無結果**：該子項記錄 N/A，不影響其他子項評分
+- **知識庫服務未啟動**：跳過寫入知識庫步驟，報告仍正常產出
+- **子項證據不足**：限制該子項不得高於 40 分，並標註「證據不足」
 
 ## 注意事項
 

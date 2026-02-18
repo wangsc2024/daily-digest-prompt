@@ -18,9 +18,9 @@ import json
 import os
 from datetime import datetime
 
-# Import agent_guardian for error classification
+# Import agent_guardian for error classification and loop detection
 try:
-    from agent_guardian import ErrorClassifier
+    from agent_guardian import ErrorClassifier, LoopDetector
     AGENT_GUARDIAN_AVAILABLE = True
 except ImportError:
     AGENT_GUARDIAN_AVAILABLE = False
@@ -249,6 +249,46 @@ def main():
             # api_source 已在前面 classify_bash 加入，這裡確保一致
             pass
 
+    # Loop Detection（session 狀態持久化於 state/loop-state-{sid}.json）
+    loop_detection = None
+    if AGENT_GUARDIAN_AVAILABLE:
+        try:
+            # 決定 params_summary（依 tool 類型）
+            if tool_name == "Bash":
+                params_summary = tool_input.get("command", "")[:100]
+            else:
+                params_summary = tool_input.get("file_path", "") or str(tool_input)[:100]
+
+            output_snippet = tool_output[:500] if tool_output else ""
+
+            # 讀取 session 狀態
+            sid_prefix = (session_id or "unknown")[:8]
+            loop_state_file = os.path.join("state", f"loop-state-{sid_prefix}.json")
+            initial_state = None
+            if os.path.exists(loop_state_file):
+                try:
+                    with open(loop_state_file, "r", encoding="utf-8") as f:
+                        initial_state = json.load(f)
+                except (json.JSONDecodeError, OSError):
+                    pass
+
+            detector = LoopDetector(warning_mode=True, initial_state=initial_state)
+            loop_result = detector.check_loop(tool_name, params_summary, output_snippet)
+
+            # 寫回新狀態
+            try:
+                os.makedirs("state", exist_ok=True)
+                with open(loop_state_file, "w", encoding="utf-8") as f:
+                    json.dump(detector.get_state(), f)
+            except OSError:
+                pass
+
+            if loop_result.get("loop_detected"):
+                tags.append("loop-suspected")
+                loop_detection = loop_result
+        except Exception:
+            pass  # Silent fail，不中斷 Agent 流程
+
     # Build log entry
     entry = {
         "ts": datetime.now().astimezone().isoformat(),
@@ -261,6 +301,11 @@ def main():
         "has_error": has_error,
         "tags": tags,
     }
+
+    # Add loop detection details if detected
+    if loop_detection:
+        entry["loop_type"] = loop_detection.get("loop_type")
+        entry["loop_warning_only"] = loop_detection.get("warning_only", True)
 
     # Add error classification details if available
     if error_classification:

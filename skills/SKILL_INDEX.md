@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（17 個核心 Skill + 3 個工具 Skill = 20 個）
+## 速查表（17 個核心 Skill + 4 個工具 Skill = 21 個）
 
 ### 核心 Skill（每日摘要/Todoist Agent 使用）
 
@@ -33,6 +33,7 @@
 | 18 | task-manager | 新增自動/排程/單次任務標準化（互動式） | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理、add task、round-robin |
 | 19 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全掃描、skill 掃描、security scan、安全稽核、安全檢查、漏洞掃描、Cisco AI Defense、YARA |
 | 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
+| 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（標籤/優先級/截止日期） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務 |
 
 **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

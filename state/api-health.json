@@ -2,9 +2,7 @@
   "todoist": {
     "state": "closed",
     "failures": 0,
-    "cooldown": null,
-    "consecutive_failures": 0,
-    "last_success": "2026-02-18T08:37:20.068080"
+    "cooldown": null
   },
   "pingtung-news": {
     "state": "closed",

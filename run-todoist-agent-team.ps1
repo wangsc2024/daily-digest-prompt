@@ -107,6 +107,13 @@ function Update-State {
 # ============================================
 $startTime = Get-Date
 
+# ─── 生產環境安全策略 ───
+# 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+}
+Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)"
+
 # Generate trace ID for distributed tracing
 $traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Todoist Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
@@ -236,6 +243,13 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
 $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
 Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
 
+# ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
+if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
+    $cbSuccess = $phase1Success -and (Test-Path "$ResultsDir\todoist-plan.json")
+    Update-CircuitBreaker -ApiName "todoist" -Success $cbSuccess
+    Write-Log "[Circuit Breaker] Todoist 更新: $(if ($cbSuccess) { 'success ✓' } else { 'failure ✗' })"
+}
+
 # Check Phase 1 result
 $planFile = "$ResultsDir\todoist-plan.json"
 if (-not $phase1Success -or -not (Test-Path $planFile)) {
@@ -282,16 +296,19 @@ if ($plan.plan_type -eq "tasks") {
     $Phase2TimeoutSeconds += $maxTaskTimeout
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Auto-tasks: determine timeout from the selected task
-    $nextTask = $plan.auto_tasks.next_task
-    if ($null -ne $nextTask) {
-        $taskKey = $nextTask.key
-        if ($taskKey -eq "git_push") {
-            $Phase2TimeoutSeconds += $TimeoutBudget["gitpush"]
+    # Auto-tasks: parallel = take max timeout across all selected tasks (not sum)
+    $selectedTasks = $plan.auto_tasks.selected_tasks
+    if ($null -ne $selectedTasks -and $selectedTasks.Count -gt 0) {
+        $maxAutoTimeout = 0
+        foreach ($autoTask in $selectedTasks) {
+            $thisTimeout = if ($autoTask.key -eq "git_push") {
+                $TimeoutBudget["gitpush"]
+            } else {
+                $TimeoutBudget["auto"]
+            }
+            if ($thisTimeout -gt $maxAutoTimeout) { $maxAutoTimeout = $thisTimeout }
         }
-        else {
-            $Phase2TimeoutSeconds += $TimeoutBudget["auto"]
-        }
+        $Phase2TimeoutSeconds += $maxAutoTimeout
     }
 }
 # plan_type == "idle" → stays at buffer only (no Phase 2 work)
@@ -350,66 +367,60 @@ if ($plan.plan_type -eq "tasks") {
     }
 }
 elseif ($plan.plan_type -eq "auto") {
-    # Scenario B: Execute the auto-task selected by Phase 1
-    $nextTask = $plan.auto_tasks.next_task
+    # Scenario B: Execute auto-tasks selected by Phase 1 (up to 4 in parallel)
+    $selectedTasks = $plan.auto_tasks.selected_tasks
 
-    if ($null -eq $nextTask) {
-        Write-Log "[Phase2] No auto-task selected (all exhausted or error)"
+    if ($null -eq $selectedTasks -or $selectedTasks.Count -eq 0) {
+        Write-Log "[Phase2] No auto-tasks selected (all exhausted or error)"
     }
     else {
-        $taskKey = $nextTask.key
-        $taskName = $nextTask.name
+        Write-Log "[Phase2] Starting $($selectedTasks.Count) auto-task agents in parallel..."
 
         # Dedicated team prompts for all 18 auto-tasks
         $dedicatedPrompts = @{
             # 佛學研究（4）
-            "shurangama"           = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
-            "jiaoguangzong"        = "$AgentDir\prompts\team\todoist-auto-jiaoguangzong.md"
-            "fahua"                = "$AgentDir\prompts\team\todoist-auto-fahua.md"
-            "jingtu"               = "$AgentDir\prompts\team\todoist-auto-jingtu.md"
+            "shurangama"             = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
+            "jiaoguangzong"          = "$AgentDir\prompts\team\todoist-auto-jiaoguangzong.md"
+            "fahua"                  = "$AgentDir\prompts\team\todoist-auto-fahua.md"
+            "jingtu"                 = "$AgentDir\prompts\team\todoist-auto-jingtu.md"
             # AI/技術研究（6）
-            "tech_research"        = "$AgentDir\prompts\team\todoist-auto-tech-research.md"
-            "ai_deep_research"     = "$AgentDir\prompts\team\todoist-auto-ai-deep-research.md"
-            "unsloth_research"     = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
-            "ai_github_research"   = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
-            "ai_smart_city"        = "$AgentDir\prompts\team\todoist-auto-ai-smart-city.md"
-            "ai_sysdev"            = "$AgentDir\prompts\team\todoist-auto-ai-sysdev.md"
+            "tech_research"          = "$AgentDir\prompts\team\todoist-auto-tech-research.md"
+            "ai_deep_research"       = "$AgentDir\prompts\team\todoist-auto-ai-deep-research.md"
+            "unsloth_research"       = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
+            "ai_github_research"     = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
+            "ai_smart_city"          = "$AgentDir\prompts\team\todoist-auto-ai-smart-city.md"
+            "ai_sysdev"              = "$AgentDir\prompts\team\todoist-auto-ai-sysdev.md"
             # 系統優化（1）
-            "skill_audit"          = "$AgentDir\prompts\team\todoist-auto-skill-audit.md"
+            "skill_audit"            = "$AgentDir\prompts\team\todoist-auto-skill-audit.md"
             # 系統維護（2）
-            "log_audit"            = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
-            "git_push"             = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
+            "log_audit"              = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
+            "git_push"               = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
             # 遊戲創意（1）
             "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
             # 專案品質（1）
-            "qa_optimize"          = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
+            "qa_optimize"            = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
             # 系統自省（2）
-            "system_insight"       = "$AgentDir\prompts\team\todoist-auto-system-insight.md"
-            "self_heal"            = "$AgentDir\prompts\team\todoist-auto-self-heal.md"
+            "system_insight"         = "$AgentDir\prompts\team\todoist-auto-system-insight.md"
+            "self_heal"              = "$AgentDir\prompts\team\todoist-auto-self-heal.md"
             # GitHub 靈感（1）
-            "github_scout"         = "$AgentDir\prompts\team\todoist-auto-github-scout.md"
+            "github_scout"           = "$AgentDir\prompts\team\todoist-auto-github-scout.md"
         }
 
-        # Choose prompt: dedicated team prompt if available, otherwise generic from Phase 1
-        $genericPrompt = "$ResultsDir\todoist-task-auto.md"
+        foreach ($autoTask in $selectedTasks) {
+            $taskKey = $autoTask.key
+            $taskName = $autoTask.name
 
-        if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
-            $promptToUse = $dedicatedPrompts[$taskKey]
-            Write-Log "[Phase2] Using dedicated prompt for $taskKey"
-        }
-        elseif (Test-Path $genericPrompt) {
-            $promptToUse = $genericPrompt
-            Write-Log "[Phase2] Using generic prompt from Phase 1 for $taskKey"
-        }
-        else {
-            Write-Log "[Phase2] No prompt found for $taskKey (checked dedicated and generic)"
-            $sections["auto-$taskKey"] = "failed"
-            $promptToUse = $null
-        }
+            if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
+                $promptToUse = $dedicatedPrompts[$taskKey]
+                Write-Log "[Phase2] Using dedicated prompt for $taskKey"
+            }
+            else {
+                Write-Log "[Phase2] No dedicated prompt found for $taskKey, skipping"
+                $sections["auto-$taskKey"] = "skipped"
+                continue
+            }
 
-        if ($null -ne $promptToUse) {
             $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
-
             $agentName = "auto-$taskKey"
 
             $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {

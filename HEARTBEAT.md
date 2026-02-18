@@ -40,7 +40,7 @@ schedules:
     cron: "30 2-23 * * *"
     interval: 60m
     script: run-todoist-agent-team.ps1
-    timeout: 2400
+    timeout: 2700
     retry: 0
     description: "Todoist 團隊模式（每小時半點）"
 
@@ -59,7 +59,7 @@ schedules:
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
-| todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2400s (40min) | Todoist 團隊模式 |
+| todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 2700s (45min) | Todoist 團隊模式 |
 
 ## Todoist 驅動任務（由每小時排程撿起）
 
