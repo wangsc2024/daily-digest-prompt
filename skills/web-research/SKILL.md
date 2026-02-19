@@ -70,6 +70,15 @@ triggers:
 查詢 3（比較性，可選）："{主題} vs alternatives comparison"
 ```
 
+**中文搜尋策略範例**（適用於中文主題研究）：
+```
+查詢 1（概念性）："{主題} 概述 入門 2026"
+查詢 2（技術性）："{主題} 最佳實踐 實作方法"
+查詢 3（比較性，可選）："{主題} 比較 替代方案 優缺點"
+```
+
+> **語言選擇**：主題為技術術語時優先使用英文搜尋（學術文獻、官方文件較多），主題為地域性議題時優先使用中文搜尋。
+
 **搜尋注意事項**：
 - 優先搜尋近 6 個月的內容（加入年份關鍵字）
 - 記錄每次搜尋查詢和結果數量
@@ -130,10 +139,20 @@ triggers:
 若研究成果值得保存（depth >= adequate），依 knowledge-query Skill 匯入知識庫。
 
 匯入前去重（使用 hybrid search，閾值 0.85 基於經驗校準）：
+
+> **Windows 注意**：POST 的 inline JSON 在 Windows Bash 會失敗，必須用 JSON 檔案方式發送。
+
 ```bash
+# 步驟 1：用 Write 工具建立 JSON 檔案
+# dedup_query.json: {"query": "研究主題關鍵字", "topK": 5}
+
+# 步驟 2：用 curl 發送
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "研究主題關鍵字", "topK": 5}'
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @dedup_query.json
+
+# 步驟 3：清理暫存檔
+rm dedup_query.json
 ```
 - 若有 score > 0.85 的結果 -> 視為重複，不匯入（但可更新已有筆記）
 - 若無重複 -> 按 knowledge-query SKILL.md 的匯入步驟執行

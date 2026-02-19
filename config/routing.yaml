@@ -132,7 +132,7 @@ label_routing:
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
-    "^専案規劃":
+    "^專案規劃":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"

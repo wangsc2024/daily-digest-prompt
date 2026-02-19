@@ -80,8 +80,11 @@ triggers:
 | `遊戲優化` | game-design | game-task.md | 遊戲品質優化 |
 | `遊戲開發` | game-design | game-task.md | 遊戲新功能開發 |
 | `AI` | hackernews-ai-digest | skill-task.md | AI/LLM 研究 |
+| `邏輯思維` | deep-research + knowledge-query | research-task.md | 邏輯分析、推理 |
 | `系統審查` | system-audit | skill-task.md | 系統審查、評分 |
 | `品質評估` | system-audit | skill-task.md | 品質評估 |
+| `Chat系統` | 程式開發 | code-task.md | 聊天系統開發 |
+| `專案規劃` | 程式開發 | code-task.md | 專案規劃與架構 |
 
 ### 標籤組合規則
 

@@ -73,7 +73,11 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^UI` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
-| `^Cloudflare` | game-design | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^Cloudflare` | web-research | Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch | code-task.md |
+| `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
+| `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
+| `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | skill-task.md |
 | `@write` | 文件撰寫 | Read,Bash,Write | skill-task.md |
 

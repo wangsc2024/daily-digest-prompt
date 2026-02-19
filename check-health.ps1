@@ -578,5 +578,34 @@ catch {
     Write-Host "  評分檢查失敗: $_" -ForegroundColor Red
 }
 
+# --- Loop State 清理 ---
+Write-Host ""
+Write-Host "[Loop State 清理]" -ForegroundColor Yellow
+$loopStateDir = "$AgentDir\state"
+$loopFiles = Get-ChildItem -Path $loopStateDir -Filter "loop-state-*.json" -ErrorAction SilentlyContinue
+if ($loopFiles.Count -gt 0) {
+    $cutoff = (Get-Date).AddHours(-6)
+    $oldFiles = $loopFiles | Where-Object { $_.LastWriteTime -lt $cutoff }
+    if ($oldFiles.Count -gt 0) {
+        $oldFiles | Remove-Item -Force -ErrorAction SilentlyContinue
+        Write-Host "  清理 $($oldFiles.Count) 個過期 loop-state 檔案（>6 小時）" -ForegroundColor Green
+    }
+    $remaining = ($loopFiles.Count - $oldFiles.Count)
+    Write-Host "  目前 loop-state 檔案：$remaining 個" -ForegroundColor White
+}
+else {
+    Write-Host "  無 loop-state 檔案" -ForegroundColor Gray
+}
+
+# --- 空 stderr log 清理 ---
+$stderrFiles = Get-ChildItem -Path "$AgentDir\logs" -Filter "*-stderr-*.log" -ErrorAction SilentlyContinue
+if ($stderrFiles.Count -gt 0) {
+    $emptyStderr = $stderrFiles | Where-Object { $_.Length -eq 0 -and $_.LastWriteTime -lt $cutoff }
+    if ($emptyStderr.Count -gt 0) {
+        $emptyStderr | Remove-Item -Force -ErrorAction SilentlyContinue
+        Write-Host "  清理 $($emptyStderr.Count) 個空 stderr 日誌" -ForegroundColor Green
+    }
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

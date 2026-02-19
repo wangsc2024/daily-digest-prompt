@@ -27,7 +27,7 @@ selection_strategy: "round_robin"
 # 每次觸發最多執行的自動任務數
 max_auto_per_run:
   single_mode: 1    # hour-todoist-prompt.md：串行，保持 1（串行 4 個超出 2100s timeout）
-  team_mode: 4      # run-todoist-agent-team.ps1：並行 Phase 2，最多同時啟動 4 個 Agent
+  team_mode: 2      # run-todoist-agent-team.ps1：並行 Phase 2，最多同時啟動 4 個 Agent
 
 # 歸零邏輯：
 #   - tracking_file 不存在 → 建立初始檔案（所有計數為 0，next_execution_order 為 1）
