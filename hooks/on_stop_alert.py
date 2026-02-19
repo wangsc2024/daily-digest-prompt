@@ -29,11 +29,11 @@ from datetime import datetime, timedelta
 from collections import Counter
 
 NTFY_TOPIC = "wangsc2025"
-SKILL_DIFF_MAX_CHARS = 800
+NTFY_MAX_BYTES = 4096  # ntfy message size limit
 
 
-def _get_skill_diff() -> str:
-    """Run git diff on SKILL.md files and return truncated output."""
+def _get_skill_diff(reserved_bytes: int = 0) -> str:
+    """Run git diff on SKILL.md files, truncated only if it exceeds ntfy's 4096-byte limit."""
     try:
         result = subprocess.run(
             ["git", "diff", "skills/*/SKILL.md"],
@@ -51,8 +51,10 @@ def _get_skill_diff() -> str:
             ).stdout.strip()
         if not diff:
             return "（無 unstaged/staged 差異，可能已 commit）"
-        if len(diff) > SKILL_DIFF_MAX_CHARS:
-            diff = diff[:SKILL_DIFF_MAX_CHARS] + "\n... (已截斷)"
+        max_bytes = NTFY_MAX_BYTES - reserved_bytes
+        encoded = diff.encode("utf-8")
+        if len(encoded) > max_bytes:
+            diff = encoded[: max_bytes - 20].decode("utf-8", errors="ignore") + "\n... (已截斷)"
         return diff
     except Exception as e:
         return f"（git diff 失敗: {e}）"
