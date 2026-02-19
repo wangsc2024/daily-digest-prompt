@@ -113,8 +113,8 @@ label_routing:
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
     "^Cloudflare":
-      skills: ["game-design"]
-      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      skills: ["web-research"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch"
       template: "templates/sub-agent/code-task.md"
     "^邏輯思維":
       skills: ["deep-research", "knowledge-query"]
@@ -128,6 +128,14 @@ label_routing:
       skills: ["system-audit"]
       allowed_tools: "Read,Bash,Write,Glob,Grep,WebSearch,WebFetch"
       template: "templates/sub-agent/skill-task.md"
+    "^Chat系統":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
+    "^専案規劃":
+      skills: ["程式開發（Plan-Then-Execute）"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/code-task.md"
 
 # Tier 2：內容關鍵字比對（信心度 80%）
 keyword_routing:
@@ -154,7 +162,7 @@ keyword_routing:
     - keywords: ["深度思維", "洞見", "報告", "分析", "反思"]
       skills: ["knowledge-query"]
     - keywords: ["Cloudflare", "Pages", "部署", "網站", "CDN"]
-      skills: ["game-design"]
+      skills: ["web-research"]
     - keywords: ["GitHub", "開源", "trending", "repository"]
       skills: []
     - keywords: ["專案", "重構", "效能", "performance"]

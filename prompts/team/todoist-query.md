@@ -26,6 +26,8 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 6. 失敗 → 嘗試過期快取（24 小時內），source="cache_degraded"
 7. **回應格式**：任務在 `results` 欄位內（`jq '.results'`）
 
+> ⛔ **禁止驗證 Token**：若 API 返回 401/403 或 curl 失敗，**禁止使用 `echo $TODOIST_API_TOKEN`、`printenv TODOIST_API_TOKEN` 等指令驗證 token 是否存在**。這類指令會被 Harness 攔截並觸發安全警告。正確做法：記錄 HTTP 狀態碼（如 `401 Unauthorized`）到 plan.json 的 `error` 欄位，使用快取降級繼續執行。
+
 記錄每筆任務的 `id`、`content`、`description`、`priority`、`labels`、`due`。
 
 ### 1.0 安全檢查（查詢後立即執行）
@@ -90,6 +92,12 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | `^專案優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^UI` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^Cloudflare` | web-research | Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch | 100% |
+| `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
+| `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
+| `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^専案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 
 ### Tier 2：內容關鍵字比對（信心度 80%）
 比對 SKILL_INDEX 速查表的觸發關鍵字。
@@ -182,7 +190,7 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 
 **第二層：模板優先級**（無任務類型標籤覆寫時）：
 1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
-2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`
+2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`/`^UI`/`^Cloudflare`/`^Chat系統`/`^専案規劃`
 3. `templates/sub-agent/research-task.md` — `^邏輯思維`
 4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
 5. `templates/sub-agent/general-task.md` — 無匹配
@@ -217,6 +225,8 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | 完整開發任務 | Read,Bash,Write,Edit,Glob,Grep |
 | 需要 Web 搜尋 | Read,Bash,Write,WebSearch,WebFetch |
 | 研究並寫入知識庫 | Read,Bash,Write,WebSearch,WebFetch |
+
+> ⚠️ **Write 必須包含於所有任務的 allowedTools**（無論 Tier 幾）：子 Agent 需要 Write 工具才能產出 `results/todoist-result-{rank}.json`。
 
 ---
 

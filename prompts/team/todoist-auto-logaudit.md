@@ -5,6 +5,12 @@
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
+## 立即行動：寫入 Fail-Safe 結果（最高優先）
+讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-logaudit.json`，內容：
+`{"agent":"todoist-logaudit","status":"failed","type":"log_audit","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
+
+（此 placeholder 將在步驟 8 成功完成後被覆寫為 status=success）
+
 必須先讀取以下 SKILL.md：
 - `skills/scheduler-state/SKILL.md`
 - `skills/knowledge-query/SKILL.md`

@@ -31,7 +31,7 @@ python D:/Source/knowledge/shurangama-web/scripts/privacy_check.py
 ```
 - exit 0（通過）→ 繼續推送
 - exit 1（BLOCK）→ **禁止推送**，記錄 `knowledge_sync.status = "blocked_by_privacy"`，跳到步驟 1
-- exit 2（WARN）→ 允許推送，記錄警告數量到 `knowledge_sync.privacy_warnings`
+- exit 2（WARN）→ 允許推送，記錄警告數量和細節到 `knowledge_sync.privacy_warnings` 和 `knowledge_sync.privacy_warning_detail`（格式：`"privacy_check.py exit=2: N item(s) flagged"`）
 
 ### 0.4 推送 shurangama-web 至 GitHub
 ```bash
@@ -81,7 +81,9 @@ cd D:/Source/daily-digest-prompt && git push origin main
     "status": "success",
     "new_articles": 3,
     "updated_articles": 1,
-    "pushed": true
+    "pushed": true,
+    "privacy_warnings": 0,
+    "privacy_warning_detail": null
   },
   "commit_hash": "abc1234",
   "files_changed": 3,
@@ -102,7 +104,9 @@ cd D:/Source/daily-digest-prompt && git push origin main
     "status": "skipped",
     "new_articles": 0,
     "updated_articles": 0,
-    "pushed": false
+    "pushed": false,
+    "privacy_warnings": 0,
+    "privacy_warning_detail": null
   },
   "commit_hash": null,
   "files_changed": 0,
@@ -123,7 +127,9 @@ cd D:/Source/daily-digest-prompt && git push origin main
     "status": "failed",
     "new_articles": 0,
     "updated_articles": 0,
-    "pushed": false
+    "pushed": false,
+    "privacy_warnings": 0,
+    "privacy_warning_detail": null
   },
   "commit_hash": null,
   "files_changed": 0,

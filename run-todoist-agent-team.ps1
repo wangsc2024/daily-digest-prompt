@@ -38,6 +38,15 @@ $TimeoutBudget = @{
     "buffer"   = 120   # CLI startup + safety buffer
 }
 
+# Per-key timeout override（秒）— 優先級高於群組預設
+$AutoTaskTimeoutOverride = @{
+    "creative_game"          = 900   # sync-games.ps1 npm build 最長 ~15 min
+    "creative_game_optimize" = 900
+    "log_audit"              = 720   # 讀 10+ log + 分析修正 + KB 匯入
+    "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
+    "ai_deep_research"       = 720   # 4 階段 WebFetch
+}
+
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 New-Item -ItemType Directory -Force -Path "$LogDir\structured" | Out-Null
@@ -302,9 +311,11 @@ elseif ($plan.plan_type -eq "auto") {
         $maxAutoTimeout = 0
         foreach ($autoTask in $selectedTasks) {
             $thisTimeout = if ($autoTask.key -eq "git_push") {
-                $TimeoutBudget["gitpush"]
+                $TimeoutBudget["gitpush"]                        # 360s（特殊）
+            } elseif ($AutoTaskTimeoutOverride.ContainsKey($autoTask.key)) {
+                $AutoTaskTimeoutOverride[$autoTask.key]          # per-key override
             } else {
-                $TimeoutBudget["auto"]
+                $TimeoutBudget["auto"]                           # 預設 600s
             }
             if ($thisTimeout -gt $maxAutoTimeout) { $maxAutoTimeout = $thisTimeout }
         }
@@ -395,8 +406,9 @@ elseif ($plan.plan_type -eq "auto") {
             # 系統維護（2）
             "log_audit"              = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
             "git_push"               = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
-            # 遊戲創意（1）
+            # 遊戲創意（1）— 兩個 key 相容（YAML 定義 creative_game_optimize，簡稱 creative_game）
             "creative_game"          = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
+            "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
             # 專案品質（1）
             "qa_optimize"            = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
             # 系統自省（2）

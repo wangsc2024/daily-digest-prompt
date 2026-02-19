@@ -7,6 +7,12 @@
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
+## 立即行動：寫入 Fail-Safe 結果（最高優先）
+讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-creative-game.json`，內容：
+`{"agent":"todoist-creative-game","status":"failed","type":"creative_game","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
+
+（此 placeholder 將在 Phase G 成功完成後被覆寫為 status=success）
+
 必須先讀取以下 SKILL.md，嚴格依照指示操作：
 - `skills/game-design/SKILL.md`
 - `skills/knowledge-query/SKILL.md`
@@ -150,11 +156,20 @@
 
 執行全量同步，確保 game-web.pages.dev 能看到本次創建/優化的遊戲：
 ```bash
-pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+timeout 480 pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
+SYNC_EXIT=$?
+# exit 124 = timeout（GNU coreutils）
+if [ $SYNC_EXIT -eq 124 ]; then
+  GAME_WEB_SYNCED=false; SYNC_ERROR="sync-games timeout after 480s"
+elif [ $SYNC_EXIT -ne 0 ]; then
+  GAME_WEB_SYNCED=false; SYNC_ERROR="exit $SYNC_EXIT"
+else
+  GAME_WEB_SYNCED=true; SYNC_ERROR=null
+fi
 ```
 
 判斷結果：
-- **腳本成功（exit 0）** → 繼續；腳本內部已完成 npm build + git push game_web
+- **腳本成功（exit 0，GAME_WEB_SYNCED=true）** → 繼續；腳本內部已完成 npm build + git push game_web
 - **腳本提示「gameMetadata.js 尚無記錄」** → 用 Edit 工具將新遊戲加入
   `D:\Source\game_web\js\gameMetadata.js`（參考現有條目格式），然後重新執行一次
 - **腳本失敗（exit 1）** → 記錄錯誤到結果 JSON 的 `remaining_issues`，繼續後續步驟

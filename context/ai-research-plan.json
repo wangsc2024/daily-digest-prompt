@@ -19,7 +19,7 @@
     "Chain-of-Thought Verification",
     "Inference-Time Compute Scaling"
   ],
-  "stage_completed": 1,
+  "stage_completed": 2,
   "related_but_different": {
     "existing_kb": [
       "AI Agent 開發框架（SDK 比較，非自驗證架構）",
@@ -36,5 +36,86 @@
       "Chat 對話系統 Function Calling",
       "Crawl4AI"
     ]
-  }
+  },
+  "sources": [
+    {
+      "title": "Towards Autonomous Mathematics Research (Aletheia 論文原文)",
+      "url": "https://arxiv.org/html/2602.10177",
+      "key_points": [
+        "Generator-Verifier-Reviser 三體迴圈架構：Generator 產生解答、Verifier 用自然語言評估正確性、Reviser 修正缺陷，迭代直到通過或達運算上限",
+        "IMO-ProofBench Advanced 95.1% 準確率（Deep Think 基準 65.7%），條件準確率 98.3%（29/30 題）",
+        "2026 年 1 月 Gemini Deep Think 比 2025 年 7 月版本減少約 100 倍運算需求",
+        "提出 AI 輔助研究雙維度分類法：自主性（H→C→A）× 顯著性（Level 0-4）",
+        "首篇完全 AI 自主產出的數學論文 Feng26（Level A2：自主+出版級）",
+        "Python 工具整合僅帶來邊際改善，但 Google Search 整合顯著降低引用幻覺"
+      ]
+    },
+    {
+      "title": "AI Trends 2026: Test-Time Reasoning and the Rise of Reflective Agents",
+      "url": "https://huggingface.co/blog/aufklarer/ai-trends-2026-test-time-reasoning-reflective-agen",
+      "key_points": [
+        "Test-Time Reasoning 定義：在推理（非訓練）階段分配更多運算資源，實現系統二思考",
+        "Reflective Agent 採用 Writer-Reviewer 子 Agent 架構，單一 Agent ReAct 迴圈（如 Claude Code）證實更易管理",
+        "Process Reward Models 對每個推理步驟給予回饋，而非僅評估最終結果",
+        "ReTool 框架將監督微調 + RL 結合，教導模型何時及如何策略性使用工具",
+        "2026 預測：Extended Reasoning 模式、自主工具使用、內建自我批判、MCP 標準化",
+        "記憶架構：短期對話記憶 → 定期壓縮為長期記憶 → 元數據標籤 → 歸檔"
+      ]
+    },
+    {
+      "title": "What is test-time compute and how to scale it?",
+      "url": "https://huggingface.co/blog/Kseniase/testtimecompute",
+      "key_points": [
+        "五大 TTC 縮放方法：(1) DeepSeek-R1 RL+冷啟動微調 (2) Virgo 長文本推理遷移 (3) CoMCTS 蒙特卡洛樹搜尋 (4) PARM 測試時驗證 (5) Search-o1 RAG 增強推理",
+        "DeepSeek-R1-Zero 純 RL：AIME 15.6%→71%（455% 提升），蒸餾後 7B 模型超越 32B 基準",
+        "GRPO 演算法：消除獨立價值函數，用群體平均獎勵作基準線",
+        "PARM++ 反思驗證在圖像生成帶來 24% 品質提升，超越 Stable Diffusion 3 達 15%",
+        "已知限制：思考不足（過快跳轉思路）、延遲不可預測、運算過度/不足分配、結果不可重現",
+        "Test-Time Training（TTT）作為下一代演化：模型在測試階段持續學習適應"
+      ]
+    },
+    {
+      "title": "Better Ways to Build Self-Improving AI Agents",
+      "url": "https://yoheinakajima.com/better-ways-to-build-self-improving-ai-agents/",
+      "key_points": [
+        "六大自我改進機制：(1) 迴圈內反思 (2) 訓練自我修正能力 (3) 自生成數據與課程 (4) 自適應模型 (5) 程式碼層自修改 (6) 具身自我改進",
+        "Reflexion 模式：無需權重更新，91% HumanEval 通過率（GPT-4 基準）",
+        "SICA 程式碼自修改：17-53% 任務表現提升，STO 自發現經典演算法（beam search、模擬退火）",
+        "SEAL 自適應模型：由 33.5% 提升至 47% 事實 QA 準確率",
+        "關鍵設計張力：區分改進信號與噪音，模型可能放大自身偏見或過度優化狹窄基準",
+        "實施路線圖四階段：反思+範例 → 驗證軌跡訓練 → 持久化策略重寫 → 約束+測試治理"
+      ]
+    },
+    {
+      "title": "Google DeepMind Introduces Aletheia (MarkTechPost 報導)",
+      "url": "https://www.marktechpost.com/2026/02/12/google-deepmind-introduces-aletheia-the-ai-agent-moving-from-math-competitions-to-fully-autonomous-professional-research-discoveries/",
+      "key_points": [
+        "Aletheia 從數學競賽解題跨越到專業研究自主發現",
+        "自然語言驗證器偵測解答缺陷與幻覺，關鍵特性：能承認無法解決問題",
+        "自主解決 Erdős 猜想資料庫中 4 個公開問題",
+        "700 個公開問題的半自主評估",
+        "整合 Google Search 和網頁瀏覽防止虛假引用"
+      ]
+    },
+    {
+      "title": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning (Nature)",
+      "url": "https://www.nature.com/articles/s41586-025-09422-z",
+      "key_points": [
+        "Nature 正式發表 DeepSeek-R1 論文，確認 RL 激勵推理的科學有效性",
+        "動態運算分配：簡單任務少 token、複雜任務多 token（10-100x）",
+        "與 OpenAI o1 效能匹配，但開源可重現",
+        "推理需求預計 2026 年超過訓練需求 118 倍"
+      ]
+    },
+    {
+      "title": "ReTool: A Tool-Augmented RL Framework (arxiv)",
+      "url": "https://arxiv.org/pdf/2504.11536",
+      "key_points": [
+        "動態交織即時程式碼執行與自然語言推理",
+        "冷啟動資料集教導基礎工具使用，RL 階段學習最佳工具操作策略",
+        "Qwen2.5-32B：AIME2024 67.0%、AIME2025 49.3%（僅 400 訓練步，基準需 1000+ 步）",
+        "湧現行為：自我修正、失敗後調整、獨立發現錯誤"
+      ]
+    }
+  ]
 }

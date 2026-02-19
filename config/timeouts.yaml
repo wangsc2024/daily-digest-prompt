@@ -36,6 +36,13 @@ todoist_team:
     general: 300    # 一般任務（5 分鐘）
     auto: 600       # 自動任務（10 分鐘）
     gitpush: 360    # Git 推送（6 分鐘）
+  # Phase 2 動態 timeout（按 auto-task key，優先級高於 phase2_timeout_by_type）
+  phase2_timeout_by_task:
+    creative_game: 900          # sync-games.ps1 npm build 最長 ~15 min
+    creative_game_optimize: 900
+    log_audit: 720              # 讀 10+ log + 分析修正 + KB 匯入
+    qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
+    ai_deep_research: 720       # 4 階段 WebFetch
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:
@@ -60,4 +67,4 @@ scheduler:
   daily_digest_mid: 900     # 11:15 摘要
   daily_digest_pm: 3600     # 21:15 摘要
   todoist_single: 2400      # 整點 Todoist
-  todoist_team: 2700        # 半點 Todoist
+  todoist_team: 3600        # 半點 Todoist（PT1H，含 creative-game 1020s + buffer）

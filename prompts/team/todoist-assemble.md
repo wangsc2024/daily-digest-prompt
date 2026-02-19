@@ -2,6 +2,8 @@
 你的任務是讀取所有 Phase 1+2 結果，關閉已完成的 Todoist 任務，更新頻率計數與歷史追蹤，最後發送 ntfy 通知。
 不要重新查詢 Todoist API、不要重新執行任務。
 
+> ⛔ **禁止驗證 Token**：若 Todoist API 返回 401/403，**禁止使用 `echo $TODOIST_API_TOKEN`、`printenv TODOIST_API_TOKEN` 等指令驗證 token**。這類指令會被 Harness 攔截並觸發安全警告。記錄 HTTP 狀態碼到 JSONL 日誌，繼續後續步驟。
+
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
@@ -203,6 +205,18 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 
 ---
 
+## 步驟 4.5：更新 warned_labels（全 plan_type 均執行）
+
+讀取 `results/todoist-plan.json` 的 `sync_warnings.unmatched_labels`。
+若 unmatched_labels 非空：
+1. 用 Read 讀取 `context/auto-tasks-today.json`
+2. 對尚未在 warned_labels 中的標籤，追加進去
+3. 用 Write 覆寫 `context/auto-tasks-today.json`
+
+這確保 tasks runs 的未匹配標籤也會被 24h 去重追蹤，不再反覆警告同一標籤。
+
+---
+
 ## 步驟 5：發送 ntfy 通知
 **使用 Skill**：`ntfy-notify`
 
@@ -256,6 +270,14 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 ```
 ⚠️ Skill 同步提醒
 - 未匹配標籤：[列表]
+```
+
+### 隱私警告（附加於通知末尾，僅 plan_type=auto 且 git-push 結果存在時）
+讀取 `results/todoist-auto-gitpush.json` 的 `knowledge_sync.privacy_warnings`（若檔案不存在則跳過）：
+- 若 `privacy_warnings > 0`，在通知末尾加入：
+```
+⚠️ 隱私審查：{N} 筆內容已標記警告
+🔍 建議手動確認：cd D:/Source/knowledge/shurangama-web && git diff HEAD~1 -- data/articles.json | head -50
 ```
 
 ### 發送步驟

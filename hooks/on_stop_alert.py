@@ -29,6 +29,33 @@ from datetime import datetime, timedelta
 from collections import Counter
 
 NTFY_TOPIC = "wangsc2025"
+SKILL_DIFF_MAX_CHARS = 800
+
+
+def _get_skill_diff() -> str:
+    """Run git diff on SKILL.md files and return truncated output."""
+    try:
+        result = subprocess.run(
+            ["git", "diff", "skills/*/SKILL.md"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        diff = result.stdout.strip()
+        if not diff:
+            diff = subprocess.run(
+                ["git", "diff", "--cached", "skills/*/SKILL.md"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            ).stdout.strip()
+        if not diff:
+            return "（無 unstaged/staged 差異，可能已 commit）"
+        if len(diff) > SKILL_DIFF_MAX_CHARS:
+            diff = diff[:SKILL_DIFF_MAX_CHARS] + "\n... (已截斷)"
+        return diff
+    except Exception as e:
+        return f"（git diff 失敗: {e}）"
 
 
 def _offset_file() -> str:
@@ -136,14 +163,15 @@ def analyze_entries(entries: list) -> dict:
     # Count error tools
     error_tools = Counter(e.get("tool", "unknown") for e in errors)
 
-    # Extract modified SKILL.md paths
-    skill_modified_paths = []
+    # Extract modified SKILL.md paths (deduplicated, preserve order)
+    _seen_paths = {}
     for e in skill_modified:
         summary = e.get("summary", "")
         # Extract file path from summary (format: "path (XXX chars)" or just "path")
         path_match = re.search(r"^(.*?)(?:\s+\(|$)", summary)
         if path_match:
-            skill_modified_paths.append(path_match.group(1))
+            _seen_paths[path_match.group(1)] = True
+    skill_modified_paths = list(_seen_paths.keys())
 
     # Tag frequency
     all_tags = []
@@ -162,7 +190,7 @@ def analyze_entries(entries: list) -> dict:
         "cache_writes": len(cache_writes),
         "skill_reads": len(skill_reads),
         "skill_modified": skill_modified,
-        "skill_modified_count": len(skill_modified),
+        "skill_modified_count": len(skill_modified_paths),
         "skill_modified_paths": skill_modified_paths,
         "sub_agents": len(sub_agents),
         "block_reasons": dict(block_reasons),
@@ -212,7 +240,7 @@ def build_alert_message(analysis: dict) -> tuple:
         )
         title = "SKILL.md 修改通知"
         message = header + "\n\n" + "\n".join(info_items)
-        message += "\n\n建議執行: git diff skills/*/SKILL.md"
+        message += "\n\n[git diff skills/*/SKILL.md]\n" + _get_skill_diff()
         return "info", title, message
 
     if not issues:
@@ -236,7 +264,7 @@ def build_alert_message(analysis: dict) -> tuple:
     all_items = issues + ([""] + info_items if info_items else [])
     message = header + "\n\n" + "\n".join(all_items)
     if info_items:
-        message += "\n\n建議執行: git diff skills/*/SKILL.md"
+        message += "\n\n[git diff skills/*/SKILL.md]\n" + _get_skill_diff()
     return severity, title, message
 
 
