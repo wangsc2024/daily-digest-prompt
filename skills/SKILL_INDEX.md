@@ -79,6 +79,8 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
 | `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
 | `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | skill-task.md |
 | `@write` | 文件撰寫 | Read,Bash,Write | skill-task.md |
 

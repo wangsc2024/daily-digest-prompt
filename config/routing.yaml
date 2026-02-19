@@ -136,6 +136,16 @@ label_routing:
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
       template: "templates/sub-agent/code-task.md"
+    "^創意":
+      skills: ["game-design"]
+      allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
+      template: "templates/sub-agent/game-task.md"
+      description: "創意遊戲開發與優化，涵蓋經典復古遊戲與主題創意遊戲"
+    "^遊戲研究":
+      skills: ["game-design", "knowledge-query"]
+      allowed_tools: "Read,Bash,Write,WebSearch,WebFetch"
+      template: "templates/sub-agent/research-task.md"
+      description: "遊戲設計研究，包含遊戲機制分析、UX 研究、技術調研"
 
 # Tier 2：內容關鍵字比對（信心度 80%）
 keyword_routing:
