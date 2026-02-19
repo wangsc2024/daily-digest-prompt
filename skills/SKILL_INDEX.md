@@ -2,9 +2,9 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（17 個核心 Skill + 4 個工具 Skill = 21 個）
+## 速查表（17 個核心 + 4 個工具 = 21 個 Skills）
 
-### 核心 Skill（每日摘要/Todoist Agent 使用）
+### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
 | # | Skill | 用途 | 觸發關鍵字 |
 |---|-------|------|-----------|
@@ -33,28 +33,29 @@
 | 18 | task-manager | 新增自動/排程/單次任務標準化（互動式） | 新增任務、新增自動任務、增加排程、新增排程任務、單次執行、任務管理、add task、round-robin |
 | 19 | skill-scanner | AI 技能安全掃描（Cisco AI Defense） | 安全掃描、skill 掃描、security scan、安全稽核、安全檢查、漏洞掃描、Cisco AI Defense、YARA |
 | 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
-| 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（標籤/優先級/截止日期，depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
+| 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
 
-**使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
+> **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
 ---
 
 ## 強制規則
 
-1. **禁止繞過 Skill**：若任務可由現有 Skill 處理，必須先讀取對應 SKILL.md 再執行
+1. **禁止繞過 Skill**：若任務可由現有 Skill 處理，必須先讀取對應 `SKILL.md` 再執行
 2. **先查索引再動手**：執行前先比對觸發關鍵字，確認是否有 Skill 可用
-3. **Skill 鏈式組合**：積極串聯多個 Skill（如：todoist -> knowledge-query -> ntfy-notify）
+3. **Skill 鏈式組合**：積極串聯多個 Skill（如：`todoist` → `knowledge-query` → `ntfy-notify`）
 4. **失敗回報不跳過**：Skill 執行失敗應記錄原因，不可靜默跳過
+5. **依賴關係必須遵守**：有 `depends-on` 的 Skill 必須先執行依賴項
 
 ---
 
-## 標籤路由（Label Routing）— 最高優先
+## 標籤路由（Label Routing）— 最高優先級
 
 Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 
 > **^prefix 匹配邏輯**：去掉 `^` 後與 Todoist labels 完全比對。多標籤命中多個映射時，合併 skills 和取最寬 allowedTools。
 >
-> **模板衝突解決**：多標籤命中不同模板時，按優先級取最具體者：game-task(1) > code-task(2) > research-task(3) > skill-task(4)。
+> **模板衝突解決**：多標籤命中不同模板時，按優先級取最具體者：`game-task(1)` > `code-task(2)` > `research-task(3)` > `skill-task(4)`。
 >
 > **修飾標籤**：`知識庫` 為跨切面修飾標籤 — 僅合併 skills/tools，不參與模板選擇。
 
@@ -62,9 +63,9 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 |-------------|-----------|-------------|------|
 | `^Claude Code` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^GitHub` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
-| `^研究` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
-| `^深度思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
-| `^邏輯思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^研究` | web-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^深度思維` | web-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^邏輯思維` | web-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
 | `^知識庫` | knowledge-query | Read,Bash,Write | skill-task.md |
 | `^AI` | hackernews-ai-digest | Read,Bash,Write | skill-task.md |
 | `^遊戲優化` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
@@ -113,40 +114,40 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 
 ### 模式 A：新聞深度解讀鏈
 ```
-pingtung-news -> pingtung-policy-expert -> knowledge-query（匯入）-> ntfy-notify
+pingtung-news → pingtung-policy-expert → knowledge-query（匯入） → ntfy-notify
 ```
 
 ### 模式 B：任務智慧執行鏈
 ```
-todoist -> knowledge-query（查詢背景）-> [執行任務] -> todoist（關閉）-> ntfy-notify
+todoist → knowledge-query（查詢背景） → [執行任務] → todoist（關閉） → ntfy-notify
 ```
 
 ### 模式 C：研究與學習鏈
 ```
-hackernews-ai-digest -> knowledge-query（匯入）-> learning-mastery -> ntfy-notify
+hackernews-ai-digest → knowledge-query（匯入） → learning-mastery → ntfy-notify
 ```
 
 ### 模式 D：無待辦時自動任務鏈
 ```
-todoist（確認無任務）-> [D1: 楞嚴經研究] -> [D2: 系統 Log 審查] -> ntfy-notify
+todoist（確認無任務） → [D1: 楞嚴經研究] → [D2: 系統 Log 審查] → ntfy-notify
 ```
 
 **D1：楞嚴經自動研究**
 1. 子 Agent 先用 `/api/notes?limit=100` + tag/title 篩選查詢知識庫已有筆記
 2. 根據已有內容自主選擇下一個研究主題（不硬編碼主題表）
 3. 用 WebSearch + WebFetch 蒐集資料
-4. 用 knowledge-query 將研究成果匯入知識庫
+4. 用 `knowledge-query` 將研究成果匯入知識庫
 
 **D2：系統 Log 深度審查**
-1. 讀取 scheduler-state（唯讀）分析成功率與耗時
-2. 掃描 logs/ 目錄搜尋 ERROR/WARN/TIMEOUT
-3. 若有可改善項目 -> 擬定修正方案 -> 執行修正 -> 驗證通過
-4. 用 knowledge-query 匯入審查報告
-5. 用 ntfy-notify 通報結果
+1. 讀取 `scheduler-state`（唯讀）分析成功率與耗時
+2. 掃描 `logs/` 目錄搜尋 ERROR/WARN/TIMEOUT
+3. 若有可改善項目 → 擬定修正方案 → 執行修正 → 驗證通過
+4. 用 `knowledge-query` 匯入審查報告
+5. 用 `ntfy-notify` 通報結果
 
 ### 模式 E：全流程保護鏈（每次執行必用）
 ```
-digest-memory（讀取）-> api-cache（包裝所有 API）-> [主要流程] -> digest-memory（寫入）
+digest-memory（讀取） → api-cache（包裝所有 API） → [主要流程] → digest-memory（寫入）
 ```
 
 ---
@@ -155,13 +156,13 @@ digest-memory（讀取）-> api-cache（包裝所有 API）-> [主要流程] -> 
 
 | 外部服務 | 對應 Skill | API 端點 |
 |---------|-----------|---------|
-| Todoist | todoist | `api.todoist.com/api/v1` |
-| 屏東新聞 MCP | pingtung-news | `ptnews-mcp.pages.dev/mcp` |
-| Hacker News | hackernews-ai-digest | `hacker-news.firebaseio.com/v0` |
-| 知識庫 | knowledge-query | `localhost:3000` |
-| ntfy | ntfy-notify | `ntfy.sh` |
-| Gmail | gmail | `gmail.googleapis.com/gmail/v1` |
-| Cloudflare Pages | game-design | `pages.cloudflare.com`（自動部署） |
+| Todoist | `todoist` | `api.todoist.com/api/v1` |
+| 屏東新聞 MCP | `pingtung-news` | `ptnews-mcp.pages.dev/mcp` |
+| Hacker News | `hackernews-ai-digest` | `hacker-news.firebaseio.com/v0` |
+| 知識庫 | `knowledge-query` | `localhost:3000` |
+| ntfy | `ntfy-notify` | `ntfy.sh` |
+| Gmail | `gmail` | `gmail.googleapis.com/gmail/v1` |
+| Cloudflare Pages | `game-design` | `pages.cloudflare.com`（自動部署） |
 
 ---
 
@@ -171,23 +172,27 @@ digest-memory（讀取）-> api-cache（包裝所有 API）-> [主要流程] -> 
 ```
 run-agent-team.ps1 (PowerShell 並行協調器)
 │
-├── Phase 1: 並行資料擷取（3 個 claude -p 同時啟動）
-│   ├── fetch-todoist.md    -> results/todoist.json
-│   ├── fetch-news.md       -> results/news.json
-│   └── fetch-hackernews.md -> results/hackernews.json
+├── Phase 1: 並行資料擷取（5 個 claude -p 同時啟動）
+│   ├── fetch-todoist.md    → results/todoist.json
+│   ├── fetch-news.md       → results/news.json
+│   ├── fetch-hackernews.md → results/hackernews.json
+│   ├── fetch-gmail.md      → results/gmail.json
+│   └── fetch-security.md   → results/security.json
 │
 └── Phase 2: 摘要組裝（1 個 claude -p）
-    └── assemble-digest.md  -> 讀取 results/*.json -> 通知 + 記憶
+    └── assemble-digest.md  → 讀取 results/*.json → 通知 + 記憶
 ```
 
 ### Agent 分工表
 
 | Agent | Prompt | 使用的 Skill | 輸出 |
 |-------|--------|-------------|------|
-| fetch-todoist | `prompts/team/fetch-todoist.md` | todoist, api-cache | `results/todoist.json` |
-| fetch-news | `prompts/team/fetch-news.md` | pingtung-news, api-cache | `results/news.json` |
-| fetch-hackernews | `prompts/team/fetch-hackernews.md` | hackernews-ai-digest, api-cache | `results/hackernews.json` |
-| assemble-digest | `prompts/team/assemble-digest.md` | policy-expert, habits, learning, knowledge, ntfy, memory | ntfy 通知 |
+| fetch-todoist | `prompts/team/fetch-todoist.md` | `todoist`, `api-cache` | `results/todoist.json` |
+| fetch-news | `prompts/team/fetch-news.md` | `pingtung-news`, `api-cache` | `results/news.json` |
+| fetch-hackernews | `prompts/team/fetch-hackernews.md` | `hackernews-ai-digest`, `api-cache` | `results/hackernews.json` |
+| fetch-gmail | `prompts/team/fetch-gmail.md` | `gmail`, `api-cache` | `results/gmail.json` |
+| fetch-security | `prompts/team/fetch-security.md` | `skill-scanner` | `results/security.json` |
+| assemble-digest | `prompts/team/assemble-digest.md` | `policy-expert`, `habits`, `learning`, `knowledge`, `ntfy`, `memory` | ntfy 通知 |
 
 ### 結果檔案統一格式
 ```json
@@ -203,17 +208,18 @@ run-agent-team.ps1 (PowerShell 並行協調器)
 ```
 
 ### Skill 分配
-- **Phase 1**：todoist、pingtung-news、hackernews-ai-digest、api-cache
-- **Phase 2**：pingtung-policy-expert、atomic-habits、learning-mastery、knowledge-query、ntfy-notify、digest-memory
-- **Phase 2 不使用**（已由 Phase 1 完成）：todoist、pingtung-news、hackernews-ai-digest
+- **Phase 1**：`todoist`、`pingtung-news`、`hackernews-ai-digest`、`gmail`、`skill-scanner`、`api-cache`
+- **Phase 2**：`pingtung-policy-expert`、`atomic-habits`、`learning-mastery`、`knowledge-query`、`ntfy-notify`、`digest-memory`
+- **Phase 2 不使用**（已由 Phase 1 完成）：`todoist`、`pingtung-news`、`hackernews-ai-digest`、`gmail`
 
 ---
 
 ## 禁止行為
 
-1. **禁止不讀 SKILL.md 就直接呼叫 API**
-2. **禁止自行拼 curl 指令而不參考 SKILL.md**
-3. **禁止跳過 api-cache** — 所有外部 API 呼叫都必須經過快取流程
-4. **禁止查新聞不加政策解讀** — pingtung-news 必須搭配 pingtung-policy-expert
-5. **禁止執行結束不寫記憶** — digest-memory 是必要的
-6. **禁止有通知需求卻不用 ntfy-notify**
+1. **禁止不讀 `SKILL.md` 就直接呼叫 API**
+2. **禁止自行拼 curl 指令而不參考 `SKILL.md`**
+3. **禁止跳過 `api-cache`** — 所有外部 API 呼叫都必須經過快取流程
+4. **禁止查新聞不加政策解讀** — `pingtung-news` 必須搭配 `pingtung-policy-expert`
+5. **禁止執行結束不寫記憶** — `digest-memory` 是必要的
+6. **禁止有通知需求卻不用 `ntfy-notify`**
+7. **禁止忽略依賴關係** — `depends-on` 標註的 Skill 必須先執行依賴項

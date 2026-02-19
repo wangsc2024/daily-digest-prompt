@@ -19,7 +19,7 @@
     "Chain-of-Thought Verification",
     "Inference-Time Compute Scaling"
   ],
-  "stage_completed": 2,
+  "stage_completed": 3,
   "related_but_different": {
     "existing_kb": [
       "AI Agent 開發框架（SDK 比較，非自驗證架構）",
@@ -117,5 +117,116 @@
         "湧現行為：自我修正、失敗後調整、獨立發現錯誤"
       ]
     }
-  ]
+  ],
+  "analysis": {
+    "consensus": [
+      {
+        "point": "Test-Time Reasoning 是 2026 年 AI 最關鍵的典範轉移：推理階段運算投資回報率遠超訓練階段",
+        "supporting_sources": ["Aletheia 論文", "AI Trends 2026", "TTC Scaling", "DeepSeek-R1 Nature", "ReTool"],
+        "evidence": "DeepSeek-R1 的 RL 純推理 AIME 455% 提升（來源3）；Nature 預估推理需求 2026 年超訓練 118 倍（來源6）；Aletheia 運算效率一年提升 100 倍（來源1）；五大 TTC 方法均在推理階段產生顯著增益（來源3）"
+      },
+      {
+        "point": "自驗證（Self-Verification）機制是提升 Agent 可靠性的核心設計模式，而非單純擴大模型規模",
+        "supporting_sources": ["Aletheia 論文", "AI Trends 2026", "Self-Improving Agents", "MarkTechPost Aletheia"],
+        "evidence": "Aletheia GVR 三體迴圈將 IMO 準確率從 65.7% 提升至 95.1%（來源1）；Reflexion 無需權重更新即達 91% HumanEval（來源4）；Aletheia 驗證器的關鍵能力是「能承認無法解決問題」（來源5）；PRM 對每步驟回饋優於僅評估最終結果（來源2）"
+      },
+      {
+        "point": "RL（強化學習）是激勵模型推理能力的有效方法，且可透過蒸餾將能力轉移至小模型",
+        "supporting_sources": ["DeepSeek-R1 Nature", "TTC Scaling", "ReTool"],
+        "evidence": "DeepSeek-R1-Zero 純 RL 產生推理湧現（來源3/6）；蒸餾後 7B 模型超越 32B 基準（來源3）；ReTool 用冷啟動+RL 僅 400 步即達高效能（來源7）；Nature 正式驗證此路線科學有效性（來源6）"
+      },
+      {
+        "point": "工具整合（Tool Use）是 Agent 能力跨越式提升的催化劑，但效果因工具類型差異巨大",
+        "supporting_sources": ["Aletheia 論文", "AI Trends 2026", "ReTool"],
+        "evidence": "Aletheia 中 Python 工具僅帶來邊際改善，但 Google Search 顯著降低幻覺（來源1）；ReTool 動態交織程式碼執行與推理產生湧現行為（來源7）；AI Trends 預測自主工具使用與 MCP 標準化為 2026 趨勢（來源2）"
+      },
+      {
+        "point": "單一 Agent 的 ReAct 迴圈在實踐中比多 Agent 編排更易管理和更穩定",
+        "supporting_sources": ["AI Trends 2026", "Self-Improving Agents"],
+        "evidence": "AI Trends 明確指出 Claude Code 的單一 Agent ReAct 迴圈「證實更易管理」（來源2）；Self-Improving Agents 的 Reflexion 模式也是單一 Agent 反思迴圈（來源4）；相比之下 Aletheia 的多角色 GVR 架構更適合高風險數學研究場景"
+      }
+    ],
+    "divergence": [
+      {
+        "point": "單一 Agent vs. 多角色 Agent 架構",
+        "position_a": {
+          "stance": "AI Trends 2026 與 Self-Improving Agents 傾向單一 Agent ReAct 迴圈",
+          "rationale": "更易管理、更少通訊開銷、Reflexion 證明單一 Agent 反思已很有效"
+        },
+        "position_b": {
+          "stance": "Aletheia 論文採用 Generator-Verifier-Reviser 三角色分離",
+          "rationale": "角色分離讓驗證器獨立於生成器，避免自我確認偏誤（confirmation bias）；高風險場景需獨立驗證"
+        },
+        "synthesis": "非二選一：日常任務用單一 Agent 反思迴圈（成本效益最佳），高風險或需要形式驗證的場景用角色分離（如數學證明、醫療診斷）。關鍵區分因素是錯誤成本。"
+      },
+      {
+        "point": "運算資源分配策略：靜態 vs. 動態",
+        "position_a": {
+          "stance": "DeepSeek-R1 與 ReTool 採用動態分配，讓模型自主決定推理深度",
+          "rationale": "簡單任務少 token、複雜任務多 token，效率最佳"
+        },
+        "position_b": {
+          "stance": "TTC Scaling 指出已知限制：思考不足（過快跳轉）、運算過度/不足分配、結果不可重現",
+          "rationale": "動態分配導致延遲不可預測，無法保證一致性"
+        },
+        "synthesis": "動態分配是正確方向但需要護欄（guardrails）：設定最低推理步驟數防止思考不足，設定上限防止無限迴圈，並在延遲敏感場景提供固定預算模式。"
+      },
+      {
+        "point": "自我改進的邊界與風險",
+        "position_a": {
+          "stance": "Self-Improving Agents 提出六大機制並持樂觀態度",
+          "rationale": "SICA 自發現經典演算法、SEAL 提升 40% QA 準確率"
+        },
+        "position_b": {
+          "stance": "同一來源也警告「模型可能放大自身偏見或過度優化狹窄基準」",
+          "rationale": "區分改進信號與噪音是核心挑戰，需要約束+測試治理"
+        },
+        "synthesis": "自我改進需要「治理層」：反思機制本身不足，必須搭配外部基準測試、人類審計、自動化回歸測試。本專案的 system-audit + quality-gate 機制與此理念一致。"
+      }
+    ],
+    "insights": [
+      {
+        "id": 1,
+        "insight": "驗證能力的價值超越生成能力：Aletheia 最關鍵的突破不是 Generator 更強，而是 Verifier 能「承認無法解決問題」。這種否定能力（negative capability）是避免幻覺的根本機制。",
+        "supporting_sources": ["Aletheia 論文", "MarkTechPost Aletheia"],
+        "implication_for_project": "本專案的 quality-gate.md 可借鑑：子 Agent 的 DONE_CERT 應增加「承認無法完成」選項，而非強制生成結果。current FAILED 狀態已部分實現，但缺乏明確的「問題超出能力範圍」分類。"
+      },
+      {
+        "id": 2,
+        "insight": "知識檢索（RAG）與推理驗證的協同效應遠大於單獨使用：Aletheia 中 Google Search 降低幻覺的效果遠超 Python 工具，而 Search-o1 將 RAG 整合進推理鏈。推理+檢索是互相增強的。",
+        "supporting_sources": ["Aletheia 論文", "TTC Scaling"],
+        "implication_for_project": "本專案的研究任務已用 KB hybrid search 做去重，但尚未在推理鏈中整合 KB 作為驗證來源。建議：子 Agent 執行研究時，用 KB 已有知識作為 fact-checking 基準，降低新研究的幻覺率。"
+      },
+      {
+        "id": 3,
+        "insight": "蒸餾效率的跨越式提升暗示「推理即服務」的商業模式：7B 蒸餾模型超越 32B 基準（DeepSeek-R1），ReTool 僅 400 步訓練達高效能。推理能力的「壓縮比」正在快速提升。",
+        "supporting_sources": ["TTC Scaling", "ReTool", "DeepSeek-R1 Nature"],
+        "implication_for_project": "本專案使用 Claude API 的成本結構可能在 2026 下半年顯著變化：若推理能力蒸餾到更小模型，部分自動任務（如楞嚴經研究）可遷移至本地模型執行，大幅降低 API 成本。"
+      },
+      {
+        "id": 4,
+        "insight": "Process Reward Models（PRM）重新定義品質控制：從「結果正確性」轉向「過程正確性」。PRM 對每個推理步驟給予回饋，比僅看最終結果更能捕捉系統性錯誤。",
+        "supporting_sources": ["AI Trends 2026", "TTC Scaling"],
+        "implication_for_project": "本專案的 post_tool_logger.py 已記錄每個工具呼叫的結構化日誌，但僅做事後分析。可借鑑 PRM 理念：在執行過程中即時評估每步品質，而非僅在結束時檢查 DONE_CERT。agent_guardian.py 的 LoopDetector 是初步嘗試。"
+      },
+      {
+        "id": 5,
+        "insight": "自我改進的四階段路線圖提供可操作的漸進路徑：反思+範例 → 驗證軌跡訓練 → 持久化策略重寫 → 約束+測試治理。不需一步到位。",
+        "supporting_sources": ["Self-Improving Agents", "Aletheia 論文"],
+        "implication_for_project": "本專案已在第 1-2 階段（反思：on_stop_alert 分析 + system-insight 洞察；範例：research-registry 避免重複）。下一步是第 3 階段：將成功的執行模式持久化為新的 Skill 或配置規則（如 self-heal 自動修復識別的問題）。"
+      },
+      {
+        "id": 6,
+        "insight": "記憶架構的分層壓縮是 Agent 長期可用性的關鍵：短期對話記憶 → 定期壓縮為長期記憶 → 元數據標籤 → 歸檔。這與人類記憶的「海馬體→新皮質」轉移機制類似。",
+        "supporting_sources": ["AI Trends 2026"],
+        "implication_for_project": "本專案的 digest-memory.json 是扁平結構（連續天數+統計），research-registry.json 是時間序列。可借鑑分層壓縮：將 registry 的 7 天明細定期壓縮為月度摘要（topic 分佈、熱門方向、覆蓋缺口），降低 registry 膨脹問題。"
+      },
+      {
+        "id": 7,
+        "insight": "【意外發現】推理需求 2026 年預計超過訓練需求 118 倍（Nature），意味著 AI 的「使用成本」而非「開發成本」將成為主要瓶頸。這對所有 Agent 系統的架構設計有深遠影響：快取、降級、預算控制不是可選項，而是核心基礎設施。",
+        "supporting_sources": ["DeepSeek-R1 Nature"],
+        "implication_for_project": "本專案的 api-cache Skill 和 circuit-breaker-utils.ps1 的設計方向完全正確。建議：未來考慮加入推理預算機制（per-task token limit），避免單一研究任務消耗過多運算資源。"
+      }
+    ]
+  }
 }
