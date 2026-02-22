@@ -36,7 +36,7 @@ class TestLoadWriteRules:
         import hook_utils
         monkeypatch.setattr(hook_utils, "find_config_path", lambda filename="hook-rules.yaml": None)
         rules = load_write_rules()
-        assert rules is FALLBACK_WRITE_RULES
+        assert rules == FALLBACK_WRITE_RULES
 
 
 class TestNulFile:

@@ -200,6 +200,7 @@ def main():
     parser.add_argument("--errors", action="store_true", help="僅顯示錯誤事件")
     parser.add_argument("--cache-audit", action="store_true", help="快取使用審計")
     parser.add_argument("--sessions", action="store_true", help="Session 摘要")
+    parser.add_argument("--trace", type=str, help="依 Trace ID 過濾（分散式追蹤）")
     parser.add_argument(
         "--format", choices=["text", "json"], default="text", help="輸出格式"
     )
@@ -220,7 +221,20 @@ def main():
     entries = load_entries(args.days)
 
     # Apply filters
-    if args.blocked:
+    if args.trace:
+        entries = [e for e in entries if e.get("trace_id", "").startswith(args.trace)]
+        print(f"  過濾: Trace ID '{args.trace}' ({len(entries)} 筆)")
+        # Show phase breakdown for trace queries
+        if entries and args.format == "text":
+            phases = {}
+            for e in entries:
+                p = e.get("phase", "unknown")
+                phases[p] = phases.get(p, 0) + 1
+            print("  [Phase 分布]")
+            for p, count in sorted(phases.items()):
+                print(f"    {p:25s} {count:4d}")
+            print()
+    elif args.blocked:
         entries = [e for e in entries if e.get("event") == "blocked"]
         print(f"  過濾: 僅攔截事件 ({len(entries)} 筆)")
     elif args.errors:

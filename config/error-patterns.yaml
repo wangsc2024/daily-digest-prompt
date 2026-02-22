@@ -1,0 +1,60 @@
+# config/error-patterns.yaml
+# 錯誤分類模式定義 — 供 hooks/error_classifier.py 使用
+# 靈感來源：Gemini CLI errorClassification.ts
+
+version: 1
+
+# HTTP 狀態碼 → 錯誤分類對映
+# category: terminal | transient | not_found | unknown
+# intent: stop | retry_always | retry_once | retry_later | skip
+http_status_map:
+  401:
+    category: terminal
+    intent: stop
+    message: "認證失敗"
+  403:
+    category: terminal
+    intent: stop
+    message: "權限不足"
+  404:
+    category: not_found
+    intent: skip
+    message: "資源不存在"
+  429:
+    category: transient
+    intent: retry_later
+    message: "速率限制"
+  500:
+    category: transient
+    intent: retry_always
+    message: "伺服器內部錯誤"
+  502:
+    category: transient
+    intent: retry_always
+    message: "閘道錯誤"
+  503:
+    category: transient
+    intent: retry_always
+    message: "服務暫時不可用"
+
+# CLI 結束碼 → 錯誤分類
+cli_exit_codes:
+  1:
+    category: unknown
+    intent: retry_once
+    note: "一般錯誤"
+  137:
+    category: transient
+    intent: retry_always
+    note: "OOM killed (SIGKILL)"
+  143:
+    category: transient
+    intent: retry_always
+    note: "SIGTERM (graceful shutdown)"
+
+# 重試退避配置
+backoff:
+  base_seconds: 30       # 初始等待
+  max_seconds: 300       # 最大等待
+  multiplier: 2          # 指數倍率
+  jitter_max: 15         # 隨機抖動上限

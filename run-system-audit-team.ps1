@@ -86,7 +86,17 @@ $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $phase1LogFile = "$LogDir\audit-phase1-$timestamp.log"
 $phase2LogFile = "$LogDir\audit-phase2-$timestamp.log"
 
+# Distributed tracing: generate trace ID for this execution
+$TraceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
+$env:DIGEST_TRACE_ID = $TraceId
+
+# Security level: strict for scheduled runs
+if (-not $env:DIGEST_SECURITY_LEVEL) {
+    $env:DIGEST_SECURITY_LEVEL = "strict"
+}
+
 Write-Log "=== System Audit Team Mode Started ===" "INFO"
+Write-Log "TraceId: $TraceId | SecurityLevel: $($env:DIGEST_SECURITY_LEVEL)" "INFO"
 
 # ============================================
 # Phase 1: Parallel Audit (4 Agents)

@@ -39,7 +39,7 @@ class TestLoadBashRules:
         import hook_utils
         monkeypatch.setattr(hook_utils, "find_config_path", lambda filename="hook-rules.yaml": None)
         rules = load_bash_rules()
-        assert rules is FALLBACK_BASH_RULES
+        assert rules == FALLBACK_BASH_RULES
 
 
 class TestNulRedirect:

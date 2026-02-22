@@ -13,7 +13,7 @@ PreToolUse:Write/Edit Guard — 檔案寫入機器強制攔截。
 """
 import os
 
-from hook_utils import load_yaml_rules, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, resolve_active_rules, log_blocked_event, read_stdin_json, output_decision
 
 
 # YAML 不可用時的內建預設規則
@@ -59,8 +59,8 @@ FALLBACK_WRITE_RULES = [
 
 
 def load_write_rules():
-    """從 YAML 載入寫入規則，失敗時回退至內建預設值。"""
-    return load_yaml_rules("write_rules", FALLBACK_WRITE_RULES)
+    """從 YAML 載入寫入規則，依安全等級過濾，失敗時回退至內建預設值。"""
+    return resolve_active_rules("write_rules", FALLBACK_WRITE_RULES)
 
 
 def _get_reason(rule, **format_kwargs):
@@ -120,7 +120,9 @@ def check_write_path(file_path, rules=None, project_root=None):
     if project_root is None:
         project_root = os.getcwd()
 
-    basename = os.path.basename(file_path) if file_path else ""
+    # Normalize backslashes for cross-platform basename extraction
+    normalized_fp = file_path.replace("\\", "/") if file_path else ""
+    basename = os.path.basename(normalized_fp) if normalized_fp else ""
 
     for rule in rules:
         check_type = rule.get("check", "")

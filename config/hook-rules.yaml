@@ -1,8 +1,27 @@
-version: 1
+version: 2
+
+# ============================================
+# 安全等級預設集（Gemini CLI 啟發的分層策略引擎）
+# 選擇方式：環境變數 DIGEST_SECURITY_LEVEL（預設 strict）
+# critical 優先級規則永遠不可被任何 preset 停用
+# ============================================
+presets:
+  strict:
+    description: "排程執行（預設）— 全部規則啟用"
+    disabled_rules: []
+
+  standard:
+    description: "互動開發 — 放寬非關鍵規則"
+    disabled_rules: ["sensitive-env"]
+
+  permissive:
+    description: "除錯模式 — 僅保留 critical 規則"
+    disabled_rules: ["sensitive-env", "force-push"]
 
 # Bash 命令攔截規則（對應 hooks/pre_bash_guard.py）
 bash_rules:
   - id: nul-redirect
+    priority: critical
     description: "禁止 nul 重導向"
     pattern: '(>|2>)\s*nul(\s|$|;|&|\|)'
     flags: IGNORECASE
@@ -10,6 +29,7 @@ bash_rules:
     guard_tag: nul-guard
 
   - id: scheduler-state-write
+    priority: critical
     description: "禁止 Agent 寫入 scheduler-state.json"
     # 移除 contains 預檢查，改用精確的寫入操作匹配（排除 ls/cat/grep/python read 等只讀操作）
     pattern: '(?<![0-9&])>\s*[^&].*scheduler-state\.json|>>\s*.*scheduler-state\.json|(tee|cp|mv)\s+.*scheduler-state\.json|echo\s+.*>\s*.*scheduler-state\.json'
@@ -17,6 +37,7 @@ bash_rules:
     guard_tag: state-guard
 
   - id: destructive-delete
+    priority: critical
     description: "禁止破壞性刪除"
     patterns:
       - 'rm\s+-[rR]f\s+/(\s|$)'
@@ -27,6 +48,7 @@ bash_rules:
     guard_tag: safety-guard
 
   - id: force-push
+    priority: high
     description: "禁止 force push 到 main/master"
     patterns:
       - 'git\s+push\s+.*--force.*\s+(main|master)(\s|$)'
@@ -35,6 +57,7 @@ bash_rules:
     guard_tag: git-guard
 
   - id: sensitive-env
+    priority: medium
     description: "禁止讀取敏感環境變數"
     patterns:
       - 'echo\s+\$[A-Z_]*(TOKEN|SECRET|KEY|PASSWORD|CREDENTIAL)'
@@ -45,6 +68,7 @@ bash_rules:
     guard_tag: env-guard
 
   - id: exfiltration
+    priority: critical
     description: "禁止透過網路傳送敏感變數"
     pattern: 'curl.*(-d|--data).*\$(TOKEN|SECRET|KEY|PASSWORD)'
     flags: IGNORECASE
@@ -54,6 +78,7 @@ bash_rules:
 # 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）
 write_rules:
   - id: nul-file
+    priority: critical
     description: "禁止寫入 nul 檔案"
     check: basename_equals
     value: "nul"
@@ -62,6 +87,7 @@ write_rules:
     guard_tag: nul-guard
 
   - id: scheduler-state
+    priority: critical
     description: "禁止 Agent 寫入 scheduler-state.json"
     check: path_contains
     value: "scheduler-state.json"
@@ -69,6 +95,7 @@ write_rules:
     guard_tag: state-guard
 
   - id: sensitive-files
+    priority: high
     description: "禁止寫入敏感檔案"
     check: basename_in
     values: [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"]
@@ -76,6 +103,7 @@ write_rules:
     guard_tag: secret-guard
 
   - id: path-traversal
+    priority: critical
     description: "禁止路徑遍歷攻擊"
     check: path_traversal
     reason_template: "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
@@ -93,6 +121,7 @@ write_rules:
 # 檔案讀取攔截規則（對應 hooks/pre_read_guard.py）
 read_rules:
   - id: sensitive-path
+    priority: high
     description: "禁止讀取敏感系統路徑"
     check: path_match
     patterns:
@@ -110,6 +139,7 @@ read_rules:
     guard_tag: read-guard
 
   - id: sensitive-read-files
+    priority: high
     description: "禁止讀取敏感檔案"
     check: basename_in
     values: [".env", ".env.local", "credentials.json", "token.json",
@@ -118,6 +148,7 @@ read_rules:
     guard_tag: secret-read-guard
 
   - id: windows-credentials
+    priority: high
     description: "禁止讀取 Windows 憑據路徑"
     check: path_match
     patterns:

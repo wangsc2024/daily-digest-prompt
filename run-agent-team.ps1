@@ -95,8 +95,19 @@ function Update-State {
 # Start execution
 # ============================================
 $startTime = Get-Date
+
+# Distributed tracing: generate trace ID for this execution
+$TraceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
+$env:DIGEST_TRACE_ID = $TraceId
+
+# Security level: strict for scheduled runs (can override via env var)
+if (-not $env:DIGEST_SECURITY_LEVEL) {
+    $env:DIGEST_SECURITY_LEVEL = "strict"
+}
+
 Write-Log "=== Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
 Write-Log "Mode: parallel (Phase 1 x5 + Phase 2 x1)"
+Write-Log "TraceId: $TraceId | SecurityLevel: $($env:DIGEST_SECURITY_LEVEL)"
 
 # Check if claude is installed
 $claudePath = Get-Command claude -ErrorAction SilentlyContinue
@@ -112,12 +123,23 @@ if (-not $claudePath) {
 Write-Log ""
 Write-Log "=== Phase 1: Parallel fetch start ==="
 
+# Circuit breaker: check API health before launching agents
+$ApiHealthFile = "$AgentDir\state\api-health.json"
+$ApiHealth = @{}
+if (Test-Path $ApiHealthFile) {
+    try {
+        $ApiHealth = Get-Content -Path $ApiHealthFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    } catch {
+        Write-Log "[WARN] api-health.json parse failed, skipping circuit breaker check"
+    }
+}
+
 $fetchAgents = @(
-    @{ Name = "todoist";    Prompt = "$AgentDir\prompts\team\fetch-todoist.md";    Result = "$ResultsDir\todoist.json" },
-    @{ Name = "news";       Prompt = "$AgentDir\prompts\team\fetch-news.md";       Result = "$ResultsDir\news.json" },
-    @{ Name = "hackernews"; Prompt = "$AgentDir\prompts\team\fetch-hackernews.md"; Result = "$ResultsDir\hackernews.json" },
-    @{ Name = "gmail";      Prompt = "$AgentDir\prompts\team\fetch-gmail.md";      Result = "$ResultsDir\gmail.json" },
-    @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json" }
+    @{ Name = "todoist";    Prompt = "$AgentDir\prompts\team\fetch-todoist.md";    Result = "$ResultsDir\todoist.json"; ApiSource = "todoist" },
+    @{ Name = "news";       Prompt = "$AgentDir\prompts\team\fetch-news.md";       Result = "$ResultsDir\news.json";    ApiSource = "pingtung-news" },
+    @{ Name = "hackernews"; Prompt = "$AgentDir\prompts\team\fetch-hackernews.md"; Result = "$ResultsDir\hackernews.json"; ApiSource = "hackernews" },
+    @{ Name = "gmail";      Prompt = "$AgentDir\prompts\team\fetch-gmail.md";      Result = "$ResultsDir\gmail.json";   ApiSource = "gmail" },
+    @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json"; ApiSource = "" }
 )
 
 $jobs = @()
@@ -127,15 +149,30 @@ foreach ($agent in $fetchAgents) {
         continue
     }
 
+    # Circuit breaker: skip agents whose API is in open state
+    $apiSource = $agent.ApiSource
+    if ($apiSource -and $ApiHealth.$apiSource.circuit_state -eq "open") {
+        $cooldownUntil = $ApiHealth.$apiSource.cooldown_until
+        Write-Log "[Phase1] SKIP $($agent.Name) — circuit open (cooldown until $cooldownUntil)"
+        $sections[$agent.Name] = "circuit_open"
+        continue
+    }
+
     $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
     $agentName = $agent.Name
 
+    # Set phase tag for distributed tracing
+    $env:DIGEST_PHASE = "phase1-$agentName"
+
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($Content)
+        param($Content, $TraceId, $Phase, $SecurityLevel)
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
+        $env:DIGEST_TRACE_ID = $TraceId
+        $env:DIGEST_PHASE = $Phase
+        $env:DIGEST_SECURITY_LEVEL = $SecurityLevel
         $Content | claude -p --allowedTools "Read,Bash,Write" 2>&1
-    } -ArgumentList $promptContent
+    } -ArgumentList $promptContent, $TraceId, "phase1-$agentName", $env:DIGEST_SECURITY_LEVEL
 
     $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
     $jobs += $job
@@ -231,6 +268,9 @@ while ($attempt -le $MaxPhase2Retries) {
 
     Write-Log "[Phase2] Running assembly agent (attempt $($attempt + 1))..."
     $phase2Start = Get-Date
+
+    # Set phase tag for distributed tracing
+    $env:DIGEST_PHASE = "phase2-assemble"
 
     try {
         $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>&1 | ForEach-Object {

@@ -54,6 +54,25 @@ SCHEMAS = {
     "dedup-policy.yaml": {
         "required_keys": ["version"],
     },
+    # 新增：之前未覆蓋的配置檔
+    "timeouts.yaml": {
+        "required_keys": ["version"],
+    },
+    "audit-scoring.yaml": {
+        "required_keys": ["version"],
+    },
+    "benchmark.yaml": {
+        "required_keys": ["version"],
+    },
+    "health-scoring.yaml": {
+        "required_keys": ["version"],
+    },
+    "topic-rotation.yaml": {
+        "required_keys": ["version"],
+    },
+    "error-patterns.yaml": {
+        "required_keys": ["version", "http_status_map", "backoff"],
+    },
 }
 
 
@@ -137,7 +156,57 @@ def validate_config(config_dir=None):
                         errors.append(
                             f"{filename}: '{field_name}.{key}' 缺少 '{subkey}'")
 
+    # Cross-file consistency checks
+    cross_errors = _check_cross_references(config_dir)
+    errors.extend(cross_errors)
+
     return errors, warnings
+
+
+def _check_cross_references(config_dir):
+    """跨檔一致性檢查。"""
+    errors = []
+
+    # 1. hook-rules.yaml: 所有規則 id 必須唯一
+    hook_rules = _load_yaml(os.path.join(config_dir, "hook-rules.yaml"))
+    if hook_rules:
+        all_ids = []
+        for section in ["bash_rules", "write_rules", "read_rules"]:
+            rules = hook_rules.get(section, [])
+            if isinstance(rules, list):
+                for rule in rules:
+                    if isinstance(rule, dict):
+                        all_ids.append(rule.get("id", ""))
+        duplicates = [rid for rid in set(all_ids) if all_ids.count(rid) > 1 and rid]
+        for dup in duplicates:
+            errors.append(f"hook-rules.yaml: 規則 id '{dup}' 重複定義")
+
+    # 2. cache-policy.yaml sources 應涵蓋主要 API（僅在 sources 區段存在時檢查）
+    cache_policy = _load_yaml(os.path.join(config_dir, "cache-policy.yaml"))
+    if cache_policy:
+        sources = cache_policy.get("sources", {})
+        if sources:  # 僅在有 sources 區段時檢查完整性
+            expected_sources = ["todoist", "pingtung-news", "hackernews", "knowledge", "gmail"]
+            for src in expected_sources:
+                if src not in sources:
+                    errors.append(f"cache-policy.yaml: 缺少來源 '{src}' 的快取定義")
+
+    # 3. frequency-limits.yaml 任務總 daily_limit 應符合預期（僅在有多個任務時檢查）
+    freq_limits = _load_yaml(os.path.join(config_dir, "frequency-limits.yaml"))
+    if freq_limits:
+        tasks = freq_limits.get("tasks", {})
+        if isinstance(tasks, dict) and len(tasks) > 1:
+            total_limit = sum(
+                t.get("daily_limit", 0)
+                for t in tasks.values()
+                if isinstance(t, dict)
+            )
+            if total_limit > 0 and total_limit != 45:
+                errors.append(
+                    f"frequency-limits.yaml: 任務 daily_limit 總和為 {total_limit}，預期 45"
+                )
+
+    return errors
 
 
 def main():
@@ -164,7 +233,7 @@ def main():
                 print(f"  - {e}")
             sys.exit(1)
         else:
-            print(f"✅ 全部 {len(SCHEMAS)} 個配置檔驗證通過")
+            print(f"✅ 全部 {len(SCHEMAS)} 個配置檔驗證通過（含跨檔一致性檢查）")
 
     sys.exit(0 if not errors else 1)
 

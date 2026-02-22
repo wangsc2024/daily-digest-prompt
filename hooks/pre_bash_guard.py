@@ -15,7 +15,7 @@ PreToolUse:Bash Guard — Bash 指令機器強制攔截。
 """
 import re
 
-from hook_utils import load_yaml_rules, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, resolve_active_rules, log_blocked_event, read_stdin_json, output_decision
 
 
 # YAML 不可用時的內建預設規則
@@ -76,8 +76,8 @@ FALLBACK_BASH_RULES = [
 
 
 def load_bash_rules():
-    """從 YAML 載入 bash 規則，失敗時回退至內建預設值。"""
-    return load_yaml_rules("bash_rules", FALLBACK_BASH_RULES)
+    """從 YAML 載入 bash 規則，依安全等級過濾，失敗時回退至內建預設值。"""
+    return resolve_active_rules("bash_rules", FALLBACK_BASH_RULES)
 
 
 def _get_patterns(rule):

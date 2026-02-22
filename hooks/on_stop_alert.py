@@ -145,6 +145,9 @@ def analyze_entries(entries: list) -> dict:
         if path_match:
             skill_modified_paths.append(path_match.group(1))
 
+    # Loop detection events
+    loop_detected = [e for e in entries if e.get("event") == "loop_detected"]
+
     # Tag frequency
     all_tags = []
     for e in entries:
@@ -165,6 +168,8 @@ def analyze_entries(entries: list) -> dict:
         "skill_modified_count": len(skill_modified),
         "skill_modified_paths": skill_modified_paths,
         "sub_agents": len(sub_agents),
+        "loop_detected": loop_detected,
+        "loop_detected_count": len(loop_detected),
         "block_reasons": dict(block_reasons),
         "error_tools": dict(error_tools),
         "tag_counts": dict(tag_counts.most_common(15)),
@@ -305,6 +310,10 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
     summary_file = os.path.join("logs", "structured", "session-summary.jsonl")
     os.makedirs(os.path.dirname(summary_file), exist_ok=True)
 
+    # Distributed tracing: include trace_id and phase if available
+    trace_id = os.environ.get("DIGEST_TRACE_ID", "")
+    phase = os.environ.get("DIGEST_PHASE", "")
+
     summary = {
         "ts": datetime.now().astimezone().isoformat(),
         "sid": session_id[:12] if session_id else "",
@@ -317,9 +326,14 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         "sub_agents": analysis["sub_agents"],
         "blocked": analysis["blocked_count"],
         "errors": analysis["error_count"],
+        "loop_detected": analysis.get("loop_detected_count", 0),
         "status": severity,
         "alert_sent": alert_sent,
     }
+    if trace_id:
+        summary["trace_id"] = trace_id
+    if phase:
+        summary["phase"] = phase
 
     with open(summary_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(summary, ensure_ascii=False) + "\n")
@@ -412,6 +426,13 @@ def main():
             analysis, alert_sent=False, severity="healthy",
             session_id=session_id,
         )
+
+    # Update API health tracker (circuit breaker state)
+    try:
+        from api_availability import update_from_session_results
+        update_from_session_results(entries)
+    except (ImportError, Exception):
+        pass  # Silent fail — API health tracking is optional
 
     _rotate_logs()
     print("{}")

@@ -213,6 +213,26 @@ def main():
                 has_error = True
                 tags.append("error")
 
+    # Error classification (when error detected)
+    error_classification = {}
+    if has_error and tool_output:
+        try:
+            from error_classifier import classify, extract_http_status
+            category, intent = classify(tool_output)
+            error_classification = {
+                "error_category": category.value,
+                "retry_intent": intent.value,
+            }
+            http_status = extract_http_status(tool_output)
+            if http_status:
+                error_classification["http_status"] = http_status
+        except ImportError:
+            pass
+
+    # Distributed tracing (from environment variables set by PowerShell scripts)
+    trace_id = os.environ.get("DIGEST_TRACE_ID", "")
+    phase = os.environ.get("DIGEST_PHASE", "")
+
     # Build log entry
     entry = {
         "ts": datetime.now().astimezone().isoformat(),
@@ -224,6 +244,16 @@ def main():
         "has_error": has_error,
         "tags": tags,
     }
+
+    # Add trace fields (only if present)
+    if trace_id:
+        entry["trace_id"] = trace_id
+    if phase:
+        entry["phase"] = phase
+
+    # Add error classification fields
+    if error_classification:
+        entry.update(error_classification)
 
     # Write to JSONL (with disk protection)
     log_dir = os.path.join("logs", "structured")
@@ -246,6 +276,48 @@ def main():
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except OSError:
         pass  # Silent fail — do not disrupt Agent workflow
+
+    # Loop detection (lightweight, runs after logging)
+    try:
+        from loop_detector import _hash_entry, check_tool_call_loop
+        # Compute tool call hash for the entry
+        tool_input_raw = data.get("tool_input", {})
+        entry["_tool_hash"] = _hash_entry(tool_name, tool_input_raw)
+
+        # Load recent session entries for loop detection
+        if os.path.exists(log_file):
+            session_entries = []
+            with open(log_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            e = json.loads(line)
+                            if e.get("sid") == entry["sid"]:
+                                session_entries.append(e)
+                        except json.JSONDecodeError:
+                            pass
+
+            result = check_tool_call_loop(session_entries, entry)
+            if result:
+                loop_entry = {
+                    "ts": datetime.now().astimezone().isoformat(),
+                    "sid": entry["sid"],
+                    "tool": tool_name,
+                    "event": "loop_detected",
+                    "loop_type": result["type"],
+                    "repeat_count": result.get("repeat_count", 0),
+                    "tags": ["loop_detected"],
+                }
+                if trace_id:
+                    loop_entry["trace_id"] = trace_id
+                try:
+                    with open(log_file, "a", encoding="utf-8") as f:
+                        f.write(json.dumps(loop_entry, ensure_ascii=False) + "\n")
+                except OSError:
+                    pass
+    except (ImportError, Exception):
+        pass  # Silent fail — loop detection is optional
 
     print("{}")
     sys.exit(0)

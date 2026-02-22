@@ -65,6 +65,56 @@ def load_yaml_rules(section_key, fallback_rules):
         return fallback_rules
 
 
+# Priority order for rule sorting (Gemini CLI-inspired tiered policy engine)
+PRIORITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+
+
+def resolve_active_rules(section_key, fallback_rules):
+    """載入規則，依活動 preset 過濾，依優先級排序。
+
+    Gemini CLI 啟發的分層策略引擎：
+    - 從環境變數 DIGEST_SECURITY_LEVEL 讀取安全等級（預設 strict）
+    - critical 優先級規則永遠不可被停用
+    - 依優先級排序：critical > high > medium > low
+
+    Args:
+        section_key: YAML 頂層鍵名
+        fallback_rules: 預設規則清單
+    """
+    rules = load_yaml_rules(section_key, fallback_rules)
+    preset_name = os.environ.get("DIGEST_SECURITY_LEVEL", "strict")
+
+    # 載入 preset 定義
+    config_path = find_config_path()
+    disabled_rules = set()
+    if config_path:
+        try:
+            import yaml
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            presets = config.get("presets", {})
+            preset = presets.get(preset_name, {})
+            disabled_rules = set(preset.get("disabled_rules", []))
+        except Exception:
+            pass
+
+    # 過濾規則（critical 規則永遠不可停用）
+    filtered = []
+    for rule in rules:
+        rule_id = rule.get("id", "")
+        priority = rule.get("priority", "high")
+
+        if rule_id in disabled_rules and priority != "critical":
+            continue  # 被 preset 停用且非 critical
+
+        filtered.append(rule)
+
+    # 依優先級排序
+    filtered.sort(key=lambda r: PRIORITY_ORDER.get(r.get("priority", "high"), 1))
+
+    return filtered
+
+
 def log_blocked_event(session_id, tool, summary, reason, guard_tag):
     """將攔截事件寫入結構化 JSONL 日誌。"""
     log_dir = os.path.join("logs", "structured")
@@ -80,6 +130,13 @@ def log_blocked_event(session_id, tool, summary, reason, guard_tag):
         "summary": summary[:200],
         "tags": ["blocked", guard_tag],
     }
+    # Distributed tracing support
+    trace_id = os.environ.get("DIGEST_TRACE_ID", "")
+    if trace_id:
+        entry["trace_id"] = trace_id
+    phase = os.environ.get("DIGEST_PHASE", "")
+    if phase:
+        entry["phase"] = phase
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 

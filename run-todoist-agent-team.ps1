@@ -106,7 +106,18 @@ function Update-State {
 # Start execution
 # ============================================
 $startTime = Get-Date
+
+# Distributed tracing: generate trace ID for this execution
+$TraceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
+$env:DIGEST_TRACE_ID = $TraceId
+
+# Security level: strict for scheduled runs
+if (-not $env:DIGEST_SECURITY_LEVEL) {
+    $env:DIGEST_SECURITY_LEVEL = "strict"
+}
+
 Write-Log "=== Todoist Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
+Write-Log "TraceId: $TraceId | SecurityLevel: $($env:DIGEST_SECURITY_LEVEL)"
 Write-Log "Mode: parallel (Phase 1 x1 + Phase 2 xN + Phase 3 x1)"
 
 # Check if claude is installed
