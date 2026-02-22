@@ -8,6 +8,7 @@ cache/
 results/
 state/scheduler-state.json
 state/todoist-history.json
+state/api-health.json
 context/digest-memory.json
 context/auto-tasks-today.json
 context/research-registry.json
