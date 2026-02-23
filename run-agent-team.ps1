@@ -96,6 +96,25 @@ function Update-State {
 # ============================================
 $startTime = Get-Date
 
+# ─── 載入 Todoist API Token（一次性，安全讀取）───
+if (-not $env:TODOIST_API_TOKEN) {
+    $envFile = "$AgentDir\.env"
+    if (Test-Path $envFile) {
+        $envLine = Get-Content $envFile | Where-Object { $_ -match '^TODOIST_API_TOKEN=' }
+        if ($envLine) {
+            $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
+            Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
+        }
+        else { $todoistToken = ""; Write-Host "[WARN] TODOIST_API_TOKEN not found in .env" }
+    }
+    else { $todoistToken = ""; Write-Host "[WARN] .env not found, TODOIST_API_TOKEN may be missing" }
+}
+else {
+    $todoistToken = $env:TODOIST_API_TOKEN
+    Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
+}
+
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
@@ -222,11 +241,14 @@ foreach ($agent in $fetchAgents) {
     $agentName = $agent.Name
 
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($Content, $agentName, $logDir, $timestamp, $traceId)
+        param($Content, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
         [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+        if ($apiToken) {
+            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+        }
 
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -243,7 +265,7 @@ foreach ($agent in $fetchAgents) {
         }
 
         return $output
-    } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
+    } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken
 
     $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
     $jobs += $job

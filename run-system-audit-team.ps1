@@ -86,6 +86,25 @@ $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $phase1LogFile = "$LogDir\audit-phase1-$timestamp.log"
 $phase2LogFile = "$LogDir\audit-phase2-$timestamp.log"
 
+# ─── 載入 Todoist API Token（一次性，安全讀取）───
+if (-not $env:TODOIST_API_TOKEN) {
+    $envFile = "$AgentDir\.env"
+    if (Test-Path $envFile) {
+        $envLine = Get-Content $envFile | Where-Object { $_ -match '^TODOIST_API_TOKEN=' }
+        if ($envLine) {
+            $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
+            Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
+        }
+        else { $todoistToken = ""; Write-Host "[WARN] TODOIST_API_TOKEN not found in .env" }
+    }
+    else { $todoistToken = ""; Write-Host "[WARN] .env not found, TODOIST_API_TOKEN may be missing" }
+}
+else {
+    $todoistToken = $env:TODOIST_API_TOKEN
+    Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
+}
+
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
@@ -154,11 +173,14 @@ $phase1Prompts = @(
 
 foreach ($agent in $phase1Prompts) {
     $job = Start-Job -ScriptBlock {
-        param($promptFile, $agentDir, $agentName, $logDir, $timestamp, $traceId)
+        param($promptFile, $agentDir, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+        if ($apiToken) {
+            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+        }
 
         Set-Location $agentDir
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -183,7 +205,7 @@ foreach ($agent in $phase1Prompts) {
             Output = $output
             ExitCode = $LASTEXITCODE
         }
-    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp, $traceId -WorkingDirectory $AgentDir
+    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
 
     $phase1Jobs += @{
         Job = $job
@@ -264,11 +286,14 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
 
     try {
         $job = Start-Job -ScriptBlock {
-            param($promptFile, $agentDir, $logDir, $timestamp, $traceId)
+            param($promptFile, $agentDir, $logDir, $timestamp, $traceId, $apiToken)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            if ($apiToken) {
+                [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+            }
 
             Set-Location $agentDir
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -286,7 +311,7 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             }
 
             return $output
-        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp, $traceId -WorkingDirectory $AgentDir
+        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
 
         $completed = Wait-Job -Job $job -Timeout $Phase2TimeoutSeconds
 

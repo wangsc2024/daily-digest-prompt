@@ -22,7 +22,7 @@ $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"
 
 # Config (Phase 2 timeout is dynamic, calculated after Phase 1)
-$Phase1TimeoutSeconds = 300
+$Phase1TimeoutSeconds = 420   # Phase 1 可能需要寫 plan.json + N 個 task prompt 檔案（300s 偶爾不足）
 $MaxPhase1Retries = 1     # Phase 1 query: max 2 attempts (30s interval)
 $Phase3TimeoutSeconds = 180
 $MaxPhase3Retries = 1
@@ -111,10 +111,58 @@ function Update-State {
     [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::UTF8)
 }
 
+# PS 層失敗通知（Phase 3 未執行時的安全網）
+function Send-FailureAlert {
+    param(
+        [string]$Phase,    # 失敗的階段，如 "Phase1"
+        [string]$Reason    # 失敗原因
+    )
+    try {
+        $tmpFile = [System.IO.Path]::GetTempFileName() + ".json"
+        $payload = @{
+            topic    = "wangsc2025"
+            title    = "Todoist Team 失敗 - $Phase"
+            message  = "$Reason`nLog: $(Split-Path -Leaf $LogFile)`n時間: $(Get-Date -Format 'HH:mm')"
+            priority = 4
+            tags     = @("warning", "robot")
+        } | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($tmpFile, $payload, [System.Text.Encoding]::UTF8)
+        curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$tmpFile" https://ntfy.sh 2>$null
+        Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
+    }
+    catch { <# 通知失敗不中斷主流程 #> }
+}
+
 # ============================================
 # Start execution
 # ============================================
 $startTime = Get-Date
+
+# ─── 載入 Todoist API Token（一次性，安全讀取）───
+# 優先使用系統環境變數，其次從 .env 讀取
+if (-not $env:TODOIST_API_TOKEN) {
+    $envFile = "$AgentDir\.env"
+    if (Test-Path $envFile) {
+        $envLine = Get-Content $envFile | Where-Object { $_ -match '^TODOIST_API_TOKEN=' }
+        if ($envLine) {
+            $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
+            Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
+        }
+        else {
+            Write-Host "[WARN] TODOIST_API_TOKEN not found in .env"
+            $todoistToken = ""
+        }
+    }
+    else {
+        Write-Host "[WARN] .env not found, TODOIST_API_TOKEN may be missing"
+        $todoistToken = ""
+    }
+}
+else {
+    $todoistToken = $env:TODOIST_API_TOKEN
+    Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
+}
 
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
@@ -198,11 +246,14 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
 
     try {
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $logDir, $timestamp, $traceId)
+            param($prompt, $logDir, $timestamp, $traceId, $apiToken)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            if ($apiToken) {
+                [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+            }
 
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -219,7 +270,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             }
 
             return $output
-        } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId
+        } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId, $todoistToken
 
         $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
 
@@ -249,6 +300,21 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
     $phase1Attempt++
 }
 
+# ─── Phase 1 Fallback: 若計畫檔在執行視窗內已寫入，即使 Job 超時也視為成功 ───
+# 根因：Claude CLI 寫完 todoist-plan.json 後可能繼續做收尾（日誌/狀態），
+# 導致 PS Job 超時而計畫檔實際上已完整產出。
+if (-not $phase1Success -and (Test-Path "$ResultsDir\todoist-plan.json")) {
+    $planAge = [int]((Get-Date) - (Get-Item "$ResultsDir\todoist-plan.json").LastWriteTime).TotalSeconds
+    $maxValidAge = ($MaxPhase1Retries + 1) * $Phase1TimeoutSeconds + 60  # 執行視窗（2×420）+ 60s 緩衝 = 900s
+    if ($planAge -lt $maxValidAge) {
+        $phase1Success = $true
+        Write-Log "[Phase1] Fallback: 計畫檔在超時前已寫入（age=${planAge}s），繼續執行"
+    }
+    else {
+        Write-Log "[Phase1] 計畫檔過舊（age=${planAge}s, threshold=${maxValidAge}s），跳過"
+    }
+}
+
 $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
 Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
 
@@ -265,6 +331,7 @@ if (-not $phase1Success -or -not (Test-Path $planFile)) {
     Write-Log "[ERROR] Phase 1 failed or plan file not found"
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "phase 1 failed" -Sections @{ query = "failed" }
+    Send-FailureAlert -Phase "Phase1" -Reason "查詢/規劃逾時（$($MaxPhase1Retries + 1) 次嘗試均失敗）"
     exit 1
 }
 
@@ -349,11 +416,14 @@ if ($plan.plan_type -eq "tasks") {
         $taskName = "task-$($task.rank)"
 
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $tools, $taskName, $logDir, $timestamp, $traceId)
+            param($prompt, $tools, $taskName, $logDir, $timestamp, $traceId, $apiToken)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            if ($apiToken) {
+                [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+            }
 
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -370,7 +440,7 @@ if ($plan.plan_type -eq "tasks") {
             }
 
             return $output
-        } -ArgumentList $taskPrompt, $taskTools, $taskName, $LogDir, $Timestamp, $traceId
+        } -ArgumentList $taskPrompt, $taskTools, $taskName, $LogDir, $Timestamp, $traceId, $todoistToken
 
         $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $taskName
         $phase2Jobs += $job
@@ -436,11 +506,14 @@ elseif ($plan.plan_type -eq "auto") {
             $agentName = "auto-$taskKey"
 
             $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                param($prompt, $agentName, $logDir, $timestamp, $traceId)
+                param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
                 # 明確設定 Process 級別環境變數（會傳遞到子 process）
                 [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
                 [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                if ($apiToken) {
+                    [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+                }
 
                 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                 $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -457,7 +530,7 @@ elseif ($plan.plan_type -eq "auto") {
                 }
 
                 return $output
-            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId
+            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken
 
             $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
             $phase2Jobs += $job

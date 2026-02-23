@@ -27,6 +27,8 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 7. **回應格式**：任務在 `results` 欄位內（`jq '.results'`）
 
 > ⛔ **禁止驗證 Token**：若 API 返回 401/403 或 curl 失敗，**禁止使用 `echo $TODOIST_API_TOKEN`、`printenv TODOIST_API_TOKEN` 等指令驗證 token 是否存在**。這類指令會被 Harness 攔截並觸發安全警告。正確做法：記錄 HTTP 狀態碼（如 `401 Unauthorized`）到 plan.json 的 `error` 欄位，使用快取降級繼續執行。
+>
+> ⛔ **嚴禁從 .env 讀取 Token**：**禁止使用 `$(cat .env | grep TOKEN)` 或任何子 shell 讀取 .env 的方式**取得 `$TODOIST_API_TOKEN`。此行為會被 `exfiltration-subshell` 規則攔截，導致整個執行失敗。若 `$TODOIST_API_TOKEN` 未設定，請直接記錄錯誤到 plan.json，不要嘗試其他讀取方式。
 
 記錄每筆任務的 `id`、`content`、`description`、`priority`、`labels`、`due`。
 
@@ -97,7 +99,9 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
 | `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
 | `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
-| `^専案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
 
 ### Tier 2：內容關鍵字比對（信心度 80%）
 比對 SKILL_INDEX 速查表的觸發關鍵字。
@@ -189,9 +193,9 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 - Skills 和 allowedTools 仍從所有命中標籤合併
 
 **第二層：模板優先級**（無任務類型標籤覆寫時）：
-1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`
-2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`/`^UI`/`^Cloudflare`/`^Chat系統`/`^専案規劃`
-3. `templates/sub-agent/research-task.md` — `^邏輯思維`
+1. `templates/sub-agent/game-task.md` — `^遊戲優化`/`^遊戲開發`/`^創意`
+2. `templates/sub-agent/code-task.md` — `^Claude Code`/`^GitHub`/`^專案優化`/`^網站優化`/`^UI/UX`/`^UI`/`^Cloudflare`/`^Chat系統`/`^專案規劃`
+3. `templates/sub-agent/research-task.md` — `^邏輯思維`/`^遊戲研究`
 4. `templates/sub-agent/skill-task.md` — 其他有 Skill 匹配的標籤
 5. `templates/sub-agent/general-task.md` — 無匹配
 

@@ -46,6 +46,24 @@
             "command": "python hooks/post_tool_logger.py"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/cjk_guard.py post-fix"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/cjk_guard.py post-fix"
+          }
+        ]
       }
     ],
     "PostToolUseFailure": [
