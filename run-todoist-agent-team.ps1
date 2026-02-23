@@ -468,7 +468,9 @@ elseif ($plan.plan_type -eq "auto") {
             "tech_research"          = "$AgentDir\prompts\team\todoist-auto-tech-research.md"
             "ai_deep_research"       = "$AgentDir\prompts\team\todoist-auto-ai-deep-research.md"
             "unsloth_research"       = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
+            "unsloth"                = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
             "ai_github_research"     = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
+            "ai_github"              = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
             "ai_smart_city"          = "$AgentDir\prompts\team\todoist-auto-ai-smart-city.md"
             "ai_sysdev"              = "$AgentDir\prompts\team\todoist-auto-ai-sysdev.md"
             # 系統優化（1）

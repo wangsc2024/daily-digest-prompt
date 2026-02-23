@@ -76,12 +76,17 @@ def detect_api_sources(text: str) -> list:
     return sources
 
 
+def _cmd_has_word(command: str, word: str) -> bool:
+    """Check if command contains word at a word boundary (start or after space/|/;/&)."""
+    return command.startswith(word) or (" " + word) in command or ("|" + word) in command or (";" + word) in command
+
+
 def classify_bash(command: str) -> tuple:
     """Classify a Bash command and return (summary, tags)."""
     tags = []
     summary = command[:200]
 
-    if "curl" in command:
+    if _cmd_has_word(command, "curl"):
         tags.append("api-call")
         tags.extend(detect_api_sources(command))
         # Distinguish read vs write API calls
@@ -92,9 +97,9 @@ def classify_bash(command: str) -> tuple:
             tags.append("api-write")
         else:
             tags.append("api-read")
-    if "rm " in command:
+    if _cmd_has_word(command, "rm "):
         tags.append("file-delete")
-    if "git " in command:
+    if _cmd_has_word(command, "git "):
         tags.append("git")
         if "git push" in command:
             tags.append("git-push")
@@ -102,7 +107,7 @@ def classify_bash(command: str) -> tuple:
             tags.append("git-commit")
     if "claude -p" in command:
         tags.append("sub-agent")
-    if "python" in command or "pytest" in command:
+    if _cmd_has_word(command, "python") or _cmd_has_word(command, "pytest"):
         tags.append("python")
 
     return summary, tags

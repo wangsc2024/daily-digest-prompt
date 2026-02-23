@@ -28,9 +28,9 @@ import re
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 
-# Import shared API source patterns
+# Import shared API source patterns and regex cache
 try:
-    from hook_utils import API_SOURCE_PATTERNS
+    from hook_utils import API_SOURCE_PATTERNS, get_compiled_regex
 except ImportError:
     API_SOURCE_PATTERNS = {
         "todoist": ["todoist.com", "todoist"],
@@ -40,6 +40,15 @@ except ImportError:
         "ntfy": ["ntfy.sh"],
         "gmail": ["gmail.googleapis"],
     }
+
+    # Standalone fallback: simple cache for compiled regex
+    _standalone_regex_cache: dict = {}
+
+    def get_compiled_regex(pattern: str, flags: int = 0):
+        key = (pattern, flags)
+        if key not in _standalone_regex_cache:
+            _standalone_regex_cache[key] = re.compile(pattern, flags)
+        return _standalone_regex_cache[key]
 
 
 # ============================================
@@ -192,7 +201,7 @@ class ErrorClassifier:
     def _extract_http_status(self, output: str) -> Optional[int]:
         """提取 HTTP 狀態碼"""
         for pattern, _ in self.HTTP_STATUS_PATTERNS:
-            match = re.search(pattern, output, re.IGNORECASE)
+            match = get_compiled_regex(pattern, re.IGNORECASE).search(output)
             if match:
                 try:
                     return int(match.group(1))
@@ -202,7 +211,7 @@ class ErrorClassifier:
 
     def _extract_retry_after(self, output: str) -> Optional[int]:
         """提取 Retry-After header 值（秒）"""
-        match = re.search(self.RETRY_AFTER_PATTERN, output, re.IGNORECASE)
+        match = get_compiled_regex(self.RETRY_AFTER_PATTERN, re.IGNORECASE).search(output)
         if match:
             try:
                 return int(match.group(1))
@@ -520,7 +529,7 @@ class LoopDetector:
     def _is_whitelisted(self, params_summary: str) -> bool:
         """檢查是否在白名單中。"""
         for pattern in self.WHITELIST_PATTERNS:
-            if re.search(pattern, params_summary):
+            if get_compiled_regex(pattern).search(params_summary):
                 return True
         return False
 

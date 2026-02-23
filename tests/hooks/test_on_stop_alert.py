@@ -236,7 +236,7 @@ class TestRotateLogs:
         old_file.write_text("{}\n")
 
         # 建立一個今天的日誌（應保留）
-        from datetime import datetime
+        from datetime import datetime, timedelta
         today_file = log_dir / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
         today_file.write_text("{}\n")
 
@@ -250,10 +250,16 @@ class TestRotateLogs:
         log_dir = tmp_path / "logs" / "structured"
         log_dir.mkdir(parents=True)
 
+        # 使用相對日期確保測試不受執行日期影響
+        from datetime import datetime, timedelta
+        today = datetime.now()
+        old_date = (today - timedelta(days=30)).strftime("%Y-%m-%d")
+        recent_date = today.strftime("%Y-%m-%d")
+
         summary_file = log_dir / "session-summary.jsonl"
         with open(summary_file, "w", encoding="utf-8") as f:
-            f.write(json.dumps({"ts": "2026-01-01T08:00:00+08:00", "status": "healthy"}) + "\n")
-            f.write(json.dumps({"ts": "2026-02-16T08:00:00+08:00", "status": "healthy"}) + "\n")
+            f.write(json.dumps({"ts": f"{old_date}T08:00:00+08:00", "status": "healthy"}) + "\n")
+            f.write(json.dumps({"ts": f"{recent_date}T08:00:00+08:00", "status": "healthy"}) + "\n")
 
         _rotate_logs(retention_days=7)
 
@@ -263,4 +269,4 @@ class TestRotateLogs:
         # 舊的應被移除，新的應保留
         assert len(lines) == 1
         entry = json.loads(lines[0])
-        assert entry["ts"].startswith("2026-02-16")
+        assert entry["ts"].startswith(recent_date)

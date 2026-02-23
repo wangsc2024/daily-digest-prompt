@@ -1,77 +1,99 @@
 {
   "version": 1,
-  "generated_at": "2026-02-19T06:05:16.458874+08:00",
+  "generated_at": "2026-02-23T23:36:00+08:00",
   "period_days": 7,
+  "data_sources": "full",
   "metrics": {
-    "daily_success_rate": 0.985,
-    "skill_usage_coverage": 1.0,
-    "cache_hit_ratio": 0.1468,
+    "daily_success_rate": 0.978,
+    "skill_usage_coverage": 0.85,
+    "cache_hit_ratio": 0.164,
     "error_rate": 0.0,
-    "block_rate": 0.0016,
+    "block_rate": 0.0007,
     "topic_diversity": 1.0,
-    "auto_task_fairness": 0.7977
+    "auto_task_fairness": 0.92
   },
   "alerts": [
     {
       "level": "warning",
       "metric": "cache_hit_ratio",
-      "value": 0.1468,
-      "threshold": 0.4
+      "value": 0.164,
+      "threshold": 0.40,
+      "message": "快取命中率 16.4% 遠低於 40% 門檻"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.7977,
-      "threshold": 0.5
+      "value": 0.92,
+      "threshold": 0.50,
+      "message": "自動任務分配不均（CV=0.92），今日 8 個任務為 0 次"
     }
   ],
   "recommendations": [
-    "Cache hit ratio below 40%: consider extending TTLs in config/cache-policy.yaml or pre-warming cache before peak hours.",
-    "25 blocked events in 7 days: review hook rules in config/hook-rules.yaml for potential over-protection.",
-    "105 loop-suspected events: investigate Agent loop patterns and consider adjusting LoopDetector thresholds.",
-    "High failure hours detected: [5]. Check system availability during these hours.",
-    "Excellent success rate (>=98%). System is operating very healthily.",
-    "High topic diversity (>=90%): research topics are well distributed with minimal duplication.",
-    "Auto task distribution is uneven (CV > 0.5). Note: auto-tasks-today.json is a snapshot of the current day only; some tasks may not yet have executed."
+    "快取命中率偏低（16.4%）：建議檢查 cache-policy.yaml TTL 設定，確認 api-cache Skill 在所有 API 呼叫前正確觸發",
+    "自動任務輪轉不均：今日 18 個任務中 8 個為 0 次，但 next_execution_order=14 表示輪轉指針運作中，剩餘任務應在後續排程執行",
+    "2/20-2/22 排程器疑似停機：scheduler-state 中 2/19 後直接跳到 2/23，需檢查 Windows Task Scheduler 是否正常",
+    "攔截率極低（0.07%，12 次/16732 次），安全規則運作穩定",
+    "零錯誤率（0/16732），系統品質優異",
+    "研究主題多樣性 100%（151 筆全不重複），去重機制效果良好"
   ],
   "skill_heatmap": {
-    "todoist": 692,
-    "knowledge-query": 660,
-    "ntfy-notify": 255,
-    "hackernews-ai-digest": 190,
-    "api-cache": 32,
-    "pingtung-news": 29,
-    "atomic-habits": 19,
-    "skill-scanner": 19,
-    "learning-mastery": 18,
-    "digest-memory": 17,
-    "pingtung-policy-expert": 17,
-    "game-design": 14,
-    "scheduler-state": 11,
-    "task-manager": 9,
-    "web-research": 8,
-    "system-audit": 8,
-    "system-insight": 6,
-    "kb-curator": 6,
-    "gmail": 6,
-    "todoist-task-creator": 5,
-    "github-scout": 4
+    "todoist": 665,
+    "knowledge-query": 627,
+    "skill-read_total": 649,
+    "api-call_total": 1611,
+    "cache-read_total": 315,
+    "team-mode_calls": 4766
   },
-  "high_failure_hours": [
-    5
-  ],
-  "raw_stats": {
-    "total_jsonl_entries": 15978,
-    "total_scheduler_runs": 200,
-    "success_runs": 197,
-    "failed_runs": 3,
-    "unique_skills_used": 21,
-    "cache_reads": 261,
-    "api_calls": 1517,
-    "blocked_events": 25,
-    "loop_suspected_events": 105,
-    "research_entries_7d": 122,
-    "unique_topics_7d": 122,
-    "auto_task_today_total": 11
+  "high_failure_hours": [],
+  "scheduler_stats": {
+    "total_runs_7d": 138,
+    "success": 135,
+    "failed": 3,
+    "success_rate": 0.978,
+    "avg_duration_seconds": 675,
+    "agent_breakdown": {
+      "todoist-team": 68,
+      "todoist": 57,
+      "daily-digest-team": 9,
+      "daily-digest": 4
+    }
+  },
+  "jsonl_stats": {
+    "total_tool_calls": 16732,
+    "errors": 0,
+    "blocked": 12,
+    "sessions": 748,
+    "top_tools": {
+      "Read": 5271,
+      "Bash": 5143,
+      "TodoWrite": 2417,
+      "Write": 1369,
+      "Edit": 631,
+      "WebFetch": 575,
+      "Grep": 446,
+      "WebSearch": 414,
+      "Glob": 263,
+      "Task": 140
+    }
+  },
+  "research_stats": {
+    "total_entries": 151,
+    "unique_topics": 151,
+    "diversity_index": 1.0,
+    "recent_7d_unique_topics": 121
+  },
+  "auto_tasks_today": {
+    "date": "2026-02-23",
+    "executed_count": 10,
+    "zero_count": 8,
+    "fairness_cv": 0.92,
+    "next_execution_order": 14,
+    "zero_tasks": ["shurangama", "unsloth_research", "ai_github_research", "creative_game_optimize", "qa_optimize", "system_insight", "self_heal", "github_scout"]
+  },
+  "trend_vs_previous": {
+    "success_rate_delta": -0.007,
+    "cache_hit_ratio_delta": 0.017,
+    "block_rate_improvement": 0.0009,
+    "notes": "成功率微降 0.7%（97.8% vs 98.5%），快取命中率微升 1.7%，攔截率改善 56%（12 vs 25）"
   }
 }

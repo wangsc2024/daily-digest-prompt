@@ -241,8 +241,9 @@ def build_alert_message(analysis: dict) -> tuple:
             f"快取讀取: {analysis['cache_reads']}"
         )
         title = "SKILL.md 修改通知"
-        message = header + "\n\n" + "\n".join(info_items)
-        message += "\n\n[git diff skills/*/SKILL.md]\n" + _get_skill_diff()
+        body = header + "\n\n" + "\n".join(info_items) + "\n\n[git diff skills/*/SKILL.md]\n"
+        reserved = len(body.encode("utf-8"))
+        message = body + _get_skill_diff(reserved_bytes=reserved)
         return "info", title, message
 
     if not issues:
@@ -266,7 +267,9 @@ def build_alert_message(analysis: dict) -> tuple:
     all_items = issues + ([""] + info_items if info_items else [])
     message = header + "\n\n" + "\n".join(all_items)
     if info_items:
-        message += "\n\n[git diff skills/*/SKILL.md]\n" + _get_skill_diff()
+        diff_prefix = "\n\n[git diff skills/*/SKILL.md]\n"
+        reserved = len((message + diff_prefix).encode("utf-8"))
+        message += diff_prefix + _get_skill_diff(reserved_bytes=reserved)
     return severity, title, message
 
 

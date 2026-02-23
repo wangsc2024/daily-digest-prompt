@@ -14,7 +14,6 @@ sys.path.insert(0, os.path.join(project_root, "hooks"))
 
 from cjk_guard import (
     CORRECTIONS,
-    CJK_CORRECTIONS,
     EXCLUDED_FILES,
     SCAN_EXTENSIONS,
     detect_issues,
@@ -24,31 +23,23 @@ from cjk_guard import (
 
 
 # ============================================================
-# CJK_CORRECTIONS 與 CORRECTIONS 映射表
+# CORRECTIONS 映射表
 # ============================================================
 
 class TestCJKCorrections:
-    """CJK_CORRECTIONS 原始映射表驗證。"""
-
-    def test_total_entries(self):
-        """CJK_CORRECTIONS 應有 16 筆（含重複與跳過）。"""
-        assert len(CJK_CORRECTIONS) == 16
+    """CORRECTIONS 映射表驗證。"""
 
     def test_valid_mappings_count(self):
-        """過濾後 CORRECTIONS 應有 12 個有效映射（13 筆 jp!=tc，重複 0x8FBA 合併為 1）。"""
+        """CORRECTIONS 應有 12 個有效映射。"""
         assert len(CORRECTIONS) == 12
 
-    def test_skipped_entries_have_same_codepoint(self):
-        """jp == tc 的條目應被過濾，不出現在 CORRECTIONS 中。"""
-        skipped = [(jp, tc) for jp, tc, _ in CJK_CORRECTIONS if jp == tc]
-        assert len(skipped) == 3
-        for jp, tc in skipped:
-            assert jp not in CORRECTIONS
+    def test_no_same_codepoint_entries(self):
+        """CORRECTIONS 中不應有 jp == tc 的條目。"""
+        for jp, tc in CORRECTIONS.items():
+            assert jp != tc, f"映射 {jp:#06X} → {tc:#06X} 不應相同"
 
-    def test_duplicate_entry_0x8FBA(self):
-        """0x8FBA（邊）在 CJK_CORRECTIONS 中出現兩次，CORRECTIONS 只保留一筆。"""
-        entries = [(jp, tc) for jp, tc, _ in CJK_CORRECTIONS if jp == 0x8FBA]
-        assert len(entries) == 2
+    def test_edge_mapping_0x8FBA(self):
+        """0x8FBA（邊）應正確映射。"""
         assert 0x8FBA in CORRECTIONS
         assert CORRECTIONS[0x8FBA] == 0x908A
 

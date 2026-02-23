@@ -143,6 +143,30 @@ def _set_nested_value(data, path, value):
         current[last_part] = value
 
 
+def _resolve_field_value(item, index, transformation):
+    """根據 value_strategy 決定欄位值。
+
+    Args:
+        item: 目標字典項目
+        index: 項目索引（用於 auto_increment）
+        transformation: 轉換規則
+
+    Returns:
+        計算出的欄位值
+    """
+    value_strategy = transformation.get("value_strategy")
+    mapping = transformation.get("mapping", {})
+
+    if value_strategy == "auto_increment":
+        return index + 1
+    elif value_strategy == "infer_from_guard_tag":
+        return mapping.get(item.get("guard_tag", ""), "medium")
+    elif value_strategy == "infer_from_id":
+        return mapping.get(item.get("id", ""), transformation.get("value", None))
+    else:
+        return transformation.get("value", None)
+
+
 def _apply_add_field(data, transformation):
     """套用 add_field 轉換（新增欄位）。
 
@@ -155,59 +179,26 @@ def _apply_add_field(data, transformation):
     """
     target = transformation.get("target", "")
     field = transformation.get("field")
-    value_strategy = transformation.get("value_strategy")
-    mapping = transformation.get("mapping", {})
 
     changes = []
 
-    # 處理萬用字元目標（如 "tasks.*" 或 "bash_rules.*"）
     if "*" in target:
         base_path = target.split(".*")[0]
         items = _get_nested_value(data, base_path)
 
         if isinstance(items, dict):
-            for key, item in items.items():
+            for idx, (key, item) in enumerate(items.items()):
                 if isinstance(item, dict) and field not in item:
-                    # 依據 value_strategy 決定值
-                    if value_strategy == "auto_increment":
-                        # 為所有項目自動編號（從 1 開始）
-                        item[field] = len(changes) + 1
-                    elif value_strategy == "infer_from_guard_tag":
-                        # 從 guard_tag 推斷優先級
-                        guard_tag = item.get("guard_tag", "")
-                        item[field] = mapping.get(guard_tag, "medium")
-                    elif value_strategy == "infer_from_id":
-                        # 從 id 推斷值
-                        item_id = item.get("id", "")
-                        item[field] = mapping.get(item_id, transformation.get("value", None))
-                    else:
-                        # 使用固定值
-                        item[field] = transformation.get("value", None)
-
+                    item[field] = _resolve_field_value(item, idx, transformation)
                     changes.append(f"  新增 {base_path}.{key}.{field} = {item[field]}")
 
         elif isinstance(items, list):
             for i, item in enumerate(items):
                 if isinstance(item, dict) and field not in item:
-                    # 依據 value_strategy 決定值
-                    if value_strategy == "auto_increment":
-                        item[field] = i + 1
-                    elif value_strategy == "infer_from_guard_tag":
-                        # 從 guard_tag 推斷優先級
-                        guard_tag = item.get("guard_tag", "")
-                        item[field] = mapping.get(guard_tag, "medium")
-                    elif value_strategy == "infer_from_id":
-                        # 從 id 推斷值
-                        item_id = item.get("id", "")
-                        item[field] = mapping.get(item_id, transformation.get("value", None))
-                    else:
-                        # 使用固定值
-                        item[field] = transformation.get("value", None)
-
+                    item[field] = _resolve_field_value(item, i, transformation)
                     changes.append(f"  新增 {base_path}[{i}].{field} = {item[field]}")
 
     else:
-        # 處理非萬用字元目標
         if field not in data:
             data[field] = transformation.get("value", None)
             changes.append(f"  新增 {field} = {data[field]}")
