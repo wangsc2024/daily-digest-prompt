@@ -16,7 +16,7 @@ PreToolUse:Bash Guard — Bash 指令機器強制攔截。
 """
 import re
 
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex
 
 
 # YAML 不可用時的內建預設規則
@@ -207,7 +207,7 @@ def check_bash_command(command, rules=None):
         re_flags = _get_re_flags(rule)
         patterns = _get_patterns(rule)
 
-        if any(re.search(p, command, re_flags) for p in patterns):
+        if any(get_compiled_regex(p, re_flags).search(command) for p in patterns):
             reason = rule.get("reason", "Blocked by rule: " + rule.get("id", "unknown"))
             guard_tag = rule.get("guard_tag", rule.get("id", "unknown"))
             return True, reason, guard_tag

@@ -28,6 +28,19 @@ import re
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 
+# Import shared API source patterns
+try:
+    from hook_utils import API_SOURCE_PATTERNS
+except ImportError:
+    API_SOURCE_PATTERNS = {
+        "todoist": ["todoist.com", "todoist"],
+        "pingtung-news": ["ptnews-mcp", "pingtung"],
+        "hackernews": ["hacker-news.firebaseio", "hn.algolia"],
+        "knowledge": ["localhost:3000"],
+        "ntfy": ["ntfy.sh"],
+        "gmail": ["gmail.googleapis"],
+    }
+
 
 # ============================================
 # Error Classifier
@@ -169,17 +182,9 @@ class ErrorClassifier:
             }
 
     def _detect_api_source(self, command: str) -> Optional[str]:
-        """偵測 API 來源"""
+        """偵測 API 來源（使用 hook_utils.API_SOURCE_PATTERNS 共用定義）"""
         lower_cmd = command.lower()
-        sources = {
-            "todoist": ["todoist.com", "todoist"],
-            "pingtung-news": ["ptnews-mcp", "pingtung"],
-            "hackernews": ["hacker-news.firebaseio", "hn.algolia"],
-            "knowledge": ["localhost:3000"],
-            "ntfy": ["ntfy.sh"],
-            "gmail": ["gmail.googleapis"],
-        }
-        for source, patterns in sources.items():
+        for source, patterns in API_SOURCE_PATTERNS.items():
             if any(p in lower_cmd for p in patterns):
                 return source
         return None

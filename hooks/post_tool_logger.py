@@ -25,16 +25,8 @@ try:
 except ImportError:
     AGENT_GUARDIAN_AVAILABLE = False
 
-
-# Source detection patterns for API calls
-API_SOURCE_PATTERNS = {
-    "todoist": ["todoist.com", "todoist"],
-    "pingtung-news": ["ptnews-mcp", "pingtung"],
-    "hackernews": ["hacker-news.firebaseio", "hn.algolia"],
-    "knowledge": ["localhost:3000"],
-    "ntfy": ["ntfy.sh"],
-    "gmail": ["gmail.googleapis"],
-}
+# Import shared API source patterns
+from hook_utils import API_SOURCE_PATTERNS
 
 # Error keywords in tool output
 ERROR_KEYWORDS = [

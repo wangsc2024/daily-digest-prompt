@@ -6,7 +6,31 @@ Hook 共用工具模組 — 提供 YAML 配置載入與結構化日誌記錄。
 """
 import json
 import os
+import re
 from datetime import datetime
+
+
+# 模組層級正則編譯快取（避免重複編譯 hot path 中的 pattern）
+_compiled_regex_cache: dict = {}
+
+
+def get_compiled_regex(pattern: str, flags: int = 0):
+    """從快取取得已編譯正則，未命中時編譯並快取。"""
+    key = (pattern, flags)
+    if key not in _compiled_regex_cache:
+        _compiled_regex_cache[key] = re.compile(pattern, flags)
+    return _compiled_regex_cache[key]
+
+
+# API 來源偵測 patterns（供 post_tool_logger 和 agent_guardian 共用）
+API_SOURCE_PATTERNS = {
+    "todoist": ["todoist.com", "todoist"],
+    "pingtung-news": ["ptnews-mcp", "pingtung"],
+    "hackernews": ["hacker-news.firebaseio", "hn.algolia"],
+    "knowledge": ["localhost:3000"],
+    "ntfy": ["ntfy.sh"],
+    "gmail": ["gmail.googleapis"],
+}
 
 
 # Prompt Injection 偵測 patterns（供 hook 或 Python 腳本引用）

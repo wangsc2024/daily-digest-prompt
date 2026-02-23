@@ -1,0 +1,23 @@
+{
+  "date": "2026-02-23",
+  "topic": "合成資料（Synthetic Data）在 AI 訓練中的角色演進 — 從資料擴增到人類判斷的規模化錨定",
+  "research_questions": [
+    "合成資料在 2025-2026 年的生成技術有哪些突破？（LLM 生成、擴散模型生成、多模態合成）",
+    "合成資料如何在醫療、自駕車、金融等高風險領域替代或補充真實資料？其品質保證機制為何？",
+    "合成資料的隱私保護效益與風險（差分隱私、模型崩潰、資料漂移）如何平衡？最新研究的共識與分歧？"
+  ],
+  "methodology": "混合研究法：(1) 系統性文獻回顧 — 搜尋 arXiv、Google Scholar、產業報告；(2) 技術對比分析 — 比較 LLM 合成 vs 擴散模型合成 vs GAN 合成的適用場景；(3) 案例研究 — 選取 3 個產業應用案例進行深度分析；(4) 趨勢預測 — 基於技術路線圖推演 2026-2027 發展方向",
+  "keywords": [
+    "Synthetic Data",
+    "合成資料",
+    "LLM data generation",
+    "data augmentation",
+    "model collapse",
+    "differential privacy synthetic data",
+    "multimodal synthetic data",
+    "synthetic data quality",
+    "self-instruct",
+    "Textbooks Are All You Need"
+  ],
+  "stage_completed": 1
+}

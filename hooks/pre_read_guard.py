@@ -13,7 +13,7 @@ PreToolUse:Read Guard — 敏感路徑讀取攔截。
 import os
 import re
 
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision
+from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex
 
 
 # YAML 不可用時的內建預設規則
@@ -119,7 +119,7 @@ def check_read_path(file_path, rules=None, project_root=None):
         if check_type == "path_match":
             patterns = rule.get("patterns", [])
             for pattern in patterns:
-                if re.search(pattern, normalized, re.IGNORECASE):
+                if get_compiled_regex(pattern, re.IGNORECASE).search(normalized):
                     # Allow reading these paths if they're within the project
                     if _is_within_project(file_path, project_root):
                         continue

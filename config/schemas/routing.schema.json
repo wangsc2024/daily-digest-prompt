@@ -177,6 +177,11 @@
             }
           ],
           "description": "模板路徑（null 代表 modifier label）"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "可選的映射說明（用途描述）"
         }
       },
       "additionalProperties": false
