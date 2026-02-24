@@ -494,12 +494,32 @@ elseif ($plan.plan_type -eq "auto") {
             $taskKey = $autoTask.key
             $taskName = $autoTask.name
 
-            if ($dedicatedPrompts.ContainsKey($taskKey) -and (Test-Path $dedicatedPrompts[$taskKey])) {
-                $promptToUse = $dedicatedPrompts[$taskKey]
-                Write-Log "[Phase2] Using dedicated prompt for $taskKey"
+            # Key 正規化：LLM 產出的 key 格式不穩定（連字號/無分隔符/縮寫）
+            # 先將連字號統一為底線，再查別名表
+            $normalizedKey = $taskKey -replace '-', '_'
+            $keyAliases = @{
+                "logaudit"       = "log_audit"
+                "gitpush"        = "git_push"
+                "tech_research"  = "tech_research"
+                "ai_deep_research" = "ai_deep_research"
+                "ai_github"      = "ai_github"
+            }
+            if ($keyAliases.ContainsKey($normalizedKey)) {
+                $normalizedKey = $keyAliases[$normalizedKey]
+            }
+            if (-not $dedicatedPrompts.ContainsKey($normalizedKey) -and $dedicatedPrompts.ContainsKey($taskKey)) {
+                $normalizedKey = $taskKey
+            }
+            if ($normalizedKey -ne $taskKey) {
+                Write-Log "[Phase2] Key normalized: $taskKey -> $normalizedKey"
+            }
+
+            if ($dedicatedPrompts.ContainsKey($normalizedKey) -and (Test-Path $dedicatedPrompts[$normalizedKey])) {
+                $promptToUse = $dedicatedPrompts[$normalizedKey]
+                Write-Log "[Phase2] Using dedicated prompt for $normalizedKey"
             }
             else {
-                Write-Log "[Phase2] No dedicated prompt found for $taskKey, skipping"
+                Write-Log "[Phase2] No dedicated prompt found for $taskKey (normalized: $normalizedKey), skipping"
                 $sections["auto-$taskKey"] = "skipped"
                 continue
             }

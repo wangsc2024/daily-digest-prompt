@@ -137,7 +137,7 @@ Act      → self-heal（異常修復）/ 手動實作 ADR
 
 ## 模組 C：依賴圖補強
 
-**目的**：現有 21 個 Skills 中只有 4 個宣告 `depends-on`，但實際隱式依賴更多。
+**目的**：現有 22 個 Skills 中只有 4 個宣告 `depends-on`，但實際隱式依賴更多。
 
 **C1：讀取所有 SKILL.md**
 

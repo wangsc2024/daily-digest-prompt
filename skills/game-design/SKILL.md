@@ -1,6 +1,6 @@
 ---
 name: game-design
-version: "1.0.0"
+version: "1.1.0"
 description: |
   遊戲設計與優化 — HTML5/JS 遊戲品質提升、復古遊戲創建、UX 最佳化、Cloudflare Pages 部署。
   支援兩大方向：1) 經典復古遊戲現代化（Space Invaders/Pac-Man/Tetris 等）
@@ -34,6 +34,80 @@ HTML5/JavaScript 遊戲品質提升、UX 最佳化與 Cloudflare Pages 部署指
 - Cloudflare Pages 靜態網站部署
 - 遊戲效能分析（FPS、記憶體、載入時間）
 - 程式碼品質審查（針對遊戲邏輯特性）
+
+## 遊戲工作目錄
+
+所有遊戲檔案位於 `D:\Source\game` 目錄下，各遊戲為獨立子目錄：
+
+```
+D:\Source\game\
+├── space-invaders/    # 太空侵略者
+├── breakout/          # 打磚塊
+├── pac-man/           # 小精靈
+├── tetris/            # 俄羅斯方塊
+└── <new-game>/        # 新遊戲
+```
+
+> 執行前先用 `ls D:/Source/game/` 確認目標遊戲目錄存在。
+
+---
+
+## 執行步驟（必須依序）
+
+### 步驟 1：定位與分析
+
+1. 讀取任務描述，確認目標遊戲名稱與工作類型（新建/優化/修 Bug）
+2. 用 `Glob` 搜尋 `D:/Source/game/<game-name>/**/*.{html,js,css}` 定位檔案
+3. 讀取主要 JS 檔案（通常為 `game.js` 或 `main.js`），分析現有架構
+
+### 步驟 2：知識庫查詢（建議）
+
+查詢已有的遊戲設計筆記，避免重複研究：
+```bash
+curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "遊戲設計 HTML5 最佳實踐", "topK": 5}'
+```
+- 成功 → 參考已有設計模式和已知問題
+- 服務未啟動 → 跳過，直接進入步驟 3
+
+### 步驟 3：實施修改
+
+依任務類型執行：
+- **新建遊戲**：建立目錄結構（`index.html` + `js/` + `assets/`）→ 實作核心機制 → 加入 UI
+- **優化遊戲**：定位問題點 → 修改程式碼 → 逐項驗證品質標準（見下方）
+- **修 Bug**：重現問題 → 定位根因 → 修復 → 回歸測試
+
+### 步驟 4：品質驗證
+
+逐項檢查下方「品質標準」和「程式碼審查清單」，確保全部通過。
+
+### 步驟 5：部署（若需要）
+
+```bash
+# Cloudflare Pages 部署
+cd D:/Source/game/<game-name>
+npx wrangler pages deploy ./ --project-name=<game-name>
+```
+或透過 git push 到 GitHub 觸發自動部署。
+
+### 步驟 6：知識庫回寫
+
+將本次修改心得寫入知識庫（見下方「完成後回寫知識庫」段落）。
+
+---
+
+## 錯誤處理與降級
+
+| 狀況 | 處理方式 |
+|------|---------|
+| 遊戲目錄不存在 | 提醒用戶確認路徑，或建立新目錄 |
+| 知識庫服務未啟動 | 跳過步驟 2 和步驟 6，不報錯 |
+| Cloudflare 部署失敗 | 檢查 wrangler 登入狀態，確認專案名稱正確 |
+| 遊戲無法啟動 | 檢查 console 錯誤，修復後重新驗證 |
+| 品質標準未達標 | 記錄未達項目，嘗試修復（最多 2 輪） |
+
+---
 
 ## 經典復古遊戲技術實作要點
 

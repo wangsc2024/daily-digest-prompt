@@ -1,6 +1,6 @@
 ---
 name: todoist-task-creator
-version: "1.0.1"
+version: "1.1.0"
 description: |
   互動式新增符合系統排程路由規則的 Todoist 任務。
   確保標籤、優先級、截止日期正確設定，使任務被 Todoist Agent 自動識別與執行。
@@ -66,9 +66,9 @@ triggers:
 
 | Todoist 標籤 | 路由 Skill | 模板 | 適用任務類型 |
 |-------------|-----------|------|------------|
-| **`研究`** | deep-research + knowledge-query | research-task.md | 研究、調查、技術分析（**最高覆寫**） |
-| **`深度思維`** | deep-research + knowledge-query | research-task.md | 深度分析、洞察報告（**最高覆寫**） |
-| `邏輯思維` | deep-research + knowledge-query | research-task.md | 邏輯分析、推理 |
+| **`研究`** | web-research + knowledge-query | research-task.md | 研究、調查、技術分析（**最高覆寫**） |
+| **`深度思維`** | web-research + knowledge-query | research-task.md | 深度分析、洞察報告（**最高覆寫**） |
+| `邏輯思維` | web-research + knowledge-query | research-task.md | 邏輯分析、推理 |
 | `知識庫` | knowledge-query | 修飾標籤（不選模板） | 結果寫入 KB（搭配其他標籤） |
 | `Claude Code` | 程式開發 | code-task.md | Claude Code 相關開發 |
 | `GitHub` | 程式開發 | code-task.md | GitHub 操作、專案相關 |
@@ -215,7 +215,7 @@ rm task_create.json
 🔄 排程執行預覽：
   路由層級：Tier 1 標籤路由（信心度 100%）
   模板觸發：「研究」標籤 → 任務類型覆寫 → research-task.md
-  匹配 Skill：deep-research + knowledge-query（含 KB 去重）
+  匹配 Skill：web-research + knowledge-query（含 KB 去重）
   allowedTools：Read,Bash,Write,WebSearch,WebFetch
   下次執行：2026-02-19 09:00 後的第一個整點/半點觸發
   綜合分估算：3 × 1.0 × 1.2 × 1.1 × 1.15 × 1.0 ≈ 4.57
@@ -313,7 +313,13 @@ Claude 操作：
 
 ```bash
 curl -s "https://api.todoist.com/api/v1/labels" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" | python -c "import sys,json; [print(l['name']) for l in json.load(sys.stdin)]"
+  -H "Authorization: Bearer $TODOIST_API_TOKEN" | python -c "
+import sys, json
+data = json.load(sys.stdin)
+labels = data.get('results', data) if isinstance(data, dict) else data
+for l in labels:
+    print(l['name'])
+"
 ```
 
 ### 建立新標籤（Windows 方式）
