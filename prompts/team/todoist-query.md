@@ -140,26 +140,28 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 6. **注意**：`next_execution_order` 的寫入由 Phase 3（todoist-assemble.md 步驟 3）負責；Phase 1 只計算並輸出 `next_execution_order_after`
 7. 若掃完一圈無任何可執行 → plan_type = "idle"
 
-| execution_order | 群組 | 自動任務 | 每日上限 | 欄位 |
-|-----------------|------|---------|---------|------|
-| 1 | 佛學 | 楞嚴經研究 | 5 次 | `shurangama_count` |
-| 2 | 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong_count` |
-| 3 | 佛學 | 法華經研究 | 2 次 | `fahua_count` |
-| 4 | 佛學 | 淨土宗研究 | 2 次 | `jingtu_count` |
-| 5 | AI/技術 | 每日任務技術研究 | 5 次 | `tech_research_count` |
-| 6 | AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research_count` |
-| 7 | AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research_count` |
-| 8 | AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research_count` |
-| 9 | AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city_count` |
-| 10 | AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev_count` |
-| 11 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit_count` |
-| 12 | 維護 | 系統 Log 審查 | 1 次 | `log_audit_count` |
-| 13 | 維護 | 專案推送 GitHub | 4 次 | `git_push_count` |
-| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_optimize_count` |
-| 15 | 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize_count` |
-| 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight_count` |
-| 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal_count` |
-| 18 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout_count` |
+> ⚠️ **key 欄位是強制規範**：輸出 `selected_tasks` 時，`key` 欄的值必須**完全符合**下表 `plan_key` 欄（使用底線 `_`，絕對不可用連字號 `-` 或縮寫）。
+
+| execution_order | 群組 | 自動任務 | 每日上限 | plan_key（plan JSON 必須用此值）| 欄位 |
+|-----------------|------|---------|---------|--------------------------------|------|
+| 1 | 佛學 | 楞嚴經研究 | 5 次 | `shurangama` | `shurangama_count` |
+| 2 | 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong` | `jiaoguangzong_count` |
+| 3 | 佛學 | 法華經研究 | 2 次 | `fahua` | `fahua_count` |
+| 4 | 佛學 | 淨土宗研究 | 2 次 | `jingtu` | `jingtu_count` |
+| 5 | AI/技術 | 每日任務技術研究 | 5 次 | `tech_research` | `tech_research_count` |
+| 6 | AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research` | `ai_deep_research_count` |
+| 7 | AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research` | `unsloth_research_count` |
+| 8 | AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research` | `ai_github_research_count` |
+| 9 | AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city` | `ai_smart_city_count` |
+| 10 | AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev` | `ai_sysdev_count` |
+| 11 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit` | `skill_audit_count` |
+| 12 | 維護 | 系統 Log 審查 | 1 次 | `log_audit` | `log_audit_count` |
+| 13 | 維護 | 專案推送 GitHub | 4 次 | `git_push` | `git_push_count` |
+| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_optimize` | `creative_game_optimize_count` |
+| 15 | 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize` | `qa_optimize_count` |
+| 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight` | `system_insight_count` |
+| 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal` | `self_heal_count` |
+| 18 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout` | `github_scout_count` |
 
 合計上限：45 次/日
 

@@ -457,52 +457,43 @@ elseif ($plan.plan_type -eq "auto") {
     else {
         Write-Log "[Phase2] Starting $($selectedTasks.Count) auto-task agents in parallel..."
 
-        # Dedicated team prompts for all 18 auto-tasks
-        $dedicatedPrompts = @{
-            # 佛學研究（4）
-            "shurangama"             = "$AgentDir\prompts\team\todoist-auto-shurangama.md"
-            "jiaoguangzong"          = "$AgentDir\prompts\team\todoist-auto-jiaoguangzong.md"
-            "fahua"                  = "$AgentDir\prompts\team\todoist-auto-fahua.md"
-            "jingtu"                 = "$AgentDir\prompts\team\todoist-auto-jingtu.md"
-            # AI/技術研究（6）
-            "tech_research"          = "$AgentDir\prompts\team\todoist-auto-tech-research.md"
-            "ai_deep_research"       = "$AgentDir\prompts\team\todoist-auto-ai-deep-research.md"
-            "unsloth_research"       = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
-            "unsloth"                = "$AgentDir\prompts\team\todoist-auto-unsloth.md"
-            "ai_github_research"     = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
-            "ai_github"              = "$AgentDir\prompts\team\todoist-auto-ai-github.md"
-            "ai_smart_city"          = "$AgentDir\prompts\team\todoist-auto-ai-smart-city.md"
-            "ai_sysdev"              = "$AgentDir\prompts\team\todoist-auto-ai-sysdev.md"
-            # 系統優化（1）
-            "skill_audit"            = "$AgentDir\prompts\team\todoist-auto-skill-audit.md"
-            # 系統維護（2）
-            "log_audit"              = "$AgentDir\prompts\team\todoist-auto-logaudit.md"
-            "git_push"               = "$AgentDir\prompts\team\todoist-auto-gitpush.md"
-            # 遊戲創意（1）— 兩個 key 相容（YAML 定義 creative_game_optimize，簡稱 creative_game）
-            "creative_game"          = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
-            "creative_game_optimize" = "$AgentDir\prompts\team\todoist-auto-creative-game.md"
-            # 專案品質（1）
-            "qa_optimize"            = "$AgentDir\prompts\team\todoist-auto-qa-optimize.md"
-            # 系統自省（2）
-            "system_insight"         = "$AgentDir\prompts\team\todoist-auto-system-insight.md"
-            "self_heal"              = "$AgentDir\prompts\team\todoist-auto-self-heal.md"
-            # GitHub 靈感（1）
-            "github_scout"           = "$AgentDir\prompts\team\todoist-auto-github-scout.md"
+        # Dedicated team prompts：動態掃描實際檔案，防止重命名後路徑失效
+        # 命名規則：prompts/team/todoist-auto-{plan_key}.md（底線，與 frequency-limits.yaml key 一致）
+        $dedicatedPrompts = @{}
+        Get-ChildItem "$AgentDir\prompts\team\todoist-auto-*.md" -ErrorAction SilentlyContinue | ForEach-Object {
+            $key = $_.BaseName -replace "^todoist-auto-", ""
+            $dedicatedPrompts[$key] = $_.FullName
         }
+        Write-Log "[Phase2] Discovered $($dedicatedPrompts.Count) dedicated prompts: $($dedicatedPrompts.Keys -join ', ')"
 
         foreach ($autoTask in $selectedTasks) {
             $taskKey = $autoTask.key
             $taskName = $autoTask.name
 
-            # Key 正規化：LLM 產出的 key 格式不穩定（連字號/無分隔符/縮寫）
-            # 先將連字號統一為底線，再查別名表
+            # Key 正規化：LLM 產出的 key 格式不穩定（連字號/縮寫/遺漏 _research 後綴）
+            # Step 1: 統一連字號→底線（最常見不一致：tech-research、ai-deep-research）
             $normalizedKey = $taskKey -replace '-', '_'
+            # Step 2: 別名表（縮寫/遺漏後綴 → 標準 key，與 frequency-limits.yaml YAML key 一致）
             $keyAliases = @{
-                "logaudit"       = "log_audit"
-                "gitpush"        = "git_push"
-                "tech_research"  = "tech_research"
-                "ai_deep_research" = "ai_deep_research"
-                "ai_github"      = "ai_github"
+                # 無分隔符縮寫（LLM 可能省略分隔符）
+                "logaudit"           = "log_audit"
+                "gitpush"            = "git_push"
+                "techresearch"       = "tech_research"
+                "aideepresearch"     = "ai_deep_research"
+                "unsloth"            = "unsloth_research"   # 省略 _research
+                "aigithub"           = "ai_github_research"
+                "aismartcity"        = "ai_smart_city"
+                "aisysdev"           = "ai_sysdev"
+                "skillaudit"         = "skill_audit"
+                "qaoptimize"         = "qa_optimize"
+                "systeminsight"      = "system_insight"
+                "selfheal"           = "self_heal"
+                "githubscout"        = "github_scout"
+                # 短形式別名（LLM 省略 _research 後綴）
+                "ai_github"          = "ai_github_research"
+                "ai_deep"            = "ai_deep_research"
+                "ai_smart"           = "ai_smart_city"
+                "creative_game"      = "creative_game_optimize"
             }
             if ($keyAliases.ContainsKey($normalizedKey)) {
                 $normalizedKey = $keyAliases[$normalizedKey]

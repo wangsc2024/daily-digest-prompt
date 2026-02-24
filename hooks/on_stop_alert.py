@@ -25,7 +25,8 @@ import os
 import re
 import subprocess
 import tempfile
-from datetime import datetime, timedelta
+import hashlib
+from datetime import datetime, timedelta, date
 from collections import Counter
 
 NTFY_TOPIC = "wangsc2025"
@@ -204,7 +205,7 @@ def analyze_entries(entries: list) -> dict:
     }
 
 
-def build_alert_message(analysis: dict) -> tuple:
+def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> tuple:
     """Build alert message. Returns (severity, title, message) or None if healthy."""
     issues = []
     info_items = []  # Non-critical informational items
@@ -230,6 +231,18 @@ def build_alert_message(analysis: dict) -> tuple:
     # Check schema violations (Guardrails output validation)
     if analysis["schema_violation_count"] > 0:
         issues.append(f"⚠️ Schema 驗證失敗 {analysis['schema_violation_count']} 次（quality-gate.md § 3.2）")
+        if severity != "critical":
+            severity = "warning"
+
+    # Check Gmail OAuth expiry
+    if gmail_expiry and gmail_expiry.get("needs_alert"):
+        days = gmail_expiry["days_remaining"]
+        expire = gmail_expiry["expire_date"]
+        if days <= 0:
+            issues.append(f"⛔ Gmail OAuth 已過期（{expire}）")
+        else:
+            issues.append(f"⏰ Gmail OAuth {days} 天後到期（{expire}）")
+        issues.append("📋 重新授權：pwsh -File gmail-reauth.ps1")
         if severity != "critical":
             severity = "warning"
 
@@ -410,6 +423,84 @@ def _rotate_logs(retention_days=7):
         pass
 
 
+def check_gmail_token_expiry() -> "dict | None":
+    """Check Gmail OAuth refresh token expiry (7-day Testing mode limit).
+
+    Google Cloud OAuth apps in 'Testing' mode issue refresh tokens that
+    expire 7 days after issuance, regardless of usage frequency.
+
+    Tracks re-authorization by hashing the refresh token value.
+    When the hash changes, a new OAuth flow occurred and the timer resets.
+
+    Returns dict with status info, or None if token file is absent.
+    Keys: days_remaining, expire_date, issued_date, needs_alert, expired.
+    """
+    TOKEN_PATH = os.path.join("key", "token.json")
+    STATE_PATH = os.path.join("state", "gmail-oauth-state.json")
+    EXPIRE_DAYS = 7
+    WARN_DAYS = 2
+
+    if not os.path.exists(TOKEN_PATH):
+        return None
+
+    try:
+        with open(TOKEN_PATH, encoding="utf-8") as f:
+            token_data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    refresh_token = token_data.get("refresh_token", "")
+    if not refresh_token:
+        return None
+
+    rt_hash = hashlib.sha256(refresh_token.encode()).hexdigest()[:12]
+    today = date.today()
+
+    # Load existing state
+    state = {}
+    if os.path.exists(STATE_PATH):
+        try:
+            with open(STATE_PATH, encoding="utf-8") as f:
+                state = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            state = {}
+
+    def _save_state(s: dict):
+        state_dir = os.path.dirname(STATE_PATH)
+        if state_dir:
+            os.makedirs(state_dir, exist_ok=True)
+        try:
+            with open(STATE_PATH, "w", encoding="utf-8") as f:
+                json.dump(s, f, ensure_ascii=False)
+        except OSError:
+            pass
+
+    stored_hash = state.get("refresh_token_hash", "")
+    if rt_hash != stored_hash:
+        # New OAuth flow detected — reset issued_date to today
+        issued_date = today
+        _save_state({"refresh_token_hash": rt_hash, "issued_date": today.isoformat()})
+    else:
+        try:
+            issued_date = datetime.strptime(state.get("issued_date", ""), "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            # Corrupt state — reset to today
+            issued_date = today
+            state["issued_date"] = today.isoformat()
+            _save_state(state)
+
+    expire_date = issued_date + timedelta(days=EXPIRE_DAYS)
+    days_remaining = (expire_date - today).days
+
+    return {
+        "days_remaining": days_remaining,
+        "expire_date": expire_date.isoformat(),
+        "issued_date": issued_date.isoformat(),
+        "needs_alert": days_remaining <= WARN_DAYS,
+        "expired": days_remaining <= 0,
+    }
+
+
 def main():
     # Read stdin - Stop hook receives session info as JSON
     session_id = ""
@@ -432,7 +523,10 @@ def main():
         entries, total_count = read_todays_log()
         _write_offset(today, total_count)
 
-    if not entries:
+    # Check Gmail OAuth expiry (independent of session log entries)
+    gmail_expiry = check_gmail_token_expiry()
+
+    if not entries and not (gmail_expiry and gmail_expiry.get("needs_alert")):
         write_session_summary(
             analyze_entries([]), alert_sent=False, severity="healthy",
             session_id=session_id,
@@ -441,7 +535,7 @@ def main():
         sys.exit(0)
 
     analysis = analyze_entries(entries)
-    alert = build_alert_message(analysis)
+    alert = build_alert_message(analysis, gmail_expiry=gmail_expiry)
 
     if alert:
         severity, title, message = alert

@@ -16,5 +16,85 @@
     "mergekit model merging toolkit",
     "open LLM leaderboard merged models"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "An Introduction to Model Merging for LLMs (NVIDIA Technical Blog)",
+      "url": "https://developer.nvidia.com/blog/an-introduction-to-model-merging-for-llms/",
+      "key_points": [
+        "完整介紹 5 種核心方法：Model Soup、SLERP、Task Arithmetic、TIES-Merging、DARE",
+        "Task Vectors 的核心洞見：權重更新集中在特定矩陣區域而非均勻分佈",
+        "DARE 可丟棄 90-99% 的任務向量權重後重縮放，仍保持效能"
+      ]
+    },
+    {
+      "title": "Merge Large Language Models with mergekit (Hugging Face Blog, Maxime Labonne)",
+      "url": "https://huggingface.co/blog/mlabonne/merge-models",
+      "key_points": [
+        "Mergekit 支援 SLERP、TIES、DARE（dare_ties + dare_linear）、Passthrough 四種方法",
+        "合併模型佔 Open LLM Leaderboard 前 50 名的 20%、前 100 名的 34%",
+        "目前最佳 3B、7B 開源模型均為 Mergekit 合併產出",
+        "完整 YAML 配置範例和操作步驟，CPU 即可執行合併"
+      ]
+    },
+    {
+      "title": "Model Merging: A Survey (Cameron R. Wolfe, Ph.D.)",
+      "url": "https://cameronrwolfe.substack.com/p/model-merging",
+      "key_points": [
+        "理論基礎：linear mode connectivity — 獨立訓練的模型可透過恆定損失路徑連接",
+        "Task Arithmetic 三種操作：加法引入能力、否定移除行為、類比組合遷移知識",
+        "TIES-Merging 保留前 20% 幅度參數、共識符號選舉、不相交合併",
+        "合併模型的泛化能力、分佈偏移穩健性通常優於個別模型"
+      ]
+    },
+    {
+      "title": "Evolutionary Optimization of Model Merging Recipes (Akiba et al., Nature Machine Intelligence 2025)",
+      "url": "https://www.nature.com/articles/s42256-024-00975-8",
+      "key_points": [
+        "使用 CMA-ES 演化演算法自動搜尋最佳合併配方",
+        "在參數空間和資料流空間同時操作，實現跨語言跨模態合併",
+        "產出 SOTA 日語 LLM（數學推理）和日語 VLM，超越先前日語專用模型",
+        "無需大規模額外訓練資源即可組合多元開源模型能力"
+      ]
+    },
+    {
+      "title": "Model Merging: Combining Different Fine-Tuned LLMs (Marvik)",
+      "url": "https://www.marvik.ai/blog/model-merging-combining-different-fine-tuned-llms",
+      "key_points": [
+        "實務合併效果：DARE-TIES 合併兩個 Mistral 7B 數學模型，GSM8K 達 70.15% 準確率",
+        "合併不需 GPU、30 分鐘即可完成（CPU 實例），但需高 RAM",
+        "Frankenmerging（層級堆疊）是唯一支援跨架構合併的方法",
+        "重要警告：Open LLM Leaderboard 有資料洩漏風險，部分合併模型使用了測試集資料"
+      ]
+    },
+    {
+      "title": "Model Merging in LLMs, MLLMs, and Beyond (ACM Computing Surveys, 2026)",
+      "url": "https://dl.acm.org/doi/10.1145/3787849",
+      "key_points": [
+        "2026 年 ACM Computing Surveys 首篇模型合併綜合綜述",
+        "涵蓋 LLM、多模態 LLM 及更廣泛領域的合併方法、理論、應用",
+        "GitHub Awesome 列表收錄完整方法論分類和論文索引",
+        "加權合併大幅優於簡單平均，稀疏子空間方法（DARE、TIES）表現亮眼"
+      ]
+    },
+    {
+      "title": "Efficient Model Editing with Task Vector Bases (arXiv 2502.01015, 2025)",
+      "url": "https://arxiv.org/html/2502.01015v1",
+      "key_points": [
+        "提出 Task Vector Bases 理論框架，實現可擴展的模型編輯",
+        "Layer-Aware Task Arithmetic (LATA)：依層級餘弦相似度分配權重",
+        "Trust-region-aware merging：限制編輯在不造成跨任務損失變化的方向",
+        "ICLR 2025 收錄 Task-Localized 模型編輯方法"
+      ]
+    },
+    {
+      "title": "Mergenetic: 演化式模型合併工具庫 (ACL 2025)",
+      "url": "https://aclanthology.org/2025.acl-demo.55.pdf",
+      "key_points": [
+        "支援標準和多模型合併，包括 TIES + DARE 的進階策略",
+        "跨語言技能遷移：合併模型比個別組件準確率提升 10-20%",
+        "2025 年 ACL 會議 Demo Paper，提供簡易使用的 API"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }
