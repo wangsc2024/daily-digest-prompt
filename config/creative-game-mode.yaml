@@ -18,7 +18,7 @@ version: 1
 #   - 使用 LRU（Least Recently Used）策略選擇復古遊戲
 # ============================================================
 
-stage: "creation"  # 初始為創建階段（creation / optimization / paused）
+stage: "optimization"  # 2026-02-24 自動切換：tier1+tier2 全部完成
 
 # ============================================================
 # 創建階段配置（stage=creation 時生效）
@@ -38,8 +38,8 @@ creation:
   switch_trigger: "tier1_tier2_complete"  # 觸發條件
 
   # 階段完成追蹤（自動更新，不需手動修改）
-  tier1_complete: false
-  tier2_complete: false
+  tier1_complete: true   # pong, breakout, space_invaders 已建立
+  tier2_complete: true   # pacman, tetris, frogger, digdug 已建立
   tier3_complete: false
 
 # ============================================================
