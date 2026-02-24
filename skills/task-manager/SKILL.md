@@ -1,6 +1,6 @@
 ---
 name: task-manager
-version: "1.1.0"
+version: "1.2.0"
 description: |
   標準化新增自動任務、排程任務及單次任務的完整流程。
   消除手動觸碰 6-7 個檔案的遺漏風險，提供自動驗證。
@@ -20,6 +20,8 @@ triggers:
   - "新增排程"
   - "自動任務管理"
   - "round-robin"
+depends-on:
+  - "web-research"
 ---
 
 # Task Manager Skill — 任務新增標準化

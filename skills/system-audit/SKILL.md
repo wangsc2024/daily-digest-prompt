@@ -1,6 +1,6 @@
 ---
 name: system-audit
-version: "1.0.0"
+version: "1.1.0"
 description: |
   通用系統審查評分工具 — 以 7 個維度（資訊安全、系統架構、系統品質、
   系統工作流、技術棧、系統文件、系統完成度）對目標系統進行全面評估，
@@ -463,7 +463,17 @@ system-audit:
    Read templates/audit-report.md
    ```
 
-5. **初始化計分表**
+5. **讀取 ADR 登記表**（若存在，不報錯）
+   ```
+   Read context/adr-registry.json
+   ```
+   從中整理出 status=Accepted 的 `source_pattern` 清單。
+   Phase 8 步驟 4 在產出 TOP 5 建議時，將比對此清單去重：
+   - 已 Accepted（進行中）的建議替換為下一個候選項
+   - 已 Rejected 的建議保留但加注標記
+   若 `adr-registry.json` 不存在，以空清單繼續，不中斷執行。
+
+6. **初始化計分表**
    準備 7 個維度的空分數陣列，後續逐項填入。
 
 ---
@@ -880,16 +890,68 @@ system-audit:
    - 從所有子項中選出分數最低的 5 項
    - 計算改善後的預期分數提升
    - 評估實作難度（低/中/高）
+   - **ADR 去重**（使用 Phase 0 步驟 5 讀取的 adr-registry）：
+     - status=Accepted → 標注「⏳ 進行中（已建立 ADR）」，以下一個候選項補位
+     - status=Rejected → 保留但標注「⚠️ 曾評估為不實施」
+     - 無對應 ADR → 正常列出
 
-5. **填寫報告模板**
+5. **寫入改善 Backlog**（arch-evolution 整合點）
+
+   將 TOP 5 建議以標準格式寫入 `context/improvement-backlog.json`，供 `arch-evolution` 模組 A 消費並轉化為持久化 ADR：
+
+   ```json
+   {
+     "version": 1,
+     "generated_at": "<ISO timestamp +08:00>",
+     "source": "system-audit",
+     "audit_date": "<YYYY-MM-DD>",
+     "total_score": "<加權總分>",
+     "grade": "<S|A|B|C|D|F>",
+     "items": [
+       {
+         "rank": 1,
+         "priority": "<P0|P1|P2>",
+         "pattern": "<建議的短標題，15 字以內，供 ADR source_pattern 去重>",
+         "description": "<詳細問題說明與改善方向>",
+         "dimension": "<維度名稱，如：系統架構>",
+         "current_score": "<子項當前分數>",
+         "target_score": "<改善後預期分數>",
+         "effort": "<low|medium|high>",
+         "target_files": ["<相關檔案路徑>"]
+       }
+     ]
+   }
+   ```
+
+   **priority 對應規則**：
+
+   | 條件 | priority |
+   |------|---------|
+   | 排名 1-2 且分數 < 60 | P0 |
+   | 排名 1-2 且分數 60-69 | P1 |
+   | 排名 3-5 且分數 < 70 | P1 |
+   | 排名 3-5 且分數 ≥ 70 | P2 |
+
+   **effort 對應規則**：
+
+   | 條件 | effort |
+   |------|--------|
+   | 補充配置/文件/注釋（≤ 5 分鐘） | low |
+   | 調整架構、補充測試、修改多個檔案 | medium |
+   | 重構、引入新機制、大幅改動 | high |
+
+   > 若 `context/improvement-backlog.json` 已存在，**覆蓋**舊版（保留最新一次審查結果）。
+
+6. **填寫報告模板**
    ```
    Read templates/audit-report.md
    ```
    將所有分數、證據、建議填入模板。
 
-6. **輸出報告**
+7. **輸出報告**
    - 用 Write 工具將報告寫入 `reports/audit-{system}-{date}.md`
    - 在終端輸出總覽表和 TOP 5 建議
+   - 提示：執行 `arch-evolution 模組 A` 可將 `context/improvement-backlog.json` 中的建議轉化為持久化 ADR
 
 ---
 
@@ -931,6 +993,8 @@ system-audit:
 - **Grep/Glob 無結果**：該子項記錄 N/A，不影響其他子項評分
 - **知識庫服務未啟動**：跳過寫入知識庫步驟，報告仍正常產出
 - **子項證據不足**：限制該子項不得高於 40 分，並標註「證據不足」
+- **adr-registry.json 不存在**：Phase 0 步驟 5 以空清單繼續，Phase 8 步驟 4 跳過去重，不影響報告產出
+- **adr-registry.json 損壞**（JSON parse 失敗）：同上，以空清單繼續，不中斷執行
 
 ## 注意事項
 
@@ -938,3 +1002,5 @@ system-audit:
 - 評分結果僅為參考，實際品質需結合專案背景判斷
 - 建議定期執行（每月一次或重大變更後）以追蹤趨勢
 - 報告保存於 `reports/` 目錄，可用 git 追蹤歷史
+- **ADR 整合**：Phase 8 步驟 5 自動產出 `context/improvement-backlog.json`，格式已標準化供 arch-evolution 模組 A 消費。執行 `arch-evolution 模組 A` 即可將建議轉化為持久化 ADR（追蹤 Proposed/Accepted/Rejected 狀態）
+- **OODA 定位**：此 Skill 在系統自省閉環中扮演「Orient」角色。完整閉環：system-insight（Observe）→ system-audit（Orient）→ arch-evolution（Decide）→ self-heal（Act）

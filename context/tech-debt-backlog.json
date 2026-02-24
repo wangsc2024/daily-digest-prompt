@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "last_scanned_at": "2026-02-24T10:05:00+08:00",
+  "scan_scope": {
+    "include_types": ["*.py", "*.ps1", "*.md"],
+    "include_dirs": ["hooks/", "tests/", "skills/", "prompts/"],
+    "exclude_dirs": ["logs/", "cache/", "context/", "state/", "results/", "docs/"]
+  },
+  "summary": {
+    "total": 2,
+    "by_type": { "FIXME": 0, "TODO": 0, "HACK": 0, "XXX": 2, "臨時": 0 },
+    "by_priority": { "P1": 0, "P2": 2 },
+    "new_since_last": 2,
+    "resolved_since_last": 2
+  },
+  "items": [
+    {
+      "id": "TD-20260224-001",
+      "type": "XXX",
+      "priority": "P2",
+      "file": "hooks/on_stop_alert.py",
+      "line": 172,
+      "text": "# Extract file path from summary (format: \"path (XXX chars)\" or just \"path\")",
+      "first_seen_at": "2026-02-24",
+      "last_seen_at": "2026-02-24",
+      "age_days": 0,
+      "status": "resolved",
+      "resolved_at": "2026-02-24",
+      "note": "已修復：'XXX chars' → '<N> chars'，消除未來技術債掃描的誤報干擾。"
+    },
+    {
+      "id": "TD-20260224-002",
+      "type": "XXX",
+      "priority": "P2",
+      "file": "check-health.ps1",
+      "line": 390,
+      "text": "# Extract file path from summary (format: \"path (XXX chars)\" or just \"path\")",
+      "first_seen_at": "2026-02-24",
+      "last_seen_at": "2026-02-24",
+      "age_days": 0,
+      "status": "resolved",
+      "resolved_at": "2026-02-24",
+      "note": "已修復：'XXX chars' → '<N> chars'，與 on_stop_alert.py 同步。"
+    }
+  ],
+  "excluded_false_positives": [
+    {
+      "file": "tests/hooks/test_agent_guardian.py",
+      "line": 175,
+      "text": "\"\"\"建立臨時狀態檔案\"\"\"",
+      "reason": "臨時 作為自然語言（『暫時/臨時』之意），非技術債標記 '# 臨時: ...' 格式"
+    },
+    {
+      "file": "skills/digest-memory/SKILL.md",
+      "line": 84,
+      "text": "- 昨日待辦：完成 M/N 項（未完成：XXX）",
+      "reason": "XXX 在 SKILL.md 文件範例中作為佔位符，skills/ 目錄的 .md 均為規格文件，非代碼"
+    }
+  ],
+  "health_assessment": {
+    "grade": "A+",
+    "message": "全專案 .py/.ps1 零 FIXME/TODO/HACK，僅 2 個低優先級 XXX 格式佔位符（非真實技術債）。496 個測試覆蓋 + 嚴格 Hook 規則有效防止技術債積累。",
+    "p1_overdue_alert": false,
+    "recommendation": "建議在下次 code review 時順手將 'XXX chars' 改為 '<N> chars'，消除未來的誤報干擾。"
+  }
+}

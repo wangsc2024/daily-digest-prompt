@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "updated_at": "2026-02-24T10:00:00+08:00",
+  "summary": {
+    "total": 5,
+    "proposed": 4,
+    "accepted": 1,
+    "rejected": 0,
+    "superseded": 0
+  },
+  "records": [
+    {
+      "id": "ADR-20260224-001",
+      "title": "依賴注入（Dependency Injection）模式",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-02-24",
+      "source": "improvement-backlog",
+      "source_pattern": "依賴注入（Dependency Injection）模式",
+      "priority": "P0",
+      "effort": "high",
+      "context": "Pydantic AI 的 RunContext + deps_type 模式揭示本專案的核心問題：Skill 模板硬編碼 API 端點、Token 來源與快取路徑，難以在測試環境替換為 mock，也無法集中管理跨 Skill 共用的資源配置。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "測試可用 mock 端點，提升可測試性",
+          "端點集中管理（config/dependencies.yaml），改配置不改 SKILL.md",
+          "跨 Skill 的 API 端點版本一致性得以保障"
+        ],
+        "negative": [
+          "需修改所有 22 個 SKILL.md 的端點引用方式",
+          "引入間接層，增加新 Skill 的學習成本",
+          "需要建立 config/dependencies.yaml 的 schema 驗證"
+        ]
+      },
+      "related_files": [
+        "config/pipeline.yaml",
+        "templates/shared/preamble.md",
+        "skills/SKILL_INDEX.md"
+      ],
+      "notes": "來源：pydantic/pydantic-ai（14,942 stars）。因 effort=high 且影響範圍廣，建議先評估 2-3 個高頻 Skill（todoist、knowledge-query）做 POC 再全面推廣。"
+    },
+    {
+      "id": "ADR-20260224-002",
+      "title": "Guardrails 輸入輸出驗證層",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-02-24",
+      "source": "improvement-backlog",
+      "source_pattern": "Guardrails 輸入輸出驗證層",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "OpenAI Agents SDK 的 Guardrails 機制將安全驗證提升為一等公民，支援輸入驗證（tripwire 模式）和輸出驗證（結構化型別檢查）。現有 Hooks 已覆蓋 PreToolUse/PostToolUse 攔截，但缺乏 Agent 輸出層的結構化驗證——DONE_CERT 格式正確性、JSON schema 一致性均無自動檢查。",
+      "decision": "接受。分三層分步實作：(1) quality-gate.md § 3.2 定義 3 個量化規則（研究 ≥300 字、摘要 ≥3 任務、通知 ≤50 字）；(2) done-cert.md 新增 schema_check 欄位；(3) on_stop_alert.py 新增 schema_violations 計數。不阻斷執行，schema fail 僅計入統計並在告警時顯示。實作日期：2026-02-24。",
+      "consequences": {
+        "positive": [
+          "Agent 輸出品質可量化（JSON schema 驗證通過率）",
+          "DONE_CERT 格式錯誤在 session 結束前即可偵測",
+          "與現有 on_stop_alert.py 整合，不需新增 Hook"
+        ],
+        "negative": [
+          "需為各 Skill 輸出定義 JSON schema（初期工作量）",
+          "過度嚴格的驗證可能降低 Agent 輸出靈活性"
+        ]
+      },
+      "related_files": [
+        "config/hook-rules.yaml",
+        "hooks/on_stop_alert.py",
+        "templates/shared/quality-gate.md",
+        "templates/shared/done-cert.md"
+      ],
+      "notes": "來源：openai/openai-agents-python（18,986 stars）。建議分兩步：(1) 在 quality-gate.md 新增 JSON schema 驗證段落；(2) 在 on_stop_alert.py 增加格式一致性統計。"
+    },
+    {
+      "id": "ADR-20260224-003",
+      "title": "Agent Handoff 控制轉移機制",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-02-24",
+      "source": "improvement-backlog",
+      "source_pattern": "Agent Handoff 控制轉移機制",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "OpenAI SDK 的 Handoff 讓 Agent 可以宣告式地將控制權轉移給其他 Agent（附帶上下文傳遞）。現有子 Agent 委派透過 PowerShell Start-Job 實現，上下文傳遞依賴臨時 JSON 檔（results/*.json），缺乏語義層的 handoff 定義——何時轉交、轉交什麼上下文、如何回傳結果沒有標準化。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "routing.yaml 可定義標準 handoff 規則，提升可讀性",
+          "子 Agent 上下文傳入格式標準化，減少 Phase 2/3 組裝錯誤",
+          "支援未來擴展為 Agent-to-Agent 雙向通訊"
+        ],
+        "negative": [
+          "需重新設計 results/*.json 的命名與 schema 規範",
+          "現有 3 個 team 腳本的 Phase 銜接邏輯需更新"
+        ]
+      },
+      "related_files": [
+        "config/routing.yaml",
+        "hour-todoist-prompt.md",
+        "templates/sub-agent/skill-task.md",
+        "run-todoist-agent-team.ps1"
+      ],
+      "notes": "來源：openai/openai-agents-python。實際上 2026-02-18 修正的 Phase 2/3 檔案命名問題（todoist-auto-*.json 命名規範）正是這個問題的症狀。"
+    },
+    {
+      "id": "ADR-20260224-004",
+      "title": "Evals 評估系統",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-02-24",
+      "source": "improvement-backlog",
+      "source_pattern": "Evals 評估系統",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "Pydantic AI 內建 Evals 評估系統，可系統性測試 Agent 的效能與準確度。現有 system-audit（38 子項評分）和 benchmark.yaml 是靜態門檻，但缺乏自動化的 Agent 輸出品質評估——摘要完整度、研究深度、通知可讀性均無量化追蹤。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "Agent 輸出品質可隨時間趨勢化",
+          "DONE_CERT 驗證從「有/無」升級為「分數」",
+          "品質回歸可在 on_stop_alert.py 自動偵測"
+        ],
+        "negative": [
+          "需定義每類 Skill 的品質指標（主觀性較高）",
+          "評估本身也消耗 token，每次執行成本增加"
+        ]
+      },
+      "related_files": [
+        "config/benchmark.yaml",
+        "config/audit-scoring.yaml",
+        "templates/shared/quality-gate.md",
+        "hooks/on_stop_alert.py"
+      ],
+      "notes": "來源：pydantic/pydantic-ai。可從最易量化的指標開始：研究筆記字數 > 300 字、摘要含 ≥3 個 Todoist 任務、通知標題 ≤ 50 字。"
+    },
+    {
+      "id": "ADR-20260224-005",
+      "title": "可組合工作流模式（Composable Workflow）",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-02-24",
+      "source": "improvement-backlog",
+      "source_pattern": "可組合工作流模式（Composable Workflow Patterns）",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "mcp-agent 實作了 Anthropic 'Building Effective Agents' 論文中的 map-reduce、orchestrator、evaluator-optimizer、router 模式。現有管線是固定三階段（fetch→assemble→notify），缺乏動態組合能力——無法根據快取狀態跳過 API 呼叫、無法讓品質閘門觸發自動重試。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "快取命中時可跳過 API fetch 階段，節省 token",
+          "evaluator-optimizer 模式讓品質閘門可觸發精修迴圈",
+          "pipeline.yaml 可宣告 sequential/parallel/conditional 工作流"
+        ],
+        "negative": [
+          "管線複雜度上升，debug 難度增加",
+          "PowerShell Start-Job 架構需部分重寫才能支援條件分支"
+        ]
+      },
+      "related_files": [
+        "config/pipeline.yaml",
+        "run-todoist-agent-team.ps1",
+        "run-agent-team.ps1",
+        "templates/sub-agent/refinement.md"
+      ],
+      "notes": "來源：lastmile-ai/mcp-agent（8,035 stars）。目前快取命中率 16.4% 偏低的問題，部分原因是即使有快取也強制執行所有 Phase 1 agent。可組合工作流可直接改善此問題。"
+    }
+  ]
+}

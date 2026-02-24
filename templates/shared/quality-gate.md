@@ -52,7 +52,23 @@
 
 > 此基線供 DONE_CERT 的 quality_score 欄位參考，不改變通過邏輯。
 
-### 3.2 通過條件
+### 3.2 輸出 Schema 驗證（Guardrails）
+
+與任務類型無關的三個量化規則，在外部驗證後執行：
+
+| 規則 | 適用條件 | 門檻 | 不通過時 |
+|------|---------|------|---------|
+| 研究筆記字數 | artifacts_produced 含 KB 筆記 | ≥ 300 字 | schema_check = "fail" |
+| 摘要 Todoist 任務數 | 任務類型為 daily-digest | ≥ 3 筆 | schema_check = "fail" |
+| 通知標題長度 | 有產出 ntfy 通知（任何任務） | ≤ 50 字 | schema_check = "fail" |
+
+判定方式：
+- 全部通過或不適用 → `schema_check: "pass"` 或 `"skip"`
+- 任一失敗 → `schema_check: "fail"`，在 `remaining_issues` 新增說明
+
+> **不阻斷執行**：schema 驗證失敗不改變通過邏輯，但會被 on_stop_alert.py 計入 schema_violations，累積後觸發告警。
+
+### 3.3 通過條件
 
 ```
 通過 = (cert_status == "DONE")

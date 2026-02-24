@@ -387,7 +387,7 @@ else {
             } | Where-Object { $_ -and ($_.tags -contains "skill-modified") })
 
             foreach ($entry in $dayEntries) {
-                # Extract file path from summary (format: "path (XXX chars)" or just "path")
+                # Extract file path from summary (format: "path (<N> chars)" or just "path")
                 $summary = $entry.summary
                 $pathMatch = $summary -match '^(.*?)(?:\s+\(|$)'
                 if ($pathMatch) {

@@ -158,6 +158,7 @@ def analyze_entries(entries: list) -> dict:
     skill_reads = [e for e in entries if "skill-read" in e.get("tags", [])]
     skill_modified = [e for e in entries if "skill-modified" in e.get("tags", [])]
     sub_agents = [e for e in entries if "sub-agent" in e.get("tags", [])]
+    schema_violations = [e for e in entries if "schema-fail" in e.get("tags", [])]
 
     # Count blocked reasons
     block_reasons = Counter(e.get("reason", "unknown") for e in blocked)
@@ -169,7 +170,7 @@ def analyze_entries(entries: list) -> dict:
     _seen_paths = {}
     for e in skill_modified:
         summary = e.get("summary", "")
-        # Extract file path from summary (format: "path (XXX chars)" or just "path")
+        # Extract file path from summary (format: "path (<N> chars)" or just "path")
         path_match = re.search(r"^(.*?)(?:\s+\(|$)", summary)
         if path_match:
             _seen_paths[path_match.group(1)] = True
@@ -195,6 +196,8 @@ def analyze_entries(entries: list) -> dict:
         "skill_modified_count": len(skill_modified_paths),
         "skill_modified_paths": skill_modified_paths,
         "sub_agents": len(sub_agents),
+        "schema_violations": schema_violations,
+        "schema_violation_count": len(schema_violations),
         "block_reasons": dict(block_reasons),
         "error_tools": dict(error_tools),
         "tag_counts": dict(tag_counts.most_common(15)),
@@ -222,6 +225,12 @@ def build_alert_message(analysis: dict) -> tuple:
         if analysis["error_count"] >= 5:
             severity = "critical"
         elif severity != "critical":
+            severity = "warning"
+
+    # Check schema violations (Guardrails output validation)
+    if analysis["schema_violation_count"] > 0:
+        issues.append(f"⚠️ Schema 驗證失敗 {analysis['schema_violation_count']} 次（quality-gate.md § 3.2）")
+        if severity != "critical":
             severity = "warning"
 
     # Check SKILL.md modifications (informational, not an error)
@@ -350,6 +359,7 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         "sub_agents": analysis["sub_agents"],
         "blocked": analysis["blocked_count"],
         "errors": analysis["error_count"],
+        "schema_violations": analysis.get("schema_violation_count", 0),
         "status": severity,
         "alert_sent": alert_sent,
     }

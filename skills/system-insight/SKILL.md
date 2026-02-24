@@ -1,6 +1,6 @@
 ---
 name: system-insight
-version: "1.1.0"
+version: "1.2.0"
 description: |
   系統自省引擎。分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出結構化洞察報告。
   Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢。
@@ -18,6 +18,8 @@ triggers:
   - "趨勢分析"
   - "統計報告"
   - "執行品質"
+depends-on:
+  - "ntfy-notify"
 ---
 
 # System Insight Skill（系統自省引擎）

@@ -4,7 +4,7 @@
 
 ```
 ===DONE_CERT_BEGIN===
-{"status":"DONE 或 PARTIAL 或 FAILED","checklist":{"primary_goal_met":true/false,"artifacts_produced":["產出物清單"],"tests_passed":true/false/null,"quality_score":1到5},"self_assessment":"一句話自評","remaining_issues":[],"iteration_count":N}
+{"status":"DONE 或 PARTIAL 或 FAILED","checklist":{"primary_goal_met":true/false,"artifacts_produced":["產出物清單"],"tests_passed":true/false/null,"quality_score":1到5,"schema_check":"pass/fail/skip"},"self_assessment":"一句話自評","remaining_issues":[],"iteration_count":N}
 ===DONE_CERT_END===
 ```
 
@@ -14,6 +14,7 @@
 - `artifacts_produced`: 產出物清單（commit hash、檔案路徑、匯入筆記數等）
 - `tests_passed`: 測試是否通過（無測試則 null）
 - `quality_score`: 1-5 分自評品質
+- `schema_check`: 輸出 Schema 驗證結果（`pass`/`fail`/`skip`），依 quality-gate.md § 3.2 判定
 - `self_assessment`: 一句話自我評估
-- `remaining_issues`: 殘留問題列表（空陣列表示無殘留）
+- `remaining_issues`: 殘留問題列表（空陣列表示無殘留；schema fail 時須列明違規規則）
 - `iteration_count`: 第幾次迭代

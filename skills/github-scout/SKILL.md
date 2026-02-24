@@ -1,6 +1,6 @@
 ---
 name: github-scout
-version: "1.1.0"
+version: "1.2.0"
 description: |
   GitHub 靈感蒐集工具。搜尋熱門 Agent/Skill/Hook 專案，分析與本系統的改進機會。
   Use when: GitHub 趨勢、熱門專案、開源靈感、最佳實踐、系統改進、架構借鑑、開源專案分析。
@@ -19,6 +19,10 @@ triggers:
   - "trending repos"
   - "專案靈感"
   - "改進建議"
+depends-on:
+  - "web-research"
+  - "knowledge-query"
+  - "ntfy-notify"
 ---
 
 # GitHub Scout Skill（GitHub 靈感蒐集工具）

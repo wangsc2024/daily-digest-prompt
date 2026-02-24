@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 20 個 Skill 速查表（17 核心 + 3 工具，名稱、觸發關鍵字、用途）
+- 22 個 Skill 速查表（17 核心 + 5 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -26,7 +26,7 @@
 ### Skill 使用強度
 - **必用**（每次必定使用）：todoist、pingtung-news、pingtung-policy-expert、hackernews-ai-digest、atomic-habits、learning-mastery、ntfy-notify、digest-memory、api-cache、scheduler-state
 - **積極用**（有機會就用）：knowledge-query、gmail
-- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時
+- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時、arch-evolution 搭配 system-audit 執行後轉化 ADR
 
 ## 🤝 Agent Team & 子 Agent 策略（積極並行）
 
@@ -250,7 +250,8 @@ daily-digest-prompt/
     gmail/ game-design/ system-insight/ web-research/
     kb-curator/ github-scout/     # 共 17 核心 Skill
     task-manager/ skill-scanner/
-    system-audit/                 # 共 3 工具 Skill（合計 20 個，各含 SKILL.md）
+    system-audit/ todoist-task-creator/
+    arch-evolution/               # 共 5 工具 Skill（合計 22 個，各含 SKILL.md）
 
   # 規格與文件
   specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
@@ -432,7 +433,27 @@ python hooks/query_logs.py --format json
 - 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
 - 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成
 
-## Skills（專案內自包含，共 20 個）
+## 架構決策索引（ADR 速查）
+
+> 完整 ADR 詳情由 `arch-evolution` Skill 維護於 `context/adr-registry.json`。
+> 本節為人類與 Agent 的快速查閱表，理解「為什麼這樣設計」。
+
+| ADR | 決策標題 | 根本原因 | 狀態 |
+|-----|---------|---------|------|
+| ADR-001 | **Skill-First 策略**：必用先查 SKILL_INDEX | 禁止自行拼湊已有 Skill 邏輯，確保行為可審計、可替換 | ✅ Accepted |
+| ADR-002 | **文件驅動架構**：Prompt 薄層 + YAML 外部配置 | 改配置不改 Prompt，降低 LLM 迭代成本；Markdown 是 LLM 最自然的理解格式 | ✅ Accepted |
+| ADR-003 | **PowerShell 7 (pwsh)** 作為執行環境 | PS 5.1 的 Start-Job 缺少 `-WorkingDirectory`，`$OutputEncoding` 預設 ASCII，導致 UTF-8 亂碼 | ✅ Accepted |
+| ADR-004 | **Team 並行模式優先**於單一模式 | 串行執行約 3-4 分鐘；並行模式約 1 分鐘，5 路 Phase 1 同時擷取資料 | ✅ Accepted |
+| ADR-005 | **Hook 機器強制層**取代 Prompt 自律 | Agent 自律可被上下文壓縮或指令覆蓋；Hook 在 runtime 攔截，無法繞過 | ✅ Accepted |
+| ADR-006 | **scheduler-state.json 由 PowerShell 獨佔寫入** | 避免 PS 腳本與 Agent 並發寫入導致競態條件與資料覆蓋 | ✅ Accepted |
+| ADR-007 | **研究去重三層防護**（registry + KB + 冷卻） | KB 中 46/100 筆 AI 相關，4 組完全重複，各 auto-task 獨立去重互不知曉 | ✅ Accepted |
+| ADR-008 | **OODA 閉環架構**（system-insight→audit→arch-evolution→self-heal） | 三個自省 auto-task 各自獨立，缺統一「Decide」層整合感測與診斷結果 | ✅ Accepted |
+
+> **如何新增 ADR**：執行 `arch-evolution 模組 A`，系統審查後自動從 `context/improvement-backlog.json` 轉化建議為持久化 ADR。
+
+---
+
+## Skills（專案內自包含，共 22 個）
 
 完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 
