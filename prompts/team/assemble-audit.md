@@ -21,6 +21,7 @@ Phase 1 的 4 個 Agent 已完成審查，各自輸出 JSON 到 `results/` 目�
 5. 生成完整報告
 6. 將報告寫入 RAG 知識庫
 7. 更新狀態檔案
+8. 發送審查完成通知（含 arch-evolution 觸發提醒與 ADR decision 填寫提醒）
 
 ## 執行步驟
 
@@ -218,6 +219,37 @@ curl -X POST http://localhost:3000/api/notes \
 }
 ```
 
+### Step 7.5: 發送審查完成通知
+
+審查完成後，透過 ntfy 推播通知，包含審查摘要與後續行動提醒。
+
+**建立通知 JSON**（用 Write 工具建立 `audit-notify.json`）：
+
+```json
+{
+  "topic": "wangsc2025",
+  "title": "系統審查完成 {GRADE}（{SCORE}/100）",
+  "message": "修正 {FIXES} 項 | 報告：docs/系統審查報告_{DATE}.md\n\n📋 請手動觸發 arch-evolution：\n  在 Claude Code 輸入 arch-evolution\n  將 improvement-backlog.json 轉化為 ADR\n\n✏️ 請人工填寫 ADR decision 欄位：\n  context/adr-registry.json\n  找 status=Proposed 的條目填寫 decision",
+  "priority": 3,
+  "tags": ["white_check_mark", "clipboard"]
+}
+```
+
+**替換佔位符**：
+- `{GRADE}`：本次等級（如 `S`、`A`）
+- `{SCORE}`：加權總分（如 `90.47`）
+- `{FIXES}`：自動修正數量（如 `2`）
+- `{DATE}`：日期時間（如 `20260224_0040`）
+
+**發送通知**：
+```bash
+curl -s -H "Content-Type: application/json; charset=utf-8" -d @audit-notify.json https://ntfy.sh
+```
+
+**錯誤處理**：
+- 發送失敗不阻塞流程，僅記錄警告
+- `audit-notify.json` 在 Step 8 清理
+
 ### Step 8: 清理
 
 刪除 Phase 1 暫存檔案：
@@ -226,6 +258,7 @@ curl -X POST http://localhost:3000/api/notes \
 - `results/audit-dim3-7.json`
 - `results/audit-dim4.json`
 - `note.json`（RAG 上傳用）
+- `audit-notify.json`（ntfy 通知用）
 
 保留：
 - `docs/系統審查報告_*.md`（永久存檔）
@@ -265,8 +298,12 @@ curl -X POST http://localhost:3000/api/notes \
 [Step 7] 更新狀態
   ✓ state/last-audit.json 已更新
 
+[Step 7.5] 發送審查完成通知
+  ✓ ntfy 通知已發送 (wangsc2025)
+    提醒：手動觸發 arch-evolution + 填寫 ADR decision
+
 [Step 8] 清理
-  ✓ 已刪除 4 個暫存 JSON 檔案
+  ✓ 已刪除 5 個暫存 JSON 檔案
 
 === 審查完成 ===
 總分：90.47/100 (S 等級)
