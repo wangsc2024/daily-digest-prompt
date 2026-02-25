@@ -254,3 +254,35 @@ class TestErrorDetection:
         has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
         assert has_keyword  # "error" matches
         assert has_benign   # "silentlycontinue" is benign
+
+    def test_exit_code_0xff_not_benign(self):
+        """含 error 且 exit code 非 0 時，不應被 'exit code 0' 的子字串匹配誤判為良性。"""
+        output = "error: process failed with exit code 0xFF"
+        lower_output = output.lower()
+        has_keyword = any(kw in lower_output for kw in ERROR_KEYWORDS)
+        # 目前 BENIGN_PATTERNS 中 "exit code 0" 是子字串匹配，會誤匹配 "exit code 0xff"
+        has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
+        assert has_keyword  # "error" matches
+        # 修正後 "exit code 0" 不應匹配 "exit code 0xff" → 紅燈測試
+        assert not has_benign, "exit code 0xFF 不應被 'exit code 0' 子字串匹配誤判為良性"
+
+    def test_exit_code_0_is_benign(self):
+        """exit code 0 確實是良性（成功退出，含換行）。"""
+        output = "process completed with exit code 0\n"
+        lower_output = output.lower()
+        has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
+        assert has_benign
+
+    def test_exit_code_0_colon_variant_is_benign(self):
+        """exit code: 0 格式也是良性。"""
+        output = "error handler says exit code: 0"
+        lower_output = output.lower()
+        has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
+        assert has_benign
+
+    def test_exit_code_1_not_benign(self):
+        """exit code 1 不應被判定為良性。"""
+        output = "failed with exit code 1"
+        lower_output = output.lower()
+        has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
+        assert not has_benign

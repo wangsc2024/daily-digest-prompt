@@ -117,6 +117,83 @@
         "grade_distribution": {"A": 3, "B": 3},
         "research_depth": "adequate"
       }
+    },
+    {
+      "scouted_at": "2026-02-25T16:30:00+08:00",
+      "topic": "Agent 架構 + Skill/Plugin 系統（第二次）",
+      "projects": [
+        {
+          "name": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "stars": 60700,
+          "description": "Claude Code 的 Agentic Skills 框架，強制性工作流（非建議）：TDD 紅綠重構、子 Agent 並行開發、系統性除錯、Git Worktree 隔離。已進入 Anthropic 官方 Marketplace。支援 Claude Code / Cursor / Codex / OpenCode 多平台。",
+          "relevance": "high",
+          "last_updated": "2026-02-25"
+        },
+        {
+          "name": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+          "url": "https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering",
+          "stars": 10100,
+          "description": "Context Engineering 學科化框架：5 類 Skill（基礎/架構/營運/開發/認知）、Progressive Disclosure、Context Degradation 量化（U 形注意力曲線）、BDI 心智模型、三層記憶架構（短期/長期/圖結構）。北京大學 2026 研究引用。",
+          "relevance": "high",
+          "last_updated": "2026-02-25"
+        },
+        {
+          "name": "skillmatic-ai/awesome-agent-skills",
+          "url": "https://github.com/skillmatic-ai/awesome-agent-skills",
+          "stars": 227,
+          "description": "Agent Skills 策展目錄：SKILL.md 標準格式、Progressive Disclosure 最佳實踐、13+ 平台整合、SkillsBench 86 任務基準測試。驗證 SKILL.md 已成跨平台標準。",
+          "relevance": "medium",
+          "last_updated": "2026-02-25"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "obra/superpowers",
+          "pattern": "Writing-Skills 元 Skill（教導如何撰寫新 Skill 的 Skill）",
+          "target_files": ["skills/skill-scanner/SKILL.md", "skills/SKILL_INDEX.md"],
+          "priority": "P1",
+          "effort": "low",
+          "description": "Superpowers 內建 writing-skills Skill，提供 Skill 撰寫的標準範本、命名慣例、觸發詞設計、frontmatter 結構等元指引。本專案的 skill-scanner 偏重安全掃描，缺乏「如何寫好一個 Skill」的元知識。建議：(1) 在 skill-scanner 或新建 skill-template Skill 中加入 Skill 撰寫最佳實踐，(2) 包含 frontmatter 標準結構、triggers 設計原則、Progressive Disclosure 層級建議，(3) 新增 Skill 時可自動驗證結構完整性。"
+        },
+        {
+          "source_project": "obra/superpowers",
+          "pattern": "兩階段 Review（規格符合 + 程式品質分離）",
+          "target_files": ["templates/shared/quality-gate.md", "templates/shared/done-cert.md"],
+          "priority": "P1",
+          "effort": "low",
+          "description": "Superpowers 將 Code Review 拆為兩階段：第一階段驗證是否符合規格/需求（功能正確性），第二階段才驗程式品質（可讀性、效能、安全）。本專案的 quality-gate.md 目前混合檢查所有面向。建議：(1) 將 quality-gate 拆為 Phase A（規格符合度：DONE_CERT checklist 全打勾、輸出格式正確）和 Phase B（品質檢查：程式碼風格、效能、安全），(2) Phase A 失敗直接拒絕，Phase B 產出改進建議但不阻斷。"
+        },
+        {
+          "source_project": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+          "pattern": "Context Degradation 量化監控",
+          "target_files": ["hooks/post_tool_logger.py", "hooks/agent_guardian.py", "config/benchmark.yaml"],
+          "priority": "P0",
+          "effort": "medium",
+          "description": "Context Engineering 框架揭示：Context Window 隨長度增加效能可預測下降（Lost-in-the-Middle 現象），需要主動監控與壓縮。本專案的 post_tool_logger 已追蹤工具呼叫數和 output_len，但未監控 context 累積量。建議：(1) 在 post_tool_logger 新增 context_tokens_estimate 欄位（累計 input+output 長度），(2) 在 agent_guardian 的 LoopDetector 加入 context_pressure 警告（當估計 token 超過閾值時），(3) 在 benchmark.yaml 設定 context 效率基準線（每 1000 tokens 產出多少有效結果）。"
+        },
+        {
+          "source_project": "muratcankoylan/Agent-Skills-for-Context-Engineering",
+          "pattern": "三層記憶架構（短期/長期/圖結構）",
+          "target_files": ["context/digest-memory.json", "context/research-registry.json", "skills/digest-memory/SKILL.md"],
+          "priority": "P2",
+          "effort": "high",
+          "description": "Context Engineering 框架區分三層記憶：短期（Session 內 working memory）、長期（跨 Session 持久化）、圖結構（實體關係網路）。本專案的 digest-memory.json 和 research-registry.json 屬於長期記憶，但缺乏 Session 級短期記憶管理和實體關係追蹤。建議：(1) 短期記憶：在 Team 模式中引入 session-context.json 追蹤當次執行的決策脈絡（為何選此任務、為何選此模板），(2) 圖結構記憶：未來可用知識庫的 tag 關聯建構簡易知識圖譜，追蹤「Skill A 常與 Skill B 搭配」等模式。長期願景，P2 優先級。"
+        },
+        {
+          "source_project": "obra/superpowers",
+          "pattern": "多平台 Plugin 結構（一套 Skills 跨平台）",
+          "target_files": ["skills/SKILL_INDEX.md"],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "Superpowers 同一套 Skills 支援 Claude Code、Cursor、Codex、OpenCode 四個平台，透過各平台獨立的 plugin 目錄適配。本專案的 Skills 目前僅供 Claude Code 使用。建議：(1) 評估是否將核心 Skills 抽出為平台無關格式，(2) 若需支援 Cursor 等工具，參考 Superpowers 的 plugin 目錄結構建立適配層。此為長期擴展方向，當前無急迫需求。"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {"A": 2, "B": 1},
+        "research_depth": "adequate"
+      }
     }
   ]
 }

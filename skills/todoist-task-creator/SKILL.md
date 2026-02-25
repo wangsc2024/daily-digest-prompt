@@ -86,6 +86,8 @@ triggers:
 | `品質評估` | system-audit | skill-task.md | 品質評估 |
 | `Chat系統` | 程式開發 | code-task.md | 聊天系統開發 |
 | `專案規劃` | 程式開發 | code-task.md | 專案規劃與架構 |
+| `@news` | pingtung-news + pingtung-policy-expert | skill-task.md | 屏東新聞相關 |
+| `@write` | 文件撰寫 | skill-task.md | 文件撰寫任務 |
 
 ### 標籤組合規則
 

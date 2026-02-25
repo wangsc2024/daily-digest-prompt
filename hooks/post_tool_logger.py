@@ -60,7 +60,9 @@ BENIGN_PATTERNS = [
     "error_tools",          # JSON field name in analysis
     "error_detect",         # variable/config name
     "failed_count",         # JSON field name
-    "exit code 0",          # successful exit
+    "exit code: 0",         # successful exit (colon-space-0 variant)
+    "exit code 0 ",         # successful exit (space-terminated, avoids matching 0xFF)
+    "exit code 0\n",        # successful exit (newline-terminated)
     "errors: []",           # empty errors array
     "errors: 0",            # zero errors
 ]

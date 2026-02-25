@@ -104,11 +104,23 @@ Act      → self-heal（異常修復）/ 手動實作 ADR
 
 **B1：全專案掃描**
 
-用 Grep 分別搜尋：`FIXME`、`TODO`、`HACK`、`XXX`、`臨時`
+用 Grep 工具分別搜尋 5 個關鍵字。每個搜尋使用以下參數：
 
-搜尋範圍：
-- 包含：`*.py`、`*.ps1`、`*.md`（skills/ 目錄和 prompts/ 目錄）
-- 排除：`logs/`、`cache/`、`context/`、`state/`、`results/`、`docs/`（避免掃描本 Skill 的說明文字）
+```
+Grep 搜尋參數：
+  pattern: "FIXME|TODO|HACK|XXX|臨時"
+  path: D:\Source\daily-digest-prompt
+  glob: "*.py"  （第一輪）
+  glob: "*.ps1" （第二輪）
+  glob: "*.md"  （第三輪，限 skills/ 和 prompts/）
+  output_mode: "content"
+  -n: true
+```
+
+排除目錄（用 Grep 的 path 參數限縮，或結果中手動過濾）：
+- `logs/`、`cache/`、`context/`、`state/`、`results/`、`docs/`
+
+> **效率提示**：可並行發起 3 次 Grep（py/ps1/md），加速掃描。
 
 每筆記錄：檔案相對路徑、行號、原始行文字（去除前後空白）、關鍵字類型。
 
