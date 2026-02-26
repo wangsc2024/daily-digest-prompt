@@ -578,6 +578,58 @@ catch {
     Write-Host "  評分檢查失敗: $_" -ForegroundColor Red
 }
 
+# --- Circuit Breaker 儀表板 ---
+Write-Host ""
+Write-Host "[Circuit Breaker 狀態]" -ForegroundColor Yellow
+$apiHealthFile = "$AgentDir\state\api-health.json"
+if (Test-Path $apiHealthFile) {
+    try {
+        $apiHealth = Get-Content -Path $apiHealthFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $apis = $apiHealth.PSObject.Properties
+        if ($apis.Count -gt 0) {
+            foreach ($api in $apis) {
+                $name = $api.Name
+                $st = $api.Value.state
+                $failures = $api.Value.failures
+                $cooldown = $api.Value.cooldown
+                $color = switch ($st) {
+                    "closed"    { "Green" }
+                    "half_open" { "Yellow" }
+                    "open"      { "Red" }
+                    default     { "Gray" }
+                }
+                $statusIcon = switch ($st) {
+                    "closed"    { "[OK]" }
+                    "half_open" { "[PROBE]" }
+                    "open"      { "[DOWN]" }
+                    default     { "[?]" }
+                }
+                $detail = "  $statusIcon $($name.PadRight(20)) state=$st  failures=$failures"
+                if ($cooldown) {
+                    try {
+                        $cdTime = [datetime]::Parse($cooldown)
+                        $remaining = ($cdTime - (Get-Date)).TotalMinutes
+                        if ($remaining -gt 0) {
+                            $detail += "  cooldown=$([math]::Round($remaining,1))min"
+                        } else {
+                            $detail += "  cooldown=expired"
+                        }
+                    } catch {
+                        $detail += "  cooldown=$cooldown"
+                    }
+                }
+                Write-Host $detail -ForegroundColor $color
+            }
+        } else {
+            Write-Host "  無 API 狀態記錄" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "  api-health.json 解析失敗: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "  api-health.json 不存在（尚未執行團隊模式）" -ForegroundColor Gray
+}
+
 # --- Loop State 清理 ---
 Write-Host ""
 Write-Host "[Loop State 清理]" -ForegroundColor Yellow
