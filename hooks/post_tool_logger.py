@@ -24,8 +24,10 @@ from datetime import datetime
 try:
     from agent_guardian import ErrorClassifier, LoopDetector
     AGENT_GUARDIAN_AVAILABLE = True
+    _error_classifier = ErrorClassifier()  # Module-level singleton
 except ImportError:
     AGENT_GUARDIAN_AVAILABLE = False
+    _error_classifier = None
 
 # Import behavior tracker for Instinct Lite pattern collection
 try:
@@ -245,10 +247,9 @@ def main():
     # Error classification (for Bash + API calls)
     error_classification = None
     if AGENT_GUARDIAN_AVAILABLE and tool_name == "Bash":
-        classifier = ErrorClassifier()
         command = tool_input.get("command", "")
         exit_code = 1 if has_error else 0  # 簡化判定，實際 exit code 未傳入
-        error_classification = classifier.classify(tool_name, command, tool_output, exit_code)
+        error_classification = _error_classifier.classify(tool_name, command, tool_output, exit_code)
 
         # 加入分類標籤
         if error_classification["category"] != "success":
