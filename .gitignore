@@ -8,6 +8,9 @@ cache/
 results/
 state/scheduler-state.json
 state/todoist-history.json
+state/loop-state-*.json
+state/api-health.json
+state/last-audit.json
 context/digest-memory.json
 context/auto-tasks-today.json
 context/research-registry.json
@@ -59,6 +62,11 @@ secrets/
 credentials.json
 token.json
 key/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
 
 # --- Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）---
 .claude/settings.local.json

@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（17 個核心 + 5 個工具 = 22 個 Skills）
+## 速查表（17 個核心 + 6 個工具 = 23 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -35,6 +35,7 @@
 | 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
 | 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
 | 22 | arch-evolution | 架構演化追蹤器（ADR/技術債/依賴圖/OODA，depends-on: system-audit、system-insight） | 架構決策、ADR、技術債、依賴圖、OODA、arch-evolution、架構治理、漸進式改進、改進計畫、架構演化 |
+| 23 | git-smart-commit | 智慧分群提交（Conventional Commit） | git commit、smart commit、智慧提交、conventional commit、分群提交 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

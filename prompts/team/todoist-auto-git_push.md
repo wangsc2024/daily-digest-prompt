@@ -54,11 +54,20 @@ cd D:/Source/daily-digest-prompt && git status --porcelain
 - 輸出為空（無變更）→ 跳到步驟 4，status="no_changes"
 - 有變更 → 繼續
 
-## 步驟 2：Stage 與 Commit
+## 步驟 2：智慧分群提交（Smart Commit）
+
+先讀取 `skills/git-smart-commit/SKILL.md`，依其流程執行：
+
+1. `git status --porcelain` 取得變更清單
+2. 依 Skill 定義的分群規則，將檔案按目錄/模組分組
+3. 每組產生一個 Conventional Commit（`<type>(<scope>): <描述>`）
+4. 逐批 `git add <files> && git commit -m "<message>"`
+
+若 Skill 讀取失敗或分群出錯，降級為：
 ```bash
 cd D:/Source/daily-digest-prompt && git add -A && git commit -m "chore: auto-sync $(date +%Y-%m-%d_%H%M)"
 ```
-- commit 訊息格式：`chore: auto-sync YYYY-MM-DD_HHMM`
+
 - 敏感檔案已由 .gitignore 排除
 
 ## 步驟 3：Push 至 GitHub
