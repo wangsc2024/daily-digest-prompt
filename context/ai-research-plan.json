@@ -21,5 +21,71 @@
     "world models robotics",
     "embodied AI 2026"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "Deloitte Tech Trends 2026: Physical AI — AI Goes Physical: Navigating the Convergence of AI and Robotics",
+      "url": "https://www.deloitte.com/us/en/insights/topics/technology-management/tech-trends/2026/physical-ai-humanoid-robots.html",
+      "key_points": [
+        "VLA（視覺-語言-動作）模型為核心技術，結合電腦視覺、NLP 與運動控制",
+        "人形機器人成本從 2025 年 3.5 萬美元預計十年內降至 1.3-1.7 萬美元",
+        "UBS 預測 2035 年職場將有 200 萬台人形機器人，2050 年市場規模達 1.4-1.7 兆美元",
+        "雙系統認知架構（System 1 快速反應 + System 2 慢速推理）",
+        "六大挑戰：Sim-to-Real Gap、安全信任、監管不確定性、數據管理、網路安全、人力接受度"
+      ]
+    },
+    {
+      "title": "NVIDIA Isaac GR00T N1 — 全球首個開放人形機器人基礎模型",
+      "url": "https://nvidianews.nvidia.com/news/nvidia-isaac-gr00t-n1-open-humanoid-robot-foundation-model-simulation-frameworks",
+      "key_points": [
+        "雙系統認知架構：System 1（VLA 驅動快速思考）+ System 2（環境推理規劃）",
+        "開源策略：模型與數據上傳 Hugging Face 與 GitHub，支持後訓練客製化",
+        "合作夥伴：1X、Boston Dynamics、Agility Robotics、NEURA Robotics",
+        "Google DeepMind 與迪士尼研究院共同開發 Newton 物理引擎，加速 ML 70 倍以上"
+      ]
+    },
+    {
+      "title": "NVIDIA Isaac GR00T N1.6 Sim-to-Real Workflow 技術部落格",
+      "url": "https://developer.nvidia.com/blog/building-generalist-humanoid-capabilities-with-nvidia-isaac-gr00t-n1-6-using-a-sim-to-real-workflow/",
+      "key_points": [
+        "端到端 VLA 模型整合世界模型，分層控制架構（高層推理 + 低層 RL 執行）",
+        "Isaac Lab 中全身強化學習訓練，實現零次轉移至物理機器人",
+        "COMPASS 合成數據導航訓練，零次部署至新物理環境",
+        "跨具身遷移：支持 GR-1、G1、雙臂 YAM 等多平台",
+        "CUDA 加速視覺映射堆棧（cuVSLAM、cuVGL、FoundationStereo、nvblox）"
+      ]
+    },
+    {
+      "title": "The Reality Gap in Robotics: Challenges, Solutions, and Best Practices (arxiv 2510.20808)",
+      "url": "https://arxiv.org/html/2510.20808v1",
+      "key_points": [
+        "Reality Gap 四大來源：動力學差距、感知差距、致動差距、系統設計差距",
+        "Domain Randomization：訓練期間隨機化模擬參數，自動化版本漸進擴展範圍",
+        "Digital Twins & Real-to-Sim：從真實數據構建精確模擬環境（3D 重建 + 物理辨識 + 神經渲染）",
+        "System Identification：線上迭代辨識 + 殘差模型學習",
+        "六步驟 Sim-to-Real 最佳實務配方：設計模擬→縮小 Gap→訓練策略→評估→調整→重訓"
+      ]
+    },
+    {
+      "title": "Physical AI in 2026: How Embodied Intelligence Is Redefining Industrial Operations, Healthcare, and Smart Cities",
+      "url": "https://www.techaheadcorp.com/blog/how-embodied-intelligence-redefining-industrial-operation/",
+      "key_points": [
+        "全球 Physical AI 市場從 2024 年 41.2 億美元預計 2034 年達 611.9 億美元（CAGR 31.26%）",
+        "AI 手術機器人減少 25% 手術時間、降低 30% 術中併發症",
+        "倉庫自動化市場至 2029 年達 1,120 億美元",
+        "Citi 預測 2035 年 13 億個 AI 機器人、2050 年 40 億個"
+      ]
+    },
+    {
+      "title": "NVIDIA Blog: Physical AI Open Models and Frameworks — Into the Omniverse",
+      "url": "https://blogs.nvidia.com/blog/physical-ai-open-models-robot-autonomous-systems-omniverse/",
+      "key_points": [
+        "Cosmos 世界模型三款：Predict 2（視覺預測）、Reason 2（社交認知/安全感知）、Transfer（合成數據生成）",
+        "Caterpillar 整合 Nemotron + Jetson Thor 以自然語言控制重型設備",
+        "LEM Surgical 的 Dynamis 手術機器人採用 Jetson AGX Thor + Holoscan",
+        "Hugging Face 整合 GR00T N 模型與 LeRobot 生態系統",
+        "NEURA Robotics + SAP 利用 Mega Omniverse 藍圖模擬工業場景"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }

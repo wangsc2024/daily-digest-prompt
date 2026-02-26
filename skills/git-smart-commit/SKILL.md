@@ -7,12 +7,12 @@ description: |
 allowed-tools: Bash, Read, Write
 cache-ttl: N/A
 triggers:
-  - git commit
-  - smart commit
-  - 智慧提交
-  - conventional commit
-  - 分群提交
-  - git push
+  - "git commit"
+  - "smart commit"
+  - "智慧提交"
+  - "conventional commit"
+  - "分群提交"
+  - "git push"
 ---
 
 # Git Smart Commit — 智慧分群提交

@@ -143,15 +143,15 @@ triggers:
 > **Windows 注意**：POST 的 inline JSON 在 Windows Bash 會失敗，必須用 JSON 檔案方式發送。
 
 ```bash
-# 步驟 1：用 Write 工具建立 JSON 檔案
+# 5a：用 Write 工具建立 JSON 檔案
 # dedup_query.json: {"query": "研究主題關鍵字", "topK": 5}
 
-# 步驟 2：用 curl 發送
+# 5b：用 curl 發送
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @dedup_query.json
 
-# 步驟 3：清理暫存檔
+# 5c：清理暫存檔
 rm dedup_query.json
 ```
 - 若有 score > 0.85 的結果 -> 視為重複，不匯入（但可更新已有筆記）
