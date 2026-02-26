@@ -12,6 +12,8 @@ with automatic tagging for:
   - Sub-agent spawning
   - Errors detected in output
   - Error classification (via agent_guardian.ErrorClassifier)
+  - Token economy tracking (input_len + output_len per call)
+  - Behavior pattern collection (Instinct Lite — via behavior_tracker)
 """
 import sys
 import json
@@ -24,6 +26,13 @@ try:
     AGENT_GUARDIAN_AVAILABLE = True
 except ImportError:
     AGENT_GUARDIAN_AVAILABLE = False
+
+# Import behavior tracker for Instinct Lite pattern collection
+try:
+    from behavior_tracker import track as track_behavior
+    BEHAVIOR_TRACKER_AVAILABLE = True
+except ImportError:
+    BEHAVIOR_TRACKER_AVAILABLE = False
 
 # Import shared API source patterns
 from hook_utils import API_SOURCE_PATTERNS
@@ -285,8 +294,13 @@ def main():
             if loop_result.get("loop_detected"):
                 tags.append("loop-suspected")
                 loop_detection = loop_result
-        except Exception:
-            pass  # Silent fail，不中斷 Agent 流程
+        except Exception as e:
+            import sys
+            print(f"[post_tool_logger] loop detection error: {e}", file=sys.stderr)
+            pass  # 不中斷 Agent 流程，但記錄錯誤到 stderr
+
+    # Compute input size for token economy tracking
+    input_len = len(json.dumps(tool_input, ensure_ascii=False)) if tool_input else 0
 
     # Build log entry
     entry = {
@@ -296,6 +310,7 @@ def main():
         "tool": tool_name,
         "event": "post",
         "summary": summary,
+        "input_len": input_len,
         "output_len": len(tool_output),
         "has_error": has_error,
         "tags": tags,
@@ -340,6 +355,20 @@ def main():
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except OSError:
         pass  # Silent fail — do not disrupt Agent workflow
+
+    # Behavior pattern tracking (Instinct Lite)
+    if BEHAVIOR_TRACKER_AVAILABLE:
+        try:
+            track_behavior(
+                tool=tool_name,
+                summary=summary,
+                tags=tags,
+                has_error=has_error,
+                input_len=input_len,
+                output_len=len(tool_output),
+            )
+        except Exception:
+            pass  # Silent fail — behavior tracking is optional
 
     print("{}")
     sys.exit(0)

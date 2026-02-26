@@ -414,6 +414,7 @@ class LoopDetector:
         r"digest-memory\.json$",
         r"scheduler-state\.json$",
         r"api-health\.json$",
+        r"state/loop-state-[0-9a-f]{8}\.json$",
     ]
 
     def __init__(self, warning_mode: bool = True, initial_state: dict = None):
