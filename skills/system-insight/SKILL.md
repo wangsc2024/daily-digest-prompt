@@ -1,6 +1,6 @@
 ---
 name: system-insight
-version: "1.2.0"
+version: "1.3.0"
 description: |
   系統自省引擎。分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出結構化洞察報告。
   Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢。
@@ -48,6 +48,12 @@ depends-on:
    - 主題多樣性指數（unique topics / total entries）
    - 近 7 天新增主題分佈
 
+5. **behavior-patterns.json**（`context/behavior-patterns.json`，可選）
+   - Token 經濟學指標：avg_io_per_call（每次工具呼叫平均 I/O 字元數）
+   - 行為模式統計：behavior_pattern_count（已識別模式數）
+   - 高信心模式：high_confidence_patterns（confidence >= 0.5 可演化為 Skill 的模式數）
+   - 若檔案不存在 → 對應 3 個指標設為 null
+
 ### 步驟 2：計算洞察指標
 
 | 指標 | 計算方式 | 健康門檻 |
@@ -59,6 +65,9 @@ depends-on:
 | block_rate | blocked 標籤 / 總呼叫數 | <= 2% |
 | topic_diversity | unique topics / total research entries | >= 0.5 |
 | auto_task_fairness | stddev(task_counts) / mean(task_counts) | <= 0.5 |
+| avg_io_per_call | 所有工具呼叫 output_len 平均值 | <= 5000 chars |
+| behavior_pattern_count | behavior-patterns.json 中模式總數 | >= 20 |
+| high_confidence_patterns | confidence >= 0.5 的模式數 | >= 5 |
 
 ### 步驟 3：產出報告
 用 Write 建立 `context/system-insight.json`：
@@ -75,7 +84,10 @@ depends-on:
     "error_rate": 0.02,
     "block_rate": 0.01,
     "topic_diversity": 0.65,
-    "auto_task_fairness": 0.3
+    "auto_task_fairness": 0.3,
+    "avg_io_per_call": 3200,
+    "behavior_pattern_count": 25,
+    "high_confidence_patterns": 8
   },
   "alerts": [
     {"level": "warning", "metric": "cache_hit_ratio", "value": 0.35, "threshold": 0.40}
@@ -99,6 +111,7 @@ depends-on:
 - 若 JSONL 日誌不存在或為空 → 跳過該資料源，metrics 中標記 `"data_source": "partial"`
 - 若 scheduler-state.json 不存在 → daily_success_rate 設為 null，加入 alert
 - 若 auto-tasks-today.json 或 research-registry.json 不存在 → 對應指標設為 null
+- 若 behavior-patterns.json 不存在 → avg_io_per_call、behavior_pattern_count、high_confidence_patterns 設為 null
 - 所有 JSON 解析失敗 → 記錄錯誤、跳過該來源，不中斷整體分析
 
 ## 注意事項

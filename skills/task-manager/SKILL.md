@@ -20,8 +20,6 @@ triggers:
   - "新增排程"
   - "自動任務管理"
   - "round-robin"
-depends-on:
-  - "web-research"
 ---
 
 # Task Manager Skill — 任務新增標準化
@@ -153,7 +151,7 @@ team_prompt_path: "prompts/team/todoist-auto-{task_key 轉 hyphen}.md"
 ```
 你是 {角色描述}，全程使用正體中文。
 你的任務是 {任務描述}。
-完成後將結果寫入 `results/todoist-{task_key_hyphen}.json`。
+完成後將結果寫入 `results/todoist-auto-{task_key_hyphen}.json`。
 
 ## 重要禁令
 - 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`，改用 `> /dev/null 2>&1`
@@ -169,20 +167,17 @@ team_prompt_path: "prompts/team/todoist-auto-{task_key 轉 hyphen}.md"
 {任務步驟}
 
 ## 輸出結果
-用 Write 工具寫入 `results/todoist-{task_key_hyphen}.json`：
+用 Write 工具寫入 `results/todoist-auto-{task_key_hyphen}.json`：
 {JSON 結構，含 done_cert}
 ```
 
-#### 4.5 Edit — run-todoist-agent-team.ps1 追加映射
+#### 4.5 驗證團隊模式 prompt 命名正確
 
-在 `$dedicatedPrompts` 哈希表的最後一個映射之後追加：
+> **注意**：`run-todoist-agent-team.ps1` 已改為動態掃描（`Get-ChildItem todoist-auto-*.md`），
+> 不再使用 hardcoded `$dedicatedPrompts` 哈希表。因此**無需手動修改 PS1 映射**。
+> 只要 prompt 檔案命名為 `prompts/team/todoist-auto-{task_key_hyphen}.md` 即可被自動發現。
 
-```powershell
-            # {群組名}
-            "{task_key}"          = "$AgentDir\prompts\team\todoist-auto-{task_key_hyphen}.md"
-```
-
-同時更新註解中的任務總數。
+驗證方式：確認 `prompts/team/todoist-auto-{task_key_hyphen}.md` 檔案存在。
 
 #### 4.6 Edit — frequency-limits.yaml 底部摘要
 
@@ -205,9 +200,9 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
 - `prompts/team/todoist-auto-{key}.md` 含 `results/`
 
 ```bash
-# 5.3 PS1 映射檢查
+# 5.3 團隊 prompt 命名檢查（動態掃描，無需 PS1 映射）
 ```
-用 Grep 確認 `run-todoist-agent-team.ps1` 含 `{task_key}`
+確認 `prompts/team/todoist-auto-{task_key_hyphen}.md` 存在且命名正確（動態掃描靠檔名匹配）
 
 ```bash
 # 5.4 counter_field 一致性

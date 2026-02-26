@@ -34,7 +34,6 @@ triggers:
 | Skill | 關係 | 說明 |
 |-------|------|------|
 | knowledge-query | 下游 | 研究成果匯入知識庫 |
-| api-cache | 搭配 | 包裝所有外部 API 呼叫 |
 | ntfy-notify | 下游 | 研究完成通知 |
 
 ## 來源品質分級
@@ -138,7 +137,7 @@ triggers:
 
 若研究成果值得保存（depth >= adequate），依 knowledge-query Skill 匯入知識庫。
 
-匯入前去重（使用 hybrid search，閾值 0.85 基於經驗校準）：
+匯入前去重（使用 hybrid search，閾值 0.85）：
 
 > **Windows 注意**：POST 的 inline JSON 在 Windows Bash 會失敗，必須用 JSON 檔案方式發送。
 
@@ -157,9 +156,7 @@ rm dedup_query.json
 - 若有 score > 0.85 的結果 -> 視為重複，不匯入（但可更新已有筆記）
 - 若無重複 -> 按 knowledge-query SKILL.md 的匯入步驟執行
 
-> **閾值說明**：0.85 為 hybrid search（BM25 + 向量）的經驗閾值。
-> hybrid search 的分數已正規化到 0-1 範圍，0.85 以上通常代表高度語意相似。
-> 若向量模型更換，建議重新校準此閾值。
+> **閾值說明**：0.85 為 hybrid search（BM25 + 向量）經驗閾值，分數已正規化到 0-1。若向量模型更換，建議重新校準。
 
 ### 步驟 6：研究註冊表更新
 

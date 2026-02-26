@@ -12,7 +12,6 @@ triggers:
   - "智慧提交"
   - "conventional commit"
   - "分群提交"
-  - "git push"
 ---
 
 # Git Smart Commit — 智慧分群提交
@@ -50,13 +49,14 @@ git status --porcelain
 | `docs/` | docs | docs | 文件 |
 | `*.ps1`（根目錄） | scripts | chore | PowerShell 腳本 |
 | `*.md`（根目錄） | project | docs | 專案文件 |
-| `state/` + `context/` + `cache/` + `results/` | — | — | **不獨立 commit**（見下方規則） |
+| `context/` | context | chore | 結構化資料檔案（部分被 .gitignore 排除） |
+| `state/` + `cache/` + `results/` | — | — | **已被 .gitignore 排除，通常不會出現在變更中** |
 
 ### 步驟 3：特殊規則
 
-1. **資料檔案合併**：`state/`、`context/`、`cache/`、`results/` 的變更不獨立 commit。
-   - 若有程式碼變更 → 併入最後一個 commit
-   - 若僅有資料檔案變更 → 用 `chore: auto-sync {timestamp}` 單一 commit
+1. **資料檔案合併**：`context/` 的變更不獨立 commit（`state/`/`cache/`/`results/` 已被 .gitignore 排除）。
+   - 若有程式碼變更 → `context/` 併入最後一個 commit
+   - 若僅有 `context/` 變更 → 用 `chore: auto-sync {timestamp}` 單一 commit
 
 2. **少量變更簡化**：若總變更 ≤ 5 個檔案且全在同一 scope → 用單一 commit
 
