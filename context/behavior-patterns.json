@@ -1,0 +1,619 @@
+{
+  "version": 1,
+  "patterns": {
+    "1f916407d074": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\behavior-patterns.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:44.276150+08:00",
+      "last_seen": "2026-02-26T04:33:44.276150+08:00",
+      "total_input": 81,
+      "total_output": 0
+    },
+    "d3863c5175bb": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\benchmark.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 2,
+      "confidence": 0.15000000000000002,
+      "success_count": 2,
+      "first_seen": "2026-02-26T04:33:44.604524+08:00",
+      "last_seen": "2026-02-26T04:36:03.441886+08:00",
+      "total_input": 176,
+      "total_output": 0
+    },
+    "627c37d4a1f6": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\.gitignore",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 2,
+      "confidence": 0.15000000000000002,
+      "success_count": 2,
+      "first_seen": "2026-02-26T04:33:44.776524+08:00",
+      "last_seen": "2026-02-26T04:36:04.166996+08:00",
+      "total_input": 120,
+      "total_output": 0
+    },
+    "5fa87f34e4f8": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\run-agent-team.ps1",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:47.753125+08:00",
+      "last_seen": "2026-02-26T04:33:47.753125+08:00",
+      "total_input": 68,
+      "total_output": 0
+    },
+    "1921498c9172": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\run-todoist-agent-team.ps1",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:47.759126+08:00",
+      "last_seen": "2026-02-26T04:33:47.759126+08:00",
+      "total_input": 76,
+      "total_output": 0
+    },
+    "9d57fd3383a9": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\run-system-audit-team.ps1",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:47.765125+08:00",
+      "last_seen": "2026-02-26T04:33:47.765125+08:00",
+      "total_input": 75,
+      "total_output": 0
+    },
+    "fa9093faf693": {
+      "tool": "Glob",
+      "summary_sample": "{'pattern': '**/tests/**/*.py'}",
+      "tags": [
+        "team-mode",
+        "glob"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:47.920127+08:00",
+      "last_seen": "2026-02-26T04:33:47.920127+08:00",
+      "total_input": 31,
+      "total_output": 0
+    },
+    "10190742d349": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\check-health.ps1",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:47.935128+08:00",
+      "last_seen": "2026-02-26T04:33:47.935128+08:00",
+      "total_input": 66,
+      "total_output": 0
+    },
+    "a0222d4363a7": {
+      "tool": "Grep",
+      "summary_sample": "{'pattern': '^(  )?- (name|skill_id|version|description):', 'path': 'D:\\\\Source\\\\daily-digest-prompt\\\\skills\\\\SKILL_INDEX.md', 'output_mode': 'content",
+      "tags": [
+        "team-mode",
+        "grep"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:48.501839+08:00",
+      "last_seen": "2026-02-26T04:33:48.501839+08:00",
+      "total_input": 171,
+      "total_output": 0
+    },
+    "47940c9bb6a1": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\pre_write_guard.py",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:48.824959+08:00",
+      "last_seen": "2026-02-26T04:33:48.824959+08:00",
+      "total_input": 75,
+      "total_output": 0
+    },
+    "8cf8e149308a": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\pre_read_guard.py",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:48.831519+08:00",
+      "last_seen": "2026-02-26T04:33:48.831519+08:00",
+      "total_input": 74,
+      "total_output": 0
+    },
+    "67c925583b96": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\on_stop_alert.py",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:49.458112+08:00",
+      "last_seen": "2026-02-26T04:33:49.458112+08:00",
+      "total_input": 73,
+      "total_output": 0
+    },
+    "5db660ceeee2": {
+      "tool": "Bash",
+      "summary_sample": "cd /d D:\\Source\\daily-digest-prompt && find config -name \"*.yaml\" -o -name \"*.json\" | head -20",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:50.714032+08:00",
+      "last_seen": "2026-02-26T04:33:50.714032+08:00",
+      "total_input": 115,
+      "total_output": 0
+    },
+    "c03e9ecd08ef": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\templates\\auto-tasks\\git-push.md",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:51.913894+08:00",
+      "last_seen": "2026-02-26T04:33:51.913894+08:00",
+      "total_input": 84,
+      "total_output": 0
+    },
+    "f42c7d3f7c95": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-git_push.md",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:52.217895+08:00",
+      "last_seen": "2026-02-26T04:33:52.217895+08:00",
+      "total_input": 89,
+      "total_output": 0
+    },
+    "98afdbfb9575": {
+      "tool": "Glob",
+      "summary_sample": "{'pattern': 'skills/git-smart-commit/SKILL.md'}",
+      "tags": [
+        "team-mode",
+        "glob"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:52.284769+08:00",
+      "last_seen": "2026-02-26T04:33:52.284769+08:00",
+      "total_input": 47,
+      "total_output": 0
+    },
+    "a36f0f1378ca": {
+      "tool": "Bash",
+      "summary_sample": "find \"D:\\Source\\daily-digest-prompt\\skills\" -name \"SKILL.md\" | wc -l",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:54.444744+08:00",
+      "last_seen": "2026-02-26T04:33:54.444744+08:00",
+      "total_input": 90,
+      "total_output": 0
+    },
+    "a6f7e1786182": {
+      "tool": "Bash",
+      "summary_sample": "ls -la \"D:\\Source\\daily-digest-prompt\\config\\schemas\\\" 2>/dev/null | grep -i schema",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:54.684434+08:00",
+      "last_seen": "2026-02-26T04:33:54.684434+08:00",
+      "total_input": 105,
+      "total_output": 0
+    },
+    "ec222a71d758": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\git-smart-commit\\SKILL.md",
+      "tags": [
+        "team-mode",
+        "skill-read"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:55.220051+08:00",
+      "last_seen": "2026-02-26T04:33:55.220051+08:00",
+      "total_input": 84,
+      "total_output": 0
+    },
+    "5c7d6717e668": {
+      "tool": "Bash",
+      "summary_sample": "ls -1 \"D:\\Source\\daily-digest-prompt\\config\\schemas\\*\" 2>/dev/null",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:57.998417+08:00",
+      "last_seen": "2026-02-26T04:33:57.998417+08:00",
+      "total_input": 88,
+      "total_output": 0
+    },
+    "472bf02bb327": {
+      "tool": "Bash",
+      "summary_sample": "find \"D:\\Source\\daily-digest-prompt\\config\" -type f -name \"*.json\" -o -name \"*.yaml\" | sort",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:33:58.342544+08:00",
+      "last_seen": "2026-02-26T04:33:58.342544+08:00",
+      "total_input": 115,
+      "total_output": 0
+    },
+    "5fe6811488d3": {
+      "tool": "Bash",
+      "summary_sample": "find D:/Source/daily-digest-prompt/config -type f \\( -name \"*.yaml\" -o -name \"*.json\" \\)",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:01.953149+08:00",
+      "last_seen": "2026-02-26T04:34:01.953149+08:00",
+      "total_input": 109,
+      "total_output": 0
+    },
+    "b8f6d6a79e60": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\scoring.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:05.099400+08:00",
+      "last_seen": "2026-02-26T04:34:05.099400+08:00",
+      "total_input": 86,
+      "total_output": 0
+    },
+    "8aed43fd4eba": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\frequency-limits.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:05.490401+08:00",
+      "last_seen": "2026-02-26T04:34:05.490401+08:00",
+      "total_input": 95,
+      "total_output": 0
+    },
+    "bc95d32351d3": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\routing.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:05.496401+08:00",
+      "last_seen": "2026-02-26T04:34:05.496401+08:00",
+      "total_input": 86,
+      "total_output": 0
+    },
+    "61804ebedcdb": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\topic-rotation.yaml",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:05.595802+08:00",
+      "last_seen": "2026-02-26T04:34:05.595802+08:00",
+      "total_input": 77,
+      "total_output": 0
+    },
+    "0dc40c903458": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\cache-policy.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:08.880094+08:00",
+      "last_seen": "2026-02-26T04:34:08.880094+08:00",
+      "total_input": 91,
+      "total_output": 0
+    },
+    "e48a07fdb90a": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\schemas\\hook-rules.schema.json",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:09.129043+08:00",
+      "last_seen": "2026-02-26T04:34:09.129043+08:00",
+      "total_input": 103,
+      "total_output": 0
+    },
+    "751acfcc8adb": {
+      "tool": "Bash",
+      "summary_sample": "grep -c \"^  [a-z_]*:\" D:/Source/daily-digest-prompt/config/frequency-limits.yaml | head -1",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:12.433229+08:00",
+      "last_seen": "2026-02-26T04:34:12.433229+08:00",
+      "total_input": 107,
+      "total_output": 0
+    },
+    "a413a57ea594": {
+      "tool": "Bash",
+      "summary_sample": "grep \"daily_limit:\" D:/Source/daily-digest-prompt/config/frequency-limits.yaml | awk '{sum+=$2} END {print sum}'",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:13.334274+08:00",
+      "last_seen": "2026-02-26T04:34:13.334274+08:00",
+      "total_input": 129,
+      "total_output": 0
+    },
+    "cc8650a2b267": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\pipeline.yaml",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:13.779527+08:00",
+      "last_seen": "2026-02-26T04:34:13.779527+08:00",
+      "total_input": 84,
+      "total_output": 0
+    },
+    "c61a3de93191": {
+      "tool": "Bash",
+      "summary_sample": "grep -E \"name|skills\" D:/Source/daily-digest-prompt/config/routing.yaml | grep \"^  \" | wc -l",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:17.288187+08:00",
+      "last_seen": "2026-02-26T04:34:17.288187+08:00",
+      "total_input": 111,
+      "total_output": 0
+    },
+    "efee64a67813": {
+      "tool": "Bash",
+      "summary_sample": "grep \"weight:\" D:/Source/daily-digest-prompt/config/benchmark.yaml | awk '{sum+=$2} END {print sum}'",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:18.548734+08:00",
+      "last_seen": "2026-02-26T04:34:18.548734+08:00",
+      "total_input": 117,
+      "total_output": 0
+    },
+    "0082ef7ecb8f": {
+      "tool": "Task",
+      "summary_sample": "{'description': 'Scan PS scripts and tests', 'prompt': 'You are analyzing the daily-digest-prompt project at D:\\\\Source\\\\daily-digest-prompt.\\n\\nYour ",
+      "tags": [
+        "task",
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:36.498992+08:00",
+      "last_seen": "2026-02-26T04:34:36.498992+08:00",
+      "total_input": 953,
+      "total_output": 0
+    },
+    "011a53570964": {
+      "tool": "Task",
+      "summary_sample": "{'description': 'Scan audit reports and hooks', 'prompt': 'You are analyzing the daily-digest-prompt project at D:\\\\Source\\\\daily-digest-prompt.\\n\\nYo",
+      "tags": [
+        "team-mode",
+        "task"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:34:38.080696+08:00",
+      "last_seen": "2026-02-26T04:34:38.080696+08:00",
+      "total_input": 1005,
+      "total_output": 0
+    },
+    "20f85da70d44": {
+      "tool": "Task",
+      "summary_sample": "{'description': 'Scan configs for optimization', 'prompt': 'You are analyzing the daily-digest-prompt project at D:\\\\Source\\\\daily-digest-prompt. \\n\\n",
+      "tags": [
+        "task",
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:35:35.091647+08:00",
+      "last_seen": "2026-02-26T04:35:35.091647+08:00",
+      "total_input": 991,
+      "total_output": 0
+    },
+    "d12160c684d5": {
+      "tool": "TodoWrite",
+      "summary_sample": "{'todos': [{'content': 'Phase A: 規劃 — 掃描配置與審查報告，識別優化項目', 'status': 'completed', 'activeForm': '掃描配置與審查報告，識別優化項目'}, {'content': 'Phase B/C: 實作優化項目（含測試先",
+      "tags": [
+        "todowrite",
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:35:49.449762+08:00",
+      "last_seen": "2026-02-26T04:35:49.449762+08:00",
+      "total_input": 538,
+      "total_output": 0
+    },
+    "3765cae5cae2": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\benchmark.yaml",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:03.093884+08:00",
+      "last_seen": "2026-02-26T04:36:03.093884+08:00",
+      "total_input": 72,
+      "total_output": 0
+    },
+    "cb8e89ddbc01": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\agent_guardian.py",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:04.011917+08:00",
+      "last_seen": "2026-02-26T04:36:04.011917+08:00",
+      "total_input": 74,
+      "total_output": 0
+    },
+    "a25eae9ab66b": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\post_tool_logger.py",
+      "tags": [
+        "team-mode"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:08.771445+08:00",
+      "last_seen": "2026-02-26T04:36:08.771445+08:00",
+      "total_input": 104,
+      "total_output": 0
+    },
+    "343564d8d39c": {
+      "tool": "Edit",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\benchmark.yaml",
+      "tags": [
+        "team-mode",
+        "file-edit"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:14.445453+08:00",
+      "last_seen": "2026-02-26T04:36:14.445453+08:00",
+      "total_input": 346,
+      "total_output": 0
+    },
+    "9103b98a13fa": {
+      "tool": "Edit",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\hooks\\agent_guardian.py",
+      "tags": [
+        "team-mode",
+        "file-edit"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:19.777751+08:00",
+      "last_seen": "2026-02-26T04:36:19.777751+08:00",
+      "total_input": 640,
+      "total_output": 0
+    },
+    "c6658c7a8ca8": {
+      "tool": "Edit",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\.gitignore",
+      "tags": [
+        "team-mode",
+        "file-edit"
+      ],
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-02-26T04:36:24.356964+08:00",
+      "last_seen": "2026-02-26T04:36:24.356964+08:00",
+      "total_input": 307,
+      "total_output": 0
+    }
+  },
+  "last_cleanup": null
+}

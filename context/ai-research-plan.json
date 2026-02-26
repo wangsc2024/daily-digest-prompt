@@ -1,25 +1,25 @@
 {
-  "date": "2026-02-25",
-  "topic": "Inference-Time Scaling（推理時間擴展）— 從預訓練擴展到推理時擴展的 AI 新範式",
+  "date": "2026-02-26",
+  "topic": "Physical AI（具身智慧）— 從虛擬推理到實體世界感知行動的 AI 新前沿",
   "research_questions": [
-    "Inference-Time Scaling 的核心技術機制有哪些？（Chain-of-Thought、Tree Search、Self-Verification、Budget Forcing 等）",
-    "與傳統 Pre-training Scaling Laws（Chinchilla）相比，推理時擴展的效率曲線與成本模型如何？",
-    "2026 年主要推理模型（OpenAI o3/o4-mini、Gemini 3 Deep Think、DeepSeek R1、Claude Opus 思考模式）各採用什麼推理時擴展策略？",
-    "Inference-Time Scaling 對 AI Agent 架構設計有何影響？（Reflective Agents、System 2 思維、自適應推理預算）",
-    "企業實務中如何平衡推理品質與推理成本？（Token 經濟學、Effort 控制、模型路由）"
+    "Physical AI 的核心技術棧包含哪些？（Embodied AI、Sim-to-Real Transfer、World Models for Robotics、Foundation Models for Robotics）",
+    "2026 年主要 Physical AI 進展有哪些？（NVIDIA Isaac、Google DeepMind RT-X、Figure 01/02、Tesla Optimus、1X NEO、Unitree）",
+    "Physical AI 如何整合 LLM/VLM 作為高層規劃器？（SayCan、Code as Policies、VoxPoser、RT-2 等範式）",
+    "Sim-to-Real Gap 的最新解決方案是什麼？（Domain Randomization、System Identification、Digital Twins、NVIDIA Omniverse）",
+    "Physical AI 對軟體工程師的機會與影響？（ROS 2 + AI Agent、機器人 MCP、具身智慧應用場景）"
   ],
   "methodology": "四階段深度研究法：(1)規劃—界定問題與文獻範圍；(2)蒐集—WebSearch+WebFetch 取得 5+ 篇權威來源（學術論文、技術部落格、官方文件）；(3)分析—交叉比對共識/分歧/獨特洞見；(4)報告—撰寫結構化研究報告並匯入知識庫",
   "keywords": [
-    "inference-time scaling",
-    "test-time compute",
-    "chain-of-thought reasoning",
-    "tree search reasoning",
-    "reasoning models",
-    "System 2 thinking",
-    "compute-optimal inference",
-    "adaptive thinking",
-    "reflective agents",
-    "budget forcing"
+    "physical AI",
+    "embodied intelligence",
+    "sim-to-real transfer",
+    "robot foundation model",
+    "humanoid robot AI",
+    "RT-X robotics transformer",
+    "NVIDIA Isaac",
+    "LLM robot planning",
+    "world models robotics",
+    "embodied AI 2026"
   ],
   "stage_completed": 1
 }
