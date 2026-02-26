@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 22 個 Skill 速查表（17 核心 + 5 工具，名稱、觸發關鍵字、用途）
+- 23 個 Skill 速查表（17 核心 + 6 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -251,7 +251,7 @@ daily-digest-prompt/
     kb-curator/ github-scout/     # 共 17 核心 Skill
     task-manager/ skill-scanner/
     system-audit/ todoist-task-creator/
-    arch-evolution/               # 共 5 工具 Skill（合計 22 個，各含 SKILL.md）
+    arch-evolution/               # 共 6 工具 Skill（合計 23 個，各含 SKILL.md）
 
   # 規格與文件
   specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
@@ -453,7 +453,7 @@ python hooks/query_logs.py --format json
 
 ---
 
-## Skills（專案內自包含，共 22 個）
+## Skills（專案內自包含，共 23 個）
 
 完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 
