@@ -215,8 +215,8 @@ tasks:
     template: "templates/auto-tasks/git-push.md"
     history_type: "git_push"
     execution_order: 13
-    skills: [knowledge-query]
-    description: "同步知識庫至網站並推送 daily-digest-prompt + shurangama-web 至 GitHub"
+    skills: [knowledge-query, git-smart-commit]
+    description: "同步知識庫至網站，用 Smart Commit 分群提交後推送 daily-digest-prompt + shurangama-web 至 GitHub"
 
   # --- 遊戲創意群組（共 2 次/日）---
   creative_game_optimize:

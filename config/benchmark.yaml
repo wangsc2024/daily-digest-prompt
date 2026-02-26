@@ -2,14 +2,14 @@
 # 系統效能基準線 — 由 system-insight Skill 讀取比對
 # 修改此文件可調整目標門檻
 
-version: 1
+version: 2
 
 metrics:
   - name: daily_success_rate
     description: "每日執行成功率"
     target: ">= 95%"
     source: scheduler-state.json
-    weight: 30
+    weight: 25
 
   - name: avg_phase1_duration
     description: "Phase 1 平均耗時"
@@ -21,31 +21,50 @@ metrics:
     description: "Skill 使用覆蓋率"
     target: ">= 70%"
     source: system-insight.json
-    weight: 15
+    weight: 12
 
   - name: cache_hit_ratio
     description: "快取命中率"
     target: ">= 40%"
     source: system-insight.json
-    weight: 15
+    weight: 12
 
   - name: security_rule_count
     description: "安全規則數量"
     target: ">= 15"
     source: hook-rules.yaml
-    weight: 10
+    weight: 8
 
   - name: test_count
     description: "測試案例數量"
-    target: ">= 200"
+    target: ">= 450"
     source: pytest
-    weight: 10
+    weight: 8
 
   - name: owasp_coverage
     description: "OWASP Agentic 覆蓋率"
     target: ">= 70%"
     source: manual_assessment
+    weight: 5
+
+  # Token 經濟學指標（v2 新增，靈感：everything-claude-code Token Economy）
+  - name: avg_io_per_call
+    description: "每次工具呼叫平均 I/O 大小（chars）"
+    target: "<= 5000"
+    source: behavior-patterns.json
     weight: 10
+
+  - name: behavior_pattern_count
+    description: "已識別行為模式數量（Instinct Lite）"
+    target: ">= 20"
+    source: behavior-patterns.json
+    weight: 5
+
+  - name: high_confidence_patterns
+    description: "高信心模式數量（confidence >= 0.5，可演化為 Skill）"
+    target: ">= 5"
+    source: behavior-patterns.json
+    weight: 5
 
 # 參考專案比較（github-scout Skill 使用）
 comparison:
@@ -56,3 +75,6 @@ comparison:
     - name: openclaw
       url: https://github.com/openclaw/openclaw
       strengths: [self-healing, local-first, shell-integration]
+    - name: everything-claude-code
+      url: https://github.com/affaan-m/everything-claude-code
+      strengths: [instinct-learning, token-economy, agent-hierarchy, agentshield]

@@ -5,7 +5,8 @@
   "properties": {
     "version": {
       "type": "integer",
-      "const": 1
+      "minimum": 1,
+      "maximum": 10
     },
     "metrics": {
       "type": "array",
@@ -37,6 +38,11 @@
           }
         }
       }
+    },
+    "output_format": {
+      "type": "object",
+      "description": "系統洞察分析輸出格式定義",
+      "additionalProperties": true
     },
     "comparison": {
       "type": "object",
