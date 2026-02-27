@@ -32,7 +32,7 @@
 | 7.1 功能完整性 | Grep 搜尋 TODO/FIXME 數量，檢查 Skill 數量、自動任務數量 |
 | 7.2 文檔完整性 | 檢查 CHANGELOG.md、config/README.md、SKILL_INDEX.md |
 | 7.3 部署就緒度 | 檢查 setup-scheduler.ps1、.env.example、$PSScriptRoot 使用率 |
-| 7.4 測試覆蓋率 | 統計測試數量（292），Hook 覆蓋率 |
+| 7.4 測試覆蓋率 | 執行 `pytest --co -q \| wc -l` 統計測試數量，Hook 覆蓋率 |
 | 7.5 維護性 | 檢查 DRY 程度、版本追蹤、模組整合緊密度 |
 
 ### 3. 輸出 JSON

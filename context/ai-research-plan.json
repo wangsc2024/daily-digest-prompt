@@ -21,5 +21,86 @@
     "AI科學發現",
     "AI自主實驗"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "AlphaGenome: AI for better understanding the genome — Google DeepMind 官方部落格",
+      "url": "https://deepmind.google/blog/alphagenome-ai-for-better-understanding-the-genome/",
+      "key_points": [
+        "首個能分析 100 萬鹼基對連續序列的 AI 模型，單鹼基解析度",
+        "架構：卷積層→Transformer層→輸出層，訓練於 ENCODE/GTEx/4D Nucleome/FANTOM5 數據集",
+        "效能：22/24 項評估超越外部最佳模型，24/26 項遺傳變異預測匹配或超越頂級模型",
+        "應用：T 細胞急性淋巴性白血病機制分析（TAL1 基因 MYB 結合基序）",
+        "開源：非商業研究用途，代碼和模型在 GitHub，2026-01 發表於 Nature",
+        "3000 位科學家（160 國）已在使用，臨床試驗效率可提升 35-45%"
+      ]
+    },
+    {
+      "title": "The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search — Sakana AI (arXiv 2504.08066)",
+      "url": "https://arxiv.org/abs/2504.08066",
+      "key_points": [
+        "端對端 Agentic 系統：自主假說制定→實驗設計執行→數據分析→論文撰寫",
+        "核心創新：Agentic Tree Search 搜索機制，由專門的實驗經理 Agent 管理",
+        "突破：首篇完全 AI 生成的論文通過 ICLR 同行評審（高於人類平均接受閾值）",
+        "改進：消除對人類代碼模板依賴、跨域泛化、整合視覺語言模型反饋迴路",
+        "約 30-40% 的生成論文達頂級 ML 會議錄取標準",
+        "代碼已開源（GitHub SakanaAI/AI-Scientist）"
+      ]
+    },
+    {
+      "title": "AI, Agentic Models and Lab Automation for Scientific Discovery — Frontiers in AI",
+      "url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1649155/full",
+      "key_points": [
+        "從「共駕駕駛員」到「實驗室駕駛員」的範式轉移",
+        "多模態自主系統：聆聽、觀察、發言並行動，協調雲端軟體和物理實驗室硬體",
+        "閉環工作流：文獻分析→計算假說生成→實驗設計優化→自主執行與詮釋",
+        "里程碑：ISM001-055 首個 AI 設計分子進入第二期臨床試驗",
+        "材料科學：DeepMind 發現 380,000 種新晶體結構",
+        "AlphaEvolve：比 1969 年紀錄更快的矩陣乘法演算法",
+        "治理挑戰：可重現性、可審計性、安全性與公平存取"
+      ]
+    },
+    {
+      "title": "AlphaGenome 探索 DNA 暗物質 — Scientific American",
+      "url": "https://www.scientificamerican.com/article/google-deepmind-unleashes-new-ai-alphagenome-to-investigate-dnas-dark-matter/",
+      "key_points": [
+        "突破：解決以往工具在序列長度與準確性間的平衡問題",
+        "聚焦基因組 98% 非編碼區（DNA 暗物質），與 AlphaMissense（蛋白質編碼區 2%）互補",
+        "應用場景：大規模基因關聯研究、癌症突變區分、罕見病診斷、基因療法設計",
+        "限制：訓練資料僅含人類和小鼠，尚無法預測所有 DNA 變異的影響"
+      ]
+    },
+    {
+      "title": "AI Scientist: Automating the Future of Scientific Discovery — AIMultiple Research",
+      "url": "https://research.aimultiple.com/ai-scientist/",
+      "key_points": [
+        "多 Agent 協作系統：如 AstroAgents 整合 8 個專業化組件（數據分析員、規劃器、科學家、評論者等）",
+        "Lila Sciences：LLM + 神經網路 + 強化學習，機器人實驗室並行數千項實驗",
+        "蛋白質工程：TATER 在 GFP 優化中將工時從數月縮短至數分鐘",
+        "材料科學：催化劑開發從數年縮至四個月",
+        "挑戰：領域專注性、物理執行複雜性、可解釋性（黑盒問題）",
+        "願景：科學本身可按 ML 擴展智能的方式來擴展"
+      ]
+    },
+    {
+      "title": "DeepMind 2026 年英國首個 AI 自動化科學實驗室 — Dataconomy",
+      "url": "https://dataconomy.com/2025/12/11/deepmind-to-open-first-ai-science-lab-in-uk-2026/",
+      "key_points": [
+        "2026 年在英國開設首個自動化科學實驗室（DeepMind + 英國政府合作）",
+        "研究方向：超導體、半導體、太陽能電池新材料發現",
+        "Gemini AI 驅動機器人每日合成和表徵數百種材料",
+        "全閉環系統：AI 數位設計 → 機器人物理驗證 → 結果回饋",
+        "英國科學家優先使用 AlphaFold 和 AlphaGenome 等工具"
+      ]
+    },
+    {
+      "title": "IsoDDE（AlphaFold 4）— Isomorphic Labs (Nature 報導)",
+      "url": "https://www.nature.com/articles/d41586-026-00365-7",
+      "key_points": [
+        "Isomorphic Labs 於 2026-02-10 發表 IsoDDE（AlphaFold 後繼者）",
+        "首個 AI 設計的癌症藥物將於 2026 年初進入 Phase 1 臨床試驗",
+        "NVIDIA 與 Eli Lilly 合作 10 億美元 AI 藥物發現五年計畫"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }
