@@ -1,6 +1,6 @@
 ---
 name: gmail
-version: "1.0.0"
+version: "1.1.0"
 description: |
   Gmail 郵件讀取整合 - 查詢未讀郵件、重要郵件、特定寄件者郵件摘要。
   透過 Gmail API (OAuth2) 讀取郵件，支援快取與降級機制。
@@ -65,120 +65,49 @@ pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
 首次執行會開啟瀏覽器要求授權，授權後會自動產生 `token.json`。
 
-## 快速使用（Python 腳本）
+## 快速使用（CLI 命令列工具）
 
-### 查詢未讀郵件（預設）
-
-```python
-# 檔案：skills/gmail/scripts/gmail.py
-import os
-from gmail_client import GmailClient
-
-client = GmailClient()
-messages = client.get_unread_messages(max_results=10)
-
-for msg in messages:
-    print(f"From: {msg['from']}")
-    print(f"Subject: {msg['subject']}")
-    print(f"Date: {msg['date']}")
-    print("---")
-```
-
-### 執行方式
+`skills/gmail/scripts/gmail.py` 提供 4 個子命令：
 
 ```bash
-# 在專案根目錄執行
-python skills/gmail/scripts/gmail.py
+# 查詢未讀郵件（預設 10 封）
+cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py unread
+
+# 查詢 5 封未讀
+cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py unread -n 5
+
+# 查詢重要未讀郵件
+cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py important
+
+# 使用 Gmail 搜尋語法查詢（今日郵件，JSON 輸出）
+cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py search "newer_than:1d" -n 20 --json
+
+# 查詢特定寄件者未讀郵件
+cd d:/Source/daily-digest-prompt/skills/gmail/scripts && python gmail.py from boss@company.com
 ```
+
+> **團隊模式**：`fetch-gmail.md` 使用 `search "newer_than:1d" -n 20 --json` 取得今日郵件。
 
 ## API 使用（Python）
 
-### 完整的 GmailClient 類別
+### GmailClient 類別
 
-```python
-import os
-import base64
-from datetime import datetime
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+完整實作在 `skills/gmail/scripts/gmail_client.py`。
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+**憑證路徑優先順序**（建構子參數 > 環境變數 > 預設路徑）：
+1. 建構子 `credentials_path` / `token_path` 參數
+2. 環境變數 `GMAIL_CREDENTIALS_PATH` / `GMAIL_TOKEN_PATH`
+3. 預設路徑 `<專案根目錄>/key/credentials.json` 和 `key/token.json`
 
-class GmailClient:
-    def __init__(self):
-        self.creds = self._get_credentials()
-        self.service = build("gmail", "v1", credentials=self.creds)
+**主要方法**：
 
-    def _get_credentials(self):
-        """取得或刷新 OAuth2 憑證"""
-        creds = None
-        token_path = os.environ.get("GMAIL_TOKEN_PATH", "token.json")
-        creds_path = os.environ.get("GMAIL_CREDENTIALS_PATH", "credentials.json")
-
-        if os.path.exists(token_path):
-            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
-                creds = flow.run_local_server(port=0)
-
-            with open(token_path, "w") as token:
-                token.write(creds.to_json())
-
-        return creds
-
-    def get_messages(self, query="", max_results=10):
-        """查詢郵件列表"""
-        try:
-            results = self.service.users().messages().list(
-                userId="me",
-                q=query,
-                maxResults=max_results
-            ).execute()
-
-            messages = results.get("messages", [])
-            return [self._get_message_detail(msg["id"]) for msg in messages]
-        except HttpError as error:
-            raise Exception(f"Gmail API 錯誤: {error}")
-
-    def get_unread_messages(self, max_results=10):
-        """查詢未讀郵件"""
-        return self.get_messages(query="is:unread", max_results=max_results)
-
-    def get_important_messages(self, max_results=10):
-        """查詢重要郵件"""
-        return self.get_messages(query="is:important is:unread", max_results=max_results)
-
-    def get_messages_from(self, sender, max_results=10):
-        """查詢特定寄件者的郵件"""
-        return self.get_messages(query=f"from:{sender} is:unread", max_results=max_results)
-
-    def _get_message_detail(self, msg_id):
-        """取得郵件詳細資訊"""
-        msg = self.service.users().messages().get(
-            userId="me",
-            id=msg_id,
-            format="metadata",
-            metadataHeaders=["From", "Subject", "Date"]
-        ).execute()
-
-        headers = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
-
-        return {
-            "id": msg_id,
-            "from": headers.get("From", ""),
-            "subject": headers.get("Subject", ""),
-            "date": headers.get("Date", ""),
-            "snippet": msg.get("snippet", ""),
-            "labels": msg.get("labelIds", [])
-        }
-```
+| 方法 | 用途 |
+|------|------|
+| `get_messages(query, max_results)` | 用 Gmail 搜尋語法查詢 |
+| `get_unread_messages(max_results)` | 查詢未讀郵件 |
+| `get_important_messages(max_results)` | 查詢重要未讀郵件 |
+| `get_messages_from(sender, max_results)` | 查詢特定寄件者未讀郵件 |
+| `format_messages(messages)` | 靜態方法，格式化郵件為摘要文字 |
 
 ## 查詢語法
 
@@ -214,77 +143,17 @@ Gmail API 支援與 Gmail 搜尋相同的查詢語法：
 }
 ```
 
-## 格式化輸出
-
-```python
-def format_messages(messages):
-    """格式化郵件列表為摘要文字"""
-    if not messages:
-        return "📭 無未讀郵件"
-
-    lines = [f"📬 {len(messages)} 封未讀郵件：", ""]
-
-    for msg in messages:
-        # 解析寄件者（取名稱部分）
-        from_addr = msg.get("from", "")
-        if "<" in from_addr:
-            from_name = from_addr.split("<")[0].strip().strip('"')
-        else:
-            from_name = from_addr.split("@")[0]
-
-        subject = msg.get("subject", "(無主旨)")
-        snippet = msg.get("snippet", "")[:50]
-
-        # 判斷是否重要
-        is_important = "IMPORTANT" in msg.get("labels", [])
-        prefix = "⭐ " if is_important else "• "
-
-        lines.append(f"{prefix}{from_name}")
-        lines.append(f"  📌 {subject}")
-        if snippet:
-            lines.append(f"  💬 {snippet}...")
-        lines.append("")
-
-    return "\n".join(lines)
-```
-
 ## 與 Daily Digest 整合
 
-### 在摘要中加入郵件區塊
+### 快取與降級流程
 
-```python
-from gmail_client import GmailClient, format_messages
+配合 `api-cache` Skill（快取 key: `gmail`，TTL: 30min）：
 
-def get_email_digest():
-    """取得郵件摘要區塊"""
-    try:
-        client = GmailClient()
-
-        # 優先查重要郵件
-        important = client.get_important_messages(max_results=5)
-        if important:
-            return format_messages(important)
-
-        # 否則查所有未讀
-        unread = client.get_unread_messages(max_results=5)
-        return format_messages(unread)
-
-    except Exception as e:
-        return f"⚠️ 郵件讀取失敗：{e}"
-```
-
-### 快取整合
-
-配合 `api-cache` Skill 使用：
-
-```python
-# 快取 key
-CACHE_KEY = "gmail"
-CACHE_TTL = 1800  # 30 分鐘
-
-# 檢查快取 → API 呼叫 → 更新快取
-# 詳見 skills/api-cache/SKILL.md
-```
+1. **先讀快取**：用 Read 讀取 `cache/gmail.json`，檢查 `cached_at` 是否在 30 分鐘內
+2. **快取有效** → 直接使用快取資料（source: `cache`）
+3. **快取過期或不存在** → 呼叫 Gmail API → 成功後用 Write 寫入快取
+4. **API 失敗** → 嘗試讀取過期快取（24 小時內），source 標記 `cache_degraded`
+5. **完全無資料** → status 標記 `failed`，不影響整體摘要流程
 
 ## 錯誤處理
 
@@ -296,34 +165,11 @@ CACHE_TTL = 1800  # 30 分鐘
 | `HttpError 403` | 權限不足 | 檢查 OAuth scope 設定 |
 | `HttpError 429` | API 配額超限 | 減少請求頻率或等待 |
 
-### Token 刷新失敗處理
-
-```python
-def refresh_or_reauth():
-    """嘗試刷新 token，失敗則重新授權"""
-    token_path = os.environ.get("GMAIL_TOKEN_PATH", "token.json")
-
-    # 刪除舊 token 強制重新授權
-    if os.path.exists(token_path):
-        os.remove(token_path)
-
-    # 重新初始化會觸發授權流程
-    return GmailClient()
-```
-
 ## Windows 環境注意事項
 
-1. **路徑設定**：使用反斜線或 raw string
-   ```python
-   GMAIL_CREDENTIALS_PATH = r"C:\Users\user\.config\gmail\credentials.json"
-   ```
-
+1. **憑證路徑**：預設使用 `<專案根目錄>/key/credentials.json` 和 `key/token.json`
 2. **首次授權**：需要有瀏覽器環境，排程執行前應先手動完成一次授權
-
-3. **環境變數**：在 PowerShell 中設定
-   ```powershell
-   [Environment]::SetEnvironmentVariable("GMAIL_CREDENTIALS_PATH", "...", "User")
-   ```
+3. **Token 刷新**：若 token 過期，GmailClient 會自動刷新；若刷新失敗，刪除 `key/token.json` 後手動重新授權
 
 ## 配額限制
 

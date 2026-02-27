@@ -1,6 +1,6 @@
 ---
 name: skill-scanner
-version: "1.0.0"
+version: "1.1.0"
 description: |
   Cisco AI Defense Skill Scanner — 掃描專案內所有 Skill，偵測安全風險（注入、資料洩露、權限提升等）。
   Use when: 安全掃描、Skill 審查、安全稽核。
@@ -79,6 +79,16 @@ D:/Python311/Scripts/skill-scanner.exe scan-all D:/Source/daily-digest-prompt/sk
 | LLM 分析 | `--use-llm` | 是（`SKILL_SCANNER_LLM_API_KEY`） | 語義分析 |
 | 病毒掃描 | `--use-virustotal` | 是（`VIRUSTOTAL_API_KEY`） | 二進位惡意程式掃描 |
 
+## 降級處理
+
+| 狀況 | 處理方式 |
+|------|---------|
+| `skill-scanner.exe` 不存在 | 跳過安全掃描，status 標記 `failed`，error 記錄路徑不存在 |
+| 執行逾時（>60s） | 終止程序，使用上次掃描結果（若有） |
+| 非零退出碼 | 檢查 stderr 記錄錯誤，status 標記 `partial` |
+
+> 安全掃描失敗不應阻塞整體每日摘要流程。
+
 ## 注意事項
 
 - 靜態分析無需任何 API Key，可直接使用
@@ -86,3 +96,4 @@ D:/Python311/Scripts/skill-scanner.exe scan-all D:/Source/daily-digest-prompt/sk
 - 本專案 Skill 均為純 Markdown，靜態分析即可覆蓋主要風險
 - 建議定期執行（每週一次或新增 Skill 時）
 - Windows 環境直接呼叫 `D:/Python311/Scripts/skill-scanner.exe`
+- 目前共 23 個 Skill（17 核心 + 6 工具），掃描數量會隨 Skill 新增而變動
