@@ -45,6 +45,7 @@ $AutoTaskTimeoutOverride = @{
     "log_audit"              = 720   # 讀 10+ log + 分析修正 + KB 匯入
     "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
     "ai_deep_research"       = 720   # 4 階段 WebFetch
+    "tech_research"          = 2000  # 讀 history + WebSearch×3 + WebFetch×3 + KB 匯入
 }
 
 # Create directories
