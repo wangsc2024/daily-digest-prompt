@@ -230,6 +230,15 @@ class TestWriteSessionSummary:
 class TestCheckGmailTokenExpiry:
     """Gmail OAuth Token 過期監控。"""
 
+    @pytest.fixture(autouse=True)
+    def _patch_module_file(self, tmp_path, monkeypatch):
+        """讓 check_gmail_token_expiry() 的 __file__ 指向 tmp_path/hooks/，
+        使 TOKEN_PATH / STATE_PATH 解析到 tmp_path 內。"""
+        import on_stop_alert
+        fake_hooks_dir = tmp_path / "hooks"
+        fake_hooks_dir.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks_dir / "on_stop_alert.py"))
+
     def _write_token(self, tmp_path, refresh_token="test_refresh_token"):
         key_dir = tmp_path / "key"
         key_dir.mkdir(exist_ok=True)

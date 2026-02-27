@@ -188,7 +188,12 @@ class TestSyntheticConfigs:
                     {"name": "m1", "target": ">= 90%", "weight": 100},
                 ],
             },
-            "timeouts.yaml": {"version": 1},
+            "timeouts.yaml": {
+                "version": 1,
+                "daily_digest_team": {"phase1_timeout": 300, "phase2_timeout": 420},
+                "todoist_team": {"phase1_timeout": 420, "phase3_timeout": 180, "phase2_timeout_by_type": {"research": 600}},
+                "audit_team": {"phase1_timeout": 600, "phase2_timeout": 1200},
+            },
         }
 
         for filename, data in configs.items():
