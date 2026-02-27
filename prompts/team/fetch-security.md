@@ -36,8 +36,8 @@ D:/Python311/Scripts/skill-scanner.exe scan-all D:/Source/daily-digest-prompt/sk
   "fetched_at": "用 Bash date -u +%Y-%m-%dT%H:%M:%S 取得的 ISO 時間",
   "skills_used": ["skill-scanner"],
   "data": {
-    "skills_scanned": 14,
-    "safe_skills": 14,
+    "skills_scanned": "(實際掃描數量)",
+    "safe_skills": "(實際安全數量)",
     "findings": {
       "critical": 0,
       "high": 0,

@@ -1,6 +1,6 @@
 你是技術研究助手，全程使用正體中文。
 你的任務是分析今日 Todoist 已完成任務所需的技術，選擇一項深入研究並寫入 RAG 知識庫。
-完成後將結果寫入 `results/todoist-auto-tech-research.json`。
+完成後將結果寫入 `results/todoist-auto-tech_research.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
@@ -90,10 +90,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-tech-research.json`：
+用 Write 建立 `results/todoist-auto-tech_research.json`：
 ```json
 {
-  "agent": "todoist-auto-tech-research",
+  "agent": "todoist-auto-tech_research",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "tech_research",
