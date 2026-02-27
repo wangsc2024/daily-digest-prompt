@@ -95,10 +95,10 @@ team_prompt_path: "prompts/team/todoist-auto-{task_key 轉 hyphen}.md"
    - 取得現有 task 清單
    - 確認最大 execution_order 值
    - 確認 counter_field 不與現有重複
-2. `Read run-todoist-agent-team.ps1`（搜尋 `$dedicatedPrompts` 區塊）
-   - 確認映射位置
-3. `Read templates/auto-tasks/` 目錄中任一現有模板
+2. `Read templates/auto-tasks/` 目錄中任一現有模板
    - 作為格式參考
+
+> **注意**：`run-todoist-agent-team.ps1` 已改為動態掃描（`Get-ChildItem todoist-auto-*.md`），無需讀取或修改 PS1 映射。
 
 ### Step 4：依序生成/修改 6 個檔案
 
@@ -229,7 +229,7 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
   - 群組: {group}
   - 模板: templates/auto-tasks/{key}.md
   - 團隊 prompt: prompts/team/todoist-auto-{key}.md
-  - PS1 映射: 已更新
+  - 動態掃描: 檔名符合 todoist-auto-*.md 規範
   - 驗證: 6/6 通過
 
 需人工確認：
@@ -362,15 +362,14 @@ schtasks /delete /tn "Claude_Once_{name}" /f
 | frequency-limits.yaml 無法解析 | 中止操作，輸出 YAML 錯誤訊息，不寫入任何檔案 |
 | execution_order 計算衝突 | 自動遞增至下一個可用值 |
 | 模板目錄不存在 | 自動建立目錄，並用 _base.md 作為最小模板 |
-| PS1 映射區塊找不到 | 輸出警告，建議使用者手動加入映射，不強行修改 |
+| 團隊 prompt 命名不符規範 | 輸出警告，提示正確格式 `todoist-auto-{key}.md` |
 | YAML 驗證失敗 | 回復原始內容，輸出差異比對，標記為 PARTIAL |
 
 ---
 
 ## 安全機制
 
-1. **備份**：修改 `run-todoist-agent-team.ps1` 前先 `cp` 備份
-2. **YAML 驗證**：frequency-limits.yaml 修改後 `python -c "import yaml; ..."` 驗證
+1. **YAML 驗證**：frequency-limits.yaml 修改後 `python -c "import yaml; ..."` 驗證
 3. **execution_order 不重複**：Grep 確認唯一性
 4. **counter_field 自動標準化**：`{task_key}_count` 格式
 5. **daily_limit 硬限制**：1-5，超過自動截斷

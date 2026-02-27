@@ -44,6 +44,28 @@ function Write-Log {
     [System.IO.File]::AppendAllText($LogFile, "$Message`r`n", [System.Text.Encoding]::UTF8)
 }
 
+# Remove stderr file if empty or contains only benign warnings
+function Remove-StderrIfBenign {
+    param([string]$StderrFile)
+    if (-not (Test-Path $StderrFile)) { return }
+    $size = (Get-Item $StderrFile).Length
+    if ($size -eq 0) {
+        Remove-Item $StderrFile -Force -ErrorAction SilentlyContinue
+        return
+    }
+    $content = Get-Content $StderrFile -Raw -ErrorAction SilentlyContinue
+    if ($null -eq $content) { return }
+    $filtered = $content -replace '(?m)^.*\.claude\.json is corrupted.*$', '' `
+                         -replace '(?m)^.*corrupted file has been backed up.*$', '' `
+                         -replace '(?m)^.*corrupted file has already been backed up.*$', '' `
+                         -replace '(?m)^.*backup file exists at.*$', '' `
+                         -replace '(?m)^.*manually restore it by running.*$', '' `
+                         -replace '(?m)^.*Pre-flight check is taking longer.*$', ''
+    if ([string]::IsNullOrWhiteSpace($filtered)) {
+        Remove-Item $StderrFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 # Update scheduler state
 function Update-State {
     param(
@@ -327,6 +349,11 @@ foreach ($job in $jobs) {
 # Clean up Phase 1 jobs
 $jobs | Remove-Job -Force -ErrorAction SilentlyContinue
 
+# Clean up stderr files (empty or containing only benign warnings)
+Get-ChildItem "$LogDir\*-stderr-$Timestamp.log" -ErrorAction SilentlyContinue | ForEach-Object {
+    Remove-StderrIfBenign $_.FullName
+}
+
 $phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
 Write-Log ""
 Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
@@ -388,13 +415,8 @@ while ($attempt -le $MaxPhase2Retries) {
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
 
-        # 執行成功且 stderr 為空 → 刪除
-        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
-            $stderrSize = (Get-Item $stderrFile).Length
-            if ($stderrSize -eq 0) {
-                Remove-Item $stderrFile -Force
-            }
-        }
+        # 清理 stderr（空檔或僅含已知無害警告）
+        Remove-StderrIfBenign $stderrFile
 
         $output | ForEach-Object {
             Write-Log "  [assemble] $_"

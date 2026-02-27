@@ -47,6 +47,28 @@ function Write-Log {
     Write-Host $logMessage
 }
 
+# Remove stderr file if empty or contains only benign warnings
+function Remove-StderrIfBenign {
+    param([string]$StderrFile)
+    if (-not (Test-Path $StderrFile)) { return }
+    $size = (Get-Item $StderrFile).Length
+    if ($size -eq 0) {
+        Remove-Item $StderrFile -Force -ErrorAction SilentlyContinue
+        return
+    }
+    $content = Get-Content $StderrFile -Raw -ErrorAction SilentlyContinue
+    if ($null -eq $content) { return }
+    $filtered = $content -replace '(?m)^.*\.claude\.json is corrupted.*$', '' `
+                         -replace '(?m)^.*corrupted file has been backed up.*$', '' `
+                         -replace '(?m)^.*corrupted file has already been backed up.*$', '' `
+                         -replace '(?m)^.*backup file exists at.*$', '' `
+                         -replace '(?m)^.*manually restore it by running.*$', '' `
+                         -replace '(?m)^.*Pre-flight check is taking longer.*$', ''
+    if ([string]::IsNullOrWhiteSpace($filtered)) {
+        Remove-Item $StderrFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Update-SchedulerState {
     param(
         [string]$Status,
@@ -267,6 +289,11 @@ if (-not $phase1Success) {
 
 Write-Log "Phase 1 completed successfully" "INFO"
 
+# Clean up stderr files from Phase 1
+Get-ChildItem "$LogDir\*-stderr-*.log" -ErrorAction SilentlyContinue | ForEach-Object {
+    Remove-StderrIfBenign $_.FullName
+}
+
 # ============================================
 # Phase 2: Assembly & Fixing
 # ============================================
@@ -325,6 +352,11 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
 
         $output = Receive-Job -Job $job
         Remove-Job -Job $job -Force
+
+        # Clean up Phase 2 stderr
+        Get-ChildItem "$LogDir\assemble-stderr-*.log" -ErrorAction SilentlyContinue | ForEach-Object {
+            Remove-StderrIfBenign $_.FullName
+        }
 
         # Save output to log
         $output | Out-File -FilePath $phase2LogFile -Encoding UTF8
