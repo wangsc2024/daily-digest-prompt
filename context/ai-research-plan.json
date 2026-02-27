@@ -1,190 +1,23 @@
 {
-  "date": "2026-02-27",
-  "topic": "AI for Scientific Discovery — 從假說生成到自主實驗的 AI 科學家範式",
+  "date": "2026-02-28",
+  "topic": "後訓練革命（Post-Training Revolution）— 從 RLHF 到 DPO/GRPO/Verifier-Driven RL 的生產對齊堆疊與推理時計算擴展",
   "research_questions": [
-    "AI for Science 的核心技術棧有哪些？（AlphaGenome、AlphaFold 3、Foundation Models for Science、AI-driven Hypothesis Generation、Automated Lab Systems）",
-    "2026 年 AI 科學發現的主要突破有哪些？（DeepMind AlphaGenome DNA 預測、AI 材料發現 67,000+ 磁性材料、AI 藥物設計加速）",
-    "AI 科學家的自主閉環如何運作？（假說生成 → 實驗設計 → 機器人執行 → 結果分析 → 假說修正）",
-    "AI for Science 與傳統 ML 科學應用有何本質差異？（從被動工具到主動發現者的範式轉移）",
-    "對軟體工程師的啟示？（Scientific Agent 架構、Tool-Augmented Reasoning、Experiment-as-Code）"
+    "RLHF、DPO、GRPO、Verifier-Driven RL 四大後訓練技術的核心原理差異與適用場景為何？",
+    "2025-2026 年後訓練革命的產業趨勢如何重塑 AI 開發範式（計算資源從預訓練向後訓練轉移）？",
+    "Test-Time Compute Scaling（推理時計算擴展）如何與後訓練技術協同提升模型推理能力？"
   ],
-  "methodology": "四階段深度研究法：(1)規劃—界定問題與文獻範圍；(2)蒐集—WebSearch+WebFetch 取得 5+ 篇權威來源（學術論文、技術部落格、官方文件）；(3)分析—交叉比對共識/分歧/獨特洞見；(4)報告—撰寫結構化研究報告並匯入知識庫",
+  "methodology": "WebSearch 蒐集學術論文、技術部落格與產業報告 → WebFetch 深入閱讀 5+ 篇核心來源 → 交叉比對不同技術路線的優劣 → 提煉實務應用建議（特別針對本專案 Agent 系統的啟發）",
   "keywords": [
-    "AI for scientific discovery",
-    "AlphaGenome DeepMind 2026",
-    "AI scientist autonomous research",
-    "AI drug discovery 2026",
-    "AI materials discovery",
-    "foundation models for science",
-    "AI hypothesis generation",
-    "automated laboratory AI",
-    "AI科學發現",
-    "AI自主實驗"
+    "Post-Training Revolution",
+    "RLHF",
+    "DPO Direct Preference Optimization",
+    "GRPO Group Relative Policy Optimization",
+    "Verifier-Driven RL",
+    "Test-Time Compute Scaling",
+    "Production Alignment Stack",
+    "inference-time scaling",
+    "reasoning models 2026",
+    "後訓練對齊"
   ],
-  "sources": [
-    {
-      "title": "AlphaGenome: AI for better understanding the genome — Google DeepMind 官方部落格",
-      "url": "https://deepmind.google/blog/alphagenome-ai-for-better-understanding-the-genome/",
-      "key_points": [
-        "首個能分析 100 萬鹼基對連續序列的 AI 模型，單鹼基解析度",
-        "架構：卷積層→Transformer層→輸出層，訓練於 ENCODE/GTEx/4D Nucleome/FANTOM5 數據集",
-        "效能：22/24 項評估超越外部最佳模型，24/26 項遺傳變異預測匹配或超越頂級模型",
-        "應用：T 細胞急性淋巴性白血病機制分析（TAL1 基因 MYB 結合基序）",
-        "開源：非商業研究用途，代碼和模型在 GitHub，2026-01 發表於 Nature",
-        "3000 位科學家（160 國）已在使用，臨床試驗效率可提升 35-45%"
-      ]
-    },
-    {
-      "title": "The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search — Sakana AI (arXiv 2504.08066)",
-      "url": "https://arxiv.org/abs/2504.08066",
-      "key_points": [
-        "端對端 Agentic 系統：自主假說制定→實驗設計執行→數據分析→論文撰寫",
-        "核心創新：Agentic Tree Search 搜索機制，由專門的實驗經理 Agent 管理",
-        "突破：首篇完全 AI 生成的論文通過 ICLR 同行評審（高於人類平均接受閾值）",
-        "改進：消除對人類代碼模板依賴、跨域泛化、整合視覺語言模型反饋迴路",
-        "約 30-40% 的生成論文達頂級 ML 會議錄取標準",
-        "代碼已開源（GitHub SakanaAI/AI-Scientist）"
-      ]
-    },
-    {
-      "title": "AI, Agentic Models and Lab Automation for Scientific Discovery — Frontiers in AI",
-      "url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1649155/full",
-      "key_points": [
-        "從「共駕駕駛員」到「實驗室駕駛員」的範式轉移",
-        "多模態自主系統：聆聽、觀察、發言並行動，協調雲端軟體和物理實驗室硬體",
-        "閉環工作流：文獻分析→計算假說生成→實驗設計優化→自主執行與詮釋",
-        "里程碑：ISM001-055 首個 AI 設計分子進入第二期臨床試驗",
-        "材料科學：DeepMind 發現 380,000 種新晶體結構",
-        "AlphaEvolve：比 1969 年紀錄更快的矩陣乘法演算法",
-        "治理挑戰：可重現性、可審計性、安全性與公平存取"
-      ]
-    },
-    {
-      "title": "AlphaGenome 探索 DNA 暗物質 — Scientific American",
-      "url": "https://www.scientificamerican.com/article/google-deepmind-unleashes-new-ai-alphagenome-to-investigate-dnas-dark-matter/",
-      "key_points": [
-        "突破：解決以往工具在序列長度與準確性間的平衡問題",
-        "聚焦基因組 98% 非編碼區（DNA 暗物質），與 AlphaMissense（蛋白質編碼區 2%）互補",
-        "應用場景：大規模基因關聯研究、癌症突變區分、罕見病診斷、基因療法設計",
-        "限制：訓練資料僅含人類和小鼠，尚無法預測所有 DNA 變異的影響"
-      ]
-    },
-    {
-      "title": "AI Scientist: Automating the Future of Scientific Discovery — AIMultiple Research",
-      "url": "https://research.aimultiple.com/ai-scientist/",
-      "key_points": [
-        "多 Agent 協作系統：如 AstroAgents 整合 8 個專業化組件（數據分析員、規劃器、科學家、評論者等）",
-        "Lila Sciences：LLM + 神經網路 + 強化學習，機器人實驗室並行數千項實驗",
-        "蛋白質工程：TATER 在 GFP 優化中將工時從數月縮短至數分鐘",
-        "材料科學：催化劑開發從數年縮至四個月",
-        "挑戰：領域專注性、物理執行複雜性、可解釋性（黑盒問題）",
-        "願景：科學本身可按 ML 擴展智能的方式來擴展"
-      ]
-    },
-    {
-      "title": "DeepMind 2026 年英國首個 AI 自動化科學實驗室 — Dataconomy",
-      "url": "https://dataconomy.com/2025/12/11/deepmind-to-open-first-ai-science-lab-in-uk-2026/",
-      "key_points": [
-        "2026 年在英國開設首個自動化科學實驗室（DeepMind + 英國政府合作）",
-        "研究方向：超導體、半導體、太陽能電池新材料發現",
-        "Gemini AI 驅動機器人每日合成和表徵數百種材料",
-        "全閉環系統：AI 數位設計 → 機器人物理驗證 → 結果回饋",
-        "英國科學家優先使用 AlphaFold 和 AlphaGenome 等工具"
-      ]
-    },
-    {
-      "title": "IsoDDE（AlphaFold 4）— Isomorphic Labs (Nature 報導)",
-      "url": "https://www.nature.com/articles/d41586-026-00365-7",
-      "key_points": [
-        "Isomorphic Labs 於 2026-02-10 發表 IsoDDE（AlphaFold 後繼者）",
-        "首個 AI 設計的癌症藥物將於 2026 年初進入 Phase 1 臨床試驗",
-        "NVIDIA 與 Eli Lilly 合作 10 億美元 AI 藥物發現五年計畫"
-      ]
-    }
-  ],
-  "analysis": {
-    "consensus": [
-      {
-        "point": "從「工具輔助」到「自主發現者」的範式轉移",
-        "supporting_sources": ["Google DeepMind", "Sakana AI", "Frontiers in AI", "AIMultiple", "Dataconomy"],
-        "detail": "AI 已從被動的數據分析工具轉變為能主動生成假說、設計實驗、分析結果的自主科學發現者。AIMultiple 描述這是從「共駕駕駛員」到「實驗室駕駛員」的轉變。"
-      },
-      {
-        "point": "閉環自主系統是核心架構模式",
-        "supporting_sources": ["Sakana AI", "Frontiers in AI", "Dataconomy", "AIMultiple"],
-        "detail": "所有描述 AI 科學系統的來源都呈現某種形式的閉環：假說生成→實驗設計→執行→分析→修正。DeepMind 的物理實驗室將此閉環延伸到硬體層面。"
-      },
-      {
-        "point": "多 Agent 協作是主要實現架構",
-        "supporting_sources": ["Sakana AI", "AIMultiple", "Frontiers in AI"],
-        "detail": "Sakana AI 的 Agentic Tree Search + 實驗經理 Agent、AstroAgents 的 8 個專業化組件、Frontiers 的多模態自主系統，都採用多 Agent 分工協作模式。"
-      },
-      {
-        "point": "生物醫學是最成熟的應用領域",
-        "supporting_sources": ["AlphaGenome", "IsoDDE", "Frontiers in AI", "AIMultiple"],
-        "detail": "從 AlphaGenome 的基因組解析到 IsoDDE 的藥物設計、ISM001-055 的臨床試驗、TATER 的蛋白質工程，生物醫學領域的 AI 科學應用最為成熟且已進入臨床驗證階段。"
-      },
-      {
-        "point": "材料科學是第二大突破領域",
-        "supporting_sources": ["Frontiers in AI", "Dataconomy", "AIMultiple"],
-        "detail": "DeepMind 發現 380,000 種新晶體結構、67,000+ 磁性材料，2026 英國實驗室聚焦超導體/半導體/太陽能電池，催化劑開發從數年縮至四個月。"
-      }
-    ],
-    "divergence": [
-      {
-        "point": "AI 科學發現的成熟度評估",
-        "optimistic": "Sakana AI：30-40% AI 論文達頂級會議標準，首篇通過 ICLR 同行評審",
-        "cautious": "AIMultiple：強調領域專注性限制、物理執行複雜性、黑盒可解釋性問題",
-        "moderate": "Frontiers in AI：承認突破但強調治理挑戰（可重現性、可審計性、安全性）"
-      },
-      {
-        "point": "自主性程度的期待",
-        "full_autonomy": "Sakana AI 主張完全端到端自主（從假說到論文）；Lila Sciences 已實現並行數千項實驗",
-        "co_pilot": "Frontiers 認為「共駕模式」仍是現階段主流，完全自主是長期目標"
-      },
-      {
-        "point": "開源與封閉的路線分歧",
-        "open_source": "AlphaGenome（非商業開源）、Sakana AI（完全開源）",
-        "closed": "Isomorphic Labs IsoDDE（封閉商業）、NVIDIA+Eli Lilly（商業合作封閉模式）"
-      }
-    ],
-    "insights": [
-      {
-        "insight": "「DNA 暗物質」突破：基因組 98% 非編碼區首次被大規模解鎖",
-        "source": "Scientific American",
-        "significance": "AlphaGenome 與 AlphaMissense 互補覆蓋完整基因組，開啟精準醫學新維度。這意味著以往被忽視的巨大基因組空間成為 AI 可探索的新領域。"
-      },
-      {
-        "insight": "Agentic Tree Search 將 MCTS 策略應用於科學發現",
-        "source": "Sakana AI",
-        "significance": "類似 AlphaGo 的探索-利用平衡被遷移到科學假說空間，實驗經理 Agent 管理搜索樹，這是遊戲 AI → 科學 AI 的方法論遷移。"
-      },
-      {
-        "insight": "「科學本身可按 ML 擴展智能的方式來擴展」",
-        "source": "AIMultiple",
-        "significance": "暗示科學發現速度可遵循類似摩爾定律的加速曲線：計算規模越大→發現越多→方法越精→正循環。這是對科學進步本身的元認知。"
-      },
-      {
-        "insight": "AlphaEvolve 在純數學領域超越 56 年人類紀錄",
-        "source": "Frontiers in AI",
-        "significance": "AI 科學發現不僅限於實驗科學，在純數學/理論計算機科學也有突破，比 1969 年紀錄更快的矩陣乘法演算法。"
-      },
-      {
-        "insight": "DeepMind 2026 英國實驗室：AI 從數位模擬進入物理驗證",
-        "source": "Dataconomy",
-        "significance": "機器人每日合成和表徵數百種材料，代表 AI 科學從「計算預測」進入「物理閉環」。這是軟體 Agent 無法替代的環節，也是 AI for Science 商業化的關鍵一步。"
-      },
-      {
-        "insight": "AI 藥物設計已進入臨床驗證階段",
-        "source": "IsoDDE (Nature)、Frontiers in AI",
-        "significance": "IsoDDE 設計的癌症藥物進入 Phase 1、ISM001-055 進入 Phase 2，NVIDIA+Eli Lilly 的 10 億美元投資。AI for Science 從論文進入了真正的臨床和商業驗證。"
-      },
-      {
-        "insight": "對軟體工程的架構啟示：Scientific Agent 可映射到任何領域的自主發現系統",
-        "source": "綜合分析",
-        "significance": "閉環（假說→實驗→分析→修正）、多 Agent 分工、Tree Search 探索——這些模式可應用於 daily-digest-prompt 的系統自省 OODA 閉環：system-insight(觀測)→system-audit(評估)→arch-evolution(決策)→self-heal(行動)。"
-      }
-    ]
-  },
-  "stage_completed": 3
+  "stage_completed": 1
 }

@@ -292,16 +292,54 @@ class CircuitBreaker:
         with open(self.state_file, "w", encoding="utf-8") as f:
             json.dump(state, f, ensure_ascii=False, indent=2)
 
+    def _atomic_update(self, updater):
+        """
+        以檔案鎖保護的 read-modify-write 操作。
+
+        避免團隊模式中多個並行 Agent 同時讀寫 api-health.json
+        導致狀態覆蓋（競態條件）。
+
+        Args:
+          updater: callable(state_dict) -> None，原地修改 state dict
+        """
+        lock_path = self.state_file + ".lock"
+        lock_fd = None
+        try:
+            # 取得檔案鎖（跨平台）
+            lock_fd = open(lock_path, "w")
+            try:
+                import msvcrt
+                msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
+            except (ImportError, OSError):
+                try:
+                    import fcntl
+                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except (ImportError, OSError):
+                    pass  # 無鎖可用時退化為無鎖模式
+
+            state = self._load_state()
+            updater(state)
+            self._save_state(state)
+        finally:
+            if lock_fd:
+                lock_fd.close()
+                try:
+                    os.remove(lock_path)
+                except OSError:
+                    pass
+
     def _get_api_state(self, api_source: str) -> Dict:
         """取得特定 API 的狀態"""
         state = self._load_state()
         if api_source not in state:
-            state[api_source] = {
-                "state": self.STATE_CLOSED,
-                "failures": 0,
-                "cooldown": None
-            }
-            self._save_state(state)
+            def _init(s):
+                s[api_source] = {
+                    "state": self.STATE_CLOSED,
+                    "failures": 0,
+                    "cooldown": None
+                }
+            self._atomic_update(_init)
+            state = self._load_state()
         return state[api_source]
 
     def check_health(self, api_source: str) -> str:
@@ -366,14 +404,14 @@ class CircuitBreaker:
         failures: int,
         cooldown: Optional[datetime] = None
     ):
-        """更新狀態"""
-        state = self._load_state()
-        state[api_source] = {
-            "state": new_state,
-            "failures": failures,
-            "cooldown": cooldown.isoformat() if cooldown else None
-        }
-        self._save_state(state)
+        """更新狀態（使用檔案鎖避免競態條件）"""
+        def _do_update(state):
+            state[api_source] = {
+                "state": new_state,
+                "failures": failures,
+                "cooldown": cooldown.isoformat() if cooldown else None
+            }
+        self._atomic_update(_do_update)
 
 
 # ============================================

@@ -7,6 +7,7 @@ Hook 共用工具模組 — 提供 YAML 配置載入與結構化日誌記錄。
 import json
 import os
 import re
+import sys
 from datetime import datetime
 
 
@@ -62,6 +63,28 @@ def find_config_path(filename="hook-rules.yaml"):
     return None
 
 
+def _load_yaml_config():
+    """載入 hook-rules.yaml 完整配置（含快取）。
+
+    單次 YAML 開檔供 load_yaml_rules + filter_rules_by_preset 共用，
+    避免同一 hook 呼叫中重複開檔讀取。
+    """
+    config_path = find_config_path()
+    if config_path is None:
+        return None
+
+    try:
+        import yaml
+    except ImportError:
+        return None
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
+    except Exception:
+        return None
+
+
 def load_yaml_rules(section_key, fallback_rules):
     """載入 YAML 配置中指定區段的規則，失敗時回傳 fallback。
 
@@ -69,24 +92,14 @@ def load_yaml_rules(section_key, fallback_rules):
         section_key: YAML 頂層鍵名（如 "bash_rules"、"write_rules"）
         fallback_rules: YAML 不可用時的預設規則清單
     """
-    config_path = find_config_path()
-    if config_path is None:
+    config = _load_yaml_config()
+    if config is None:
         return fallback_rules
 
-    try:
-        import yaml
-    except ImportError:
+    rules = config.get(section_key)
+    if not isinstance(rules, list) or not rules:
         return fallback_rules
-
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f)
-        rules = config.get(section_key)
-        if not isinstance(rules, list) or not rules:
-            return fallback_rules
-        return rules
-    except Exception:
-        return fallback_rules
+    return rules
 
 
 def filter_rules_by_preset(rules, section_key="bash_rules"):
@@ -102,49 +115,31 @@ def filter_rules_by_preset(rules, section_key="bash_rules"):
     Returns:
         過濾後的規則清單
     """
-    # 讀取環境變數（預設 normal）
     preset_name = os.environ.get("HOOK_SECURITY_PRESET", "normal").lower()
 
-    # 若未指定或為 normal，回傳所有規則
     if preset_name == "normal":
         return rules
 
-    # 載入 presets 配置
-    config_path = find_config_path()
-    if config_path is None:
-        return rules  # 無配置檔，回傳所有規則
-
-    try:
-        import yaml
-    except ImportError:
+    config = _load_yaml_config()
+    if config is None:
         return rules
 
-    try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = yaml.safe_load(f)
-
-        presets = config.get("presets", {})
-        if not isinstance(presets, dict):
-            return rules
-
-        preset_config = presets.get(preset_name)
-        if not preset_config or not isinstance(preset_config, dict):
-            # 未知 preset，回傳所有規則
-            return rules
-
-        enabled_priorities = preset_config.get("enabled_priorities", ["critical", "high", "medium", "low"])
-
-        # 過濾規則（保留符合優先級的規則）
-        filtered = [r for r in rules if r.get("priority", "medium") in enabled_priorities]
-
-        # 若過濾後為空（例如配置錯誤），回傳所有規則作為安全回退
-        if not filtered:
-            return rules
-
-        return filtered
-    except Exception:
-        # 載入失敗，回傳所有規則
+    presets = config.get("presets", {})
+    if not isinstance(presets, dict):
         return rules
+
+    preset_config = presets.get(preset_name)
+    if not preset_config or not isinstance(preset_config, dict):
+        return rules
+
+    enabled_priorities = preset_config.get("enabled_priorities", ["critical", "high", "medium", "low"])
+
+    filtered = [r for r in rules if r.get("priority", "medium") in enabled_priorities]
+
+    if not filtered:
+        return rules
+
+    return filtered
 
 
 def log_blocked_event(session_id, tool, summary, reason, guard_tag):
@@ -168,7 +163,6 @@ def log_blocked_event(session_id, tool, summary, reason, guard_tag):
 
 def read_stdin_json():
     """從 stdin 讀取 JSON，解析失敗回傳 None。"""
-    import sys
     try:
         return json.load(sys.stdin)
     except Exception:
@@ -183,7 +177,6 @@ def output_decision(decision, reason=None, protocol_version="1.0"):
         reason: 選填的原因說明
         protocol_version: 協議版本號（預設 "1.0"）
     """
-    import sys
     result = {
         "protocol_version": protocol_version,
         "decision": decision,

@@ -435,8 +435,11 @@ def check_gmail_token_expiry() -> "dict | None":
     Returns dict with status info, or None if token file is absent.
     Keys: days_remaining, expire_date, issued_date, needs_alert, expired.
     """
-    TOKEN_PATH = os.path.join("key", "token.json")
-    STATE_PATH = os.path.join("state", "gmail-oauth-state.json")
+    # 用腳本位置推算專案根目錄，避免 cwd 不同時找不到檔案
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _project_root = os.path.dirname(_script_dir)
+    TOKEN_PATH = os.path.join(_project_root, "key", "token.json")
+    STATE_PATH = os.path.join(_project_root, "state", "gmail-oauth-state.json")
     EXPIRE_DAYS = 7
     WARN_DAYS = 2
 

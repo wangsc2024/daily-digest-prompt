@@ -459,7 +459,12 @@ SCHEMAS = {
         },
     },
     "timeouts.yaml": {
-        "required_keys": ["version"],
+        "required_keys": ["version", "daily_digest_team", "todoist_team", "audit_team"],
+        "nested_required": {
+            "daily_digest_team": ["phase1_timeout", "phase2_timeout"],
+            "todoist_team": ["phase1_timeout", "phase3_timeout", "phase2_timeout_by_type"],
+            "audit_team": ["phase1_timeout", "phase2_timeout"],
+        },
     },
 }
 
@@ -559,6 +564,18 @@ def validate_config(config_dir=None):
                         if subkey not in value:
                             errors.append(
                                 f"{filename}: '{field_name}.{key}' 缺少 '{subkey}'")
+
+            # 檢查巢狀必要鍵（如 timeouts.yaml 的 daily_digest_team.phase1_timeout）
+            nested_required = schema.get("nested_required", {})
+            for parent_key, child_keys in nested_required.items():
+                parent = data.get(parent_key)
+                if not isinstance(parent, dict):
+                    errors.append(f"{filename}: '{parent_key}' 應為 dict 類型")
+                    continue
+                for child_key in child_keys:
+                    if child_key not in parent:
+                        errors.append(
+                            f"{filename}: '{parent_key}' 缺少必要鍵 '{child_key}'")
 
     return errors, warnings, stats
 

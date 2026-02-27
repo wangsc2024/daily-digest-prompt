@@ -76,6 +76,11 @@ BENIGN_PATTERNS = [
     "exit code 0\n",        # successful exit (newline-terminated)
     "errors: []",           # empty errors array
     "errors: 0",            # zero errors
+    "error_category",       # agent_guardian JSON field name
+    "error_classification", # post_tool_logger variable name
+    "error-",               # error-xxx tag prefix in own JSONL output
+    "benign_patterns",      # variable name in own source code
+    '"denied": false',      # JSON boolean field (permission denied: false)
 ]
 
 
