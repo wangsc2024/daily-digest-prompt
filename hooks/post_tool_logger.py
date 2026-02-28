@@ -58,7 +58,9 @@ ERROR_KEYWORDS = [
 ERROR_DETECT_TOOLS = {"Bash", "Write", "Edit"}
 
 # Benign patterns that contain error keywords but aren't actual errors
-BENIGN_PATTERNS = [
+# This list is the hardcoded fallback; the authoritative list is loaded from
+# config/hook-rules.yaml benign_output_patterns at module initialisation.
+_BENIGN_PATTERNS_FALLBACK = [
     "erroraction", "error_msg", "errormsg", "silentlycontinue",
     "error_keywords",       # variable name in own source code
     "has_error",            # JSON field name
@@ -82,6 +84,27 @@ BENIGN_PATTERNS = [
     "benign_patterns",      # variable name in own source code
     '"denied": false',      # JSON boolean field (permission denied: false)
 ]
+
+
+def _load_benign_patterns_from_yaml() -> list:
+    """從 hook-rules.yaml 載入良性輸出模式，失敗時回退硬編碼清單。"""
+    try:
+        from hook_utils import find_config_path
+        config_path = find_config_path()
+        if config_path:
+            import yaml
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+            patterns = config.get("benign_output_patterns")
+            if isinstance(patterns, list) and patterns:
+                return [str(p).lower() for p in patterns]
+    except Exception:
+        pass
+    return _BENIGN_PATTERNS_FALLBACK
+
+
+# Module-level: load from YAML (falls back to hardcoded list on any error)
+BENIGN_PATTERNS = _load_benign_patterns_from_yaml()
 
 
 def detect_api_sources(text: str) -> list:
@@ -202,6 +225,95 @@ def classify_edit(tool_input: dict) -> tuple:
     return summary, tags
 
 
+def _find_token_usage_file() -> str:
+    """找 token-usage.json 的路徑"""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "state", "token-usage.json"),
+        "state/token-usage.json",
+    ]
+    for c in candidates:
+        parent = os.path.dirname(c)
+        if parent and os.path.exists(parent):
+            return c
+    return candidates[0]
+
+
+def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None:
+    """累積 Token 估算統計（input_len/3.5 + output_len/3.5 ≈ tokens）。
+
+    使用 .lock 檔案保護 read-modify-write 序列，防止團隊並行模式
+    （5 路 Phase 1）下多個進程同時更新導致計數遺失。
+    """
+    try:
+        token_file = _find_token_usage_file()
+        lock_path = token_file + ".lock"
+        lock_fd = None
+        try:
+            # 取得檔案鎖（跨平台，與 CircuitBreaker._atomic_update 相同模式）
+            lock_fd = open(lock_path, "w")
+            try:
+                import msvcrt
+                msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
+            except (ImportError, OSError):
+                try:
+                    import fcntl
+                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except (ImportError, OSError):
+                    pass  # 無鎖可用時退化為無鎖模式
+
+            today = datetime.now().strftime("%Y-%m-%d")
+
+            # 持鎖後重新讀取（確保讀到最新狀態）
+            if os.path.exists(token_file):
+                try:
+                    with open(token_file, "r", encoding="utf-8") as f:
+                        usage = json.load(f)
+                except Exception:
+                    usage = {"daily": {}, "updated": ""}
+            else:
+                usage = {"daily": {}, "updated": ""}
+
+            # 確保今日條目
+            if today not in usage.get("daily", {}):
+                usage.setdefault("daily", {})[today] = {
+                    "estimated_tokens": 0, "tool_calls": 0,
+                    "input_chars": 0, "output_chars": 0
+                }
+
+            # 估算 token（字元 ÷ 3.5，中英混合取中間值）
+            estimated = (input_len + output_len) / 3.5
+
+            day_data = usage["daily"][today]
+            day_data["estimated_tokens"] = day_data.get("estimated_tokens", 0) + estimated
+            day_data["tool_calls"] = day_data.get("tool_calls", 0) + 1
+            day_data["input_chars"] = day_data.get("input_chars", 0) + input_len
+            day_data["output_chars"] = day_data.get("output_chars", 0) + output_len
+
+            usage["updated"] = datetime.now().isoformat()
+
+            # 只保留 7 天
+            import datetime as _dt
+            cutoff = (_dt.datetime.now() - _dt.timedelta(days=7)).strftime("%Y-%m-%d")
+            usage["daily"] = {k: v for k, v in usage["daily"].items() if k >= cutoff}
+
+            # 原子寫入（持鎖期間完成，確保無競態）
+            try:
+                from hook_utils import atomic_write_json
+                atomic_write_json(token_file, usage)
+            except ImportError:
+                with open(token_file, "w", encoding="utf-8") as f:
+                    json.dump(usage, f, ensure_ascii=False)
+        finally:
+            if lock_fd:
+                lock_fd.close()
+                try:
+                    os.remove(lock_path)
+                except OSError:
+                    pass
+    except Exception:
+        pass  # token 統計失敗不影響主流程
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -313,6 +425,8 @@ def main():
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
         "trace_id": os.environ.get("DIGEST_TRACE_ID", ""),
+        "phase": os.environ.get("AGENT_PHASE", ""),
+        "agent": os.environ.get("AGENT_NAME", ""),
         "tool": tool_name,
         "event": "post",
         "summary": summary,
@@ -361,6 +475,13 @@ def main():
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except OSError:
         pass  # Silent fail — do not disrupt Agent workflow
+
+    # Token usage tracking
+    _update_token_usage(
+        input_len=entry.get("input_len", 0),
+        output_len=entry.get("output_len", 0),
+        tool_name=entry.get("tool", ""),
+    )
 
     # Behavior pattern tracking (Instinct Lite)
     if BEHAVIOR_TRACKER_AVAILABLE:

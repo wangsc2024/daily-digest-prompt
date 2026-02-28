@@ -288,9 +288,14 @@ class CircuitBreaker:
             return {}
 
     def _save_state(self, state: Dict):
-        """保存狀態（注意：Phase 2 應由 assembly agent 獨佔寫入）"""
-        with open(self.state_file, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
+        """保存狀態（原子寫入，防止並行 Agent 競態損壞）"""
+        try:
+            from hook_utils import atomic_write_json
+            atomic_write_json(self.state_file, state)
+        except ImportError:
+            # Fallback：hook_utils 不可用時退回直接寫入
+            with open(self.state_file, "w", encoding="utf-8") as f:
+                json.dump(state, f, ensure_ascii=False, indent=2)
 
     def _atomic_update(self, updater):
         """

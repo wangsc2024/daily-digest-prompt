@@ -186,3 +186,35 @@ def output_decision(decision, reason=None, protocol_version="1.0"):
         result["reason"] = reason
     print(json.dumps(result))
     sys.exit(0)
+
+
+def atomic_write_json(filepath: str, data) -> None:
+    """原子寫入 JSON 檔案（write-to-temp + os.replace()）。
+
+    防止多個 Agent 並行寫入同一 JSON 導致資料損壞。
+    在 POSIX 和 Windows NTFS 上 os.replace() 均為原子操作。
+
+    注意：此函數保證目標檔案不會處於半寫入狀態，
+    但不保護 read-modify-write 序列的互斥性。
+    若需要累積計數，請在外層使用 .lock 檔案保護。
+    """
+    import tempfile
+    dirpath = os.path.dirname(os.path.abspath(filepath))
+    os.makedirs(dirpath, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8",
+            dir=dirpath, suffix=".tmp", delete=False
+        ) as tf:
+            tmp_path = tf.name
+            json.dump(data, tf, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, filepath)
+        tmp_path = None  # 成功替換後清除引用，避免 finally 誤刪
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+        raise

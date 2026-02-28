@@ -254,6 +254,13 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
         if not issues:  # Only if no errors/blocks, make this a warning
             severity = "warning"
 
+    # Check Token budget (informational warning if exceeded)
+    token_warning = _check_token_budget()
+    if token_warning:
+        issues.append(f"⚠️ {token_warning}")
+        if severity not in ("critical", "warning"):
+            severity = "warning"
+
     # If only SKILL.md modifications (no errors/blocks), send as info notification
     if not issues and info_items:
         # Build message for info-level SKILL.md notification
@@ -502,6 +509,38 @@ def check_gmail_token_expiry() -> "dict | None":
         "needs_alert": days_remaining <= WARN_DAYS,
         "expired": days_remaining <= 0,
     }
+
+
+def _find_token_usage_file_for_stop() -> str:
+    """找 token-usage.json 的路徑（供 on_stop_alert 使用）。"""
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _project_root = os.path.dirname(_script_dir)
+    return os.path.join(_project_root, "state", "token-usage.json")
+
+
+def _check_token_budget() -> "str | None":
+    """檢查今日 Token 估算是否超過 1.5M。
+
+    Returns:
+        警告字串（若超過上限），否則 None。
+    """
+    try:
+        token_file = _find_token_usage_file_for_stop()
+        if not os.path.exists(token_file):
+            return None
+
+        with open(token_file, "r", encoding="utf-8") as f:
+            usage = json.load(f)
+
+        today = datetime.now().strftime("%Y-%m-%d")
+        day_data = usage.get("daily", {}).get(today, {})
+        estimated = day_data.get("estimated_tokens", 0)
+
+        if estimated > 1_500_000:
+            return f"今日 Token 估算超過 1.5M：{estimated / 1_000_000:.1f}M"
+        return None
+    except Exception:
+        return None
 
 
 def main():

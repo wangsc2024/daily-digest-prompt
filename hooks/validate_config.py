@@ -610,16 +610,46 @@ def _extract_frontmatter(filepath):
         return None
 
 
+def _load_routing_skill_aliases(config_dir=None):
+    """從 routing.yaml 載入 skill_aliases，回傳無需 SKILL.md 的別名名稱集合。
+
+    回傳：
+        set[str] — alias 名稱集合（no_skill_file: true 的那些）
+    """
+    if config_dir is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        config_dir = os.path.join(os.path.dirname(script_dir), "config")
+
+    routing_path = os.path.join(config_dir, "routing.yaml")
+    routing = _load_yaml(routing_path)
+    if routing is None:
+        return set()
+
+    aliases = routing.get("skill_aliases", {})
+    if not isinstance(aliases, dict):
+        return set()
+
+    # 只回傳 no_skill_file: true 的別名，這些在交叉驗證時應跳過 SKILL.md 檢查
+    return {
+        name
+        for name, cfg in aliases.items()
+        if isinstance(cfg, dict) and cfg.get("no_skill_file") is True
+    }
+
+
 def check_routing_consistency(skills_dir=None, config_dir=None):
     """檢查 SKILL.md triggers 與 routing.yaml 的一致性。
 
     檢查邏輯（修正版）：
     1. 檢查 Skill triggers 是否有對應的 routing 映射（防止 Skill 失效）
     2. **不**警告 routing.yaml 中的標籤沒有對應 Skill triggers（正常設計）
+    3. routing.yaml skill_aliases（no_skill_file: true）在交叉驗證時跳過 SKILL.md 檢查
 
     說明：routing.yaml 中的標籤是 Todoist 任務分類標籤（用戶手動添加），
           SKILL.md 中的 triggers 是 Skill 啟動關鍵字（用於內容匹配），
           兩者服務於不同目的，不需要一一對應。
+          「程式開發（Plan-Then-Execute）」等別名由模板驅動，無獨立 SKILL.md，
+          已在 routing.yaml skill_aliases 中標記 no_skill_file: true。
 
     Returns:
         (errors, warnings) — 各為字串 list。
@@ -636,6 +666,9 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
 
     errors = []
     warnings = []
+
+    # 0. 載入 skill_aliases（no_skill_file: true 者在交叉驗證時跳過）
+    skill_aliases_no_file = _load_routing_skill_aliases(config_dir)
 
     # 1. 載入 routing.yaml
     routing_path = os.path.join(config_dir, "routing.yaml")
@@ -661,6 +694,11 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
 
     # 合併所有可路由標籤
     all_routing_labels = routing_labels | keyword_labels
+
+    # 注意：skill_aliases_no_file 中的名稱（如「程式開發（Plan-Then-Execute）」）
+    # 是描述性別名，由模板驅動而非獨立 SKILL.md，交叉驗證時應跳過 SKILL.md 檢查。
+    # 這些別名已在 routing.yaml skill_aliases 中標記 no_skill_file: true。
+    _ = skill_aliases_no_file  # 供未來交叉驗證邏輯使用（目前此函數不驗證 skills/ 存在性）
 
     # 3. 掃描所有 SKILL.md，提取 triggers
     skill_triggers = {}  # {skill_name: [triggers]}
@@ -980,6 +1018,235 @@ def validate_skill_quality(skills_dir=None):
     return results
 
 
+def check_skill_references(config_dir: str = ".", warn_only: bool = True) -> List[str]:
+    """驗證 frequency-limits.yaml 中的 skill/skills 欄位是否在 skills/ 目錄存在"""
+    issues = []
+
+    freq_path = os.path.join(config_dir, "config", "frequency-limits.yaml")
+    if not os.path.exists(freq_path):
+        return issues
+
+    try:
+        import yaml
+        with open(freq_path, "r", encoding="utf-8") as f:
+            freq_data = yaml.safe_load(f)
+    except Exception as e:
+        issues.append(f"ERROR: 無法讀取 frequency-limits.yaml: {e}")
+        return issues
+
+    skills_dir = os.path.join(config_dir, "skills")
+    tasks = freq_data.get("tasks", {})
+
+    for task_name, task_cfg in tasks.items():
+        if not isinstance(task_cfg, dict):
+            continue  # 跳過格式異常的 task（非 dict）
+        skill_refs = []
+        if task_cfg.get("skill"):
+            skill_refs.append(task_cfg["skill"])
+        if task_cfg.get("skills"):
+            skill_refs.extend(task_cfg["skills"])
+
+        for skill_ref in skill_refs:
+            skill_dir = os.path.join(skills_dir, skill_ref)
+            skill_file = os.path.join(skill_dir, "SKILL.md")
+            if not os.path.exists(skill_file):
+                level = "WARN" if warn_only else "ERROR"
+                issues.append(f"{level}: task '{task_name}' 引用的 skill '{skill_ref}' 在 skills/{skill_ref}/SKILL.md 不存在")
+
+    return issues
+
+
+def check_template_references(config_dir: str = ".", warn_only: bool = True) -> List[str]:
+    """驗證 routing.yaml 中的 template 路徑是否存在"""
+    issues = []
+
+    routing_path = os.path.join(config_dir, "config", "routing.yaml")
+    if not os.path.exists(routing_path):
+        return issues
+
+    try:
+        import yaml
+        with open(routing_path, "r", encoding="utf-8") as f:
+            routing_data = yaml.safe_load(f)
+    except Exception as e:
+        issues.append(f"ERROR: 無法讀取 routing.yaml: {e}")
+        return issues
+
+    def check_path(path_str, context):
+        if not path_str:
+            return
+        full_path = os.path.join(config_dir, path_str)
+        if not os.path.exists(full_path):
+            level = "WARN" if warn_only else "ERROR"
+            issues.append(f"{level}: routing.yaml {context} 引用的模板 '{path_str}' 不存在")
+
+    # 檢查各 tier 的 template_file
+    for tier_key in ["tier1", "tier2", "tier3"]:
+        tier = routing_data.get(tier_key, {})
+        if isinstance(tier, dict):
+            check_path(tier.get("template_file"), f"{tier_key}.template_file")
+
+    # 檢查 skill_aliases 中的 template
+    for alias_name, alias_cfg in routing_data.get("skill_aliases", {}).items():
+        if isinstance(alias_cfg, dict):
+            check_path(alias_cfg.get("template"), f"skill_aliases.{alias_name}.template")
+
+    return issues
+
+
+def check_frequency_template_references(config_dir: str = ".", warn_only: bool = True) -> List[str]:
+    """驗證 frequency-limits.yaml 中的 template 路徑是否存在"""
+    issues = []
+
+    freq_path = os.path.join(config_dir, "config", "frequency-limits.yaml")
+    if not os.path.exists(freq_path):
+        return issues
+
+    try:
+        import yaml
+        with open(freq_path, "r", encoding="utf-8") as f:
+            freq_data = yaml.safe_load(f)
+    except Exception as e:
+        issues.append(f"ERROR: 無法讀取 frequency-limits.yaml: {e}")
+        return issues
+
+    tasks = freq_data.get("tasks", {})
+    for task_name, task_cfg in tasks.items():
+        if not isinstance(task_cfg, dict):
+            continue  # 跳過格式異常的 task（非 dict）
+        template = task_cfg.get("template")
+        if template:
+            full_path = os.path.join(config_dir, template)
+            if not os.path.exists(full_path):
+                level = "WARN" if warn_only else "ERROR"
+                issues.append(f"{level}: task '{task_name}' 的 template '{template}' 不存在")
+
+    return issues
+
+
+def _load_skill_dependencies(config_dir: str = ".") -> Dict[str, List[str]]:
+    """讀取所有 SKILL.md 的 depends-on 欄位，建構依賴圖。"""
+    try:
+        import yaml
+    except ImportError:
+        return {}
+
+    deps = {}
+    skills_dir = os.path.join(config_dir, "skills")
+
+    if not os.path.exists(skills_dir):
+        return deps
+
+    for skill_dir in os.listdir(skills_dir):
+        skill_path = os.path.join(skills_dir, skill_dir, "SKILL.md")
+        if not os.path.isfile(skill_path):
+            continue
+
+        try:
+            with open(skill_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # 解析 YAML frontmatter
+            if content.startswith("---"):
+                parts = content.split("---", 2)
+                if len(parts) >= 2:
+                    fm = yaml.safe_load(parts[1])
+                    if fm and isinstance(fm, dict):
+                        depends = fm.get("depends-on", [])
+                        if isinstance(depends, list):
+                            deps[skill_dir] = depends
+                        elif isinstance(depends, str):
+                            deps[skill_dir] = [depends]
+                        else:
+                            deps[skill_dir] = []
+                    continue
+        except Exception:
+            pass
+
+        # 無 frontmatter 或 depends-on 欄位
+        if skill_dir not in deps:
+            deps[skill_dir] = []
+
+    return deps
+
+
+def detect_cycles(deps: Dict[str, List[str]]) -> List[List[str]]:
+    """DFS 偵測依賴圖中的迴圈，回傳所有迴圈路徑。"""
+    cycles = []
+    visited = set()
+    path: List[str] = []
+
+    def dfs(node: str):
+        if node in path:
+            cycle_start = path.index(node)
+            cycles.append(path[cycle_start:] + [node])
+            return
+        if node in visited:
+            return
+
+        path.append(node)
+        for neighbor in deps.get(node, []):
+            dfs(neighbor)
+        path.pop()
+        visited.add(node)
+
+    for skill in deps:
+        if skill not in visited:
+            dfs(skill)
+
+    return cycles
+
+
+def generate_skill_dag(config_dir: str = ".", output_file: Optional[str] = None) -> str:
+    """生成 Graphviz DOT 格式的 Skill 依賴圖。"""
+    deps = _load_skill_dependencies(config_dir)
+
+    if not deps:
+        return "// 未找到任何 Skill 依賴關係\ndigraph skills {}"
+
+    # 偵測迴圈
+    cycles = detect_cycles(deps)
+    cycle_nodes: set = set()
+    for cycle in cycles:
+        for n in cycle:
+            cycle_nodes.add(n)
+
+    lines = ["digraph skills {"]
+    lines.append('  rankdir=LR;')
+    lines.append('  node [shape=box, style=filled, fillcolor="#e8f4fd"];')
+    lines.append('  edge [color="#666666"];')
+    lines.append("")
+
+    # 收集所有節點（含被引用但無 SKILL.md 的 Skill）
+    all_nodes: set = set(deps.keys())
+    for skill, skill_deps in deps.items():
+        for dep in skill_deps:
+            all_nodes.add(dep)
+
+    # 節點定義（迴圈節點用紅色標示）
+    for node in sorted(all_nodes):
+        if node in cycle_nodes:
+            lines.append(f'  "{node}" [fillcolor="#ffcccc", label="{node}\\n(迴圈!)"];')
+
+    # 邊定義
+    for skill, skill_deps in sorted(deps.items()):
+        for dep in skill_deps:
+            if skill in cycle_nodes and dep in cycle_nodes:
+                lines.append(f'  "{skill}" -> "{dep}" [color="red", style="bold"];')
+            else:
+                lines.append(f'  "{skill}" -> "{dep}";')
+
+    lines.append("}")
+    dot_content = "\n".join(lines)
+
+    if output_file:
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(dot_content)
+        print(f"DOT 檔案已寫入：{output_file}")
+
+    return dot_content
+
+
 def main():
     # Ensure UTF-8 output on Windows
     if hasattr(sys.stdout, "reconfigure"):
@@ -989,14 +1256,18 @@ def main():
     if "--help" in sys.argv or "-h" in sys.argv:
         print(__doc__)
         print("\n使用方式：")
-        print("  python validate_config.py                    # 驗證所有配置檔")
-        print("  python validate_config.py --all              # 驗證 + Routing + Skills")
-        print("  python validate_config.py --check-routing    # 僅檢查 Routing 一致性")
-        print("  python validate_config.py --check-skills     # 僅檢查 Skill 品質")
-        print("  python validate_config.py --migrate          # Dry-run 遷移所有配置檔")
-        print("  python validate_config.py --migrate --apply  # 實際執行遷移")
-        print("  python validate_config.py --fix <config>     # 修復特定配置檔問題")
-        print("  python validate_config.py --json             # JSON 格式輸出")
+        print("  python validate_config.py                           # 驗證所有配置檔")
+        print("  python validate_config.py --all                     # 驗證 + Routing + Skills + 交叉驗證")
+        print("  python validate_config.py --check-routing           # 僅檢查 Routing 一致性")
+        print("  python validate_config.py --check-skills            # 僅檢查 Skill 品質")
+        print("  python validate_config.py --cross-validate          # 交叉驗證（技能引用、模板路徑）")
+        print("  python validate_config.py --cross-validate --strict # 嚴格模式（錯誤時 exit 1）")
+        print("  python validate_config.py --migrate                 # Dry-run 遷移所有配置檔")
+        print("  python validate_config.py --migrate --apply         # 實際執行遷移")
+        print("  python validate_config.py --fix <config>            # 修復特定配置檔問題")
+        print("  python validate_config.py --json                    # JSON 格式輸出")
+        print("  python validate_config.py --skill-dag               # 生成 Skill 依賴圖（DOT 格式）")
+        print("  python validate_config.py --skill-dag --dag-output skills.dot  # 輸出到檔案")
         sys.exit(0)
 
     # 處理 --migrate（配置遷移模式）
@@ -1047,6 +1318,43 @@ def main():
             print(f"❌ 錯誤：{str(e)}")
             sys.exit(1)
 
+    # 計算 base_dir（專案根目錄，即 hooks/ 的上層目錄）
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(script_dir)
+
+    # 處理 --skill-dag（Skill 依賴圖生成）
+    if "--skill-dag" in sys.argv:
+        # 解析 --dag-output 參數
+        dag_output = None
+        if "--dag-output" in sys.argv:
+            try:
+                idx = sys.argv.index("--dag-output")
+                if idx + 1 < len(sys.argv):
+                    dag_output = sys.argv[idx + 1]
+            except (ValueError, IndexError):
+                pass
+
+        print("\n[Skill 依賴圖]")
+        dot = generate_skill_dag(config_dir=base_dir, output_file=dag_output)
+
+        # 偵測迴圈
+        deps = _load_skill_dependencies(config_dir=base_dir)
+        cycles = detect_cycles(deps)
+        if cycles:
+            print(f"  警告：發現 {len(cycles)} 個循環依賴！")
+            for cycle in cycles:
+                print(f"    {' -> '.join(cycle)}")
+        else:
+            skill_count = len(deps)
+            dep_count = sum(len(d) for d in deps.values())
+            print(f"  無循環依賴（{skill_count} 個 Skill，{dep_count} 條依賴邊）")
+
+        if not dag_output:
+            print("\n--- DOT 格式輸出（可複製到 https://dreampuf.github.io/GraphvizOnline/ 視覺化）---")
+            print(dot)
+
+        sys.exit(0)
+
     # 標準驗證模式
     errors, warnings, stats = validate_config()
 
@@ -1068,6 +1376,18 @@ def main():
         if low_score_skills:
             warnings.append(f"發現 {len(low_score_skills)} 個低分 Skill（< 80）：{', '.join(low_score_skills)}")
 
+    # 新增：交叉驗證（skill 引用 + template 路徑）
+    cross_issues = []
+    if "--cross-validate" in sys.argv or "--all" in sys.argv:
+        strict = "--strict" in sys.argv
+        cross_issues.extend(check_skill_references(config_dir=base_dir, warn_only=not strict))
+        cross_issues.extend(check_template_references(config_dir=base_dir, warn_only=not strict))
+        cross_issues.extend(check_frequency_template_references(config_dir=base_dir, warn_only=not strict))
+
+        # 將 ERROR 級別的交叉驗證問題提升到 errors 列表
+        for issue in cross_issues:
+            if issue.startswith("ERROR:"):
+                errors.append(issue)
 
     if "--json" in sys.argv:
         output = {
@@ -1099,6 +1419,20 @@ def main():
             avg = sum(s["score"] for s in skill_scores.values()) / total if total > 0 else 0
             print(f"\n  平均分：{avg:.1f}/100 （共 {total} 個 Skill）")
 
+        # 交叉驗證輸出
+        if "--cross-validate" in sys.argv or "--all" in sys.argv:
+            print("\n[交叉驗證]")
+            if cross_issues:
+                for issue in cross_issues:
+                    print(f"  {issue}")
+                warn_count = sum(1 for i in cross_issues if i.startswith("WARN"))
+                err_count = sum(1 for i in cross_issues if i.startswith("ERROR"))
+                print(f"\n  交叉驗證：{warn_count} 個警告，{err_count} 個錯誤")
+                if "--strict" in sys.argv and err_count > 0:
+                    sys.exit(1)
+            else:
+                print("  ✓ 所有引用均有效（技能、模板路徑）")
+
         # 顯示驗證統計
         if stats["json_schema_used"] > 0 or stats["simple_validation_used"] > 0:
             print("\n[驗證模式]")
@@ -1125,6 +1459,9 @@ def main():
             if "--check-skills" in sys.argv or "--all" in sys.argv:
                 checks_done += 1
                 check_names.append("Skill 品質")
+            if "--cross-validate" in sys.argv or "--all" in sys.argv:
+                checks_done += 1
+                check_names.append("交叉驗證")
 
             print(f"\n✅ 全部 {checks_done} 項檢查通過（{' + '.join(check_names)}）")
 
