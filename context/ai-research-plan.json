@@ -19,5 +19,92 @@
     "reasoning models 2026",
     "後訓練對齊"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "Group Relative Policy Optimization (GRPO) — Cameron R. Wolfe 深度技術解析",
+      "url": "https://cameronrwolfe.substack.com/p/grpo",
+      "key_points": [
+        "GRPO 核心創新：移除 PPO 的 critic/value function model，改用 group-based baseline 估計 advantage",
+        "數學公式：A_i = (r_i - mean(r_group)) / (std(r_group) + ε)，使用 KL 散度的正保證估計器",
+        "記憶體節省約 50%：PPO 需 4 個模型（policy+critic+reference+reward），GRPO 僅需 policy+reference",
+        "DeepSeek-R1 配置：671B MoE，batch 1024（16 prompts × 64 completions），純 RL 無 SFT 的 R1-Zero 自發產生推理行為",
+        "實作建議：group size 16-64，clipping ε=0.2，KL beta 0.01-0.1，偏好 verifiable rewards 避免 reward hacking"
+      ]
+    },
+    {
+      "title": "The State of Reinforcement Learning for LLM Reasoning — Sebastian Raschka",
+      "url": "https://sebastianraschka.com/blog/2025/the-state-of-reinforcement-learning-for-llm-reasoning.html",
+      "key_points": [
+        "RL for LLM reasoning 三大方法論：RLHF（偏好對齊）、GRPO（推理增強）、RLVR（可驗證獎勵）",
+        "DeepSeek-R1 刻意避免 Process Reward Model，因大規模 RL 易遭 reward hacking",
+        "長度偏差問題：PPO/GRPO 數學損失特性不自覺偏好冗長回答",
+        "歸因問題：推理能力可能來自預訓練的 chain-of-thought 數據而非 RL 本身",
+        "2025-2026 趨勢：推理後訓練成為標準實踐，但需要長度控制、外部工具整合（搜尋、RAG）"
+      ]
+    },
+    {
+      "title": "Reinforcement Learning for LLMs: RLHF, DPO, and the Future — Inferless",
+      "url": "https://www.inferless.com/learn/a-deep-dive-into-reinforcement-learning",
+      "key_points": [
+        "前沿實驗室使用混合管線：Meta Llama 3 = SFT → rejection sampling → PPO → DPO 多輪精煉",
+        "DeepSeek-R1 = 兩階段 GRPO + 輕量 SFT 前後包裝",
+        "推理模型生成 3-4 倍 token，增加延遲和成本",
+        "新興趨勢：GRPO-based 長度正則化 RL（TLDR）控制 CoT 冗長、LLM-as-a-Judge 自主回饋迴圈",
+        "分散式訓練：ROLL 等函式庫在數千 GPU 上並行化 PPO/DPO"
+      ]
+    },
+    {
+      "title": "Inference-Time Scaling Research: Reasoning Models — Introl Blog (December 2025)",
+      "url": "https://introl.com/blog/inference-time-scaling-research-reasoning-models-december-2025",
+      "key_points": [
+        "DeepSeek-R1：AIME 準確率從 15.6% → 71%（majority voting 86.7%），成本降低 70%",
+        "推理計算預計 2026 年超越訓練計算 118 倍",
+        "推理份額到 2030 年佔 AI 計算的 75%，市場從 $106B(2025) 增長至 $255B(2030)",
+        "ThreadWeaver 並行推理路徑：1.53x 延遲加速，P1 物理模型首個拿下 IPhO 金牌的開源系統",
+        "推理時擴展 vs 後訓練：前者允許適度基礎模型透過延長推理達到專家級表現"
+      ]
+    },
+    {
+      "title": "Why GRPO is Important and How it Works — Oxen.ai",
+      "url": "https://ghost.oxen.ai/why-grpo-is-important-and-how-it-works/",
+      "key_points": [
+        "民主化效應：1B 參數 Llama 3.2 可用 16GB VRAM 訓練成推理模型",
+        "PPO 需要 4 個 LLM（policy+critic+reference+reward），GRPO 僅需 2 個（policy+reference）",
+        "DeepSeek-R1 交替進行 SFT 和 GRPO 訓練",
+        "使用 regex/字串匹配的確定性獎勵，無需獨立獎勵模型 LLM",
+        "個人可在最低成本下訓練特定領域推理模型（如 Rust 程式碼推理器）"
+      ]
+    },
+    {
+      "title": "RLHF 算法全景解析：從 PPO 到 DPO/GRPO 的範式革命（中文深度長文）",
+      "url": "https://www.cnblogs.com/yangykaifa/p/19375378",
+      "key_points": [
+        "RLHF 決定模型上限：能否在複雜邏輯權衡中輸出符合 HHH 的內容",
+        "REINFORCE++ 在訓練中比 GRPO 更穩定、比 PPO 更快",
+        "GSPO（Generalized Self-Play Optimization）vs GRPO 代表兩種修復 RLHF 的不同理念",
+        "GRPO 優化獎勵保守下界，主動避免高獎勵但高不確定性的區域"
+      ]
+    },
+    {
+      "title": "Reinforcement Learning from Verifiable Rewards (RLVR) — Label Studio & Emergent Mind",
+      "url": "https://labelstud.io/blog/reinforcement-learning-from-verifiable-rewards/",
+      "key_points": [
+        "RLVR 繞過獎勵模型，直接用符號驗證器（計算器、編譯器）提供二元回饋",
+        "Process Reward Model (PRM) 提供逐步密集獎勵，優於僅看最終結果的 ORM",
+        "Med-RLVR 等結構化領域用嚴格格式匹配和標準答案比對",
+        "非結構化領域用生成式獎勵模型（從大模型蒸餾）提供軟獎勵信號"
+      ]
+    },
+    {
+      "title": "The Art of Scaling Test-Time Compute for LLMs（arXiv 2512.02008）",
+      "url": "https://arxiv.org/abs/2512.02008",
+      "key_points": [
+        "30+ billion tokens 實驗：8 個開源 LLM（7B-235B），4 個推理資料集",
+        "沒有單一 TTS 策略普遍佔優，推理模型在不同難度和軌跡長度展現不同品質模式",
+        "最優 TTS 效能隨計算預算單調擴展",
+        "知識密集型任務中推理時計算增加不一致提升準確率，甚至導致更多幻覺"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }

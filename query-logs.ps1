@@ -12,10 +12,11 @@
 #   .\query-logs.ps1 -Mode health-score
 #   .\query-logs.ps1 -Mode health-score -Days 3 -Format json
 #   .\query-logs.ps1 -Mode trace -TraceId abc123  # 追蹤特定 trace_id
+#   .\query-logs.ps1 -Mode timeline               # Phase 執行時間線（最近 5 筆）
 # ============================================
 
 param(
-    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score", "trace")]
+    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score", "trace", "task-board", "timeline")]
     [string]$Mode = "summary",
 
     [int]$Days = 7,
@@ -985,6 +986,242 @@ function Show-Trace {
 }
 
 # ============================================
+# VZ2: 自動任務 7 天完成矩陣
+# ============================================
+function Show-TaskBoard {
+    param([int]$BoardDays = 7)
+
+    Write-Header "自動任務 ${BoardDays} 天完成矩陣"
+
+    $historyFile = "$AgentDir\state\todoist-history.json"
+    $freqLimitsFile = "$AgentDir\config\frequency-limits.yaml"
+
+    if (-not (Test-Path $historyFile)) {
+        Write-Host "  （無歷史紀錄：$historyFile）" -ForegroundColor Gray
+        return
+    }
+
+    # 讀取任務定義（名稱 + counter_field）
+    $taskDefs = @()
+    if (Test-Path $freqLimitsFile) {
+        $freqContent = Get-Content -Path $freqLimitsFile -Raw -Encoding UTF8
+        $taskMatches = [regex]::Matches($freqContent, '(?m)^\s{2}(\w+):\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}name:\s*(.+?)\s*\n')
+        foreach ($m in $taskMatches) {
+            $taskDefs += @{ key = $m.Groups[1].Value; name = $m.Groups[2].Value.Trim() }
+        }
+    }
+
+    # 讀取 todoist-history.json 的 daily_summary 或 auto_tasks
+    $historyRaw = Get-Content -Path $historyFile -Raw -Encoding UTF8
+    $history = $historyRaw | ConvertFrom-Json
+
+    # 建立近 N 天日期列表
+    $today = Get-Date
+    $dates = @()
+    for ($i = $BoardDays - 1; $i -ge 0; $i--) {
+        $dates += ($today.AddDays(-$i)).ToString("MM/dd")
+    }
+    $dateKeys = @()
+    for ($i = $BoardDays - 1; $i -ge 0; $i--) {
+        $dateKeys += ($today.AddDays(-$i)).ToString("yyyy-MM-dd")
+    }
+
+    # 從 auto_tasks 聚合每日每任務執行次數
+    $matrix = @{}
+    if ($history.auto_tasks) {
+        foreach ($entry in $history.auto_tasks) {
+            $d = try { ([datetime]::Parse($entry.date)).ToString("yyyy-MM-dd") } catch { "" }
+            $type = $entry.type
+            if ($d -and $type) {
+                $matKey = "${d}|${type}"
+                if (-not $matrix.ContainsKey($matKey)) { $matrix[$matKey] = 0 }
+                $matrix[$matKey]++
+            }
+        }
+    }
+
+    # 標題列（日期）
+    $headerPad = "  {0,-12}" -f "任務名稱"
+    $dateHeader = ($dates | ForEach-Object { $_.PadLeft(6) }) -join " "
+    Write-Host ("$headerPad $dateHeader") -ForegroundColor DarkCyan
+    Write-Host ("  $('─' * (12 + 7 * $BoardDays + 1))") -ForegroundColor DarkGray
+
+    # 任務列
+    $fallbackTasks = if ($taskDefs.Count -gt 0) { $taskDefs } else {
+        # Fallback：從 history 中提取唯一任務類型
+        $uniqueTypes = $history.auto_tasks | Select-Object -ExpandProperty type -Unique | Sort-Object
+        $uniqueTypes | ForEach-Object { @{ key = $_; name = $_ } }
+    }
+
+    $hungerAlert = @()
+    foreach ($t in $fallbackTasks) {
+        $taskKey = $t.key
+        $taskName = if ($t.name.Length -gt 8) { $t.name.Substring(0,8) } else { $t.name }
+        $row = "  {0,-12}" -f $taskName
+
+        $zeroCount = 0
+        foreach ($dk in $dateKeys) {
+            $cnt = if ($matrix.ContainsKey("${dk}|${taskKey}")) { $matrix["${dk}|${taskKey}"] } else { 0 }
+            $cell = switch ($cnt) {
+                0 { "░" }
+                1 { "█" }
+                2 { "██" }
+                3 { "███" }
+                default { "████" }
+            }
+            $row += " " + $cell.PadLeft(6)
+            if ($cnt -eq 0) { $zeroCount++ }
+        }
+
+        $color = if ($zeroCount -ge ($BoardDays - 1)) { "Gray" } elseif ($zeroCount -ge 3) { "Yellow" } else { "White" }
+        Write-Host $row -ForegroundColor $color
+
+        # 飢餓任務偵測（連續 3 天以上 0 次）
+        $consecutiveZero = 0
+        $maxConsec = 0
+        foreach ($dk in $dateKeys) {
+            if (($matrix["${dk}|${taskKey}"] -or 0) -eq 0) { $consecutiveZero++ } else { $consecutiveZero = 0 }
+            if ($consecutiveZero -gt $maxConsec) { $maxConsec = $consecutiveZero }
+        }
+        if ($maxConsec -ge 3) { $hungerAlert += $t.name }
+    }
+
+    Write-Host ("  $('─' * (12 + 7 * $BoardDays + 1))") -ForegroundColor DarkGray
+    Write-Host "  圖例：░=0次  █=1  ██=2  ███=3  ████=4+" -ForegroundColor DarkGray
+
+    if ($hungerAlert.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  ⚠ 連續 3 天以上未執行（可能饑餓）：" -ForegroundColor Yellow
+        foreach ($ta in $hungerAlert) {
+            Write-Host "    - $ta" -ForegroundColor Yellow
+        }
+    }
+    Write-Host ""
+}
+
+# ============================================
+# Show-Timeline: Phase 執行時間線
+# ============================================
+function Show-Timeline {
+    Write-Host ""
+    Write-Host "[Phase 執行時間線]" -ForegroundColor Cyan
+    Write-Host ("  " + "─" * 60) -ForegroundColor DarkGray
+
+    # 讀取 scheduler-state.json
+    $stateFile = "$AgentDir\state\scheduler-state.json"
+    if (-not (Test-Path $stateFile)) {
+        Write-Host "  找不到 state/scheduler-state.json" -ForegroundColor Yellow
+        return
+    }
+
+    try {
+        $stateData = Get-Content $stateFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
+    catch {
+        Write-Host "  無法解析 scheduler-state.json: $_" -ForegroundColor Red
+        return
+    }
+
+    # 優先取 runs（daily/todoist），其次取 executions（audit）
+    $allRecords = @()
+    if ($stateData.runs) {
+        $allRecords += $stateData.runs | Where-Object { $_.phase_breakdown -ne $null }
+    }
+    if ($stateData.executions) {
+        $allRecords += $stateData.executions | Where-Object { $_.phase_breakdown -ne $null }
+    }
+
+    # 依時間排序，取最近 $Days 天且最多 5 筆
+    $cutoff = (Get-Date).AddDays(-$Days)
+    $recent = $allRecords | Where-Object {
+        $ts = if ($_.start_time) { $_.start_time } else { $_.timestamp }
+        try { [datetime]$ts -ge $cutoff } catch { $false }
+    } | Sort-Object {
+        $ts = if ($_.start_time) { $_.start_time } else { $_.timestamp }
+        try { [datetime]$ts } catch { [datetime]::MinValue }
+    } -Descending | Select-Object -First 5
+
+    if ($recent.Count -eq 0) {
+        Write-Host "  近 ${Days} 天內無 phase_breakdown 資料（需執行新版腳本後才會產生）" -ForegroundColor Yellow
+        Write-Host ""
+        return
+    }
+
+    foreach ($run in $recent) {
+        $ts = if ($run.start_time) { $run.start_time } else { $run.timestamp }
+        $dateStr = try { ([datetime]$ts).ToString("MM-dd HH:mm") } catch { "unknown" }
+        $agentStr = if ($run.agent) { $run.agent } else { "unknown" }
+        $pb = $run.phase_breakdown
+
+        $statusColor = switch ($run.status) {
+            "success" { "Green" }
+            "failed"  { "Red" }
+            "skipped" { "Gray" }
+            default   { "White" }
+        }
+        Write-Host ("  [{0}] {1} ({2})" -f $dateStr, $agentStr, $run.status) -ForegroundColor $statusColor
+
+        # Phase 1
+        if ($null -ne $pb.phase1_seconds) {
+            $p1 = [int]$pb.phase1_seconds
+            $maxRef = 300  # 基準 300s（daily-digest Phase 1 timeout）
+            $barLen = if ($maxRef -gt 0) { [int](($p1 / $maxRef) * 20) } else { 0 }
+            $barLen = [Math]::Min([Math]::Max($barLen, 0), 20)
+            $bar = ("█" * $barLen) + ("░" * (20 - $barLen))
+            $status = if ($p1 -le $maxRef) { "✓" } else { "⚠慢" }
+            $color = if ($p1 -le $maxRef) { "Green" } else { "Yellow" }
+            Write-Host ("    Phase 1 [{0}] {1,4}s {2}" -f $bar, $p1, $status) -ForegroundColor $color
+        }
+
+        # Phase 2
+        if ($null -ne $pb.phase2_seconds) {
+            $p2 = [int]$pb.phase2_seconds
+            # Todoist Phase 2 基準 720s（最長 tech_research），audit Phase 2 基準 1200s
+            # daily-digest Phase 2 基準 420s
+            $maxRef = switch ($agentStr) {
+                "todoist-team"       { 720 }
+                "system-audit-team"  { 1200 }
+                default              { 420 }
+            }
+            $barLen = if ($maxRef -gt 0) { [int](($p2 / $maxRef) * 20) } else { 0 }
+            $barLen = [Math]::Min([Math]::Max($barLen, 0), 20)
+            $bar = ("█" * $barLen) + ("░" * (20 - $barLen))
+            $status = if ($p2 -le $maxRef) { "✓" } else { "⚠慢" }
+            $color = if ($p2 -le $maxRef) { "Green" } else { "Yellow" }
+            Write-Host ("    Phase 2 [{0}] {1,4}s {2}" -f $bar, $p2, $status) -ForegroundColor $color
+        }
+
+        # Phase 3（Todoist 才有）
+        if ($null -ne $pb.phase3_seconds) {
+            $p3 = [int]$pb.phase3_seconds
+            $maxRef = 180  # 基準 180s（Phase 3 timeout = 180s）
+            $barLen = if ($maxRef -gt 0) { [int](($p3 / $maxRef) * 20) } else { 0 }
+            $barLen = [Math]::Min([Math]::Max($barLen, 0), 20)
+            $bar = ("█" * $barLen) + ("░" * (20 - $barLen))
+            $status = if ($p3 -le $maxRef) { "✓" } else { "⚠慢" }
+            $color = if ($p3 -le $maxRef) { "Green" } else { "Yellow" }
+            Write-Host ("    Phase 3 [{0}] {1,4}s {2}" -f $bar, $p3, $status) -ForegroundColor $color
+        }
+
+        # 附加資訊（plan_type / phase1_agents）
+        if ($pb.plan_type) {
+            Write-Host ("    plan_type: {0}" -f $pb.plan_type) -ForegroundColor DarkGray
+        }
+        if ($pb.phase1_agents) {
+            $agents = $pb.phase1_agents -join ", "
+            Write-Host ("    agents: {0}" -f $agents) -ForegroundColor DarkGray
+        }
+
+        Write-Host ""
+    }
+
+    Write-Host ("  " + "─" * 60) -ForegroundColor DarkGray
+    Write-Host "  圖例：基準 Phase1=300s, Phase2=420s(daily)/720s(todoist)/1200s(audit), Phase3=180s" -ForegroundColor DarkGray
+    Write-Host "  ✓ = 在基準內  ⚠慢 = 超過基準  顯示最近 5 筆（含 phase_breakdown 的記錄）" -ForegroundColor DarkGray
+    Write-Host ""
+}
+
+# ============================================
 # Main dispatch
 # ============================================
 switch ($Mode) {
@@ -995,4 +1232,6 @@ switch ($Mode) {
     "trend"        { Show-Trend }
     "health-score" { Show-HealthScore }
     "trace"        { Show-Trace }
+    "task-board"   { Show-TaskBoard -BoardDays $Days }
+    "timeline"     { Show-Timeline }
 }

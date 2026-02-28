@@ -36,6 +36,140 @@ New-Item -ItemType Directory -Force -Path "$AgentDir\docs" | Out-Null
 # Helper Functions
 # ============================================
 
+# FSM 狀態管理
+function Set-FsmState {
+    param(
+        [string]$RunId,
+        [string]$Phase,
+        [string]$State,
+        [string]$AgentType = "system-audit",
+        [string]$Detail = ""
+    )
+
+    $fsmFile = "$AgentDir\state\run-fsm.json"
+    $transitionFile = "$AgentDir\logs\structured\fsm-transitions.jsonl"
+    $now = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+
+    if (Test-Path $fsmFile) {
+        try {
+            $fsm = Get-Content $fsmFile -Raw | ConvertFrom-Json
+        } catch {
+            $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+        }
+    } else {
+        $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+    }
+
+    $runKey = "${AgentType}_${RunId}"
+    if (-not $fsm.runs.$runKey) {
+        $fsm.runs | Add-Member -NotePropertyName $runKey -NotePropertyValue ([PSCustomObject]@{
+            run_id     = $RunId
+            agent_type = $AgentType
+            started    = $now
+            phases     = [PSCustomObject]@{}
+        }) -Force
+    }
+
+    $fsm.runs.$runKey.phases | Add-Member -NotePropertyName $Phase -NotePropertyValue ([PSCustomObject]@{
+        state   = $State
+        updated = $now
+        detail  = $Detail
+    }) -Force
+
+    $fsm | Add-Member -NotePropertyName "updated" -NotePropertyValue $now -Force
+
+    $cutoff = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
+    $oldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
+        $_.Value.started -lt $cutoff
+    } | Select-Object -ExpandProperty Name)
+    foreach ($k in $oldKeys) {
+        $fsm.runs.PSObject.Properties.Remove($k)
+    }
+
+    $tmpFile = "$fsmFile.tmp"
+    $fsm | ConvertTo-Json -Depth 6 | Set-Content $tmpFile -Encoding UTF8
+    Move-Item $tmpFile $fsmFile -Force
+
+    $transition = [PSCustomObject]@{
+        ts         = $now
+        run_id     = $RunId
+        agent_type = $AgentType
+        phase      = $Phase
+        state      = $State
+        detail     = $Detail
+    }
+    $transitionJson = $transition | ConvertTo-Json -Compress
+
+    $transitionDir = Split-Path $transitionFile -Parent
+    if (-not (Test-Path $transitionDir)) {
+        New-Item -ItemType Directory -Path $transitionDir -Force | Out-Null
+    }
+
+    Add-Content -Path $transitionFile -Value $transitionJson -Encoding UTF8
+}
+
+function Set-OodaState {
+    param(
+        [string]$Step,           # observe/orient/decide/act/complete
+        [string]$Status,         # pending/running/completed/failed/skipped
+        [hashtable]$Meta = @{}
+    )
+
+    $workflowFile = Join-Path $AgentDir "context\workflow-state.json"
+    $transitionFile = Join-Path $AgentDir "logs\structured\ooda-transitions.jsonl"
+
+    $now = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
+    $entry = @{
+        ts       = $now
+        run_id   = $traceId
+        step     = $Step
+        status   = $Status
+        meta     = $Meta
+    }
+
+    # 更新 workflow-state.json（原子寫入，I1 修復：try/finally 清理 tmp 檔）
+    $tmpFile = "$workflowFile.tmp"
+    try {
+        $state = @{
+            run_id       = $traceId
+            current_step = $Step
+            status       = $Status
+            updated_at   = $now
+            history      = @()
+        }
+        if (Test-Path $workflowFile) {
+            try {
+                $existing = Get-Content $workflowFile -Raw -Encoding UTF8 | ConvertFrom-Json
+                $state.history = @($existing.history) + @(@{ step = $existing.current_step; status = $existing.status; ts = $existing.updated_at })
+                # 保留最近 20 筆歷史
+                if ($state.history.Count -gt 20) {
+                    $state.history = $state.history[-20..-1]
+                }
+            } catch {
+                Write-Log "[OodaState] workflow-state.json 損壞，歷史記錄重置: $_"
+            }
+        }
+        $state | ConvertTo-Json -Depth 5 | Set-Content $tmpFile -Encoding UTF8
+        Move-Item $tmpFile $workflowFile -Force
+        $tmpFile = $null  # 成功後清除 tmp 路徑，finally 不清理
+    } catch {
+        Write-Log "[OodaState] 寫入失敗: $_"
+    } finally {
+        if ($tmpFile -and (Test-Path $tmpFile)) {
+            Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # Append to transitions JSONL
+    try {
+        $entry | ConvertTo-Json -Compress | Add-Content $transitionFile -Encoding UTF8
+    } catch {
+        Write-Log "[OodaState] JSONL 追加失敗: $_"
+    }
+
+    Write-Log "[OODA] $Step → $Status"
+}
+
 function Get-Timestamp {
     return Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 }
@@ -73,7 +207,8 @@ function Update-SchedulerState {
     param(
         [string]$Status,
         [string]$Message = "",
-        [int]$ExitCode = 0
+        [int]$ExitCode = 0,
+        [PSCustomObject]$PhaseBreakdown
     )
 
     if (-not (Test-Path $StateFile)) {
@@ -83,11 +218,13 @@ function Update-SchedulerState {
     }
 
     $execution = @{
-        timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-        agent = "system-audit-team"
-        status = $Status
-        message = $Message
-        exit_code = $ExitCode
+        timestamp       = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        start_time      = if ($script:auditStartTime) { $script:auditStartTime.ToString("yyyy-MM-ddTHH:mm:ss") } else { $null }
+        agent           = "system-audit-team"
+        status          = $Status
+        message         = $Message
+        exit_code       = $ExitCode
+        phase_breakdown = $PhaseBreakdown
     }
 
     $state.executions += $execution
@@ -104,6 +241,7 @@ function Update-SchedulerState {
 # Main Execution
 # ============================================
 
+$auditStartTime = Get-Date
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $phase1LogFile = "$LogDir\audit-phase1-$timestamp.log"
 $phase2LogFile = "$LogDir\audit-phase2-$timestamp.log"
@@ -184,6 +322,10 @@ else {
 # ============================================
 
 Write-Log "Phase 1: Starting 4 parallel audit agents..." "INFO"
+$phase1Start = Get-Date
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "running" -AgentType "system-audit"
+# OODA: 系統審查 = Orient 階段
+Set-OodaState -Step "orient" -Status "running" -Meta @{ trigger = "scheduled" }
 
 $phase1Jobs = @()
 $phase1Prompts = @(
@@ -200,6 +342,8 @@ foreach ($agent in $phase1Prompts) {
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+        [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase1", "Process")
+        [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
         if ($apiToken) {
             [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
         }
@@ -267,6 +411,7 @@ foreach ($jobInfo in $phase1Jobs) {
 # Check if all Phase 1 agents succeeded
 if (-not $phase1Success) {
     Write-Log "Phase 1 failed - some agents timed out" "ERROR"
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "failed" -AgentType "system-audit" -Detail "timeout or missing result files"
     Update-SchedulerState -Status "error" -Message "Phase 1 timeout" -ExitCode 1
     exit 1
 }
@@ -287,7 +432,9 @@ if (-not $phase1Success) {
     exit 1
 }
 
-Write-Log "Phase 1 completed successfully" "INFO"
+$phase1Seconds = [int]((Get-Date) - $phase1Start).TotalSeconds
+Write-Log "Phase 1 completed successfully (${phase1Seconds}s)" "INFO"
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "system-audit" -Detail "4 agents completed"
 
 # Clean up stderr files from Phase 1
 Get-ChildItem "$LogDir\*-stderr-*.log" -ErrorAction SilentlyContinue | ForEach-Object {
@@ -299,11 +446,14 @@ Get-ChildItem "$LogDir\*-stderr-*.log" -ErrorAction SilentlyContinue | ForEach-O
 # ============================================
 
 Write-Log "Phase 2: Starting assembly agent..." "INFO"
+$phase2Start = Get-Date
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "running" -AgentType "system-audit"
 
 $phase2Prompt = "$AgentDir\prompts\team\assemble-audit.md"
 $phase2Attempt = 1
 $maxPhase2Attempts = $MaxPhase2Retries + 1
 $phase2Success = $false
+$phase2Seconds = 0
 
 while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
     if ($phase2Attempt -gt 1) {
@@ -318,6 +468,8 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2", "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_NAME", "assemble-audit", "Process")
             if ($apiToken) {
                 [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
             }
@@ -364,8 +516,29 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
         # Check if successful (look for completion indicators)
         $outputStr = $output -join "`n"
         if ($outputStr -match "審查完成|Step 8.*清理|知識庫.*成功|state/last-audit.json.*已更新") {
-            Write-Log "Phase 2 completed successfully" "INFO"
+            $phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
+            Write-Log "Phase 2 completed successfully (${phase2Seconds}s)" "INFO"
             $phase2Success = $true
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "system-audit"
+
+            # OODA: Orient 完成，檢查是否需要觸發 Decide
+            Set-OodaState -Step "orient" -Status "completed"
+            $backlogFile = Join-Path $AgentDir "context\improvement-backlog.json"
+            if (Test-Path $backlogFile) {
+                try {
+                    $backlog = Get-Content $backlogFile -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $pendingItems = @($backlog.items | Where-Object { $_.status -eq "pending" })
+                    if ($pendingItems.Count -gt 0) {
+                        Write-Log "[OODA] improvement-backlog 有 $($pendingItems.Count) 筆待辦，記錄 decide 觸發信號"
+                        Set-OodaState -Step "decide" -Status "pending" -Meta @{ pending_items = $pendingItems.Count; trigger = "orient_completed" }
+                    } else {
+                        Write-Log "[OODA] improvement-backlog 為空，跳過 Decide/Act"
+                        Set-OodaState -Step "decide" -Status "skipped" -Meta @{ reason = "backlog_empty" }
+                    }
+                } catch {
+                    Write-Log "[OODA] 無法讀取 improvement-backlog.json: $_"
+                }
+            }
 
             # ─── Circuit Breaker 自動更新（knowledge API）───
             if ($knowledgeAvailable) {
@@ -393,6 +566,8 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
 
 if (-not $phase2Success) {
     Write-Log "Phase 2 failed after $maxPhase2Attempts attempts" "ERROR"
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "system-audit" -Detail "failed after $maxPhase2Attempts attempts"
+    Set-OodaState -Step "orient" -Status "failed" -Meta @{ error = "phase2_failed" }
     Update-SchedulerState -Status "error" -Message "Phase 2 failed" -ExitCode 1
     exit 1
 }
@@ -405,6 +580,11 @@ Write-Log "=== System Audit Team Mode Completed ===" "INFO"
 Write-Log "Phase 1 log: $phase1LogFile" "INFO"
 Write-Log "Phase 2 log: $phase2LogFile" "INFO"
 
+# 若 phase2 未成功賦值，用外層計時估算
+if ($phase2Seconds -eq 0) {
+    $phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
+}
+
 # Check if audit state was updated
 $auditStateFile = "$AgentDir\state\last-audit.json"
 if (Test-Path $auditStateFile) {
@@ -415,5 +595,14 @@ if (Test-Path $auditStateFile) {
     }
 }
 
-Update-SchedulerState -Status "success" -Message "Team audit completed" -ExitCode 0
+$totalAuditSeconds = [int]((Get-Date) - $auditStartTime).TotalSeconds
+$phaseBreakdown = [PSCustomObject]@{
+    phase1_seconds  = $phase1Seconds
+    phase2_seconds  = $phase2Seconds
+    total_seconds   = $totalAuditSeconds
+    phase1_agents   = @("dim1-5", "dim2-6", "dim3-7", "dim4")
+}
+Write-Log "Total: ${totalAuditSeconds}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s)" "INFO"
+
+Update-SchedulerState -Status "success" -Message "Team audit completed" -ExitCode 0 -PhaseBreakdown $phaseBreakdown
 exit 0

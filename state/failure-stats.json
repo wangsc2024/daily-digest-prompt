@@ -1,0 +1,11 @@
+{
+  "updated": "",
+  "daily": {},
+  "total": {
+    "timeout": 0,
+    "api_error": 0,
+    "circuit_open": 0,
+    "phase_failure": 0,
+    "parse_error": 0
+  }
+}

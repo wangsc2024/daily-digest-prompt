@@ -1,0 +1,154 @@
+{
+  "runs": {
+    "todoist_92519023": {
+      "run_id": "92519023",
+      "agent_type": "todoist",
+      "started": "2026-02-28T10:30:02",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T10:33:35",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T10:44:33",
+          "detail": "3 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T10:48:43",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_2ac55eed": {
+      "run_id": "2ac55eed",
+      "agent_type": "todoist",
+      "started": "2026-02-28T11:30:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T11:31:33",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T11:38:42",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T11:41:14",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_5393e8e0": {
+      "run_id": "5393e8e0",
+      "agent_type": "todoist",
+      "started": "2026-02-28T12:30:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T12:31:49",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T12:40:27",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T12:46:08",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_521fe532": {
+      "run_id": "521fe532",
+      "agent_type": "todoist",
+      "started": "2026-02-28T13:30:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T13:31:51",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T13:36:24",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T13:40:01",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_0e224cb5": {
+      "run_id": "0e224cb5",
+      "agent_type": "todoist",
+      "started": "2026-02-28T14:30:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T14:31:43",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T14:38:01",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T14:41:53",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_0688163b": {
+      "run_id": "0688163b",
+      "agent_type": "todoist",
+      "started": "2026-02-28T15:30:02",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T15:31:31",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-02-28T15:35:55",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-02-28T15:38:31",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_498d49b0": {
+      "run_id": "498d49b0",
+      "agent_type": "todoist",
+      "started": "2026-02-28T16:30:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-02-28T16:32:12",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "running",
+          "updated": "2026-02-28T16:32:13",
+          "detail": ""
+        }
+      }
+    }
+  },
+  "updated": "2026-02-28T16:32:13"
+}

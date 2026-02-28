@@ -45,7 +45,7 @@ $AutoTaskTimeoutOverride = @{
     "log_audit"              = 720   # 讀 10+ log + 分析修正 + KB 匯入
     "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
     "ai_deep_research"       = 720   # 4 階段 WebFetch
-    "tech_research"          = 2000  # 讀 history + WebSearch×3 + WebFetch×3 + KB 匯入
+    "tech_research"          = 2600  # 讀 history + WebSearch×3 + WebFetch×4 + KB 匯入
 }
 
 # Create directories
@@ -97,17 +97,20 @@ function Update-State {
         [string]$Status,
         [int]$Duration,
         [string]$ErrorMsg,
-        [hashtable]$Sections
+        [hashtable]$Sections,
+        [PSCustomObject]$PhaseBreakdown
     )
 
     $run = @{
         timestamp        = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
+        start_time       = $script:startTime.ToString("yyyy-MM-ddTHH:mm:ss")
         agent            = "todoist-team"
         status           = $Status
         duration_seconds = $Duration
         error            = $ErrorMsg
         sections         = $Sections
         log_file         = (Split-Path -Leaf $LogFile)
+        phase_breakdown  = $PhaseBreakdown
     }
 
     if (Test-Path $StateFile) {
@@ -136,6 +139,61 @@ function Update-State {
     [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::UTF8)
 }
 
+# Update failure stats
+function Update-FailureStats {
+    param(
+        [string]$FailureType,  # "timeout" | "api_error" | "circuit_open" | "phase_failure" | "parse_error"
+        [string]$Phase = "unknown",
+        [string]$AgentType = "todoist"
+    )
+
+    $statsFile = "$AgentDir\state\failure-stats.json"
+
+    # 讀取現有統計
+    if (Test-Path $statsFile) {
+        try {
+            $stats = Get-Content $statsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        } catch {
+            $stats = [PSCustomObject]@{ updated = ""; daily = [PSCustomObject]@{}; total = [PSCustomObject]@{} }
+        }
+    } else {
+        $stats = [PSCustomObject]@{ updated = ""; daily = [PSCustomObject]@{}; total = [PSCustomObject]@{} }
+    }
+
+    $today = (Get-Date).ToString("yyyy-MM-dd")
+
+    # 確保今日條目存在
+    if (-not $stats.daily.$today) {
+        $stats.daily | Add-Member -NotePropertyName $today -NotePropertyValue ([PSCustomObject]@{
+            timeout = 0; api_error = 0; circuit_open = 0; phase_failure = 0; parse_error = 0
+        }) -Force
+    }
+
+    # 更新今日統計
+    $currentVal = $stats.daily.$today.$FailureType
+    if ($null -eq $currentVal) { $currentVal = 0 }
+    $stats.daily.$today | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($currentVal + 1) -Force
+
+    # 更新總計
+    $totalVal = $stats.total.$FailureType
+    if ($null -eq $totalVal) { $totalVal = 0 }
+    $stats.total | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($totalVal + 1) -Force
+
+    # 只保留 30 天
+    $cutoff = (Get-Date).AddDays(-30).ToString("yyyy-MM-dd")
+    $oldKeys = @($stats.daily.PSObject.Properties.Name | Where-Object { $_ -lt $cutoff })
+    foreach ($k in $oldKeys) {
+        $stats.daily.PSObject.Properties.Remove($k)
+    }
+
+    $stats | Add-Member -NotePropertyName "updated" -NotePropertyValue (Get-Date -Format "yyyy-MM-ddTHH:mm:ss") -Force
+
+    # 原子寫入（write-to-temp + rename）
+    $tmpFile = "$statsFile.tmp"
+    $stats | ConvertTo-Json -Depth 5 | Set-Content $tmpFile -Encoding UTF8
+    Move-Item $tmpFile $statsFile -Force
+}
+
 # PS 層失敗通知（Phase 3 未執行時的安全網）
 function Send-FailureAlert {
     param(
@@ -158,15 +216,88 @@ function Send-FailureAlert {
     catch { <# 通知失敗不中斷主流程 #> }
 }
 
+# FSM 狀態管理
+function Set-FsmState {
+    param(
+        [string]$RunId,
+        [string]$Phase,
+        [string]$State,
+        [string]$AgentType = "todoist",
+        [string]$Detail = ""
+    )
+
+    $fsmFile = "$AgentDir\state\run-fsm.json"
+    $transitionFile = "$AgentDir\logs\structured\fsm-transitions.jsonl"
+    $now = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+
+    if (Test-Path $fsmFile) {
+        try {
+            $fsm = Get-Content $fsmFile -Raw | ConvertFrom-Json
+        } catch {
+            $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+        }
+    } else {
+        $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+    }
+
+    $runKey = "${AgentType}_${RunId}"
+    if (-not $fsm.runs.$runKey) {
+        $fsm.runs | Add-Member -NotePropertyName $runKey -NotePropertyValue ([PSCustomObject]@{
+            run_id     = $RunId
+            agent_type = $AgentType
+            started    = $now
+            phases     = [PSCustomObject]@{}
+        }) -Force
+    }
+
+    $fsm.runs.$runKey.phases | Add-Member -NotePropertyName $Phase -NotePropertyValue ([PSCustomObject]@{
+        state   = $State
+        updated = $now
+        detail  = $Detail
+    }) -Force
+
+    $fsm | Add-Member -NotePropertyName "updated" -NotePropertyValue $now -Force
+
+    $cutoff = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
+    $oldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
+        $_.Value.started -lt $cutoff
+    } | Select-Object -ExpandProperty Name)
+    foreach ($k in $oldKeys) {
+        $fsm.runs.PSObject.Properties.Remove($k)
+    }
+
+    $tmpFile = "$fsmFile.tmp"
+    $fsm | ConvertTo-Json -Depth 6 | Set-Content $tmpFile -Encoding UTF8
+    Move-Item $tmpFile $fsmFile -Force
+
+    $transition = [PSCustomObject]@{
+        ts         = $now
+        run_id     = $RunId
+        agent_type = $AgentType
+        phase      = $Phase
+        state      = $State
+        detail     = $Detail
+    }
+    $transitionJson = $transition | ConvertTo-Json -Compress
+
+    $transitionDir = Split-Path $transitionFile -Parent
+    if (-not (Test-Path $transitionDir)) {
+        New-Item -ItemType Directory -Path $transitionDir -Force | Out-Null
+    }
+
+    Add-Content -Path $transitionFile -Value $transitionJson -Encoding UTF8
+}
+
 # ============================================
 # Start execution
 # ============================================
 $startTime = Get-Date
 
-# ─── 載入 Todoist API Token（一次性，安全讀取）───
-# 優先使用系統環境變數，其次從 .env 讀取
+# ─── 載入環境變數（系統環境變數優先，其次從 .env 讀取）───
+$envFile = "$AgentDir\.env"
+
+# TODOIST_API_TOKEN
 if (-not $env:TODOIST_API_TOKEN) {
-    $envFile = "$AgentDir\.env"
     if (Test-Path $envFile) {
         $envLine = Get-Content $envFile | Where-Object { $_ -match '^TODOIST_API_TOKEN=' }
         if ($envLine) {
@@ -187,6 +318,19 @@ if (-not $env:TODOIST_API_TOKEN) {
 else {
     $todoistToken = $env:TODOIST_API_TOKEN
     Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
+}
+
+# BOT_API_SECRET（chatroom 認證，從 .env 讀取作為備援）
+if (-not $env:BOT_API_SECRET) {
+    if (Test-Path $envFile) {
+        $botSecretLine = Get-Content $envFile | Where-Object { $_ -match '^BOT_API_SECRET=' }
+        if ($botSecretLine) {
+            $botSecret = ($botSecretLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable("BOT_API_SECRET", $botSecret, "Process")
+            Write-Host "[Token] BOT_API_SECRET loaded from .env"
+        }
+        # 無 BOT_API_SECRET 時靜默略過（chatroom 為可選整合）
+    }
 }
 
 # ─── 生產環境安全策略 ───
@@ -228,6 +372,7 @@ if (Test-Path $utilsPath) {
     if ($todoistState -eq "open") {
         Write-Log "[預檢查] ✗ Todoist API 為 OPEN 狀態，Circuit Breaker 啟動"
         Write-Log "[預檢查] Todoist 為核心 API，跳過本次執行"
+        Update-FailureStats "circuit_open" "phase0" "todoist"
         $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
         Update-State -Status "skipped" -Duration $totalDuration -ErrorMsg "todoist circuit breaker open" -Sections @{ todoist = "circuit_open" }
         exit 0
@@ -248,6 +393,8 @@ else {
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 1: Query & Plan start ==="
+$phase1Start = Get-Date
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "running" -AgentType "todoist"
 
 $queryPrompt = "$AgentDir\prompts\team\todoist-query.md"
 if (-not (Test-Path $queryPrompt)) {
@@ -276,6 +423,8 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase1", "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_NAME", "todoist-query", "Process")
             if ($apiToken) {
                 [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
             }
@@ -297,6 +446,37 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             return $output
         } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId, $todoistToken
 
+        # G28: chatroom-query Phase 1 並行 Job（軟依賴，失敗不影響主流程）
+        $chatroomQueryPrompt = "$AgentDir\prompts\team\chatroom-query.md"
+        $chatroom_job = $null
+        if (Test-Path $chatroomQueryPrompt) {
+            $chatroomContent = Get-Content -Path $chatroomQueryPrompt -Raw -Encoding UTF8
+            $botApiSecret = $env:BOT_API_SECRET  # 讀取 bot API secret（若未設定則空字串）
+            $chatroom_job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt, $logDir, $timestamp, $traceId, $botSecret)
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase1", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", "chatroom-query", "Process")
+                if ($botSecret) {
+                    [System.Environment]::SetEnvironmentVariable("BOT_API_SECRET", $botSecret, "Process")
+                }
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+                $stderrFile = "$logDir\chatroom-query-stderr-$timestamp.log"
+                $output = $prompt | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                    $stderrSize = (Get-Item $stderrFile).Length
+                    if ($stderrSize -eq 0) { Remove-Item $stderrFile -Force }
+                }
+                return $output
+            } -ArgumentList $chatroomContent, $LogDir, $Timestamp, $traceId, $botApiSecret
+            Write-Log "[Phase1] G28 chatroom-query job started (Job $($chatroom_job.Id))"
+        }
+        else {
+            Write-Log "[Phase1] G28 chatroom-query prompt not found, skipping"
+        }
+
         $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
 
         if ($null -eq $completed) {
@@ -304,6 +484,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             if ($partialOutput) { foreach ($line in $partialOutput) { Write-Log "  [query] $line" } }
             Stop-Job $job
             Write-Log "[Phase1] TIMEOUT after ${Phase1TimeoutSeconds}s"
+            Update-FailureStats "timeout" "phase1" "todoist"
         }
         else {
             $output = Receive-Job $job
@@ -316,6 +497,32 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             if ($job.State -eq 'Completed') { $phase1Success = $true }
         }
         Remove-Job $job -Force
+
+        # G28: 收集 chatroom-query job 結果（軟依賴，失敗靜默忽略）
+        if ($null -ne $chatroom_job) {
+            $chatroomCompleted = $chatroom_job | Wait-Job -Timeout 120
+            if ($null -eq $chatroomCompleted) {
+                Stop-Job $chatroom_job -ErrorAction SilentlyContinue
+                Write-Log "[Phase1] G28 chatroom-query TIMEOUT (120s), skipping"
+            }
+            else {
+                $chatroomOutput = Receive-Job $chatroom_job -ErrorAction SilentlyContinue
+                if ($chatroom_job.State -eq 'Completed') {
+                    Write-Log "[Phase1] G28 chatroom-query completed"
+                }
+                else {
+                    Write-Log "[Phase1] G28 chatroom-query failed (state: $($chatroom_job.State)), continuing"
+                }
+            }
+            Remove-Job $chatroom_job -Force -ErrorAction SilentlyContinue
+            # 確認結果檔案狀態
+            if (Test-Path "$ResultsDir\chatroom-plan.json") {
+                Write-Log "[Phase1] G28 chatroom-plan.json produced"
+            }
+            else {
+                Write-Log "[Phase1] G28 chatroom-plan.json not produced (bot.js may be offline)"
+            }
+        }
     }
     catch {
         Write-Log "[Phase1] Error: $_"
@@ -340,8 +547,15 @@ if (-not $phase1Success -and (Test-Path "$ResultsDir\todoist-plan.json")) {
     }
 }
 
-$phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
-Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
+$phase1End = Get-Date
+$phase1Seconds = [int]($phase1End - $phase1Start).TotalSeconds
+$phase1Duration = [int]($phase1End - $startTime).TotalSeconds
+Write-Log "=== Phase 1 complete (${phase1Duration}s from start, ${phase1Seconds}s phase-only) ==="
+if ($phase1Success) {
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "todoist" -Detail "plan_type=$($plan.plan_type)"
+} else {
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "failed" -AgentType "todoist" -Detail "query/plan failed"
+}
 
 # ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
 if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
@@ -354,6 +568,7 @@ if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
 $planFile = "$ResultsDir\todoist-plan.json"
 if (-not $phase1Success -or -not (Test-Path $planFile)) {
     Write-Log "[ERROR] Phase 1 failed or plan file not found"
+    Update-FailureStats "phase_failure" "phase1" "todoist"
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "phase 1 failed" -Sections @{ query = "failed" }
     Send-FailureAlert -Phase "Phase1" -Reason "查詢/規劃逾時（$($MaxPhase1Retries + 1) 次嘗試均失敗）"
@@ -368,6 +583,7 @@ try {
 }
 catch {
     Write-Log "[ERROR] Failed to parse plan: $_"
+    Update-FailureStats "parse_error" "phase1" "todoist"
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan parse error" -Sections @{ query = "failed" }
     exit 1
@@ -423,6 +639,8 @@ Write-Log "[Dynamic] Phase2 timeout = ${Phase2TimeoutSeconds}s (plan_type=$($pla
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 2: Parallel execution start ==="
+$phase2Start = Get-Date
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "running" -AgentType "todoist"
 
 $phase2Jobs = @()
 $sections = @{ query = "success" }
@@ -446,6 +664,8 @@ if ($plan.plan_type -eq "tasks") {
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
             [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2", "Process")
+            [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $taskName, "Process")
             if ($apiToken) {
                 [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
             }
@@ -541,6 +761,15 @@ elseif ($plan.plan_type -eq "auto") {
             }
 
             $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
+
+            # G10: 若 todoist-plan.json 中有 prompt_content，前置到 prompt 開頭
+            # JSON null → PS $null；字串 "null" 亦排除（防 LLM 將 null 輸出為字串）
+            $promptContent_override = $autoTask.prompt_content
+            if ($promptContent_override -and $promptContent_override -ne "null") {
+                $promptContent = "$promptContent_override`n`n$promptContent"
+                Write-Log "[Phase2] G10 prompt_content injected for $normalizedKey"
+            }
+
             $agentName = "auto-$taskKey"
 
             $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
@@ -549,6 +778,8 @@ elseif ($plan.plan_type -eq "auto") {
                 # 明確設定 Process 級別環境變數（會傳遞到子 process）
                 [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
                 [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
                 if ($apiToken) {
                     [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
                 }
@@ -607,11 +838,13 @@ foreach ($job in $phase2Jobs) {
         Write-Log "[Phase2] $agentName TIMEOUT - stopping"
         Stop-Job -Job $job
         $sections[$agentName] = "timeout"
+        Update-FailureStats "timeout" "phase2" "todoist"
     }
     else {
         Write-Log "[Phase2] $agentName failed (state: $($job.State))"
         if ($output) { foreach ($line in @($output)) { Write-Log "  [$agentName] $line" } }
         $sections[$agentName] = "failed"
+        Update-FailureStats "phase_failure" "phase2" "todoist"
     }
 }
 
@@ -622,15 +855,21 @@ Get-ChildItem "$LogDir\*-stderr-$Timestamp.log" -ErrorAction SilentlyContinue | 
     Remove-StderrIfBenign $_.FullName
 }
 
+$phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
 $phase2Duration = [int]((Get-Date) - $startTime).TotalSeconds - $phase1Duration
 Write-Log ""
-Write-Log "=== Phase 2 complete (${phase2Duration}s) ==="
+Write-Log "=== Phase 2 complete (${phase2Duration}s from start, ${phase2Seconds}s phase-only) ==="
+$phase2FailCount = @($phase2Jobs | Where-Object { $_.AgentName } | ForEach-Object {
+    $n = $_.AgentName; $sections[$n]
+} | Where-Object { $_ -eq "failed" -or $_ -eq "timeout" }).Count
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "todoist" -Detail "$($phase2Jobs.Count) agents done, $phase2FailCount failed"
 
 # ============================================
 # Phase 3: Assembly (close + update + notify)
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 3: Assembly start ==="
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "running" -AgentType "todoist"
 
 $assemblePrompt = "$AgentDir\prompts\team\todoist-assemble.md"
 if (-not (Test-Path $assemblePrompt)) {
@@ -642,7 +881,9 @@ if (-not (Test-Path $assemblePrompt)) {
 
 $assembleContent = Get-Content -Path $assemblePrompt -Raw -Encoding UTF8
 $phase3Success = $false
+$phase3Seconds = 0
 $attempt = 0
+$phase3StartOuter = Get-Date
 
 while ($attempt -le $MaxPhase3Retries) {
     if ($attempt -gt 0) {
@@ -660,8 +901,10 @@ while ($attempt -le $MaxPhase3Retries) {
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
 
-        # Set trace ID for Phase 3 (same as Phase 1 & 2)
+        # Set trace ID and phase marker for Phase 3
         $env:DIGEST_TRACE_ID = $traceId
+        $env:AGENT_PHASE = "phase3"
+        $env:AGENT_NAME = "todoist-assemble"
 
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
@@ -675,19 +918,29 @@ while ($attempt -le $MaxPhase3Retries) {
 
         if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
             $phase3Success = $true
-            $phase3Duration = [int]((Get-Date) - $phase3Start).TotalSeconds
-            Write-Log "[Phase3] Assembly completed (${phase3Duration}s)"
+            $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+            Write-Log "[Phase3] Assembly completed (${phase3Seconds}s)"
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "completed" -AgentType "todoist"
             break
         }
         else {
             Write-Log "[Phase3] Assembly exited with code: $LASTEXITCODE"
+            Update-FailureStats "phase_failure" "phase3" "todoist"
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "failed" -AgentType "todoist" -Detail "exit code $LASTEXITCODE"
         }
     }
     catch {
         Write-Log "[Phase3] Assembly failed: $_"
+        Update-FailureStats "phase_failure" "phase3" "todoist"
+        Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "failed" -AgentType "todoist" -Detail "$_"
     }
 
     $attempt++
+}
+
+# 若 phase3 未成功完成（失敗/未賦值），用外層計時估算
+if ($phase3Seconds -eq 0) {
+    $phase3Seconds = [int]((Get-Date) - $phase3StartOuter).TotalSeconds
 }
 
 # ============================================
@@ -695,17 +948,25 @@ while ($attempt -le $MaxPhase3Retries) {
 # ============================================
 $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
 
+# 組合 phase_breakdown
+$phaseBreakdown = [PSCustomObject]@{
+    phase1_seconds = $phase1Seconds
+    phase2_seconds = $phase2Seconds
+    phase3_seconds = $phase3Seconds
+    plan_type      = $plan.plan_type
+}
+
 if ($phase3Success) {
     Write-Log ""
     Write-Log "=== Todoist Agent Team done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
-    Write-Log "Total: ${totalDuration}s (Phase1: ${phase1Duration}s + Phase2: ${phase2Duration}s)"
-    Update-State -Status "success" -Duration $totalDuration -ErrorMsg $null -Sections $sections
+    Write-Log "Total: ${totalDuration}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s + Phase3: ${phase3Seconds}s)"
+    Update-State -Status "success" -Duration $totalDuration -ErrorMsg $null -Sections $sections -PhaseBreakdown $phaseBreakdown
 }
 else {
     Write-Log ""
     Write-Log "=== Todoist Agent Team done (failed): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
     Write-Log "Total: ${totalDuration}s"
-    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly failed after $($MaxPhase3Retries + 1) attempts" -Sections $sections
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly failed after $($MaxPhase3Retries + 1) attempts" -Sections $sections -PhaseBreakdown $phaseBreakdown
 }
 
 # Clean up logs older than 7 days

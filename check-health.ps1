@@ -492,6 +492,34 @@ catch {
     Write-Host "  配置驗證失敗: $_" -ForegroundColor Red
 }
 
+# --- YAML 交叉驗證 ---
+Write-Host ""
+Write-Host "[YAML 交叉驗證]" -ForegroundColor Cyan
+
+try {
+    $validatePath = "$AgentDir\hooks\validate_config.py"
+    if (Test-Path $validatePath) {
+        $crossResult = python $validatePath --cross-validate 2>&1
+        if ($crossResult -match "ERROR:") {
+            Write-Host "  ⚠ 發現問題" -ForegroundColor Yellow
+            $crossResult | Where-Object { $_ -match "(WARN|ERROR):" } | ForEach-Object {
+                Write-Host ("  " + $_) -ForegroundColor Yellow
+            }
+        } elseif ($crossResult -match "✓") {
+            Write-Host "  ✓ 所有引用均有效" -ForegroundColor Green
+        } else {
+            Write-Host "  （執行中...）" -ForegroundColor DarkGray
+            $crossResult | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+        }
+    }
+    else {
+        Write-Host "  validate_config.py 不存在" -ForegroundColor Gray
+    }
+}
+catch {
+    Write-Host "  交叉驗證失敗: $_" -ForegroundColor Red
+}
+
 # --- Skill 品質評分 ---
 Write-Host ""
 Write-Host "[Skill 品質評分]" -ForegroundColor Yellow
@@ -657,6 +685,238 @@ if ($stderrFiles.Count -gt 0) {
         $emptyStderr | Remove-Item -Force -ErrorAction SilentlyContinue
         Write-Host "  清理 $($emptyStderr.Count) 個空 stderr 日誌" -ForegroundColor Green
     }
+}
+
+Write-Host ""
+
+# --- Token 預算估算 ---
+$tokenFile = "$AgentDir\state\token-usage.json"
+Write-Host "[今日 Token 估算]" -ForegroundColor Cyan
+
+if (Test-Path $tokenFile) {
+    try {
+        $tokenData = Get-Content $tokenFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $today = (Get-Date).ToString("yyyy-MM-dd")
+        $dayData = $tokenData.daily.$today
+
+        if ($dayData) {
+            $estimated = [long]$dayData.estimated_tokens
+            $toolCalls = [int]$dayData.tool_calls
+            $limitM = 1.5
+            $pct = [int]($estimated / ($limitM * 1000000) * 100)
+            $barFilled = [int](($pct / 100) * 20)
+            $barFilled = [Math]::Min($barFilled, 20)
+            $bar = ("█" * $barFilled) + ("░" * (20 - $barFilled))
+
+            $estimatedM = "{0:F2}" -f ($estimated / 1000000)
+            $color = if ($pct -lt 80) { "Green" } elseif ($pct -lt 100) { "Yellow" } else { "Red" }
+
+            Write-Host ("  今日估算：{0}M tokens / {1}M 上限  ({2}%)" -f $estimatedM, $limitM, $pct) -ForegroundColor $color
+            Write-Host ("  進度：[{0}]  工具呼叫：{1} 次" -f $bar, $toolCalls) -ForegroundColor $color
+
+            if ($pct -ge 100) {
+                Write-Host "  ⚠ 已超過日預算！建議暫停執行" -ForegroundColor Red
+            }
+        }
+        else {
+            Write-Host "  今日尚無記錄" -ForegroundColor DarkGray
+        }
+    }
+    catch {
+        Write-Host "  讀取失敗：$_" -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "  尚無統計資料（需執行一次 Agent 後才會出現）" -ForegroundColor DarkGray
+}
+
+# ─── 近 7 天失敗分類統計 ────────────────────────────────
+$statsFile = "$AgentDir\state\failure-stats.json"
+Write-Host ""
+Write-Host "[失敗分類統計（近 7 天）]" -ForegroundColor Cyan
+
+if (Test-Path $statsFile) {
+    try {
+        $stats = Get-Content $statsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+
+        $categories = @("timeout", "api_error", "circuit_open", "phase_failure", "parse_error")
+        $catLabels  = @{
+            "timeout"       = "逾時"
+            "api_error"     = "API 錯誤"
+            "circuit_open"  = "斷路器開啟"
+            "phase_failure" = "Phase 失敗"
+            "parse_error"   = "解析錯誤"
+        }
+
+        # 算近 7 天
+        $last7 = @{}
+        $cutoff7 = (Get-Date).AddDays(-7).ToString("yyyy-MM-dd")
+        foreach ($day in $stats.daily.PSObject.Properties) {
+            if ($day.Name -ge $cutoff7) {
+                foreach ($cat in $categories) {
+                    if ($null -eq $last7[$cat]) { $last7[$cat] = 0 }
+                    $val = $day.Value.$cat
+                    if ($val) { $last7[$cat] += $val }
+                }
+            }
+        }
+
+        $total7 = ($last7.Values | Measure-Object -Sum).Sum
+        Write-Host ("  近 7 天總失敗：{0} 次" -f $total7) -ForegroundColor $(if ($total7 -eq 0) { "Green" } else { "Yellow" })
+        Write-Host ("  " + "-" * 40) -ForegroundColor DarkGray
+
+        foreach ($cat in $categories) {
+            $cnt = if ($last7[$cat]) { $last7[$cat] } else { 0 }
+            $label = $catLabels[$cat]
+            $bar = ([string]"█" * $cnt)
+            $color = if ($cnt -eq 0) { "DarkGray" } elseif ($cnt -le 2) { "Yellow" } else { "Red" }
+            Write-Host ("  {0,-12} {1,3} 次  {2}" -f $label, $cnt, $bar) -ForegroundColor $color
+        }
+    } catch {
+        Write-Host "  讀取統計失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  尚無統計資料（首次執行後才會出現）" -ForegroundColor DarkGray
+}
+
+Write-Host ""
+
+# --- 今日自動任務看板 (VZ1) ---
+Write-Host "[今日自動任務看板]" -ForegroundColor Yellow
+$autoTasksFile = "$AgentDir\context\auto-tasks-today.json"
+$freqLimitsFile = "$AgentDir\config\frequency-limits.yaml"
+
+if ((Test-Path $autoTasksFile) -and (Test-Path $freqLimitsFile)) {
+    try {
+        $autoTasks = Get-Content -Path $autoTasksFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $freqContent = Get-Content -Path $freqLimitsFile -Raw -Encoding UTF8
+
+        # 解析 YAML tasks（簡易 regex 解析各任務定義）
+        $taskDefs = @()
+        $taskMatches = [regex]::Matches($freqContent, '(?m)^\s{2}(\w+):\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}name:\s*(.+?)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}counter_field:\s*(\w+)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}daily_limit:\s*(\d+)')
+        foreach ($m in $taskMatches) {
+            $taskDefs += @{ key = $m.Groups[1].Value; name = $m.Groups[2].Value.Trim(); counter = $m.Groups[3].Value; limit = [int]$m.Groups[4].Value }
+        }
+
+        # Fallback：若 regex 解析失敗，直接從 auto-tasks-today.json 推斷（只有計數，無限制）
+        if ($taskDefs.Count -eq 0) {
+            Write-Host "  （YAML 解析失敗，顯示原始計數）" -ForegroundColor Gray
+            $autoTasks.PSObject.Properties | Where-Object { $_.Name -like '*_count' } | ForEach-Object {
+                Write-Host ("  {0,-28} {1}" -f $_.Name, $_.Value) -ForegroundColor Cyan
+            }
+        }
+        else {
+            Write-Host "  $('━' * 54)" -ForegroundColor DarkGray
+            Write-Host ("  {0,-14} {1,5}  {2,-10} {3}" -f "任務名稱", "今/限", "進度", "狀態") -ForegroundColor DarkCyan
+            Write-Host "  $('─' * 54)" -ForegroundColor DarkGray
+
+            $totalUsed = 0
+            $totalLimit = 0
+            foreach ($t in $taskDefs) {
+                $count = if ($null -ne $autoTasks.PSObject.Properties[$t.counter]) { [int]($autoTasks.PSObject.Properties[$t.counter].Value) } else { 0 }
+                $limit = $t.limit
+                $totalUsed += $count
+                $totalLimit += $limit
+                $filled = if ($limit -gt 0) { [math]::Min($count, $limit) } else { 0 }
+                $empty  = [math]::Max(0, $limit - $filled)
+                $bar = ("█" * $filled) + ("░" * $empty)
+                $statusStr = if ($count -eq 0) { "(今日未執行)" } elseif ($count -ge $limit) { "✓完成" } else { "✓" }
+                $color = if ($count -eq 0) { "Gray" } elseif ($count -ge $limit) { "Green" } else { "Cyan" }
+                $nameShort = if ($t.name.Length -gt 8) { $t.name.Substring(0,8) } else { $t.name }
+                Write-Host ("  {0,-10} {1,3}/{2,-2}  {3,-7} {4}" -f $nameShort, $count, $limit, $bar, $statusStr) -ForegroundColor $color
+            }
+
+            Write-Host "  $('─' * 54)" -ForegroundColor DarkGray
+            $pct = if ($totalLimit -gt 0) { [math]::Round($totalUsed / $totalLimit * 100, 0) } else { 0 }
+            $barLen = 15
+            $filledLen = if ($totalLimit -gt 0) { [math]::Min([math]::Round($pct / 100 * $barLen), $barLen) } else { 0 }
+            $totalBarStr = ("█" * $filledLen) + ("░" * ($barLen - $filledLen))
+            Write-Host ("  總計: {0}/{1} 次 ({2}%)  {3}" -f $totalUsed, $totalLimit, $pct, $totalBarStr) -ForegroundColor White
+            Write-Host "  $('━' * 54)" -ForegroundColor DarkGray
+        }
+    }
+    catch {
+        Write-Host "  （讀取任務資料失敗：$($_.Exception.Message)）" -ForegroundColor Gray
+    }
+}
+else {
+    Write-Host "  （auto-tasks-today.json 或 frequency-limits.yaml 不存在）" -ForegroundColor Gray
+}
+
+# ─── FSM 執行狀態 ────────────────────────────────
+$fsmFile = "$AgentDir\state\run-fsm.json"
+Write-Host ""
+Write-Host "[FSM 執行狀態（近期）]" -ForegroundColor Cyan
+
+if (Test-Path $fsmFile) {
+    try {
+        $fsm = Get-Content $fsmFile -Raw | ConvertFrom-Json
+        $runs = $fsm.runs.PSObject.Properties | Sort-Object { $_.Value.started } -Descending | Select-Object -First 5
+
+        if ($runs.Count -eq 0) {
+            Write-Host "  尚無 FSM 記錄" -ForegroundColor DarkGray
+        } else {
+            foreach ($run in $runs) {
+                $r = $run.Value
+                $startStr = if ($r.started) { $r.started.Substring(0, 16) } else { "unknown" }
+                Write-Host ("  [{0}] {1}" -f $startStr, $r.agent_type) -ForegroundColor White
+
+                foreach ($phase in $r.phases.PSObject.Properties | Sort-Object Name) {
+                    $p = $phase.Value
+                    $stateColor = switch ($p.state) {
+                        "completed" { "Green" }
+                        "running"   { "Cyan" }
+                        "failed"    { "Red" }
+                        default     { "DarkGray" }
+                    }
+                    $stateIcon = switch ($p.state) {
+                        "completed" { "v" }
+                        "running"   { ">" }
+                        "failed"    { "x" }
+                        default     { "o" }
+                    }
+                    $detailStr = if ($p.detail) { " ($($p.detail))" } else { "" }
+                    Write-Host ("    {0} {1}: {2}{3}" -f $stateIcon, $phase.Name, $p.state, $detailStr) -ForegroundColor $stateColor
+                }
+            }
+        }
+    } catch {
+        Write-Host "  讀取 FSM 狀態失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  尚無 FSM 記錄（首次執行後才會出現）" -ForegroundColor DarkGray
+}
+
+# [OODA 工作流狀態]
+Write-Host ""
+Write-Host "[OODA 工作流狀態（最近一次）]" -ForegroundColor Cyan
+$workflowFile = Join-Path $PSScriptRoot "context\workflow-state.json"
+if (Test-Path $workflowFile) {
+    try {
+        $wf = Get-Content $workflowFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $stepColor = switch ($wf.status) {
+            "completed" { "Green" }
+            "failed"    { "Red" }
+            "running"   { "Yellow" }
+            "skipped"   { "DarkGray" }
+            default     { "White" }
+        }
+        Write-Host "  當前步驟: $($wf.current_step) [$($wf.status)]" -ForegroundColor $stepColor
+        if ($wf.updated_at) {
+            Write-Host "  更新時間: $($wf.updated_at)"
+        }
+        if ($wf.history -and $wf.history.Count -gt 0) {
+            Write-Host "  最近歷史:"
+            $recent = $wf.history | Select-Object -Last 3
+            foreach ($h in $recent) {
+                Write-Host "    $($h.ts) → $($h.step) [$($h.status)]" -ForegroundColor DarkGray
+            }
+        }
+    } catch {
+        Write-Host "  無法解析 workflow-state.json" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (workflow-state.json 尚未建立)" -ForegroundColor DarkGray
 }
 
 Write-Host ""

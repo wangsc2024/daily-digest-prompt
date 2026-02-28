@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "description": "Token 使用量估算（字元 ÷ 3.5，7 天滾動）",
+  "daily_limit_warn": 1500000,
+  "days": {}
+}

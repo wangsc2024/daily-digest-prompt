@@ -72,17 +72,20 @@ function Update-State {
         [string]$Status,
         [int]$Duration,
         [string]$ErrorMsg,
-        [hashtable]$Sections
+        [hashtable]$Sections,
+        [PSCustomObject]$PhaseBreakdown
     )
 
     $run = @{
         timestamp        = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss")
+        start_time       = $script:startTime.ToString("yyyy-MM-ddTHH:mm:ss")
         agent            = "daily-digest-team"
         status           = $Status
         duration_seconds = $Duration
         error            = $ErrorMsg
         sections         = $Sections
         log_file         = (Split-Path -Leaf $LogFile)
+        phase_breakdown  = $PhaseBreakdown
     }
 
     if (Test-Path $StateFile) {
@@ -111,6 +114,141 @@ function Update-State {
     $state.runs = $runs.ToArray()
     $json = $state | ConvertTo-Json -Depth 5
     [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::UTF8)
+}
+
+# Update failure stats
+function Update-FailureStats {
+    param(
+        [string]$FailureType,  # "timeout" | "api_error" | "circuit_open" | "phase_failure" | "parse_error"
+        [string]$Phase = "unknown",
+        [string]$AgentType = "daily-digest"
+    )
+
+    $statsFile = "$AgentDir\state\failure-stats.json"
+
+    # 讀取現有統計
+    if (Test-Path $statsFile) {
+        try {
+            $stats = Get-Content $statsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        } catch {
+            $stats = [PSCustomObject]@{ updated = ""; daily = [PSCustomObject]@{}; total = [PSCustomObject]@{} }
+        }
+    } else {
+        $stats = [PSCustomObject]@{ updated = ""; daily = [PSCustomObject]@{}; total = [PSCustomObject]@{} }
+    }
+
+    $today = (Get-Date).ToString("yyyy-MM-dd")
+
+    # 確保今日條目存在
+    if (-not $stats.daily.$today) {
+        $stats.daily | Add-Member -NotePropertyName $today -NotePropertyValue ([PSCustomObject]@{
+            timeout = 0; api_error = 0; circuit_open = 0; phase_failure = 0; parse_error = 0
+        }) -Force
+    }
+
+    # 更新今日統計
+    $currentVal = $stats.daily.$today.$FailureType
+    if ($null -eq $currentVal) { $currentVal = 0 }
+    $stats.daily.$today | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($currentVal + 1) -Force
+
+    # 更新總計
+    $totalVal = $stats.total.$FailureType
+    if ($null -eq $totalVal) { $totalVal = 0 }
+    $stats.total | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($totalVal + 1) -Force
+
+    # 只保留 30 天
+    $cutoff = (Get-Date).AddDays(-30).ToString("yyyy-MM-dd")
+    $oldKeys = @($stats.daily.PSObject.Properties.Name | Where-Object { $_ -lt $cutoff })
+    foreach ($k in $oldKeys) {
+        $stats.daily.PSObject.Properties.Remove($k)
+    }
+
+    $stats | Add-Member -NotePropertyName "updated" -NotePropertyValue (Get-Date -Format "yyyy-MM-ddTHH:mm:ss") -Force
+
+    # 原子寫入（write-to-temp + rename）
+    $tmpFile = "$statsFile.tmp"
+    $stats | ConvertTo-Json -Depth 5 | Set-Content $tmpFile -Encoding UTF8
+    Move-Item $tmpFile $statsFile -Force
+}
+
+# FSM 狀態管理
+function Set-FsmState {
+    param(
+        [string]$RunId,      # 唯一執行 ID（通常是 $traceId 的前 8 碼）
+        [string]$Phase,      # "phase1" | "phase2" | "phase3" | "overall"
+        [string]$State,      # "pending" | "running" | "completed" | "failed"
+        [string]$AgentType = "daily-digest",
+        [string]$Detail = ""
+    )
+
+    $fsmFile = "$AgentDir\state\run-fsm.json"
+    $transitionFile = "$AgentDir\logs\structured\fsm-transitions.jsonl"
+    $now = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+
+    # 讀取現有 FSM 狀態
+    if (Test-Path $fsmFile) {
+        try {
+            $fsm = Get-Content $fsmFile -Raw | ConvertFrom-Json
+        } catch {
+            $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+        }
+    } else {
+        $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
+    }
+
+    # 建立或更新 run 記錄
+    $runKey = "${AgentType}_${RunId}"
+    if (-not $fsm.runs.$runKey) {
+        $fsm.runs | Add-Member -NotePropertyName $runKey -NotePropertyValue ([PSCustomObject]@{
+            run_id     = $RunId
+            agent_type = $AgentType
+            started    = $now
+            phases     = [PSCustomObject]@{}
+        }) -Force
+    }
+
+    # 更新 Phase 狀態
+    $fsm.runs.$runKey.phases | Add-Member -NotePropertyName $Phase -NotePropertyValue ([PSCustomObject]@{
+        state   = $State
+        updated = $now
+        detail  = $Detail
+    }) -Force
+
+    $fsm | Add-Member -NotePropertyName "updated" -NotePropertyValue $now -Force
+
+    # 清理超過 24 小時的 runs（只保留近期）
+    $cutoff = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
+    $oldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
+        $_.Value.started -lt $cutoff
+    } | Select-Object -ExpandProperty Name)
+    foreach ($k in $oldKeys) {
+        $fsm.runs.PSObject.Properties.Remove($k)
+    }
+
+    # 原子寫入 FSM 狀態
+    $tmpFile = "$fsmFile.tmp"
+    $fsm | ConvertTo-Json -Depth 6 | Set-Content $tmpFile -Encoding UTF8
+    Move-Item $tmpFile $fsmFile -Force
+
+    # Append-only 寫入 transition JSONL
+    $transition = [PSCustomObject]@{
+        ts         = $now
+        run_id     = $RunId
+        agent_type = $AgentType
+        phase      = $Phase
+        state      = $State
+        detail     = $Detail
+    }
+    $transitionJson = $transition | ConvertTo-Json -Compress
+
+    # 確保目錄存在
+    $transitionDir = Split-Path $transitionFile -Parent
+    if (-not (Test-Path $transitionDir)) {
+        New-Item -ItemType Directory -Path $transitionDir -Force | Out-Null
+    }
+
+    # Append（檔案不存在時自動建立）
+    Add-Content -Path $transitionFile -Value $transitionJson -Encoding UTF8
 }
 
 # ============================================
@@ -148,7 +286,7 @@ Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)"
 $traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
 Write-Log "Trace ID: $traceId"
-Write-Log "Mode: parallel (Phase 1 x5 + Phase 2 x1)"
+Write-Log "Mode: parallel (Phase 1 x6 + Phase 2 x1)"
 
 # Check if claude is installed
 $claudePath = Get-Command claude -ErrorAction SilentlyContinue
@@ -179,6 +317,7 @@ $apiMapping = @{
     "news"       = "pingtung-news"
     "hackernews" = "hackernews"
     "gmail"      = "gmail"
+    "chatroom"   = "gun-bot"
 }
 
 # 執行預檢查
@@ -209,13 +348,16 @@ if (Test-Path $utilsPath) {
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 1: Parallel fetch start (with precheck) ==="
+$phase1Start = Get-Date
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "running" -AgentType "daily-digest"
 
 $fetchAgents = @(
     @{ Name = "todoist";    Prompt = "$AgentDir\prompts\team\fetch-todoist.md";    Result = "$ResultsDir\todoist.json" },
     @{ Name = "news";       Prompt = "$AgentDir\prompts\team\fetch-news.md";       Result = "$ResultsDir\news.json" },
     @{ Name = "hackernews"; Prompt = "$AgentDir\prompts\team\fetch-hackernews.md"; Result = "$ResultsDir\hackernews.json" },
     @{ Name = "gmail";      Prompt = "$AgentDir\prompts\team\fetch-gmail.md";      Result = "$ResultsDir\gmail.json" },
-    @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json" }
+    @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json" },
+    @{ Name = "chatroom";   Prompt = "$AgentDir\prompts\team\fetch-chatroom.md";   Result = "$ResultsDir\fetch-chatroom.json" }
 )
 
 $jobs = @()
@@ -268,6 +410,8 @@ foreach ($agent in $fetchAgents) {
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
         [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+        [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase1", "Process")
+        [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
         if ($apiToken) {
             [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
         }
@@ -338,11 +482,13 @@ foreach ($job in $jobs) {
         Write-Log "[Phase1] $agentName TIMEOUT - stopping"
         Stop-Job -Job $job
         $sections[$agentName] = "failed"
+        Update-FailureStats "timeout" "phase1" "daily-digest"
     }
     else {
         Write-Log "[Phase1] $agentName failed (state: $($job.State))"
         if ($output) { Write-Log "  $output" }
         $sections[$agentName] = "failed"
+        Update-FailureStats "phase_failure" "phase1" "daily-digest"
     }
 }
 
@@ -354,10 +500,20 @@ Get-ChildItem "$LogDir\*-stderr-$Timestamp.log" -ErrorAction SilentlyContinue | 
     Remove-StderrIfBenign $_.FullName
 }
 
-$phase1Duration = [int]((Get-Date) - $startTime).TotalSeconds
+$phase1End = Get-Date
+$phase1Seconds = [int]($phase1End - $phase1Start).TotalSeconds
+$phase1Duration = [int]($phase1End - $startTime).TotalSeconds
 Write-Log ""
-Write-Log "=== Phase 1 complete (${phase1Duration}s) ==="
-Write-Log "Results: todoist=$($sections['todoist']) | news=$($sections['news']) | hackernews=$($sections['hackernews']) | gmail=$($sections['gmail']) | security=$($sections['security'])"
+Write-Log "=== Phase 1 complete (${phase1Duration}s from start, ${phase1Seconds}s phase-only) ==="
+Write-Log "Results: todoist=$($sections['todoist']) | news=$($sections['news']) | hackernews=$($sections['hackernews']) | gmail=$($sections['gmail']) | security=$($sections['security']) | chatroom=$($sections['chatroom'])"
+
+# FSM Phase 1 結果
+$phase1Failed = ($sections.Values | Where-Object { $_ -eq "failed" }).Count
+if ($phase1Failed -gt 0) {
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "daily-digest" -Detail "$($jobs.Count - $phase1Failed) agents OK, $phase1Failed failed"
+} else {
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "daily-digest" -Detail "$($jobs.Count) agents completed"
+}
 
 # ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
 if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
@@ -366,13 +522,14 @@ if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
         "news"        = "pingtung-news"
         "hackernews"  = "hackernews"
         "gmail"       = "gmail"
+        "chatroom"    = "gun-bot"
     }
     foreach ($agentKey in $apiMapping.Keys) {
         $apiName = $apiMapping[$agentKey]
         $success = ($sections[$agentKey] -eq "success") -or ($sections[$agentKey] -eq "cache")
         Update-CircuitBreaker -ApiName $apiName -Success $success
     }
-    Write-Log "[Circuit Breaker] Phase 1 結果已更新（todoist/$($sections['todoist']), news/$($sections['news']), hn/$($sections['hackernews']), gmail/$($sections['gmail'])）"
+    Write-Log "[Circuit Breaker] Phase 1 結果已更新（todoist/$($sections['todoist']), news/$($sections['news']), hn/$($sections['hackernews']), gmail/$($sections['gmail']), chatroom/$($sections['chatroom'])）"
 }
 
 # ============================================
@@ -380,6 +537,7 @@ if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 2: Assembly start ==="
+Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "running" -AgentType "daily-digest"
 
 $assemblePrompt = "$AgentDir\prompts\team\assemble-digest.md"
 if (-not (Test-Path $assemblePrompt)) {
@@ -391,7 +549,9 @@ if (-not (Test-Path $assemblePrompt)) {
 
 $assembleContent = Get-Content -Path $assemblePrompt -Raw -Encoding UTF8
 $phase2Success = $false
+$phase2Seconds = 0
 $attempt = 0
+$phase2StartOuter = Get-Date
 
 while ($attempt -le $MaxPhase2Retries) {
     if ($attempt -gt 0) {
@@ -409,8 +569,10 @@ while ($attempt -le $MaxPhase2Retries) {
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $OutputEncoding = [System.Text.Encoding]::UTF8
 
-        # Set trace ID for Phase 2 (same as Phase 1)
+        # Set trace ID and phase marker for Phase 2
         $env:DIGEST_TRACE_ID = $traceId
+        $env:AGENT_PHASE = "phase2"
+        $env:AGENT_NAME = "assemble-digest"
 
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
@@ -424,19 +586,29 @@ while ($attempt -le $MaxPhase2Retries) {
 
         if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
             $phase2Success = $true
-            $phase2Duration = [int]((Get-Date) - $phase2Start).TotalSeconds
-            Write-Log "[Phase2] Assembly completed (${phase2Duration}s)"
+            $phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
+            Write-Log "[Phase2] Assembly completed (${phase2Seconds}s)"
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "daily-digest"
             break
         }
         else {
             Write-Log "[Phase2] Assembly exited with code: $LASTEXITCODE"
+            Update-FailureStats "phase_failure" "phase2" "daily-digest"
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "exit code $LASTEXITCODE"
         }
     }
     catch {
         Write-Log "[Phase2] Assembly failed: $_"
+        Update-FailureStats "phase_failure" "phase2" "daily-digest"
+        Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "$_"
     }
 
     $attempt++
+}
+
+# 若 phase2 未成功完成（失敗/未賦值），用外層計時作為估算
+if ($phase2Seconds -eq 0) {
+    $phase2Seconds = [int]((Get-Date) - $phase2StartOuter).TotalSeconds
 }
 
 # ============================================
@@ -444,17 +616,24 @@ while ($attempt -le $MaxPhase2Retries) {
 # ============================================
 $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
 
+# 組合 phase_breakdown
+$phaseBreakdown = [PSCustomObject]@{
+    phase1_seconds = $phase1Seconds
+    phase2_seconds = $phase2Seconds
+    phase1_agents  = @("todoist", "news", "hackernews", "gmail", "security")
+}
+
 if ($phase2Success) {
     Write-Log ""
     Write-Log "=== Agent Team done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
-    Write-Log "Total: ${totalDuration}s (Phase1: ${phase1Duration}s)"
-    Update-State -Status "success" -Duration $totalDuration -ErrorMsg $null -Sections $sections
+    Write-Log "Total: ${totalDuration}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s)"
+    Update-State -Status "success" -Duration $totalDuration -ErrorMsg $null -Sections $sections -PhaseBreakdown $phaseBreakdown
 }
 else {
     Write-Log ""
     Write-Log "=== Agent Team done (failed): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
     Write-Log "Total: ${totalDuration}s"
-    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly failed after $($MaxPhase2Retries + 1) attempts" -Sections $sections
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly failed after $($MaxPhase2Retries + 1) attempts" -Sections $sections -PhaseBreakdown $phaseBreakdown
 }
 
 # Clean up logs older than 7 days
