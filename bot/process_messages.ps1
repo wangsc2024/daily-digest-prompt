@@ -1,12 +1,11 @@
 # ============================================================
-# Gun.js 孤島加密排程機器人 - 本地端自動化腳本（Codex exec 登入方案）
+# Gun.js 孤島加密排程機器人 - 本地端自動化腳本（claude -p 方案）
 # ============================================================
 # 遵循 learn-claude-code s11: "Poll, claim, work, repeat"
 # Worker 主動認領任務，支援多 Worker 安全並行。
 #
-# Codex exec 採用登入方案：呼叫時不傳 OPENAI_API_KEY，改為使用
-# 本機已登入的 Codex 快取（~/.codex）。請在執行 Worker 的機器上
-# 先執行：codex login（無瀏覽器時用 codex login --device-auth）
+# 使用 claude -p 執行任務，直接呼叫本機已設定的 Claude Code CLI。
+# 前置需求：claude CLI 已安裝並完成認證（claude /login）。
 #
 # 流程：poll → claim → work → complete
 #
@@ -18,8 +17,6 @@
 $ApiBaseUrl = "http://127.0.0.1:3001"
 $TempDir = $PWD
 $WorkerId = "$env:COMPUTERNAME-$PID"
-$CodexModel        = if ($env:CODEX_MODEL)        { $env:CODEX_MODEL }        else { "gpt-5.2" }
-$CodexCodingModel  = if ($env:CODEX_CODING_MODEL) { $env:CODEX_CODING_MODEL } else { "gpt-5.2-codex" }
 
 # 編碼任務關鍵字（符合其中一個即視為編碼任務）
 $CodingKeywords = @(
@@ -169,7 +166,6 @@ foreach ($record in $records) {
         }
 
         $isCoding = Test-IsCodingTask -Content $optimizedContent
-        $selectedModel = if ($isCoding) { $CodexCodingModel } else { $CodexModel }
 
         # ── 偵測 [WORKDIR: path] 標記或訊息中的 Windows 路徑（優先從原始內容偵測，確保意圖不失真）──
         $workDir = $null
@@ -195,33 +191,18 @@ foreach ($record in $records) {
             $effectiveContent = "請在目錄 $workDir 中執行以下任務。若目錄不存在請先建立。所有產出的檔案必須儲存在 $workDir 目錄中。`n`n" + $optimizedContent
         }
 
-        Write-Log "--> Worker 使用 Codex exec 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 模型: $selectedModel, 工作目錄: $(if($workDir){$workDir}else{'預設'}))..."
-        # 登入方案：暫時移除 API 金鑰，讓 Codex 使用 ~/.codex 快取（codex login）
-        $prevOpenAI = $env:OPENAI_API_KEY
-        $prevGroq = $env:GROQ_API_KEY
-        $env:OPENAI_API_KEY = $null
-        $env:GROQ_API_KEY = $null
-        try {
-            if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-                $output = & npx @openai/codex exec --ephemeral -m $selectedModel -s danger-full-access --cwd $workDir $effectiveContent 2>&1
-                # 若 --cwd 不被支援則退回不帶 cwd 的方式
-                if ($LASTEXITCODE -ne 0 -and ($output -match 'unknown option|invalid option|--cwd')) {
-                    Write-Log "Codex --cwd 不支援，改用 Push-Location 方式"
-                    Push-Location $workDir
-                    try {
-                        $output = & npx @openai/codex exec --ephemeral -m $selectedModel -s danger-full-access $effectiveContent 2>&1
-                    } finally {
-                        Pop-Location
-                    }
-                }
-            } else {
-                $output = & npx @openai/codex exec --ephemeral -m $selectedModel -s danger-full-access $effectiveContent 2>&1
+        Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}))..."
+        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+            Push-Location $workDir
+            try {
+                $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
+            } finally {
+                Pop-Location
             }
-        } finally {
-            $env:OPENAI_API_KEY = $prevOpenAI
-            $env:GROQ_API_KEY = $prevGroq
+        } else {
+            $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
         }
-        $toolUsed = "Codex CLI ($selectedModel)"
+        $toolUsed = "Claude CLI"
 
         Write-Log "任務執行完畢 (使用: $toolUsed)"
 
