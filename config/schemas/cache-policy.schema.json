@@ -30,21 +30,8 @@
     "sources": {
       "type": "object",
       "description": "各 API 來源的快取配置",
-      "additionalProperties": false,
-      "properties": {
-        "todoist": {
-          "$ref": "#/$defs/cacheSource"
-        },
-        "pingtung-news": {
-          "$ref": "#/$defs/cacheSource"
-        },
-        "hackernews": {
-          "$ref": "#/$defs/cacheSource"
-        },
-        "knowledge": {
-          "$ref": "#/$defs/cacheSource"
-        },
-        "gmail": {
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
           "$ref": "#/$defs/cacheSource"
         }
       },

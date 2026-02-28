@@ -149,6 +149,11 @@
             "type": "string",
             "minLength": 1
           }
+        },
+        "template_version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "模板版本號（G10：≥1 啟用 prompt_content 展開，可選）"
         }
       },
       "additionalProperties": false

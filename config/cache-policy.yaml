@@ -34,6 +34,12 @@ sources:
     ttl_minutes: 360  # 30 → 360（6 小時，郵件即時性需求）
     degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
+  chatroom:
+    file: "cache/chatroom.json"
+    ttl_minutes: 15   # 短 TTL（任務佇列變化快，需即時掌握）
+    degraded_ttl_minutes: 120  # 降級使用時限（2 小時）
+    note: "bot.js Gun.js 任務佇列快取（G28 整合）"
+
 # 快取檔案結構（所有來源統一格式）
 schema: |
   {

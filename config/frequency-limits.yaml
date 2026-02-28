@@ -56,6 +56,7 @@ initial_schema: |
     "system_insight_count": 0,
     "self_heal_count": 0,
     "github_scout_count": 0,
+    "chatroom_optimize_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -72,6 +73,7 @@ tasks:
     daily_limit: 5
     counter_field: "shurangama_count"
     template: "templates/auto-tasks/shurangama-research.md"
+    template_version: 1
     history_type: "shurangama"
     execution_order: 1
     skill: knowledge-query
@@ -81,6 +83,7 @@ tasks:
     daily_limit: 3
     counter_field: "jiaoguangzong_count"
     template: "templates/auto-tasks/buddhist-research.md"
+    template_version: 1
     template_params:
       subject: "教觀綱宗"
       author: "智者大師（智顗）"
@@ -96,6 +99,7 @@ tasks:
     daily_limit: 2
     counter_field: "fahua_count"
     template: "templates/auto-tasks/buddhist-research.md"
+    template_version: 1
     template_params:
       subject: "法華經"
       author: "鳩摩羅什 譯"
@@ -111,6 +115,7 @@ tasks:
     daily_limit: 2
     counter_field: "jingtu_count"
     template: "templates/auto-tasks/buddhist-research.md"
+    template_version: 1
     template_params:
       subject: "淨土宗"
       author: "善導大師 等"
@@ -127,6 +132,7 @@ tasks:
     daily_limit: 5
     counter_field: "tech_research_count"
     template: "templates/auto-tasks/tech-research.md"
+    template_version: 1
     history_type: "tech_research"
     execution_order: 5
     skills: [knowledge-query]
@@ -137,6 +143,7 @@ tasks:
     daily_limit: 4
     counter_field: "ai_deep_research_count"
     template: "templates/auto-tasks/ai-deep-research.md"
+    template_version: 1
     history_type: "ai_deep_research"
     execution_order: 6
     skills: [knowledge-query, hackernews-ai-digest]
@@ -152,6 +159,7 @@ tasks:
     daily_limit: 2
     counter_field: "unsloth_research_count"
     template: "templates/auto-tasks/unsloth-research.md"
+    template_version: 1
     history_type: "unsloth_research"
     execution_order: 7
     skills: [knowledge-query]
@@ -162,6 +170,7 @@ tasks:
     daily_limit: 2
     counter_field: "ai_github_research_count"
     template: "templates/auto-tasks/ai-github-research.md"
+    template_version: 1
     history_type: "ai_github_research"
     execution_order: 8
     skills: [knowledge-query]
@@ -172,6 +181,7 @@ tasks:
     daily_limit: 2
     counter_field: "ai_smart_city_count"
     template: "templates/auto-tasks/ai-smart-city-research.md"
+    template_version: 1
     history_type: "ai_smart_city"
     execution_order: 9
     skills: [knowledge-query]
@@ -182,6 +192,7 @@ tasks:
     daily_limit: 2
     counter_field: "ai_sysdev_count"
     template: "templates/auto-tasks/ai-sysdev-research.md"
+    template_version: 1
     history_type: "ai_sysdev"
     execution_order: 10
     skills: [knowledge-query]
@@ -193,6 +204,7 @@ tasks:
     daily_limit: 2
     counter_field: "skill_audit_count"
     template: "templates/auto-tasks/skill-audit.md"
+    template_version: 1
     history_type: "skill_audit"
     execution_order: 11
     skills: [knowledge-query, skill-scanner]
@@ -204,6 +216,7 @@ tasks:
     daily_limit: 1
     counter_field: "log_audit_count"
     template: "templates/auto-tasks/log-audit.md"
+    template_version: 1
     history_type: "log_audit"
     execution_order: 12
     skills: [scheduler-state, knowledge-query]
@@ -213,6 +226,7 @@ tasks:
     daily_limit: 4
     counter_field: "git_push_count"
     template: "templates/auto-tasks/git-push.md"
+    template_version: 1
     history_type: "git_push"
     execution_order: 13
     skills: [knowledge-query, git-smart-commit]
@@ -224,6 +238,7 @@ tasks:
     daily_limit: 2
     counter_field: "creative_game_optimize_count"
     template: "templates/auto-tasks/creative-game-optimize.md"
+    template_version: 1
     history_type: "creative_game_optimize"
     execution_order: 14
     skills: [game-design, knowledge-query]
@@ -235,6 +250,7 @@ tasks:
     daily_limit: 2
     counter_field: "qa_optimize_count"
     template: "templates/auto-tasks/qa-system-optimize.md"
+    template_version: 1
     history_type: "qa_optimize"
     execution_order: 15
     skills: [knowledge-query]
@@ -246,6 +262,7 @@ tasks:
     daily_limit: 1
     counter_field: "system_insight_count"
     template: "templates/auto-tasks/system-insight.md"
+    template_version: 1
     history_type: "system_insight"
     execution_order: 16
     skills: [system-insight]
@@ -256,10 +273,23 @@ tasks:
     daily_limit: 3
     counter_field: "self_heal_count"
     template: "templates/auto-tasks/self-heal.md"
+    template_version: 1
     history_type: "self_heal"
     execution_order: 17
     skills: [system-insight]
     description: "識別可自動修復的問題（過期快取/過期 registry/跨日未歸零/殘留檔案）並自動修復"
+
+  # --- Chatroom 整合優化群組（共 2 次/日）---
+  chatroom_optimize:
+    name: "Chatroom 整合品質優化"
+    daily_limit: 2
+    counter_field: "chatroom_optimize_count"
+    template: "templates/auto-tasks/chatroom-optimize.md"
+    template_version: 1
+    history_type: "chatroom_optimize"
+    execution_order: 19
+    skills: [chatroom-query]
+    description: "評估 bot.js 任務佇列執行品質（成功率/衝突率/耗時），自動清除過期快取或調整 max_tasks_per_run"
 
   # --- GitHub 靈感群組（共 1 次/日，僅週三/週日）---
   github_scout:
@@ -267,6 +297,7 @@ tasks:
     daily_limit: 1
     counter_field: "github_scout_count"
     template: "templates/auto-tasks/github-scout.md"
+    template_version: 1
     history_type: "github_scout"
     execution_order: 18
     skills: [github-scout, knowledge-query]
@@ -282,8 +313,9 @@ tasks:
 # 遊戲創意：創意遊戲優化(2) = 2
 # 專案品質：QA優化(2) = 2
 # 系統自省：系統洞察(1) + 自愈迴圈(3) = 4
+# Chatroom 整合：品質優化(2) = 2
 # GitHub 靈感：靈感蒐集(1) = 1
-# 合計：45 次/日
+# 合計：47 次/日
 
 # 歷史追蹤寫入規則
 history:

@@ -1,0 +1,50 @@
+# OODA 工作流引擎配置（G15）
+# 借鑑 wsc-bot01 工作流引擎的依賴自動推進設計
+version: 1
+workflow_name: "OODA 系統自省閉環"
+state_file: "context/workflow-state.json"
+history_file: "logs/structured/ooda-transitions.jsonl"
+cleanup_hours: 48  # 清理 48h 前的舊 run 記錄
+
+steps:
+  observe:
+    name: "Observe — 系統洞察"
+    auto_task_key: "system_insight"
+    prompt_file: "prompts/team/todoist-auto-system-insight.md"
+    timeout_seconds: 600
+    on_success: "orient"     # 完成後自動觸發 orient
+    on_failure: "stop"       # 失敗停止（不傳播）
+    description: "使用 system-insight Skill 觀察系統狀態、效能指標、異常訊號"
+
+  orient:
+    name: "Orient — 系統審查"
+    auto_task_key: "system_audit"
+    prompt_file: "run-system-audit-team.ps1"  # 以 PS 腳本觸發
+    trigger_mode: "ps_script"  # 特殊模式：觸發 PS 腳本而非 claude -p
+    timeout_seconds: 1800
+    on_success: "decide"
+    on_failure: "stop"
+    condition:
+      check_file: "context/improvement-backlog.json"
+      check_non_empty: true   # backlog 為空則跳過 Decide/Act
+    description: "運行完整系統審查（7 維度），產出 improvement-backlog.json"
+
+  decide:
+    name: "Decide — 架構演進"
+    auto_task_key: "arch_evolution"
+    prompt_file: "prompts/team/todoist-auto-arch-evolution.md"  # TODO: 建立專屬 prompt（I3 修復：暫以 enabled:false 封鎖）
+    skill: "arch-evolution"
+    enabled: false  # I3 修復：arch-evolution 尚無專屬 prompt，待建立後啟用
+    timeout_seconds: 900
+    on_success: "act"
+    on_failure: "stop"
+    description: "基於 improvement-backlog 決定架構改善方案，寫入 adr-registry（待 prompts/team/todoist-auto-arch-evolution.md 建立後啟用）"
+
+  act:
+    name: "Act — 自愈迴圈"
+    auto_task_key: "self_heal"
+    prompt_file: "prompts/team/todoist-auto-self-heal.md"
+    timeout_seconds: 600
+    on_success: "complete"
+    on_failure: "stop"
+    description: "執行系統修復動作，更新 improvement-backlog 狀態"

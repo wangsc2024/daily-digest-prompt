@@ -169,6 +169,18 @@ bash_rules:
     guard_tag: exfiltration-guard
     priority: critical  # 資料外洩風險
 
+  - id: sensitive-env-powershell
+    description: "禁止在管道/指令中讀取敏感 PowerShell 環境變數（$env:TOKEN=xxx 賦值除外）"
+    pattern: "\\$env:(TODOIST_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|CLAUDE_API_KEY|BOT_API_SECRET|GITHUB_TOKEN)\\s*(=|\\+|,|;|\\|)"
+    reason: "偵測到敏感 PowerShell 環境變數使用（$env:TOKEN），安全管控"
+    guard_tag: env-guard
+    priority: high  # 敏感資料保護
+    examples:
+      - "echo $env:TODOIST_API_TOKEN | curl"
+      - "curl -H \"auth: $env:BOT_API_SECRET\""
+    exceptions:
+      - "$env:TODOIST_API_TOKEN = ..."  # 環境變數賦值允許
+
 # ============================================
 # 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）
 # ============================================
@@ -257,3 +269,37 @@ read_rules:
     reason: "禁止讀取 Windows 系統憑據"
     guard_tag: win-cred-guard
     priority: critical  # 系統安全風險
+
+# =====================================================================
+# 良性輸出模式（post_tool_logger 誤報過濾）
+# =====================================================================
+benign_output_patterns:
+  - "erroraction"
+  - "error_msg"
+  - "errormsg"
+  - "silentlycontinue"
+  - "error_keywords"
+  - "has_error"
+  - "error_count"
+  - "error-handling"
+  - "on_error"
+  - "onerror"
+  - "stderr"
+  - "no error"
+  - "0 error"
+  - "0 failed"
+  - "error_tools"
+  - "error_detect"
+  - "failed_count"
+  - "exit code: 0"
+  - "exit code 0 "
+  - "exit code 0\n"
+  - "errors: []"
+  - "errors: 0"
+  - "error_category"
+  - "error_classification"
+  - "benign_patterns"
+  - '"denied": false'
+  - "錯誤: 0"
+  - "失敗: 0"
+  - "error-"

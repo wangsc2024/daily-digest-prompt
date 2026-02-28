@@ -129,9 +129,10 @@ label_routing:
       allowed_tools: "Read,Bash,Write,Glob,Grep,WebSearch,WebFetch"
       template: "templates/sub-agent/skill-task.md"
     "^Chat系統":
-      skills: ["程式開發（Plan-Then-Execute）"]
+      skills: ["chatroom-query"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
-      template: "templates/sub-agent/code-task.md"
+      template: "templates/sub-agent/chatroom-task.md"
+      description: "執行 bot.js 任務佇列中的聊天室任務（G28 整合）"
     "^專案規劃":
       skills: ["程式開發（Plan-Then-Execute）"]
       allowed_tools: "Read,Bash,Write,Edit,Glob,Grep"
@@ -203,3 +204,30 @@ sync_check:
     3. 建議：考慮新增 Skill 或更新 routing.yaml
   frequency: "每次執行都檢查，但同一標籤 24 小時內只提醒一次"
   tracking_field: "context/auto-tasks-today.json → warned_labels"
+
+# =====================================================================
+# Chatroom 任務來源（G28 整合）
+# =====================================================================
+chatroom_task_source:
+  enabled: true
+  api_url: "http://localhost:3001"
+  auth_env: "BOT_API_SECRET_KEY"
+  health_endpoint: "/api/health"
+  records_endpoint: "/api/records?state=pending&limit=10"
+  trigger_condition: "todoist_empty OR all_completed"
+  max_tasks_per_run: 2
+  worker_id: "claude-todoist-agent"
+  template: "templates/sub-agent/chatroom-task.md"
+  note: "bot.js Gun.js 聊天室任務佇列，由 todoist-query.md 步驟 1.5 查詢"
+
+# =====================================================================
+# Skill 別名映射（validate_config 交叉驗證用）
+# =====================================================================
+# 說明：以下別名是描述性技能名稱，使用 templates/sub-agent/code-task.md 驅動，
+#       無對應 SKILL.md 檔案，validate_config 交叉驗證時跳過 SKILL.md 檢查。
+skill_aliases:
+  "程式開發（Plan-Then-Execute）":
+    type: template_driven
+    template: "templates/sub-agent/code-task.md"
+    no_skill_file: true
+    description: "程式開發類任務，使用 Plan-Then-Execute 模板，非獨立 Skill"
