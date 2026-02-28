@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>孤島加密控制台</title>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1235/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1235/sea.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #818cf8;
+            --primary-dim: rgba(129, 140, 248, 0.12);
+            --primary-glow: rgba(129, 140, 248, 0.25);
+            --bg-deep: #06080d;
+            --bg-dark: #0a0e17;
+            --bg-card: rgba(14, 19, 30, 0.92);
+            --bg-surface: rgba(22, 30, 46, 0.55);
+            --bg-elevated: rgba(30, 40, 58, 0.5);
+            --text-main: #dfe6f0;
+            --text-dim: #6b7a90;
+            --text-muted: #3e4d63;
+            --accent: #34d399;
+            --accent-dim: rgba(52, 211, 153, 0.1);
+            --accent-glow: rgba(52, 211, 153, 0.2);
+            --warning: #fbbf24;
+            --border: rgba(255, 255, 255, 0.05);
+            --border-subtle: rgba(255, 255, 255, 0.03);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --ease-out: cubic-bezier(0, 0, 0.2, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(129, 140, 248, 0.06), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(52, 211, 153, 0.04), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 94%;
+            max-width: 640px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            box-shadow:
+                0 1px 2px rgba(0,0,0,0.2),
+                0 4px 8px rgba(0,0,0,0.15),
+                0 16px 32px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.03);
+            animation: containerReveal 0.6s var(--ease-out) both;
+        }
+
+        @keyframes containerReveal {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .container.chat-active {
+            max-width: 720px;
+            height: min(88vh, 800px);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        /* ─── Header ─── */
+
+        .app-header {
+            text-align: center;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .app-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .app-header h1 span {
+            color: var(--accent);
+        }
+
+        .app-header .subtitle {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .chat-header h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .chat-header h1 span { color: var(--accent); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--accent-glow);
+            animation: statusPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* ─── Form Controls ─── */
+
+        .field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+            margin-top: 18px;
+        }
+
+        .field-label:first-child { margin-top: 0; }
+
+        input, textarea {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.82rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-dim);
+        }
+
+        textarea { resize: vertical; }
+
+        .field-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .field-row input { min-width: 0; }
+
+        /* ─── Buttons ─── */
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px 20px;
+            cursor: pointer;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s var(--ease-out), box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s;
+        }
+
+        .btn-primary:hover::after {
+            transform: translateX(100%);
+        }
+
+        .btn-send {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.12s var(--ease-out), background 0.15s;
+        }
+
+        .btn-send:hover {
+            transform: scale(1.05);
+            background: #4ade80;
+        }
+
+        .btn-send:active {
+            transform: scale(0.95);
+        }
+
+        .btn-send svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ─── Messages Area ─── */
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(129, 140, 248, 0.2) transparent;
+        }
+
+        #messages::-webkit-scrollbar { width: 4px; }
+        #messages::-webkit-scrollbar-track { background: transparent; }
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(129, 140, 248, 0.2);
+            border-radius: 4px;
+        }
+
+        /* ─── Message Bubbles ─── */
+
+        .msg-user {
+            align-self: flex-end;
+            max-width: 78%;
+            background: var(--primary-dim);
+            border: 1px solid rgba(129, 140, 248, 0.08);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
+            font-size: 0.88rem;
+            line-height: 1.55;
+            animation: msgSlideIn 0.25s var(--ease-out) both;
+        }
+
+        .msg-reply {
+            align-self: flex-start;
+            max-width: 88%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            color: var(--text-main);
+            padding: 14px 16px;
+            border-radius: 4px var(--radius-lg) var(--radius-lg) var(--radius-lg);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            animation: msgSlideIn 0.3s var(--ease-out) both;
+        }
+
+        @keyframes msgSlideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .msg-task-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            background: rgba(129, 140, 248, 0.06);
+            padding: 5px 8px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            border-left: 2px solid var(--primary);
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        /* ─── Markdown Rendered Content ─── */
+
+        .msg-reply h1, .msg-reply h2, .msg-reply h3,
+        .msg-reply h4, .msg-reply h5, .msg-reply h6 {
+            color: var(--primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            margin: 14px 0 6px;
+            line-height: 1.3;
+        }
+
+        .msg-reply h1 { font-size: 1.15rem; }
+        .msg-reply h2 { font-size: 1.05rem; }
+        .msg-reply h3 { font-size: 0.95rem; }
+
+        .msg-reply p {
+            margin: 5px 0;
+            line-height: 1.7;
+        }
+
+        .msg-reply strong {
+            color: #c4b5fd;
+            font-weight: 600;
+        }
+
+        .msg-reply em {
+            color: #93c5fd;
+        }
+
+        .msg-reply ul, .msg-reply ol {
+            margin: 6px 0;
+            padding-left: 20px;
+        }
+
+        .msg-reply li {
+            margin-bottom: 8px;
+            line-height: 1.7;
+            padding-left: 2px;
+        }
+
+        .msg-reply li:last-child { margin-bottom: 0; }
+
+        .msg-reply li::marker {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .msg-reply li p {
+            margin: 2px 0;
+        }
+
+        .msg-reply code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(129, 140, 248, 0.1);
+            color: #e0e7ff;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.82em;
+        }
+
+        .msg-reply pre {
+            background: rgba(6, 8, 13, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .msg-reply pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.8em;
+            line-height: 1.55;
+            color: var(--text-main);
+        }
+
+        .msg-reply blockquote {
+            border-left: 2px solid var(--primary);
+            margin: 8px 0;
+            padding: 4px 12px;
+            color: var(--text-dim);
+            background: rgba(129, 140, 248, 0.04);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .msg-reply hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 10px 0;
+        }
+
+        .msg-reply a {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(129, 140, 248, 0.3);
+            text-underline-offset: 2px;
+            transition: text-decoration-color 0.15s;
+        }
+
+        .msg-reply a:hover {
+            text-decoration-color: var(--primary);
+        }
+
+        .msg-reply table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 8px 0;
+            font-size: 0.85em;
+        }
+
+        .msg-reply th, .msg-reply td {
+            border: 1px solid var(--border);
+            padding: 5px 8px;
+            text-align: left;
+        }
+
+        .msg-reply th {
+            background: rgba(129, 140, 248, 0.08);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .msg-reply > *:first-child { margin-top: 0; }
+        .msg-reply > *:last-child { margin-bottom: 0; }
+
+        /* ─── Chat Input Bar ─── */
+
+        .chat-input-bar {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            padding: 12px 24px 14px;
+            border-top: 1px solid var(--border);
+            background: rgba(10, 14, 23, 0.6);
+            flex-shrink: 0;
+        }
+
+        .chat-input-bar textarea {
+            flex: 1;
+            min-width: 0;
+            margin: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 11px 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            resize: none;
+            overflow-y: auto;
+            min-height: 44px;
+            max-height: 160px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(129, 140, 248, 0.2) transparent;
+        }
+
+        .chat-footer {
+            text-align: center;
+            padding: 6px 24px 12px;
+            flex-shrink: 0;
+        }
+
+        .chat-footer p {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .chat-footer p span {
+            color: var(--accent);
+        }
+
+        /* ─── Tab Navigation ─── */
+
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 14, 23, 0.4);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-dim);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn:hover { color: var(--text-main); }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-btn .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: var(--primary-dim);
+            color: var(--primary);
+            border-radius: 10px;
+            padding: 0 5px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .tab-panel { display: none; flex: 1; overflow-y: auto; min-height: 0; }
+        .tab-panel.active { display: flex; flex-direction: column; }
+
+        /* ─── Schedule Panel ─── */
+
+        .schedule-panel {
+            padding: 16px 24px;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(129, 140, 248, 0.2) transparent;
+        }
+
+        .schedule-section-title {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-dim);
+            margin: 16px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .schedule-section-title:first-child { margin-top: 0; }
+
+        .schedule-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .schedule-empty {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            padding: 12px 0;
+            text-align: center;
+        }
+
+        .schedule-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            animation: msgSlideIn 0.25s var(--ease-out) both;
+        }
+
+        .schedule-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .schedule-card-content {
+            font-size: 0.84rem;
+            color: var(--text-main);
+            line-height: 1.5;
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        .schedule-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+        }
+
+        .schedule-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .schedule-tag.time {
+            background: rgba(129, 140, 248, 0.1);
+            color: var(--primary);
+        }
+
+        .schedule-tag.cron {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+        }
+
+        .schedule-tag.status {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .btn-cancel {
+            flex-shrink: 0;
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: var(--radius-sm);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-refresh {
+            padding: 4px 10px;
+            background: var(--primary-dim);
+            color: var(--primary);
+            border: 1px solid rgba(129, 140, 248, 0.12);
+            border-radius: var(--radius-sm);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-refresh:hover { background: var(--primary-glow); }
+
+        .schedule-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        /* ─── Send State & Error ─── */
+
+        .btn-send.sending {
+            opacity: 0.5;
+            pointer-events: none;
+            animation: sendPulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes sendPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .msg-send-error {
+            align-self: flex-end;
+            max-width: 78%;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: msgSlideIn 0.25s var(--ease-out) both;
+        }
+
+        .msg-send-error button {
+            flex-shrink: 0;
+            padding: 3px 10px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: var(--radius-sm);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .msg-send-error button:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .status-badge.disconnected {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        .status-badge.disconnected::before {
+            background: #fbbf24;
+            box-shadow: 0 0 6px rgba(251, 191, 36, 0.3);
+            animation: none;
+        }
+
+        /* ─── Responsive ─── */
+
+        @media (max-width: 480px) {
+            .container { width: 100%; border-radius: 0; }
+            .container.chat-active { height: 100vh; border-radius: 0; }
+            .chat-input-bar { padding: 10px 16px 12px; }
+            #messages { padding: 16px; }
+            .msg-reply { max-width: 92%; }
+            .schedule-panel { padding: 12px 16px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="app-container">
+        <div id="setup-section">
+            <header class="app-header">
+                <h1>孤島<span>加密</span>控制台</h1>
+                <div class="subtitle">E2E Encrypted Command Console</div>
+            </header>
+
+            <label class="field-label">Gun.js Relay URL</label>
+            <input type="text" id="relay-url" placeholder="wss://relay.example.com/gun"
+                onblur="autoFetchBotEpub()">
+
+            <label class="field-label">你的公開金鑰 (Epub)</label>
+            <textarea id="my-epub" rows="2" readonly></textarea>
+
+            <label class="field-label" style="display:flex;align-items:center;gap:8px;">
+                伺服器公開金鑰 (Target Epub)
+                <span id="epub-fetch-status" style="font-size:0.75rem;color:var(--accent);flex:1;"></span>
+                <button type="button" id="btn-refetch-epub"
+                    onclick="autoFetchBotEpub()"
+                    style="font-size:0.72rem;padding:2px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-dim);cursor:pointer;white-space:nowrap;">
+                    重新取得
+                </button>
+            </label>
+            <textarea id="target-epub" rows="2" readonly
+                placeholder="填入 Relay URL 後自動取得…"></textarea>
+
+            <label class="field-label">API Secret
+                <span style="font-size:0.72rem;color:var(--text-muted);margin-left:6px;">（選用，伺服器啟用 API_SECRET_KEY 時填入）</span>
+            </label>
+            <input type="password" id="api-key" placeholder="留空則不啟用認證">
+
+            <details style="margin-top:12px;">
+                <summary style="cursor:pointer;font-size:0.8rem;color:var(--text-dim);user-select:none;">▶ 排程管理 API（選用，內網環境才需填）</summary>
+                <div style="margin-top:8px;">
+                    <label class="field-label" style="font-size:0.8rem;">API 位址</label>
+                    <div class="field-row">
+                        <input type="text" id="api-url" placeholder="http://bot-intranet:3001" style="flex:1">
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">僅供查詢排程、cron 清單使用。若在外網開啟 index.html 但 bot 在內網，此功能無法使用。</div>
+                </div>
+            </details>
+
+            <button class="btn-primary" onclick="connect()">建立安全連線</button>
+        </div>
+
+        <div id="chat-section" style="display:none;">
+            <div class="chat-header">
+                <h1>孤島<span>加密</span>控制台</h1>
+                <div class="status-badge">E2E 已連線</div>
+            </div>
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('chat')" id="tab-chat">聊天室</button>
+                <button class="tab-btn" onclick="switchTab('schedule')" id="tab-schedule">排程管理<span class="tab-count" id="schedule-count" style="display:none">0</span></button>
+            </div>
+
+            <div id="panel-chat" class="tab-panel active">
+                <div id="messages"></div>
+            </div>
+
+            <div id="panel-schedule" class="tab-panel">
+                <div class="schedule-panel">
+                    <div class="schedule-toolbar">
+                        <button class="btn-refresh" onclick="refreshSchedule()">重新整理</button>
+                    </div>
+
+                    <div class="schedule-section-title">定時任務</div>
+                    <div id="scheduled-tasks-list"></div>
+
+                    <div class="schedule-section-title">週期排程</div>
+                    <div id="cron-jobs-list"></div>
+                </div>
+            </div>
+
+            <div id="chat-bottom" class="chat-input-bar">
+                <textarea id="msg-input" rows="1" placeholder="輸入任務指令… (Shift+Enter 換行)"
+                    onkeydown="handleInputKeydown(event)" oninput="autoResize(this)"></textarea>
+                <button class="btn-send" onclick="sendMessage()" aria-label="發送">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+            <div class="chat-footer">
+                <p>所有訊息均經 <span>E2E 加密</span>，中繼伺服器無法解密</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const KEYPAIR_STORAGE_KEY = 'gun_bot_keypair';
+        const RELAY_STORAGE_KEY = 'gun_bot_relay_url';
+        const chatRoomName = 'render_isolated_chat_room';
+
+        const displayedMessages = new Map();
+        const sentMessageIds = new Set();
+        const MSG_CACHE_TTL = 24 * 60 * 60 * 1000;
+        let gun, myPair, sharedSecret;
+        let purgeIntervalId = null;
+
+        function purgeStaleDisplayedMessages() {
+            const cutoff = Date.now() - MSG_CACHE_TTL;
+            for (const [id, ts] of displayedMessages) {
+                if (ts < cutoff) displayedMessages.delete(id);
+            }
+        }
+
+        window.onload = async () => {
+            document.getElementById('relay-url').value = localStorage.getItem(RELAY_STORAGE_KEY) || "";
+            const savedApiUrl = localStorage.getItem('gun_bot_api_url');
+            if (savedApiUrl) {
+                const el = document.getElementById('api-url');
+                if (el) el.value = savedApiUrl;
+            }
+            const savedApiKey = localStorage.getItem('gun_bot_api_key');
+            if (savedApiKey) {
+                const el = document.getElementById('api-key');
+                if (el) el.value = savedApiKey;
+            }
+
+            const savedPair = localStorage.getItem(KEYPAIR_STORAGE_KEY);
+            if (savedPair) {
+                myPair = JSON.parse(savedPair);
+            } else {
+                myPair = await SEA.pair();
+                localStorage.setItem(KEYPAIR_STORAGE_KEY, JSON.stringify(myPair));
+            }
+            document.getElementById('my-epub').value = myPair.epub;
+
+            // 若已有儲存的 relay URL，頁面載入時自動預取 bot epub
+            const savedRelay = localStorage.getItem(RELAY_STORAGE_KEY);
+            if (savedRelay) autoFetchBotEpub();
+        };
+
+        let _fetchGun = null; // 專用於 epub 預取的 Gun 實例
+
+        async function autoFetchBotEpub() {
+            const relayUrl = document.getElementById('relay-url').value.trim();
+            if (!relayUrl) return;
+
+            const statusEl = document.getElementById('epub-fetch-status');
+            const targetEl = document.getElementById('target-epub');
+            const btn = document.getElementById('btn-refetch-epub');
+
+            statusEl.textContent = '⏳ 取得中…';
+            if (btn) btn.disabled = true;
+
+            // 建立一個暫時的 Gun 連線來抓 epub
+            _fetchGun = Gun({ peers: [relayUrl] });
+            const botEpub = await new Promise((resolve) => {
+                const timeout = setTimeout(() => resolve(null), 10000);
+                _fetchGun.get('wsc-bot/handshake').get('bot-epub').once((epub) => {
+                    clearTimeout(timeout);
+                    resolve(epub || null);
+                });
+            });
+
+            if (btn) btn.disabled = false;
+
+            if (botEpub) {
+                targetEl.value = botEpub;
+                statusEl.style.color = 'var(--accent)';
+                statusEl.textContent = '✅ 已取得';
+            } else {
+                targetEl.value = '';
+                statusEl.style.color = 'var(--warning)';
+                statusEl.textContent = '⚠ 逾時，bot 尚未上線或 URL 錯誤';
+            }
+        }
+
+        async function connect() {
+            const relayUrl = document.getElementById('relay-url').value.trim();
+            const botEpub = document.getElementById('target-epub').value.trim();
+
+            if (!relayUrl) return alert('請填寫 Gun.js Relay URL');
+            if (!botEpub) {
+                // 尚未取得，先嘗試即時抓取
+                await autoFetchBotEpub();
+                const retry = document.getElementById('target-epub').value.trim();
+                if (!retry) return alert('無法取得伺服器公開金鑰（bot epub）\n\n請確認：\n1. Relay URL 是否正確。\n2. bot.js 是否已啟動並連線至同一 relay。');
+            }
+
+            const finalEpub = document.getElementById('target-epub').value.trim();
+
+            localStorage.setItem(RELAY_STORAGE_KEY, relayUrl);
+            const apiUrlEl = document.getElementById('api-url');
+            if (apiUrlEl && apiUrlEl.value.trim()) {
+                localStorage.setItem('gun_bot_api_url', apiUrlEl.value.trim());
+            }
+            const apiKeyEl = document.getElementById('api-key');
+            if (apiKeyEl) {
+                const keyVal = apiKeyEl.value.trim();
+                if (keyVal) {
+                    localStorage.setItem('gun_bot_api_key', keyVal);
+                } else {
+                    localStorage.removeItem('gun_bot_api_key');
+                }
+            }
+
+            // 先建立正式 Gun 連線（若預取時已有 _fetchGun，重新建立以掛載事件）
+            gun = Gun({ peers: [relayUrl] });
+            gun.on('hi', () => updateConnectionBadge(true));
+            gun.on('bye', () => updateConnectionBadge(false));
+
+            // 透過 Gun relay 發布本端 epub（ECDH 公鑰，公開安全）
+            gun.get('wsc-bot/handshake').get('client-epub').put(myPair.epub);
+
+            // 雙方各自用對方公鑰 + 自身私鑰計算出相同 sharedSecret（ECDH）
+            sharedSecret = await SEA.secret(finalEpub, myPair);
+
+            document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'flex';
+            document.getElementById('chat-section').style.flexDirection = 'column';
+            document.getElementById('chat-section').style.flex = '1';
+            document.getElementById('chat-section').style.minHeight = '0';
+            document.getElementById('app-container').classList.add('chat-active');
+
+            gun.get(chatRoomName).map().on(async (data, id) => {
+                if (displayedMessages.has(id)) return;
+                try {
+                    const decryptedMsg = await SEA.decrypt(data, sharedSecret);
+                    if (decryptedMsg) {
+                        displayedMessages.set(id, Date.now());
+                        displayMessage(decryptedMsg, id);
+                    }
+                } catch (err) { }
+            });
+
+            if (purgeIntervalId) clearInterval(purgeIntervalId);
+            purgeIntervalId = setInterval(purgeStaleDisplayedMessages, 60 * 1000);
+
+            refreshSchedule();
+        }
+
+        function handleInputKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+        }
+
+        let isSending = false;
+
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            const sendBtn = document.querySelector('.btn-send');
+            const text = input.value.trim();
+            if (!text || isSending) return;
+
+            isSending = true;
+            sendBtn.disabled = true;
+            sendBtn.classList.add('sending');
+
+            const encryptedData = await SEA.encrypt(text, sharedSecret);
+            const buf = new Uint8Array(9);
+            crypto.getRandomValues(buf);
+            const msgId = 'msg_' + Array.from(buf, b => b.toString(36).padStart(2, '0')).join('').slice(0, 12);
+
+            sentMessageIds.add(msgId);
+            input.value = '';
+            input.style.height = 'auto';
+
+            const MAX_RETRIES = 3;
+            let success = false;
+
+            for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                success = await new Promise((resolve) => {
+                    const timer = setTimeout(() => resolve(false), 5000);
+                    gun.get(chatRoomName).get(msgId).put(encryptedData, (ack) => {
+                        clearTimeout(timer);
+                        resolve(!ack.err);
+                    });
+                });
+                if (success) break;
+                if (attempt < MAX_RETRIES) {
+                    await new Promise(r => setTimeout(r, 800 * attempt));
+                }
+            }
+
+            isSending = false;
+            sendBtn.disabled = false;
+            sendBtn.classList.remove('sending');
+
+            if (!success) {
+                showSendError(text);
+            }
+        }
+
+        function showSendError(originalText) {
+            const container = document.getElementById('messages');
+            const errDiv = document.createElement('div');
+            errDiv.className = 'msg-send-error';
+            errDiv.innerHTML = `<span>訊息發送失敗，Gun.js 伺服器可能無回應。</span>` +
+                `<button onclick="retrySend(this, ${JSON.stringify(JSON.stringify(originalText))})">重試</button>`;
+            container.appendChild(errDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function retrySend(btn, text) {
+            btn.disabled = true;
+            btn.textContent = '重試中…';
+            const errDiv = btn.parentElement;
+            const input = document.getElementById('msg-input');
+            input.value = text;
+            await sendMessage();
+            if (errDiv.parentElement) errDiv.remove();
+        }
+
+        function updateConnectionBadge(connected) {
+            const badge = document.querySelector('.status-badge');
+            if (!badge) return;
+            if (connected) {
+                badge.textContent = 'E2E 已連線';
+                badge.classList.remove('disconnected');
+            } else {
+                badge.textContent = 'Relay 斷線';
+                badge.classList.add('disconnected');
+            }
+        }
+
+        // ─── Tab Switching & Schedule Panel ───
+
+        let currentTab = 'chat';
+        let scheduleRefreshTimer = null;
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`panel-${tab}`).classList.add('active');
+
+            const chatBottom = document.getElementById('chat-bottom');
+            chatBottom.style.display = tab === 'chat' ? 'flex' : 'none';
+
+            if (tab === 'schedule') {
+                refreshSchedule();
+                if (!scheduleRefreshTimer) {
+                    scheduleRefreshTimer = setInterval(refreshSchedule, 30000);
+                }
+            }
+        }
+
+        function getApiHeaders() {
+            const el = document.getElementById('api-key');
+            const apiKey = el ? el.value.trim() : '';
+            const h = { 'Content-Type': 'application/json' };
+            if (apiKey) h['Authorization'] = `Bearer ${apiKey}`;
+            return h;
+        }
+
+        function getApiUrl() {
+            const el = document.getElementById('api-url');
+            return (el && el.value.trim()) || localStorage.getItem('gun_bot_api_url') || '';
+        }
+
+        async function refreshSchedule() {
+            const base = getApiUrl();
+            if (!base) {
+                const msg = '<div class="schedule-empty">未設定 API 位址（僅限內網使用）</div>';
+                document.getElementById('scheduled-tasks-list').innerHTML = msg;
+                document.getElementById('cron-jobs-list').innerHTML = msg;
+                return;
+            }
+            const headers = getApiHeaders();
+            await Promise.all([
+                fetchScheduledTasks(base, headers),
+                fetchCronJobs(base, headers)
+            ]);
+        }
+
+        async function fetchScheduledTasks(base, headers) {
+            const container = document.getElementById('scheduled-tasks-list');
+            try {
+                const resp = await fetch(`${base}/api/scheduled-tasks?status=waiting&limit=50`, { headers });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                const tasks = data.scheduledTasks || [];
+                updateScheduleCount(tasks.length, null);
+                if (tasks.length === 0) {
+                    container.innerHTML = '<div class="schedule-empty">目前沒有等待中的定時任務</div>';
+                    return;
+                }
+                container.innerHTML = tasks.map(t => renderScheduledTaskCard(t)).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="schedule-empty">載入失敗：${DOMPurify.sanitize(err.message)}</div>`;
+            }
+        }
+
+        async function fetchCronJobs(base, headers) {
+            const container = document.getElementById('cron-jobs-list');
+            try {
+                const resp = await fetch(`${base}/api/cron-jobs`, { headers });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                const jobs = data.jobs || [];
+                updateScheduleCount(null, jobs.length);
+                if (jobs.length === 0) {
+                    container.innerHTML = '<div class="schedule-empty">目前沒有週期排程</div>';
+                    return;
+                }
+                container.innerHTML = jobs.map(j => renderCronJobCard(j)).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="schedule-empty">載入失敗：${DOMPurify.sanitize(err.message)}</div>`;
+            }
+        }
+
+        let _schedTaskCount = 0, _cronJobCount = 0;
+
+        function updateScheduleCount(schedCount, cronCount) {
+            if (schedCount !== null) _schedTaskCount = schedCount;
+            if (cronCount !== null) _cronJobCount = cronCount;
+            const total = _schedTaskCount + _cronJobCount;
+            const badge = document.getElementById('schedule-count');
+            if (total > 0) {
+                badge.textContent = total;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function formatLocalTime(isoStr) {
+            try {
+                const d = new Date(isoStr);
+                if (isNaN(d.getTime())) return isoStr;
+                return d.toLocaleString('zh-TW', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                });
+            } catch { return isoStr; }
+        }
+
+        function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+        function renderScheduledTaskCard(t) {
+            const content = DOMPurify.sanitize(t.task_content || '(無內容)');
+            const time = formatLocalTime(t.scheduled_at);
+            const created = formatLocalTime(t.created_at);
+            const wfTag = t.is_workflow ? '<span class="schedule-tag status">工作流</span>' : '';
+            return `<div class="schedule-card">
+                <div class="schedule-card-header">
+                    <div class="schedule-card-content">${content}</div>
+                    <button class="btn-cancel" onclick="cancelScheduledTask('${escAttr(t.id)}')">取消</button>
+                </div>
+                <div class="schedule-card-meta">
+                    <span class="schedule-tag time">&#9200; ${DOMPurify.sanitize(time)}</span>
+                    <span class="schedule-tag status">${DOMPurify.sanitize(t.status)}</span>
+                    ${wfTag}
+                </div>
+            </div>`;
+        }
+
+        function renderCronJobCard(j) {
+            const content = DOMPurify.sanitize(j.task_content || '(無內容)');
+            const created = formatLocalTime(j.created_at);
+            return `<div class="schedule-card">
+                <div class="schedule-card-header">
+                    <div class="schedule-card-content">${content}</div>
+                    <button class="btn-cancel" onclick="deleteCronJob('${escAttr(j.id)}')">刪除</button>
+                </div>
+                <div class="schedule-card-meta">
+                    <span class="schedule-tag cron">&#8635; ${DOMPurify.sanitize(j.cron_expression)}</span>
+                    <span class="schedule-tag time">${DOMPurify.sanitize(created)}</span>
+                </div>
+            </div>`;
+        }
+
+        async function cancelScheduledTask(id) {
+            if (!confirm('確定要取消這個定時任務？')) return;
+            const base = getApiUrl();
+            const headers = getApiHeaders();
+            try {
+                const resp = await fetch(`${base}/api/scheduled-tasks/${encodeURIComponent(id)}`, {
+                    method: 'DELETE', headers
+                });
+                if (!resp.ok) {
+                    const data = await resp.json().catch(() => ({}));
+                    throw new Error(data.error || `HTTP ${resp.status}`);
+                }
+                refreshSchedule();
+            } catch (err) {
+                alert('取消失敗：' + err.message);
+            }
+        }
+
+        async function deleteCronJob(id) {
+            if (!confirm('確定要刪除這個週期排程？')) return;
+            const base = getApiUrl();
+            const headers = getApiHeaders();
+            try {
+                const resp = await fetch(`${base}/api/cron-jobs/${encodeURIComponent(id)}`, {
+                    method: 'DELETE', headers
+                });
+                if (!resp.ok) {
+                    const data = await resp.json().catch(() => ({}));
+                    throw new Error(data.error || `HTTP ${resp.status}`);
+                }
+                refreshSchedule();
+            } catch (err) {
+                alert('刪除失敗：' + err.message);
+            }
+        }
+
+        // ─── Chat Logic ───
+
+        const SANITIZE_OPTS = {
+            ALLOWED_TAGS: [
+                'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'del', 's',
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+                'a', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                'span', 'div', 'sub', 'sup'
+            ],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+        };
+
+        function preprocessMarkdown(text) {
+            // Convert inline numbered lists to proper markdown format
+            // "...句。 2. 下一段..." → "...句。\n\n2. 下一段..."
+            text = text.replace(/([。！？；：」』)）、\.\!\?\;\:]) *(\d+)\. /g, '$1\n\n$2. ');
+            // Convert inline bullet lists: "...句。 - 下一段..."
+            text = text.replace(/([。！？；：」』)）、\.\!\?\;\:]) +([-*·•]) /g, '$1\n\n$2 ');
+            return text;
+        }
+
+        function renderMarkdown(html) {
+            const el = document.createElement('div');
+            el.innerHTML = DOMPurify.sanitize(html, SANITIZE_OPTS);
+            el.querySelectorAll('a').forEach(a => {
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+            });
+            return el.innerHTML;
+        }
+
+        function displayMessage(text, msgId) {
+            const isMine = sentMessageIds.has(msgId);
+            const msgDiv = document.createElement('div');
+
+            if (isMine) {
+                msgDiv.className = 'msg-user';
+                msgDiv.textContent = text;
+            } else {
+                msgDiv.className = 'msg-reply';
+                let body = text;
+                let headerHtml = '';
+
+                if (text.startsWith('[系統回覆]')) {
+                    body = text.replace(/^\[系統回覆\]\s*/, '');
+                }
+
+                const taskMatch = body.match(/^(任務檔案 \[.+?\] 已由 .+?執行完畢[：:])\s*/);
+                if (taskMatch) {
+                    headerHtml = `<div class="msg-task-header">${DOMPurify.sanitize(taskMatch[1])}</div>`;
+                    body = body.slice(taskMatch[0].length);
+                }
+
+                const rawHtml = marked.parse(preprocessMarkdown(body), { breaks: true, gfm: true });
+                msgDiv.innerHTML = headerHtml + renderMarkdown(rawHtml);
+            }
+
+            const container = document.getElementById('messages');
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
