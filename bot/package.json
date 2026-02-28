@@ -1,0 +1,26 @@
+{
+  "name": "gun-gemini-bot",
+  "version": "1.0.0",
+  "description": "Isolated Gun.js Relay with SEA and Task Scheduling",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.20.0",
+    "cors": "^2.8.6",
+    "cron-parser": "^5.5.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.5.0",
+    "gun": "^0.2020.1235",
+    "helmet": "^8.0.0",
+    "luxon": "^3.7.2",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  }
+}
