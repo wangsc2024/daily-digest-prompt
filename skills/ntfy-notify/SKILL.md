@@ -8,6 +8,7 @@ description: |
   Use when: 任務完成推播、即時提醒、通知發送、排程結果通知、告警推播。
 allowed-tools: Bash, Read, Write
 cache-ttl: 0min
+depends-on: []
 triggers:
   - "通知"
   - "提醒"

@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（17 個核心 + 6 個工具 = 23 個 Skills）
+## 速查表（17 個核心 + 7 個工具 = 24 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -36,6 +36,7 @@
 | 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
 | 22 | arch-evolution | 架構演化追蹤器（ADR/技術債/依賴圖/OODA，depends-on: system-audit、system-insight） | 架構決策、ADR、技術債、依賴圖、OODA、arch-evolution、架構治理、漸進式改進、改進計畫、架構演化 |
 | 23 | git-smart-commit | 智慧分群提交（Conventional Commit） | git commit、smart commit、智慧提交、conventional commit、分群提交 |
+| 24 | chatroom-query | bot.js REST API 互動（查詢/認領/執行 Gun.js 聊天室任務） | chatroom、聊天室、bot.js、Gun.js 任務、任務佇列、pending 任務、wsc-bot |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
@@ -79,7 +80,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^Cloudflare` | web-research | Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch | code-task.md |
 | `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
 | `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
-| `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
+| `^Chat系統` | chatroom-query | Read,Bash,Write,Edit,Glob,Grep | chatroom-task.md |
 | `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
 | `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
@@ -104,6 +105,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 ├── 涉及「郵件/email」？    -> gmail + api-cache
 ├── 涉及「系統審查/評分」？ -> system-audit
 ├── 無可處理項目？          -> knowledge-query（楞嚴經研究 -> 匯入知識庫）
+├── 涉及「聊天室/chatroom」？-> chatroom-query（查詢/認領/執行 bot.js 任務）
 ├── 需要「通知/提醒」？     -> ntfy-notify
 ├── 任何 API 呼叫？         -> api-cache（包裝所有外部 API）
 ├── 執行開始？              -> digest-memory（讀取記憶）

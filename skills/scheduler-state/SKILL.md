@@ -6,6 +6,7 @@ description: |
   Use when: 狀態、健康度、執行記錄、排程狀態。
 allowed-tools: Read
 cache-ttl: N/A
+depends-on: []
 triggers:
   - "狀態"
   - "健康度"

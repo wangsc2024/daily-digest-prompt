@@ -164,7 +164,13 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 4. 用 Read 讀取 `results/todoist-plan.json` 的 `auto_tasks.next_execution_order_after`
 5. 若該值不為 null，將 `context/auto-tasks-today.json` 的 `next_execution_order` 更新為此值
 
-用 Write 覆寫整個 JSON（包含所有計數欄位 + 更新後的 next_execution_order）。
+**版本戳樂觀鎖（防排程重疊競態）**：
+6. 記錄讀取時的 `write_version`（若欄位不存在，視為 0）
+7. 計算新 JSON 時，將 `write_version` 加 1
+8. 若偵測到競態（`write_version` 不等於預期，即兩個實例同時讀取同一版本後均嘗試寫入），**以最大值合併各計數欄位**（取兩份 JSON 中每個 `*_count` 欄位的最大值），再加 1
+9. 範例：若讀取時 `write_version=3`，寫入時應為 4；若寫入前發現檔案已是 4，則 merge 後寫為 5
+
+用 Write 覆寫整個 JSON（包含所有計數欄位 + 更新後的 `next_execution_order` + 遞增的 `write_version`）。
 
 ---
 
@@ -293,11 +299,68 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 
 ---
 
+## 步驟 5.5：聊天室執行摘要推播（可選，VZ4）
+
+**此步驟為軟依賴（soft dependency）。若 bot.js 未啟動或推播失敗，靜默忽略，不影響主流程。**
+
+### 5.5.1 健康檢查
+
+```bash
+curl -s --max-time 5 http://localhost:3001/api/health 2>/dev/null
+```
+
+若失敗或無回應，跳過本步驟剩餘內容，直接進入步驟 6。
+
+### 5.5.2 組裝執行摘要
+
+組裝不超過 500 字元的純文字摘要，格式如下：
+
+```
+[系統報告] {今日日期 YYYY-MM-DD} {本地時間 HH:MM}
+{各任務完成狀態，每項一行}
+✓ {任務名稱} — {一句話結果}   ← 成功
+⚠ {任務名稱} — {失敗原因}    ← 失敗
+━━━━━━━━━━━━━━━━
+本輪：{成功數} 完成 / {失敗數} 失敗
+```
+
+範例：
+```
+[系統報告] 2026-02-28 14:30
+✓ 楞嚴經研究 — 完成第三卷阿難請問因緣段落研究
+⚠ AI GitHub 研究 — WebSearch 逾時
+━━━━━━━━━━━━━━━━
+本輪：1 完成 / 1 失敗
+```
+
+### 5.5.3 發送廣播
+
+用 Write 建立 `/tmp/broadcast_payload.json`（UTF-8）：
+```json
+{"message": "上面組裝的摘要文字"}
+```
+
+然後發送：
+```bash
+curl -s --max-time 10 \
+  -X POST http://localhost:3001/api/broadcast \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -H "Authorization: Bearer $BOT_API_SECRET" \
+  -d @/tmp/broadcast_payload.json \
+  2>/dev/null
+rm -f /tmp/broadcast_payload.json
+```
+
+若 curl 失敗（非零退出碼）或回應含 `"error"` 欄位，記錄警告但繼續執行。
+
+---
+
 ## 步驟 6：清理 results/
 
 ```bash
 rm -f results/todoist-plan.json results/todoist-task-*.md results/todoist-result-*.json
 rm -f results/todoist-auto-*.json
+rm -f results/chatroom-plan.json
 ```
 
 ---

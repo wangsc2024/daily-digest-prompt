@@ -42,6 +42,29 @@
 - 對每個檔案，檢查對應 Windows 排程是否存在
 - 若排程不存在 → 安全刪除殘留檔案
 
+#### f. Chatroom 整合健康檢查（G28）
+用 Read 讀取 `state/api-health.json`：
+- 找出 `gun-bot` 的 circuit_breaker 狀態
+- 若 state="open"（API 連續失敗）→ 刪除 `cache/chatroom.json`（強制下次重抓）+ 記錄到 alerts
+
+用 Bash 檢查 `cache/chatroom.json` 修改時間：
+```bash
+python -c "
+import json, os, datetime
+path = 'cache/chatroom.json'
+if os.path.exists(path):
+    age = datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(path))
+    print(f'age_minutes:{int(age.total_seconds()/60)}')
+    with open(path) as f:
+        data = json.load(f)
+    print(f'source:{data.get(\"source\",\"unknown\")}')
+else:
+    print('age_minutes:-1')
+"
+```
+- 若 age_minutes > 120 且 source != "api" → 刪除 `cache/chatroom.json`（過期降級快取清理）
+- 若 age_minutes = -1（不存在）→ 正常，無需處理
+
 ### 步驟 3：記錄修復行為
 每項修復動作記錄到結構化日誌（透過工具呼叫自動被 post_tool_logger.py 記錄）。
 

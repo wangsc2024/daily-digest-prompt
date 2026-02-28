@@ -9,6 +9,7 @@ description: |
   Note: 互動式工具 Skill，由使用者手動觸發，不透過 Todoist 自動路由。
 allowed-tools: Bash, Read, Write, Glob, Grep, WebSearch, WebFetch
 cache-ttl: N/A
+depends-on: [skill-scanner]
 triggers:
   - "系統審查"
   - "系統評分"

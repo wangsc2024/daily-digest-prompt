@@ -6,6 +6,7 @@ description: |
   Use when: 快取、cache、降級、API 故障、快取策略、TTL、cache hit、快取命中、降級服務、API 快取。
 allowed-tools: Bash, Read, Write
 cache-ttl: N/A
+depends-on: []
 triggers:
   - "快取"
   - "cache"

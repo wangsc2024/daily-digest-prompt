@@ -29,17 +29,19 @@
 
 ## 1. 讀取 Phase 1 結果
 
-用 Read 讀取五個結果檔案：
+用 Read 讀取六個結果檔案：
 - `results/todoist.json`
 - `results/news.json`
 - `results/hackernews.json`
 - `results/gmail.json`
 - `results/security.json`
+- `results/fetch-chatroom.json`（G28 新增，bot.js 任務佇列）
 
 ### 容錯處理
 - 檔案不存在 → 該區塊標記為「⚠️ 資料擷取失敗」，繼續執行
 - status 為 "failed" → 同上
 - source 為 "cache_degraded" → 標注「⚠️ 資料來自快取」
+- `fetch-chatroom.json` 不存在或 status="failed" → 聊天室區塊標記「⚠️ 聊天室無法連線」，不影響其他區塊
 
 記錄每個結果的 source 用於 Skill 使用報告：
 - "api" → API 呼叫 +1
@@ -245,9 +247,32 @@ else:
 
 讀取 `config/digest-format.md`，依模板格式組裝完整摘要。
 資料來源：各 results/*.json（Phase 1）+ 步驟 2-6.5 的本地 Skill 輸出。
-- 執行模式標記為「團隊並行（Phase 1 x5 + Phase 2 x1）」
+- 執行模式標記為「團隊並行（Phase 1 x6 + Phase 2 x1）」
 - 若 results/security.json 有 HIGH 或 CRITICAL：ntfy 通知加 warning tag
 - **降級標記整合**：若步驟 6.5 識別出降級 API，在對應摘要區塊開頭加上降級標記（參考步驟 6.5 的對照表）
+
+### 7.1 聊天室佇列區塊（G28 新增）
+
+讀取 `results/fetch-chatroom.json` 的 `data` 欄位，在 Todoist 區塊後加入：
+
+**有資料時**：
+```
+🤖 聊天室佇列
+  待處理：{pending_count} 筆 | 執行中：{processing_count} 筆 | 今日完成：{completed_today} 筆
+  [最多列出前 3 筆待處理任務的 content 前 60 字]
+```
+
+**無法連線時**（status="failed"）：
+```
+🤖 聊天室佇列
+  ⚠️ bot.js 無法連線（任務佇列狀態不明）
+```
+
+**快取降級時**（source="cache_degraded"）：
+```
+🤖 聊天室佇列 ⚠️ 資料來自快取
+  待處理：{pending_count} 筆 | ...
+```
 
 ---
 
@@ -272,5 +297,5 @@ else:
 ### 9.2 清理 results/
 用 Bash 清理：
 ```bash
-rm -f results/todoist.json results/news.json results/hackernews.json results/gmail.json results/security.json
+rm -f results/todoist.json results/news.json results/hackernews.json results/gmail.json results/security.json results/fetch-chatroom.json
 ```

@@ -68,6 +68,36 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 
 ---
 
+## 步驟 1.5：查詢 bot.js 聊天室任務佇列
+
+此步驟在 Todoist 查詢後、路由前執行，**不論 Todoist 有無可處理任務都執行**（資料用於步驟 3 路由決策）。
+
+### 健康確認（無需認證）
+```bash
+curl -s --max-time 5 http://localhost:3001/api/health
+```
+- 連線失敗或超時 → 跳過此步驟，記錄 `chatroom_available=false`
+- 連線成功 → 繼續查詢
+
+### 查詢 pending 任務
+```bash
+curl -s --max-time 8 \
+  -H "Authorization: Bearer $BOT_API_SECRET" \
+  "http://localhost:3001/api/records?state=pending&limit=10"
+```
+- 401/403 → `chatroom_auth=false`（記錄但不影響執行）
+- 成功 → 記錄 pending 任務清單（uid、content、is_research）
+
+### 整合規則
+- `chatroom_available=false` → 輸出計畫不含 chatroom 任務
+- 有 pending 任務 + Todoist 有可處理任務 → **Todoist 優先**，chatroom 任務**納入計畫末位**（若 max_tasks_per_run 尚有空餘）
+- 有 pending 任務 + Todoist 無可處理任務 → chatroom 任務視為可處理任務，走路由（`^Chat系統` 或 Tier 3）
+- chatroom 任務的 source 標記為 `"chatroom"`，模板使用 `templates/sub-agent/chatroom-task.md`
+
+> ⛔ 禁止使用 `echo $BOT_API_SECRET` 驗證環境變數（Harness 攔截）。
+
+---
+
 ## 步驟 2：三層路由篩選
 
 ### 前置過濾：不可處理的任務類型
@@ -98,7 +128,7 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | `^Cloudflare` | web-research | Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch | 100% |
 | `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
 | `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
-| `^Chat系統` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^Chat系統` | chatroom-query | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
@@ -132,11 +162,15 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針）。
 
 **選取演算法（每次最多選 4 個）**：
-1. 以 `next_execution_order` 為起點，按 execution_order 循環掃描全部 18 個任務（掃一圈，到 18 後環繞回 1）
+1. 以 `next_execution_order` 為起點，按 execution_order 循環掃描全部 19 個任務（掃一圈，到 19 後環繞回 1）
 2. 收集所有 `count < daily_limit` 的任務，按掃描先後排列
 3. 取前 min(max_auto_per_run.team_mode, 可用數量) 個作為本次批次
 4. **git_push 特殊規則**：若 git_push 被選中且同批次還有其他任務 → 將 git_push 移到批次最末位（避免 git 操作與其他 Agent 並行衝突）
-5. 記下 `next_execution_order_after` = 最後一個被選中任務的 execution_order + 1（若 = 19 則環繞為 1）
+5. 計算 `next_execution_order_after`（精確定義）：
+   - 取所有被選中任務的**原始** `execution_order` 中的最大值
+   - `next_execution_order_after = max(selected原始orders) % 19 + 1`（環繞：19→1，不是 19+1=20）
+   - ⚠️ **git_push 末位調整不影響此計算**：即使 git_push 被移到批次末位，仍以其原始 order=13 參與 max() 計算
+   - 範例：若選中 [11, 13(git_push→末), 15]，max=15，next_after = 15 % 19 + 1 = 16
 6. **注意**：`next_execution_order` 的寫入由 Phase 3（todoist-assemble.md 步驟 3）負責；Phase 1 只計算並輸出 `next_execution_order_after`
 7. 若掃完一圈無任何可執行 → plan_type = "idle"
 
@@ -162,8 +196,9 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 | 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight` | `system_insight_count` |
 | 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal` | `self_heal_count` |
 | 18 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout` | `github_scout_count` |
+| 19 | Chatroom | Chatroom 品質優化 | 2 次 | `chatroom_optimize` | `chatroom_optimize_count` |
 
-合計上限：45 次/日
+合計上限：47 次/日
 
 ---
 
@@ -293,6 +328,31 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 - `selected_tasks`：本次選出的任務陣列（1-4 個，依 round-robin 演算法選取）
 - `next_execution_order_after`：下次掃描起始位置（Phase 3 負責寫入 auto-tasks-today.json）
 
+---
+
+**prompt_content 展開規則**（G10 — 在輸出 todoist-plan.json 時執行）：
+
+Phase 1 的職責是**傳遞「已決定的研究主題」**給 Phase 2，避免 Phase 2 的 LLM 重新選題（可能導致重複研究）。
+
+對 `selected_tasks` 中的每個項目：
+
+1. **預設值**：`"prompt_content": null`（讓 Phase 2 讀取模板檔，自行選題）
+
+2. **例外（填入非 null 值）**：若 task 對應的 `config/frequency-limits.yaml` 中有 `topic_rotation` 設定，**且**當次研究主題已從輪替算法確定，則填入以下格式字串：
+   ```
+   "今日研究主題：<已決定的主題>\n\n"
+   ```
+   Phase 2 會將此字串**前置**於模板內容開頭。
+
+3. **現階段行為**：所有 18 個任務的 `topic_rotation` 設定尚未在 frequency-limits.yaml 中定義，因此目前所有 `prompt_content` 一律填 `null`。
+
+4. **注意事項**：
+   - `prompt_content` 欄位**僅**用於傳遞「已決定的主題」，不展開整個 prompt 內容
+   - 研究主題輪替算法（`config/topic-rotation.yaml` + `context/research-registry.json`）由 Phase 2 負責；Phase 1 不讀取這些檔案
+   - 若 `prompt_content` 為 null，Phase 2 自行讀取模板並執行選題邏輯，行為與 G10 前完全一致
+
+---
+
 ```json
 {
   "agent": "todoist-query",
@@ -308,7 +368,8 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
         "current_count": 1,
         "limit": 5,
         "execution_order": 1,
-        "prompt_file": "prompts/team/todoist-auto-shurangama.md"
+        "prompt_file": "prompts/team/todoist-auto-shurangama.md",
+        "prompt_content": null
       },
       {
         "key": "jiaoguangzong",
@@ -316,7 +377,8 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
         "current_count": 2,
         "limit": 3,
         "execution_order": 2,
-        "prompt_file": "prompts/team/todoist-auto-jiaoguangzong.md"
+        "prompt_file": "prompts/team/todoist-auto-jiaoguangzong.md",
+        "prompt_content": null
       }
     ],
     "next_execution_order_after": 3,

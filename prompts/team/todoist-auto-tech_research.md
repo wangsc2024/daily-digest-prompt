@@ -10,6 +10,27 @@
 
 ---
 
+## 立即執行（讀完 preamble 後的第一個動作，無例外）
+
+用 Write 建立 `results/todoist-auto-tech_research.json`，內容（佔坑用，最後覆寫）：
+```json
+{
+  "agent": "todoist-auto-tech_research",
+  "status": "running",
+  "task_id": null,
+  "type": "tech_research",
+  "topic": null,
+  "kb_imported": false,
+  "duration_seconds": 0,
+  "done_cert": null,
+  "summary": "執行中...",
+  "error": null
+}
+```
+> 此步驟確保即使 agent 被 timeout 強制終止，Phase 3 仍能讀到結果檔案（status=running → 標記為 interrupted），而非出現「結果檔案缺失」。
+
+---
+
 ## 第零步：研究註冊表檢查（跨任務去重）
 
 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
@@ -37,6 +58,13 @@
 
 ## 第二步：查詢知識庫去重
 
+**先執行 KB 健康檢查**（3 秒 timeout）：
+```bash
+curl -s --connect-timeout 3 "http://localhost:3000/health"
+```
+- 若連線成功 → 繼續執行以下去重查詢
+- 若連線失敗（connection refused / timeout）→ 設定 `kb_available=false`，**跳過本步驟與第四步（KB 匯入）**，直接進行第三步研究，最終結果 JSON 設 `kb_imported=false`，不視為失敗
+
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json" \
@@ -50,7 +78,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 ## 第三步：深入研究
 
 1. 使用 WebSearch 搜尋該技術的最新進展（至少 3 組關鍵詞）
-2. 使用 WebFetch 獲取 2-3 篇高品質文章
+2. 使用 WebFetch 獲取 4 篇高品質文章（確保研究深度）
 3. 整理為結構化 Markdown 筆記：
    - 技術概述（100-200 字）
    - 核心概念與原理
