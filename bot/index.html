@@ -933,7 +933,7 @@
             _fetchGun = Gun({ peers: [relayUrl] });
             const botEpub = await new Promise((resolve) => {
                 const timeout = setTimeout(() => resolve(null), 10000);
-                _fetchGun.get('wsc-bot/handshake').get('bot-epub').once((epub) => {
+                _fetchGun.get('wsc-bot/handshake').get('epub').once((epub) => {
                     clearTimeout(timeout);
                     resolve(epub || null);
                 });
@@ -987,7 +987,8 @@
             gun.on('bye', () => updateConnectionBadge(false));
 
             // 透過 Gun relay 發布本端 epub（ECDH 公鑰，公開安全）
-            gun.get('wsc-bot/handshake').get('client-epub').put(myPair.epub);
+            gun.get('wsc-bot/handshake').get('client-epub').put(myPair.epub); // 向下相容
+            gun.get('wsc-bot/handshake').get('clients').get(myPair.pub).put(myPair.epub); // 多用戶
 
             // 雙方各自用對方公鑰 + 自身私鑰計算出相同 sharedSecret（ECDH）
             sharedSecret = await SEA.secret(finalEpub, myPair);

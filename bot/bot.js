@@ -157,6 +157,7 @@ app.use((req, res, next) => {
 // 共享狀態 (透過 app.locals 供 routes 存取)
 // ============================================================
 app.locals.sharedSecret = null;
+app.locals.sharedSecrets = new Map(); // clientEpub → sharedSecret（多用戶）
 app.locals.isListening = false;
 app.locals.activeCronJobs = {};
 app.locals.gunConnected = false; // M4: 由 Gun hi/bye 更新，供 /api/health 回報
@@ -202,14 +203,19 @@ function generateId(prefix) {
     return `${prefix}_${crypto.randomUUID().slice(0, 12)}`;
 }
 
-// S5: sendSystemReply 加入錯誤捕獲
+// S5: sendSystemReply — 廣播給所有已連線用戶（各自加密）
 async function sendSystemReply(text) {
-    if (!app.locals.sharedSecret) return;
+    if (app.locals.sharedSecrets.size === 0) return;
     try {
         // G25: 加密含時間戳的 JSON payload，供前端排序使用
         const payload = JSON.stringify({ text, ts: Date.now() });
-        const encrypted = await SEA.encrypt(payload, app.locals.sharedSecret);
-        gun.get(chatRoomName).get(generateId('reply')).put(encrypted);
+        const replyId = generateId('reply');
+        let i = 0;
+        for (const ss of app.locals.sharedSecrets.values()) {
+            const encrypted = await SEA.encrypt(payload, ss);
+            // 每個用戶分配獨立 node id，確保各自接收
+            gun.get(chatRoomName).get(`${replyId}_${i++}`).put(encrypted);
+        }
     } catch (err) {
         console.error('[sendSystemReply] 失敗:', err.message);
     }
@@ -433,10 +439,23 @@ function startMessageLoop() {
             return;
         }
 
-        if (!data || !app.locals.sharedSecret) return;
+        if (!data || app.locals.sharedSecrets.size === 0) return;
+
+        // 多用戶：逐一嘗試所有已知 sharedSecret 解密
+        let raw = null;
+        for (const ss of app.locals.sharedSecrets.values()) {
+            try {
+                const decrypted = await SEA.decrypt(data, ss);
+                if (decrypted !== undefined && decrypted !== null) { raw = decrypted; break; }
+            } catch {}
+        }
+
+        if (raw === null) {
+            processedMessages.set(id, Date.now());
+            return;
+        }
 
         try {
-            const raw = await SEA.decrypt(data, app.locals.sharedSecret);
             const text = typeof raw === 'string' ? raw : (raw != null ? String(raw) : '');
             if (!text || text.startsWith('[系統回覆]')) return;
 
@@ -447,7 +466,7 @@ function startMessageLoop() {
             }
         } catch (err) {
             processedMessages.set(id, Date.now());
-            console.error(`[message] 解密失敗 ${id}:`, err.message);
+            console.error(`[message] 處理失敗 ${id}:`, err.message);
         }
     });
 
@@ -532,15 +551,35 @@ async function init() {
     // G20: 廣播 epub + 附加自身簽章（防 MITM：收方可用簽章驗證 epub 真實性）
     const epubSig = await SEA.sign(myPair.epub, myPair);
     gun.get('wsc-bot/handshake').put({ epub: myPair.epub, sig: epubSig });
+    // 相容舊版客端讀取路徑 `bot-epub`
+    gun.get('wsc-bot/handshake').get('bot-epub').put(myPair.epub);
     console.log('[握手] 已將 bot epub + 簽章公告至 Gun relay');
 
+    /** 註冊客端 epub，計算 sharedSecret 並啟動訊息迴圈（如尚未啟動） */
+    async function registerClient(clientEpub) {
+        const ss = await SEA.secret(clientEpub, myPair);
+        app.locals.sharedSecrets.set(clientEpub, ss);
+        app.locals.sharedSecret = ss; // 向下相容
+        if (!app.locals.isListening) {
+            startMessageLoop();
+            console.log('[握手] 已與前端完成 ECDH 金鑰交換，開始監聽加密訊息');
+        } else {
+            console.log(`[握手] 客端連線/重連，已連線用戶數: ${app.locals.sharedSecrets.size}`);
+        }
+    }
+
+    // 向下相容：單一 client-epub 路徑
     gun.get('wsc-bot/handshake').get('client-epub').on(async (clientEpub) => {
         if (!clientEpub || typeof clientEpub !== 'string') return;
         if (clientEpub.length > 2048) return;
-        if (app.locals.isListening) return; // 已建立連線，忽略重複握手
-        app.locals.sharedSecret = await SEA.secret(clientEpub, myPair);
-        startMessageLoop();
-        console.log('[握手] 已與前端完成 ECDH 金鑰交換，開始監聽加密訊息');
+        await registerClient(clientEpub);
+    });
+
+    // 多用戶：監聽 clients map，每個用戶以自身 pub 為 key 發布 epub
+    gun.get('wsc-bot/handshake').get('clients').map().on(async (clientEpub, userPub) => {
+        if (!clientEpub || typeof clientEpub !== 'string') return;
+        if (clientEpub.length > 2048) return;
+        await registerClient(clientEpub);
     });
 
     // 重新載入 cron 排程 (P2)。L4: 重載時也檢查最小間隔，避免惡意表達式一旦寫入即永久生效
