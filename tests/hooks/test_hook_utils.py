@@ -12,8 +12,9 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, os.path.join(project_root, "hooks"))
 
 from hook_utils import (
-    find_config_path, load_yaml_rules, log_blocked_event,
+    find_config_path, load_yaml_rules, load_yaml_section, log_blocked_event,
     get_compiled_regex, get_rule_patterns, get_rule_re_flags,
+    atomic_write_lines,
 )
 
 
@@ -71,6 +72,68 @@ class TestLoadYamlRules:
         fallback = [{"id": "fallback"}]
         rules = load_yaml_rules("bash_rules", fallback)
         assert rules is fallback
+        hook_utils.clear_yaml_config_cache()
+
+
+class TestLoadYamlSection:
+    """YAML 通用區段載入（load_yaml_section）。"""
+
+    def test_loads_benign_output_patterns(self):
+        """應成功載入 benign_output_patterns 區段（list 型別）。"""
+        patterns = load_yaml_section("benign_output_patterns")
+        assert isinstance(patterns, list)
+        assert len(patterns) >= 10
+        # 驗證包含已知的良性模式
+        lower_patterns = [str(p).lower() for p in patterns]
+        assert "erroraction" in lower_patterns
+
+    def test_loads_presets_as_dict(self):
+        """應成功載入 presets 區段（dict 型別）。"""
+        presets = load_yaml_section("presets")
+        assert isinstance(presets, dict)
+        assert "strict" in presets
+        assert "normal" in presets
+
+    def test_fallback_on_missing_section(self):
+        """YAML 中不存在該區段時應回傳 fallback。"""
+        result = load_yaml_section("nonexistent_section", fallback="default_value")
+        assert result == "default_value"
+
+    def test_fallback_default_is_none(self):
+        """未指定 fallback 時預設回傳 None。"""
+        result = load_yaml_section("nonexistent_section")
+        assert result is None
+
+    def test_fallback_on_missing_config(self, monkeypatch):
+        """配置檔不存在時應回傳 fallback。"""
+        import hook_utils
+        hook_utils.clear_yaml_config_cache()
+        monkeypatch.setattr(hook_utils, "find_config_path", lambda filename="hook-rules.yaml": None)
+        result = load_yaml_section("benign_output_patterns", fallback=["fb"])
+        assert result == ["fb"]
+        hook_utils.clear_yaml_config_cache()
+
+    def test_shares_cache_with_load_yaml_rules(self, monkeypatch):
+        """load_yaml_section 與 load_yaml_rules 共用 YAML 快取（不重複開檔）。"""
+        import hook_utils
+        hook_utils.clear_yaml_config_cache()
+
+        call_count = {"n": 0}
+        original_open = open
+
+        def counting_open(*args, **kwargs):
+            if args and isinstance(args[0], str) and "hook-rules.yaml" in args[0]:
+                call_count["n"] += 1
+            return original_open(*args, **kwargs)
+
+        with patch("builtins.open", side_effect=counting_open):
+            load_yaml_rules("bash_rules", [])
+            first_count = call_count["n"]
+            # 第二次呼叫用 load_yaml_section — 應從快取取得
+            load_yaml_section("benign_output_patterns")
+            second_count = call_count["n"]
+
+        assert second_count == first_count  # 不額外開檔
         hook_utils.clear_yaml_config_cache()
 
 
@@ -212,3 +275,74 @@ class TestGetRuleReFlags:
     def test_unknown_flags(self):
         """未知 flags 值回傳 0。"""
         assert get_rule_re_flags({"flags": "UNKNOWN"}) == 0
+
+
+class TestAtomicWriteLines:
+    """atomic_write_lines — JSONL 原子寫入。"""
+
+    def test_writes_lines_correctly(self, tmp_path):
+        """應正確寫入多行內容，每行自動加換行符。"""
+        filepath = str(tmp_path / "test.jsonl")
+        lines = ['{"a": 1}', '{"b": 2}', '{"c": 3}']
+        atomic_write_lines(filepath, lines)
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            written_lines = [l.strip() for l in f.readlines()]
+
+        assert written_lines == lines
+
+    def test_overwrites_existing_file_atomically(self, tmp_path):
+        """應原子替換現有檔案（不會出現半寫入狀態）。"""
+        filepath = str(tmp_path / "test.jsonl")
+        # 先寫入舊內容
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write("old content\n")
+
+        # 用 atomic_write_lines 覆寫
+        new_lines = ["new line 1", "new line 2"]
+        atomic_write_lines(filepath, new_lines)
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        assert "old content" not in content
+        assert "new line 1" in content
+        assert "new line 2" in content
+
+    def test_creates_parent_directory(self, tmp_path):
+        """目標目錄不存在時應自動建立。"""
+        filepath = str(tmp_path / "subdir" / "deep" / "test.jsonl")
+        atomic_write_lines(filepath, ["line1"])
+
+        assert os.path.exists(filepath)
+        with open(filepath, "r", encoding="utf-8") as f:
+            assert f.readline().strip() == "line1"
+
+    def test_empty_lines_creates_empty_file(self, tmp_path):
+        """空清單應建立空檔案。"""
+        filepath = str(tmp_path / "empty.jsonl")
+        atomic_write_lines(filepath, [])
+
+        assert os.path.exists(filepath)
+        with open(filepath, "r", encoding="utf-8") as f:
+            assert f.read() == ""
+
+    def test_handles_unicode_content(self, tmp_path):
+        """應正確處理 UTF-8 中文內容。"""
+        filepath = str(tmp_path / "unicode.jsonl")
+        lines = ['{"msg": "正體中文測試"}', '{"msg": "日本語テスト"}']
+        atomic_write_lines(filepath, lines)
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            written_lines = [l.strip() for l in f.readlines()]
+
+        assert written_lines == lines
+
+    def test_no_temp_file_left_on_success(self, tmp_path):
+        """成功寫入後不應留下暫存檔。"""
+        filepath = str(tmp_path / "clean.jsonl")
+        atomic_write_lines(filepath, ["data"])
+
+        # 檢查目錄中沒有 .tmp 檔案
+        tmp_files = list(tmp_path.glob("*.tmp"))
+        assert len(tmp_files) == 0

@@ -15,7 +15,7 @@ multiple claude -p processes run in parallel). Falls back to
 offset-based analysis if session_id is unavailable.
 
 Alert severity:
-  - critical: blocked ≥3 OR errors ≥5
+  - critical: blocked >=3 OR errors >=5
   - warning: blocked 1-2 OR errors 1-4
   - info (no alert): everything healthy
 """
@@ -230,7 +230,7 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
 
     # Check schema violations (Guardrails output validation)
     if analysis["schema_violation_count"] > 0:
-        issues.append(f"⚠️ Schema 驗證失敗 {analysis['schema_violation_count']} 次（quality-gate.md § 3.2）")
+        issues.append(f"Schema 驗證失敗 {analysis['schema_violation_count']} 次（quality-gate.md 3.2）")
         if severity != "critical":
             severity = "warning"
 
@@ -239,16 +239,16 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
         days = gmail_expiry["days_remaining"]
         expire = gmail_expiry["expire_date"]
         if days <= 0:
-            issues.append(f"⛔ Gmail OAuth 已過期（{expire}）")
+            issues.append(f"Gmail OAuth 已過期（{expire}）")
         else:
-            issues.append(f"⏰ Gmail OAuth {days} 天後到期（{expire}）")
-        issues.append("📋 重新授權：pwsh -File gmail-reauth.ps1")
+            issues.append(f"Gmail OAuth {days} 天後到期（{expire}）")
+        issues.append("重新授權：pwsh -File gmail-reauth.ps1")
         if severity != "critical":
             severity = "warning"
 
     # Check SKILL.md modifications (informational, not an error)
     if analysis["skill_modified_count"] > 0:
-        info_items.append(f"⚠️ 已修改 SKILL.md ({analysis['skill_modified_count']} 個檔案):")
+        info_items.append(f"已修改 SKILL.md ({analysis['skill_modified_count']} 個檔案):")
         for path in analysis["skill_modified_paths"]:
             info_items.append(f"  - {path}")
         if not issues:  # Only if no errors/blocks, make this a warning
@@ -257,7 +257,7 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
     # Check Token budget (informational warning if exceeded)
     token_warning = _check_token_budget()
     if token_warning:
-        issues.append(f"⚠️ {token_warning}")
+        issues.append(f"{token_warning}")
         if severity not in ("critical", "warning"):
             severity = "warning"
 
@@ -405,6 +405,7 @@ def _rotate_logs(retention_days=7):
                     pass
 
     # Trim session-summary.jsonl: keep only entries within retention window
+    # 使用 atomic_write_lines 避免團隊模式下多 Agent 並行結束時的競態損壞
     summary_file = os.path.join(log_dir, "session-summary.jsonl")
     if not os.path.exists(summary_file):
         return
@@ -423,9 +424,16 @@ def _rotate_logs(retention_days=7):
                     kept.append(line)
             except json.JSONDecodeError:
                 pass
-        with open(summary_file, "w", encoding="utf-8") as f:
-            for line in kept:
-                f.write(line + "\n")
+        from hook_utils import atomic_write_lines
+        atomic_write_lines(summary_file, kept)
+    except ImportError:
+        # hook_utils 不可用時退回直接寫入
+        try:
+            with open(summary_file, "w", encoding="utf-8") as f:
+                for line in kept:
+                    f.write(line + "\n")
+        except (OSError, UnboundLocalError):
+            pass
     except OSError:
         pass
 

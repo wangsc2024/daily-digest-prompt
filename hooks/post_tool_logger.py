@@ -87,17 +87,30 @@ _BENIGN_PATTERNS_FALLBACK = [
 
 
 def _load_benign_patterns_from_yaml() -> list:
-    """從 hook-rules.yaml 載入良性輸出模式，失敗時回退硬編碼清單。"""
+    """從 hook-rules.yaml 載入良性輸出模式，失敗時回退硬編碼清單。
+
+    使用 hook_utils.load_yaml_section 共用 YAML 快取，
+    避免與其他 hook 在同一進程中重複開檔讀取 hook-rules.yaml。
+    """
     try:
-        from hook_utils import find_config_path
-        config_path = find_config_path()
-        if config_path:
-            import yaml
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = yaml.safe_load(f)
-            patterns = config.get("benign_output_patterns")
-            if isinstance(patterns, list) and patterns:
-                return [str(p).lower() for p in patterns]
+        from hook_utils import load_yaml_section
+        patterns = load_yaml_section("benign_output_patterns")
+        if isinstance(patterns, list) and patterns:
+            return [str(p).lower() for p in patterns]
+    except ImportError:
+        # hook_utils.load_yaml_section 不可用時退回直接讀取（向下相容）
+        try:
+            from hook_utils import find_config_path
+            config_path = find_config_path()
+            if config_path:
+                import yaml
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = yaml.safe_load(f)
+                patterns = config.get("benign_output_patterns")
+                if isinstance(patterns, list) and patterns:
+                    return [str(p).lower() for p in patterns]
+        except Exception:
+            pass
     except Exception:
         pass
     return _BENIGN_PATTERNS_FALLBACK

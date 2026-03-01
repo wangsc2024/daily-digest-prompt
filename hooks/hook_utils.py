@@ -124,6 +124,26 @@ def load_yaml_rules(section_key, fallback_rules):
     return rules
 
 
+def load_yaml_section(section_key, fallback=None):
+    """載入 YAML 配置中指定區段（通用版，不限於規則清單）。
+
+    與 load_yaml_rules 不同，此函數不要求值為 list，
+    可用於取得任意型別的配置值（list/dict/str 等）。
+
+    Args:
+        section_key: YAML 頂層鍵名（如 "benign_output_patterns"）
+        fallback: YAML 不可用或區段不存在時的預設值
+    """
+    config = _load_yaml_config()
+    if config is None:
+        return fallback
+
+    value = config.get(section_key)
+    if value is None:
+        return fallback
+    return value
+
+
 def filter_rules_by_preset(rules, section_key="bash_rules"):
     """根據環境變數 HOOK_SECURITY_PRESET 過濾規則。
 
@@ -253,6 +273,39 @@ def atomic_write_json(filepath: str, data) -> None:
             json.dump(data, tf, ensure_ascii=False, indent=2)
         os.replace(tmp_path, filepath)
         tmp_path = None  # 成功替換後清除引用，避免 finally 誤刪
+    except Exception:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+        raise
+
+
+def atomic_write_lines(filepath: str, lines: list) -> None:
+    """原子寫入多行文字檔案（write-to-temp + os.replace()）。
+
+    與 atomic_write_json 相同的原子替換策略，但用於 JSONL 等
+    逐行格式的檔案。每行自帶換行符或由呼叫者確保。
+
+    Args:
+        filepath: 目標檔案路徑
+        lines: 字串列表，每個元素寫為一行（自動加換行符）
+    """
+    import tempfile
+    dirpath = os.path.dirname(os.path.abspath(filepath))
+    os.makedirs(dirpath, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8",
+            dir=dirpath, suffix=".tmp", delete=False
+        ) as tf:
+            tmp_path = tf.name
+            for line in lines:
+                tf.write(line + "\n")
+        os.replace(tmp_path, filepath)
+        tmp_path = None
     except Exception:
         if tmp_path and os.path.exists(tmp_path):
             try:
