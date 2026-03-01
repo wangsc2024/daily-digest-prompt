@@ -16,10 +16,71 @@
  */
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const store = require('./store');
 const skills = require('./skills');
 const { STATES } = require('./fsm');
 const workflow = require('./workflow');
+
+// 需自動存入知識庫的任務類型關鍵字
+const KB_KEYWORDS = ['研究', '規劃', '計畫', '方案', '架構', '設計', '優化', '改善', '提升', '重構', '改進', '分析', '評估', '策略', '報告'];
+const KB_URL = 'http://127.0.0.1:3000';
+
+// 機器人記憶（最近 N 筆完成任務，持久化，供 Worker 注入上下文）
+const DATA_DIR = process.env.WSC_BOT_DATA_DIR || path.join(__dirname, '..', 'data');
+const BOT_MEMORY_PATH = path.join(DATA_DIR, 'bot-memory.json');
+const MEMORY_MAX_ENTRIES = 20;
+
+/**
+ * 非同步將任務+成果存入知識庫（fire-and-forget，不影響回應速度）
+ */
+function saveToKnowledgeBase(taskContent, resultStr) {
+    const title = taskContent.trim().slice(0, 60) + (taskContent.length > 60 ? '…' : '');
+    const noteContent = `## 任務\n${taskContent}\n\n## 執行結果\n${resultStr}`;
+    const body = JSON.stringify({ title, content: noteContent, source: 'manual' });
+    const req = http.request(`${KB_URL}/api/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) }
+    }, res => {
+        console.log(`[KB] 已儲存任務至知識庫: ${title} (HTTP ${res.statusCode})`);
+    });
+    req.on('error', e => console.error('[KB] 儲存失敗:', e.message));
+    req.write(body);
+    req.end();
+}
+
+function shouldSaveToKB(taskContent, isResearch) {
+    if (isResearch) return true;
+    const lower = taskContent || '';
+    return KB_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+function loadBotMemory() {
+    try {
+        if (fs.existsSync(BOT_MEMORY_PATH)) {
+            return JSON.parse(fs.readFileSync(BOT_MEMORY_PATH, 'utf8'));
+        }
+    } catch {}
+    return { version: 1, recent_tasks: [] };
+}
+
+function saveBotMemory(taskContent, resultStr, isResearch) {
+    try {
+        const mem = loadBotMemory();
+        mem.recent_tasks.unshift({
+            ts: new Date().toISOString(),
+            task_preview: (taskContent || '').trim().slice(0, 120),
+            result_preview: (resultStr || '').trim().slice(0, 300),
+            is_research: !!isResearch
+        });
+        if (mem.recent_tasks.length > MEMORY_MAX_ENTRIES) {
+            mem.recent_tasks = mem.recent_tasks.slice(0, MEMORY_MAX_ENTRIES);
+        }
+        fs.writeFileSync(BOT_MEMORY_PATH, JSON.stringify(mem, null, 2), 'utf8');
+    } catch (e) {
+        console.error('[Memory] 儲存失敗:', e.message);
+    }
+}
 
 const VALID_STATES = new Set(Object.values(STATES));
 const VALID_WF_STATES = new Set(Object.values(workflow.WF_STATES)); // M10: 工作流 status 白名單
@@ -55,6 +116,14 @@ function mount(app, opts = {}) {
     app.get('/api/skills', (req, res) => {
         const list = skills.listSkills();
         res.json({ total: list.length, skills: list });
+    });
+
+    // 近期任務記憶查詢（Worker 執行前注入上下文，避免重複執行相同任務）
+    app.get('/api/memory/recent', (req, res) => {
+        const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 5, 20));
+        const mem = loadBotMemory();
+        const tasks = (mem.recent_tasks || []).slice(0, limit);
+        res.json({ total: mem.recent_tasks ? mem.recent_tasks.length : 0, recent_tasks: tasks });
     });
 
     // 查詢任務記錄（支援 state 篩選 + D3 分頁）
@@ -196,8 +265,22 @@ function mount(app, opts = {}) {
                         const truncated = resultStr.length > MAX_LEN
                             ? resultStr.slice(0, MAX_LEN) + '\n...[內容過長，已截斷]'
                             : resultStr;
-                        sendReply(`[系統回覆] 任務 ${uid} 執行完畢：\n${truncated}`)
+
+                        // 取得原始任務內容
+                        const rec = store.getRecord(uid);
+                        const taskContent = store.getTaskContent(uid) || uid;
+                        const taskLabel = taskContent.trim().slice(0, 80) + (taskContent.length > 80 ? '…' : '');
+
+                        sendReply(`[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`)
                             .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
+
+                        // 研究型 / 規劃型 / 優化型任務自動存入知識庫
+                        if (shouldSaveToKB(taskContent, rec && rec.is_research)) {
+                            saveToKnowledgeBase(taskContent, resultStr);
+                        }
+
+                        // 儲存至機器人記憶（供 Worker 下次執行前注入上下文，避免重複）
+                        saveBotMemory(taskContent, resultStr, rec && rec.is_research);
                     }
                     res.json({ success: true });
                 },

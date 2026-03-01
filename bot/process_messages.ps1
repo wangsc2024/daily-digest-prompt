@@ -52,6 +52,83 @@ function Write-Log {
     Add-Content -Path $LogFile -Value $logEntry -Encoding UTF8
 }
 
+$CompletionLogFile = Join-Path $LogDir "completion_log.jsonl"
+$ProjectRoot = "D:\Source\daily-digest-prompt"
+
+# ── Skill-First 前言（所有任務都注入，讓 Agent 主動使用 Skill）──
+$SkillFirstPreamble = @"
+## Skill-First 指引（最高優先原則）
+
+在執行任何任務前，請先讀取以下 Skill 索引，了解所有可用技能：
+路徑：$ProjectRoot\skills\SKILL_INDEX.md
+
+**強制規則**：
+1. 能用 Skill 就用 Skill，禁止自行拼湊已有 Skill 覆蓋的邏輯
+2. 每個步驟必須先讀取對應 SKILL.md 再動手
+3. 積極串聯多個 Skill 實現更高價值（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
+4. 可用工具（--allowedTools）：Read、Bash、Write
+"@
+
+# ── 查詢近期任務記憶（提供上下文，避免重複執行）──
+function Get-BotMemoryContext {
+    try {
+        $memResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/memory/recent?limit=3" `
+            -Method Get -Headers $DlHeaders -TimeoutSec 5
+        if ($memResp.recent_tasks -and $memResp.recent_tasks.Count -gt 0) {
+            $lines = @("## 近期完成任務（供參考，避免重複執行相同工作）")
+            foreach ($t in $memResp.recent_tasks) {
+                $date = $t.ts.Substring(0, 10)
+                $lines += "- [$date] $($t.task_preview)"
+            }
+            return ($lines -join "`n") + "`n"
+        }
+    } catch {}
+    return ""
+}
+
+# ── 品質要求後綴（依任務類型，強制結構化輸出）──
+function Get-QualityRequirements {
+    param([string]$TaskContent, [bool]$IsCoding, [bool]$IsResearch)
+    $lower = $TaskContent.ToLower()
+    $isPlan     = $lower -match '規劃|計畫|方案|策略|架構|設計'
+    $isOptimize = $lower -match '優化|改善|提升|重構|改進'
+    $common = "`n`n---`n## 輸出品質要求（必須遵守）`n執行完畢後，**必須**以下列格式提供結構化摘要：`n`n✅ **執行摘要**：（2-3 句話說明完成了什麼）"
+    if ($IsResearch) {
+        return $common + "`n📚 **主要發現**：（列出 3-5 個關鍵洞察）`n💾 **知識庫**：（是否已存入知識庫，使用何關鍵字）`n🔗 **延伸方向**：（建議後續研究方向）"
+    } elseif ($IsCoding) {
+        return $common + "`n📁 **已修改/建立的檔案**：（列出所有異動檔案）`n🧪 **測試結果**：（測試通過情況）`n⚠️ **注意事項**：（使用限制或後續動作）"
+    } elseif ($isPlan) {
+        return $common + "`n📋 **具體行動步驟**：（有序列出 3-7 個步驟）`n✔️ **可驗收標準**：（如何確認計畫成功執行）"
+    } elseif ($isOptimize) {
+        return $common + "`n📊 **改善成果**：（量化說明改善幅度）`n🎯 **可驗證成果**：（已完成的具體成果）`n🔄 **後續建議**：（維持或進一步優化的方向）"
+    } else {
+        return $common + "`n📌 **重要結論**：（最重要的 2-3 個結論）`n🚀 **後續行動**：（建議的後續步驟）"
+    }
+}
+
+function Write-CompletionLog {
+    param(
+        [string]$Uid,
+        [string]$Filename,
+        [string]$Event,          # started | completed | failed
+        [int]$DurationSec = -1,
+        [int]$OutputLen = -1,
+        [string]$ErrorMsg = ""
+    )
+    $entry = [ordered]@{
+        ts           = (Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz")
+        uid          = $Uid
+        worker_id    = $WorkerId
+        event        = $Event
+        filename     = $Filename
+    }
+    if ($DurationSec -ge 0) { $entry["duration_sec"] = $DurationSec }
+    if ($OutputLen -ge 0)   { $entry["output_len"]   = $OutputLen }
+    if ($ErrorMsg)           { $entry["error"]        = $ErrorMsg }
+    $json = $entry | ConvertTo-Json -Compress
+    Add-Content -Path $CompletionLogFile -Value $json -Encoding UTF8
+}
+
 # 嘗試從 .env 讀取設定 (本地部署便利性)
 $DotEnvPath = Join-Path $PSScriptRoot ".env"
 if (Test-Path $DotEnvPath) {
@@ -120,6 +197,7 @@ foreach ($record in $records) {
         $claimResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/claim" -Method Patch -Body $claimBody -Headers $JsonHeaders
         $claimGeneration = $claimResp.claim_generation
         Write-Log "已認領任務 (worker: $WorkerId, generation: $claimGeneration)"
+        $TaskStartTime = Get-Date
     } catch {
         $statusCode = $null
         try { $statusCode = $_.Exception.Response.StatusCode.value__ } catch {}
@@ -185,13 +263,23 @@ foreach ($record in $records) {
             }
         }
 
-        # 若有目標目錄，在強化後內容前加入 cd 指令以確保 Codex 在正確目錄執行
-        $effectiveContent = $optimizedContent
-        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-            $effectiveContent = "請在目錄 $workDir 中執行以下任務。若目錄不存在請先建立。所有產出的檔案必須儲存在 $workDir 目錄中。`n`n" + $optimizedContent
-        }
+        # ── 取得記憶上下文（查詢最近 3 筆完成任務）──
+        $memoryContext = Get-BotMemoryContext
 
-        Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}))..."
+        # ── 品質要求（依任務類型）──
+        $qualityReqs = Get-QualityRequirements -TaskContent $taskContent -IsCoding $isCoding -IsResearch ([bool]$isResearch)
+
+        # ── 組合最終任務內容：Skill-First + 記憶 + 工作目錄 + 任務本文 + 品質要求 ──
+        $workDirPrefix = ""
+        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+            $workDirPrefix = "請在目錄 $workDir 中執行以下任務。若目錄不存在請先建立。所有產出的檔案必須儲存在 $workDir 目錄中。`n`n"
+        }
+        $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
+        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $qualityReqs
+
+        Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+        Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
+        $ClaudeStartTime = Get-Date
         # 清除 CLAUDECODE 環境變數：Task Scheduler 繼承此變數會導致 claude -p 拒絕啟動（巢狀 session 保護）
         # 官方說明：「To bypass this check, unset the CLAUDECODE environment variable.」
         $savedClaudeCode = $env:CLAUDECODE
@@ -212,19 +300,25 @@ foreach ($record in $records) {
             if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
         }
         $toolUsed = "Claude CLI"
-
-        Write-Log "任務執行完畢 (使用: $toolUsed)"
+        $claudeDurationSec = [int]((Get-Date) - $ClaudeStartTime).TotalSeconds
+        $outputStr = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
+        Write-Log "任務執行完畢 (使用: $toolUsed，耗時: ${claudeDurationSec}s，輸出: $($outputStr.Length) 字元)"
+        Write-CompletionLog -Uid $uid -Filename $filename -Event "completed" `
+            -DurationSec $claudeDurationSec -OutputLen $outputStr.Length
 
         # ---- Step 4: Complete — 標記為已完成（帶 claim_generation、result 供工作流下游使用）----
         # 注意：結果回傳至聊天室由 bot server 的 /processed 端點透過穩定 Gun 連線負責，
         # 避免 Worker 自行呼叫 /api/send 時因 Gun relay 閒置斷線導致訊息遺失。
-        $outputStr = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
         $completeBody = @{ claim_generation = $claimGeneration; result = $outputStr } | ConvertTo-Json -Depth 3
         Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/processed" -Method Patch -Body $completeBody -ContentType "application/json; charset=utf-8" -Headers $JsonHeaders | Out-Null
         Write-Log "狀態已更新為 completed (generation: $claimGeneration)。已請 bot server 透過 Gun 回傳結果至聊天室。"
 
     } catch {
-        Write-Log "處理發生錯誤: $_"
+        $errMsg = "$_"
+        Write-Log "處理發生錯誤: $errMsg"
+        $failDurationSec = if ($null -ne $TaskStartTime) { [int]((Get-Date) - $TaskStartTime).TotalSeconds } else { -1 }
+        Write-CompletionLog -Uid $uid -Filename $filename -Event "failed" `
+            -DurationSec $failDurationSec -ErrorMsg $errMsg
 
         # 標記為 failed（讓系統知道此任務失敗，可觸發重試）
         try {

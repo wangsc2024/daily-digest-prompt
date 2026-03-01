@@ -418,6 +418,16 @@ function getRecord(uid) {
     return records.find(r => r.uid === uid) || null;
 }
 
+function getTaskContent(uid) {
+    const rec = records.find(r => r.uid === uid);
+    if (!rec) return null;
+    try {
+        return fs.readFileSync(path.join(TASKS_DIR, rec.filename), 'utf8');
+    } catch {
+        return null;
+    }
+}
+
 // ---- Cron Jobs CRUD ----
 
 function addCronJob(job) {
@@ -539,6 +549,7 @@ module.exports = {
     forceFailRecord,
     queryRecords,
     getRecord,
+    getTaskContent,
     addCronJob,
     removeCronJob,
     addScheduledTask,
