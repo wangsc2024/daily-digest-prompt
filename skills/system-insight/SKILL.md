@@ -1,11 +1,13 @@
 ---
 name: system-insight
-version: "1.3.0"
+version: "1.4.0"
 description: |
   系統自省引擎。分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出結構化洞察報告。
-  Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢。
+  Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢、自動任務公平性評估。
 allowed-tools: Read, Write, Bash, Glob, Grep
 cache-ttl: N/A
+depends-on:
+  - "ntfy-notify"
 triggers:
   - "系統分析"
   - "執行報告"
@@ -18,8 +20,6 @@ triggers:
   - "趨勢分析"
   - "統計報告"
   - "執行品質"
-depends-on:
-  - "ntfy-notify"
 ---
 
 # System Insight Skill（系統自省引擎）
@@ -67,7 +67,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | 指標 | 計算方式 | 健康門檻 |
 |------|---------|---------|
 | daily_success_rate | 成功 runs / 總 runs（近 7 天） | >= 90% |
-| skill_usage_coverage | 被使用的 Skill 數 / 23（總 Skill 數） | >= 70% |
+| skill_usage_coverage | 被使用的 Skill 數 / 24（總 Skill 數：17 核心 + 7 工具） | >= 70% |
 | cache_hit_ratio | cache-read / (cache-read + api-call) | >= 40% |
 | error_rate | error 標籤 / 總呼叫數 | <= 5% |
 | block_rate | blocked 標籤 / 總呼叫數 | <= 2% |
@@ -77,14 +77,17 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | behavior_pattern_count | behavior-patterns.json 中模式總數 | >= 20 |
 | high_confidence_patterns | confidence >= 0.5 的模式數 | >= 5 |
 
+> **注意**：Skill 總數（24）應隨 SKILL_INDEX.md 速查表同步更新。
+
 ### 步驟 3：產出報告
 用 Write 建立 `context/system-insight.json`：
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "generated_at": "ISO timestamp",
   "period_days": 7,
+  "total_skills": 24,
   "metrics": {
     "daily_success_rate": 0.95,
     "skill_usage_coverage": 0.80,
@@ -128,3 +131,4 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 - 報告每日最多產生 1 次，避免重複分析
 - 健康門檻值應與 `config/benchmark.yaml` 保持同步（benchmark 為權威來源）
 - behavior-patterns.json 為可選資料源，尚未有程式自動產出，對應 3 個指標設為 null 不影響整體報告
+- Skill 總數變更時，需同步更新本文件步驟 2 表格與步驟 3 的 `total_skills` 欄位

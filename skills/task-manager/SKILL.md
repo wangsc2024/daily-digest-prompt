@@ -1,6 +1,6 @@
 ---
 name: task-manager
-version: "1.2.0"
+version: "1.3.0"
 description: |
   標準化新增自動任務、排程任務及單次任務的完整流程。
   消除手動觸碰 6-7 個檔案的遺漏風險，提供自動驗證。
@@ -191,8 +191,6 @@ team_prompt_path: "prompts/team/todoist-auto-{task_key 轉 hyphen}.md"
 ```bash
 # 5.1 YAML 語法檢查
 python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', encoding='utf-8'))"
-
-# 5.2 模板結構檢查
 ```
 用 Grep 確認：
 - `templates/auto-tasks/{key}.md` 含 `DONE_CERT`
@@ -200,24 +198,29 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
 - `prompts/team/todoist-auto-{key}.md` 含 `results/`
 
 ```bash
-# 5.3 團隊 prompt 命名檢查（動態掃描，無需 PS1 映射）
+# 5.2 團隊 prompt 命名檢查（動態掃描，無需 PS1 映射）
 ```
 確認 `prompts/team/todoist-auto-{task_key_hyphen}.md` 存在且命名正確（動態掃描靠檔名匹配）
 
 ```bash
-# 5.4 counter_field 一致性
+# 5.3 counter_field 一致性
 ```
 用 Grep 確認 `frequency-limits.yaml` 的 `counter_field` 值出現在 `initial_schema` 中
 
 ```bash
-# 5.5 execution_order 無重複
+# 5.4 execution_order 無重複
 ```
 用 Grep 確認 `execution_order: {N}` 只出現一次
 
 ```bash
-# 5.6 團隊 prompt 檔案存在
+# 5.5 團隊 prompt 檔案存在
 ```
 確認 `prompts/team/todoist-auto-{key}.md` 檔案存在
+
+```bash
+# 5.6 SKILL_INDEX.md 同步確認
+```
+若新任務涉及新 Skill，確認已在 `skills/SKILL_INDEX.md` 速查表中登記
 
 ### Step 6：輸出變更摘要
 
@@ -309,8 +312,10 @@ retry: 0 或 1  # 失敗是否自動重試
 |------|------|------|
 | 1 | 收集規格 | task_description、allowed_tools、skills、output_file（可選） |
 | 2 | Write 建立 prompt | `task_prompt_once.md`（組合 _base.md + 任務指引） |
-| 3 | Bash 執行 | `cat task_prompt_once.md \| claude -p --allowedTools "..."` |
+| 3 | Bash 執行 | `claude -p --allowedTools "..." < task_prompt_once.md` |
 | 4 | 清理 | `rm task_prompt_once.md` |
+
+> **注意**：Windows Bash 環境中建議使用 `< file` 輸入重導向，而非 `cat file | cmd` 管線。
 
 ### C-2：定時單次執行
 
@@ -364,12 +369,14 @@ schtasks /delete /tn "Claude_Once_{name}" /f
 | 模板目錄不存在 | 自動建立目錄，並用 _base.md 作為最小模板 |
 | 團隊 prompt 命名不符規範 | 輸出警告，提示正確格式 `todoist-auto-{key}.md` |
 | YAML 驗證失敗 | 回復原始內容，輸出差異比對，標記為 PARTIAL |
+| prompt 建立失敗 | 清理已建立的部分檔案，輸出已完成/未完成的步驟清單 |
 
 ---
 
 ## 安全機制
 
 1. **YAML 驗證**：frequency-limits.yaml 修改後 `python -c "import yaml; ..."` 驗證
+2. **動態掃描相容性**：團隊 prompt 命名必須符合 `todoist-auto-*.md` 規範，確保被自動發現
 3. **execution_order 不重複**：Grep 確認唯一性
 4. **counter_field 自動標準化**：`{task_key}_count` 格式
 5. **daily_limit 硬限制**：1-5，超過自動截斷
