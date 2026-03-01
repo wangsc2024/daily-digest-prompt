@@ -56,26 +56,26 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
    - 主題多樣性指數（unique topics / total entries）
    - 近 7 天新增主題分佈
 
-5. **behavior-patterns.json**（`context/behavior-patterns.json`，可選）
+5. **behavior-patterns.json**（`context/behavior-patterns.json`，可選 — 尚無自動產出程式）
    - Token 經濟學指標：avg_io_per_call（每次工具呼叫平均 I/O 字元數）
    - 行為模式統計：behavior_pattern_count（已識別模式數）
    - 高信心模式：high_confidence_patterns（confidence >= 0.5 可演化為 Skill 的模式數）
-   - 若檔案不存在 → 對應 3 個指標設為 null
+   - 若檔案不存在 → 對應 3 個指標設為 null，不影響整體報告健康判定
 
 ### 步驟 2：計算洞察指標
 
 | 指標 | 計算方式 | 健康門檻 |
 |------|---------|---------|
 | daily_success_rate | 成功 runs / 總 runs（近 7 天） | >= 90% |
-| skill_usage_coverage | 被使用的 Skill 數 / 24（總 Skill 數：17 核心 + 7 工具） | >= 70% |
+| skill_usage_coverage | 被使用的 Skill 數 / 24（從 JSONL `skill-read` 標籤統計 unique Skill 名稱；總數：17 核心 + 7 工具） | >= 70% |
 | cache_hit_ratio | cache-read / (cache-read + api-call) | >= 40% |
 | error_rate | error 標籤 / 總呼叫數 | <= 5% |
 | block_rate | blocked 標籤 / 總呼叫數 | <= 2% |
 | topic_diversity | unique topics / total research entries | >= 0.5 |
 | auto_task_fairness | stddev(task_counts) / mean(task_counts) | <= 0.5 |
 | avg_io_per_call | 所有工具呼叫 output_len 平均值 | <= 5000 chars |
-| behavior_pattern_count | behavior-patterns.json 中模式總數 | >= 20 |
-| high_confidence_patterns | confidence >= 0.5 的模式數 | >= 5 |
+| behavior_pattern_count | behavior-patterns.json 中模式總數（可選，null 不扣分） | >= 20（有資料時） |
+| high_confidence_patterns | confidence >= 0.5 的模式數（可選，null 不扣分） | >= 5（有資料時） |
 
 > **注意**：Skill 總數（24）應隨 SKILL_INDEX.md 速查表同步更新。
 

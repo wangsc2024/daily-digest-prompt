@@ -194,3 +194,4 @@ rm dedup_query.json
 - 搜尋失敗時降級為已有快取或 KB 內容
 - 研究前先查詢 research-registry.json 避免重複
 - 此 Skill 為框架型 Skill，不直接被 Todoist 路由，而是被研究類模板隱式引用
+- **隱式依賴清單**：`templates/sub-agent/research-task.md`、`templates/auto-tasks/ai-deep-research.md`、`templates/auto-tasks/ai-github-research.md`、`templates/auto-tasks/tech-research.md` 等研究類模板均應遵循本框架的來源品質分級和去重流程
