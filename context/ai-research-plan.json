@@ -106,5 +106,90 @@
       ]
     }
   ],
-  "stage_completed": 2
+  "analysis": {
+    "consensus": [
+      {
+        "point": "GRPO 是後訓練民主化的關鍵突破",
+        "evidence": "6/8 來源一致認同 GRPO 移除 PPO 的 critic model，記憶體需求降低約 50%（從 4 模型減至 2 模型），使個人開發者能以 16GB VRAM 訓練推理模型",
+        "sources": ["Cameron R. Wolfe", "Oxen.ai", "Inferless", "Raschka", "中文長文", "Introl"]
+      },
+      {
+        "point": "混合管線（Hybrid Pipeline）已成為產業標準",
+        "evidence": "Meta Llama 3 採用 SFT→rejection sampling→PPO→DPO 多輪精煉；DeepSeek-R1 採用兩階段 GRPO+SFT 交替訓練。單一技術無法涵蓋所有對齊需求",
+        "sources": ["Inferless", "Oxen.ai", "Cameron R. Wolfe"]
+      },
+      {
+        "point": "Reward Hacking 是後訓練的核心挑戰",
+        "evidence": "DeepSeek 刻意避免 Process Reward Model；GRPO 優化獎勵保守下界；推薦使用 verifiable rewards（regex/字串匹配）替代學習式獎勵模型",
+        "sources": ["Raschka", "中文長文", "Label Studio", "Cameron R. Wolfe"]
+      },
+      {
+        "point": "計算重心正從預訓練向推理時計算轉移",
+        "evidence": "推理計算 2026 年預計超越訓練計算 118 倍；2030 年佔 AI 計算的 75%；市場從 $106B 增長至 $255B",
+        "sources": ["Introl", "Inferless", "arXiv 2512.02008"]
+      },
+      {
+        "point": "長度偏差（Verbosity Bias）是 RL 後訓練的系統性問題",
+        "evidence": "PPO/GRPO 的數學損失特性不自覺偏好冗長回答；推理模型生成 3-4 倍 token；TLDR 長度正則化 RL 是新興解決方案",
+        "sources": ["Raschka", "Inferless"]
+      }
+    ],
+    "divergence": [
+      {
+        "point": "GRPO vs REINFORCE++ vs GSPO — 哪種是 PPO 的最佳替代？",
+        "positions": {
+          "GRPO陣營": "DeepSeek-R1 實戰驗證，移除 critic model 效果顯著（Cameron R. Wolfe、Oxen.ai）",
+          "REINFORCE++陣營": "訓練更穩定、收斂更快，理論上更簡潔（中文長文）",
+          "GSPO陣營": "用 self-play 取代外部獎勵模型，代表不同的修復理念（中文長文）"
+        }
+      },
+      {
+        "point": "推理能力的真正來源 — RL 還是預訓練？",
+        "positions": {
+          "RL歸因": "DeepSeek R1-Zero 從純 RL（無 SFT）即自發產生推理行為（Cameron R. Wolfe、Introl）",
+          "預訓練歸因": "推理能力可能來自預訓練階段的 chain-of-thought 數據，RL 僅起「解鎖」作用（Raschka）"
+        }
+      },
+      {
+        "point": "推理時計算擴展是否普遍有效？",
+        "positions": {
+          "樂觀派": "適度模型透過延長推理可達專家級表現，市場高速成長（Introl）",
+          "審慎派": "知識密集型任務中增加推理計算不一致提升準確率，甚至增加幻覺；無單一策略普遍佔優（arXiv 2512.02008）"
+        }
+      }
+    ],
+    "insights": [
+      {
+        "insight": "後訓練的「三明治架構」正在形成標準模式",
+        "description": "輕量 SFT（格式化）→ 核心 RL（GRPO/PPO）→ 輕量 DPO（微調），三層各司其職。SFT 教格式，RL 教推理，DPO 精修品味。這類似軟體架構中的三層式設計",
+        "applicable_to": "daily-digest-prompt 的 Todoist 任務路由本質上也是三層結構（標籤覆寫→模板優先級→修飾標籤），可視為類比的「對齊堆疊」"
+      },
+      {
+        "insight": "RLVR（可驗證獎勵）為 Agent 系統提供了品質閘門的理論基礎",
+        "description": "用符號驗證器（編譯器、計算器、regex）取代主觀的獎勵模型。在 Agent 系統中，這等價於用確定性測試（test pass/fail）作為任務品質的直接回饋信號，避免 LLM-as-a-Judge 的偏見",
+        "applicable_to": "本專案的 quality-gate.md 和 done-cert.md 本質上就是 RLVR 的應用 — 用確定性規則（結構完整性、字數門檻、KB 匯入成功）驗證任務品質"
+      },
+      {
+        "insight": "推理計算的邊際效益高度依賴任務類型",
+        "description": "arXiv 大規模實驗證實：推理類任務（數學/程式碼）受益顯著，但知識密集型任務中額外推理反而增加幻覺。這意味 Agent 系統應根據任務類型動態調整推理深度",
+        "applicable_to": "本專案可在 scoring.yaml 或 routing.yaml 中區分「需要深度推理的任務」（code-task、research-task）和「知識擷取型任務」（新聞、佛學），對後者適度限制 token budget"
+      },
+      {
+        "insight": "GRPO 的民主化效應重新定義了個人 AI 的可能性",
+        "description": "1B 參數模型 + 16GB VRAM + GRPO + 確定性獎勵 = 個人可訓練特定領域推理模型。這不需要昂貴的獎勵模型 LLM，只需要結構化的驗證規則",
+        "applicable_to": "本專案的 Unsloth 研究線可與 GRPO 結合 — 使用 Unsloth + GRPO 在消費級 GPU 上微調一個「任務規劃推理模型」，用 Todoist 完成率作為 verifiable reward"
+      },
+      {
+        "insight": "長度偏差問題對 Agent 系統有直接啟示",
+        "description": "RL 訓練的模型系統性偏好冗長回答。在 Agent 系統中，冗長輸出消耗 token 預算、增加延遲、降低重點。TLDR 長度正則化 RL 的思路可轉化為 Agent prompt 的簡潔性約束",
+        "applicable_to": "本專案各 prompt 模板可加入明確的輸出長度約束（如 research-task 的洞見限制在 5-7 點、summary 限制 200 字），模擬 TLDR 的長度控制效果"
+      },
+      {
+        "insight": "Process Reward Model 的逐步驗證思維與 OODA 閉環高度相似",
+        "description": "PRM 在每個推理步驟提供密集回饋（而非僅看最終結果），這與 daily-digest-prompt 的 OODA 閉環（Observe→Orient→Decide→Act，每步有檢查點）在架構精神上一致。逐步驗證優於結果驗證",
+        "applicable_to": "強化本專案 Phase 1→2→3 的中間驗證點（如 Phase 1 輸出 JSON 後立即驗證格式，而非等到 Phase 3 組裝時才發現問題）"
+      }
+    ]
+  },
+  "stage_completed": 3
 }

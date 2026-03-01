@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 23 個 Skill 速查表（17 核心 + 6 工具，名稱、觸發關鍵字、用途）
+- 24 個 Skill 速查表（17 核心 + 7 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -112,7 +112,7 @@ daily-digest-prompt/
     pipeline.yaml                 # 每日摘要管線：步驟順序、Skill 依賴、後處理
     routing.yaml                  # Todoist 三層路由：標籤映射、關鍵字映射、排除清單
     cache-policy.yaml             # 快取策略：各 API 的 TTL、降級時限
-    frequency-limits.yaml         # 自動任務頻率限制（18 個任務，45 次/日上限）
+    frequency-limits.yaml         # 自動任務頻率限制（19 個任務，47 次/日上限）
     benchmark.yaml                # 系統效能基準線（目標門檻、參考專案比較）
     scoring.yaml                  # TaskSense 優先級計分規則
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
@@ -207,7 +207,7 @@ daily-digest-prompt/
     fetch-audit-dim3-7.md         # Phase 1: 維度 3（系統品質）+ 維度 7（系統完成度）
     fetch-audit-dim4.md           # Phase 1: 維度 4（系統工作流）
     assemble-audit.md             # Phase 2: 組裝結果 + 自動修正 + 報告 + RAG
-    # Todoist 團隊模式（Phase 1 → Phase 2 → Phase 3，共 20 個）
+    # Todoist 團隊模式（Phase 1 → Phase 2 → Phase 3，共 21 個）
     todoist-query.md              # Phase 1: Todoist 查詢 + 路由 + 計分 + 規劃
     todoist-assemble.md           # Phase 3: 組裝結果 + 關閉任務 + 通知
     todoist-auto-shurangama.md    # Phase 2: 自動楞嚴經研究
@@ -251,7 +251,7 @@ daily-digest-prompt/
     kb-curator/ github-scout/     # 共 17 核心 Skill
     task-manager/ skill-scanner/
     system-audit/ todoist-task-creator/
-    arch-evolution/               # 共 6 工具 Skill（合計 23 個，各含 SKILL.md）
+    arch-evolution/               # 共 7 工具 Skill（合計 24 個，各含 SKILL.md）
 
   # 規格與文件
   specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
@@ -296,7 +296,7 @@ daily-digest-prompt/
 6. 無可處理項目或全部完成時，自動任務 prompt 從 `templates/auto-tasks/` 按需載入
 7. 品質驗證依 `templates/shared/quality-gate.md` + `templates/shared/done-cert.md`
 8. 通知格式依 `config/notification.yaml`
-9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：18 個任務，合計 45 次/日上限，round-robin 輪轉
+9. **自動任務頻率限制**（定義在 config/frequency-limits.yaml）：19 個任務，合計 47 次/日上限，round-robin 輪轉
 10. **研究任務 KB 去重**（定義在 templates/sub-agent/research-task.md）：研究前先查詢知識庫避免重複
 
 ### Todoist 任務規劃 - 團隊並行模式（run-todoist-agent-team.ps1，推薦）
@@ -428,8 +428,8 @@ python hooks/query_logs.py --format json
 - `check-health.ps1` 提供近 7 天健康度報告
 
 ### 4. 自動任務輪轉（round-robin）
-- 18 個自動任務定義在 `config/frequency-limits.yaml`，合計 45 次/日上限
-- 8 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)、系統自省(4)、GitHub靈感(1)
+- 19 個自動任務定義在 `config/frequency-limits.yaml`，合計 47 次/日上限
+- 9 大群組：佛學研究(12)、AI/技術研究(17)、系統優化(2)、系統維護(5)、遊戲創意(2)、專案品質(2)、系統自省(4)、Chatroom整合(2)、GitHub靈感(1)
 - 維護 `next_execution_order` 指針（跨日保留），確保所有任務公平輪轉
 - 觸發條件：無可處理 Todoist 項目 **或** 今日任務全部完成
 
@@ -453,7 +453,7 @@ python hooks/query_logs.py --format json
 
 ---
 
-## Skills（專案內自包含，共 23 個）
+## Skills（專案內自包含，共 24 個）
 
 完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
 

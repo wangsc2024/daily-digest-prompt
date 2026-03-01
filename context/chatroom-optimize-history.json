@@ -1,0 +1,24 @@
+{
+  "history": [
+    {
+      "date": "2026-02-28",
+      "run_at": "2026-02-28T13:20:00+08:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "closed",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "pending_tasks": 0,
+        "uptime_seconds": 10166
+      },
+      "optimized": false
+    }
+  ]
+}

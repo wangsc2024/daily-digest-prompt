@@ -58,6 +58,20 @@ schedules:
     retry: 0
     description: "知識庫備份審查（每日 00:30，備份後驗證完整性，失敗時 ntfy 告警）"
 
+  bot-startup:
+    trigger: startup
+    delay: 30
+    command: "node bot.js"
+    workdir: "D:/Source/daily-digest-prompt/bot"
+    description: "Bot.js 聊天室伺服器（開機啟動，延遲 30s 等待網路）"
+
+  chatroom-scheduler-startup:
+    trigger: startup
+    delay: 60
+    command: "uv run python chatroom-scheduler.py"
+    workdir: "D:/Source/daily-digest-prompt"
+    description: "Chatroom 任務排程器（開機啟動，延遲 60s 等待 bot.js 就緒）"
+
 ---
 
 # Heartbeat 排程定義
@@ -76,6 +90,8 @@ schedules:
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 3600s (60min) | Todoist 團隊模式 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
 | kb-verify-backup | 每日 00:30 | kb-verify-backup.ps1 | 60s (1min) | 備份完整性審查（失敗時 ntfy 告警） |
+| bot-startup | 開機啟動 +30s | node bot.js | 無限制 | Bot.js 聊天室伺服器 |
+| chatroom-scheduler-startup | 開機啟動 +60s | uv run python chatroom-scheduler.py | 無限制 | Chatroom 任務排程器 |
 
 ## Todoist 驅動任務（由每小時排程撿起）
 

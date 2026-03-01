@@ -39,7 +39,7 @@ if ($FromHeartbeat) {
             if ($currentSchedule -and $currentSchedule.Name) {
                 $schedules += $currentSchedule
             }
-            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Description = ""; Interval = ""; Timeout = 0 }
+            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Description = ""; Interval = ""; Timeout = 0; Trigger = ""; Command = ""; WorkDir = ""; Delay = 0 }
         }
         elseif ($currentSchedule) {
             if ($line -match '^\s{4}cron:\s*"(.+)"') { $currentSchedule.Cron = $Matches[1] }
@@ -47,6 +47,10 @@ if ($FromHeartbeat) {
             if ($line -match '^\s{4}description:\s*"(.+)"') { $currentSchedule.Description = $Matches[1] }
             if ($line -match '^\s{4}interval:\s*(\S+)') { $currentSchedule.Interval = $Matches[1] }
             if ($line -match '^\s{4}timeout:\s*(\d+)') { $currentSchedule.Timeout = [int]$Matches[1] }
+            if ($line -match '^\s{4}trigger:\s*(\S+)') { $currentSchedule.Trigger = $Matches[1] }
+            if ($line -match '^\s{4}command:\s*"(.+)"') { $currentSchedule.Command = $Matches[1] }
+            if ($line -match '^\s{4}workdir:\s*"(.+)"') { $currentSchedule.WorkDir = $Matches[1] }
+            if ($line -match '^\s{4}delay:\s*(\d+)') { $currentSchedule.Delay = [int]$Matches[1] }
         }
     }
     if ($currentSchedule -and $currentSchedule.Name) { $schedules += $currentSchedule }
@@ -68,10 +72,12 @@ if ($FromHeartbeat) {
         }
         $taskNameFromHB = "Claude_$($s.Name)"
         $timeoutInfo = if ($s.Timeout -gt 0) { "$($s.Timeout)s" } else { "無限制" }
-        Write-Host "  - $taskNameFromHB | $cronTime | $($s.Script) | timeout=$timeoutInfo | $($s.Description)" -ForegroundColor White
+        $timeStr   = if ($s.Trigger -eq 'startup') { "開機啟動" } else { $cronTime }
+        $scriptStr = if ($s.Command) { $s.Command } else { $s.Script }
+        Write-Host "  - $taskNameFromHB | $timeStr | $scriptStr | timeout=$timeoutInfo | $($s.Description)" -ForegroundColor White
 
         $scriptPath = "$AgentDir\$($s.Script)"
-        if (-not (Test-Path $scriptPath)) {
+        if (-not $s.Command -and -not (Test-Path $scriptPath)) {
             Write-Host "    [警告] 腳本不存在: $scriptPath，跳過" -ForegroundColor Yellow
             continue
         }
@@ -80,10 +86,30 @@ if ($FromHeartbeat) {
         $existing = Get-ScheduledTask -TaskName $taskNameFromHB -ErrorAction SilentlyContinue
         if ($existing) { Unregister-ScheduledTask -TaskName $taskNameFromHB -Confirm:$false }
 
-        $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
-            -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`"" `
-            -WorkingDirectory $AgentDir
-        $trigger = New-ScheduledTaskTrigger -Daily -At $cronTime
+        # Action：command 欄位（node/uv 等）優先，其次 pwsh Script
+        if ($s.Command) {
+            $workDir = if ($s.WorkDir) { $s.WorkDir } else { $AgentDir }
+            $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
+                -Argument "-NoProfile -WindowStyle Hidden -Command `"Set-Location '$workDir'; $($s.Command)`"" `
+                -WorkingDirectory $workDir
+        } else {
+            $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
+                -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`"" `
+                -WorkingDirectory $AgentDir
+        }
+
+        # Trigger：startup 或 daily cron
+        if ($s.Trigger -eq 'startup') {
+            $trigger = New-ScheduledTaskTrigger -AtStartup
+            if ($s.Delay -gt 0) {
+                $trigger.Delay = "PT$($s.Delay)S"
+                Write-Host "    觸發條件：開機啟動（延遲 $($s.Delay)s）" -ForegroundColor DarkCyan
+            } else {
+                Write-Host "    觸發條件：開機啟動" -ForegroundColor DarkCyan
+            }
+        } else {
+            $trigger = New-ScheduledTaskTrigger -Daily -At $cronTime
+        }
 
         # 支援間隔排程（如 interval: 60m → 每小時重複）
         if ($s.Interval -match '^(\d+)m$') {
