@@ -93,5 +93,95 @@
       ]
     }
   ],
-  "stage_completed": 2
+  "analysis": {
+    "consensus": [
+      {
+        "point": "四協議互補非競爭",
+        "support_count": 7,
+        "detail": "所有來源一致認為 MCP、A2A、ACP、ANP 是互補的構建塊，非相互競爭的標準。無單一協議適用所有場景，應根據使用情境分層組合。"
+      },
+      {
+        "point": "分層架構已確立共識",
+        "support_count": 6,
+        "detail": "MCP 處理工具層存取、A2A 管理代理間協作、ACP 負責訊息傳遞、ANP 處理全球互聯網級互操作。層級從具體到抽象、從本地到全球。"
+      },
+      {
+        "point": "漸進式採納策略",
+        "support_count": 4,
+        "detail": "建議從 MCP 工具整合開始（最成熟/最低風險），逐步向 A2A 代理協作擴展，最終達到 ANP 全球互操作。分階段降低整合風險。"
+      },
+      {
+        "point": "安全是每一層的核心關注",
+        "support_count": 5,
+        "detail": "每個協議都有專屬安全機制：MCP 用能力型令牌/OAuth 2.1+PKCE、A2A 用 OAuth 2.0/mTLS/OIDC、ACP 用 Bearer tokens/K8s RBAC。安全複雜度隨層級升高而增加。"
+      },
+      {
+        "point": "MCP 已達事實標準地位",
+        "support_count": 5,
+        "detail": "MCP 擁有 10,000+ 活躍伺服器、9700 萬月 SDK 下載量，生態系統最成熟。任何新協議都必須與 MCP 互操作。"
+      }
+    ],
+    "divergence": [
+      {
+        "point": "ACP 的獨立性問題",
+        "detail": "arxiv 論文和 WorkOS 將 ACP 視為獨立協議進行詳細技術分析；EffectiveSoft 和 Katonic 則指出 ACP 已於 2025-08 併入 A2A。時間差造成學術界與產業界的觀點分歧。",
+        "implication": "後續研究應以合併後的 A2A 為主，但 ACP 的本地優先設計理念仍有獨立參考價值。"
+      },
+      {
+        "point": "ANP 的成熟度評估",
+        "detail": "GetStream 將 ANP 視為已就緒的五層堆疊組件；arxiv 論文定位為 Stage 4（最後階段），暗示尚未達生產級。Katonic 認為 ANP 可達互聯網級規模但未提供實證。",
+        "implication": "ANP 的架構設計已明確，但生產環境驗證不足，2026 年仍處於早期採納階段。"
+      },
+      {
+        "point": "AGORA 的存在與定位",
+        "detail": "僅 Katonic 提及 AGORA 協議（自然語言驅動交互），其他 6 篇來源完全未涉及。可能是過於新興或受眾有限。",
+        "implication": "自然語言驅動的代理交互是潛在方向，但 2026 年仍不在主流討論範圍。"
+      }
+    ],
+    "insights": [
+      {
+        "id": 1,
+        "insight": "協議分層金字塔已確立：MCP（工具層）→ ACP（訊息層）→ A2A（協作層）→ ANP（互聯網層），形成從具體到抽象、從本地到全球的四層架構",
+        "support": "7/7 篇來源交叉驗證",
+        "relevance": "daily-digest-prompt 的 Agent Team 架構目前處於 MCP 工具層（Claude Code CLI），未來可考慮引入 A2A 實現跨系統代理協作"
+      },
+      {
+        "id": 2,
+        "insight": "ACP 與 A2A 合併標誌協議整合趨勢，預示未來可能整合為 2-3 個核心協議（MCP + A2A + ANP）",
+        "support": "EffectiveSoft、Katonic 直接確認；arxiv 論文的四協議分析框架即將變為三協議",
+        "relevance": "選擇技術棧時應優先投入 MCP 和 A2A，避免押注在可能被合併的協議上"
+      },
+      {
+        "id": 3,
+        "insight": "MCP 10,000+ 伺服器和 9700 萬月下載量已達臨界規模，形成網路效應護城河",
+        "support": "ruh.ai 數據 + GetStream 生態分析",
+        "relevance": "專案已使用 MCP（Cloudflare、Slack 等 deferred tools），站在正確的技術軌道上"
+      },
+      {
+        "id": 4,
+        "insight": "安全威脅隨協議層級升高而指數級複雜化：工具中毒（MCP）→ Agent Card 欺騙（A2A）→ 全球身份欺騙（ANP）",
+        "support": "arxiv 威脅矩陣 + Zylos 安全分析 + ruh.ai 安全比較",
+        "relevance": "現有 Hook 機器強制層已覆蓋 MCP 層級安全，未來引入 A2A 時需增加 Agent Card 驗證機制"
+      },
+      {
+        "id": 5,
+        "insight": "A2A 不透明性原則（基於能力協作、不暴露內部實現）是企業級 AI 互操作的必要條件",
+        "support": "Zylos 獨特觀點 + ruh.ai 銀行/零售企業案例佐證",
+        "relevance": "daily-digest-prompt 的 sub-agent 架構已隱式遵循此原則（Task 工具不暴露子 Agent 內部邏輯）"
+      },
+      {
+        "id": 6,
+        "insight": "本地優先（ACP/BeeAI）vs 雲端優先（A2A/ANP）代表兩種設計哲學，日常開發場景偏好本地優先",
+        "support": "WorkOS 技術深度分析（ACP 三種通訊模式 + K8s RBAC 橋接）",
+        "relevance": "專案的 Agent Team 在 Windows 本地執行，符合本地優先哲學，無需雲端協調器"
+      },
+      {
+        "id": 7,
+        "insight": "AP2（Agent Payment Protocol）開闢 AI 經濟學新維度，代理間自主交易將催生新的商業模式",
+        "support": "GetStream 獨特提及，目前僅 1 篇來源",
+        "relevance": "前沿方向，暫不影響現有架構，但值得持續關注"
+      }
+    ]
+  },
+  "stage_completed": 3
 }
