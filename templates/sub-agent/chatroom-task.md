@@ -27,7 +27,7 @@
 ```bash
 python -c "import json; print(json.dumps({'worker_id': 'claude-todoist-agent'}))" > /tmp/claim_body.json
 curl -s -X PATCH \
-  -H "Authorization: Bearer $BOT_API_SECRET_KEY" \
+  -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json" \
   -d @/tmp/claim_body.json \
   "http://localhost:3001/api/records/{uid}/claim"
@@ -47,7 +47,7 @@ body = {'state': 'processing', 'worker_id': 'claude-todoist-agent', 'claim_gener
 print(json.dumps(body))
 " > /tmp/state_body.json
 curl -s -X PATCH \
-  -H "Authorization: Bearer $BOT_API_SECRET_KEY" \
+  -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json" \
   -d @/tmp/state_body.json \
   "http://localhost:3001/api/records/{uid}/state"
@@ -92,7 +92,7 @@ with open('/tmp/complete_body.json', 'w', encoding='utf-8') as f:
 ### 3.2 呼叫完成 API
 ```bash
 curl -s -X PATCH \
-  -H "Authorization: Bearer $BOT_API_SECRET_KEY" \
+  -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @/tmp/complete_body.json \
   "http://localhost:3001/api/records/{uid}/processed"

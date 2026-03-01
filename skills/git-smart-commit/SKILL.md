@@ -1,6 +1,6 @@
 ---
 name: git-smart-commit
-version: "1.0.0"
+version: "1.1.0"
 description: |
   將雜亂的 git 變更依功能邏輯自動拆分為多個語義化的 Conventional Commit。
   Use when: 自動推送前需要將多個變更分群提交，或手動整理 git 歷史時使用。
@@ -12,6 +12,8 @@ triggers:
   - "智慧提交"
   - "conventional commit"
   - "分群提交"
+  - "git push"
+  - "自動提交"
 ---
 
 # Git Smart Commit — 智慧分群提交
@@ -81,6 +83,7 @@ git status --porcelain
 - 不超過 50 字
 - 動詞開頭：新增、調整、修正、移除、重構、更新
 - 不以句號結尾
+- 每個 commit 結尾加上 `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`（專案規範）
 
 範例：
 ```
@@ -95,9 +98,14 @@ chore: auto-sync 2026-02-25_2130
 ### 步驟 5：逐批執行
 
 ```bash
-# 對每個分群依序執行
+# 對每個分群依序執行（使用 HEREDOC 確保格式正確）
 git add <group_files...>
-git commit -m "<type>(<scope>): <description>"
+git commit -m "$(cat <<'EOF'
+<type>(<scope>): <description>
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
 ```
 
 若某次 commit 失敗（例如 pre-commit hook 攔截）：

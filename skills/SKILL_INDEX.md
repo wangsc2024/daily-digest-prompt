@@ -35,8 +35,8 @@
 | 20 | system-audit | 系統審查評分（7 維度 38 子項） | 系統審查、系統評分、品質評估、system audit、安全評分、架構評審、完成度檢查、系統健檢 |
 | 21 | todoist-task-creator | 互動式新增符合路由規則的 Todoist 任務（depends-on: todoist） | 新增 Todoist 任務、建立排程任務、add todoist task、新增待辦排程、todoist 新增、新增可執行任務、todoist-task-creator、新增排程待辦、建立 todoist |
 | 22 | arch-evolution | 架構演化追蹤器（ADR/技術債/依賴圖/OODA，depends-on: system-audit、system-insight） | 架構決策、ADR、技術債、依賴圖、OODA、arch-evolution、架構治理、漸進式改進、改進計畫、架構演化 |
-| 23 | git-smart-commit | 智慧分群提交（Conventional Commit） | git commit、smart commit、智慧提交、conventional commit、分群提交 |
-| 24 | chatroom-query | bot.js REST API 互動（查詢/認領/執行 Gun.js 聊天室任務） | chatroom、聊天室、bot.js、Gun.js 任務、任務佇列、pending 任務、wsc-bot |
+| 23 | git-smart-commit | 智慧分群提交（Conventional Commit） | git commit、smart commit、智慧提交、conventional commit、分群提交、git push、自動提交 |
+| 24 | chatroom-query | bot.js REST API 互動（查詢/認領/執行 Gun.js 聊天室任務，depends-on: api-cache） | chatroom、聊天室、bot.js、Gun.js 任務、任務佇列、pending 任務、wsc-bot、聊天室任務、bot 任務 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
