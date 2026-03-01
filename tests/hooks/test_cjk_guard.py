@@ -30,8 +30,24 @@ class TestCJKCorrections:
     """CORRECTIONS 映射表驗證。"""
 
     def test_valid_mappings_count(self):
-        """CORRECTIONS 應有 12 個有效映射。"""
+        """CORRECTIONS 應有 12 個唯一映射（源碼無重複 key）。"""
         assert len(CORRECTIONS) == 12
+
+    def test_no_duplicate_keys_in_source(self):
+        """源碼中 CORRECTIONS dict 不應有重複 key（Python dict 靜默覆蓋）。"""
+        import re
+        source_path = os.path.join(project_root, "hooks", "cjk_guard.py")
+        with open(source_path, "r", encoding="utf-8") as f:
+            source = f.read()
+        # 提取 CORRECTIONS = { ... } 區塊中的 hex key
+        m = re.search(r"CORRECTIONS\s*=\s*\{([^}]+)\}", source, re.DOTALL)
+        assert m, "找不到 CORRECTIONS 定義"
+        keys = re.findall(r"0x[0-9A-Fa-f]+", m.group(1))
+        # 每個 key:value 對有兩個 hex，取偶數位置為 key
+        hex_keys = keys[::2]
+        assert len(hex_keys) == len(set(hex_keys)), (
+            f"CORRECTIONS 源碼有重複 key: {[k for k in hex_keys if hex_keys.count(k) > 1]}"
+        )
 
     def test_no_same_codepoint_entries(self):
         """CORRECTIONS 中不應有 jp == tc 的條目。"""

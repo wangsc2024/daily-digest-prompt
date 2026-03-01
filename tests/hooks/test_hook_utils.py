@@ -1,7 +1,9 @@
 """Tests for hooks/hook_utils.py — Hook 共用工具模組測試。"""
 import json
 import os
+import re
 import sys
+from unittest.mock import patch
 
 import pytest
 
@@ -9,7 +11,10 @@ import pytest
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(project_root, "hooks"))
 
-from hook_utils import find_config_path, load_yaml_rules, log_blocked_event
+from hook_utils import (
+    find_config_path, load_yaml_rules, log_blocked_event,
+    get_compiled_regex, get_rule_patterns, get_rule_re_flags,
+)
 
 
 class TestFindConfigPath:
@@ -61,10 +66,12 @@ class TestLoadYamlRules:
     def test_fallback_on_missing_config(self, monkeypatch):
         """配置檔不存在時應回退。"""
         import hook_utils
+        hook_utils.clear_yaml_config_cache()
         monkeypatch.setattr(hook_utils, "find_config_path", lambda filename="hook-rules.yaml": None)
         fallback = [{"id": "fallback"}]
         rules = load_yaml_rules("bash_rules", fallback)
         assert rules is fallback
+        hook_utils.clear_yaml_config_cache()
 
 
 class TestLogBlockedEvent:
@@ -113,3 +120,95 @@ class TestLogBlockedEvent:
             entry = json.loads(f.readline())
 
         assert entry["sid"] == ""
+
+
+class TestYamlConfigCache:
+    """YAML 配置載入快取機制。"""
+
+    def test_repeated_calls_return_same_result(self):
+        """連續呼叫 load_yaml_rules 應回傳一致的結果。"""
+        fallback = [{"id": "fallback"}]
+        result1 = load_yaml_rules("bash_rules", fallback)
+        result2 = load_yaml_rules("bash_rules", fallback)
+        assert result1 == result2
+
+    def test_cache_avoids_repeated_file_reads(self, monkeypatch):
+        """快取啟用後，第二次呼叫不應重新開檔。"""
+        import hook_utils
+        # 清除快取
+        hook_utils.clear_yaml_config_cache()
+
+        call_count = {"n": 0}
+        original_open = open
+
+        def counting_open(*args, **kwargs):
+            if args and isinstance(args[0], str) and "hook-rules.yaml" in args[0]:
+                call_count["n"] += 1
+            return original_open(*args, **kwargs)
+
+        with patch("builtins.open", side_effect=counting_open):
+            load_yaml_rules("bash_rules", [])
+            first_count = call_count["n"]
+            load_yaml_rules("write_rules", [])
+            second_count = call_count["n"]
+
+        # 第二次呼叫不應增加開檔次數（從快取取得）
+        assert second_count == first_count
+        # 清除快取避免影響其他測試
+        hook_utils.clear_yaml_config_cache()
+
+    def test_clear_cache_forces_reload(self, monkeypatch):
+        """清除快取後應重新載入配置。"""
+        import hook_utils
+        hook_utils.clear_yaml_config_cache()
+
+        fallback = [{"id": "fallback"}]
+        result1 = load_yaml_rules("bash_rules", fallback)
+        hook_utils.clear_yaml_config_cache()
+        result2 = load_yaml_rules("bash_rules", fallback)
+        assert result1 == result2  # 結果相同但經過重新載入
+
+
+class TestGetRulePatterns:
+    """共用規則 pattern 提取。"""
+
+    def test_single_pattern(self):
+        """單一 pattern 規則應回傳含該 pattern 的清單。"""
+        rule = {"pattern": r"echo\s+hello"}
+        assert get_rule_patterns(rule) == [r"echo\s+hello"]
+
+    def test_multiple_patterns(self):
+        """多個 patterns 應直接回傳。"""
+        rule = {"patterns": [r"a+", r"b+"]}
+        assert get_rule_patterns(rule) == [r"a+", r"b+"]
+
+    def test_patterns_takes_precedence(self):
+        """同時有 pattern 和 patterns 時，patterns 優先。"""
+        rule = {"pattern": r"single", "patterns": [r"multi1", r"multi2"]}
+        assert get_rule_patterns(rule) == [r"multi1", r"multi2"]
+
+    def test_empty_rule(self):
+        """無 pattern/patterns 時回傳空清單。"""
+        assert get_rule_patterns({}) == []
+
+    def test_empty_patterns_falls_back_to_single(self):
+        """patterns 為空清單時應回退到 pattern。"""
+        rule = {"pattern": r"fallback", "patterns": []}
+        assert get_rule_patterns(rule) == [r"fallback"]
+
+
+class TestGetRuleReFlags:
+    """共用規則 regex flags 提取。"""
+
+    def test_ignorecase(self):
+        """flags 為 IGNORECASE 時回傳 re.IGNORECASE。"""
+        rule = {"flags": "IGNORECASE"}
+        assert get_rule_re_flags(rule) == re.IGNORECASE
+
+    def test_no_flags(self):
+        """無 flags 時回傳 0。"""
+        assert get_rule_re_flags({}) == 0
+
+    def test_unknown_flags(self):
+        """未知 flags 值回傳 0。"""
+        assert get_rule_re_flags({"flags": "UNKNOWN"}) == 0

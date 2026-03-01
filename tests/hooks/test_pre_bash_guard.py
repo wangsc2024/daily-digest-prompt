@@ -50,9 +50,11 @@ class TestLoadBashRules:
     def test_fallback_when_yaml_missing(self, monkeypatch):
         """YAML 不可用時應回退至內建規則。"""
         import hook_utils
+        hook_utils.clear_yaml_config_cache()
         monkeypatch.setattr(hook_utils, "find_config_path", lambda filename="hook-rules.yaml": None)
         rules = load_bash_rules()
         assert rules is FALLBACK_BASH_RULES
+        hook_utils.clear_yaml_config_cache()
 
 
 class TestNulRedirect:
