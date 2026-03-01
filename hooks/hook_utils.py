@@ -14,6 +14,9 @@ from datetime import datetime
 # 模組層級正則編譯快取（避免重複編譯 hot path 中的 pattern）
 _compiled_regex_cache: dict = {}
 
+# 模組層級 YAML 配置快取（避免同一進程多次開檔讀取 hook-rules.yaml）
+_yaml_config_cache: dict = {"loaded": False, "data": None}
+
 
 def get_compiled_regex(pattern: str, flags: int = 0):
     """從快取取得已編譯正則，未命中時編譯並快取。"""
@@ -63,25 +66,44 @@ def find_config_path(filename="hook-rules.yaml"):
     return None
 
 
+def clear_yaml_config_cache():
+    """清除 YAML 配置快取，下次呼叫將重新載入。"""
+    _yaml_config_cache["loaded"] = False
+    _yaml_config_cache["data"] = None
+
+
 def _load_yaml_config():
-    """載入 hook-rules.yaml 完整配置（含快取）。
+    """載入 hook-rules.yaml 完整配置（含模組層級快取）。
 
     單次 YAML 開檔供 load_yaml_rules + filter_rules_by_preset 共用，
-    避免同一 hook 呼叫中重複開檔讀取。
+    避免同一 hook 呼叫中重複開檔讀取。快取在進程生命週期內有效，
+    可透過 clear_yaml_config_cache() 手動清除。
     """
+    if _yaml_config_cache["loaded"]:
+        return _yaml_config_cache["data"]
+
     config_path = find_config_path()
     if config_path is None:
+        _yaml_config_cache["loaded"] = True
+        _yaml_config_cache["data"] = None
         return None
 
     try:
         import yaml
     except ImportError:
+        _yaml_config_cache["loaded"] = True
+        _yaml_config_cache["data"] = None
         return None
 
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f)
+        _yaml_config_cache["loaded"] = True
+        _yaml_config_cache["data"] = data
+        return data
     except Exception:
+        _yaml_config_cache["loaded"] = True
+        _yaml_config_cache["data"] = None
         return None
 
 
@@ -140,6 +162,26 @@ def filter_rules_by_preset(rules, section_key="bash_rules"):
         return rules
 
     return filtered
+
+
+def get_rule_patterns(rule):
+    """從規則取得 pattern 清單（支援單一 pattern 或多個 patterns）。
+
+    供 pre_bash_guard、pre_read_guard 等 guard 共用，避免重複實作。
+    """
+    patterns = rule.get("patterns", [])
+    single = rule.get("pattern")
+    if single and not patterns:
+        return [single]
+    return patterns
+
+
+def get_rule_re_flags(rule):
+    """從規則取得 regex flags。
+
+    供 pre_bash_guard、pre_read_guard 等 guard 共用，避免重複實作。
+    """
+    return re.IGNORECASE if rule.get("flags") == "IGNORECASE" else 0
 
 
 def log_blocked_event(session_id, tool, summary, reason, guard_tag):

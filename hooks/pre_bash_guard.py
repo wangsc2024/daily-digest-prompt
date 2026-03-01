@@ -14,9 +14,7 @@ PreToolUse:Bash Guard — Bash 指令機器強制攔截。
 規則來源：config/hook-rules.yaml（不可用時回退至內建預設值）。
 攔截事件記錄至 logs/structured/YYYY-MM-DD.jsonl。
 """
-import re
-
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex
+from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex, get_rule_patterns, get_rule_re_flags
 
 
 # YAML 不可用時的內建預設規則
@@ -175,20 +173,6 @@ def load_bash_rules():
     return filter_rules_by_preset(rules, "bash_rules")
 
 
-def _get_patterns(rule):
-    """從規則取得 pattern 清單（支援單一 pattern 或多個 patterns）。"""
-    patterns = rule.get("patterns", [])
-    single = rule.get("pattern")
-    if single and not patterns:
-        return [single]
-    return patterns
-
-
-def _get_re_flags(rule):
-    """從規則取得 regex flags。"""
-    return re.IGNORECASE if rule.get("flags") == "IGNORECASE" else 0
-
-
 def check_bash_command(command, rules=None):
     """檢查 bash 指令是否命中攔截規則。
 
@@ -204,8 +188,8 @@ def check_bash_command(command, rules=None):
         if contains and contains not in command:
             continue
 
-        re_flags = _get_re_flags(rule)
-        patterns = _get_patterns(rule)
+        re_flags = get_rule_re_flags(rule)
+        patterns = get_rule_patterns(rule)
 
         if any(get_compiled_regex(p, re_flags).search(command) for p in patterns):
             reason = rule.get("reason", "Blocked by rule: " + rule.get("id", "unknown"))

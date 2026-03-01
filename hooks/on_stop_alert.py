@@ -502,11 +502,13 @@ def check_gmail_token_expiry() -> "dict | None":
     expire_date = issued_date + timedelta(days=EXPIRE_DAYS)
     days_remaining = (expire_date - today).days
 
+    today_str = today.isoformat()
+    already_alerted_today = state.get("last_alerted_date", "") == today_str
     return {
         "days_remaining": days_remaining,
         "expire_date": expire_date.isoformat(),
         "issued_date": issued_date.isoformat(),
-        "needs_alert": days_remaining <= WARN_DAYS,
+        "needs_alert": days_remaining <= WARN_DAYS and not already_alerted_today,
         "expired": days_remaining <= 0,
     }
 
@@ -582,6 +584,20 @@ def main():
     if alert:
         severity, title, message = alert
         send_ntfy_alert(title, message, severity)
+        # 寫入每日去重標記（僅在 Gmail 到期告警觸發時）
+        if gmail_expiry and gmail_expiry.get("needs_alert"):
+            _state_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "state", "gmail-oauth-state.json",
+            )
+            try:
+                with open(_state_path, "r", encoding="utf-8") as _f:
+                    _state = json.load(_f)
+                _state["last_alerted_date"] = date.today().isoformat()
+                with open(_state_path, "w", encoding="utf-8") as _f:
+                    json.dump(_state, _f, ensure_ascii=False)
+            except (OSError, json.JSONDecodeError):
+                pass
         write_session_summary(
             analysis, alert_sent=True, severity=severity,
             session_id=session_id,
