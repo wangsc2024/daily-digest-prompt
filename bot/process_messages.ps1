@@ -192,15 +192,24 @@ foreach ($record in $records) {
         }
 
         Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}))..."
-        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-            Push-Location $workDir
-            try {
+        # 清除 CLAUDECODE 環境變數：Task Scheduler 繼承此變數會導致 claude -p 拒絕啟動（巢狀 session 保護）
+        # 官方說明：「To bypass this check, unset the CLAUDECODE environment variable.」
+        $savedClaudeCode = $env:CLAUDECODE
+        Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+        try {
+            if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                Push-Location $workDir
+                try {
+                    $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
+                } finally {
+                    Pop-Location
+                }
+            } else {
                 $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
-            } finally {
-                Pop-Location
             }
-        } else {
-            $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
+        } finally {
+            # 還原環境變數
+            if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
         }
         $toolUsed = "Claude CLI"
 

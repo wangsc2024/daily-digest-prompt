@@ -211,7 +211,7 @@ sync_check:
 chatroom_task_source:
   enabled: true
   api_url: "http://localhost:3001"
-  auth_env: "BOT_API_SECRET_KEY"
+  auth_env: "BOT_API_SECRET"
   health_endpoint: "/api/health"
   records_endpoint: "/api/records?state=pending&limit=10"
   trigger_condition: "todoist_empty OR all_completed"

@@ -19,6 +19,26 @@
         "uptime_seconds": 10166
       },
       "optimized": false
+    },
+    {
+      "date": "2026-03-01",
+      "run_at": "2026-03-01T13:15:00+08:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "closed",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "pending_tasks": 2,
+        "uptime_seconds": 1367
+      },
+      "optimized": false
     }
   ]
 }

@@ -175,7 +175,15 @@ const gun = Gun({
     axe: false,         // 避免 put ACK 異常
     localStorage: false,
 });
-gun.on('hi', () => { if (app.locals) app.locals.gunConnected = true; });
+gun.on('hi', () => {
+    if (app.locals) app.locals.gunConnected = true;
+    // Relay 重新連線時補發 epub（Render.com 重啟後 radisk 資料消失）
+    if (myPair && epubSig) {
+        gun.get('wsc-bot/handshake').put({ epub: myPair.epub, sig: epubSig, pub: myPair.pub });
+        gun.get('wsc-bot/handshake').get('bot-epub').put(myPair.epub);
+        console.log('[握手] relay 重連，已補發 epub');
+    }
+});
 gun.on('bye', () => { if (app.locals) app.locals.gunConnected = false; });
 const SEA = Gun.SEA;
 const chatRoomName = 'render_isolated_chat_room';
@@ -198,6 +206,7 @@ const processedMessages = new Map();
 const MSG_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 小時
 
 let myPair = null;
+let epubSig = null; // 模組層級，供 gun.on('hi') 重連補發使用
 
 function generateId(prefix) {
     return `${prefix}_${crypto.randomUUID().slice(0, 12)}`;
@@ -456,7 +465,15 @@ function startMessageLoop() {
         }
 
         try {
-            const text = typeof raw === 'string' ? raw : (raw != null ? String(raw) : '');
+            // SEA.decrypt 可能回傳字串（用戶訊息）或已解析物件（bot 回覆 JSON.stringify({text,ts})）
+            let text;
+            if (typeof raw === 'string') {
+                text = raw;
+            } else if (raw && typeof raw === 'object' && raw.text) {
+                text = raw.text; // bot 回覆格式：{text, ts}
+            } else {
+                text = raw != null ? String(raw) : '';
+            }
             if (!text || text.startsWith('[系統回覆]')) return;
 
             processedMessages.set(id, Date.now());
@@ -548,9 +565,9 @@ async function init() {
 
     // Gun 握手：公告 bot epub，並監聽 client epub（取代 /api/connect HTTP 呼叫）
     // epub 是 ECDH 公鑰，公開傳遞安全，私鑰 epriv 永不離開本機
-    // G20: 廣播 epub + 附加自身簽章（防 MITM：收方可用簽章驗證 epub 真實性）
-    const epubSig = await SEA.sign(myPair.epub, myPair);
-    gun.get('wsc-bot/handshake').put({ epub: myPair.epub, sig: epubSig });
+    // G20: 廣播 epub + pub + 附加自身簽章（防 MITM：收方可用 pub 驗證 sig）
+    epubSig = await SEA.sign(myPair.epub, myPair);
+    gun.get('wsc-bot/handshake').put({ epub: myPair.epub, sig: epubSig, pub: myPair.pub });
     // 相容舊版客端讀取路徑 `bot-epub`
     gun.get('wsc-bot/handshake').get('bot-epub').put(myPair.epub);
     console.log('[握手] 已將 bot epub + 簽章公告至 Gun relay');

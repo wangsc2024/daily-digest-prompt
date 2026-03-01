@@ -1,22 +1,17 @@
 {
   "version": 1,
-  "generated_at": "2026-02-28T17:30:00+08:00",
+  "generated_at": "2026-03-01T20:30:00+08:00",
   "period_days": 7,
-  "data_sources": {
-    "scheduler_state": "full",
-    "jsonl_logs": "partial (5 days: 02-19,23,24,25,26; missing 02-27,28)",
-    "auto_tasks_today": "full",
-    "research_registry": "full",
-    "behavior_patterns": "full"
-  },
+  "data_source": "partial",
+  "data_note": "JSONL 日誌缺少 2026-02-27 和 2026-03-01；output_len 欄位多數為 0",
   "metrics": {
-    "daily_success_rate": 0.9806,
-    "skill_usage_coverage": 0.8261,
+    "daily_success_rate": 0.9846,
+    "skill_usage_coverage": 0.9583,
     "cache_hit_ratio": 0.2387,
-    "error_rate": 0.0000,
-    "block_rate": 0.0001,
-    "topic_diversity": 1.0000,
-    "auto_task_fairness": 0.6338,
+    "error_rate": 0.0,
+    "block_rate": 0.0003,
+    "topic_diversity": 1.0,
+    "auto_task_fairness": 0.5047,
     "avg_io_per_call": null,
     "behavior_pattern_count": 43,
     "high_confidence_patterns": 0
@@ -27,127 +22,111 @@
       "metric": "cache_hit_ratio",
       "value": 0.2387,
       "threshold": 0.40,
-      "detail": "快取命中率 23.9%（180 cache-read vs 574 api-call），連續三次低於 40% 門檻，已成為結構性問題"
+      "message": "快取命中率 23.9% 低於 40% 門檻"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.6338,
+      "value": 0.5047,
       "threshold": 0.50,
-      "detail": "自動任務執行分配不均（CV=0.63 > 0.50），shurangama/tech_research 頻率偏高，部分任務偏低"
+      "message": "自動任務公平性 CV=0.50 略超門檻，部分任務（github_scout=5, system_insight=6）執行次數偏低"
     },
     {
       "level": "warning",
       "metric": "high_confidence_patterns",
       "value": 0,
       "threshold": 5,
-      "detail": "43 個行為模式全部低信心（<0.5），behavior-patterns.json 僅 1 次 session 記錄，樣本嚴重不足"
+      "message": "高信心行為模式數為 0，所有 43 個模式 confidence < 0.5，尚未有模式可演化為 Skill"
     },
     {
       "level": "info",
-      "metric": "avg_io_per_call",
-      "value": null,
-      "threshold": 5000,
-      "detail": "JSONL 日誌中 output_len 均為 0，post_tool_logger 未記錄 output 長度，無法計算"
-    },
-    {
-      "level": "info",
-      "metric": "loop_suspected",
+      "metric": "loop-suspected",
       "value": 315,
       "threshold": null,
-      "detail": "loop-suspected 標籤出現 315 次，雖非 error 但頻率偏高，值得關注"
+      "message": "近 7 天有 315 次 loop-suspected 標籤，建議檢查 LoopDetector 閾值是否過敏"
     }
   ],
   "recommendations": [
-    "【P1 快取命中率持續偏低】23.9% 連續三次低於 40% 門檻，已成結構性問題。根因：團隊模式各 Phase Agent 為獨立進程無法共享快取。建議：(1) Phase 0 預熱快取；(2) 延長 API TTL；(3) 考慮檔案級跨進程快取共享",
-    "【P2 自動任務分配不均】CV=0.63 超過 0.50 門檻。175 次自動任務中 10 次 skipped、1 次 timeout。建議：微調 frequency-limits.yaml 中低頻任務的 daily_limit，或調整 round-robin 初始順序",
-    "【P2 行為模式累積不足】43 個模式但 0 個高信心（需 ≥5）。建議：確認 self-heal 是否有觸發 behavior-patterns 寫入，或增加 session 採樣頻率",
-    "【P3 JSONL 日誌 02-27/28 缺失】最近兩天無結構化日誌，建議檢查 post_tool_logger.py 是否正常運作",
-    "【P3 loop-suspected 頻繁】315 次佔總呼叫 4.2%，需確認 LoopDetector 閾值是否過於敏感",
-    "【改善】成功率 98.1%（101/103）vs 前次 97.6%（82/84），穩步上升",
-    "【改善】研究多樣性維持 100%（97 篇全不重複），去重機制持續運作良好",
-    "【改善】Skill 覆蓋率 82.6%（19/23），4 個未使用 Skill 為 atomic-habits/learning-mastery/scheduler-state/pingtung-policy-expert"
+    "快取命中率偏低（23.9%），建議檢查 cache-policy.yaml 的 TTL 設定，或確認 API 呼叫前是否確實走快取流程",
+    "自動任務分佈略不均：shurangama(16) vs github_scout(5)，round-robin 指針可能受 daily_limit 差異影響，屬正常範圍",
+    "loop-suspected 標籤 315 次偏多，建議調整 LoopDetector 的 window_size 或 similarity_threshold 減少誤報",
+    "behavior-patterns.json 所有模式 confidence < 0.5，需要更多執行次數累積信心值"
   ],
-  "scheduler_summary": {
-    "total_runs_7d": 103,
-    "success_count": 101,
-    "failed_count": 2,
-    "success_rate": 0.9806,
-    "avg_duration_seconds": 774,
-    "high_failure_hours": [4, 8],
-    "agent_distribution_note": "以 todoist-team 為主，daily-digest-team 約 4-5 次/週",
-    "section_timeouts": 1,
-    "section_skips": 10
-  },
-  "jsonl_summary": {
-    "total_tool_calls": 7579,
-    "errors": 0,
-    "blocked": 1,
-    "cache_read": 180,
-    "api_call": 574,
-    "skill_read": 442,
-    "notable_tags": {
-      "team-mode": 5257,
-      "api-call": 574,
-      "skill-read": 442,
-      "loop-suspected": 315,
-      "knowledge": 305,
-      "cache-read": 180,
-      "blocked": 1
-    }
-  },
   "skill_heatmap": {
     "todoist": 337,
-    "knowledge-query": 305,
-    "api-cache": 180,
-    "hackernews-ai-digest": 85,
-    "pingtung-news": 65,
-    "ntfy-notify": 57,
-    "gmail": 45,
-    "digest-memory": 38,
-    "system-audit": 30,
-    "system-insight": 25,
-    "game-design": 23,
-    "web-research": 22,
-    "kb-curator": 20,
-    "github-scout": 18,
-    "skill-scanner": 15,
-    "task-manager": 12,
-    "arch-evolution": 11,
-    "todoist-task-creator": 10,
-    "git-smart-commit": 2
+    "knowledge": 305,
+    "webfetch": 384,
+    "websearch": 306,
+    "api-cache": 180
   },
-  "research_summary": {
-    "total_entries_7d": 97,
-    "unique_topics": 97,
-    "diversity_index": 1.0,
-    "task_type_distribution": {
-      "todoist_research": 28,
-      "shurangama": 7,
-      "jiaoguangzong": 6,
-      "tech_research": 7,
-      "fahua": 5,
-      "jingtu": 5,
-      "creative_game": 5,
-      "unsloth_research": 5,
-      "ai_github_research": 5,
-      "ai_smart_city": 5,
-      "ai_sysdev": 5,
-      "ai_deep_research": 2,
-      "github_scout": 1,
-      "game_research": 1
+  "skill_usage_list": [
+    "api-cache", "arch-evolution", "atomic-habits", "digest-memory",
+    "game-design", "git-smart-commit", "github-scout", "gmail",
+    "hackernews-ai-digest", "kb-curator", "knowledge-query",
+    "learning-mastery", "ntfy-notify", "pingtung-news",
+    "pingtung-policy-expert", "scheduler-state", "skill-scanner",
+    "system-audit", "system-insight", "task-manager", "todoist",
+    "todoist-task-creator", "web-research"
+  ],
+  "high_failure_hours": [],
+  "scheduler_summary": {
+    "total_runs_7d": 130,
+    "success": 128,
+    "failed": 2,
+    "avg_duration_seconds": 782.3,
+    "agent_breakdown": {
+      "todoist-team": 122,
+      "daily-digest-team": 6,
+      "todoist": 2
     }
   },
-  "auto_tasks_today": {
-    "date": "2026-02-28",
-    "executed_count": 8,
-    "next_execution_order": 14,
-    "closed_todoist_tasks": 2
+  "research_summary": {
+    "total_entries_7d": 129,
+    "unique_topics_7d": 129,
+    "top_task_types": {
+      "todoist_research": 39,
+      "tech_research": 12,
+      "shurangama": 11,
+      "creative_game": 9,
+      "jiaoguangzong": 9,
+      "ai_sysdev": 8,
+      "ai_smart_city": 8,
+      "ai_github_research": 8,
+      "unsloth_research": 8,
+      "jingtu": 7,
+      "fahua": 7
+    }
   },
-  "trend_vs_previous": {
-    "success_rate_delta": 0.004,
-    "cache_hit_ratio_delta": 0.0,
-    "skill_coverage_delta": -0.174,
-    "notes": "成功率微升（98.1% vs 97.6%）；快取命中率持平（23.9%，結構性問題）；Skill 覆蓋率 82.6%（修正統計法後的真實數字，前次 100% 因路徑 alias 重複計算）；研究多樣性 100%；loop-suspected 315 次需關注"
+  "auto_task_distribution": {
+    "auto-shurangama": 16,
+    "auto-tech_research": 15,
+    "auto-ai_deep_research": 14,
+    "auto-git_push": 14,
+    "auto-jiaoguangzong": 13,
+    "auto-self_heal": 13,
+    "auto-ai_smart_city": 11,
+    "auto-ai_sysdev": 11,
+    "auto-qa_optimize": 11,
+    "auto-fahua": 10,
+    "auto-jingtu": 10,
+    "auto-skill_audit": 10,
+    "auto-creative_game_optimize": 10,
+    "auto-ai_github_research": 9,
+    "auto-unsloth_research": 8,
+    "auto-log_audit": 7,
+    "auto-system_insight": 6,
+    "auto-github_scout": 5
+  },
+  "tool_distribution": {
+    "Read": 2596,
+    "Bash": 1932,
+    "TodoWrite": 969,
+    "Write": 688,
+    "WebFetch": 384,
+    "WebSearch": 306,
+    "Edit": 298,
+    "Grep": 221,
+    "Glob": 131,
+    "Task": 44
   }
 }

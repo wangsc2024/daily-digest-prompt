@@ -58,7 +58,11 @@
         {
           "source_project": "openai/openai-agents-python",
           "pattern": "Guardrails 輸入輸出驗證層",
-          "target_files": ["config/hook-rules.yaml", "hooks/pre_bash_guard.py", "templates/shared/quality-gate.md"],
+          "target_files": [
+            "config/hook-rules.yaml",
+            "hooks/pre_bash_guard.py",
+            "templates/shared/quality-gate.md"
+          ],
           "priority": "P1",
           "effort": "medium",
           "description": "OpenAI Agents SDK 的 Guardrails 機制將安全驗證提升為一等公民，支援輸入驗證（tripwire 模式）和輸出驗證（結構化型別檢查）。目前本專案的 Hooks 已覆蓋 PreToolUse/PostToolUse 攔截，但缺乏 Agent 輸出層的結構化驗證。建議：(1) 在 quality-gate.md 中引入輸出 schema 驗證（JSON Schema），(2) 在 on_stop_alert.py 增加輸出格式一致性檢查，(3) 將 Guardrails 概念整合進 DONE_CERT 驗證流程。"
@@ -66,7 +70,11 @@
         {
           "source_project": "openai/openai-agents-python",
           "pattern": "Agent Handoff 控制轉移機制",
-          "target_files": ["config/routing.yaml", "hour-todoist-prompt.md", "templates/sub-agent/skill-task.md"],
+          "target_files": [
+            "config/routing.yaml",
+            "hour-todoist-prompt.md",
+            "templates/sub-agent/skill-task.md"
+          ],
           "priority": "P1",
           "effort": "medium",
           "description": "OpenAI SDK 的 Handoff 是一種特殊工具呼叫，讓 Agent 可以宣告式地將控制權轉移給其他 Agent（附帶上下文傳遞）。目前本專案的子 Agent 委派是透過 PowerShell Start-Job 實現，缺乏語義層的控制轉移。建議：(1) 在 routing.yaml 中定義 handoff 規則（何時從主 Agent 轉交子 Agent），(2) 標準化子 Agent 的上下文傳入格式（類似 Handoff 的 context 參數），(3) 讓子 Agent 也能宣告 handoff 回主 Agent（目前是寫檔案間接溝通）。"
@@ -74,7 +82,11 @@
         {
           "source_project": "pydantic/pydantic-ai",
           "pattern": "依賴注入（Dependency Injection）模式",
-          "target_files": ["config/pipeline.yaml", "templates/shared/preamble.md", "skills/SKILL_INDEX.md"],
+          "target_files": [
+            "config/pipeline.yaml",
+            "templates/shared/preamble.md",
+            "skills/SKILL_INDEX.md"
+          ],
           "priority": "P0",
           "effort": "high",
           "description": "Pydantic AI 的 RunContext + deps_type 模式讓工具函數可以透過型別安全的依賴注入取得資料庫連線、API 客戶端等資源，而非硬編碼。目前本專案的 Skill 透過 SKILL.md 中的硬編碼 API 端點和路徑來存取資源。建議：(1) 建立 config/dependencies.yaml 集中管理 API 端點、Token 來源、快取路徑等可注入依賴，(2) Skill 模板改為從 dependencies.yaml 讀取端點而非硬編碼，(3) 這能讓測試環境輕鬆替換為 mock 端點，提升可測試性。"
@@ -82,7 +94,11 @@
         {
           "source_project": "pydantic/pydantic-ai",
           "pattern": "Evals 評估系統",
-          "target_files": ["config/benchmark.yaml", "config/audit-scoring.yaml", "templates/shared/quality-gate.md"],
+          "target_files": [
+            "config/benchmark.yaml",
+            "config/audit-scoring.yaml",
+            "templates/shared/quality-gate.md"
+          ],
           "priority": "P1",
           "effort": "medium",
           "description": "Pydantic AI 內建 Evals 評估系統，可系統性測試 Agent 的效能與準確度，並在 Logfire 中持續監控。目前本專案有 system-audit（38 子項評分）和 benchmark.yaml，但缺乏自動化的 Agent 輸出品質評估。建議：(1) 建立 config/evals.yaml 定義評估指標（摘要完整度、通知可讀性、研究深度），(2) 在 on_stop_alert.py 中增加基於 DONE_CERT 的品質回歸偵測，(3) 每週自動生成品質趨勢報告。"
@@ -90,7 +106,11 @@
         {
           "source_project": "lastmile-ai/mcp-agent",
           "pattern": "可組合工作流模式（Composable Workflow Patterns）",
-          "target_files": ["config/pipeline.yaml", "run-todoist-agent-team.ps1", "run-agent-team.ps1"],
+          "target_files": [
+            "config/pipeline.yaml",
+            "run-todoist-agent-team.ps1",
+            "run-agent-team.ps1"
+          ],
           "priority": "P1",
           "effort": "medium",
           "description": "mcp-agent 實作了 Anthropic 'Building Effective Agents' 論文中的所有模式（map-reduce、orchestrator、evaluator-optimizer、router），且可互相組合串接。目前本專案的管線是固定三階段（fetch→assemble→notify），缺乏動態組合能力。建議：(1) 在 pipeline.yaml 中支援工作流模式宣告（sequential/parallel/conditional），(2) 引入 evaluator-optimizer 模式讓品質閘門可以觸發自動重試與精修，(3) 讓自動任務支援條件式分支（如根據快取狀態決定是否呼叫 API）。"
@@ -98,7 +118,9 @@
         {
           "source_project": "lastmile-ai/mcp-agent",
           "pattern": "Agent 作為 MCP Server 暴露",
-          "target_files": ["skills/SKILL_INDEX.md"],
+          "target_files": [
+            "skills/SKILL_INDEX.md"
+          ],
           "priority": "P2",
           "effort": "high",
           "description": "mcp-agent 允許將 Agent 本身暴露為 MCP Server，讓其他 Agent 或應用可以透過標準 MCP 協議呼叫。目前本專案的 Skill 是檔案驅動（SKILL.md），未來可考慮將核心 Skill（如 todoist、pingtung-news）包裝為 MCP Server，實現跨專案共用與標準化呼叫介面。此為長期願景，短期優先級較低。"
@@ -106,7 +128,10 @@
         {
           "source_project": "pydantic/pydantic-ai",
           "pattern": "Human-in-the-Loop 工具審批",
-          "target_files": ["hooks/pre_bash_guard.py", "config/hook-rules.yaml"],
+          "target_files": [
+            "hooks/pre_bash_guard.py",
+            "config/hook-rules.yaml"
+          ],
           "priority": "P2",
           "effort": "low",
           "description": "Pydantic AI 支援標記特定工具呼叫需要人工審批才能執行，可依據參數、對話歷史或使用者偏好動態決定。目前本專案的 Hooks 是全自動攔截（block/allow），缺乏中間的 'pending approval' 狀態。建議：在 hook-rules.yaml 中新增 action: 'prompt' 選項（除了現有的 block/allow），用於高風險但非明確違規的操作（如刪除多個檔案），透過 ntfy 發送審批請求。"
@@ -114,7 +139,10 @@
       ],
       "quality": {
         "sources_count": 6,
-        "grade_distribution": {"A": 3, "B": 3},
+        "grade_distribution": {
+          "A": 3,
+          "B": 3
+        },
         "research_depth": "adequate"
       }
     },
@@ -151,7 +179,10 @@
         {
           "source_project": "obra/superpowers",
           "pattern": "Writing-Skills 元 Skill（教導如何撰寫新 Skill 的 Skill）",
-          "target_files": ["skills/skill-scanner/SKILL.md", "skills/SKILL_INDEX.md"],
+          "target_files": [
+            "skills/skill-scanner/SKILL.md",
+            "skills/SKILL_INDEX.md"
+          ],
           "priority": "P1",
           "effort": "low",
           "description": "Superpowers 內建 writing-skills Skill，提供 Skill 撰寫的標準範本、命名慣例、觸發詞設計、frontmatter 結構等元指引。本專案的 skill-scanner 偏重安全掃描，缺乏「如何寫好一個 Skill」的元知識。建議：(1) 在 skill-scanner 或新建 skill-template Skill 中加入 Skill 撰寫最佳實踐，(2) 包含 frontmatter 標準結構、triggers 設計原則、Progressive Disclosure 層級建議，(3) 新增 Skill 時可自動驗證結構完整性。"
@@ -159,7 +190,10 @@
         {
           "source_project": "obra/superpowers",
           "pattern": "兩階段 Review（規格符合 + 程式品質分離）",
-          "target_files": ["templates/shared/quality-gate.md", "templates/shared/done-cert.md"],
+          "target_files": [
+            "templates/shared/quality-gate.md",
+            "templates/shared/done-cert.md"
+          ],
           "priority": "P1",
           "effort": "low",
           "description": "Superpowers 將 Code Review 拆為兩階段：第一階段驗證是否符合規格/需求（功能正確性），第二階段才驗程式品質（可讀性、效能、安全）。本專案的 quality-gate.md 目前混合檢查所有面向。建議：(1) 將 quality-gate 拆為 Phase A（規格符合度：DONE_CERT checklist 全打勾、輸出格式正確）和 Phase B（品質檢查：程式碼風格、效能、安全），(2) Phase A 失敗直接拒絕，Phase B 產出改進建議但不阻斷。"
@@ -167,7 +201,11 @@
         {
           "source_project": "muratcankoylan/Agent-Skills-for-Context-Engineering",
           "pattern": "Context Degradation 量化監控",
-          "target_files": ["hooks/post_tool_logger.py", "hooks/agent_guardian.py", "config/benchmark.yaml"],
+          "target_files": [
+            "hooks/post_tool_logger.py",
+            "hooks/agent_guardian.py",
+            "config/benchmark.yaml"
+          ],
           "priority": "P0",
           "effort": "medium",
           "description": "Context Engineering 框架揭示：Context Window 隨長度增加效能可預測下降（Lost-in-the-Middle 現象），需要主動監控與壓縮。本專案的 post_tool_logger 已追蹤工具呼叫數和 output_len，但未監控 context 累積量。建議：(1) 在 post_tool_logger 新增 context_tokens_estimate 欄位（累計 input+output 長度），(2) 在 agent_guardian 的 LoopDetector 加入 context_pressure 警告（當估計 token 超過閾值時），(3) 在 benchmark.yaml 設定 context 效率基準線（每 1000 tokens 產出多少有效結果）。"
@@ -175,7 +213,11 @@
         {
           "source_project": "muratcankoylan/Agent-Skills-for-Context-Engineering",
           "pattern": "三層記憶架構（短期/長期/圖結構）",
-          "target_files": ["context/digest-memory.json", "context/research-registry.json", "skills/digest-memory/SKILL.md"],
+          "target_files": [
+            "context/digest-memory.json",
+            "context/research-registry.json",
+            "skills/digest-memory/SKILL.md"
+          ],
           "priority": "P2",
           "effort": "high",
           "description": "Context Engineering 框架區分三層記憶：短期（Session 內 working memory）、長期（跨 Session 持久化）、圖結構（實體關係網路）。本專案的 digest-memory.json 和 research-registry.json 屬於長期記憶，但缺乏 Session 級短期記憶管理和實體關係追蹤。建議：(1) 短期記憶：在 Team 模式中引入 session-context.json 追蹤當次執行的決策脈絡（為何選此任務、為何選此模板），(2) 圖結構記憶：未來可用知識庫的 tag 關聯建構簡易知識圖譜，追蹤「Skill A 常與 Skill B 搭配」等模式。長期願景，P2 優先級。"
@@ -183,7 +225,9 @@
         {
           "source_project": "obra/superpowers",
           "pattern": "多平台 Plugin 結構（一套 Skills 跨平台）",
-          "target_files": ["skills/SKILL_INDEX.md"],
+          "target_files": [
+            "skills/SKILL_INDEX.md"
+          ],
           "priority": "P2",
           "effort": "medium",
           "description": "Superpowers 同一套 Skills 支援 Claude Code、Cursor、Codex、OpenCode 四個平台，透過各平台獨立的 plugin 目錄適配。本專案的 Skills 目前僅供 Claude Code 使用。建議：(1) 評估是否將核心 Skills 抽出為平台無關格式，(2) 若需支援 Cursor 等工具，參考 Superpowers 的 plugin 目錄結構建立適配層。此為長期擴展方向，當前無急迫需求。"
@@ -191,7 +235,108 @@
       ],
       "quality": {
         "sources_count": 3,
-        "grade_distribution": {"A": 2, "B": 1},
+        "grade_distribution": {
+          "A": 2,
+          "B": 1
+        },
+        "research_depth": "adequate"
+      }
+    },
+    {
+      "scouted_at": "2026-03-01T15:30:00+08:00",
+      "topic": "自愈系統 + 日誌可觀測",
+      "projects": [
+        {
+          "name": "EvoAgentX/EvoAgentX",
+          "url": "https://github.com/EvoAgentX/EvoAgentX",
+          "stars": 2600,
+          "description": "自我演化 AI Agent 框架：三階段循環（建構→評估→演化），WorkFlowGenerator 自動產生多 Agent 工作流，自學習算法持續優化，HITL 人機協作檢查點，20+ 工具套件",
+          "relevance": "high",
+          "last_updated": "2026-03-01"
+        },
+        {
+          "name": "langfuse/langfuse",
+          "url": "https://github.com/langfuse/langfuse",
+          "stars": 22400,
+          "description": "LLM 工程平台：Agent 可觀測性 + 追蹤 + 評估。@observe() 裝飾器零侵入追蹤、多框架整合（LangChain/AutoGen/CrewAI）、結構化日誌 + 評估管線 + 資料集基準測試、支援自託管 Docker/K8s",
+          "relevance": "high",
+          "last_updated": "2026-03-01"
+        },
+        {
+          "name": "EvoAgentX/Awesome-Self-Evolving-Agents",
+          "url": "https://github.com/EvoAgentX/Awesome-Self-Evolving-Agents",
+          "stars": 1200,
+          "description": "自我演化 Agent 綜合調查：涵蓋論文、工具、框架的策展清單，定義「自我演化」新範式 — 從靜態 prompt 到動態目標驅動的持續改進",
+          "relevance": "medium",
+          "last_updated": "2026-02-28"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "EvoAgentX/EvoAgentX",
+          "pattern": "三階段自我演化循環（Build→Evaluate→Evolve）",
+          "target_files": [
+            "config/audit-scoring.yaml",
+            "templates/auto-tasks/self-heal.md",
+            "context/adr-registry.json"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "EvoAgentX 的核心模式是建構→評估→演化三階段迭代循環，每輪自動評估 Agent 表現並用演化算法優化工作流。本專案已有 OODA 閉環（insight→audit→arch-evolution→self-heal），但 self-heal 目前是被動修復，缺乏主動演化能力。建議：(1) 在 self-heal.md 中引入「演化提案」步驟 — 除了修復已知問題，主動提出工作流優化（如調整自動任務頻率、重新排序執行優先級），(2) 在 audit-scoring.yaml 增加「演化效益」維度 — 追蹤每次自愈修正後的品質分數變化，量化改進效果，(3) 建立 context/evolution-log.json 記錄每次演化提案及其結果，支援回溯分析。"
+        },
+        {
+          "source_project": "EvoAgentX/EvoAgentX",
+          "pattern": "WorkFlowGenerator 自動工作流產生",
+          "target_files": [
+            "config/pipeline.yaml",
+            "config/routing.yaml"
+          ],
+          "priority": "P2",
+          "effort": "high",
+          "description": "EvoAgentX 可從自然語言目標自動產生多 Agent 工作流圖，包含 Agent 角色分配和工具指派。目前本專案的工作流固定在 pipeline.yaml/routing.yaml 中，變更需人工修改配置。長期可考慮：(1) 根據歷史執行數據自動建議工作流調整（如某個自動任務持續低品質→建議停用或合併），(2) 新增自動任務時由系統建議最佳執行順序和頻率。此為長期演化方向。"
+        },
+        {
+          "source_project": "langfuse/langfuse",
+          "pattern": "結構化追蹤的三層分離（Trace/Span/Generation）",
+          "target_files": [
+            "hooks/post_tool_logger.py",
+            "hooks/query_logs.py",
+            "config/health-scoring.yaml"
+          ],
+          "priority": "P0",
+          "effort": "medium",
+          "description": "Langfuse 將可觀測性分為三層：Trace（完整 Session 追蹤）、Span（子操作區間，如一次 API 呼叫）、Generation（LLM 呼叫詳情含 token 用量和延遲）。本專案的 post_tool_logger 已實作 JSONL 結構化日誌，但所有事件平坦記錄，缺乏層級關係。建議：(1) 在 JSONL 記錄中增加 parent_id 欄位 — 讓子 Agent 的工具呼叫可以關聯到父 Agent 的 Session（目前 sid 是獨立的），(2) 區分 span_type 為 tool_call/api_call/file_io/llm_generation，支援按類型聚合分析，(3) 在 query_logs.py 新增 --trace 模式，可輸出樹狀結構的 Session 追蹤視圖。"
+        },
+        {
+          "source_project": "langfuse/langfuse",
+          "pattern": "評估管線（Evaluation Pipeline）",
+          "target_files": [
+            "templates/shared/quality-gate.md",
+            "config/benchmark.yaml",
+            "hooks/on_stop_alert.py"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "Langfuse 提供系統化的評估管線：LLM-as-judge 自動評分、人工標註、自定義評估函數、資料集基準測試。本專案有 quality-gate.md（人工定義品質標準）和 benchmark.yaml（效能基準線），但缺乏自動化的品質評估回饋循環。建議：(1) 在 on_stop_alert.py 中增加 Session 品質評分（基於 DONE_CERT 的 quality_score 歷史趨勢），(2) 建立 config/eval-criteria.yaml 定義各任務類型的評估標準（研究任務看 KB 匯入數、Todoist 看完成率、摘要看完整度），(3) 每週自動生成品質趨勢報告，偵測品質退化。"
+        },
+        {
+          "source_project": "AgentTrace (arxiv 2602.10133)",
+          "pattern": "三表面日誌分類（Cognitive/Operational/Contextual）",
+          "target_files": [
+            "hooks/post_tool_logger.py",
+            "hooks/hook_utils.py"
+          ],
+          "priority": "P1",
+          "effort": "low",
+          "description": "AgentTrace 論文提出三表面分類法：認知面（Agent 推理與決策過程）、操作面（工具呼叫與執行結果）、上下文面（環境狀態與外部資料）。本專案的 post_tool_logger 目前主要記錄操作面（工具呼叫），透過 tags 間接觸及上下文面（api-call/cache-read），但完全缺乏認知面追蹤。建議：(1) 在 tags 系統新增 cognitive 類標籤（decision-point、routing-choice、quality-judgment），(2) 在 routing.yaml 的路由決策點產生結構化日誌（為何選此模板、計分結果），(3) 這能大幅提升系統可解釋性，支援事後分析「為什麼 Agent 做了這個決定」。"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 2,
+          "B": 1
+        },
         "research_depth": "adequate"
       }
     }

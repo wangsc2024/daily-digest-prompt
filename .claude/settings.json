@@ -1,90 +1,21 @@
 {
   "hooks": {
     "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/pre_bash_guard.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/pre_write_guard.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/pre_write_guard.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/pre_read_guard.py"
-          }
-        ]
-      }
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/pre_bash_guard.py" }] },
+      { "matcher": "Write", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/pre_write_guard.py" }] },
+      { "matcher": "Edit", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/pre_write_guard.py" }] },
+      { "matcher": "Read", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/pre_read_guard.py" }] }
     ],
     "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/post_tool_logger.py"
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/cjk_guard.py post-fix"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/cjk_guard.py post-fix"
-          }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/post_tool_logger.py" }] },
+      { "matcher": "Write", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/cjk_guard.py post-fix" }] },
+      { "matcher": "Edit", "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/cjk_guard.py post-fix" }] }
     ],
     "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/post_tool_logger.py"
-          }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/post_tool_logger.py" }] }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python hooks/on_stop_alert.py"
-          }
-        ]
-      }
+      { "hooks": [{ "type": "command", "command": "python D:/Source/daily-digest-prompt/hooks/on_stop_alert.py" }] }
     ]
   }
 }

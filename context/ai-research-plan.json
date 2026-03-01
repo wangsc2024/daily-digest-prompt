@@ -1,195 +1,20 @@
 {
-  "date": "2026-02-28",
-  "topic": "後訓練革命（Post-Training Revolution）— 從 RLHF 到 DPO/GRPO/Verifier-Driven RL 的生產對齊堆疊與推理時計算擴展",
+  "date": "2026-03-01",
+  "topic": "AI Agent 互操作性協議四強 — MCP、A2A、ACP、ANP 的架構比較、協同模式與生產級整合策略",
   "research_questions": [
-    "RLHF、DPO、GRPO、Verifier-Driven RL 四大後訓練技術的核心原理差異與適用場景為何？",
-    "2025-2026 年後訓練革命的產業趨勢如何重塑 AI 開發範式（計算資源從預訓練向後訓練轉移）？",
-    "Test-Time Compute Scaling（推理時計算擴展）如何與後訓練技術協同提升模型推理能力？"
+    "MCP、A2A、ACP、ANP 四大協議各自解決什麼問題？它們的架構設計理念與技術取捨有何差異？",
+    "這四個協議如何分層協同？從工具存取（MCP）到訊息傳遞（ACP）到企業協作（A2A）到全球互操作（ANP）的四層架構如何運作？",
+    "在實際生產環境中如何整合多個協議？有哪些成功案例和最佳實踐？對 daily-digest-prompt 專案的 Agent Team 架構有何借鑑意義？"
   ],
-  "methodology": "WebSearch 蒐集學術論文、技術部落格與產業報告 → WebFetch 深入閱讀 5+ 篇核心來源 → 交叉比對不同技術路線的優劣 → 提煉實務應用建議（特別針對本專案 Agent 系統的啟發）",
+  "methodology": "四階段系統性研究法：(1) 官方規格文件分析 (2) 學術論文交叉比對 (3) 開源實作案例蒐集 (4) 架構比較矩陣與實務應用建議。中英文來源至少各2篇，總計5篇以上權威來源。",
   "keywords": [
-    "Post-Training Revolution",
-    "RLHF",
-    "DPO Direct Preference Optimization",
-    "GRPO Group Relative Policy Optimization",
-    "Verifier-Driven RL",
-    "Test-Time Compute Scaling",
-    "Production Alignment Stack",
-    "inference-time scaling",
-    "reasoning models 2026",
-    "後訓練對齊"
+    "Model Context Protocol MCP",
+    "Agent-to-Agent A2A protocol",
+    "Agent Communication Protocol ACP IBM",
+    "Agent Network Protocol ANP",
+    "AI agent interoperability",
+    "multi-agent communication standards",
+    "agentic AI protocols 2026"
   ],
-  "sources": [
-    {
-      "title": "Group Relative Policy Optimization (GRPO) — Cameron R. Wolfe 深度技術解析",
-      "url": "https://cameronrwolfe.substack.com/p/grpo",
-      "key_points": [
-        "GRPO 核心創新：移除 PPO 的 critic/value function model，改用 group-based baseline 估計 advantage",
-        "數學公式：A_i = (r_i - mean(r_group)) / (std(r_group) + ε)，使用 KL 散度的正保證估計器",
-        "記憶體節省約 50%：PPO 需 4 個模型（policy+critic+reference+reward），GRPO 僅需 policy+reference",
-        "DeepSeek-R1 配置：671B MoE，batch 1024（16 prompts × 64 completions），純 RL 無 SFT 的 R1-Zero 自發產生推理行為",
-        "實作建議：group size 16-64，clipping ε=0.2，KL beta 0.01-0.1，偏好 verifiable rewards 避免 reward hacking"
-      ]
-    },
-    {
-      "title": "The State of Reinforcement Learning for LLM Reasoning — Sebastian Raschka",
-      "url": "https://sebastianraschka.com/blog/2025/the-state-of-reinforcement-learning-for-llm-reasoning.html",
-      "key_points": [
-        "RL for LLM reasoning 三大方法論：RLHF（偏好對齊）、GRPO（推理增強）、RLVR（可驗證獎勵）",
-        "DeepSeek-R1 刻意避免 Process Reward Model，因大規模 RL 易遭 reward hacking",
-        "長度偏差問題：PPO/GRPO 數學損失特性不自覺偏好冗長回答",
-        "歸因問題：推理能力可能來自預訓練的 chain-of-thought 數據而非 RL 本身",
-        "2025-2026 趨勢：推理後訓練成為標準實踐，但需要長度控制、外部工具整合（搜尋、RAG）"
-      ]
-    },
-    {
-      "title": "Reinforcement Learning for LLMs: RLHF, DPO, and the Future — Inferless",
-      "url": "https://www.inferless.com/learn/a-deep-dive-into-reinforcement-learning",
-      "key_points": [
-        "前沿實驗室使用混合管線：Meta Llama 3 = SFT → rejection sampling → PPO → DPO 多輪精煉",
-        "DeepSeek-R1 = 兩階段 GRPO + 輕量 SFT 前後包裝",
-        "推理模型生成 3-4 倍 token，增加延遲和成本",
-        "新興趨勢：GRPO-based 長度正則化 RL（TLDR）控制 CoT 冗長、LLM-as-a-Judge 自主回饋迴圈",
-        "分散式訓練：ROLL 等函式庫在數千 GPU 上並行化 PPO/DPO"
-      ]
-    },
-    {
-      "title": "Inference-Time Scaling Research: Reasoning Models — Introl Blog (December 2025)",
-      "url": "https://introl.com/blog/inference-time-scaling-research-reasoning-models-december-2025",
-      "key_points": [
-        "DeepSeek-R1：AIME 準確率從 15.6% → 71%（majority voting 86.7%），成本降低 70%",
-        "推理計算預計 2026 年超越訓練計算 118 倍",
-        "推理份額到 2030 年佔 AI 計算的 75%，市場從 $106B(2025) 增長至 $255B(2030)",
-        "ThreadWeaver 並行推理路徑：1.53x 延遲加速，P1 物理模型首個拿下 IPhO 金牌的開源系統",
-        "推理時擴展 vs 後訓練：前者允許適度基礎模型透過延長推理達到專家級表現"
-      ]
-    },
-    {
-      "title": "Why GRPO is Important and How it Works — Oxen.ai",
-      "url": "https://ghost.oxen.ai/why-grpo-is-important-and-how-it-works/",
-      "key_points": [
-        "民主化效應：1B 參數 Llama 3.2 可用 16GB VRAM 訓練成推理模型",
-        "PPO 需要 4 個 LLM（policy+critic+reference+reward），GRPO 僅需 2 個（policy+reference）",
-        "DeepSeek-R1 交替進行 SFT 和 GRPO 訓練",
-        "使用 regex/字串匹配的確定性獎勵，無需獨立獎勵模型 LLM",
-        "個人可在最低成本下訓練特定領域推理模型（如 Rust 程式碼推理器）"
-      ]
-    },
-    {
-      "title": "RLHF 算法全景解析：從 PPO 到 DPO/GRPO 的範式革命（中文深度長文）",
-      "url": "https://www.cnblogs.com/yangykaifa/p/19375378",
-      "key_points": [
-        "RLHF 決定模型上限：能否在複雜邏輯權衡中輸出符合 HHH 的內容",
-        "REINFORCE++ 在訓練中比 GRPO 更穩定、比 PPO 更快",
-        "GSPO（Generalized Self-Play Optimization）vs GRPO 代表兩種修復 RLHF 的不同理念",
-        "GRPO 優化獎勵保守下界，主動避免高獎勵但高不確定性的區域"
-      ]
-    },
-    {
-      "title": "Reinforcement Learning from Verifiable Rewards (RLVR) — Label Studio & Emergent Mind",
-      "url": "https://labelstud.io/blog/reinforcement-learning-from-verifiable-rewards/",
-      "key_points": [
-        "RLVR 繞過獎勵模型，直接用符號驗證器（計算器、編譯器）提供二元回饋",
-        "Process Reward Model (PRM) 提供逐步密集獎勵，優於僅看最終結果的 ORM",
-        "Med-RLVR 等結構化領域用嚴格格式匹配和標準答案比對",
-        "非結構化領域用生成式獎勵模型（從大模型蒸餾）提供軟獎勵信號"
-      ]
-    },
-    {
-      "title": "The Art of Scaling Test-Time Compute for LLMs（arXiv 2512.02008）",
-      "url": "https://arxiv.org/abs/2512.02008",
-      "key_points": [
-        "30+ billion tokens 實驗：8 個開源 LLM（7B-235B），4 個推理資料集",
-        "沒有單一 TTS 策略普遍佔優，推理模型在不同難度和軌跡長度展現不同品質模式",
-        "最優 TTS 效能隨計算預算單調擴展",
-        "知識密集型任務中推理時計算增加不一致提升準確率，甚至導致更多幻覺"
-      ]
-    }
-  ],
-  "analysis": {
-    "consensus": [
-      {
-        "point": "GRPO 是後訓練民主化的關鍵突破",
-        "evidence": "6/8 來源一致認同 GRPO 移除 PPO 的 critic model，記憶體需求降低約 50%（從 4 模型減至 2 模型），使個人開發者能以 16GB VRAM 訓練推理模型",
-        "sources": ["Cameron R. Wolfe", "Oxen.ai", "Inferless", "Raschka", "中文長文", "Introl"]
-      },
-      {
-        "point": "混合管線（Hybrid Pipeline）已成為產業標準",
-        "evidence": "Meta Llama 3 採用 SFT→rejection sampling→PPO→DPO 多輪精煉；DeepSeek-R1 採用兩階段 GRPO+SFT 交替訓練。單一技術無法涵蓋所有對齊需求",
-        "sources": ["Inferless", "Oxen.ai", "Cameron R. Wolfe"]
-      },
-      {
-        "point": "Reward Hacking 是後訓練的核心挑戰",
-        "evidence": "DeepSeek 刻意避免 Process Reward Model；GRPO 優化獎勵保守下界；推薦使用 verifiable rewards（regex/字串匹配）替代學習式獎勵模型",
-        "sources": ["Raschka", "中文長文", "Label Studio", "Cameron R. Wolfe"]
-      },
-      {
-        "point": "計算重心正從預訓練向推理時計算轉移",
-        "evidence": "推理計算 2026 年預計超越訓練計算 118 倍；2030 年佔 AI 計算的 75%；市場從 $106B 增長至 $255B",
-        "sources": ["Introl", "Inferless", "arXiv 2512.02008"]
-      },
-      {
-        "point": "長度偏差（Verbosity Bias）是 RL 後訓練的系統性問題",
-        "evidence": "PPO/GRPO 的數學損失特性不自覺偏好冗長回答；推理模型生成 3-4 倍 token；TLDR 長度正則化 RL 是新興解決方案",
-        "sources": ["Raschka", "Inferless"]
-      }
-    ],
-    "divergence": [
-      {
-        "point": "GRPO vs REINFORCE++ vs GSPO — 哪種是 PPO 的最佳替代？",
-        "positions": {
-          "GRPO陣營": "DeepSeek-R1 實戰驗證，移除 critic model 效果顯著（Cameron R. Wolfe、Oxen.ai）",
-          "REINFORCE++陣營": "訓練更穩定、收斂更快，理論上更簡潔（中文長文）",
-          "GSPO陣營": "用 self-play 取代外部獎勵模型，代表不同的修復理念（中文長文）"
-        }
-      },
-      {
-        "point": "推理能力的真正來源 — RL 還是預訓練？",
-        "positions": {
-          "RL歸因": "DeepSeek R1-Zero 從純 RL（無 SFT）即自發產生推理行為（Cameron R. Wolfe、Introl）",
-          "預訓練歸因": "推理能力可能來自預訓練階段的 chain-of-thought 數據，RL 僅起「解鎖」作用（Raschka）"
-        }
-      },
-      {
-        "point": "推理時計算擴展是否普遍有效？",
-        "positions": {
-          "樂觀派": "適度模型透過延長推理可達專家級表現，市場高速成長（Introl）",
-          "審慎派": "知識密集型任務中增加推理計算不一致提升準確率，甚至增加幻覺；無單一策略普遍佔優（arXiv 2512.02008）"
-        }
-      }
-    ],
-    "insights": [
-      {
-        "insight": "後訓練的「三明治架構」正在形成標準模式",
-        "description": "輕量 SFT（格式化）→ 核心 RL（GRPO/PPO）→ 輕量 DPO（微調），三層各司其職。SFT 教格式，RL 教推理，DPO 精修品味。這類似軟體架構中的三層式設計",
-        "applicable_to": "daily-digest-prompt 的 Todoist 任務路由本質上也是三層結構（標籤覆寫→模板優先級→修飾標籤），可視為類比的「對齊堆疊」"
-      },
-      {
-        "insight": "RLVR（可驗證獎勵）為 Agent 系統提供了品質閘門的理論基礎",
-        "description": "用符號驗證器（編譯器、計算器、regex）取代主觀的獎勵模型。在 Agent 系統中，這等價於用確定性測試（test pass/fail）作為任務品質的直接回饋信號，避免 LLM-as-a-Judge 的偏見",
-        "applicable_to": "本專案的 quality-gate.md 和 done-cert.md 本質上就是 RLVR 的應用 — 用確定性規則（結構完整性、字數門檻、KB 匯入成功）驗證任務品質"
-      },
-      {
-        "insight": "推理計算的邊際效益高度依賴任務類型",
-        "description": "arXiv 大規模實驗證實：推理類任務（數學/程式碼）受益顯著，但知識密集型任務中額外推理反而增加幻覺。這意味 Agent 系統應根據任務類型動態調整推理深度",
-        "applicable_to": "本專案可在 scoring.yaml 或 routing.yaml 中區分「需要深度推理的任務」（code-task、research-task）和「知識擷取型任務」（新聞、佛學），對後者適度限制 token budget"
-      },
-      {
-        "insight": "GRPO 的民主化效應重新定義了個人 AI 的可能性",
-        "description": "1B 參數模型 + 16GB VRAM + GRPO + 確定性獎勵 = 個人可訓練特定領域推理模型。這不需要昂貴的獎勵模型 LLM，只需要結構化的驗證規則",
-        "applicable_to": "本專案的 Unsloth 研究線可與 GRPO 結合 — 使用 Unsloth + GRPO 在消費級 GPU 上微調一個「任務規劃推理模型」，用 Todoist 完成率作為 verifiable reward"
-      },
-      {
-        "insight": "長度偏差問題對 Agent 系統有直接啟示",
-        "description": "RL 訓練的模型系統性偏好冗長回答。在 Agent 系統中，冗長輸出消耗 token 預算、增加延遲、降低重點。TLDR 長度正則化 RL 的思路可轉化為 Agent prompt 的簡潔性約束",
-        "applicable_to": "本專案各 prompt 模板可加入明確的輸出長度約束（如 research-task 的洞見限制在 5-7 點、summary 限制 200 字），模擬 TLDR 的長度控制效果"
-      },
-      {
-        "insight": "Process Reward Model 的逐步驗證思維與 OODA 閉環高度相似",
-        "description": "PRM 在每個推理步驟提供密集回饋（而非僅看最終結果），這與 daily-digest-prompt 的 OODA 閉環（Observe→Orient→Decide→Act，每步有檢查點）在架構精神上一致。逐步驗證優於結果驗證",
-        "applicable_to": "強化本專案 Phase 1→2→3 的中間驗證點（如 Phase 1 輸出 JSON 後立即驗證格式，而非等到 Phase 3 組裝時才發現問題）"
-      }
-    ]
-  },
-  "stage_completed": 3
+  "stage_completed": 1
 }
