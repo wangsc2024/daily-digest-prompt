@@ -1,13 +1,18 @@
 {
+  "updated_at": "2026-03-02T00:40:02+08:00",
+  "status": "running",
+  "run_id": "60be0dceba7a",
+  "current_step": "orient",
   "history": [
     {
       "step": "idle",
       "status": "idle",
       "ts": null
+    },
+    {
+      "ts": "2026-03-01T00:40:03+08:00",
+      "step": "orient",
+      "status": "running"
     }
-  ],
-  "status": "running",
-  "updated_at": "2026-03-01T00:40:03+08:00",
-  "run_id": "15d2974f34b0",
-  "current_step": "orient"
+  ]
 }

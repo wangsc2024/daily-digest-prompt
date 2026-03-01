@@ -1,4 +1,4 @@
-# ============================================
+﻿# ============================================
 # System Audit Agent Team - Parallel Orchestrator (PowerShell 7)
 # ============================================
 # Usage:
@@ -336,8 +336,9 @@ $phase1Prompts = @(
 )
 
 foreach ($agent in $phase1Prompts) {
+    $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
     $job = Start-Job -ScriptBlock {
-        param($promptFile, $agentDir, $agentName, $logDir, $timestamp, $traceId, $apiToken)
+        param($promptContent, $agentDir, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
         # 明確設定 Process 級別環境變數（會傳遞到子 process）
         [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
@@ -355,7 +356,7 @@ foreach ($agent in $phase1Prompts) {
         Write-Host "[$agentName] Starting audit..." -ForegroundColor Cyan
 
         $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
-        $output = claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write" 2>$stderrFile
+        $output = $promptContent | claude -p --allowedTools "Read,Bash,Glob,Grep,Write" 2>$stderrFile
 
         # 執行成功且 stderr 為空 → 刪除
         if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
@@ -371,7 +372,7 @@ foreach ($agent in $phase1Prompts) {
             Output = $output
             ExitCode = $LASTEXITCODE
         }
-    } -ArgumentList $agent.Prompt, $AgentDir, $agent.Name, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
+    } -ArgumentList $promptContent, $AgentDir, $agent.Name, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
 
     $phase1Jobs += @{
         Job = $job
@@ -462,8 +463,9 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
     }
 
     try {
+        $phase2Content = Get-Content -Path $phase2Prompt -Raw -Encoding UTF8
         $job = Start-Job -ScriptBlock {
-            param($promptFile, $agentDir, $logDir, $timestamp, $traceId, $apiToken)
+            param($phase2Content, $agentDir, $logDir, $timestamp, $traceId, $apiToken)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
@@ -479,7 +481,7 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             $OutputEncoding = [System.Text.Encoding]::UTF8
 
             $stderrFile = "$logDir\assemble-stderr-$timestamp.log"
-            $output = claude -p $promptFile --allowedTools "Read,Bash,Glob,Grep,Write,Edit" 2>$stderrFile
+            $output = $phase2Content | claude -p --allowedTools "Read,Bash,Glob,Grep,Write,Edit" 2>$stderrFile
 
             # 執行成功且 stderr 為空 → 刪除
             if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
@@ -490,7 +492,7 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             }
 
             return $output
-        } -ArgumentList $phase2Prompt, $AgentDir, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
+        } -ArgumentList $phase2Content, $AgentDir, $LogDir, $timestamp, $traceId, $todoistToken -WorkingDirectory $AgentDir
 
         $completed = Wait-Job -Job $job -Timeout $Phase2TimeoutSeconds
 

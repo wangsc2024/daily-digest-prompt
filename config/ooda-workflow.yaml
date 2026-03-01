@@ -10,7 +10,7 @@ steps:
   observe:
     name: "Observe — 系統洞察"
     auto_task_key: "system_insight"
-    prompt_file: "prompts/team/todoist-auto-system-insight.md"
+    prompt_file: "prompts/team/todoist-auto-system_insight.md"
     timeout_seconds: 600
     on_success: "orient"     # 完成後自動觸發 orient
     on_failure: "stop"       # 失敗停止（不傳播）

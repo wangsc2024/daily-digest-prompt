@@ -23,6 +23,11 @@ ntfy_temp.json
 hooks_alert_temp.json
 tmp_*
 temp_*
+*.tmp
+
+# --- Gun.js 暫存資料 ---
+bot/radata-*/
+bot/radata-*.tmp
 
 # --- 根目錄暫存文件 ---
 強化方案.md

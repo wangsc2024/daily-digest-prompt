@@ -1,187 +1,60 @@
 {
-  "date": "2026-03-01",
-  "topic": "AI Agent 互操作性協議四強 — MCP、A2A、ACP、ANP 的架構比較、協同模式與生產級整合策略",
+  "date": "2026-03-02",
+  "topic": "AI Safety & Alignment — 從 Constitutional AI 到 Scalable Oversight 的前沿安全技術、紅隊測試方法論與全球治理框架",
   "research_questions": [
-    "MCP、A2A、ACP、ANP 四大協議各自解決什麼問題？它們的架構設計理念與技術取捨有何差異？",
-    "這四個協議如何分層協同？從工具存取（MCP）到訊息傳遞（ACP）到企業協作（A2A）到全球互操作（ANP）的四層架構如何運作？",
-    "在實際生產環境中如何整合多個協議？有哪些成功案例和最佳實踐？對 daily-digest-prompt 專案的 Agent Team 架構有何借鑑意義？"
+    "2025-2026 年 AI 對齊（Alignment）技術的主要進展為何？Constitutional AI、RLHF/RLAIF、DPO/KTO 等方法的演進路線與各自優劣比較？Anthropic 的 Constitutional AI v2 與 OpenAI 的 Superalignment 計畫有何具體成果？",
+    "Scalable Oversight（可擴展監督）如何解決超人類 AI 系統的安全驗證問題？Debate Protocol、Recursive Reward Modeling、Weak-to-Strong Generalization、Process Reward Models 等方法的技術原理、實驗結果與可行性評估？",
+    "AI 紅隊測試（Red Teaming）的最新方法論演進：從人工對抗測試到 Automated Red Teaming、多模態攻擊向量（文字+圖像+音訊）、越獄攻擊（Jailbreaking）分類學與系統性防禦框架？Meta Purple Llama / Llama Guard 的實踐經驗？"
   ],
-  "methodology": "四階段系統性研究法：(1) 官方規格文件分析 (2) 學術論文交叉比對 (3) 開源實作案例蒐集 (4) 架構比較矩陣與實務應用建議。中英文來源至少各2篇，總計5篇以上權威來源。",
+  "methodology": "四階段系統性研究法：(1) 規劃與去重（本階段，已完成）→ (2) 資料蒐集：搜尋 Anthropic/OpenAI/DeepMind/Meta 官方安全報告、arXiv 2025-2026 最新論文（Constitutional AI v2、Superalignment、Scalable Oversight）、AI Safety 社群資源（CAIS/MIRI/ARC）、各國監管框架（EU AI Act/NIST AI RMF/中國 AI 安全法規）→ (3) 交叉分析：建構三大技術路線比較矩陣（Constitutional AI vs RLHF vs DPO/KTO）、整合紅隊方法論分類學框架、繪製全球 AI 安全監管地圖 → (4) 報告撰寫：含 7+ 核心洞見、技術比較矩陣、實務應用建議、對本專案 Agent 安全架構的啟示（Hook 規則 ← Constitutional AI 原則映射、scan-skills ← Red Teaming 方法論）",
   "keywords": [
-    "Model Context Protocol MCP",
-    "Agent-to-Agent A2A protocol",
-    "Agent Communication Protocol ACP IBM",
-    "Agent Network Protocol ANP",
-    "AI agent interoperability",
-    "multi-agent communication standards",
-    "agentic AI protocols 2026"
+    "AI Safety",
+    "AI Alignment",
+    "Constitutional AI",
+    "RLHF",
+    "RLAIF",
+    "DPO",
+    "KTO",
+    "Scalable Oversight",
+    "Weak-to-Strong Generalization",
+    "Red Teaming",
+    "Automated Red Teaming",
+    "Jailbreaking",
+    "Prompt Injection Defense",
+    "AI Governance",
+    "EU AI Act",
+    "NIST AI RMF",
+    "Responsible AI",
+    "Superalignment",
+    "Process Reward Models",
+    "Debate Protocol",
+    "Recursive Reward Modeling",
+    "Llama Guard",
+    "Purple Llama",
+    "Constitutional AI v2",
+    "Interpretability",
+    "Mechanistic Interpretability"
   ],
-  "sources": [
-    {
-      "title": "A Survey of Agent Interoperability Protocols: MCP, ACP, A2A, and ANP (arxiv)",
-      "url": "https://arxiv.org/html/2505.02279v1",
-      "key_points": [
-        "四協議架構比較矩陣：MCP（客戶端-伺服器/JSON-RPC）、ACP（代理客戶端-伺服器/多部分MIME）、A2A（對等/Task+Artifact）、ANP（去中心化P2P/JSON-LD）",
-        "分階段採納藍圖：Stage 1 MCP → Stage 2 ACP → Stage 3 A2A → Stage 4 ANP",
-        "安全威脅矩陣：MCP 面臨工具中毒與命令注入、A2A 面臨 Agent Card 欺騙、ACP 面臨元資料偽造、ANP 面臨身份欺騙",
-        "四協議共享 Creation→Operation→Update→Termination 生命週期",
-        "論文結論：無單一協議適用所有場景，應逐步互補採納"
-      ]
-    },
-    {
-      "title": "How AI Communication Protocols Enable Multi-Agent Systems (EffectiveSoft)",
-      "url": "https://www.effectivesoft.com/blog/ai-communication-protocols.html",
-      "key_points": [
-        "MCP 負責工具整合、A2A 管理代理編排，兩者互補而非競爭",
-        "ACP 已於 2025 年 8 月與 A2A 合併，路線圖與治理已轉移",
-        "實務應用：銀行助手整合 Salesforce/HR/知識庫、零售跨系統預測",
-        "挑戰：跨組織身份管理、長時間任務可靠性、可觀測性"
-      ]
-    },
-    {
-      "title": "AI Agent Protocols 2026: The Complete Guide (ruh.ai)",
-      "url": "https://www.ruh.ai/blogs/ai-agent-protocols-2026-complete-guide",
-      "key_points": [
-        "MCP 生態：10,000+ 活躍伺服器、9700 萬月 SDK 下載量",
-        "產業數據：Gartner 預測 2026 年 40% 企業應用整合 AI 代理、McKinsey 多代理系統 ROI 為單代理 3 倍",
-        "醫療（MCP）：資料檢索時間 -40%、診斷準確度 +25%",
-        "三步實施流程：需求評估 → 試點部署 → 監控優化",
-        "安全比較：MCP 用能力型令牌、A2A 用 OAuth 2.0、ACP 用 Bearer tokens"
-      ]
-    },
-    {
-      "title": "Top AI Agent Protocols in 2026 (GetStream)",
-      "url": "https://getstream.io/blog/ai-agent-protocols/",
-      "key_points": [
-        "五層協議堆疊：ANP/A2A/ACP 處理網路發現、MCP 管理工具存取",
-        "新增 AP2（Agent Payment Protocol）用於自主交易",
-        "設計原則：模組化而非供應商鎖定",
-        "現代系統應跨責任層組合協議"
-      ]
-    },
-    {
-      "title": "IBM ACP Technical Overview for Software Engineers (WorkOS)",
-      "url": "https://workos.com/blog/ibm-agent-communication-protocol-acp",
-      "key_points": [
-        "ACP 源自 BeeAI 開源專案，採 JSON-RPC over HTTP/WebSockets",
-        "三種通訊模式：同步 HTTP POST、非同步 taskId 輪詢、WebSocket/SSE 串流",
-        "代理生命週期：INITIALIZING → ACTIVE → DEGRADED → RETIRING → RETIRED",
-        "本地優先設計：針對叢集或筆記型電腦上多代理協作最佳化",
-        "能力權杖機制：不可偽造簽署物件，支援 Kubernetes RBAC 橋接"
-      ]
-    },
-    {
-      "title": "MCP vs A2A vs ANP vs ACP vs AGORA: AI Agent Protocol Comparison (Katonic)",
-      "url": "https://www.katonic.ai/blog/agent-protocols",
-      "key_points": [
-        "ACP 已於 2025 年 8 月與 A2A 合併",
-        "分層應用：工具整合→MCP、協作→A2A、互聯網→ANP、適應→AGORA",
-        "ANP 可達互聯網級規模、MCP 延遲最低",
-        "AGORA 採自然語言驅動的代理交互方式，是新興方向",
-        "五個協議是互補構建塊，非競爭標準"
-      ]
-    },
-    {
-      "title": "Agent-to-Agent Communication Protocol Standards (Zylos Research)",
-      "url": "https://zylos.ai/research/2026-02-15-agent-to-agent-communication-protocols",
-      "key_points": [
-        "A2A 三層架構：資料模型（協議無關）→ 操作（綁定無關）→ 協議綁定（JSON-RPC/gRPC/REST）",
-        "A2A 不透明性原則：代理基於宣告能力協作，不暴露內部實現",
-        "WebSocket vs HTTP 混合策略：HTTP 用於同步/發現、WebSocket 用於即時協作",
-        "A2A 市場估值 2026 年預計 23 億美元、35% AI 企業探索整合",
-        "安全最佳實踐：A2A 支援 OAuth 2.0/mTLS/OIDC、MCP 採 OAuth 2.1+PKCE"
-      ]
-    }
+  "expected_sources": [
+    "Anthropic — Constitutional AI 系列論文與 Claude Safety 技術報告",
+    "OpenAI — Superalignment 計畫進展、Weak-to-Strong Generalization 論文",
+    "DeepMind — Scalable Oversight 研究（Debate Protocol、Process Reward Models）",
+    "Meta — Purple Llama / Llama Guard 安全工具鏈文件",
+    "arXiv — 2025-2026 AI Safety & Alignment 最新論文",
+    "NIST — AI Risk Management Framework (AI RMF) 技術標準",
+    "EU — AI Act 技術實施細則",
+    "Center for AI Safety (CAIS) — 研究報告與風險分類",
+    "Alignment Research Center (ARC) — 評估方法論",
+    "MIRI — 數學化對齊理論"
   ],
-  "analysis": {
-    "consensus": [
-      {
-        "point": "四協議互補非競爭",
-        "support_count": 7,
-        "detail": "所有來源一致認為 MCP、A2A、ACP、ANP 是互補的構建塊，非相互競爭的標準。無單一協議適用所有場景，應根據使用情境分層組合。"
-      },
-      {
-        "point": "分層架構已確立共識",
-        "support_count": 6,
-        "detail": "MCP 處理工具層存取、A2A 管理代理間協作、ACP 負責訊息傳遞、ANP 處理全球互聯網級互操作。層級從具體到抽象、從本地到全球。"
-      },
-      {
-        "point": "漸進式採納策略",
-        "support_count": 4,
-        "detail": "建議從 MCP 工具整合開始（最成熟/最低風險），逐步向 A2A 代理協作擴展，最終達到 ANP 全球互操作。分階段降低整合風險。"
-      },
-      {
-        "point": "安全是每一層的核心關注",
-        "support_count": 5,
-        "detail": "每個協議都有專屬安全機制：MCP 用能力型令牌/OAuth 2.1+PKCE、A2A 用 OAuth 2.0/mTLS/OIDC、ACP 用 Bearer tokens/K8s RBAC。安全複雜度隨層級升高而增加。"
-      },
-      {
-        "point": "MCP 已達事實標準地位",
-        "support_count": 5,
-        "detail": "MCP 擁有 10,000+ 活躍伺服器、9700 萬月 SDK 下載量，生態系統最成熟。任何新協議都必須與 MCP 互操作。"
-      }
-    ],
-    "divergence": [
-      {
-        "point": "ACP 的獨立性問題",
-        "detail": "arxiv 論文和 WorkOS 將 ACP 視為獨立協議進行詳細技術分析；EffectiveSoft 和 Katonic 則指出 ACP 已於 2025-08 併入 A2A。時間差造成學術界與產業界的觀點分歧。",
-        "implication": "後續研究應以合併後的 A2A 為主，但 ACP 的本地優先設計理念仍有獨立參考價值。"
-      },
-      {
-        "point": "ANP 的成熟度評估",
-        "detail": "GetStream 將 ANP 視為已就緒的五層堆疊組件；arxiv 論文定位為 Stage 4（最後階段），暗示尚未達生產級。Katonic 認為 ANP 可達互聯網級規模但未提供實證。",
-        "implication": "ANP 的架構設計已明確，但生產環境驗證不足，2026 年仍處於早期採納階段。"
-      },
-      {
-        "point": "AGORA 的存在與定位",
-        "detail": "僅 Katonic 提及 AGORA 協議（自然語言驅動交互），其他 6 篇來源完全未涉及。可能是過於新興或受眾有限。",
-        "implication": "自然語言驅動的代理交互是潛在方向，但 2026 年仍不在主流討論範圍。"
-      }
-    ],
-    "insights": [
-      {
-        "id": 1,
-        "insight": "協議分層金字塔已確立：MCP（工具層）→ ACP（訊息層）→ A2A（協作層）→ ANP（互聯網層），形成從具體到抽象、從本地到全球的四層架構",
-        "support": "7/7 篇來源交叉驗證",
-        "relevance": "daily-digest-prompt 的 Agent Team 架構目前處於 MCP 工具層（Claude Code CLI），未來可考慮引入 A2A 實現跨系統代理協作"
-      },
-      {
-        "id": 2,
-        "insight": "ACP 與 A2A 合併標誌協議整合趨勢，預示未來可能整合為 2-3 個核心協議（MCP + A2A + ANP）",
-        "support": "EffectiveSoft、Katonic 直接確認；arxiv 論文的四協議分析框架即將變為三協議",
-        "relevance": "選擇技術棧時應優先投入 MCP 和 A2A，避免押注在可能被合併的協議上"
-      },
-      {
-        "id": 3,
-        "insight": "MCP 10,000+ 伺服器和 9700 萬月下載量已達臨界規模，形成網路效應護城河",
-        "support": "ruh.ai 數據 + GetStream 生態分析",
-        "relevance": "專案已使用 MCP（Cloudflare、Slack 等 deferred tools），站在正確的技術軌道上"
-      },
-      {
-        "id": 4,
-        "insight": "安全威脅隨協議層級升高而指數級複雜化：工具中毒（MCP）→ Agent Card 欺騙（A2A）→ 全球身份欺騙（ANP）",
-        "support": "arxiv 威脅矩陣 + Zylos 安全分析 + ruh.ai 安全比較",
-        "relevance": "現有 Hook 機器強制層已覆蓋 MCP 層級安全，未來引入 A2A 時需增加 Agent Card 驗證機制"
-      },
-      {
-        "id": 5,
-        "insight": "A2A 不透明性原則（基於能力協作、不暴露內部實現）是企業級 AI 互操作的必要條件",
-        "support": "Zylos 獨特觀點 + ruh.ai 銀行/零售企業案例佐證",
-        "relevance": "daily-digest-prompt 的 sub-agent 架構已隱式遵循此原則（Task 工具不暴露子 Agent 內部邏輯）"
-      },
-      {
-        "id": 6,
-        "insight": "本地優先（ACP/BeeAI）vs 雲端優先（A2A/ANP）代表兩種設計哲學，日常開發場景偏好本地優先",
-        "support": "WorkOS 技術深度分析（ACP 三種通訊模式 + K8s RBAC 橋接）",
-        "relevance": "專案的 Agent Team 在 Windows 本地執行，符合本地優先哲學，無需雲端協調器"
-      },
-      {
-        "id": 7,
-        "insight": "AP2（Agent Payment Protocol）開闢 AI 經濟學新維度，代理間自主交易將催生新的商業模式",
-        "support": "GetStream 獨特提及，目前僅 1 篇來源",
-        "relevance": "前沿方向，暫不影響現有架構，但值得持續關注"
-      }
-    ]
+  "dedup_check": {
+    "registry_conflict": false,
+    "registry_note": "research-registry.json 中完全無 AI Safety/Alignment/Constitutional AI/Red Teaming/Scalable Oversight 相關記錄（Grep 0 匹配）",
+    "kb_conflict": false,
+    "kb_note": "知識庫 hybrid search 以 'AI safety alignment constitutional AI red teaming' 查詢，未回傳任何 AI Safety 專門研究筆記。最近的相關研究是 Test-Time Reasoning（2026-02-19）但方向完全不同。",
+    "cross_type_conflict": false,
+    "cross_type_note": "ai_sysdev 近期主題（AI-Driven IaC/Documentation/CI-CD/Technical Debt/Requirements QA/Code Review）均為開發工具化方向，與 Safety/Alignment 理論方向無重疊。ai_github_research 聚焦開源工具（Dify/FastMCP/OpenBB/Aider/mergekit），亦無 Safety 方向。tech_research 聚焦工程實踐（Signal Protocol/Canvas/密碼雜湊），無 Safety 理論。"
   },
-  "stage_completed": 3
+  "relevance_to_project": "本專案已建構 Hooks 機器強制層（5 個 Guard Hook + CJK Guard）與 Agent Guardian 系統（ErrorClassifier + CircuitBreaker + LoopDetector），但這些安全機制缺乏系統性的 AI 安全理論框架支撐。此研究可提供：(1) Constitutional AI 原則 → 映射為 Hook 規則設計哲學（從經驗法則升級為理論驅動）；(2) Red Teaming 方法論 → 強化 scan-skills.ps1 的安全掃描覆蓋範圍；(3) Prompt Injection 防禦框架 → 增強 pre_bash_guard.py 和 pre_write_guard.py 的注入偵測能力；(4) Scalable Oversight → 啟發 Agent 監督架構設計（如 post_tool_logger 的自動化審計路徑）",
+  "stage_completed": 1
 }

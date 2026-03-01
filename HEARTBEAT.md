@@ -58,6 +58,14 @@ schedules:
     retry: 0
     description: "知識庫備份審查（每日 00:30，備份後驗證完整性，失敗時 ntfy 告警）"
 
+  bot-server-restart:
+    cron: "15 0 * * *"
+    script: bot/restart-bot.ps1
+    workdir: "D:/Source/daily-digest-prompt/bot"
+    timeout: 180
+    retry: 0
+    description: "Bot Server + Gun Relay 每日重啟（00:15，確保 WebSocket 連線穩定）"
+
   bot-startup:
     trigger: startup
     delay: 30
@@ -90,6 +98,7 @@ schedules:
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 3600s (60min) | Todoist 團隊模式 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
 | kb-verify-backup | 每日 00:30 | kb-verify-backup.ps1 | 60s (1min) | 備份完整性審查（失敗時 ntfy 告警） |
+| bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot Server + Gun Relay 重啟（確保 WebSocket 穩定） |
 | bot-startup | 開機啟動 +30s | node bot.js | 無限制 | Bot.js 聊天室伺服器 |
 | chatroom-scheduler-startup | 開機啟動 +60s | uv run python chatroom-scheduler.py | 無限制 | Chatroom 任務排程器 |
 
