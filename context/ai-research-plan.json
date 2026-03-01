@@ -16,5 +16,82 @@
     "multi-agent communication standards",
     "agentic AI protocols 2026"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "A Survey of Agent Interoperability Protocols: MCP, ACP, A2A, and ANP (arxiv)",
+      "url": "https://arxiv.org/html/2505.02279v1",
+      "key_points": [
+        "四協議架構比較矩陣：MCP（客戶端-伺服器/JSON-RPC）、ACP（代理客戶端-伺服器/多部分MIME）、A2A（對等/Task+Artifact）、ANP（去中心化P2P/JSON-LD）",
+        "分階段採納藍圖：Stage 1 MCP → Stage 2 ACP → Stage 3 A2A → Stage 4 ANP",
+        "安全威脅矩陣：MCP 面臨工具中毒與命令注入、A2A 面臨 Agent Card 欺騙、ACP 面臨元資料偽造、ANP 面臨身份欺騙",
+        "四協議共享 Creation→Operation→Update→Termination 生命週期",
+        "論文結論：無單一協議適用所有場景，應逐步互補採納"
+      ]
+    },
+    {
+      "title": "How AI Communication Protocols Enable Multi-Agent Systems (EffectiveSoft)",
+      "url": "https://www.effectivesoft.com/blog/ai-communication-protocols.html",
+      "key_points": [
+        "MCP 負責工具整合、A2A 管理代理編排，兩者互補而非競爭",
+        "ACP 已於 2025 年 8 月與 A2A 合併，路線圖與治理已轉移",
+        "實務應用：銀行助手整合 Salesforce/HR/知識庫、零售跨系統預測",
+        "挑戰：跨組織身份管理、長時間任務可靠性、可觀測性"
+      ]
+    },
+    {
+      "title": "AI Agent Protocols 2026: The Complete Guide (ruh.ai)",
+      "url": "https://www.ruh.ai/blogs/ai-agent-protocols-2026-complete-guide",
+      "key_points": [
+        "MCP 生態：10,000+ 活躍伺服器、9700 萬月 SDK 下載量",
+        "產業數據：Gartner 預測 2026 年 40% 企業應用整合 AI 代理、McKinsey 多代理系統 ROI 為單代理 3 倍",
+        "醫療（MCP）：資料檢索時間 -40%、診斷準確度 +25%",
+        "三步實施流程：需求評估 → 試點部署 → 監控優化",
+        "安全比較：MCP 用能力型令牌、A2A 用 OAuth 2.0、ACP 用 Bearer tokens"
+      ]
+    },
+    {
+      "title": "Top AI Agent Protocols in 2026 (GetStream)",
+      "url": "https://getstream.io/blog/ai-agent-protocols/",
+      "key_points": [
+        "五層協議堆疊：ANP/A2A/ACP 處理網路發現、MCP 管理工具存取",
+        "新增 AP2（Agent Payment Protocol）用於自主交易",
+        "設計原則：模組化而非供應商鎖定",
+        "現代系統應跨責任層組合協議"
+      ]
+    },
+    {
+      "title": "IBM ACP Technical Overview for Software Engineers (WorkOS)",
+      "url": "https://workos.com/blog/ibm-agent-communication-protocol-acp",
+      "key_points": [
+        "ACP 源自 BeeAI 開源專案，採 JSON-RPC over HTTP/WebSockets",
+        "三種通訊模式：同步 HTTP POST、非同步 taskId 輪詢、WebSocket/SSE 串流",
+        "代理生命週期：INITIALIZING → ACTIVE → DEGRADED → RETIRING → RETIRED",
+        "本地優先設計：針對叢集或筆記型電腦上多代理協作最佳化",
+        "能力權杖機制：不可偽造簽署物件，支援 Kubernetes RBAC 橋接"
+      ]
+    },
+    {
+      "title": "MCP vs A2A vs ANP vs ACP vs AGORA: AI Agent Protocol Comparison (Katonic)",
+      "url": "https://www.katonic.ai/blog/agent-protocols",
+      "key_points": [
+        "ACP 已於 2025 年 8 月與 A2A 合併",
+        "分層應用：工具整合→MCP、協作→A2A、互聯網→ANP、適應→AGORA",
+        "ANP 可達互聯網級規模、MCP 延遲最低",
+        "AGORA 採自然語言驅動的代理交互方式，是新興方向",
+        "五個協議是互補構建塊，非競爭標準"
+      ]
+    },
+    {
+      "title": "Agent-to-Agent Communication Protocol Standards (Zylos Research)",
+      "url": "https://zylos.ai/research/2026-02-15-agent-to-agent-communication-protocols",
+      "key_points": [
+        "A2A 三層架構：資料模型（協議無關）→ 操作（綁定無關）→ 協議綁定（JSON-RPC/gRPC/REST）",
+        "A2A 不透明性原則：代理基於宣告能力協作，不暴露內部實現",
+        "WebSocket vs HTTP 混合策略：HTTP 用於同步/發現、WebSocket 用於即時協作",
+        "A2A 市場估值 2026 年預計 23 億美元、35% AI 企業探索整合",
+        "安全最佳實踐：A2A 支援 OAuth 2.0/mTLS/OIDC、MCP 採 OAuth 2.1+PKCE"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }
