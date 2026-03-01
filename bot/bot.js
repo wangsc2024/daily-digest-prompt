@@ -112,9 +112,9 @@ app.use('/api/', (req, res, next) => {
 // S1: Timing-safe Bearer Token 認證 (HMAC 消除長度洩漏)
 const API_SECRET_KEY = process.env.API_SECRET_KEY ? process.env.API_SECRET_KEY.trim() : null;
 const HMAC_KEY = crypto.randomBytes(32); // per-boot random key
-// C2 修復：未設定時明確警告（避免靜默開放認證）
 if (!API_SECRET_KEY) {
-    logger.warn('[SECURITY] API_SECRET_KEY 未設定 — 所有 API 端點無需認證（僅限開發環境）');
+    console.error('[SECURITY] API_SECRET_KEY 未設定，伺服器拒絕啟動。請在 .env 設定 API_SECRET_KEY。');
+    process.exit(1);
 }
 
 function timingSafeTokenCompare(a, b) {
@@ -139,8 +139,6 @@ app.use((req, res, next) => {
     if (cleanPath === '/' || cleanPath === '/api/health') {
         return next();
     }
-
-    if (!API_SECRET_KEY) return next();
 
     const auth = req.headers['authorization'];
     if (!auth) {
