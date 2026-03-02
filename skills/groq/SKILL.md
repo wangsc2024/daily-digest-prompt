@@ -22,8 +22,8 @@ depends-on: []
 
 ```
 Claude Code Agent
-  └─ curl http://localhost:3001/groq/chat
-       └─ groq-relay.js (port 3001，持有 GROQ_API_KEY)
+  └─ curl http://localhost:3002/groq/chat
+       └─ groq-relay.js (port 3002，持有 GROQ_API_KEY)
             └─ Groq API (llama-3.1-8b-instant)
 ```
 
@@ -38,7 +38,7 @@ Claude Code Agent
 執行任何 Groq 操作前，先確認 Relay 服務可用：
 
 ```bash
-curl -s --max-time 3 http://localhost:3001/groq/health
+curl -s --max-time 3 http://localhost:3002/groq/health
 ```
 
 - 回傳 `{"status":"ok"}` → Relay 可用，繼續
@@ -55,7 +55,7 @@ curl -s --max-time 3 http://localhost:3001/groq/health
 ```bash
 # 建立請求 JSON（用 Write 工具，確保 UTF-8）
 # 然後執行：
-curl -s --max-time 20 -X POST http://localhost:3001/groq/chat \
+curl -s --max-time 20 -X POST http://localhost:3002/groq/chat \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @/tmp/groq-request.json
 ```
@@ -141,7 +141,7 @@ curl -s --max-time 20 -X POST http://localhost:3001/groq/chat \
 # {"mode":"translate","content":"Meta releases new open-source LLM with 70B parameters"}
 
 # 步驟 2：呼叫 Relay
-curl -s --max-time 20 -X POST http://localhost:3001/groq/chat \
+curl -s --max-time 20 -X POST http://localhost:3002/groq/chat \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @/tmp/groq-hn-translate.json
 
@@ -208,7 +208,7 @@ node bot/groq-relay.js
 Start-Process -NoNewWindow node -ArgumentList "bot/groq-relay.js"
 
 # 確認啟動
-curl http://localhost:3001/groq/health
+curl http://localhost:3002/groq/health
 ```
 
 Relay 啟動後持續運行，不需每次請求重啟。建議整合到 Windows Task Scheduler 或隨 bot.js 一起啟動。

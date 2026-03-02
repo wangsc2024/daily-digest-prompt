@@ -11,8 +11,8 @@ version: 1
 
 providers:
   groq:
-    endpoint: http://localhost:3001/groq/chat
-    health_check: http://localhost:3001/groq/health
+    endpoint: http://localhost:3002/groq/chat
+    health_check: http://localhost:3002/groq/health
     model: llama-3.1-8b-instant
     timeout_s: 20
     max_tokens: 2048

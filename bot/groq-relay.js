@@ -26,7 +26,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const Groq = require('groq-sdk');
 
-const PORT = parseInt(process.env.GROQ_RELAY_PORT || '3001', 10);
+const PORT = parseInt(process.env.GROQ_RELAY_PORT || '3002', 10);
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 const GROQ_RELAY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 分鐘快取
 const GROQ_TIMEOUT_MS = 15000;

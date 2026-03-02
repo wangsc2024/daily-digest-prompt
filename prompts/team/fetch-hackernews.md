@@ -47,12 +47,12 @@ AI, LLM, GPT, Claude, OpenAI, Anthropic, Gemini, DeepSeek, machine learning, dee
 
 先確認 Groq Relay 可用：
 ```bash
-curl -s --max-time 3 http://localhost:3001/groq/health
+curl -s --max-time 3 http://localhost:3002/groq/health
 ```
 
 - 若回傳 `{"status":"ok"}` → 用 Groq 批次翻譯標題（逐篇，篇間等 0.5 秒）：
   1. 用 Write 工具建立 `/tmp/groq-hn-translate.json`：`{"mode":"translate","content":"<英文標題>"}`
-  2. 執行：`curl -s --max-time 20 -X POST http://localhost:3001/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @/tmp/groq-hn-translate.json`
+  2. 執行：`curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @/tmp/groq-hn-translate.json`
   3. 從回應 `.result` 欄位取得中文譯文
   - 遇到 429 → 等待 22 秒後重試一次；仍失敗則跳過該篇，Claude 自行翻譯
 - 若 Relay 不可用（連線拒絕）→ 記錄 `groq_skipped: true`，由 Claude 翻譯（原有行為不變）

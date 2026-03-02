@@ -40,12 +40,12 @@ curl -s --max-time 10 -X POST https://ptnews-mcp.pages.dev/mcp \
 
 取得新聞後，先確認 Groq Relay 可用：
 ```bash
-curl -s --max-time 3 http://localhost:3001/groq/health
+curl -s --max-time 3 http://localhost:3002/groq/health
 ```
 
 - 若回傳 `{"status":"ok"}` → 對每則新聞（最多 5 則）用 Groq 產生一句話摘要：
   1. 用 Write 工具建立 `/tmp/groq-news-summary.json`：`{"mode":"summarize","content":"<新聞標題> <原始摘要（前 300 字）>"}`
-  2. 執行：`curl -s --max-time 20 -X POST http://localhost:3001/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @/tmp/groq-news-summary.json`
+  2. 執行：`curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @/tmp/groq-news-summary.json`
   3. 從回應 `.result` 欄位取得摘要，存入各新聞項目的 `groq_summary` 欄位
   - 篇間等待 0.3 秒（避免 429）
 - 若 Relay 不可用 → 記錄 `groq_skipped: true`，`groq_summary` 欄位省略（不影響後續政策解讀）

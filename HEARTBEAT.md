@@ -78,7 +78,7 @@ schedules:
     delay: 45
     command: "node groq-relay.js"
     workdir: "D:/Source/daily-digest-prompt/bot"
-    description: "Groq Relay 服務（開機啟動，延遲 45s，port 3001，為 Claude Agent 提供快速翻譯/摘要前處理）"
+    description: "Groq Relay 服務（開機啟動，延遲 45s，port 3002，為 Claude Agent 提供快速翻譯/摘要前處理）"
 
   chatroom-scheduler-startup:
     trigger: startup
@@ -107,7 +107,7 @@ schedules:
 | kb-verify-backup | 每日 00:30 | kb-verify-backup.ps1 | 60s (1min) | 備份完整性審查（失敗時 ntfy 告警） |
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot Server + Gun Relay 重啟（確保 WebSocket 穩定） |
 | bot-startup | 開機啟動 +30s | node bot.js | 無限制 | Bot.js 聊天室伺服器 |
-| groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3001，Claude Agent 前處理層） |
+| groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
 | chatroom-scheduler-startup | 開機啟動 +60s | uv run python chatroom-scheduler.py | 無限制 | Chatroom 任務排程器 |
 
 ## Todoist 驅動任務（由每小時排程撿起）
