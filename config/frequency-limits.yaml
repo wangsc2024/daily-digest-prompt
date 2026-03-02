@@ -27,7 +27,7 @@ selection_strategy: "round_robin"
 # 每次觸發最多執行的自動任務數
 max_auto_per_run:
   single_mode: 1    # hour-todoist-prompt.md：串行，保持 1（串行 4 個超出 2100s timeout）
-  team_mode: 2      # run-todoist-agent-team.ps1：並行 Phase 2，最多同時啟動 4 個 Agent
+  team_mode: 1      # run-todoist-agent-team.ps1：並行 Phase 2，最多同時啟動 4 個 Agent
 
 # 歸零邏輯：
 #   - tracking_file 不存在 → 建立初始檔案（所有計數為 0，next_execution_order 為 1）
@@ -70,7 +70,7 @@ tasks:
   # --- 佛學研究群組（共 12 次/日）---
   shurangama:
     name: "楞嚴經研究"
-    daily_limit: 5
+    daily_limit: 1
     counter_field: "shurangama_count"
     template: "templates/auto-tasks/shurangama-research.md"
     template_version: 1
@@ -80,7 +80,7 @@ tasks:
 
   jiaoguangzong:
     name: "教觀綱宗研究"
-    daily_limit: 3
+    daily_limit: 1
     counter_field: "jiaoguangzong_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -96,7 +96,7 @@ tasks:
 
   fahua:
     name: "法華經研究"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "fahua_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -112,7 +112,7 @@ tasks:
 
   jingtu:
     name: "淨土宗研究"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "jingtu_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -129,7 +129,7 @@ tasks:
   # --- AI / 技術研究群組（共 17 次/日）---
   tech_research:
     name: "每日任務技術研究"
-    daily_limit: 5
+    daily_limit: 1
     counter_field: "tech_research_count"
     template: "templates/auto-tasks/tech-research.md"
     template_version: 1
@@ -156,7 +156,7 @@ tasks:
 
   unsloth_research:
     name: "Unsloth 研究"
-    daily_limit: 2
+    daily_limit: 0
     counter_field: "unsloth_research_count"
     template: "templates/auto-tasks/unsloth-research.md"
     template_version: 1
@@ -167,7 +167,7 @@ tasks:
 
   ai_github_research:
     name: "AI GitHub 熱門專案研究"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "ai_github_research_count"
     template: "templates/auto-tasks/ai-github-research.md"
     template_version: 1
@@ -178,7 +178,7 @@ tasks:
 
   ai_smart_city:
     name: "AI 智慧城市研究"
-    daily_limit: 2
+    daily_limit: 0
     counter_field: "ai_smart_city_count"
     template: "templates/auto-tasks/ai-smart-city-research.md"
     template_version: 1
@@ -189,7 +189,7 @@ tasks:
 
   ai_sysdev:
     name: "AI 系統開發研究"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "ai_sysdev_count"
     template: "templates/auto-tasks/ai-sysdev-research.md"
     template_version: 1
@@ -201,7 +201,7 @@ tasks:
   # --- 系統優化群組 ---
   skill_audit:
     name: "Skill 審查優化"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "skill_audit_count"
     template: "templates/auto-tasks/skill-audit.md"
     template_version: 1
@@ -223,7 +223,7 @@ tasks:
 
   git_push:
     name: "專案推送 GitHub + 知識庫同步"
-    daily_limit: 4
+    daily_limit: 1
     counter_field: "git_push_count"
     template: "templates/auto-tasks/git-push.md"
     template_version: 1
@@ -235,7 +235,7 @@ tasks:
   # --- 遊戲創意群組（共 2 次/日）---
   creative_game_optimize:
     name: "創意遊戲優化"
-    daily_limit: 2
+    daily_limit: 0
     counter_field: "creative_game_optimize_count"
     template: "templates/auto-tasks/creative-game-optimize.md"
     template_version: 1
@@ -247,7 +247,7 @@ tasks:
   # --- 專案品質優化群組（共 2 次/日）---
   qa_optimize:
     name: "QA System 品質與安全優化"
-    daily_limit: 2
+    daily_limit: 0
     counter_field: "qa_optimize_count"
     template: "templates/auto-tasks/qa-system-optimize.md"
     template_version: 1
@@ -270,7 +270,7 @@ tasks:
 
   self_heal:
     name: "系統自愈迴圈"
-    daily_limit: 3
+    daily_limit: 1
     counter_field: "self_heal_count"
     template: "templates/auto-tasks/self-heal.md"
     template_version: 1
@@ -282,7 +282,7 @@ tasks:
   # --- Chatroom 整合優化群組（共 2 次/日）---
   chatroom_optimize:
     name: "Chatroom 整合品質優化"
-    daily_limit: 2
+    daily_limit: 1
     counter_field: "chatroom_optimize_count"
     template: "templates/auto-tasks/chatroom-optimize.md"
     template_version: 1
@@ -294,7 +294,7 @@ tasks:
   # --- GitHub 靈感群組（共 1 次/日，僅週三/週日）---
   github_scout:
     name: "GitHub 靈感蒐集"
-    daily_limit: 1
+    daily_limit: 0
     counter_field: "github_scout_count"
     template: "templates/auto-tasks/github-scout.md"
     template_version: 1

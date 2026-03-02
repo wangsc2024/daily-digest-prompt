@@ -1,132 +1,137 @@
 {
-  "version": 1,
-  "generated_at": "2026-03-01T20:30:00+08:00",
+  "version": 2,
+  "generated_at": "2026-03-02T05:34:51+08:00",
   "period_days": 7,
+  "total_skills": 24,
   "data_source": "partial",
-  "data_note": "JSONL 日誌缺少 2026-02-27 和 2026-03-01；output_len 欄位多數為 0",
+  "data_notes": "JSONL logs only cover 5 of 7 days (02-23~02-28); output_len not recorded in JSONL entries; auto-tasks-today is current-day snapshot only",
   "metrics": {
-    "daily_success_rate": 0.9846,
-    "skill_usage_coverage": 0.9583,
+    "daily_success_rate": 0.9876,
+    "skill_usage_coverage": 0.4583,
     "cache_hit_ratio": 0.2387,
     "error_rate": 0.0,
     "block_rate": 0.0003,
     "topic_diversity": 1.0,
-    "auto_task_fairness": 0.5047,
+    "auto_task_fairness": 0.9487,
     "avg_io_per_call": null,
     "behavior_pattern_count": 43,
     "high_confidence_patterns": 0
   },
+  "health_assessment": {
+    "daily_success_rate": "healthy",
+    "skill_usage_coverage": "warning",
+    "cache_hit_ratio": "warning",
+    "error_rate": "healthy",
+    "block_rate": "healthy",
+    "topic_diversity": "healthy",
+    "auto_task_fairness": "warning",
+    "avg_io_per_call": "no_data",
+    "behavior_pattern_count": "healthy",
+    "high_confidence_patterns": "warning"
+  },
   "alerts": [
+    {
+      "level": "warning",
+      "metric": "skill_usage_coverage",
+      "value": 0.4583,
+      "threshold": 0.7,
+      "detail": "僅 11/24 個 Skill 在近 7 天 JSONL 日誌中被記錄使用，低於 70% 門檻"
+    },
     {
       "level": "warning",
       "metric": "cache_hit_ratio",
       "value": 0.2387,
-      "threshold": 0.40,
-      "message": "快取命中率 23.9% 低於 40% 門檻"
+      "threshold": 0.4,
+      "detail": "快取命中率 23.87% 遠低於 40% 門檻。cache-read=180 vs api-call=574"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.5047,
-      "threshold": 0.50,
-      "message": "自動任務公平性 CV=0.50 略超門檻，部分任務（github_scout=5, system_insight=6）執行次數偏低"
+      "value": 0.9487,
+      "threshold": 0.5,
+      "detail": "自動任務分配不均：10 個任務已執行，9 個任務仍為 0 次。CV=0.95 遠超 0.5 門檻"
     },
     {
       "level": "warning",
       "metric": "high_confidence_patterns",
       "value": 0,
       "threshold": 5,
-      "message": "高信心行為模式數為 0，所有 43 個模式 confidence < 0.5，尚未有模式可演化為 Skill"
+      "detail": "43 個行為模式中無一達到 confidence >= 0.5"
     },
     {
       "level": "info",
-      "metric": "loop-suspected",
+      "metric": "loop_suspected",
       "value": 315,
       "threshold": null,
-      "message": "近 7 天有 315 次 loop-suspected 標籤，建議檢查 LoopDetector 閾值是否過敏"
+      "detail": "JSONL 記錄 315 次 loop-suspected 標籤，佔總呼叫 4.15%"
     }
   ],
   "recommendations": [
-    "快取命中率偏低（23.9%），建議檢查 cache-policy.yaml 的 TTL 設定，或確認 API 呼叫前是否確實走快取流程",
-    "自動任務分佈略不均：shurangama(16) vs github_scout(5)，round-robin 指針可能受 daily_limit 差異影響，屬正常範圍",
-    "loop-suspected 標籤 315 次偏多，建議調整 LoopDetector 的 window_size 或 similarity_threshold 減少誤報",
-    "behavior-patterns.json 所有模式 confidence < 0.5，需要更多執行次數累積信心值"
+    "快取命中率偏低（23.87%），建議檢查 cache-policy.yaml TTL 設定或確認 api-cache Skill 是否被各 Agent 正確使用",
+    "Skill 使用覆蓋率不足（45.8%），部分 Skill 可能未被 JSONL 標籤正確追蹤，或確實未被使用",
+    "自動任務公平性待改善（CV=0.95），當日尚有 9 個任務未執行，round-robin 尚未輪完一圈",
+    "loop-suspected 事件偏多（315 次），建議分析具體迴圈類型並優化相關 Agent 行為",
+    "行為模式尚無高信心項目（0/43），建議增加資料收集頻率或調低信心門檻"
   ],
   "skill_heatmap": {
     "todoist": 337,
     "knowledge": 305,
-    "webfetch": 384,
-    "websearch": 306,
-    "api-cache": 180
+    "api-cache": 180,
+    "system-audit": 0,
+    "system-insight": 0,
+    "github-scout": 0,
+    "web-research": 0,
+    "gmail": 0,
+    "pingtung-news": 0,
+    "kb-curator": 0,
+    "task-manager": 0,
+    "todoist-task-creator": 0
   },
-  "skill_usage_list": [
-    "api-cache", "arch-evolution", "atomic-habits", "digest-memory",
-    "game-design", "git-smart-commit", "github-scout", "gmail",
-    "hackernews-ai-digest", "kb-curator", "knowledge-query",
-    "learning-mastery", "ntfy-notify", "pingtung-news",
-    "pingtung-policy-expert", "scheduler-state", "skill-scanner",
-    "system-audit", "system-insight", "task-manager", "todoist",
-    "todoist-task-creator", "web-research"
-  ],
   "high_failure_hours": [],
   "scheduler_summary": {
-    "total_runs_7d": 130,
-    "success": 128,
+    "total_runs_7d": 161,
+    "success": 159,
     "failed": 2,
-    "avg_duration_seconds": 782.3,
+    "success_rate": 0.9876,
+    "avg_duration_seconds": 797.1,
     "agent_breakdown": {
-      "todoist-team": 122,
-      "daily-digest-team": 6,
-      "todoist": 2
+      "todoist-team": { "total": 135, "success": 133, "fail": 2 },
+      "daily-digest-team": { "total": 8, "success": 8, "fail": 0 },
+      "todoist": { "total": 18, "success": 18, "fail": 0 }
     }
   },
   "research_summary": {
-    "total_entries_7d": 129,
-    "unique_topics_7d": 129,
-    "top_task_types": {
-      "todoist_research": 39,
-      "tech_research": 12,
-      "shurangama": 11,
-      "creative_game": 9,
-      "jiaoguangzong": 9,
-      "ai_sysdev": 8,
-      "ai_smart_city": 8,
-      "ai_github_research": 8,
-      "unsloth_research": 8,
-      "jingtu": 7,
-      "fahua": 7
+    "total_entries": 161,
+    "recent_7d_entries": 161,
+    "unique_topics": 161,
+    "diversity_index": 1.0
+  },
+  "jsonl_summary": {
+    "files_analyzed": ["2026-02-23.jsonl", "2026-02-24.jsonl", "2026-02-25.jsonl", "2026-02-26.jsonl", "2026-02-28.jsonl"],
+    "total_tool_calls": 7580,
+    "top_tools": {
+      "Read": 2596,
+      "Bash": 1932,
+      "TodoWrite": 969,
+      "Write": 688,
+      "WebFetch": 384,
+      "WebSearch": 306,
+      "Edit": 298,
+      "Grep": 221,
+      "Glob": 131,
+      "Task": 44
+    },
+    "top_tags": {
+      "team-mode": 5257,
+      "todowrite": 969,
+      "api-call": 574,
+      "python": 539,
+      "skill-read": 442,
+      "api-write": 388,
+      "webfetch": 384,
+      "todoist": 337,
+      "loop-suspected": 315,
+      "websearch": 306
     }
-  },
-  "auto_task_distribution": {
-    "auto-shurangama": 16,
-    "auto-tech_research": 15,
-    "auto-ai_deep_research": 14,
-    "auto-git_push": 14,
-    "auto-jiaoguangzong": 13,
-    "auto-self_heal": 13,
-    "auto-ai_smart_city": 11,
-    "auto-ai_sysdev": 11,
-    "auto-qa_optimize": 11,
-    "auto-fahua": 10,
-    "auto-jingtu": 10,
-    "auto-skill_audit": 10,
-    "auto-creative_game_optimize": 10,
-    "auto-ai_github_research": 9,
-    "auto-unsloth_research": 8,
-    "auto-log_audit": 7,
-    "auto-system_insight": 6,
-    "auto-github_scout": 5
-  },
-  "tool_distribution": {
-    "Read": 2596,
-    "Bash": 1932,
-    "TodoWrite": 969,
-    "Write": 688,
-    "WebFetch": 384,
-    "WebSearch": 306,
-    "Edit": 298,
-    "Grep": 221,
-    "Glob": 131,
-    "Task": 44
   }
 }

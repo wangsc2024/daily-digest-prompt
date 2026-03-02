@@ -339,6 +339,72 @@
         },
         "research_depth": "adequate"
       }
+    },
+    {
+      "scouted_at": "2026-03-02T06:10:08.709192",
+      "topic": "可觀測性與自愈系統（KB 降級分析）",
+      "mode": "degraded_kb_only",
+      "projects": [
+        {
+          "name": "DeerFlow (ByteDance)",
+          "url": "https://github.com/bytedance/deer-flow",
+          "stars": 21500,
+          "description": "ByteDance 開源 SuperAgent 編排平台：四大支柱架構、11 階段中介層管線與沙箱隔離執行",
+          "relevance": "high",
+          "last_updated": "2026-02",
+          "source": "KB note (existing analysis)"
+        },
+        {
+          "name": "AI-Powered Observability",
+          "url": "KB internal note",
+          "stars": 0,
+          "description": "智能告警降噪、自動根因分析與 LLM 驅動的遙測資料探索（OpenTelemetry + Agentic AI）",
+          "relevance": "medium",
+          "last_updated": "2026-03",
+          "source": "KB note (AI 可觀測性研究)"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "DeerFlow (ByteDance)",
+          "pattern": "11 階段中介層管線",
+          "target_files": [
+            "config/pipeline.yaml"
+          ],
+          "priority": "P2",
+          "effort": "high",
+          "description": "DeerFlow 的 11 階段管線（Plan→Search→Research→Coding→Reporting）可作為 daily-digest pipeline 的參考架構。目前系統已有 Phase 分層，可評估是否需要更細粒度的中介層。"
+        },
+        {
+          "source_project": "AI-Powered Observability",
+          "pattern": "OpenTelemetry + LLM 根因分析",
+          "target_files": [
+            "hooks/post_tool_logger.py",
+            "hooks/query_logs.py"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "目前 JSONL 日誌系統可增強：(1) 引入 OpenTelemetry-compatible trace format 讓日誌可被外部工具消費；(2) 在 on_stop_alert.py 中加入 LLM 自動根因分析（分析 error patterns 而非僅計數）。"
+        },
+        {
+          "source_project": "AI-Powered Observability",
+          "pattern": "智能告警降噪",
+          "target_files": [
+            "hooks/on_stop_alert.py",
+            "config/notification.yaml"
+          ],
+          "priority": "P2",
+          "effort": "low",
+          "description": "目前告警邏輯為 threshold-based（errors >= 5 → critical），可加入告警去重（同類錯誤 24h 內只告警一次）和智能分級（依歷史基線動態調整閾值）。"
+        }
+      ],
+      "quality": {
+        "sources_count": 2,
+        "grade_distribution": {
+          "B": 2
+        },
+        "research_depth": "limited (WebSearch unavailable, KB-only analysis)"
+      }
     }
   ]
 }
