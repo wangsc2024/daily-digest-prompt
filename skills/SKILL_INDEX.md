@@ -2,7 +2,7 @@
 
 > **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（17 個核心 + 7 個工具 = 24 個 Skills）
+## 速查表（19 個核心 + 7 個工具 = 26 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -25,6 +25,8 @@
 | 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分/KB匯入，depends-on: knowledge-query） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋、技術調查、趨勢分析、深度研究、資料蒐集、文獻回顧、調研 |
 | 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator、清理、重複筆記、品質檢查、知識庫清理、筆記統計 |
 | 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進、架構借鑑、開源分析、GitHub trending、trending repos、專案靈感、改進建議 |
+| 18 | kb-research-strategist | 研究前 KB 全文分析 + 長期系列研究管理（五階段進度追蹤，無 TTL）+ 結構化深化計畫 | 研究策略、系列研究、深化研究、知識差距分析、研究計畫、KB 擴充、知識系列、kb-research-strategist |
+| 19 | groq | Groq 快速推理前處理層（透過本機 Relay，支援摘要/翻譯/分類/萃取，depends-on: bot/groq-relay.js） | groq、快速摘要、快速翻譯、en_to_zh、英文摘要、批次翻譯、輕量分類、groq-relay、前處理 |
 
 ### 工具 Skill（按需使用，互動式觸發）
 

@@ -224,24 +224,38 @@ async function decomposeWorkflow(userMessage) {
 
 const OPTIMIZE_TASK_TIMEOUT_MS = 45000;
 const OPTIMIZE_TASK_MAX_TOKENS = 8192;
+const RESEARCH_SEP = '---RESEARCH_KEYWORDS---';
 const OPTIMIZE_TASK_SYSTEM_PROMPT =
     '你是任務描述強化專家。你的唯一工作是讓任務更清晰易執行。' +
     '你必須完整保留原始任務的所有需求、目標與意圖，絕對不可刪除、合併、簡化或替換任何需求。' +
-    '若你無法在完全不改變原意的前提下強化，請原文回傳原始任務，不要做任何修改。';
+    '若你無法在完全不改變原意的前提下強化，請原文回傳原始任務，不要做任何修改。' +
+    '若任務含有研究意圖（任務描述包含：研究、查詢、了解、分析、調查、學習、探索、比較、評估任何技術/工具/概念），' +
+    '額外輸出 JSON 尾碼，格式固定如下（主體強化文字在前，JSON 在後，以 ' + RESEARCH_SEP + ' 分隔）：\n' +
+    RESEARCH_SEP + '\n' +
+    '{"keywords": ["關鍵詞1", "關鍵詞2", "關鍵詞3"], "is_research": true}\n' +
+    '若無研究意圖，不輸出分隔符與 JSON，直接回傳強化後的純文字。';
 const TASK_CONTENT_MAX_CHARS = 50000;
 
 /**
  * 強化任務描述：保留原始意圖，補充技術細節與結構，絕不簡化或刪減需求。
+ * 若任務含研究意圖，額外解析 research_keywords 供 Worker 執行 KB 深化。
  * @param {string} taskContent - 原始任務內容
- * @returns {Promise<string>} 強化後的任務內容（失敗時返回原始內容）
+ * @returns {Promise<{optimized: string, research_keywords: string[], is_research: boolean}>}
+ *   失敗時 optimized 為原始內容，research_keywords 為空陣列，is_research 為 false
  */
 async function optimizeTask(taskContent) {
     if (!groq) throw new Error('Classifier 未初始化，請先呼叫 init()');
-    if (!taskContent || typeof taskContent !== 'string') return taskContent;
+    if (!taskContent || typeof taskContent !== 'string') {
+        return { optimized: taskContent, research_keywords: [], is_research: false };
+    }
     const trimmed = taskContent.trim();
-    if (trimmed.length === 0) return taskContent;
+    if (trimmed.length === 0) {
+        return { optimized: taskContent, research_keywords: [], is_research: false };
+    }
     // 過短的任務不需要優化（< 20 字元通常是簡單指令）
-    if (trimmed.length < 20) return taskContent;
+    if (trimmed.length < 20) {
+        return { optimized: taskContent, research_keywords: [], is_research: false };
+    }
 
     const truncated = trimmed.length > TASK_CONTENT_MAX_CHARS
         ? trimmed.slice(0, TASK_CONTENT_MAX_CHARS) + '\n[...內容過長已截斷]'
@@ -257,12 +271,25 @@ async function optimizeTask(taskContent) {
         const result = text ? String(text).trim() : '';
         if (result.length === 0) {
             console.warn('[optimizeTask] AI 回傳空內容，使用原始任務');
-            return taskContent;
+            return { optimized: taskContent, research_keywords: [], is_research: false };
         }
-        return result;
+        if (result.includes(RESEARCH_SEP)) {
+            const [optimizedText, jsonPart] = result.split(RESEARCH_SEP);
+            try {
+                const parsed = JSON.parse(jsonPart.trim());
+                return {
+                    optimized: optimizedText.trim(),
+                    research_keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+                    is_research: parsed.is_research === true
+                };
+            } catch {
+                return { optimized: result, research_keywords: [], is_research: false };
+            }
+        }
+        return { optimized: result, research_keywords: [], is_research: false };
     } catch (err) {
         console.error('[optimizeTask] 強化失敗，使用原始任務:', err.message);
-        return taskContent;
+        return { optimized: taskContent, research_keywords: [], is_research: false };
     }
 }
 

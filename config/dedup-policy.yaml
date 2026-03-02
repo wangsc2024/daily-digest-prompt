@@ -40,3 +40,25 @@ rules:
   - name: "kb_saturation"
     action: "suggest_change_direction"
     description: "知識庫同方向筆記已足夠，建議深入不同子主題"
+
+# 知識策略分析參數（kb-research-strategist Skill 使用）
+strategy_search:
+  # 納入內容分析的最低分數（比去重閾值 0.85 低，擷取相關但非重複的筆記）
+  min_relevance_score: 0.4
+  # 搜尋數量（與去重的 default_topK 分開設定）
+  strategy_topK: 10
+  # 每筆 contentText 讀取字數上限
+  content_read_limit: 2000
+  # 研究簡報輸出路徑（跨步驟暫存，Phase D 清理）
+  brief_file: "context/kb-research-brief.json"
+
+# 長期系列研究追蹤（kb-research-strategist 使用，永久保留，無 TTL）
+series_tracking:
+  # 系列追蹤資料位置（不受任何清理機制刪除）
+  series_file: "context/research-series.json"
+  # 五階段知識累積模型
+  stages: ["foundation", "mechanism", "application", "optimization", "synthesis"]
+  # 至少 N 筆 KB 筆記才算完成階段
+  stage_completion_threshold: 1
+  # 主題比對需吻合的最少標籤數（或 domain 包含主題詞）
+  series_match_min_tags: 2

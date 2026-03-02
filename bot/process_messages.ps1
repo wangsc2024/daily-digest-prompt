@@ -243,6 +243,31 @@ foreach ($record in $records) {
             Write-Log "任務強化呼叫失敗（將使用原始任務）: $_"
         }
 
+        # ── 擷取 optimize 回應的研究關鍵詞，更新 is_research 判定 ──
+        $researchKeywords = @()
+        if ($optimizeResp -and $optimizeResp.research_keywords) {
+            $researchKeywords = @($optimizeResp.research_keywords)
+        }
+        if ($optimizeResp -and $optimizeResp.is_research -eq $true) {
+            $isResearch = $true
+        }
+
+        # ── KB 深化預處理（研究任務：執行 kb-research-strategist + 注入系列上下文）──
+        $kbBriefPath = Join-Path $ProjectRoot "context\kb-research-brief.json"
+        if ($isResearch -and $researchKeywords.Count -gt 0) {
+            $keywords = ($researchKeywords -join ", ")
+            Write-Log "研究任務偵測到 KB 深化需求（關鍵詞：$keywords），執行 kb-research-strategist..."
+            $krsPrompt = "讀取 skills/kb-research-strategist/SKILL.md，以「$keywords」為研究主題執行完整步驟（步驟 0-5），結果輸出至 context/kb-research-brief.json。"
+            $savedClaudeCodeKRS = $env:CLAUDECODE
+            Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+            try {
+                & claude -p $krsPrompt --allowedTools "Read,Bash,Write" --max-turns 15 2>&1 | Out-Null
+            } finally {
+                if ($null -ne $savedClaudeCodeKRS) { $env:CLAUDECODE = $savedClaudeCodeKRS }
+            }
+            Write-Log "kb-research-strategist 執行完畢"
+        }
+
         $isCoding = Test-IsCodingTask -Content $optimizedContent
 
         # ── 偵測 [WORKDIR: path] 標記或訊息中的 Windows 路徑（優先從原始內容偵測，確保意圖不失真）──
@@ -269,13 +294,31 @@ foreach ($record in $records) {
         # ── 品質要求（依任務類型）──
         $qualityReqs = Get-QualityRequirements -TaskContent $taskContent -IsCoding $isCoding -IsResearch ([bool]$isResearch)
 
-        # ── 組合最終任務內容：Skill-First + 記憶 + 工作目錄 + 任務本文 + 品質要求 ──
+        # ── 注入 KB 系列研究上下文（若有 kb-research-brief.json）──
+        $kbSeriesContext = ""
+        if ($isResearch -and (Test-Path $kbBriefPath)) {
+            try {
+                $brief = Get-Content $kbBriefPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                if ($brief.recommendation -eq "deepen" -or $brief.recommendation -eq "series_continue") {
+                    $seriesId = if ($brief.series -and $brief.series.series_id) { $brief.series.series_id } else { "（新系列）" }
+                    $currentStage = if ($brief.series -and $brief.series.current_stage) { $brief.series.current_stage } else { "" }
+                    $synthesis = if ($brief.kb_foundation -and $brief.kb_foundation.synthesis) { $brief.kb_foundation.synthesis } else { "" }
+                    $primaryQ = if ($brief.research_plan -and $brief.research_plan.primary_question) { $brief.research_plan.primary_question } else { "" }
+                    $kbSeriesContext = "`n`n## [KB 研究策略簡報]`n系列：$seriesId（當前階段：$currentStage）`n現有知識：$synthesis`n本次研究問題：$primaryQ`n"
+                    Write-Log "已注入 KB 系列上下文（$seriesId/$currentStage）"
+                }
+            } catch {
+                Write-Log "讀取 kb-research-brief.json 失敗，略過系列上下文注入: $_"
+            }
+        }
+
+        # ── 組合最終任務內容：Skill-First + 記憶 + 工作目錄 + 任務本文 + KB上下文 + 品質要求 ──
         $workDirPrefix = ""
         if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
             $workDirPrefix = "請在目錄 $workDir 中執行以下任務。若目錄不存在請先建立。所有產出的檔案必須儲存在 $workDir 目錄中。`n`n"
         }
         $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
-        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $qualityReqs
+        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $kbSeriesContext + $qualityReqs
 
         Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
         Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
@@ -312,6 +355,30 @@ foreach ($record in $records) {
         $completeBody = @{ claim_generation = $claimGeneration; result = $outputStr } | ConvertTo-Json -Depth 3
         Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/processed" -Method Patch -Body $completeBody -ContentType "application/json; charset=utf-8" -Headers $JsonHeaders | Out-Null
         Write-Log "狀態已更新為 completed (generation: $claimGeneration)。已請 bot server 透過 Gun 回傳結果至聊天室。"
+
+        # ── 更新 research-series.json（研究任務完成後）──
+        if ($isResearch -and (Test-Path $kbBriefPath)) {
+            try {
+                $brief = Get-Content $kbBriefPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                if ($brief.series_update -and $brief.series_update.series_id) {
+                    $su = $brief.series_update
+                    # 委派給 kb-depth-check.md Phase C Python 腳本（涵蓋 completion_pct + current_stage 推進邏輯）
+                    $updatePrompt = "讀取 templates/shared/kb-depth-check.md，執行其中 Phase C（研究完成後更新系列狀態）的 Bash 指令（Python 腳本）。若 context/research-series.json 不存在，先用 Write 建立空結構 ``{""version"":1,""updated_at"":""$(Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz')"",""series"":{}}``。"
+                    $savedClaudeCodeSU = $env:CLAUDECODE
+                    Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+                    try {
+                        & claude -p $updatePrompt --allowedTools "Read,Bash,Write" --max-turns 5 2>&1 | Out-Null
+                    } finally {
+                        if ($null -ne $savedClaudeCodeSU) { $env:CLAUDECODE = $savedClaudeCodeSU }
+                    }
+                    Write-Log "research-series.json 已更新（$($su.series_id)/$($su.stage_to_update) → $($su.new_status)）"
+                }
+            } catch {
+                Write-Log "更新 research-series.json 失敗: $_"
+            }
+            Remove-Item $kbBriefPath -ErrorAction SilentlyContinue
+            Write-Log "kb-research-brief.json 已清理"
+        }
 
     } catch {
         $errMsg = "$_"

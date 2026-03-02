@@ -1,0 +1,117 @@
+# LLM 路由配置
+# 定義哪些任務類型路由到 Groq（快速/低成本），哪些保留給 Claude（複雜推理）
+#
+# 關聯組件：
+#   - skills/groq/SKILL.md       → Agent 使用 Groq 的操作指南
+#   - bot/groq-relay.js          → Relay 服務（持有 API KEY）
+#   - prompts/team/fetch-hackernews.md  → 使用 en_to_zh 規則
+#   - prompts/team/fetch-news.md        → 使用 news_summary 規則
+
+version: 1
+
+providers:
+  groq:
+    endpoint: http://localhost:3001/groq/chat
+    health_check: http://localhost:3001/groq/health
+    model: llama-3.1-8b-instant
+    timeout_s: 20
+    max_tokens: 2048
+    rate_limit_per_min: 5           # 免費方案上限；付費可設到 30
+    cache_ttl_min: 5                # Relay 端快取 TTL（分鐘）
+    fallback_on_error: true         # 失敗時降級，不中斷主流程
+
+  claude:
+    description: 當前執行的 Claude Code Agent（預設行為，無需額外配置）
+    fallback_for: [groq]            # Groq 失敗時的備援
+
+# 任務類型 → LLM Provider 映射
+routing_rules:
+
+  # ── 路由到 Groq（快速、結構化、低成本）─────────────────────
+  news_summary:
+    provider: groq
+    mode: summarize
+    description: 新聞標題或段落一句話摘要
+    used_by: [fetch-news.md]
+    max_input_chars: 500            # 每則新聞的摘要輸入上限
+
+  en_to_zh:
+    provider: groq
+    mode: translate
+    description: 英文技術文章標題轉正體中文，保留技術術語原文
+    used_by: [fetch-hackernews.md]
+    max_input_chars: 300            # 單篇標題上限
+
+  topic_classify:
+    provider: groq
+    mode: classify
+    description: 為文章或任務自動打主題標籤（JSON 輸出）
+    used_by: []                     # 目前未在 prompt 中使用，預留
+
+  quick_extract:
+    provider: groq
+    mode: extract
+    description: 從非結構化文字萃取關鍵資訊（JSON 輸出）
+    used_by: []                     # 預留
+
+  # ── 保留給 Claude（深度推理、隱私、安全）──────────────────────
+  policy_analysis:
+    provider: claude
+    description: 屏東政策深度解讀，需要政策背景知識與推理
+    used_by: [assemble-digest.md, prompts/team/fetch-news.md]
+    reason: 政策解讀需要 Claude 的深度理解能力
+
+  code_review:
+    provider: claude
+    description: 程式碼審查與修正建議
+    used_by: [templates/sub-agent/code-task.md]
+    reason: 程式碼品質評估需要複雜推理
+
+  kb_import:
+    provider: claude
+    description: 知識庫匯入前的品質評估與重複性判斷
+    used_by: [skills/kb-curator/SKILL.md]
+    reason: 語意去重需要 Claude 的語言理解能力
+
+  research_synthesis:
+    provider: claude
+    description: 多篇研究來源的整合與摘要
+    used_by: [templates/sub-agent/research-task.md]
+    reason: 跨來源資訊融合需要 Claude 的推理能力
+
+  security_analysis:
+    provider: claude
+    description: 系統安全審查（Cisco AI Defense）
+    used_by: [prompts/team/fetch-security.md]
+    reason: 安全分析需要 Claude 的精確評估
+
+  gmail_processing:
+    provider: claude
+    description: Gmail 郵件分析（隱私考量）
+    used_by: [prompts/team/fetch-gmail.md]
+    reason: 個人郵件資料不送第三方 Groq 服務
+
+# 批次處理設定
+batch:
+  hackernews_articles:
+    rule: en_to_zh
+    max_items: 5                    # 一次最多翻譯 5 篇
+    strategy: sequential            # 逐篇翻譯（避免 429）
+    delay_between_ms: 500           # 篇間延遲（ms）
+
+  news_items:
+    rule: news_summary
+    max_items: 5
+    strategy: sequential
+    delay_between_ms: 300
+
+# 降級策略
+fallback:
+  groq_unavailable:
+    action: skip_and_log            # 跳過 Groq 步驟，記錄 groq_skipped: true
+    fallback_to: claude_inline      # Claude 行內處理（不使用 Relay）
+
+  groq_quota_exceeded:
+    action: wait_and_retry          # 等待 22 秒後重試一次
+    retry_once: true
+    then: skip_and_log              # 重試仍失敗則跳過

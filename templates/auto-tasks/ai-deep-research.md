@@ -52,6 +52,11 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
    - 優先選擇：Agent 架構、多模態模型、推理優化、RAG 進階、程式碼生成、AI 安全
    - 必須與 registry 中近期主題有明確差異
 
+### 1.15 知識策略分析（kb-research-strategist Skill）
+
+讀取 `templates/shared/kb-depth-check.md`，以「{選定的 AI 研究主題}」為查詢詞執行完整流程。
+（注意：此步驟僅在階段 1 執行；階段 2-4 直接讀取 context/kb-research-brief.json 的研究計畫延續即可）
+
 ### 1.2 設計研究計畫
 用 Write 建立 `context/ai-research-plan.json`：
 ```json

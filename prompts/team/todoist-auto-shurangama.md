@@ -58,6 +58,10 @@ rm kb_notes.json
 - 兩階段都失敗（知識庫無法連線）→ 跳過查詢，從楞嚴經概論開始研究
 - 有結果 → 仔細閱讀已有標題，避免重複
 
+## 知識策略分析（kb-research-strategist Skill，去重通過後執行）
+
+讀取 `templates/shared/kb-depth-check.md`，以「楞嚴經 佛學研究」為查詢詞執行完整流程。
+
 ## 第二步：選定研究主題
 
 根據已有研究記錄，選擇一個尚未涵蓋的主題：

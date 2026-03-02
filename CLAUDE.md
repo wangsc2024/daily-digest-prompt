@@ -17,7 +17,7 @@
 
 ### Skill 索引
 `skills/SKILL_INDEX.md` 包含：
-- 24 個 Skill 速查表（17 核心 + 7 工具，名稱、觸發關鍵字、用途）
+- 26 個 Skill 速查表（19 核心 + 7 工具，名稱、觸發關鍵字、用途）
 - 路由決策樹（任務 → Skill 匹配邏輯）
 - 鏈式組合模式（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
 - 能力矩陣（依任務類型、依外部服務查找 Skill）
@@ -26,7 +26,7 @@
 ### Skill 使用強度
 - **必用**（每次必定使用）：todoist、pingtung-news、pingtung-policy-expert、hackernews-ai-digest、atomic-habits、learning-mastery、ntfy-notify、digest-memory、api-cache、scheduler-state
 - **積極用**（有機會就用）：knowledge-query、gmail
-- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時、arch-evolution 搭配 system-audit 執行後轉化 ADR
+- **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查或新增 Skill 時、arch-evolution 搭配 system-audit 執行後轉化 ADR、groq 搭配 hackernews-ai-digest（批次翻譯）+ pingtung-news（快速摘要）作前處理
 
 ## 🤝 Agent Team & 子 Agent 策略（積極並行）
 
@@ -91,6 +91,7 @@
 | `config/benchmark.yaml` | 系統效能基準線（7 指標 + 參考專案比較） | system-insight Skill、品質閘門 |
 | `config/health-scoring.yaml` | 健康評分 6 維度權重（成功率、錯誤率等） | query-logs.ps1 -Mode health-score |
 | `config/hook-rules.yaml` | Hooks 規則外部化（Bash/Write guard 規則） | pre_bash_guard.py、pre_write_guard.py |
+| `config/llm-router.yaml` | LLM 路由規則（Groq vs Claude 任務分配） | skills/groq/SKILL.md、fetch-hackernews.md、fetch-news.md |
 | `config/timeouts.yaml` | 各 Agent 超時配置（單一/團隊模式 timeout） | run-todoist-agent-team.ps1 |
 | `config/topic-rotation.yaml` | 主題輪替演算法（LRU + 同日去重） | 研究任務（AI/佛學研究模板） |
 | `templates/shared/preamble.md` | 共用前言（nul 禁令 + Skill-First） | 所有 prompt |

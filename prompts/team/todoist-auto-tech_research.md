@@ -75,6 +75,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 - 先輸出：「今日任務涉及技術：[列表]」
 - 再輸出：「本次研究主題：XXX（因知識庫尚無此主題的深入研究）」
 
+## 知識策略分析（kb-research-strategist Skill，去重通過後執行）
+
+讀取 `templates/shared/kb-depth-check.md`，以「{識別到的技術主題關鍵字}」為查詢詞執行完整流程。
+
 ## 第三步：深入研究
 
 1. 使用 WebSearch 搜尋該技術的最新進展（至少 3 組關鍵詞）

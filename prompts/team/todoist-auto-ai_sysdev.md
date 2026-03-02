@@ -32,6 +32,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 列出已有筆記，確認尚未涵蓋的面向。
 
+## 知識策略分析（kb-research-strategist Skill，去重通過後執行）
+
+讀取 `templates/shared/kb-depth-check.md`，以「AI 系統開發 software engineering」為查詢詞執行完整流程。
+
 ## 第二步：選定研究方向
 
 從以下主題中選擇知識庫尚未涵蓋的：

@@ -409,8 +409,14 @@ function mount(app, opts = {}) {
                 return res.status(400).json({ error: 'task_content 不可超過 50000 字元' });
             }
             try {
-                const optimized = await classifierDep.optimizeTask(task_content);
-                res.json({ success: true, original: task_content, optimized });
+                const result = await classifierDep.optimizeTask(task_content);
+                res.json({
+                    success: true,
+                    original: task_content,
+                    optimized: (result && result.optimized) || result,
+                    research_keywords: (result && result.research_keywords) || [],
+                    is_research: (result && result.is_research) || false
+                });
             } catch (err) {
                 console.error('[/api/tasks/optimize] 強化失敗:', err.message);
                 res.status(500).json({ error: '任務強化失敗', original: task_content });
