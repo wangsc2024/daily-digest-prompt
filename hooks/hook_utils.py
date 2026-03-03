@@ -250,6 +250,53 @@ def output_decision(decision, reason=None, protocol_version="1.0"):
     sys.exit(0)
 
 
+class file_lock:
+    """跨平台檔案鎖 context manager（Windows msvcrt / POSIX fcntl）。
+
+    用於保護 read-modify-write 序列的互斥性，防止團隊並行模式下
+    多個 Agent 進程同時更新同一 JSON 檔案導致資料遺失。
+
+    使用方式：
+        with file_lock(filepath):
+            data = json.load(open(filepath))
+            data["count"] += 1
+            atomic_write_json(filepath, data)
+
+    鎖定機制：
+      - Windows: msvcrt.locking(LK_NBLCK)
+      - POSIX: fcntl.flock(LOCK_EX | LOCK_NB)
+      - 兩者皆不可用時：退化為無鎖模式（不中斷流程）
+
+    注意：鎖檔案（{filepath}.lock）在釋放後自動清理。
+    """
+
+    def __init__(self, filepath: str):
+        self.lock_path = filepath + ".lock"
+        self._lock_fd = None
+
+    def __enter__(self):
+        self._lock_fd = open(self.lock_path, "w")
+        try:
+            import msvcrt
+            msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
+        except (ImportError, OSError):
+            try:
+                import fcntl
+                fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except (ImportError, OSError):
+                pass  # 無鎖可用時退化為無鎖模式
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._lock_fd:
+            self._lock_fd.close()
+            try:
+                os.remove(self.lock_path)
+            except OSError:
+                pass
+        return False  # 不吞掉例外
+
+
 def atomic_write_json(filepath: str, data) -> None:
     """原子寫入 JSON 檔案（write-to-temp + os.replace()）。
 
@@ -258,7 +305,7 @@ def atomic_write_json(filepath: str, data) -> None:
 
     注意：此函數保證目標檔案不會處於半寫入狀態，
     但不保護 read-modify-write 序列的互斥性。
-    若需要累積計數，請在外層使用 .lock 檔案保護。
+    若需要累積計數，請在外層使用 file_lock 保護。
     """
     import tempfile
     dirpath = os.path.dirname(os.path.abspath(filepath))

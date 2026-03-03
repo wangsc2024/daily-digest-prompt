@@ -28,10 +28,12 @@ import re
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 
-# Import shared API source patterns and regex cache
+# Import shared API source patterns, regex cache, and file lock
 try:
-    from hook_utils import API_SOURCE_PATTERNS, get_compiled_regex
+    from hook_utils import API_SOURCE_PATTERNS, get_compiled_regex, file_lock
+    _FILE_LOCK_AVAILABLE = True
 except ImportError:
+    _FILE_LOCK_AVAILABLE = False
     API_SOURCE_PATTERNS = {
         "todoist": ["todoist.com", "todoist"],
         "pingtung-news": ["ptnews-mcp", "pingtung"],
@@ -67,7 +69,7 @@ class ErrorClassifier:
 
     5 種重試意圖：
       - immediate: 立即重試
-      - exponential: 指數退避（2^n × 5s，最多 3 次）
+      - exponential: 指數退避（2^n * 5s，最多 3 次）
       - long_delay: 長時間延遲（從 Retry-After header 讀取或預設 60s）
       - use_cache: 跳過重試，直接用快取
       - stop: 停止重試，發送告警
@@ -239,10 +241,10 @@ class CircuitBreaker:
       - half_open: 試探狀態，允許單次請求測試恢復
 
     狀態轉換：
-      - closed → open: 連續 3 次失敗（5xx/timeout/connection refused）
-      - open → half_open: cooldown 5 分鐘後
-      - half_open → closed: 試探成功
-      - half_open → open: 試探失敗，cooldown 時間翻倍（10 分鐘）
+      - closed -> open: 連續 3 次失敗（5xx/timeout/connection refused）
+      - open -> half_open: cooldown 5 分鐘後
+      - half_open -> closed: 試探成功
+      - half_open -> open: 試探失敗，cooldown 時間翻倍（10 分鐘）
 
     狀態檔案格式（state/api-health.json）：
       {
@@ -298,40 +300,44 @@ class CircuitBreaker:
                 json.dump(state, f, ensure_ascii=False, indent=2)
 
     def _atomic_update(self, updater):
-        """
-        以檔案鎖保護的 read-modify-write 操作。
+        """以檔案鎖保護的 read-modify-write 操作。
 
-        避免團隊模式中多個並行 Agent 同時讀寫 api-health.json
-        導致狀態覆蓋（競態條件）。
+        使用 hook_utils.file_lock 避免團隊模式中多個並行 Agent
+        同時讀寫 api-health.json 導致狀態覆蓋（競態條件）。
 
         Args:
           updater: callable(state_dict) -> None，原地修改 state dict
         """
-        lock_path = self.state_file + ".lock"
-        lock_fd = None
-        try:
-            # 取得檔案鎖（跨平台）
-            lock_fd = open(lock_path, "w")
+        if _FILE_LOCK_AVAILABLE:
+            with file_lock(self.state_file):
+                state = self._load_state()
+                updater(state)
+                self._save_state(state)
+        else:
+            # Fallback：hook_utils 不可用時退化為無鎖模式
+            lock_path = self.state_file + ".lock"
+            lock_fd = None
             try:
-                import msvcrt
-                msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
-            except (ImportError, OSError):
+                lock_fd = open(lock_path, "w")
                 try:
-                    import fcntl
-                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    import msvcrt
+                    msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
                 except (ImportError, OSError):
-                    pass  # 無鎖可用時退化為無鎖模式
-
-            state = self._load_state()
-            updater(state)
-            self._save_state(state)
-        finally:
-            if lock_fd:
-                lock_fd.close()
-                try:
-                    os.remove(lock_path)
-                except OSError:
-                    pass
+                    try:
+                        import fcntl
+                        fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    except (ImportError, OSError):
+                        pass
+                state = self._load_state()
+                updater(state)
+                self._save_state(state)
+            finally:
+                if lock_fd:
+                    lock_fd.close()
+                    try:
+                        os.remove(lock_path)
+                    except OSError:
+                        pass
 
     def _get_api_state(self, api_source: str) -> Dict:
         """取得特定 API 的狀態"""
@@ -382,22 +388,22 @@ class CircuitBreaker:
         failures = api_state["failures"]
 
         if success:
-            # 成功 → 重置失敗計數，狀態轉為 closed
+            # 成功 -> 重置失敗計數，狀態轉為 closed
             self._update_state(api_source, self.STATE_CLOSED, failures=0)
         else:
             # 失敗處理
             if current_state == self.STATE_CLOSED:
                 failures += 1
                 if failures >= self.FAILURE_THRESHOLD:
-                    # 達到閾值 → 轉為 open，設定 cooldown
+                    # 達到閾值 -> 轉為 open，設定 cooldown
                     cooldown = datetime.now() + timedelta(seconds=self.COOLDOWN_SECONDS)
                     self._update_state(api_source, self.STATE_OPEN, failures=failures, cooldown=cooldown)
                 else:
-                    # 未達閾值 → 保持 closed，累積失敗計數
+                    # 未達閾值 -> 保持 closed，累積失敗計數
                     self._update_state(api_source, self.STATE_CLOSED, failures=failures)
 
             elif current_state == self.STATE_HALF_OPEN:
-                # half_open 狀態試探失敗 → 轉回 open，cooldown 翻倍
+                # half_open 狀態試探失敗 -> 轉回 open，cooldown 翻倍
                 cooldown_seconds = min(self.COOLDOWN_SECONDS * 2, self.COOLDOWN_MAX_SECONDS)
                 cooldown = datetime.now() + timedelta(seconds=cooldown_seconds)
                 self._update_state(api_source, self.STATE_OPEN, failures=failures, cooldown=cooldown)
@@ -432,8 +438,8 @@ class LoopDetector:
     偵測工具呼叫迴圈（Loop Detection）。
 
     3 層偵測演算法：
-      1. Tool Hash 重複：同一工具 + 相同參數連續呼叫 ≥5 次
-      2. Content 重複：相同 output 連續出現 ≥3 次（SHA-256 hash）
+      1. Tool Hash 重複：同一工具 + 相同參數連續呼叫 >=5 次
+      2. Content 重複：相同 output 連續出現 >=3 次（SHA-256 hash）
       3. Excessive Turns：單一 session 超過 100 個 tool calls
 
     白名單機制：
@@ -531,7 +537,7 @@ class LoopDetector:
 
         if len(self.tool_hash_window) == self.TOOL_HASH_THRESHOLD:
             if len(set(self.tool_hash_window)) == 1:
-                # 所有 hash 相同 → 重複呼叫
+                # 所有 hash 相同 -> 重複呼叫
                 return {
                     "loop_detected": True,
                     "loop_type": "tool_hash",
@@ -546,7 +552,7 @@ class LoopDetector:
 
             if len(self.content_hash_window) == self.CONTENT_HASH_THRESHOLD:
                 if len(set(self.content_hash_window)) == 1:
-                    # 所有 output 相同 → 重複輸出
+                    # 所有 output 相同 -> 重複輸出
                     return {
                         "loop_detected": True,
                         "loop_type": "content_hash",

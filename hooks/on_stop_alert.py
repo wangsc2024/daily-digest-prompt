@@ -427,12 +427,13 @@ def _rotate_logs(retention_days=7):
         from hook_utils import atomic_write_lines
         atomic_write_lines(summary_file, kept)
     except ImportError:
-        # hook_utils 不可用時退回直接寫入
+        # hook_utils 不可用時退回直接寫入（kept 可能未綁定若 try 區塊在 readlines 前失敗）
         try:
-            with open(summary_file, "w", encoding="utf-8") as f:
-                for line in kept:
-                    f.write(line + "\n")
-        except (OSError, UnboundLocalError):
+            if kept:
+                with open(summary_file, "w", encoding="utf-8") as f:
+                    for line in kept:
+                        f.write(line + "\n")
+        except (OSError, NameError):
             pass
     except OSError:
         pass

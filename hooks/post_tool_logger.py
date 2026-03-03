@@ -254,26 +254,15 @@ def _find_token_usage_file() -> str:
 def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None:
     """累積 Token 估算統計（input_len/3.5 + output_len/3.5 ≈ tokens）。
 
-    使用 .lock 檔案保護 read-modify-write 序列，防止團隊並行模式
+    使用 hook_utils.file_lock 保護 read-modify-write 序列，防止團隊並行模式
     （5 路 Phase 1）下多個進程同時更新導致計數遺失。
     """
     try:
-        token_file = _find_token_usage_file()
-        lock_path = token_file + ".lock"
-        lock_fd = None
-        try:
-            # 取得檔案鎖（跨平台，與 CircuitBreaker._atomic_update 相同模式）
-            lock_fd = open(lock_path, "w")
-            try:
-                import msvcrt
-                msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
-            except (ImportError, OSError):
-                try:
-                    import fcntl
-                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                except (ImportError, OSError):
-                    pass  # 無鎖可用時退化為無鎖模式
+        from hook_utils import file_lock, atomic_write_json
 
+        token_file = _find_token_usage_file()
+
+        with file_lock(token_file):
             today = datetime.now().strftime("%Y-%m-%d")
 
             # 持鎖後重新讀取（確保讀到最新狀態）
@@ -293,7 +282,7 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
                     "input_chars": 0, "output_chars": 0
                 }
 
-            # 估算 token（字元 ÷ 3.5，中英混合取中間值）
+            # 估算 token（字元 / 3.5，中英混合取中間值）
             estimated = (input_len + output_len) / 3.5
 
             day_data = usage["daily"][today]
@@ -305,24 +294,12 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
             usage["updated"] = datetime.now().isoformat()
 
             # 只保留 7 天
-            import datetime as _dt
-            cutoff = (_dt.datetime.now() - _dt.timedelta(days=7)).strftime("%Y-%m-%d")
+            from datetime import timedelta
+            cutoff = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
             usage["daily"] = {k: v for k, v in usage["daily"].items() if k >= cutoff}
 
             # 原子寫入（持鎖期間完成，確保無競態）
-            try:
-                from hook_utils import atomic_write_json
-                atomic_write_json(token_file, usage)
-            except ImportError:
-                with open(token_file, "w", encoding="utf-8") as f:
-                    json.dump(usage, f, ensure_ascii=False)
-        finally:
-            if lock_fd:
-                lock_fd.close()
-                try:
-                    os.remove(lock_path)
-                except OSError:
-                    pass
+            atomic_write_json(token_file, usage)
     except Exception:
         pass  # token 統計失敗不影響主流程
 
@@ -426,7 +403,6 @@ def main():
                 tags.append("loop-suspected")
                 loop_detection = loop_result
         except Exception as e:
-            import sys
             print(f"[post_tool_logger] loop detection error: {e}", file=sys.stderr)
             pass  # 不中斷 Agent 流程，但記錄錯誤到 stderr
 
