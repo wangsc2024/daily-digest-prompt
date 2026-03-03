@@ -11,7 +11,7 @@
 | 1 | todoist | 待辦事項查詢/新增/完成 | todoist、待辦事項、todo、任務、to-do list、待辦清單、待辦 |
 | 2 | pingtung-news | 屏東新聞查詢 | 屏東新聞、屏東縣政、周春米、縣府公告、屏東最新消息、屏東縣長、新聞稿、地方新聞 |
 | 3 | pingtung-policy-expert | 施政背景解讀（depends-on: pingtung-news） | 政策、施政、長照、托育、產業、醫療、交通、農業、觀光、治水、教育、施政報告、政策解讀、社會福利 |
-| 4 | hackernews-ai-digest | HN AI 新聞篩選 | AI 新聞、LLM、GPT、Claude、機器學習、HN、人工智慧、深度學習、ML、Transformer |
+| 4 | hackernews-ai-digest | HN AI 新聞篩選（depends-on: api-cache, groq） | AI 新聞、LLM、GPT、Claude、機器學習、HN、人工智慧、深度學習、ML、Transformer |
 | 5 | atomic-habits | 原子習慣每日提示 | 習慣、行為改變、原子習慣、好習慣、壞習慣、行為設計、James Clear、身份認同、兩分鐘法則 |
 | 6 | learning-mastery | 深度學習技術每日技巧 | 學習、費曼、刻意練習、間隔複習、學習方法、學習技巧、記憶法、楊大輝、提取練習 |
 | 7 | knowledge-query | 知識庫查詢與匯入 | 知識庫、筆記、搜尋筆記、匯入、KB、knowledge base、查詢筆記、知識管理 |

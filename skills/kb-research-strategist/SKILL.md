@@ -1,17 +1,15 @@
 ---
 name: kb-research-strategist
-version: 1.0.0
+version: "1.1.0"
 description: |
   知識庫研究策略師。執行三層知識工作：
   （1）讀取 KB 相關文件全文，合成現有知識狀態；
   （2）偵測或建立長期研究系列，追蹤五階段進度（永久，無 TTL）；
   （3）制定「從現有知識往下一階段延伸」的結構化研究計畫。
   讓每次研究都能在既有知識基礎上往深處推進，並持久追蹤系列進度。
-  Use when: 研究前策略規劃、知識系列管理、深化研究計畫、KB 擴充設計。
-allowed-tools:
-  - Bash
-  - Write
-  - Read
+  Use when: 研究前策略規劃、知識系列管理、深化研究計畫、KB 擴充設計、研究前知識差距分析。
+allowed-tools: Bash, Read, Write
+cache-ttl: N/A
 triggers:
   - "研究策略"
   - "系列研究"
@@ -78,7 +76,7 @@ rm temp_krs_query.json
 
 ---
 
-## 步驟 2：讀取相關筆記全文（score 0.4–0.85）
+## 步驟 2：讀取相關筆記全文（score 0.4-0.85）
 
 ```bash
 python -X utf8 -c "
@@ -157,9 +155,9 @@ KB 有 foundation 深度的筆記（步驟 3 判定）
 ```
 
 **階段推進邏輯**：
-- foundation 完成：KB 有 ≥1 筆概論筆記 + covered_concepts ≥ 3 個核心概念
-- mechanism 完成：KB 有 ≥1 筆原理/演算法筆記 + 有說明性敘述（含關鍵詞「原理」「機制」「演算法」「架構」之一）
-- application 完成：KB 有 ≥1 筆實作指南 + content 含程式碼片段（三個反引號）
+- foundation 完成：KB 有 >=1 筆概論筆記 + covered_concepts >= 3 個核心概念
+- mechanism 完成：KB 有 >=1 筆原理/演算法筆記 + 有說明性敘述（含關鍵詞「原理」「機制」「演算法」「架構」之一）
+- application 完成：KB 有 >=1 筆實作指南 + content 含程式碼片段（三個反引號）
 - optimization 完成：KB 有效能比較或最佳實踐筆記（含「效能」「優化」「benchmark」之一）
 - synthesis 完成：KB 有與其他主題的連結筆記（含「整合」「連結」「跨」之一）
 
@@ -254,9 +252,11 @@ rm temp_krs_selected.json
 
 ---
 
-## 步驟 6：研究完成後更新系列狀態（由研究模板呼叫，非 Skill 本身）
+## 步驟 6：研究完成後更新系列狀態
 
-研究與 KB 匯入完成後，讀取 `context/kb-research-brief.json` 的 `series_update` 欄位，更新 `context/research-series.json`：
+> **注意**：此步驟由呼叫端的研究模板負責執行（如 `research-task.md`、`auto-tasks/*.md`），
+> 非 Skill 本身自動觸發。研究模板在 KB 匯入完成後，讀取 `context/kb-research-brief.json`
+> 的 `series_update` 欄位，更新 `context/research-series.json`。
 
 ```python
 # 偽程式碼，由研究模板的 Python 腳本執行

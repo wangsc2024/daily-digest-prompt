@@ -1,8 +1,13 @@
 ---
 name: groq
-version: 1.0.0
-description: Groq 快速推理 Skill — 透過本機 Relay 呼叫 Groq API，提供快速摘要、翻譯、分類、結構化萃取，作為 Claude 的低成本前處理層。
-allowed-tools: [Bash, Write]
+version: "1.1.0"
+description: |
+  Groq 快速推理前處理層 — 透過本機 Relay（bot/groq-relay.js）呼叫 Groq API，
+  提供四種模式：摘要（summarize）、翻譯（translate）、分類（classify）、萃取（extract），
+  作為 Claude 的低成本前處理層，降低 token 消耗。
+  Use when: 英文翻譯為正體中文、一句話摘要、主題分類標籤、結構化資訊萃取、HN 標題批次翻譯、新聞快速摘要。
+allowed-tools: Bash, Read, Write
+cache-ttl: 5min
 triggers:
   - groq
   - 快速摘要
