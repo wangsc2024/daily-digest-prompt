@@ -29,4 +29,3 @@
 - 禁止修改 scheduler-state.json
 - 禁止修改任何 SKILL.md
 - 禁止修改 config/*.yaml
-- 禁止使用 > nul（見 preamble.md）
