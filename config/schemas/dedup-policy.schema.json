@@ -97,6 +97,28 @@
         "additionalProperties": false
       },
       "minItems": 1
+    },
+    "strategy_search": {
+      "type": "object",
+      "description": "知識策略分析參數（kb-research-strategist Skill 使用）",
+      "properties": {
+        "min_relevance_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "strategy_topK": { "type": "integer", "minimum": 1 },
+        "content_read_limit": { "type": "integer", "minimum": 100 },
+        "brief_file": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "series_tracking": {
+      "type": "object",
+      "description": "長期系列研究追蹤（kb-research-strategist 使用，永久保留）",
+      "properties": {
+        "series_file": { "type": "string" },
+        "stages": { "type": "array", "items": { "type": "string" } },
+        "stage_completion_threshold": { "type": "integer", "minimum": 1 },
+        "series_match_min_tags": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

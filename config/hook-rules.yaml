@@ -171,15 +171,13 @@ bash_rules:
 
   - id: sensitive-env-powershell
     description: "禁止在管道/指令中讀取敏感 PowerShell 環境變數（$env:TOKEN=xxx 賦值除外）"
-    pattern: "\\$env:(TODOIST_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|CLAUDE_API_KEY|BOT_API_SECRET|GITHUB_TOKEN)\\s*(=|\\+|,|;|\\|)"
+    pattern: "\\$env:(TODOIST_API_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|CLAUDE_API_KEY|BOT_API_SECRET|GITHUB_TOKEN)\\s*(\\+|,|;|\\|)"
     reason: "偵測到敏感 PowerShell 環境變數使用（$env:TOKEN），安全管控"
     guard_tag: env-guard
     priority: high  # 敏感資料保護
     examples:
       - "echo $env:TODOIST_API_TOKEN | curl"
       - "curl -H \"auth: $env:BOT_API_SECRET\""
-    exceptions:
-      - "$env:TODOIST_API_TOKEN = ..."  # 環境變數賦值允許
 
 # ============================================
 # 檔案寫入攔截規則（對應 hooks/pre_write_guard.py）

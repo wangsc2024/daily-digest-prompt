@@ -82,9 +82,9 @@
         },
         "daily_limit": {
           "type": "integer",
-          "minimum": 1,
+          "minimum": 0,
           "maximum": 20,
-          "description": "每日執行次數上限（1-20）"
+          "description": "每日執行次數上限（0=停用, 1-20=啟用）"
         },
         "counter_field": {
           "type": "string",
