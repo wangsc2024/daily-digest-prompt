@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-03T18:58:36.325609+08:00",
+  "updated_at": "2026-03-04T02:56:25.735346+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -125,6 +125,611 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "應用階段：邏輯思維框架在實際場景中的應用案例、程式碼實作、工具整合"
+    },
+    "shurangama-sutra": {
+      "series_id": "shurangama-sutra",
+      "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
+      "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
+      "initiated_at": "2026-02-15",
+      "last_active": "2026-03-03",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "如來藏",
+        "修行",
+        "跨宗派比較"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-03-03",
+          "kb_notes": [
+            "楞嚴經研究：七處徵心 — 卷一佛陀七破妄心的義理脈絡與修行啟示",
+            "十番顯見",
+            "真妄二本與頓漸二修",
+            "阿難示墮與摩登伽因緣",
+            "真偽之爭與文獻學考察",
+            "別業妄見與同分妄見",
+            "核心譬喻教學"
+          ],
+          "covered_concepts": [
+            "七處徵心",
+            "心在何處",
+            "破妄顯真",
+            "十番顯見",
+            "見性",
+            "如來藏",
+            "真妄二本",
+            "般剌蜜帝",
+            "傳譯歷史",
+            "經題深義",
+            "別業妄見",
+            "同分妄見",
+            "演若達多喻",
+            "第二月喻",
+            "客塵喻"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-02-18",
+          "completed_at": "2026-02-25",
+          "kb_notes": [
+            "會通四科圓彰七大",
+            "三種相續",
+            "二決定義",
+            "富樓那問難與世界起源",
+            "首楞嚴三昧與戒定慧三學",
+            "非因緣非自然中道哲學",
+            "妙奢摩他三摩禪那"
+          ],
+          "covered_concepts": [
+            "四科七大",
+            "如來藏妙真如性",
+            "世界相續",
+            "眾生相續",
+            "業果相續",
+            "覺明為咎",
+            "審因心果覺",
+            "審煩惱根本",
+            "奢摩他",
+            "三摩",
+            "禪那",
+            "非因緣非自然",
+            "中道哲學"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-02-20",
+          "completed_at": "2026-02-27",
+          "kb_notes": [
+            "耳根圓通章",
+            "大勢至念佛圓通章",
+            "五十五位真菩提路",
+            "四禪八定"
+          ],
+          "covered_concepts": [
+            "耳根圓通",
+            "反聞聞自性",
+            "念佛圓通",
+            "都攝六根",
+            "淨念相繼",
+            "乾慧地至等覺",
+            "五十五位",
+            "四禪八定",
+            "色界十八天",
+            "無色界四空天"
+          ]
+        },
+        "optimization": {
+          "status": "completed",
+          "started_at": "2026-02-25",
+          "completed_at": "2026-02-27",
+          "kb_notes": [
+            "五十陰魔",
+            "七趣因果",
+            "楞嚴經在禪宗的地位與影響",
+            "末法預言與正法護持"
+          ],
+          "covered_concepts": [
+            "五陰十魔",
+            "色陰受陰想陰行陰識陰",
+            "七趣因果",
+            "情想升墜",
+            "辨魔",
+            "開悟楞嚴",
+            "禪門修行",
+            "憨山德清",
+            "虛雲老和尚",
+            "末法預言",
+            "正法護持"
+          ]
+        },
+        "synthesis": {
+          "status": "in_progress",
+          "started_at": "2026-03-03",
+          "kb_notes": [
+            "楞嚴經與天台宗的義理會通",
+            "楞嚴經與唯識學的義理對話 — 如來藏與阿賴耶識的同異辨析及會通路徑",
+            "如來藏與唯識學的對話 — 八識論、如來藏緣起與阿賴耶識的會通辨析"
+          ],
+          "covered_concepts": [
+            "天台圓教會通",
+            "蕅益智旭",
+            "五重玄義",
+            "唯識學對話",
+            "阿賴耶識",
+            "三性說",
+            "轉識成智",
+            "陀那微細識",
+            "真妄和合",
+            "八識論",
+            "如來藏緣起"
+          ]
+        }
+      },
+      "current_stage": "synthesis",
+      "completion_pct": 80,
+      "related_series": [],
+      "next_research_hint": "foundation 已完善（含七處徵心），系列在 synthesis 階段"
+    },
+    "jiaoguangzong": {
+      "series_id": "jiaoguangzong",
+      "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
+      "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
+      "initiated_at": "2026-03-03",
+      "last_active": "2026-03-03",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "五時八教",
+        "判教"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-02-15",
+          "kb_notes": [
+            "教觀綱宗概論",
+            "五時判教",
+            "八教分類"
+          ],
+          "covered_concepts": [
+            "五時判教",
+            "八教分類",
+            "化法四教",
+            "化儀四教",
+            "教觀雙美"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-02-16",
+          "kb_notes": [
+            "藏教通教",
+            "別教圓教",
+            "觀法修持",
+            "判教實例"
+          ],
+          "covered_concepts": [
+            "析空觀",
+            "體空觀",
+            "次第觀",
+            "一心三觀",
+            "止觀法門",
+            "生滅四諦",
+            "無生四諦",
+            "無量四諦",
+            "無作四諦"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-02-17",
+          "completed_at": "2026-02-23",
+          "kb_notes": [
+            "蕅益智旭",
+            "華嚴比較",
+            "六即佛",
+            "現代詮釋",
+            "台淨雙修",
+            "日本天台",
+            "性惡法門",
+            "一念三千",
+            "十乘觀法",
+            "三諦圓融"
+          ],
+          "covered_concepts": [
+            "蕅益智旭融通諸宗",
+            "華嚴五教十宗比較",
+            "六即佛修行位次",
+            "印順大乘三系",
+            "台淨雙修",
+            "日本天台傳承",
+            "性惡法門",
+            "一念三千",
+            "十乘觀法",
+            "三諦圓融"
+          ]
+        },
+        "optimization": {
+          "status": "in_progress",
+          "started_at": "2026-02-24",
+          "kb_notes": [
+            "四悉檀",
+            "接與轉",
+            "五悔法門",
+            "四種三昧",
+            "二十五方便",
+            "六妙門",
+            "別教無量四諦",
+            "天台四教儀比較",
+            "化儀四教深化",
+            "方等時維摩經",
+            "般若時融通淘汰",
+            "教觀綱宗研究：阿含時的析法明義 — 五時判教中鹿苑時期的教觀意涵與聲聞修行次第"
+          ],
+          "covered_concepts": [
+            "四悉檀",
+            "接與轉",
+            "五悔法門",
+            "四種三昧",
+            "二十五方便",
+            "六妙門",
+            "別教無量四諦",
+            "方等時彈偏斥小",
+            "般若時融通淘汰",
+            "阿含時析法明義",
+            "七賢七聖",
+            "酪味",
+            "聲聞修行次第"
+          ]
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "shurangama-sutra"
+      ],
+      "next_research_hint": "完成阿含時後可研究華嚴時或法華涅槃時的專題深化，最終進入 synthesis 階段整合五時體系"
+    },
+    "lotus-sutra": {
+      "series_id": "lotus-sutra",
+      "domain": "法華經 / Lotus Sutra 佛學研究",
+      "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
+      "initiated_at": "2026-02-15",
+      "last_active": "2026-03-03",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "一佛乘",
+        "開權顯實"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-02-15",
+          "kb_notes": [
+            "法華經概論：妙法蓮華經的核心義理與歷史地位"
+          ],
+          "covered_concepts": [
+            "一佛乘",
+            "開權顯實",
+            "會三歸一",
+            "迹門本門",
+            "七卷二十八品",
+            "鳩摩羅什譯本"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-02-20",
+          "kb_notes": [
+            "法華經方便品研究：十如是",
+            "法華經譬喻品研究：三車火宅喻",
+            "法華經信解品研究：窮子喻",
+            "法華經藥草喻品研究：三草二木",
+            "法華經化城喻品研究：化城權施"
+          ],
+          "covered_concepts": [
+            "諸法實相十如是",
+            "三車火宅喻",
+            "窮子喻",
+            "三草二木",
+            "化城權施",
+            "法華七喻"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-02-20",
+          "completed_at": "2026-02-27",
+          "kb_notes": [
+            "法華經法師品研究：三軌弘經",
+            "法華經見寶塔品研究：多寶佛塔",
+            "法華經提婆達多品研究：女身成佛",
+            "法華經安樂行品研究：四安樂行",
+            "法華經壽量品研究：如來壽量無量",
+            "法華經普門品研究：三十三應身"
+          ],
+          "covered_concepts": [
+            "三軌弘經",
+            "多寶佛塔",
+            "龍女成佛",
+            "四安樂行",
+            "如來壽量",
+            "三十三應身"
+          ]
+        },
+        "optimization": {
+          "status": "completed",
+          "started_at": "2026-02-27",
+          "completed_at": "2026-03-02",
+          "kb_notes": [
+            "法華經常不輕菩薩品研究",
+            "法華經如來神力品研究",
+            "法華經藥王菩薩本事品研究",
+            "法華經從地涌出品研究",
+            "法華經五百弟子受記品研究",
+            "法華經授記品研究"
+          ],
+          "covered_concepts": [
+            "但禮四眾",
+            "十種神力",
+            "燃身供養",
+            "地湧菩薩",
+            "衣珠喻",
+            "聲聞授記"
+          ]
+        },
+        "synthesis": {
+          "status": "in_progress",
+          "started_at": "2026-03-02",
+          "kb_notes": [
+            "法華經一佛乘義理的系統總結",
+            "法華經勸持品研究：比丘尼授記與末法弘經的二十行誓偈"
+          ],
+          "covered_concepts": [
+            "一佛乘系統總結",
+            "開權顯實到會三歸一",
+            "比丘尼授記",
+            "二十行偈",
+            "三類強敵"
+          ]
+        }
+      },
+      "current_stage": "synthesis",
+      "completion_pct": 80,
+      "related_series": [
+        "shurangama-sutra",
+        "jiaoguangzong"
+      ],
+      "next_research_hint": "繼續補充尚未研究的品章（分別功德品、隨喜功德品、法師功德品、囑累品、陀羅尼品、妙莊嚴王本事品、普賢菩薩勸發品等），完成 synthesis 階段"
+    },
+    "pure-land-buddhism": {
+      "series_id": "pure-land-buddhism",
+      "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
+      "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
+      "initiated_at": "2026-02-15",
+      "last_active": "2026-03-04",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "善導大師",
+        "信願行"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-02-15",
+          "kb_notes": [
+            "淨土三經概論",
+            "阿彌陀經要義",
+            "觀無量壽經十六觀",
+            "無量壽經四十八願",
+            "善導大師五正行",
+            "念佛法門修持",
+            "淨土十疑論",
+            "臨終正念"
+          ],
+          "covered_concepts": [
+            "淨土三經",
+            "四十八願",
+            "五正行",
+            "四種念佛",
+            "十念法",
+            "十六觀",
+            "臨終助念"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-02-18",
+          "completed_at": "2026-02-24",
+          "kb_notes": [
+            "曇鸞大師研究",
+            "道綽大師研究",
+            "蓮池大師研究",
+            "蕅益大師研究"
+          ],
+          "covered_concepts": [
+            "自力他力",
+            "難易二道",
+            "聖道淨土二門",
+            "一心不亂",
+            "六信",
+            "竹窗隨筆"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-02-24",
+          "completed_at": "2026-02-25",
+          "kb_notes": [
+            "印光大師淨土思想",
+            "少康大師研究",
+            "十念法與計數念佛"
+          ],
+          "covered_concepts": [
+            "十念記數法",
+            "老實念佛",
+            "敦倫盡分",
+            "口出化佛",
+            "攝心念佛"
+          ]
+        },
+        "optimization": {
+          "status": "completed",
+          "started_at": "2026-02-25",
+          "completed_at": "2026-03-04",
+          "kb_notes": [
+            "截流大師淨土思想",
+            "天台教觀與淨土會通"
+          ],
+          "covered_concepts": [
+            "念佛百日期",
+            "禪淨雙修",
+            "台淨雙修",
+            "五方便念佛門"
+          ]
+        },
+        "synthesis": {
+          "status": "in_progress",
+          "started_at": "2026-03-04",
+          "kb_notes": [
+            "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進"
+          ],
+          "covered_concepts": [
+            "淨土判教體系系統整理",
+            "聖道門與淨土門的完整辨析",
+            "要門與弘願門的深層區分",
+            "五願開示（善導大師三心釋）",
+            "橫出三界與豎出三界的比較",
+            "淨土宗判教在中日兩國的不同發展"
+          ]
+        }
+      },
+      "current_stage": "synthesis",
+      "completion_pct": 80,
+      "related_series": [
+        "shurangama-sutra",
+        "jiaoguangzong"
+      ],
+      "next_research_hint": "synthesis 階段首篇：判教體系整理完成後，可繼續研究淨土宗與華嚴宗的會通（普賢十大願王導歸極樂）"
+    },
+    "owl-multi-agent": {
+      "series_id": "owl-multi-agent",
+      "domain": "OWL — CAMEL-AI 多 Agent 協作框架",
+      "description": "",
+      "initiated_at": "2026-03-04",
+      "last_active": "2026-03-04",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-04",
+          "kb_notes": [
+            "OWL — CAMEL-AI 開源多 Agent 協作框架深度研究"
+          ],
+          "covered_concepts": [
+            "OWL 雙角色架構",
+            "WORKFORCE 強化學習",
+            "CAMEL-AI 框架",
+            "MCP Toolkit 整合",
+            "GAIA 開源第一"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 WORKFORCE 訓練演算法、Agent 通訊協定、任務分解機制"
+    },
+    "ai-code-review": {
+      "series_id": "ai-code-review",
+      "domain": "AI Code Review / LLM-Driven Code Quality",
+      "description": "AI 程式碼審查研究系列，涵蓋 LLM 審查機制、多 Agent 架構、SAST 融合、大規模部署",
+      "initiated_at": "2026-03-04",
+      "last_active": "2026-03-04",
+      "tags": [
+        "AI",
+        "Code Review",
+        "程式碼審查",
+        "LLM",
+        "SAST",
+        "軟體工程"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-04",
+          "completed_at": "2026-03-04",
+          "kb_notes": [
+            "AI-Assisted Code Review 完整指南"
+          ],
+          "covered_concepts": [
+            "AI Code Review 概論",
+            "工具生態矩陣",
+            "CodeMender 自主修復",
+            "SAST 誤報過濾",
+            "PR 工作流整合"
+          ]
+        },
+        "mechanism": {
+          "status": "in_progress",
+          "started_at": "2026-03-04",
+          "kb_notes": [
+            "AI 程式碼審查的內部機制 — LLM 差異感知審查架構、AST/CFG 融合分析與大規模 Code Review 系統設計模式（2026）"
+          ],
+          "covered_concepts": [
+            "LLM Code Understanding 機制",
+            "AST/CFG 與 LLM 融合架構",
+            "大規模 Code Review 工程（Critique@Google/AutoCR@Meta）",
+            "精確度/召回率量化評估",
+            "差異感知審查（diff-aware review）"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "ai-security-testing"
+      ],
+      "next_research_hint": "完成後進入 application：實作指南——如何在 CI/CD 管線中部署 AI Code Review"
     }
   }
 }

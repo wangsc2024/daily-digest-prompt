@@ -1,29 +1,30 @@
 {
-  "total_score": 85.70,
+  "total_score": 87.51,
   "grade": "A",
-  "date": "2026-03-03",
-  "timestamp": "2026-03-03 18:00:00",
+  "date": "2026-03-04",
+  "timestamp": "2026-03-04 00:41:00",
   "dimensions": {
-    "1_information_security": 84,
-    "2_system_architecture": 82,
-    "3_system_quality": 90,
-    "4_system_workflow": 91,
-    "5_technology_stack": 78,
-    "6_system_documentation": 83,
-    "7_system_completeness": 91
+    "1_information_security": 86,
+    "2_system_architecture": 85,
+    "3_system_quality": 91,
+    "4_system_workflow": 93,
+    "5_technology_stack": 80,
+    "6_system_documentation": 84,
+    "7_system_completeness": 92
   },
   "previous": {
-    "total_score": 90.47,
-    "grade": "S",
-    "date": "2026-02-16",
-    "delta": -4.77
+    "total_score": 85.70,
+    "grade": "A",
+    "date": "2026-03-03",
+    "delta": 1.81
   },
-  "note_id": "3c6482c9-a392-495e-a47c-fb1b90809af1",
-  "fixes_applied": 3,
+  "note_id": "2c326b54-8565-406c-9910-4701da4e9878",
+  "fixes_applied": 4,
   "fixes_list": [
-    "清理 4 個 prompt inline nul 殘留（改為引用 preamble.md）",
-    "更新 config/README.md 補充 5 個遺漏配置檔說明",
-    "更新 CHANGELOG.md 補充 2026-02-16 至 2026-03-03 變更"
+    "pyproject.toml 加入 pyyaml 依賴（同步 requirements.txt）",
+    "清理 ooda-workflow.yaml TODO 註解",
+    "移除 4 個 prompt inline nul 殘留（已由 preamble.md 覆蓋）",
+    "補充 health-scoring.yaml 注釋"
   ],
-  "message": "Team mode audit completed with 3 auto-fixes. Score decreased due to stricter calibration."
+  "message": "Team mode audit completed with 4 auto-fixes. Score improved +1.81 from 85.70 to 87.51."
 }

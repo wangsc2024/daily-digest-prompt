@@ -1,0 +1,35 @@
+{
+  "date": "2026-03-04",
+  "topic": "AI 自主編碼 Agent（Autonomous Coding Agents）— 從輔助補全到端對端軟體工程的範式轉移",
+  "research_questions": [
+    "2025-2026 年自主編碼 Agent 的技術演進路徑為何？從 GitHub Copilot 的行內補全、到 Cursor/Windsurf 的對話式編輯、再到 Devin/OpenHands/SWE-agent 的端對端任務完成，各階段的架構差異與能力邊界在哪裡？",
+    "當前主流自主編碼 Agent（Devin、OpenHands、SWE-agent、Claude Code Agent SDK、Amazon Q Developer Agent）在 SWE-bench 等標準基準測試上的表現比較如何？它們各自的技術架構（規劃-執行-驗證迴圈、工具使用策略、上下文管理、沙箱隔離）有何關鍵差異？",
+    "自主編碼 Agent 面臨的核心技術挑戰（長上下文理解、跨文件推理、測試生成與驗證、安全沙箱、成本控制）及 2026 年的前沿解法（Agentic RAG for Code、Repository-Level Understanding、Speculative Editing、Reward Models for Code）有哪些？"
+  ],
+  "methodology": "四階段研究法：(1) 規劃 — 選定主題與研究問題設計；(2) 資料收集 — WebSearch 搜尋學術論文、技術部落格、GitHub 專案，交叉比對至少 7 篇來源；(3) 分析綜合 — 提煉共識/分歧/關鍵洞見，建構技術全景圖；(4) 報告撰寫 — 結構化研究報告 + 知識庫匯入",
+  "keywords": [
+    "Autonomous Coding Agent",
+    "SWE-bench",
+    "Devin",
+    "OpenHands",
+    "SWE-agent",
+    "Claude Code Agent SDK",
+    "Cursor",
+    "AI Code Generation",
+    "Repository-Level Understanding",
+    "Agentic Software Engineering",
+    "Program Synthesis",
+    "Code LLM"
+  ],
+  "stage_completed": 1,
+  "dedup_check": {
+    "registry_ai_deep_research_7d_count": 0,
+    "topic_cooldown_clear": true,
+    "kb_coverage": "zero — 無專門聚焦自主編碼 Agent 的系統研究",
+    "nearest_existing": [
+      "AI 驅動程式碼審查（側重 review 非 generation）",
+      "AI Agent 開發框架與 Tool Use 設計模式（側重框架 API 非編碼能力）",
+      "Claude Code 技術更新系列（側重產品功能非技術深研）"
+    ]
+  }
+}
