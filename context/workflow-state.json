@@ -1,8 +1,7 @@
 {
-  "updated_at": "2026-03-02T00:40:02+08:00",
-  "status": "running",
-  "run_id": "60be0dceba7a",
-  "current_step": "orient",
+  "status": "skipped",
+  "run_id": "a3c66f5fe8e7",
+  "current_step": "decide",
   "history": [
     {
       "step": "idle",
@@ -13,6 +12,22 @@
       "ts": "2026-03-01T00:40:03+08:00",
       "step": "orient",
       "status": "running"
+    },
+    {
+      "status": "running",
+      "ts": "2026-03-02T00:40:02+08:00",
+      "step": "orient"
+    },
+    {
+      "status": "running",
+      "ts": "2026-03-03T17:47:49+08:00",
+      "step": "orient"
+    },
+    {
+      "status": "completed",
+      "ts": "2026-03-03T18:03:27+08:00",
+      "step": "orient"
     }
-  ]
+  ],
+  "updated_at": "2026-03-03T18:03:27+08:00"
 }

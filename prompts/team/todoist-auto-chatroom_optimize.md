@@ -36,4 +36,4 @@
 - 禁止修改 scheduler-state.json
 - 禁止修改任何 SKILL.md
 - 禁止修改 config/frequency-limits.yaml（僅允許修改 config/routing.yaml 的 max_tasks_per_run）
-- 禁止使用 > nul（改用 > /dev/null 2>&1）
+- 禁止使用 > nul（見 preamble.md）

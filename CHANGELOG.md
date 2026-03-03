@@ -6,23 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
-- `config/audit-scoring.yaml` - 系統審查評分規則配置
-- `config/timeouts.yaml` - 集中超時配置（取代 PS1 硬編碼）
-- `config/README.md` - 配置文件速查說明
-- `skills/system-audit/` - 系統審查評分 Skill（7 維度）
-- `templates/audit-report.md` - 審查報告模板
-- `.env.example` - 環境變數範本
-- `requirements.lock` - pip 依賴鎖定檔（pip-compile 產生）
-- `CHANGELOG.md` - 本檔案
+### Added（2026-02-16 ~ 2026-03-03）
+- `skills/arch-evolution/` - 架構演進 Skill（OODA Decide 層，ADR 管理）
+- `skills/kb-research-strategist/` - 知識庫研究策略 Skill（五階段深度模型）
+- `skills/groq/` - Groq 超快推論 Skill（透過 groq-relay 中繼）
+- `skills/todoist-task-creator/` - Todoist 任務建立工具 Skill
+- `bot/groq-relay.js` - Groq API 中繼服務（port 3001，4 模式 + 速率限制）
+- `config/llm-router.yaml` - LLM 路由規則（Groq vs Claude 任務分配）
+- `config/ooda-workflow.yaml` - OODA 閉環工作流配置
+- `config/creative-game-mode.yaml` - 創意遊戲模式配置
+- `config/retro-games.yaml` - 復古遊戲評鑑配置
+- `config/schemas/` - YAML 驗證 Schema 目錄
+- `hooks/agent_guardian.py` - 三層守護（ErrorClassifier + CircuitBreaker + LoopDetector）
+- `hooks/cjk_guard.py` - CJK 字元守衛（偵測日文 Unicode 變體）
+- `hooks/behavior_tracker.py` - 行為模式識別
+- `context/adr-registry.json` - 架構決策記錄（8 個 ADR）
+- `context/research-series.json` - 永久系列研究追蹤
+- `templates/shared/kb-depth-check.md` - 共用 4-Phase KB 深度模板
+- 自動任務新增至 19 個（+4：system-insight、self-heal、github-scout、chatroom-optimize）
+- 測試從 292 → 556 個（hooks 529 + skills 27）
+- `circuit-breaker-utils.ps1` - 斷路器工具（5 個 API 健康追蹤）
+- `state/failure-stats.json` - 失敗統計（5 種類型 + 30 天保留）
+- `state/run-fsm.json` - 有限狀態機追蹤
 
 ### Changed
-- PS1 腳本路徑從硬編碼 `D:\Source\daily-digest-prompt` 改為 `$PSScriptRoot`（9 個檔案）
-- prompts/team 和 templates 中的 inline nul 禁令改為引用 `preamble.md`（DRY 重構）
+- Skill 計數 20 → 26（19 核心 + 7 工具）
+- 自動任務頻率上限 40 → 47 次/日
+- `config/hook-rules.yaml` v2 → v3（20 條規則 + 3 個 preset）
+- `run-todoist-agent-team.ps1` 動態掃描 prompt 檔案（取代硬編碼路徑）
+- Groq 整合：fetch-hackernews（批次翻譯）、fetch-news（快速摘要）
+- Hook CWD 修復：`.claude/settings.json` 加 `cd /d` 包裝
 
 ### Fixed
-- `skills/SKILL_INDEX.md` Skill 計數一致性（17 核心 + 3 工具 = 20）
-- `.gitignore` 補充排除 `task_result.txt`、`table_render_*.png` 等暫存檔
+- Phase 2/3 結果檔案命名統一（`todoist-auto-` 前綴）
+- LoopDetector 跨進程持久化（state/loop-state-*.json）
+- MinGW 雙斜線路徑修正（`_normalize_windows_path`）
+- CJK 字元日文變體修正（10 個字元對映）
+- 4 個 prompt inline nul 殘留改為引用 preamble.md
+
+### Security
+- `pre_read_guard.py` 新增（攔截敏感路徑讀取）
+- `validate_config.py` 新增（7 個 YAML Schema 驗證）
+- Prompt Injection 防護（3 處模板消毒指引）
+- 3 個安全 preset（strict/normal/permissive）
+- 機密外洩防護加強（子 shell 繞過 + base64 編碼攔截）
 
 ## [0.1.0] - 2026-02-15
 
