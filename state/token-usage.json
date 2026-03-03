@@ -2,5 +2,14 @@
   "schema_version": 1,
   "description": "Token 使用量估算（字元 ÷ 3.5，7 天滾動）",
   "daily_limit_warn": 1500000,
-  "days": {}
+  "days": {},
+  "daily": {
+    "2026-03-03": {
+      "estimated_tokens": 136641.42857142873,
+      "tool_calls": 924,
+      "input_chars": 478245,
+      "output_chars": 0
+    }
+  },
+  "updated": "2026-03-03T21:33:32.797184"
 }

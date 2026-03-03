@@ -1,5 +1,130 @@
 {
   "version": 1,
-  "updated_at": "2026-03-02T00:00:00+08:00",
-  "series": {}
+  "updated_at": "2026-03-03T18:58:36.325609+08:00",
+  "series": {
+    "ai-security-testing": {
+      "series_id": "ai-security-testing",
+      "domain": "AI Security Testing / Autonomous Penetration Testing",
+      "description": "AI 驅動的自動化安全測試與滲透測試研究系列",
+      "initiated_at": "2026-03-03",
+      "last_active": "2026-03-03",
+      "tags": [
+        "AI安全",
+        "滲透測試",
+        "OWASP",
+        "多Agent架構",
+        "自動化安全"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-03",
+          "completed_at": "2026-03-03",
+          "kb_notes": [
+            "Shannon -- 全自動 AI 滲透測試框架深度研究"
+          ],
+          "covered_concepts": [
+            "四階段架構",
+            "XBOW Benchmark",
+            "No Exploit No Report",
+            "白箱測試",
+            "OWASP WSTG",
+            "Temporal 工作流"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "深入 Shannon 的 Claude Agent SDK 整合機制、Temporal 工作流定義與安全工具編排原理"
+    },
+    "logical-thinking-frameworks": {
+      "series_id": "logical-thinking-frameworks",
+      "domain": "Logical Thinking / Critical Thinking / Decision Frameworks",
+      "description": "邏輯思維、批判性思考與決策框架研究系列",
+      "initiated_at": "2026-03-03",
+      "last_active": "2026-03-03",
+      "tags": [
+        "邏輯思維",
+        "批判性思考",
+        "決策框架",
+        "方法論",
+        "認知科學"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-26",
+          "completed_at": "2026-03-03",
+          "kb_notes": [
+            "邏輯思維三大熱門框架：第一性原理、心智模型格柵與批判性思考",
+            "邏輯思維與決策框架完整指南",
+            "RPD 識別啟動決策模型",
+            "貝葉斯思維（Bayesian Thinking）",
+            "系統思考（Systems Thinking）"
+          ],
+          "covered_concepts": [
+            "第一性原理",
+            "心智模型",
+            "Paul-Elder 批判性思考",
+            "MECE 原則",
+            "二階思維",
+            "RPD 決策",
+            "貝葉斯更新",
+            "系統基模",
+            "槓桿點",
+            "Peter Senge 第五項修練"
+          ]
+        },
+        "mechanism": {
+          "status": "in_progress",
+          "started_at": "2026-03-02",
+          "kb_notes": [
+            "辯證法（Dialectical Thinking）",
+            "溯因推理（Abductive Reasoning）",
+            "OODA Loop",
+            "Toulmin 論證模型與邏輯謬誤分類系統",
+            "認知去偏技術（Cognitive Debiasing）",
+            "ACH 競爭假設分析法"
+          ],
+          "covered_concepts": [
+            "辯證法 正反合",
+            "溯因推理 IBE",
+            "OODA 四階段",
+            "Toulmin 六要素",
+            "邏輯謬誤分類",
+            "預驗屍分析",
+            "ACH 矩陣評估",
+            "反證法",
+            "診斷性證據"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "應用階段：邏輯思維框架在實際場景中的應用案例、程式碼實作、工具整合"
+    }
+  }
 }
