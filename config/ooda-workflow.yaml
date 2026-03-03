@@ -32,7 +32,7 @@ steps:
   decide:
     name: "Decide — 架構演進"
     auto_task_key: "arch_evolution"
-    prompt_file: "prompts/team/todoist-auto-arch-evolution.md"  # TODO: 建立專屬 prompt（I3 修復：暫以 enabled:false 封鎖）
+    prompt_file: "prompts/team/todoist-auto-arch-evolution.md"  # 暫以 enabled:false 封鎖，待建立專屬 prompt 後啟用
     skill: "arch-evolution"
     enabled: false  # I3 修復：arch-evolution 尚無專屬 prompt，待建立後啟用
     timeout_seconds: 900
