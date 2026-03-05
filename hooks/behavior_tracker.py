@@ -12,6 +12,7 @@ Behavior Pattern Tracker — Instinct Lite 行為模式採集器。
   - 原子級模式：tool + 簽名摘要作為模式 key
   - 信心分數：重複觀察 → 信心遞增（0.1 ~ 1.0）
   - 滾動視窗：30 天未觀察的模式自動衰減
+  - 敏感資訊消毒：summary_sample 寫入前自動移除 token/key/secret
 
 使用方式：
   由 post_tool_logger.py 在寫入 JSONL 後呼叫 track()。
@@ -31,10 +32,46 @@ CONFIDENCE_MAX = 1.0
 CONFIDENCE_INITIAL = 0.1
 
 
+def _sanitize_summary(summary: str) -> str:
+    """消毒摘要，移除可能的敏感資訊。
+
+    從 summary 中移除：
+      - Authorization / Bearer token headers
+      - API token / Key / Secret header 值
+      - $env: 環境變數引用值
+    保留結構與工具名稱，確保模式辨識不受影響。
+    """
+    import re
+    sanitized = summary
+    # 移除 Authorization header 值（Bearer xxx / Basic xxx）
+    sanitized = re.sub(
+        r'(-H\s+["\']?Authorization:\s*)(Bearer|Basic)\s+\S+',
+        r'\1\2 <REDACTED>',
+        sanitized,
+        flags=re.IGNORECASE
+    )
+    # 移除 -H "X-...-Token: xxx" 或 -H "X-...-Key: xxx" header 值
+    sanitized = re.sub(
+        r'(-H\s+["\']?[Xx][-\w]*(?:Token|Key|Secret):\s*)\S+',
+        r'\1<REDACTED>',
+        sanitized,
+        flags=re.IGNORECASE
+    )
+    # 移除 $TODOIST_API_TOKEN 等環境變數展開值
+    sanitized = re.sub(
+        r'(\$(?:env:)?[A-Z_]*(?:TOKEN|SECRET|KEY|PASSWORD)(?:\s*=\s*|\s+))\S+',
+        r'\1<REDACTED>',
+        sanitized,
+        flags=re.IGNORECASE
+    )
+    return sanitized
+
+
 def _compute_signature(tool: str, summary: str) -> str:
     """從工具名稱和摘要計算穩定簽名。
 
     正規化策略：移除動態部分（時間戳、UUID、數字後綴）保留結構。
+    使用 SHA-256（與 agent_guardian.py 一致），避免 MD5 碰撞風險。
     """
     import re
     # 移除常見動態部分
@@ -44,25 +81,37 @@ def _compute_signature(tool: str, summary: str) -> str:
     # 截斷到合理長度
     normalized = normalized[:120]
     sig = f"{tool}:{normalized}"
-    return hashlib.md5(sig.encode()).hexdigest()[:12]
+    return hashlib.sha256(sig.encode()).hexdigest()[:12]
 
 
 def _load_patterns() -> dict:
     """載入行為模式檔案。"""
-    if not os.path.exists(PATTERNS_FILE):
-        return {"version": 1, "patterns": {}, "last_cleanup": None}
+    _default = {"version": 1, "patterns": {}, "last_cleanup": None}
     try:
-        with open(PATTERNS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return {"version": 1, "patterns": {}, "last_cleanup": None}
+        from hook_utils import safe_load_json
+        result = safe_load_json(PATTERNS_FILE, default=_default)
+        return result if isinstance(result, dict) else _default
+    except ImportError:
+        # hook_utils 不可用時退回直接讀取
+        if not os.path.exists(PATTERNS_FILE):
+            return _default
+        try:
+            with open(PATTERNS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return _default
 
 
 def _save_patterns(data: dict):
-    """寫入行為模式檔案。"""
-    os.makedirs(os.path.dirname(PATTERNS_FILE), exist_ok=True)
-    with open(PATTERNS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    """寫入行為模式檔案（原子寫入，防並行損壞）。"""
+    try:
+        from hook_utils import atomic_write_json
+        atomic_write_json(PATTERNS_FILE, data)
+    except ImportError:
+        # hook_utils 不可用時退回直接寫入
+        os.makedirs(os.path.dirname(PATTERNS_FILE), exist_ok=True)
+        with open(PATTERNS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def _cleanup_stale(data: dict) -> dict:
@@ -91,46 +140,59 @@ def track(tool: str, summary: str, tags: list, has_error: bool = False,
     """
     try:
         sig = _compute_signature(tool, summary)
-        data = _load_patterns()
-        patterns = data.setdefault("patterns", {})
-        now = datetime.now().astimezone().isoformat()
 
-        if sig in patterns:
-            p = patterns[sig]
-            p["count"] += 1
-            p["confidence"] = min(p["confidence"] + CONFIDENCE_INCREMENT, CONFIDENCE_MAX)
-            p["last_seen"] = now
-            if not has_error:
-                p["success_count"] = p.get("success_count", 0) + 1
-            # 更新 Token 經濟統計
-            p["total_input"] = p.get("total_input", 0) + input_len
-            p["total_output"] = p.get("total_output", 0) + output_len
-        else:
-            # 新模式
-            if len(patterns) >= MAX_PATTERNS:
-                # 移除信心最低的模式
-                lowest = min(patterns, key=lambda k: patterns[k].get("confidence", 0))
-                del patterns[lowest]
+        # 消毒摘要，移除敏感資訊後再儲存
+        safe_summary = _sanitize_summary(summary)
 
-            patterns[sig] = {
-                "tool": tool,
-                "summary_sample": summary[:150],
-                "tags": list(set(tags))[:5],
-                "count": 1,
-                "confidence": CONFIDENCE_INITIAL,
-                "success_count": 1 if not has_error else 0,
-                "first_seen": now,
-                "last_seen": now,
-                "total_input": input_len,
-                "total_output": output_len,
-            }
+        # file_lock 保護 read-modify-write 序列，防並行覆蓋
+        try:
+            from hook_utils import file_lock
+            lock_ctx = file_lock(PATTERNS_FILE)
+        except ImportError:
+            from contextlib import nullcontext
+            lock_ctx = nullcontext()
 
-        # 每 100 次呼叫清理一次過期模式
-        total_calls = sum(p.get("count", 0) for p in patterns.values())
-        if total_calls % 100 == 0:
-            data = _cleanup_stale(data)
+        with lock_ctx:
+            data = _load_patterns()
+            patterns = data.setdefault("patterns", {})
+            now = datetime.now().astimezone().isoformat()
 
-        _save_patterns(data)
+            if sig in patterns:
+                p = patterns[sig]
+                p["count"] += 1
+                p["confidence"] = min(p["confidence"] + CONFIDENCE_INCREMENT, CONFIDENCE_MAX)
+                p["last_seen"] = now
+                if not has_error:
+                    p["success_count"] = p.get("success_count", 0) + 1
+                # 更新 Token 經濟統計
+                p["total_input"] = p.get("total_input", 0) + input_len
+                p["total_output"] = p.get("total_output", 0) + output_len
+            else:
+                # 新模式
+                if len(patterns) >= MAX_PATTERNS:
+                    # 移除信心最低的模式
+                    lowest = min(patterns, key=lambda k: patterns[k].get("confidence", 0))
+                    del patterns[lowest]
+
+                patterns[sig] = {
+                    "tool": tool,
+                    "summary_sample": safe_summary[:150],
+                    "tags": list(set(tags))[:5],
+                    "count": 1,
+                    "confidence": CONFIDENCE_INITIAL,
+                    "success_count": 1 if not has_error else 0,
+                    "first_seen": now,
+                    "last_seen": now,
+                    "total_input": input_len,
+                    "total_output": output_len,
+                }
+
+            # 每 100 次呼叫清理一次過期模式
+            total_calls = sum(p.get("count", 0) for p in patterns.values())
+            if total_calls % 100 == 0:
+                data = _cleanup_stale(data)
+
+            _save_patterns(data)
     except Exception:
         pass  # 靜默失敗，不中斷 Agent 流程
 

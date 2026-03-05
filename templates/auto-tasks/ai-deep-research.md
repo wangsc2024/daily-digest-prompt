@@ -31,13 +31,14 @@
 ### 1.0 研究註冊表檢查（跨任務去重）
 
 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
-用 Read 讀取 `context/research-registry.json`：
-- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
-- 存在 → 列出近 7 天內的 entries（所有 task_type）
+優先讀取 `context/research-registry.json` 的 `summary` 欄位：
+- 不存在 → 用 Write 建立空 registry：`{"version":1,"summary":{"total":0,"last_updated":"","by_type":{},"recent_3d_topics":[],"saturated_types":[]},"entries":[]}`
+- 存在 → 讀 `summary.recent_3d_topics`（3 天冷卻判定）、`summary.by_type.ai_deep_research`（飽和度判定）
+- 僅在邊界判定時才讀完整 entries
 
 **判定規則（必須遵守）：**
-1. 若 registry 中 3 天內有 topic 與本次候選主題完全相同 → **必須換主題**
-2. 若 registry 中 7 天內 task_type="ai_deep_research" 已有 ≥3 個不同 topic → 優先探索冷門方向
+1. 若 `summary.recent_3d_topics` 中有與本次候選主題完全相同的 topic → **必須換主題**（3 天冷卻）
+2. 若 `summary.by_type.ai_deep_research` ≥ 3 → 優先探索冷門方向
 3. 特別注意：tech_research、ai_github_research、ai_sysdev 的 topic 也要比對，避免跨類型重複
 
 ### 1.1 選定研究主題
@@ -136,6 +137,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
    }
    ```
    同時移除超過 7 天的舊 entry。
+   **同步更新 summary**：total+1、by_type.ai_deep_research+1、recent_3d_topics 前插本次主題（保留最多 10 條）、last_updated 更新為今日日期。
 
 輸出：「📝 研究報告已完成並匯入知識庫」
 

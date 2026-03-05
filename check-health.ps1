@@ -3,12 +3,60 @@
 # ============================================
 # Usage:
 #   pwsh -ExecutionPolicy Bypass -File check-health.ps1
+#   pwsh -ExecutionPolicy Bypass -File check-health.ps1 -Scheduled
 # ============================================
+
+param([switch]$Scheduled)
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
 $AgentDir = $PSScriptRoot
+
+# 排程模式：spawn 子進程捕捉輸出 → 寫 log → 推 ntfy → 早退
+if ($Scheduled) {
+    $logTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $scheduledLogFile = "$AgentDir\logs\health-$logTimestamp.log"
+    if (-not (Test-Path "$AgentDir\logs")) { New-Item -ItemType Directory -Path "$AgentDir\logs" -Force | Out-Null }
+
+    # 以無色模式重新執行自身（不帶 -Scheduled），捕捉所有輸出
+    $output = & pwsh -ExecutionPolicy Bypass -File $PSCommandPath 2>&1
+    $output | Out-File -FilePath $scheduledLogFile -Encoding UTF8
+
+    # 從輸出解析關鍵指標
+    $srMatch    = ($output | Select-String '成功率: (\d+\.?\d*)%') | Select-Object -First 1
+    $taskMatch  = ($output | Select-String '總計: (\d+)/(\d+) 次') | Select-Object -First 1
+    $srText     = if ($srMatch)   { $srMatch.Matches[0].Groups[1].Value + "%" } else { "N/A" }
+    $taskText   = if ($taskMatch) { $taskMatch.Matches[0].Groups[1].Value + "/" + $taskMatch.Matches[0].Groups[2].Value } else { "N/A" }
+
+    $issues = @()
+    if ($output | Select-String '逾時\s+(\d+) 次' | Where-Object { [int]$_.Matches[0].Groups[1].Value -gt 0 }) { $issues += "逾時" }
+    if ($output | Select-String 'Phase 失敗\s+(\d+) 次' | Where-Object { [int]$_.Matches[0].Groups[1].Value -gt 0 }) { $issues += "Phase失敗" }
+    if ($output | Select-String '攔截事件: (\d+)' | Where-Object { [int]$_.Matches[0].Groups[1].Value -gt 0 }) { $issues += "攔截" }
+    $issueStr  = if ($issues.Count -gt 0) { $issues -join ", " } else { "無" }
+
+    $priority  = if ($issues.Count -gt 0) { 3 } else { 2 }
+    $tagsArr   = if ($issues.Count -gt 0) { @("warning","stethoscope") } else { @("white_check_mark","stethoscope") }
+    $title     = "健康報告 $(Get-Date -Format 'MM/dd HH:mm')"
+    $logName   = Split-Path $scheduledLogFile -Leaf
+    $body      = "成功率 ${srText} | 自動任務 ${taskText}`n問題: ${issueStr}`nLog: ${logName}"
+
+    $ntfyPayload = [ordered]@{
+        topic    = "wangsc2025"
+        title    = $title
+        message  = $body
+        priority = $priority
+        tags     = $tagsArr
+    } | ConvertTo-Json -Compress
+    $ntfyFile = "$AgentDir\logs\ntfy_health_temp.json"
+    [System.IO.File]::WriteAllText($ntfyFile, $ntfyPayload, [System.Text.Encoding]::UTF8)
+    curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyFile" https://ntfy.sh | Out-Null
+    Remove-Item $ntfyFile -Force -ErrorAction SilentlyContinue
+
+    Write-Host "[Scheduled] Log: $logName" -ForegroundColor Green
+    Write-Host "[Scheduled] ntfy 已推播：$body" -ForegroundColor Green
+    exit 0
+}
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $MemoryFile = "$AgentDir\context\digest-memory.json"
 $CacheDir = "$AgentDir\cache"
@@ -16,6 +64,7 @@ $CacheDir = "$AgentDir\cache"
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Claude Agent Health Report" -ForegroundColor Cyan
+
 Write-Host "  $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
@@ -393,7 +442,7 @@ else {
                 if ($pathMatch) {
                     $path = $matches[1]
                     $skillModifications += [PSCustomObject]@{
-                        Date = $entry.ts.Substring(0, 16)  # YYYY-MM-DDTHH:MM
+                        Date = ([string]$entry.ts).Substring(0, 16)  # YYYY-MM-DDTHH:MM
                         Path = $path
                         Tool = $entry.tool
                     }
@@ -419,6 +468,173 @@ else {
     }
 }
 
+# --- Metrics Trend (metrics-daily.json) ---
+Write-Host ""
+Write-Host "[指標趨勢（7 天）]" -ForegroundColor Yellow
+
+$MetricsFile = "$AgentDir\context\metrics-daily.json"
+if (-not (Test-Path $MetricsFile)) {
+    Write-Host "  尚無指標歷史（首次 session 結束後建立）" -ForegroundColor Gray
+}
+else {
+    try {
+        $metricsData = Get-Content -Path $MetricsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $records = @($metricsData.records)
+
+        if ($records.Count -eq 0) {
+            Write-Host "  指標記錄為空" -ForegroundColor Gray
+        }
+        else {
+            $today = Get-Date -Format "yyyy-MM-dd"
+            $todayRec = $records | Where-Object { $_.date -eq $today } | Select-Object -Last 1
+
+            # 計算 7 天均值（排除今日）
+            $cutoff7d = (Get-Date).AddDays(-8).ToString("yyyy-MM-dd")
+            $pastRecs = @($records | Where-Object { $_.date -ge $cutoff7d -and $_.date -lt $today })
+
+            function Get-Trend {
+                param([double]$current, [double]$avg, [bool]$higherIsBetter = $true)
+                if ($avg -eq 0) { return "→" }
+                $diff = ($current - $avg) / $avg
+                if ([Math]::Abs($diff) -lt 0.05) { return "→" }
+                $up = $diff -gt 0
+                if ($higherIsBetter) {
+                    return if ($up) { "▲" } else { "▼" }
+                } else {
+                    return if ($up) { "▼" } else { "▲" }
+                }
+            }
+
+            function Get-TrendColor {
+                param([string]$arrow, [bool]$higherIsBetter = $true)
+                if ($arrow -eq "→") { return "White" }
+                if ($higherIsBetter) {
+                    return if ($arrow -eq "▲") { "Green" } else { "Red" }
+                } else {
+                    return if ($arrow -eq "▲") { "Red" } else { "Green" }
+                }
+            }
+
+            $metrics = @(
+                @{ key = "cache_hit_ratio";       label = "快取命中率";     fmt = "{0}%";  higherBetter = $true;  threshold = 40 }
+                @{ key = "api_calls";             label = "API 呼叫數";     fmt = "{0}";   higherBetter = $false; threshold = $null }
+                @{ key = "blocked_count";         label = "攔截次數";       fmt = "{0}";   higherBetter = $false; threshold = 3 }
+                @{ key = "error_count";           label = "錯誤次數";       fmt = "{0}";   higherBetter = $false; threshold = 5 }
+                @{ key = "loop_suspected_count";  label = "迴圈疑似";       fmt = "{0}";   higherBetter = $false; threshold = $null }
+                @{ key = "session_success_rate";  label = "Session成功率"; fmt = "{0}%";  higherBetter = $true;  threshold = 90 }
+            )
+
+            if ($todayRec) {
+                Write-Host "  [今日 vs 7 天均值]" -ForegroundColor Cyan
+                Write-Host ("  {0,-20} {1,8}  {2,8}  {3}" -f "指標", "今日", "7d均值", "趨勢") -ForegroundColor Gray
+                Write-Host ("  " + "-" * 48) -ForegroundColor Gray
+
+                foreach ($m in $metrics) {
+                    $val = $todayRec.($m.key)
+                    if ($null -eq $val) { continue }
+
+                    $avg7d = if ($pastRecs.Count -gt 0) {
+                        $vals = @($pastRecs | ForEach-Object { $_.($m.key) } | Where-Object { $null -ne $_ })
+                        if ($vals.Count -gt 0) { [math]::Round(($vals | Measure-Object -Average).Average, 1) } else { 0 }
+                    } else { 0 }
+
+                    $arrow = Get-Trend -current ([double]$val) -avg ([double]$avg7d) -higherIsBetter $m.higherBetter
+                    $arrowColor = Get-TrendColor -arrow $arrow -higherIsBetter $m.higherBetter
+
+                    # 閾值警告色
+                    $valStr = $m.fmt -f $val
+                    $avg7dStr = if ($avg7d -gt 0) { $m.fmt -f $avg7d } else { "N/A" }
+                    $valColor = "White"
+                    if ($null -ne $m.threshold) {
+                        if ($m.higherBetter -and [double]$val -lt $m.threshold) { $valColor = "Red" }
+                        elseif (-not $m.higherBetter -and [double]$val -ge $m.threshold) { $valColor = "Yellow" }
+                    }
+
+                    Write-Host ("  {0,-20} " -f $m.label) -NoNewline -ForegroundColor Gray
+                    Write-Host ("{0,8}" -f $valStr) -NoNewline -ForegroundColor $valColor
+                    Write-Host ("  {0,8}  " -f $avg7dStr) -NoNewline -ForegroundColor Gray
+                    Write-Host $arrow -ForegroundColor $arrowColor
+                }
+
+                # 顯示資料天數
+                $totalDays = $records.Count
+                Write-Host ""
+                Write-Host "  歷史記錄: $totalDays 天（最長 14 天）" -ForegroundColor DarkGray
+            }
+            else {
+                Write-Host "  今日尚無指標記錄（session 結束後更新）" -ForegroundColor Gray
+                if ($records.Count -gt 0) {
+                    $lastRec = $records | Select-Object -Last 1
+                    Write-Host "  最近一筆: $($lastRec.date) — 快取命中率 $($lastRec.cache_hit_ratio)%" -ForegroundColor DarkGray
+                }
+            }
+        }
+    }
+    catch {
+        Write-Host "  指標讀取失敗: $_" -ForegroundColor Red
+    }
+}
+
+# --- SLO / Error Budget ---
+Write-Host ""
+Write-Host "[SLO / Error Budget]" -ForegroundColor Cyan
+
+$sloFile    = "$AgentDir\config\slo.yaml"
+$metricsFile = "$AgentDir\context\metrics-daily.json"
+
+if ((Test-Path $sloFile) -and (Test-Path $metricsFile)) {
+    try {
+        # 用 Python 計算（重用 on_stop_alert._compute_error_budget 邏輯）
+        $sloScript = @"
+import json, sys, os
+sys.path.insert(0, r'$($AgentDir.Replace("\","\\"))\hooks')
+try:
+    from on_stop_alert import _compute_error_budget
+    results = _compute_error_budget()
+    print(json.dumps(results, ensure_ascii=False))
+except Exception as e:
+    print(json.dumps([]))
+"@
+        $sloJson = $sloScript | uv run --project $AgentDir python - 2>$null
+        if ($sloJson) {
+            $sloResults = $sloJson | ConvertFrom-Json
+            foreach ($slo in $sloResults) {
+                $id      = $slo.id
+                $name    = $slo.name
+                $actual  = if ($null -ne $slo.actual)       { $slo.actual }       else { "N/A" }
+                $target  = if ($null -ne $slo.target)       { $slo.target }       else { "?" }
+                $remain  = if ($null -ne $slo.remaining_pct) { "$($slo.remaining_pct)%" } else { "N/A" }
+                $status  = $slo.status
+
+                $budgetColor = switch ($status) {
+                    "critical" { "Red" }
+                    "warning"  { "Yellow" }
+                    "no_data"  { "DarkGray" }
+                    default    { "Green" }
+                }
+                $icon = switch ($status) {
+                    "critical" { "❌" }
+                    "warning"  { "⚠️" }
+                    "no_data"  { "—" }
+                    default    { "✅" }
+                }
+                $label = "$icon $id $name"
+                $detail = "實際=$actual  目標=$target  預算剩餘=$remain"
+                Write-Host "  $label" -ForegroundColor $budgetColor -NoNewline
+                Write-Host "  $detail"
+            }
+        } else {
+            Write-Host "  SLO 計算失敗（Python 呼叫回傳空值）" -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host "  SLO 計算失敗: $_" -ForegroundColor DarkGray
+    }
+} elseif (-not (Test-Path $sloFile)) {
+    Write-Host "  config/slo.yaml 不存在" -ForegroundColor DarkGray
+} else {
+    Write-Host "  context/metrics-daily.json 尚無資料（首次執行後生成）" -ForegroundColor DarkGray
+}
+
 # --- Configuration Validation ---
 Write-Host ""
 Write-Host "[配置驗證]" -ForegroundColor Yellow
@@ -427,7 +643,7 @@ try {
     $validatePath = "$AgentDir\hooks\validate_config.py"
     if (Test-Path $validatePath) {
         # 執行配置驗證
-        $jsonOutput = python $validatePath --json 2>&1 | Out-String
+        $jsonOutput = uv run python $validatePath --json 2>&1 | Out-String
         $result = $jsonOutput | ConvertFrom-Json
 
         $totalConfigs = 13  # 目前有 13 個配置檔
@@ -499,7 +715,7 @@ Write-Host "[YAML 交叉驗證]" -ForegroundColor Cyan
 try {
     $validatePath = "$AgentDir\hooks\validate_config.py"
     if (Test-Path $validatePath) {
-        $crossResult = python $validatePath --cross-validate 2>&1
+        $crossResult = uv run python $validatePath --cross-validate 2>&1
         if ($crossResult -match "ERROR:") {
             Write-Host "  ⚠ 發現問題" -ForegroundColor Yellow
             $crossResult | Where-Object { $_ -match "(WARN|ERROR):" } | ForEach-Object {
@@ -528,7 +744,7 @@ try {
     # 呼叫 validate_config.py --check-skills --json
     $validatePath = "$AgentDir\hooks\validate_config.py"
     if (Test-Path $validatePath) {
-        $jsonOutput = python $validatePath --check-skills --json 2>&1 | Out-String
+        $jsonOutput = uv run python $validatePath --check-skills --json 2>&1 | Out-String
         $result = $jsonOutput | ConvertFrom-Json
 
         if ($result.skill_scores) {
@@ -658,9 +874,9 @@ if (Test-Path $apiHealthFile) {
     Write-Host "  api-health.json 不存在（尚未執行團隊模式）" -ForegroundColor Gray
 }
 
-# --- Loop State 清理 ---
+# --- Loop State 清理與摘要 ---
 Write-Host ""
-Write-Host "[Loop State 清理]" -ForegroundColor Yellow
+Write-Host "[Loop State 狀態]" -ForegroundColor Yellow
 $loopStateDir = "$AgentDir\state"
 $loopFiles = Get-ChildItem -Path $loopStateDir -Filter "loop-state-*.json" -ErrorAction SilentlyContinue
 if ($loopFiles.Count -gt 0) {
@@ -670,8 +886,27 @@ if ($loopFiles.Count -gt 0) {
         $oldFiles | Remove-Item -Force -ErrorAction SilentlyContinue
         Write-Host "  清理 $($oldFiles.Count) 個過期 loop-state 檔案（>6 小時）" -ForegroundColor Green
     }
-    $remaining = ($loopFiles.Count - $oldFiles.Count)
-    Write-Host "  目前 loop-state 檔案：$remaining 個" -ForegroundColor White
+    $activeFiles = Get-ChildItem -Path $loopStateDir -Filter "loop-state-*.json" -ErrorAction SilentlyContinue
+    Write-Host "  目前 loop-state 檔案：$($activeFiles.Count) 個" -ForegroundColor White
+
+    # 顯示最近 5 筆活躍 session 摘要
+    $recent = $activeFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 5
+    if ($recent.Count -gt 0) {
+        Write-Host ("  {0,-20} {1,6}  {2,5}  {3}" -f "Session ID", "Calls", "Hash窗", "最後更新") -ForegroundColor DarkCyan
+        Write-Host "  $('─' * 52)" -ForegroundColor DarkGray
+        foreach ($f in $recent) {
+            try {
+                $d = Get-Content $f.FullName -Raw | ConvertFrom-Json
+                $calls   = if ($null -ne $d.session_call_count) { $d.session_call_count } else { "?" }
+                $hashWin = if ($d.tool_hash_window) { $d.tool_hash_window.Count } else { 0 }
+                $sid     = $f.BaseName -replace "loop-state-", ""
+                $updated = $f.LastWriteTime.ToString("MM/dd HH:mm")
+                Write-Host ("  {0,-20} {1,6}  {2,5}  {3}" -f $sid, $calls, $hashWin, $updated) -ForegroundColor White
+            } catch {
+                Write-Host "  $($f.Name)  [讀取失敗]" -ForegroundColor DarkGray
+            }
+        }
+    }
 }
 else {
     Write-Host "  無 loop-state 檔案" -ForegroundColor Gray
@@ -793,9 +1028,9 @@ if ((Test-Path $autoTasksFile) -and (Test-Path $freqLimitsFile)) {
 
         # 解析 YAML tasks（簡易 regex 解析各任務定義）
         $taskDefs = @()
-        $taskMatches = [regex]::Matches($freqContent, '(?m)^\s{2}(\w+):\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}name:\s*(.+?)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}counter_field:\s*(\w+)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}daily_limit:\s*(\d+)')
+        $taskMatches = [regex]::Matches($freqContent, '(?m)^\s{2}(\w+):\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}name:\s*(.+?)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}daily_limit:\s*(\d+)\s*\n(?:(?!\s{2}\w+:)[\s\S])*?\s{4}counter_field:\s*"?(\w+)"?')
         foreach ($m in $taskMatches) {
-            $taskDefs += @{ key = $m.Groups[1].Value; name = $m.Groups[2].Value.Trim(); counter = $m.Groups[3].Value; limit = [int]$m.Groups[4].Value }
+            $taskDefs += @{ key = $m.Groups[1].Value; name = $m.Groups[2].Value.Trim(); counter = $m.Groups[4].Value; limit = [int]$m.Groups[3].Value }
         }
 
         # Fallback：若 regex 解析失敗，直接從 auto-tasks-today.json 推斷（只有計數，無限制）
@@ -858,7 +1093,7 @@ if (Test-Path $fsmFile) {
         } else {
             foreach ($run in $runs) {
                 $r = $run.Value
-                $startStr = if ($r.started) { $r.started.Substring(0, 16) } else { "unknown" }
+                $startStr = if ($r.started) { ([string]$r.started).Substring(0, 16) } else { "unknown" }
                 Write-Host ("  [{0}] {1}" -f $startStr, $r.agent_type) -ForegroundColor White
 
                 foreach ($phase in $r.phases.PSObject.Properties | Sort-Object Name) {
@@ -917,6 +1152,118 @@ if (Test-Path $workflowFile) {
     }
 } else {
     Write-Host "  (workflow-state.json 尚未建立)" -ForegroundColor DarkGray
+}
+
+# [自動任務一致性]
+Write-Host ""
+Write-Host "[自動任務一致性]" -ForegroundColor Cyan
+$validatePath = Join-Path $PSScriptRoot "hooks\validate_config.py"
+if (Test-Path $validatePath) {
+    try {
+        $autoTaskOutput = uv run python $validatePath --check-auto-tasks 2>&1 | Out-String
+        if ($autoTaskOutput -match "不一致：(\d+)") {
+            $inconsistCount = [int]$Matches[1]
+            if ($inconsistCount -gt 0) {
+                Write-Host "  ⚠️  發現 $inconsistCount 個不一致" -ForegroundColor Yellow
+            } else {
+                Write-Host "  ✅ 所有自動任務設定一致" -ForegroundColor Green
+            }
+        } elseif ($autoTaskOutput -match "✅") {
+            Write-Host "  ✅ 所有自動任務設定一致" -ForegroundColor Green
+        } else {
+            # 直接輸出驗證結果
+            $autoTaskOutput.Trim() -split "`n" | ForEach-Object {
+                Write-Host "  $_" -ForegroundColor Gray
+            }
+        }
+    } catch {
+        Write-Host "  無法執行自動任務一致性驗證：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (validate_config.py 不存在)" -ForegroundColor DarkGray
+}
+
+# [研究註冊表健康度]
+Write-Host ""
+Write-Host "[研究註冊表健康度]" -ForegroundColor Cyan
+$registryFile = Join-Path $PSScriptRoot "context\research-registry.json"
+if (Test-Path $registryFile) {
+    try {
+        $registry = Get-Content $registryFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $summary = $registry.summary
+        if ($summary) {
+            $total = $summary.total
+            $lastUpdated = $summary.last_updated
+            $saturated = if ($summary.saturated_types -and $summary.saturated_types.Count -gt 0) {
+                $summary.saturated_types -join ", "
+            } else { "無" }
+            Write-Host "  總條目：$total 筆 | 最後更新：$lastUpdated" -ForegroundColor White
+            Write-Host "  飽和類型：$saturated" -ForegroundColor $(if ($summary.saturated_types -and $summary.saturated_types.Count -gt 0) { "Yellow" } else { "Green" })
+            if ($total -gt 100) {
+                Write-Host "  ⚠️  條目數超過 100，建議清理舊記錄" -ForegroundColor Yellow
+            }
+            if ($summary.recent_3d_topics -and $summary.recent_3d_topics.Count -gt 0) {
+                Write-Host "  近 3 日主題（$($summary.recent_3d_topics.Count) 筆）：$($summary.recent_3d_topics[0])" -ForegroundColor DarkGray
+            }
+        } else {
+            Write-Host "  (summary 欄位尚未建立，讀取完整 entries...)" -ForegroundColor DarkGray
+            $entryCount = if ($registry.entries) { $registry.entries.Count } else { 0 }
+            Write-Host "  條目數：$entryCount" -ForegroundColor White
+        }
+    } catch {
+        Write-Host "  無法解析 research-registry.json：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (尚無研究記錄)" -ForegroundColor DarkGray
+}
+
+# [快取效率]
+Write-Host ""
+Write-Host "[快取效率]" -ForegroundColor Cyan
+$cacheStatusFile = Join-Path $PSScriptRoot "cache\status.json"
+if (Test-Path $cacheStatusFile) {
+    try {
+        $cacheStatus = Get-Content $cacheStatusFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $generatedAt = $cacheStatus.generated_at
+        Write-Host "  快取狀態預計算於：$generatedAt" -ForegroundColor DarkGray
+        if ($cacheStatus.apis) {
+            foreach ($apiProp in $cacheStatus.apis.PSObject.Properties) {
+                $apiName = $apiProp.Name
+                $apiInfo = $apiProp.Value
+                $valid = $apiInfo.valid
+                $reason = $apiInfo.reason
+                $ageMins = $apiInfo.age_min
+                $ttlMins = $apiInfo.ttl_min
+                if ($valid) {
+                    Write-Host "  ✅ $apiName`: 命中（${ageMins}分鐘前，TTL ${ttlMins}分鐘）" -ForegroundColor Green
+                } elseif ($reason -eq "missing") {
+                    Write-Host "  ⬜ $apiName`: 快取不存在" -ForegroundColor DarkGray
+                } else {
+                    Write-Host "  ⚠️  $apiName`: 已過期（${ageMins}分鐘前，TTL ${ttlMins}分鐘）" -ForegroundColor Yellow
+                }
+            }
+        }
+    } catch {
+        Write-Host "  無法解析 cache/status.json：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (cache/status.json 尚未生成，下次執行 run-agent-team.ps1 後會建立)" -ForegroundColor DarkGray
+}
+
+# [配置膨脹指標]
+Write-Host ""
+Write-Host "[配置膨脹指標]" -ForegroundColor Cyan
+$analyzeScript = Join-Path $PSScriptRoot "analyze-config.ps1"
+if (Test-Path $analyzeScript) {
+    try {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $analyzeScript -Brief 2>&1 | ForEach-Object {
+            Write-Host "  $_"
+        }
+    } catch {
+        Write-Host "  無法執行 analyze-config.ps1：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (analyze-config.ps1 尚未建立)" -ForegroundColor DarkGray
 }
 
 Write-Host ""

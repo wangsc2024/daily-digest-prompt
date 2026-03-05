@@ -60,6 +60,25 @@ audit_team:
   phase2_timeout: 1200      # Phase 2: 組裝+修正（20 分鐘）
   phase2_max_retries: 1     # Phase 2 重試次數
 
+# FSM 生命週期管理
+fsm:
+  stale_timeout_hours: 2    # running 狀態超過此時間 → 轉為 timeout（消除殭屍狀態）
+  max_entries: 20           # FSM 記錄上限（超過時移除最舊已完成 run）
+
+# 媒體管線工具超時（article-to-video.ps1 / article-to-podcast.ps1）
+media_pipeline:
+  video_phase1_timeout: 600    # Phase 1: Claude 生成腳本+分鏡稿（KB查詢+分析+寫檔）
+  video_phase3_timeout: 1800   # Phase 3: Remotion 渲染（10 分鐘影片約需 3-5 分鐘）
+  podcast_phase1_timeout: 600  # Phase 1: Claude 生成雙主持人對話腳本
+  tts_per_segment_timeout: 60  # Phase 2: 每段 TTS 最長等待（edge-tts 通常 <10s）
+
+# 排程式媒體工具 wrapper（run-video-latest-research.ps1 / run-podcast-latest-buddhist.ps1）
+media_scheduled:
+  kb_search_timeout: 15        # Invoke-RestMethod KB 搜尋超時（秒）
+  kb_health_timeout: 5         # KB health check 超時（秒）
+  video_total_timeout: 2400    # 影片完整流程（含 Remotion 渲染）
+  podcast_total_timeout: 2400  # Podcast 完整流程（含 TTS 所有段落）
+
 # HEARTBEAT.md 排程超時
 scheduler:
   system_audit: 2400        # 00:40 系統審查
@@ -68,3 +87,5 @@ scheduler:
   daily_digest_pm: 3600     # 21:15 摘要
   todoist_single: 2400      # 整點 Todoist
   todoist_team: 3600        # 半點 Todoist（PT1H，含 creative-game 1020s + buffer）
+  media_video_research: 2400  # 13:20 影片製作
+  media_podcast_buddhist: 2400  # 15:20 Podcast 製作

@@ -1247,6 +1247,88 @@ def generate_skill_dag(config_dir: str = ".", output_file: Optional[str] = None)
     return dot_content
 
 
+def check_auto_tasks_consistency(config_dir: str = ".") -> tuple:
+    """驗證自動任務的三檔一致性：frequency-limits key ↔ template ↔ team prompt。
+
+    Returns:
+        (issues, rows) — issues 為問題字串清單，rows 為對照表列清單
+    """
+    import glob
+
+    issues = []
+    rows = []  # [(key, template_display, team_prompt_display, status)]
+
+    # 1. 讀取 frequency-limits.yaml
+    freq_path = os.path.join(config_dir, "config", "frequency-limits.yaml")
+    if not os.path.exists(freq_path):
+        return ["❌ frequency-limits.yaml 不存在"], []
+
+    try:
+        import yaml
+        with open(freq_path, "r", encoding="utf-8") as f:
+            freq_data = yaml.safe_load(f)
+    except Exception as e:
+        return [f"❌ 無法讀取 frequency-limits.yaml: {e}"], []
+
+    tasks = freq_data.get("tasks", {})
+
+    # 2. 掃描 prompts/team/todoist-auto-*.md 建立已知 team prompt 集合
+    team_dir = os.path.join(config_dir, "prompts", "team")
+    team_prompts: Dict[str, str] = {}  # {key_part: filepath}
+    if os.path.exists(team_dir):
+        for fp in glob.glob(os.path.join(team_dir, "todoist-auto-*.md")):
+            basename = os.path.basename(fp)  # todoist-auto-shurangama.md
+            key_part = basename[len("todoist-auto-"):-len(".md")]  # shurangama
+            team_prompts[key_part] = fp
+
+    # 3. 對每個 frequency-limits task 做三欄檢查
+    fl_key_parts: set = set()
+    for task_key, task_cfg in tasks.items():
+        if not isinstance(task_cfg, dict):
+            continue
+
+        fl_key_parts.add(task_key)
+        key_hyphen = task_key.replace("_", "-")
+        fl_key_parts.add(key_hyphen)
+
+        # template field
+        template = task_cfg.get("template", "")
+        template_path = os.path.join(config_dir, template) if template else None
+        template_exists = os.path.exists(template_path) if template_path else False
+        template_display = template if template else "(無 template 欄位)"
+
+        # team prompt：嘗試 key 本身（底線）和 key-hyphen 兩種形式
+        team_prompt_file = team_prompts.get(task_key) or team_prompts.get(key_hyphen)
+        team_prompt_exists = team_prompt_file is not None
+        team_prompt_display = (
+            os.path.basename(team_prompt_file)
+            if team_prompt_file
+            else f"todoist-auto-{key_hyphen}.md (缺失)"
+        )
+
+        # 狀態判定
+        if template_exists and team_prompt_exists:
+            status = "✅"
+        elif not template_exists and not team_prompt_exists:
+            status = "❌ 兩者缺失"
+            issues.append(f"❌ {task_key}: template 和 team prompt 均缺失")
+        elif not template_exists:
+            status = "⚠️ template↑"
+            issues.append(f"⚠️ {task_key}: template '{template_display}' 不存在")
+        else:
+            status = "⚠️ prompt↑"
+            issues.append(f"⚠️ {task_key}: team prompt '{team_prompt_display}' 不存在")
+
+        rows.append((task_key, template_display, team_prompt_display, status))
+
+    # 4. 孤兒 team prompts（prompts/team/ 有但不在 frequency-limits 中）
+    for key_part, filepath in team_prompts.items():
+        if key_part not in fl_key_parts:
+            issues.append(f"⚠️ 孤兒 team prompt: {os.path.basename(filepath)} 不在 frequency-limits.yaml")
+
+    return issues, rows
+
+
 def main():
     # Ensure UTF-8 output on Windows
     if hasattr(sys.stdout, "reconfigure"):
@@ -1258,6 +1340,7 @@ def main():
         print("\n使用方式：")
         print("  python validate_config.py                           # 驗證所有配置檔")
         print("  python validate_config.py --all                     # 驗證 + Routing + Skills + 交叉驗證")
+        print("  python validate_config.py --check-auto-tasks        # 驗證自動任務三檔一致性")
         print("  python validate_config.py --check-routing           # 僅檢查 Routing 一致性")
         print("  python validate_config.py --check-skills            # 僅檢查 Skill 品質")
         print("  python validate_config.py --cross-validate          # 交叉驗證（技能引用、模板路徑）")
@@ -1354,6 +1437,25 @@ def main():
             print(dot)
 
         sys.exit(0)
+
+    # 處理 --check-auto-tasks（自動任務一致性驗證）
+    if "--check-auto-tasks" in sys.argv:
+        issues, rows = check_auto_tasks_consistency(config_dir=base_dir)
+        print("\n[自動任務一致性檢查]")
+        if rows:
+            print(f"  {'任務 key':<24} {'template':<40} {'team prompt':<36} 狀態")
+            print(f"  {'─'*24} {'─'*40} {'─'*36} {'─'*8}")
+            for key, tmpl, prompt, status in rows:
+                tmpl_short = tmpl.replace("templates/auto-tasks/", "")
+                print(f"  {key:<24} {tmpl_short:<40} {prompt:<36} {status}")
+        if issues:
+            print(f"\n  共 {len(issues)} 個問題：")
+            for issue in issues:
+                print(f"    {issue}")
+            sys.exit(1)
+        else:
+            print(f"\n  ✅ 全部 {len(rows)} 個自動任務配置一致")
+            sys.exit(0)
 
     # 標準驗證模式
     errors, warnings, stats = validate_config()

@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(project_root, "hooks"))
 from hook_utils import (
     find_config_path, load_yaml_rules, load_yaml_section, log_blocked_event,
     get_compiled_regex, get_rule_patterns, get_rule_re_flags,
-    atomic_write_lines,
+    atomic_write_lines, safe_load_json,
 )
 
 
@@ -346,3 +346,75 @@ class TestAtomicWriteLines:
         # 檢查目錄中沒有 .tmp 檔案
         tmp_files = list(tmp_path.glob("*.tmp"))
         assert len(tmp_files) == 0
+
+
+class TestSafeLoadJson:
+    """safe_load_json — 安全 JSON 載入。"""
+
+    def test_loads_valid_json(self, tmp_path):
+        """應正確載入有效的 JSON 檔案。"""
+        filepath = str(tmp_path / "data.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump({"key": "value", "count": 42}, f)
+
+        result = safe_load_json(filepath)
+        assert result == {"key": "value", "count": 42}
+
+    def test_returns_default_for_missing_file(self, tmp_path):
+        """檔案不存在時應回傳預設值。"""
+        filepath = str(tmp_path / "nonexistent.json")
+        result = safe_load_json(filepath, default={"empty": True})
+        assert result == {"empty": True}
+
+    def test_returns_none_default_for_missing_file(self, tmp_path):
+        """預設值未指定時，檔案不存在回傳 None。"""
+        filepath = str(tmp_path / "nonexistent.json")
+        result = safe_load_json(filepath)
+        assert result is None
+
+    def test_returns_default_for_corrupt_json(self, tmp_path):
+        """JSON 損壞時應回傳預設值。"""
+        filepath = str(tmp_path / "corrupt.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write("{ invalid json }")
+
+        result = safe_load_json(filepath, default=[])
+        assert result == []
+
+    def test_returns_default_for_empty_file(self, tmp_path):
+        """空檔案應回傳預設值。"""
+        filepath = str(tmp_path / "empty.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write("")
+
+        result = safe_load_json(filepath, default={})
+        assert result == {}
+
+    def test_handles_unicode_content(self, tmp_path):
+        """應正確處理 UTF-8 中文內容。"""
+        filepath = str(tmp_path / "unicode.json")
+        data = {"名稱": "測試資料", "標籤": ["正體中文"]}
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+
+        result = safe_load_json(filepath)
+        assert result == data
+
+    def test_loads_array_json(self, tmp_path):
+        """應正確載入 JSON 陣列。"""
+        filepath = str(tmp_path / "array.json")
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump([1, 2, 3], f)
+
+        result = safe_load_json(filepath)
+        assert result == [1, 2, 3]
+
+    def test_loads_nested_json(self, tmp_path):
+        """應正確載入巢狀 JSON。"""
+        filepath = str(tmp_path / "nested.json")
+        data = {"level1": {"level2": {"level3": "deep"}}}
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+
+        result = safe_load_json(filepath)
+        assert result == data

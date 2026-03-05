@@ -1,5 +1,13 @@
 ---
 schedules:
+  health-check:
+    cron: "15 7 * * *"
+    script: check-health.ps1
+    args: "-Scheduled"
+    timeout: 120
+    retry: 0
+    description: "每日健康檢查（07:15，寫 log + 推 ntfy）"
+
   daily-digest-0615:
     cron: "15 6 * * *"
     script: run-agent-team.ps1
@@ -43,6 +51,20 @@ schedules:
     timeout: 3600
     retry: 0
     description: "Todoist 團隊模式（每小時半點）"
+
+  media-video-research:
+    cron: "20 13 * * *"
+    script: run-video-latest-research.ps1
+    timeout: 2400
+    retry: 0
+    description: "每日影片製作（13:20）：KB 最新深度研究報告 → Remotion MP4"
+
+  media-podcast-buddhist:
+    cron: "20 15 * * *"
+    script: run-podcast-latest-buddhist.ps1
+    timeout: 2400
+    retry: 0
+    description: "每日 Podcast 製作（15:20）：KB 最新教觀綱宗筆記 → 雙主持人 MP3"
 
   kb-backup-all:
     cron: "15 0 * * *"
@@ -97,12 +119,15 @@ schedules:
 
 | 排程名稱 | 觸發時間 | 腳本 | 超時 | 說明 |
 |---------|---------|------|------|------|
+| health-check | 每日 07:15 | check-health.ps1 -Scheduled | 120s (2min) | 健康檢查（log + ntfy） |
 | daily-digest-0615 | 每日 06:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 早 |
 | daily-digest-1645 | 每日 16:45 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 傍晚 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
 | todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
 | todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 3600s (60min) | Todoist 團隊模式 |
+| media-video-research | 每日 13:20 | run-video-latest-research.ps1 | 2400s (40min) | KB 最新深度研究報告 → Remotion MP4 |
+| media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 2400s (40min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
 | kb-verify-backup | 每日 00:30 | kb-verify-backup.ps1 | 60s (1min) | 備份完整性審查（失敗時 ntfy 告警） |
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot Server + Gun Relay 重啟（確保 WebSocket 穩定） |

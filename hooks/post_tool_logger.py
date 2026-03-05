@@ -14,10 +14,18 @@ with automatic tagging for:
   - Error classification (via agent_guardian.ErrorClassifier)
   - Token economy tracking (input_len + output_len per call)
   - Behavior pattern collection (Instinct Lite — via behavior_tracker)
+
+Security:
+  - Bash command summaries are sanitized to remove Authorization headers,
+    API tokens, and sensitive environment variable values before logging.
+  - output_len reflects tool_output string length as provided by the hooks
+    protocol; note that Claude Code PostToolUse may not always pass full
+    output content, so output_chars in token-usage.json may be zero.
 """
 import sys
 import json
 import os
+import re
 from datetime import datetime
 
 # Import agent_guardian for error classification and loop detection
@@ -86,6 +94,17 @@ _BENIGN_PATTERNS_FALLBACK = [
 ]
 
 
+# Pre-compiled regex patterns for summary sanitization (module-level for performance)
+_RE_AUTH_HEADER = re.compile(
+    r'(-H\s+["\']?Authorization:\s*)(Bearer|Basic)\s+\S+',
+    re.IGNORECASE
+)
+_RE_TOKEN_HEADER = re.compile(
+    r'(-H\s+["\']?[Xx][-\w]*(?:Token|Key|Secret):\s*)\S+',
+    re.IGNORECASE
+)
+
+
 def _load_benign_patterns_from_yaml() -> list:
     """從 hook-rules.yaml 載入良性輸出模式，失敗時回退硬編碼清單。
 
@@ -135,10 +154,27 @@ def _cmd_has_word(command: str, word: str) -> bool:
     return command.startswith(word) or (" " + word) in command or ("|" + word) in command or (";" + word) in command
 
 
+def _sanitize_bash_summary(summary: str) -> str:
+    """消毒 Bash 命令摘要，移除可能的敏感資訊。
+
+    從摘要中移除：
+      - curl -H "Authorization: Bearer <token>" 中的 token 值
+      - curl -H "X-...-Token: <value>" 中的 value
+    保留命令結構，確保日誌仍具可讀性與偵錯價值。
+    """
+    sanitized = _RE_AUTH_HEADER.sub(r'\1\2 <REDACTED>', summary)
+    sanitized = _RE_TOKEN_HEADER.sub(r'\1<REDACTED>', sanitized)
+    return sanitized
+
+
 def classify_bash(command: str) -> tuple:
-    """Classify a Bash command and return (summary, tags)."""
+    """Classify a Bash command and return (summary, tags).
+
+    Summary is sanitized to remove sensitive tokens from curl headers
+    before being written to structured logs.
+    """
     tags = []
-    summary = command[:200]
+    summary = _sanitize_bash_summary(command[:200])
 
     if _cmd_has_word(command, "curl"):
         tags.append("api-call")
@@ -163,6 +199,16 @@ def classify_bash(command: str) -> tuple:
         tags.append("sub-agent")
     if _cmd_has_word(command, "python") or _cmd_has_word(command, "pytest"):
         tags.append("python")
+    # Cognitive tags: 追蹤路由決策與技能選擇的讀取行為
+    _ROUTING_CONFIGS = ("routing.yaml", "scoring.yaml", "frequency-limits.yaml",
+                        "hook-rules.yaml", "dedup-policy.yaml")
+    if any(cfg in command for cfg in _ROUTING_CONFIGS):
+        tags.append("cognitive-routing")
+    if "SKILL.md" in command or "SKILL_INDEX" in command:
+        tags.append("cognitive-skill-select")
+    # Retry decisions: claude -p with error handling or retry patterns
+    if "claude -p" in command and any(w in command for w in ["retry", "fallback", "again", "Retry"]):
+        tags.append("cognitive-retry")
 
     return summary, tags
 
@@ -204,8 +250,15 @@ def classify_read(tool_input: dict) -> tuple:
     if "cache/" in path or "cache\\" in path:
         tags.append("cache-read")
         tags.extend(detect_api_sources(path))
+        # Detect cache-miss: if cache file doesn't exist or is empty, it's a miss
+        try:
+            if not os.path.exists(path) or os.path.getsize(path) == 0:
+                tags.append("cache-miss")
+        except OSError:
+            tags.append("cache-miss")
     if "SKILL.md" in path:
         tags.append("skill-read")
+        tags.append("cognitive-skill-select")
     if "SKILL_INDEX" in path:
         tags.append("skill-index")
     if "digest-memory" in path:
@@ -239,16 +292,13 @@ def classify_edit(tool_input: dict) -> tuple:
 
 
 def _find_token_usage_file() -> str:
-    """找 token-usage.json 的路徑"""
-    candidates = [
-        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "state", "token-usage.json"),
-        "state/token-usage.json",
-    ]
-    for c in candidates:
-        parent = os.path.dirname(c)
-        if parent and os.path.exists(parent):
-            return c
-    return candidates[0]
+    """找 token-usage.json 的絕對路徑。
+
+    始終使用基於腳本位置的絕對路徑，避免團隊並行模式下
+    多個 Agent 的 CWD 不同導致寫入不同檔案的競態條件。
+    """
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(project_root, "state", "token-usage.json")
 
 
 def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None:
@@ -256,9 +306,13 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
 
     使用 hook_utils.file_lock 保護 read-modify-write 序列，防止團隊並行模式
     （5 路 Phase 1）下多個進程同時更新導致計數遺失。
+
+    Note: output_len depends on what the Claude Code hooks protocol passes
+    in tool_output. PostToolUse may receive truncated or empty output for
+    some tool types, so output_chars may undercount actual output volume.
     """
     try:
-        from hook_utils import file_lock, atomic_write_json
+        from hook_utils import file_lock, atomic_write_json, safe_load_json
 
         token_file = _find_token_usage_file()
 
@@ -266,14 +320,7 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
             today = datetime.now().strftime("%Y-%m-%d")
 
             # 持鎖後重新讀取（確保讀到最新狀態）
-            if os.path.exists(token_file):
-                try:
-                    with open(token_file, "r", encoding="utf-8") as f:
-                        usage = json.load(f)
-                except Exception:
-                    usage = {"daily": {}, "updated": ""}
-            else:
-                usage = {"daily": {}, "updated": ""}
+            usage = safe_load_json(token_file, default={"daily": {}, "updated": ""})
 
             # 確保今日條目
             if today not in usage.get("daily", {}):
@@ -409,18 +456,32 @@ def main():
     # Compute input size for token economy tracking
     input_len = len(json.dumps(tool_input, ensure_ascii=False)) if tool_input else 0
 
+    # Compute output_len: hooks protocol may not pass full output for all tools.
+    # For Read tool, use file size as proxy when output is empty (common in Claude Code PostToolUse).
+    output_len = len(tool_output)
+    if output_len == 0 and tool_name == "Read":
+        try:
+            file_path = tool_input.get("file_path", "")
+            if file_path and os.path.exists(file_path):
+                output_len = os.path.getsize(file_path)
+        except (OSError, TypeError):
+            pass
+
     # Build log entry
+    # span_type hierarchy: session > phase > agent > tool_call
+    # Each JSONL entry is always a "tool_call" span; phase/session spans are recorded by PS1 scripts.
     entry = {
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
         "trace_id": os.environ.get("DIGEST_TRACE_ID", ""),
         "phase": os.environ.get("AGENT_PHASE", ""),
         "agent": os.environ.get("AGENT_NAME", ""),
+        "span_type": "tool_call",
         "tool": tool_name,
         "event": "post",
         "summary": summary,
         "input_len": input_len,
-        "output_len": len(tool_output),
+        "output_len": output_len,
         "has_error": has_error,
         "tags": tags,
     }
@@ -439,9 +500,12 @@ def main():
         if error_classification["api_source"]:
             entry["api_source"] = error_classification["api_source"]
 
-    # Add parent_trace_id for sub-agent calls
-    if "sub-agent" in tags and entry["trace_id"]:
-        entry["parent_trace_id"] = entry["trace_id"]
+    # parent_trace_id: 繼承自 PS1 腳本設定的 PARENT_TRACE_ID（子 Agent 場景）
+    # DIGEST_TRACE_ID 是整個 Team Run 的協調 ID（trace level），
+    # PARENT_TRACE_ID 是本 Agent 的「上一層」Phase ID（span level）。
+    parent_trace_id = os.environ.get("PARENT_TRACE_ID", "")
+    if parent_trace_id:
+        entry["parent_trace_id"] = parent_trace_id
 
     # Write to JSONL (with disk protection)
     log_dir = os.path.join("logs", "structured")

@@ -33,6 +33,28 @@ New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null
 New-Item -ItemType Directory -Force -Path $ResultsDir | Out-Null
 
+# ─── Instance Lock（防止同一腳本多實例並行）───
+$LockFile = "$AgentDir\state\run-agent-team.lock"
+if (Test-Path $LockFile) {
+    $lockContent = Get-Content $LockFile -Raw -ErrorAction SilentlyContinue
+    $lockPid = ($lockContent -split "`n")[0].Trim()
+    # 檢查持有鎖的行程是否仍在執行
+    $existingProcess = Get-Process -Id $lockPid -ErrorAction SilentlyContinue
+    if ($existingProcess) {
+        Write-Host "[SKIP] Another instance is running (PID $lockPid). Exiting."
+        exit 0
+    } else {
+        Write-Host "[WARN] Stale lock found (PID $lockPid not running). Removing."
+        Remove-Item $LockFile -Force -ErrorAction SilentlyContinue
+    }
+}
+# 寫入當前 PID
+$PID | Set-Content $LockFile -Encoding UTF8
+# 確保退出時清理鎖檔
+Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+    Remove-Item "$using:LockFile" -Force -ErrorAction SilentlyContinue
+} | Out-Null
+
 # Generate log filename (team_ prefix to distinguish from single mode)
 $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $LogFile = "$LogDir\team_$Timestamp.log"
@@ -196,6 +218,18 @@ function Set-FsmState {
         $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
     }
 
+    # P2-A: 殭屍狀態清理（running 超過 stale_timeout_hours → timeout）
+    $staleHours = 2  # 與 config/timeouts.yaml fsm.stale_timeout_hours 同步
+    $staleCutoff = (Get-Date).AddHours(-$staleHours).ToString("yyyy-MM-ddTHH:mm:ss")
+    foreach ($existingRun in @($fsm.runs.PSObject.Properties)) {
+        foreach ($existingPhase in @($existingRun.Value.phases.PSObject.Properties)) {
+            if ($existingPhase.Value.state -eq "running" -and $existingPhase.Value.updated -lt $staleCutoff) {
+                $existingPhase.Value | Add-Member -NotePropertyName "state" -NotePropertyValue "timeout" -Force
+                $existingPhase.Value | Add-Member -NotePropertyName "detail" -NotePropertyValue "auto-timeout: running > ${staleHours}h" -Force
+            }
+        }
+    }
+
     # 建立或更新 run 記錄
     $runKey = "${AgentType}_${RunId}"
     if (-not $fsm.runs.$runKey) {
@@ -216,13 +250,31 @@ function Set-FsmState {
 
     $fsm | Add-Member -NotePropertyName "updated" -NotePropertyValue $now -Force
 
-    # 清理超過 24 小時的 runs（只保留近期）
-    $cutoff = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
-    $oldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
-        $_.Value.started -lt $cutoff
+    # 清理：已完成/失敗/timeout 超過 24 小時的 runs（不清除仍 running 的 runs）
+    $cutoff24h = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
+    $doneOldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
+        $run = $_.Value
+        $phases = @($run.phases.PSObject.Properties.Value)
+        $isOld = $run.started -lt $cutoff24h
+        $allDone = $phases.Count -gt 0 -and ($phases | Where-Object { $_.state -eq "running" }).Count -eq 0
+        $isOld -and $allDone
     } | Select-Object -ExpandProperty Name)
-    foreach ($k in $oldKeys) {
+    foreach ($k in $doneOldKeys) {
         $fsm.runs.PSObject.Properties.Remove($k)
+    }
+
+    # max_entries 限制（超過 20 則移除最舊的已完成 run）
+    $maxEntries = 20  # 與 config/timeouts.yaml fsm.max_entries 同步
+    $runCount = ($fsm.runs.PSObject.Properties | Measure-Object).Count
+    if ($runCount -gt $maxEntries) {
+        $toRemoveCount = $runCount - $maxEntries
+        $doneRunsToRemove = @($fsm.runs.PSObject.Properties | Where-Object {
+            $phases = @($_.Value.phases.PSObject.Properties.Value)
+            $phases.Count -gt 0 -and ($phases | Where-Object { $_.state -eq "running" }).Count -eq 0
+        } | Sort-Object { $_.Value.started } | Select-Object -First $toRemoveCount -ExpandProperty Name)
+        foreach ($k in $doneRunsToRemove) {
+            $fsm.runs.PSObject.Properties.Remove($k)
+        }
     }
 
     # 原子寫入 FSM 狀態
@@ -249,6 +301,50 @@ function Set-FsmState {
 
     # Append（檔案不存在時自動建立）
     Add-Content -Path $transitionFile -Value $transitionJson -Encoding UTF8
+}
+
+function Write-Span {
+    <#
+    .SYNOPSIS
+        記錄 Phase/Agent 級別 Span 到 results/spans-{traceId}.json（Level 3-A）
+    .DESCRIPTION
+        每個 Phase 或子 Agent 完成後呼叫，記錄 start_time、end_time、duration_s、status。
+        由 query-logs.ps1 -Mode waterfall 讀取渲染 ASCII Waterfall 視覺化。
+    #>
+    param(
+        [string]$TraceId,
+        [string]$SpanType,   # "phase" | "agent"
+        [string]$Phase,      # "phase1" | "phase2" | "overall"
+        [string]$Agent = "", # 子 Agent 名稱（phase 層級時為空）
+        [datetime]$StartTime,
+        [datetime]$EndTime,
+        [string]$Status      # "ok" | "failed" | "timeout" | "cache"
+    )
+
+    $spansFile = "$ResultsDir\spans-$TraceId.json"
+    $spans = @()
+    if (Test-Path $spansFile) {
+        try { $spans = @(Get-Content $spansFile -Raw | ConvertFrom-Json) } catch { $spans = @() }
+    }
+
+    $span = [PSCustomObject]@{
+        span_id    = [guid]::NewGuid().ToString("N").Substring(0, 8)
+        trace_id   = $TraceId
+        span_type  = $SpanType
+        phase      = $Phase
+        agent      = $Agent
+        start_time = $StartTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        end_time   = $EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        duration_s = [int]($EndTime - $StartTime).TotalSeconds
+        status     = $Status
+    }
+    $spans += $span
+
+    try {
+        $spans | ConvertTo-Json -Depth 3 | Set-Content $spansFile -Encoding UTF8
+    } catch {
+        Write-Log "[Span] Write failed: $_"
+    }
 }
 
 # ============================================
@@ -342,6 +438,62 @@ if (Test-Path $utilsPath) {
         $precheckResults[$agentName] = "closed"
     }
 }
+
+# ============================================
+# Phase 0: 快取狀態預計算（由 PS 計算，不依賴 LLM 時鐘）
+# LLM 無時鐘問題：讓 PS 預計算 valid/expired，LLM 只讀 valid 欄位
+# ============================================
+Write-Log ""
+Write-Log "=== Phase 0: Cache status precomputation ==="
+$cacheTtl = @{
+    "todoist"       = 45
+    "pingtung-news" = 360
+    "hackernews"    = 180
+    "gmail"         = 360
+    "knowledge"     = 60
+}
+# 從 cache-policy.yaml 讀取實際 TTL（若可用，覆蓋預設值）
+$cachePolicyPath = "$AgentDir\config\cache-policy.yaml"
+if (Test-Path $cachePolicyPath) {
+    $policyContent = Get-Content $cachePolicyPath -Raw -Encoding UTF8
+    foreach ($api in @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")) {
+        if ($policyContent -match "(?s)${api}:.*?ttl_minutes:\s*(\d+)") {
+            $cacheTtl[$api] = [int]$Matches[1]
+        }
+    }
+}
+$cacheStatus = [ordered]@{
+    generated_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz")
+    apis = [ordered]@{}
+}
+foreach ($api in @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")) {
+    $cacheFile = "$AgentDir\cache\$api.json"
+    if (-not (Test-Path $cacheFile)) {
+        $cacheFile = "$AgentDir\cache\$($api -replace '-', '_').json"
+    }
+    if (Test-Path $cacheFile) {
+        try {
+            $cacheData = Get-Content $cacheFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            $cachedAt = [DateTime]$cacheData.cached_at
+            $ageMins = [int]((Get-Date).ToUniversalTime() - $cachedAt.ToUniversalTime()).TotalMinutes
+            $ttl = $cacheTtl[$api]
+            $valid = ($ageMins -lt $ttl)
+            $reason = if ($valid) { "hit" } else { "expired" }
+            $cacheStatus.apis[$api] = [ordered]@{ valid = $valid; reason = $reason; age_min = $ageMins; ttl_min = $ttl }
+            $statusStr = if ($valid) { "HIT (${ageMins}min / TTL ${ttl}min)" } else { "EXPIRED (${ageMins}min > TTL ${ttl}min)" }
+            Write-Log "  [Cache] ${api}: $statusStr"
+        } catch {
+            $cacheStatus.apis[$api] = [ordered]@{ valid = $false; reason = "error" }
+            Write-Log "  [Cache] ${api}: ERROR (parse failed)"
+        }
+    } else {
+        $cacheStatus.apis[$api] = [ordered]@{ valid = $false; reason = "missing" }
+        Write-Log "  [Cache] ${api}: MISSING"
+    }
+}
+$cacheStatusJson = $cacheStatus | ConvertTo-Json -Depth 3
+[System.IO.File]::WriteAllText("$AgentDir\cache\status.json", $cacheStatusJson, [System.Text.Encoding]::UTF8)
+Write-Log "[Phase0] cache/status.json 生成完成"
 
 # ============================================
 # Phase 1: Parallel Data Fetch (含預檢查)
@@ -515,6 +667,15 @@ if ($phase1Failed -gt 0) {
     Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "daily-digest" -Detail "$($jobs.Count) agents completed"
 }
 
+# Level 3-A: 記錄 per-agent span + Phase 1 span
+foreach ($agentKey in $sections.Keys) {
+    Write-Span -TraceId $traceId -SpanType "agent" -Phase "phase1" -Agent $agentKey `
+        -StartTime $phase1Start -EndTime $phase1End -Status ($sections[$agentKey] -ne $null ? $sections[$agentKey] : "unknown")
+}
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase1" `
+    -StartTime $phase1Start -EndTime $phase1End `
+    -Status (if ($phase1Failed -gt 0) { "failed" } else { "ok" })
+
 # ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
 if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
     $apiMapping = @{
@@ -574,7 +735,7 @@ while ($attempt -le $MaxPhase2Retries) {
         $env:AGENT_PHASE = "phase2"
         $env:AGENT_NAME = "assemble-digest"
 
-        $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
+        $stderrFile = "$LogDir\assemble-stderr-$Timestamp-$($traceId.Substring(0,8)).log"
         $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
 
         # 清理 stderr（空檔或僅含已知無害警告）
@@ -623,6 +784,15 @@ $phaseBreakdown = [PSCustomObject]@{
     phase1_agents  = @("todoist", "news", "hackernews", "gmail", "security")
 }
 
+# Level 3-A: 記錄 Phase 2 span + Overall span
+$runEnd = Get-Date
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
+    -StartTime $phase2StartOuter -EndTime $runEnd `
+    -Status (if ($phase2Success) { "ok" } else { "failed" })
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "overall" `
+    -StartTime $startTime -EndTime $runEnd `
+    -Status (if ($phase2Success) { "ok" } else { "failed" })
+
 if ($phase2Success) {
     Write-Log ""
     Write-Log "=== Agent Team done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
@@ -640,3 +810,11 @@ else {
 Get-ChildItem -Path $LogDir -Filter "*.log" |
     Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
     Remove-Item -Force
+
+# Clean up spans files older than 7 days
+Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
+    Remove-Item -Force
+
+# 清理 Instance Lock
+Remove-Item $LockFile -Force -ErrorAction SilentlyContinue

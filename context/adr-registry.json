@@ -1,8 +1,8 @@
 {
-  "version": 1,
-  "updated_at": "2026-02-24T10:00:00+08:00",
+  "version": 2,
+  "updated_at": "2026-03-04",
   "summary": {
-    "total": 5,
+    "total": 6,
     "proposed": 4,
     "accepted": 1,
     "rejected": 0,
@@ -163,6 +163,45 @@
         "templates/sub-agent/refinement.md"
       ],
       "notes": "來源：lastmile-ai/mcp-agent（8,035 stars）。目前快取命中率 16.4% 偏低的問題，部分原因是即使有快取也強制執行所有 Phase 1 agent。可組合工作流可直接改善此問題。"
+    },
+    {
+      "id": "ADR-20260304-009",
+      "title": "自建輕量級指標聚合 + Span 記錄（OTel 語義相容）",
+      "status": "Accepted",
+      "implementation_status": "completed",
+      "created_at": "2026-03-04",
+      "source": "observability-roadmap",
+      "source_pattern": "Daily-Digest-Prompt 可觀測性成熟度演進路線圖（KB: a085364f）",
+      "priority": "P0",
+      "effort": "medium",
+      "context": "系統快取命中率 12.1%（目標 ≥40%）、output_len 始終為 0、無跨 Phase 因果關聯、無 SLO 量化基準。現有 JSONL 日誌結構良好但缺乏時序聚合與 Span 追蹤能力。評估過 OpenTelemetry SDK 但引入外部依賴不符合「不使用 Docker、最小化依賴」的架構原則。",
+      "decision": "自建輕量級四層可觀測性框架：(1) Level 2 指標聚合—context/metrics-daily.json 14 天滾動窗口，by on_stop_alert.py；(2) Level 3 Span 記錄—results/spans-{trace_id}.json，by PS1 team 腳本；(3) SLO 配置—config/slo.yaml 6 個 SLO 定義；(4) Error Budget 計算—整合至健康報告。採用 OpenTelemetry 語義欄位命名（trace_id/span_type/parent_trace_id）確保未來可遷移至標準 OTel。",
+      "consequences": {
+        "positive": [
+          "零外部依賴：純 Python + PowerShell，保持最小化架構",
+          "14 天趨勢基礎：metrics-daily.json 支援 regression 模式與趨勢箭頭",
+          "SLO 量化決策：Error Budget 取代主觀判斷",
+          "Waterfall 視覺化：spans-*.json 支援 query-logs.ps1 -Mode waterfall",
+          "OTel 語義相容：未來可接 Jaeger/Tempo 而不需重構"
+        ],
+        "negative": [
+          "per-agent span 時間精度有限（共用 Phase 起始時間，非真實個別完成時間）",
+          "指標計算依賴 Session 結束（on_stop_alert.py），中途崩潰不寫入"
+        ]
+      },
+      "related_files": [
+        "context/metrics-daily.json",
+        "results/spans-{trace_id}.json",
+        "config/slo.yaml",
+        "hooks/on_stop_alert.py",
+        "hooks/post_tool_logger.py",
+        "check-health.ps1",
+        "query-logs.ps1",
+        "run-agent-team.ps1",
+        "run-todoist-agent-team.ps1",
+        "run-system-audit-team.ps1"
+      ],
+      "notes": "來源 KB 報告 ID: a085364f。Level 3-B parent_trace_id 改由 PARENT_TRACE_ID 環境變數注入（非錯誤地複製 trace_id）。cognitive tags 為 Level 3-C 補充（routing/skill-select/retry 決策可追蹤）。"
     }
   ]
 }

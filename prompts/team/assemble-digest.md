@@ -251,7 +251,13 @@ else:
 - 若 results/security.json 有 HIGH 或 CRITICAL：ntfy 通知加 warning tag
 - **降級標記整合**：若步驟 6.5 識別出降級 API，在對應摘要區塊開頭加上降級標記（參考步驟 6.5 的對照表）
 
-### 7.1 聊天室佇列區塊（G28 新增）
+### 7.1 stale 快取透明化
+若有任何 results/*.json 的 source="cache_degraded" 且含 `data_freshness:"stale"` 欄位：
+- 在摘要**最後**加一行：`※ 部分資料使用快取（最舊：N 分鐘前）`
+- N = 所有 stale 結果的 `cache_age_minutes` 最大值
+- 若無 stale 資料，跳過此步驟
+
+### 7.2 聊天室佇列區塊（G28 新增）
 
 讀取 `results/fetch-chatroom.json` 的 `data` 欄位，在 Todoist 區塊後加入：
 

@@ -1,0 +1,51 @@
+# config/media-pipeline.yaml
+# 媒體管線共用配置（影片 + Podcast 工具）
+# 修改此文件可調整 TTS 聲音、輸出格式等，不需動腳本
+version: 1
+
+# 知識庫 API（文章來源）
+knowledge_base:
+  api_url: "http://localhost:3000"
+  health_endpoint: "/api/health"
+  notes_endpoint: "/api/notes"
+  search_endpoint: "/api/search/hybrid"
+  search_top_k: 1              # 搜尋取最佳 1 筆
+
+# 影片工具配置
+video:
+  fps: 30
+  width: 1280
+  height: 720
+  voice: "zh-TW-HsiaoChenNeural"       # edge-tts 繁中女聲
+  remotion_project: "tools/video-studio"
+  scene_types:                          # 支援的場景類型（與 TypeScript 元件對應）
+    - title_card
+    - content_slide
+    - code_highlight
+    - quote
+    - split_view
+    - outro
+  min_scenes: 4
+  max_scenes: 8
+
+# Podcast 工具配置
+podcast:
+  voice_a: "zh-TW-HsiaoChenNeural"     # host_a：解說者（女聲）
+  voice_b: "zh-TW-YunJheNeural"        # host_b：好奇提問者（男聲）
+  target_words: 2500                   # 目標字數（約 10-15 分鐘）
+  silence_between_turns_ms: 100        # 對話段落間靜音（毫秒）
+  # 音訊後製
+  target_lufs: -14                     # 正規化目標（Podcast 廣播標準）
+  output_bitrate_kbps: 128             # MP3 位元率
+  # Intro/Outro 音調（FFmpeg sine wave 生成）
+  intro_freq_hz: 440                   # A4 音
+  outro_freq_hz: 330                   # E4 音（稍低）
+  tone_duration_s: 5
+  tone_fade_s: 1                       # 淡入/淡出各 1 秒
+
+# 輸出路徑
+output:
+  videos_dir: "output/videos"
+  podcasts_dir: "output/podcasts"
+  results_dir: "results"
+  temp_dir: "results/_temp"            # 暫存目錄（tone wav、concat list 等）

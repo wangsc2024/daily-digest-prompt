@@ -301,3 +301,5 @@ benign_output_patterns:
   - "錯誤: 0"
   - "失敗: 0"
   - "error-"
+  - "cache-miss"
+  - "cache_miss"

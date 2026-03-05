@@ -1,6 +1,7 @@
 # config/frequency-limits.yaml
 # 自動任務頻率限制（無 Todoist 待辦時觸發）
-# 修改此文件可調整次數上限，不需碰 prompt
+# ⭐ 唯一真相來源：daily_limit / 新增 / 停用任務皆只改此檔
+# daily_limit: 0 = 停用（todoist-query.md 讀取此值，不另行維護任務清單）
 
 version: 3
 
@@ -57,6 +58,7 @@ initial_schema: |
     "self_heal_count": 0,
     "github_scout_count": 0,
     "chatroom_optimize_count": 0,
+    "ai_workflow_github_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -67,7 +69,7 @@ initial_schema: |
 # ============================================================
 tasks:
 
-  # --- 佛學研究群組（共 12 次/日）---
+  # --- 佛學研究群組（共 4 次/日）---
   shurangama:
     name: "楞嚴經研究"
     daily_limit: 1
@@ -126,7 +128,7 @@ tasks:
     execution_order: 4
     skill: knowledge-query
 
-  # --- AI / 技術研究群組（共 17 次/日）---
+  # --- AI / 技術研究群組（共 7 次/日）---
   tech_research:
     name: "每日任務技術研究"
     daily_limit: 1
@@ -180,23 +182,64 @@ tasks:
     name: "AI 智慧城市研究"
     daily_limit: 0
     counter_field: "ai_smart_city_count"
-    template: "templates/auto-tasks/ai-smart-city-research.md"
-    template_version: 1
+    template: "templates/auto-tasks/ai-domain-research.md"  # P1-D: 改用共用參數化模板
+    template_version: 2
     history_type: "ai_smart_city"
     execution_order: 9
     skills: [knowledge-query]
     description: "研究 AI 應用於智慧城市（交通、能源、公共安全、環境監測等），將報告寫入 RAG 知識庫"
+    template_params:
+      domain_name: "AI 智慧城市"
+      task_type: "ai_smart_city"
+      search_terms: ["AI 智慧城市 smart city", "智慧城市 AI 應用"]
+      kb_search_en: "AI smart city urban computing"
+      topic_list: |
+        - **智慧交通**：AI 號誌控制、自動駕駛、交通流量預測、MaaS 平台
+        - **智慧能源**：AI 電網調度、再生能源預測、建築能耗優化、碳排監測
+        - **公共安全**：AI 影像監控、犯罪預測、災害預警、緊急救援調度
+        - **環境監測**：AI 空氣品質預測、水質監測、噪音地圖、廢棄物管理
+        - **智慧治理**：AI 政策模擬、市民服務聊天機器人、公文自動分類
+        - **智慧醫療**：AI 疫情預測、遠距醫療、公共衛生決策支援
+        - **數位孿生**：城市數位孿生建模、即時模擬、情境分析
+        - **台灣案例**：屏東/高雄/台北智慧城市應用實例
+      kb_tags: '["AI", "智慧城市", "smart-city"]'
+      quality_checks: |
+        1. 是否包含具體案例（不只是概念描述）？
+        2. 是否涵蓋台灣視角？
+        3. 內容是否超過 400 字？
+      quality_note: "請結合台灣在地視角，並關注可落地的應用場景。"
 
   ai_sysdev:
     name: "AI 系統開發研究"
     daily_limit: 1
     counter_field: "ai_sysdev_count"
-    template: "templates/auto-tasks/ai-sysdev-research.md"
-    template_version: 1
+    template: "templates/auto-tasks/ai-domain-research.md"  # P1-D: 改用共用參數化模板
+    template_version: 2
     history_type: "ai_sysdev"
     execution_order: 10
     skills: [knowledge-query]
     description: "研究 AI 應用於系統開發（AI-assisted coding、自動測試、架構優化、DevOps 智能化），將報告寫入 RAG 知識庫"
+    template_params:
+      domain_name: "AI 系統開發"
+      task_type: "ai_sysdev"
+      search_terms: ["AI 系統開發 software engineering", "AI 輔助開發"]
+      kb_search_en: "AI software development LLM coding"
+      topic_list: |
+        - **AI-Assisted Coding**：Copilot/Cursor/Claude Code 最佳實踐、Prompt Engineering for Code
+        - **自動測試生成**：AI 生成單元測試、E2E 測試、Mutation Testing 自動化
+        - **架構優化**：AI 驅動的架構決策、程式碼品質分析、技術債檢測
+        - **DevOps 智能化**：AI 日誌分析、自動 incident response、智能監控告警
+        - **程式碼審查**：AI Code Review、漏洞自動偵測、風格一致性檢查
+        - **需求工程**：AI 需求分析、使用者故事生成、驗收條件自動化
+        - **持續整合**：AI 驅動的 CI/CD 優化、構建時間預測、flaky test 偵測
+        - **Agent 開發**：Claude Agent SDK、Multi-Agent 系統、Tool Use 設計模式
+        - **文件生成**：AI 自動文件化、API 文件生成、變更日誌自動化
+      kb_tags: '["AI", "系統開發", "software-engineering"]'
+      quality_checks: |
+        1. 是否包含可執行的工作流程（不只是概念）？
+        2. 是否有程式碼或配置範例？
+        3. 內容是否超過 400 字？
+      quality_note: "請聚焦可落地的工作流程，非純概念。"
 
   # --- 系統優化群組 ---
   skill_audit:
@@ -210,7 +253,7 @@ tasks:
     skills: [knowledge-query, skill-scanner]
     description: "審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證"
 
-  # --- 系統維護群組（共 5 次/日）---
+  # --- 系統維護群組（共 2 次/日）---
   log_audit:
     name: "系統 Log 審查"
     daily_limit: 1
@@ -232,7 +275,7 @@ tasks:
     skills: [knowledge-query, git-smart-commit]
     description: "同步知識庫至網站，用 Smart Commit 分群提交後推送 daily-digest-prompt + shurangama-web 至 GitHub"
 
-  # --- 遊戲創意群組（共 2 次/日）---
+  # --- 遊戲創意群組（共 0 次/日，暫停）---
   creative_game_optimize:
     name: "創意遊戲優化"
     daily_limit: 0
@@ -244,7 +287,7 @@ tasks:
     skills: [game-design, knowledge-query]
     description: "階段一：依優先級創建 10 個經典復古小遊戲（Space Invaders、Pac-Man、Tetris 等）；階段二：90% 優化復古遊戲 + 10% 優化佛學遊戲"
 
-  # --- 專案品質優化群組（共 2 次/日）---
+  # --- 專案品質優化群組（共 0 次/日，暫停）---
   qa_optimize:
     name: "QA System 品質與安全優化"
     daily_limit: 0
@@ -256,7 +299,7 @@ tasks:
     skills: [knowledge-query]
     description: "以最嚴格資訊安全標準漸進式優化 D:\\Source\\qa_system，每次基於前次成果持續改進"
 
-  # --- 系統自省群組（共 4 次/日）---
+  # --- 系統自省群組（共 2 次/日）---
   system_insight:
     name: "系統洞察分析"
     daily_limit: 1
@@ -279,7 +322,7 @@ tasks:
     skills: [system-insight]
     description: "識別可自動修復的問題（過期快取/過期 registry/跨日未歸零/殘留檔案）並自動修復"
 
-  # --- Chatroom 整合優化群組（共 2 次/日）---
+  # --- Chatroom 整合優化群組（共 1 次/日）---
   chatroom_optimize:
     name: "Chatroom 整合品質優化"
     daily_limit: 1
@@ -291,7 +334,19 @@ tasks:
     skills: [chatroom-query]
     description: "評估 bot.js 任務佇列執行品質（成功率/衝突率/耗時），自動清除過期快取或調整 max_tasks_per_run"
 
-  # --- GitHub 靈感群組（共 1 次/日，僅週三/週日）---
+  # --- AI 工作流自動化研究群組（共 1 次/日）---
+  ai_workflow_github:
+    name: "AI 工作流自動化 GitHub 研究"
+    daily_limit: 1
+    counter_field: "ai_workflow_github_count"
+    template: "templates/auto-tasks/ai-workflow-github-research.md"
+    template_version: 1
+    history_type: "ai_workflow_github"
+    execution_order: 20
+    skills: [knowledge-query, kb-research-strategist]
+    description: "從 GitHub 選出 AI 工作流自動化熱門專案（n8n/Dify/AutoGen/LangGraph 等），經 kb-research-strategist 優化選題後深度研究並將報告納入知識庫"
+
+  # --- GitHub 靈感群組（共 0 次/日，暫停）---
   github_scout:
     name: "GitHub 靈感蒐集"
     daily_limit: 0
@@ -314,8 +369,9 @@ tasks:
 # 專案品質：QA優化(0) = 0
 # 系統自省：系統洞察(1) + 自愈迴圈(1) = 2
 # Chatroom 整合：品質優化(1) = 1
+# AI 工作流自動化：GitHub 研究(1) = 1
 # GitHub 靈感：靈感蒐集(0) = 0
-# 合計：17 次/日
+# 合計：18 次/日
 
 # 歷史追蹤寫入規則
 history:

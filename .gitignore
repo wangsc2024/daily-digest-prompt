@@ -2,7 +2,7 @@
 # Daily Digest Prompt - .gitignore
 # ============================================================
 
-# --- 執行時產生的資料（每次執行都會變動）---
+# ── 執行時產生的狀態資料（每次執行都會變動）────────────────
 logs/
 cache/
 results/
@@ -11,58 +11,89 @@ state/todoist-history.json
 state/loop-state-*.json
 state/api-health.json
 state/last-audit.json
+state/gmail-oauth-state.json
 context/digest-memory.json
 context/auto-tasks-today.json
 context/research-registry.json
+context/metrics-daily.json
 
-# --- 暫存檔（子 Agent / 自動任務產生）---
+# ── 影片 / Podcast 媒體輸出（大型二進位，不進版控）──────────
+output/
+*.mp3
+*.mp4
+*.wav
+*.webm
+
+# ── Remotion 影片工作室（Node.js 工件）─────────────────────
+tools/video-studio/node_modules/
+tools/video-studio/src/data/remotion-data.json
+tools/video-studio/public/audio/
+tools/video-studio/public/images/
+
+# ── Bot 任務排程暫存（每次 cron 觸發都會產生新檔）──────────
+bot/tasks_md/
+
+# ── 暫存檔（子 Agent / 自動任務 / 工具產生）────────────────
 task_prompt.md
 task_result.txt
 import_note.json
 ntfy_temp.json
 hooks_alert_temp.json
+debug_audio.py
 tmp_*
 temp_*
 *.tmp
+*.txt.tmp
+{
 
-# --- Gun.js 暫存資料 ---
+# ── Gun.js 暫存資料 ─────────────────────────────────────────
 bot/radata-*/
 bot/radata-*.tmp
 
-# --- 根目錄暫存文件 ---
+# ── 根目錄雜項暫存文件 ──────────────────────────────────────
 強化方案.md
-table_render_*.png
+影片工作流.txt
+goose-repo-overview.md
+*.plan.md
 
-# --- 備份檔 ---
+# ── 備份檔 ──────────────────────────────────────────────────
 *.bak
 
-# --- 大型二進位 / 測試產物 ---
+# ── 大型二進位文件（PDF / 影像）────────────────────────────
 *.pdf
-*.png
+chatroom-*.png
+table_render_*.png
 
-# --- 參考文件（非系統核心，不需版控）---
+# ── 參考文件（外部複製，非系統核心）────────────────────────
 AgentTeams-*.md
-ClaudeCodeTeamAgent.md
+ClaudeCodeTeamAgent.*
 
-# --- Windows 誤產生 ---
+# ── Windows 誤產生 ──────────────────────────────────────────
 nul
 
-# --- 工具快取 ---
+# ── 工具快取 ────────────────────────────────────────────────
 .ruff_cache/
 .pytest_cache/
 .playwright-mcp/
 htmlcov/
 
-# --- Python ---
+# ── Python ──────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
 .venv/
 .coverage
 
-# --- Secrets ---
+# ── Node.js（根目錄 / 其他子專案）──────────────────────────
+node_modules/
+dist/
+.next/
+.nuxt/
+
+# ── Secrets ─────────────────────────────────────────────────
 .env
 .env.*
+!.env.example
 secrets/
 credentials.json
 token.json
@@ -73,11 +104,14 @@ key/
 *.p12
 *.pfx
 
-# --- Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）---
+# ── Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）──
 .claude/settings.local.json
 
-# --- 編輯器 ---
+# ── 編輯器 ──────────────────────────────────────────────────
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
+Thumbs.db
+.DS_Store

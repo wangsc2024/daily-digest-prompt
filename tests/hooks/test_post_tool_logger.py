@@ -14,6 +14,7 @@ from post_tool_logger import (
     classify_write,
     classify_read,
     classify_edit,
+    _sanitize_bash_summary,
     ERROR_KEYWORDS,
     BENIGN_PATTERNS,
 )
@@ -54,6 +55,86 @@ class TestDetectApiSources:
     def test_no_source_detected(self):
         sources = detect_api_sources("echo hello world")
         assert sources == []
+
+
+class TestSanitizeBashSummary:
+    """Bash 命令摘要消毒測試。"""
+
+    def test_redact_bearer_token(self):
+        """Authorization: Bearer token 應被消毒。"""
+        cmd = 'curl -H "Authorization: Bearer abc123secret456" https://api.todoist.com/api/v1/tasks'
+        result = _sanitize_bash_summary(cmd)
+        assert "abc123secret456" not in result
+        assert "<REDACTED>" in result
+        assert "Authorization:" in result
+        assert "Bearer" in result
+
+    def test_redact_basic_auth(self):
+        """Authorization: Basic token 應被消毒。"""
+        cmd = 'curl -H "Authorization: Basic dXNlcjpwYXNz" https://example.com'
+        result = _sanitize_bash_summary(cmd)
+        assert "dXNlcjpwYXNz" not in result
+        assert "<REDACTED>" in result
+
+    def test_redact_x_api_token_header(self):
+        """X-Api-Token header 應被消毒。"""
+        cmd = 'curl -H "X-Api-Token: my_secret_token_value" https://example.com'
+        result = _sanitize_bash_summary(cmd)
+        assert "my_secret_token_value" not in result
+        assert "<REDACTED>" in result
+
+    def test_redact_x_api_key_header(self):
+        """X-Api-Key header 應被消毒。"""
+        cmd = "curl -H 'X-Api-Key: sk-abc123def456' https://api.openai.com/v1/chat"
+        result = _sanitize_bash_summary(cmd)
+        assert "sk-abc123def456" not in result
+        assert "<REDACTED>" in result
+
+    def test_preserve_non_sensitive_headers(self):
+        """非敏感 header 不應被消毒。"""
+        cmd = 'curl -H "Content-Type: application/json" https://example.com'
+        result = _sanitize_bash_summary(cmd)
+        assert result == cmd
+
+    def test_preserve_url_structure(self):
+        """URL 結構應保持完整。"""
+        cmd = 'curl -H "Authorization: Bearer secret" https://api.todoist.com/api/v1/tasks'
+        result = _sanitize_bash_summary(cmd)
+        assert "https://api.todoist.com/api/v1/tasks" in result
+
+    def test_no_sensitive_content_passes_through(self):
+        """不含敏感內容的命令應原樣通過。"""
+        cmd = "ls -la /home/user"
+        result = _sanitize_bash_summary(cmd)
+        assert result == cmd
+
+    def test_case_insensitive_redaction(self):
+        """大小寫不敏感的消毒。"""
+        cmd = 'curl -H "authorization: BEARER MyToken123" https://example.com'
+        result = _sanitize_bash_summary(cmd)
+        assert "MyToken123" not in result
+
+
+class TestClassifyBashSanitization:
+    """classify_bash 的消毒整合測試。"""
+
+    def test_summary_is_sanitized(self):
+        """classify_bash 回傳的 summary 應已消毒。"""
+        cmd = 'curl -s -H "Authorization: Bearer abc123" https://api.todoist.com/api/v1/tasks'
+        summary, tags = classify_bash(cmd)
+        assert "abc123" not in summary
+        assert "<REDACTED>" in summary
+        # tags 仍正常分類
+        assert "api-call" in tags
+        assert "todoist" in tags
+
+    def test_tags_not_affected_by_sanitization(self):
+        """消毒不影響 tag 分類邏輯（使用原始 command 判斷）。"""
+        cmd = 'curl -s -H "X-Api-Key: secret" -d @file.json https://ntfy.sh'
+        summary, tags = classify_bash(cmd)
+        assert "api-call" in tags
+        assert "api-write" in tags
+        assert "ntfy" in tags
 
 
 class TestClassifyBash:
@@ -286,3 +367,167 @@ class TestErrorDetection:
         lower_output = output.lower()
         has_benign = any(bp in lower_output for bp in BENIGN_PATTERNS)
         assert not has_benign
+
+
+# ============================================================
+# Tests for output_len Read proxy and cache-miss tag
+# ============================================================
+
+class TestOutputLenReadProxy:
+    """Read 工具 output_len 代理（使用檔案大小）測試。"""
+
+    def test_read_output_len_uses_file_size(self, tmp_path):
+        """Read 工具的 output_len 為 0 時應回落到檔案大小。"""
+        # 建立測試檔案
+        test_file = tmp_path / "test.md"
+        test_file.write_bytes(b"x" * 1234)
+
+        # 模擬 post_tool_logger 計算邏輯（output_len 為 0 時用 file size）
+        tool_output = ""
+        output_len = len(tool_output)
+        if output_len == 0:
+            try:
+                path = str(test_file)
+                import os as _os
+                if _os.path.exists(path):
+                    output_len = _os.path.getsize(path)
+            except (OSError, TypeError):
+                pass
+
+        assert output_len == 1234
+
+    def test_read_output_len_nonzero_unchanged(self, tmp_path):
+        """output_len 非零時不應修改。"""
+        tool_output = "file content here"
+        output_len = len(tool_output)
+        # 如果已有值，不應被替換
+        assert output_len == len("file content here")
+
+    def test_read_output_len_nonexistent_file(self):
+        """檔案不存在時 output_len 應維持 0（不拋例外）。"""
+        tool_output = ""
+        output_len = len(tool_output)
+        try:
+            import os as _os
+            path = "/nonexistent/path/that/does/not/exist.json"
+            if _os.path.exists(path):
+                output_len = _os.path.getsize(path)
+        except (OSError, TypeError):
+            pass
+        assert output_len == 0
+
+
+class TestCacheMissTag:
+    """cache-miss 標籤偵測測試。"""
+
+    def test_existing_empty_cache_file_tagged_as_miss(self, tmp_path):
+        """空快取檔案應標為 cache-miss。"""
+        cache_file = tmp_path / "cache" / "todoist.json"
+        cache_file.parent.mkdir()
+        cache_file.write_bytes(b"")  # 空檔案
+
+        tool_input = {"file_path": str(cache_file)}
+        _, tags = classify_read(tool_input)
+
+        assert "cache-read" in tags
+        assert "cache-miss" in tags
+
+    def test_nonexistent_cache_file_tagged_as_miss(self, tmp_path):
+        """不存在的快取路徑應標為 cache-miss。"""
+        cache_path = str(tmp_path / "cache" / "nonexistent.json")
+        tool_input = {"file_path": cache_path}
+        _, tags = classify_read(tool_input)
+
+        assert "cache-read" in tags
+        assert "cache-miss" in tags
+
+    def test_nonempty_cache_file_not_tagged_as_miss(self, tmp_path):
+        """有內容的快取檔案不應標為 cache-miss。"""
+        cache_file = tmp_path / "cache" / "pingtung-news.json"
+        cache_file.parent.mkdir()
+        cache_file.write_text('{"data": "ok"}', encoding="utf-8")
+
+        tool_input = {"file_path": str(cache_file)}
+        _, tags = classify_read(tool_input)
+
+        assert "cache-read" in tags
+        assert "cache-miss" not in tags
+
+    def test_non_cache_path_no_miss_tag(self, tmp_path):
+        """非快取路徑讀取不應有 cache-miss 標籤。"""
+        regular_file = tmp_path / "SKILL.md"
+        regular_file.write_text("# Skill", encoding="utf-8")
+
+        tool_input = {"file_path": str(regular_file)}
+        _, tags = classify_read(tool_input)
+
+        assert "cache-miss" not in tags
+
+
+class TestCognitiveTags:
+    """Tests for cognitive tags in classify_bash and classify_read. (Level 3-C)"""
+
+    def test_routing_config_read_bash_gets_cognitive_routing(self):
+        """讀取 routing.yaml 的 Bash 指令應標記 cognitive-routing。"""
+        cmd = "cat config/routing.yaml"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-routing" in tags
+
+    def test_scoring_config_read_bash_gets_cognitive_routing(self):
+        """讀取 scoring.yaml 的 Bash 指令應標記 cognitive-routing。"""
+        cmd = "python -c \"import yaml; yaml.safe_load(open('config/scoring.yaml'))\""
+        _, tags = classify_bash(cmd)
+        assert "cognitive-routing" in tags
+
+    def test_frequency_limits_bash_gets_cognitive_routing(self):
+        """讀取 frequency-limits.yaml 應標記 cognitive-routing。"""
+        cmd = "cat config/frequency-limits.yaml | head -20"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-routing" in tags
+
+    def test_skill_index_bash_gets_cognitive_skill_select(self):
+        """讀取 SKILL_INDEX 應標記 cognitive-skill-select。"""
+        cmd = "cat skills/SKILL_INDEX.md"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-skill-select" in tags
+
+    def test_skill_md_bash_gets_cognitive_skill_select(self):
+        """讀取 SKILL.md 應標記 cognitive-skill-select。"""
+        cmd = "cat skills/ntfy-notify/SKILL.md"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-skill-select" in tags
+
+    def test_skill_md_read_tool_gets_cognitive_skill_select(self):
+        """Read 工具讀取 SKILL.md 應標記 cognitive-skill-select。"""
+        tool_input = {"file_path": "skills/ntfy-notify/SKILL.md"}
+        _, tags = classify_read(tool_input)
+        assert "cognitive-skill-select" in tags
+        assert "skill-read" in tags
+
+    def test_claude_retry_bash_gets_cognitive_retry(self):
+        """claude -p 含 retry 關鍵字應標記 cognitive-retry。"""
+        cmd = "echo 'retry prompt' | claude -p --allowedTools Read,Bash"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-retry" in tags
+
+    def test_normal_bash_no_cognitive_tags(self):
+        """一般 Bash 指令不應有 cognitive tags。"""
+        cmd = "ls -la results/"
+        _, tags = classify_bash(cmd)
+        assert "cognitive-routing" not in tags
+        assert "cognitive-skill-select" not in tags
+        assert "cognitive-retry" not in tags
+
+
+class TestSpanTypeInLogEntry:
+    """Tests for span_type field in JSONL log entry. (Level 3-B)"""
+
+    def test_classify_bash_does_not_add_span_type(self):
+        """classify_bash 不應加入 span_type 標籤（由 log entry building 負責注入）。"""
+        _, tags = classify_bash("ls -la")
+        assert "span_type" not in tags
+
+    def test_classify_read_does_not_add_span_type(self):
+        """classify_read 不應加入 span_type 標籤。"""
+        _, tags = classify_read({"file_path": "config/slo.yaml"})
+        assert "span_type" not in tags

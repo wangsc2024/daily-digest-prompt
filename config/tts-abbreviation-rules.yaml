@@ -1,0 +1,42 @@
+# config/tts-abbreviation-rules.yaml
+# TTS 縮寫展開規則（解決 edge-tts 念錯全大寫縮寫的問題）
+# 修改此文件可調整縮寫規則，不需動 Python 腳本
+version: 1
+
+# 例外清單：這些全大寫縮寫不展開（edge-tts 可正確發音）
+exceptions:
+  - URL
+  - HTTP
+  - HTTPS
+  - JSON
+  - YAML
+  - HTML
+  - CSS
+  - PDF
+  - GUI
+  - SDK
+
+# 手動指定（優先於 auto_expand_caps）
+explicit_rules:
+  LLM: "L L M"
+  AI: "A I"
+  API: "A P I"
+  RAG: "R A G"
+  TTS: "T T S"
+  GPT: "G P T"
+  AGI: "A G I"
+  ASR: "A S R"
+  MCP: "M C P"
+  CLI: "C L I"
+  IDE: "I D E"
+  UI: "U I"
+  UX: "U X"
+  CI: "C I"
+  CD: "C D"
+  AWS: "A W S"
+  GCP: "G C P"
+
+# 通用規則：符合以下條件的單詞自動展開（字母間加空格）
+# 條件：全大寫 + 2個以上字母 + 不在 exceptions 清單中 + 不在 explicit_rules 中
+auto_expand_caps: true
+auto_expand_min_length: 2    # 最少幾個字母才展開（避免「AI」→「A I」需在 explicit_rules 處理）

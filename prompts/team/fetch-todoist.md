@@ -12,11 +12,11 @@
 - `skills/todoist/SKILL.md`
 - `skills/api-cache/SKILL.md`
 
-### 步驟 2：檢查快取
-依 api-cache SKILL.md 指示，用 Read 讀取 `cache/todoist.json`。
-- 若存在且 cached_at 在 30 分鐘內 → 使用快取資料，跳到步驟 4
-- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
-- 若不存在或已過期 → 進入步驟 3
+### 步驟 2：讀取快取狀態（PS 預計算）
+優先讀取 `cache/status.json`（由 PowerShell 在本次執行啟動時預計算，勿自行計算時間差）：
+- `apis.todoist.valid == true` → 直接讀取 `cache/todoist.json` 使用快取資料，跳到步驟 4
+- `apis.todoist.reason == "missing"` 或 `cache/status.json` 不存在 → 進入步驟 3
+- `apis.todoist.reason == "expired"` → 進入步驟 3；若 API 失敗則降級讀取舊快取（source="cache_degraded"）
 
 ### 步驟 3：呼叫 Todoist API（僅當日）
 依 todoist SKILL.md 指示，查詢**僅當日**待辦（不含 overdue）：

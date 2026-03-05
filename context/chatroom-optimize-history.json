@@ -92,6 +92,35 @@
         "uptime_seconds": 17068
       },
       "optimized": false
+    },
+    {
+      "date": "2026-03-04",
+      "run_at": "2026-03-04T13:15:00+08:00",
+      "metrics": {
+        "total_calls": 81,
+        "success_rate": 100.0,
+        "conflict_rate": 0.0,
+        "avg_exec_seconds": null,
+        "breakdown": {
+          "health_checks": 51,
+          "broadcasts": 14,
+          "record_queries": 16,
+          "claims": 0
+        }
+      },
+      "actions_taken": [],
+      "gun_bot_state": "not_tracked",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "pending_tasks": 0,
+        "claimed_tasks": 0,
+        "active_cron_jobs": 6,
+        "uptime_seconds": 17776
+      },
+      "optimized": false,
+      "notes": "首次使用 localhost:3001 模式匹配偵測到 81 筆呼叫（先前用 chatroom tag 匹配均為 0）；api-health.json 無 gun-bot 斷路器條目；所有指標正常"
     }
   ]
 }

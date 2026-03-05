@@ -409,10 +409,10 @@ def _rotate_logs(retention_days=7):
     summary_file = os.path.join(log_dir, "session-summary.jsonl")
     if not os.path.exists(summary_file):
         return
+    kept = []
     try:
         with open(summary_file, "r", encoding="utf-8") as f:
             lines = f.readlines()
-        kept = []
         for line in lines:
             line = line.strip()
             if not line:
@@ -427,16 +427,276 @@ def _rotate_logs(retention_days=7):
         from hook_utils import atomic_write_lines
         atomic_write_lines(summary_file, kept)
     except ImportError:
-        # hook_utils 不可用時退回直接寫入（kept 可能未綁定若 try 區塊在 readlines 前失敗）
+        # hook_utils 不可用時退回直接寫入
         try:
             if kept:
                 with open(summary_file, "w", encoding="utf-8") as f:
                     for line in kept:
                         f.write(line + "\n")
-        except (OSError, NameError):
+        except OSError:
             pass
     except OSError:
         pass
+
+
+def _update_metrics_daily() -> None:
+    """從今日所有 JSONL 記錄計算日指標，更新 context/metrics-daily.json。
+
+    完整重算今日記錄（覆寫模式），保留 14 天滾動窗口。
+    使用 file_lock + atomic_write_json 防止並行 session 競態條件。
+    由 main() 在 _rotate_logs() 之後呼叫。
+    """
+    try:
+        from hook_utils import file_lock, atomic_write_json, safe_load_json
+    except ImportError:
+        return  # hook_utils 不可用時靜默跳過
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    metrics_file = os.path.join(project_root, "context", "metrics-daily.json")
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # 讀取今日所有 JSONL（所有 session 合計，非僅本 session）
+    log_file = os.path.join(project_root, "logs", "structured", f"{today}.jsonl")
+    all_entries = _parse_all_entries(log_file)
+    if not all_entries:
+        return
+
+    # 計算指標
+    all_tags = []
+    for e in all_entries:
+        all_tags.extend(e.get("tags", []))
+    tag_counts = Counter(all_tags)
+
+    api_calls       = tag_counts.get("api-call", 0)
+    cache_reads     = tag_counts.get("cache-read", 0)
+    cache_writes    = tag_counts.get("cache-write", 0)
+    blocked_count   = sum(1 for e in all_entries if e.get("event") == "blocked")
+    loop_suspected  = tag_counts.get("loop-suspected", 0)
+    error_count     = sum(1 for e in all_entries if e.get("has_error"))
+    skill_reads     = tag_counts.get("skill-read", 0)
+    total_calls     = len(all_entries)
+
+    # 快取命中率：cache_reads / (cache_reads + api_calls)
+    cache_total = cache_reads + api_calls
+    cache_hit_ratio = round(cache_reads / cache_total * 100, 1) if cache_total > 0 else 0.0
+
+    # 平均輸入 IO（output_len 目前因 hooks 協定限制始終為 0，僅計 input_len）
+    total_input = sum(e.get("input_len", 0) for e in all_entries)
+    avg_io = round(total_input / total_calls, 0) if total_calls > 0 else 0
+
+    # 從 session-summary.jsonl 計算今日 session 成功率
+    session_success_rate = None
+    summary_file = os.path.join(project_root, "logs", "structured", "session-summary.jsonl")
+    if os.path.exists(summary_file):
+        today_sessions = []
+        try:
+            with open(summary_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            entry = json.loads(line)
+                            if entry.get("ts", "")[:10] == today:
+                                today_sessions.append(entry)
+                        except json.JSONDecodeError:
+                            pass
+        except OSError:
+            pass
+        if today_sessions:
+            healthy = sum(
+                1 for s in today_sessions
+                if s.get("status") in ("healthy", "info")
+            )
+            session_success_rate = round(healthy / len(today_sessions) * 100, 1)
+
+    new_record: dict = {
+        "date": today,
+        "total_tool_calls": total_calls,
+        "api_calls": api_calls,
+        "cache_reads": cache_reads,
+        "cache_writes": cache_writes,
+        "cache_hit_ratio": cache_hit_ratio,
+        "blocked_count": blocked_count,
+        "loop_suspected_count": loop_suspected,
+        "error_count": error_count,
+        "skill_reads": skill_reads,
+        "avg_io_per_call": avg_io,
+    }
+    if session_success_rate is not None:
+        new_record["session_success_rate"] = session_success_rate
+
+    try:
+        os.makedirs(os.path.dirname(metrics_file), exist_ok=True)
+        with file_lock(metrics_file):
+            data = safe_load_json(metrics_file, default={"schema_version": 1, "records": []})
+            records: list = data.get("records", [])
+            # 覆寫今日記錄（每次 session 結束後完整重算，不增量累積）
+            records = [r for r in records if r.get("date") != today]
+            records.append(new_record)
+            # 保留 14 天滾動窗口
+            cutoff = (datetime.now() - timedelta(days=14)).strftime("%Y-%m-%d")
+            records = sorted(
+                [r for r in records if r.get("date", "") >= cutoff],
+                key=lambda r: r.get("date", ""),
+            )
+            data["records"] = records
+            data["updated"] = datetime.now().isoformat()
+            atomic_write_json(metrics_file, data)
+    except Exception:
+        pass  # 不中斷 Agent 流程
+
+
+def _compute_error_budget() -> list:
+    """讀取 config/slo.yaml + context/metrics-daily.json，計算每個 SLO 的 Error Budget 狀態。
+
+    Returns list of dicts:
+        id, name, metric, target, actual, remaining_pct, status
+        status: "ok" | "warning" | "critical" | "no_data"
+    """
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        return []
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+
+    slo_file = os.path.join(project_root, "config", "slo.yaml")
+    metrics_file = os.path.join(project_root, "context", "metrics-daily.json")
+
+    if not os.path.exists(slo_file) or not os.path.exists(metrics_file):
+        return []
+
+    try:
+        with open(slo_file, "r", encoding="utf-8") as f:
+            slo_config = yaml.safe_load(f)
+        with open(metrics_file, "r", encoding="utf-8") as f:
+            metrics_data = json.load(f)
+    except (yaml.YAMLError, json.JSONDecodeError, OSError):
+        return []
+
+    slos = slo_config.get("slos", [])
+    records = metrics_data.get("records", [])
+    if not records:
+        return []
+
+    # 取最近 window_days 內的記錄平均值（或最新單日值）
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    results = []
+    for slo in slos:
+        slo_id = slo.get("id", "?")
+        name = slo.get("name", "?")
+        metric = slo.get("metric", "")
+        target = slo.get("target", 0)
+        direction = slo.get("metric_direction", "higher_is_better")
+        warning_thresh = slo.get("warning_threshold", 30)
+        critical_thresh = slo.get("critical_threshold", 10)
+        window_days = slo.get("window_days", 7)
+
+        # 取窗口內記錄
+        cutoff = (datetime.now() - timedelta(days=window_days)).strftime("%Y-%m-%d")
+        window_records = [r for r in records if r.get("date", "") >= cutoff]
+        if not window_records:
+            results.append({
+                "id": slo_id, "name": name, "metric": metric,
+                "target": target, "actual": None,
+                "remaining_pct": None, "status": "no_data",
+            })
+            continue
+
+        # 取窗口內平均值（忽略 None）
+        values = [r[metric] for r in window_records if metric in r and r[metric] is not None]
+        if not values:
+            results.append({
+                "id": slo_id, "name": name, "metric": metric,
+                "target": target, "actual": None,
+                "remaining_pct": None, "status": "no_data",
+            })
+            continue
+
+        actual = round(sum(values) / len(values), 3)
+
+        # Error Budget 計算
+        # higher_is_better: remaining = (actual - target) / (1 - target) × 100 [若 target < 1]
+        # lower_is_better:  remaining = (target - actual) / target × 100
+        if direction == "higher_is_better":
+            if target >= 1.0:  # 絕對值目標（如 SLO-006 skill_reads ≥ 3）
+                remaining_pct = min(100.0, (actual / target) * 100) if target > 0 else 100.0
+            else:  # 比例目標（0~1）
+                budget_range = 1.0 - target
+                remaining_pct = ((actual - target) / budget_range * 100) if budget_range > 0 else 100.0
+        else:  # lower_is_better
+            if target == 0:  # 目標是 0（如 loop_suspected）
+                remaining_pct = 100.0 if actual == 0 else max(-100.0, (target - actual) / max(actual, 1) * 100)
+            else:
+                remaining_pct = max(-100.0, (target - actual) / target * 100)
+
+        remaining_pct = round(remaining_pct, 1)
+
+        # 狀態判斷
+        if remaining_pct < critical_thresh:
+            status = "critical"
+        elif remaining_pct < warning_thresh:
+            status = "warning"
+        else:
+            status = "ok"
+
+        results.append({
+            "id": slo_id, "name": name, "metric": metric,
+            "target": target, "actual": actual,
+            "remaining_pct": remaining_pct, "status": status,
+        })
+
+    return results
+
+
+def _check_slow_session(entries: list) -> "dict | None":
+    """比較本 session 工具呼叫數與 14 天 P95，偵測 Slow Session。
+
+    Returns dict with slow_detected, session_calls, p95_calls, ratio
+    Returns None if insufficient data.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    metrics_file = os.path.join(project_root, "context", "metrics-daily.json")
+
+    if not entries or not os.path.exists(metrics_file):
+        return None
+
+    try:
+        with open(metrics_file, "r", encoding="utf-8") as f:
+            metrics_data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    records = metrics_data.get("records", [])
+    if len(records) < 3:  # 需要至少 3 天才有意義
+        return None
+
+    # 計算歷史 P95（total_tool_calls）
+    past_totals = [r.get("total_tool_calls", 0) for r in records if r.get("total_tool_calls", 0) > 0]
+    if not past_totals:
+        return None
+
+    past_totals.sort()
+    p95_idx = int(len(past_totals) * 0.95)
+    p95_calls = past_totals[min(p95_idx, len(past_totals) - 1)]
+
+    session_calls = len(entries)
+    if p95_calls == 0:
+        return None
+
+    ratio = round(session_calls / p95_calls, 2)
+    slow_detected = ratio > 1.5
+
+    return {
+        "slow_detected": slow_detected,
+        "session_calls": session_calls,
+        "p95_calls": p95_calls,
+        "ratio": ratio,
+    }
 
 
 def check_gmail_token_expiry() -> "dict | None":
@@ -489,10 +749,14 @@ def check_gmail_token_expiry() -> "dict | None":
         if state_dir:
             os.makedirs(state_dir, exist_ok=True)
         try:
-            with open(STATE_PATH, "w", encoding="utf-8") as f:
-                json.dump(s, f, ensure_ascii=False)
-        except OSError:
-            pass
+            from hook_utils import atomic_write_json
+            atomic_write_json(STATE_PATH, s)
+        except ImportError:
+            try:
+                with open(STATE_PATH, "w", encoding="utf-8") as f:
+                    json.dump(s, f, ensure_ascii=False)
+            except OSError:
+                pass
 
     stored_hash = state.get("refresh_token_hash", "")
     if rt_hash != stored_hash:
@@ -603,8 +867,12 @@ def main():
                 with open(_state_path, "r", encoding="utf-8") as _f:
                     _state = json.load(_f)
                 _state["last_alerted_date"] = date.today().isoformat()
-                with open(_state_path, "w", encoding="utf-8") as _f:
-                    json.dump(_state, _f, ensure_ascii=False)
+                try:
+                    from hook_utils import atomic_write_json
+                    atomic_write_json(_state_path, _state)
+                except ImportError:
+                    with open(_state_path, "w", encoding="utf-8") as _f:
+                        json.dump(_state, _f, ensure_ascii=False)
             except (OSError, json.JSONDecodeError):
                 pass
         write_session_summary(
@@ -618,6 +886,54 @@ def main():
         )
 
     _rotate_logs()
+    _update_metrics_daily()
+
+    # Level 4-B: Error Budget 計算（寫入後才讀，確保今日資料最新）
+    try:
+        slo_results = _compute_error_budget()
+        critical_slos = [s for s in slo_results if s["status"] == "critical"]
+        warning_slos = [s for s in slo_results if s["status"] == "warning"]
+
+        if critical_slos:
+            lines = [f"SLO 預算耗盡：{len(critical_slos)} 項"]
+            for s in critical_slos[:3]:
+                actual_str = f"{s['actual']}" if s["actual"] is not None else "N/A"
+                remaining_str = f"{s['remaining_pct']}%" if s["remaining_pct"] is not None else "N/A"
+                lines.append(f"  ❌ {s['id']} {s['name']}: 實際={actual_str} 目標={s['target']} 剩餘={remaining_str}")
+            send_ntfy_alert(
+                f"[SLO] {len(critical_slos)} 項 Error Budget 耗盡",
+                "\n".join(lines),
+                "critical",
+            )
+        elif warning_slos and not alert:
+            # 僅在無其他告警時才發 SLO warning（避免告警轟炸）
+            lines = [f"SLO 預算偏低：{len(warning_slos)} 項"]
+            for s in warning_slos[:2]:
+                remaining_str = f"{s['remaining_pct']}%" if s["remaining_pct"] is not None else "N/A"
+                lines.append(f"  ⚠️ {s['id']} {s['name']}: 剩餘={remaining_str}")
+            send_ntfy_alert(
+                f"[SLO] {len(warning_slos)} 項 Error Budget 偏低",
+                "\n".join(lines),
+                "warning",
+            )
+    except Exception:
+        pass  # 不中斷 Agent 流程
+
+    # Level 4-C: Slow Session 偵測
+    try:
+        slow_info = _check_slow_session(entries if entries else [])
+        if slow_info and slow_info.get("slow_detected"):
+            send_ntfy_alert(
+                "[Slow Session] 工具呼叫數超出 P95 × 1.5",
+                (f"本次呼叫數：{slow_info['session_calls']} 次\n"
+                 f"歷史 P95：{slow_info['p95_calls']} 次\n"
+                 f"比率：{slow_info['ratio']}x（閾值 1.5x）\n"
+                 "可能原因：迴圈重試、快取失效、任務複雜度異常"),
+                "warning",
+            )
+    except Exception:
+        pass
+
     print("{}")
     sys.exit(0)
 

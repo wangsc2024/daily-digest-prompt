@@ -158,47 +158,28 @@ curl -s --max-time 8 \
 
 ### 決定可執行的自動任務（純輪轉 round-robin，最多 4 個並行）
 
-讀取 `config/frequency-limits.yaml` 的 `max_auto_per_run.team_mode`（= 4）。
+用 Read 讀取 `config/frequency-limits.yaml`，取出：
+- `max_auto_per_run.team_mode`（並行上限）
+- `tasks` 區段：每個任務的 `execution_order`、`counter_field`、`daily_limit`、`name`
+  - **plan_key = YAML tasks 的 key**（底線 `_`，絕對不可用連字號 `-`）
+  - `daily_limit: 0` 的任務視同**停用**，選取時直接跳過
+
 讀取 `context/auto-tasks-today.json` 的 `next_execution_order`（跨日指針）。
+設 N = YAML tasks 區段的任務總數。
 
 **選取演算法（每次最多選 4 個）**：
-1. 以 `next_execution_order` 為起點，按 execution_order 循環掃描全部 19 個任務（掃一圈，到 19 後環繞回 1）
-2. 收集所有 `count < daily_limit` 的任務，按掃描先後排列
+1. 以 `next_execution_order` 為起點，按 execution_order 循環掃描全部 N 個任務（掃一圈，到 N 後環繞回 1）
+2. 收集所有 `daily_limit > 0` 且 `count < daily_limit` 的任務，按掃描先後排列
 3. 取前 min(max_auto_per_run.team_mode, 可用數量) 個作為本次批次
 4. **git_push 特殊規則**：若 git_push 被選中且同批次還有其他任務 → 將 git_push 移到批次最末位（避免 git 操作與其他 Agent 並行衝突）
 5. 計算 `next_execution_order_after`（精確定義）：
    - 取所有被選中任務的**原始** `execution_order` 中的最大值
-   - `next_execution_order_after = max(selected原始orders) % 19 + 1`（環繞：19→1，不是 19+1=20）
-   - ⚠️ **git_push 末位調整不影響此計算**：即使 git_push 被移到批次末位，仍以其原始 order=13 參與 max() 計算
-   - 範例：若選中 [11, 13(git_push→末), 15]，max=15，next_after = 15 % 19 + 1 = 16
+   - `next_execution_order_after = max(selected原始orders) % N + 1`（環繞：N→1）
+   - ⚠️ **git_push 末位調整不影響此計算**：即使 git_push 被移到批次末位，仍以其原始 order 參與 max() 計算
 6. **注意**：`next_execution_order` 的寫入由 Phase 3（todoist-assemble.md 步驟 3）負責；Phase 1 只計算並輸出 `next_execution_order_after`
 7. 若掃完一圈無任何可執行 → plan_type = "idle"
 
-> ⚠️ **key 欄位是強制規範**：輸出 `selected_tasks` 時，`key` 欄的值必須**完全符合**下表 `plan_key` 欄（使用底線 `_`，絕對不可用連字號 `-` 或縮寫）。
-
-| execution_order | 群組 | 自動任務 | 每日上限 | plan_key（plan JSON 必須用此值）| 欄位 |
-|-----------------|------|---------|---------|--------------------------------|------|
-| 1 | 佛學 | 楞嚴經研究 | 5 次 | `shurangama` | `shurangama_count` |
-| 2 | 佛學 | 教觀綱宗研究 | 3 次 | `jiaoguangzong` | `jiaoguangzong_count` |
-| 3 | 佛學 | 法華經研究 | 2 次 | `fahua` | `fahua_count` |
-| 4 | 佛學 | 淨土宗研究 | 2 次 | `jingtu` | `jingtu_count` |
-| 5 | AI/技術 | 每日任務技術研究 | 5 次 | `tech_research` | `tech_research_count` |
-| 6 | AI/技術 | AI 深度研究計畫 | 4 次 | `ai_deep_research` | `ai_deep_research_count` |
-| 7 | AI/技術 | Unsloth 研究 | 2 次 | `unsloth_research` | `unsloth_research_count` |
-| 8 | AI/技術 | AI GitHub 熱門專案 | 2 次 | `ai_github_research` | `ai_github_research_count` |
-| 9 | AI/技術 | AI 智慧城市研究 | 2 次 | `ai_smart_city` | `ai_smart_city_count` |
-| 10 | AI/技術 | AI 系統開發研究 | 2 次 | `ai_sysdev` | `ai_sysdev_count` |
-| 11 | 系統優化 | Skill 審查優化 | 2 次 | `skill_audit` | `skill_audit_count` |
-| 12 | 維護 | 系統 Log 審查 | 1 次 | `log_audit` | `log_audit_count` |
-| 13 | 維護 | 專案推送 GitHub | 4 次 | `git_push` | `git_push_count` |
-| 14 | 遊戲 | 創意遊戲優化 | 2 次 | `creative_game_optimize` | `creative_game_optimize_count` |
-| 15 | 專案品質 | QA System 品質與安全優化 | 2 次 | `qa_optimize` | `qa_optimize_count` |
-| 16 | 系統自省 | 系統洞察分析 | 1 次 | `system_insight` | `system_insight_count` |
-| 17 | 系統自省 | 系統自愈迴圈 | 3 次 | `self_heal` | `self_heal_count` |
-| 18 | GitHub | GitHub 靈感蒐集 | 1 次 | `github_scout` | `github_scout_count` |
-| 19 | Chatroom | Chatroom 品質優化 | 2 次 | `chatroom_optimize` | `chatroom_optimize_count` |
-
-合計上限：47 次/日
+> ⚠️ **唯一真相來源**：每日上限（`daily_limit`）以 `config/frequency-limits.yaml` 為準，此 prompt 不另行定義。新增/停用/調整任務只需修改 YAML。
 
 ---
 

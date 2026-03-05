@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "generated_at": "2026-03-03T21:55:00+08:00",
+  "generated_at": "2026-03-04T03:53:00+08:00",
   "period_days": 7,
   "total_skills": 26,
   "data_sources": {
-    "jsonl_log": "logs/structured/2026-03-03.jsonl",
+    "jsonl_files": ["2026-02-26.jsonl", "2026-02-28.jsonl", "2026-03-03.jsonl", "2026-03-04.jsonl"],
+    "jsonl_total_entries": 2969,
     "scheduler_state": "state/scheduler-state.json",
     "auto_tasks_today": "context/auto-tasks-today.json",
     "research_registry": "context/research-registry.json",
@@ -12,187 +13,190 @@
   },
   "metrics": {
     "daily_success_rate": {
-      "value": 0.9888,
-      "threshold": 0.9,
+      "value": 99.0,
+      "unit": "%",
+      "threshold": ">= 90%",
       "healthy": true,
-      "detail": "177/179 runs succeeded in 7 days (2 failures)"
+      "detail": "191/193 runs succeeded in 7 days (2 failures: todoist-team 1, daily-digest-team 1)"
     },
     "skill_usage_coverage": {
-      "value": 1.0,
-      "threshold": 0.7,
+      "value": 100.0,
+      "unit": "%",
+      "threshold": ">= 70%",
       "healthy": true,
-      "detail": "26/26 skills used today (100% coverage)"
+      "detail": "27 unique skills detected across 4 JSONL files (exceeds 26 total; SKILL_INDEX.md counted separately)"
     },
     "cache_hit_ratio": {
-      "value": 0.1222,
-      "threshold": 0.4,
+      "value": 12.1,
+      "unit": "%",
+      "threshold": ">= 40%",
       "healthy": false,
-      "detail": "22 cache-read vs 158 api-call (12.2% hit ratio)"
+      "detail": "52 cache-read vs 376 api-call (12.1% hit ratio). Persistent issue across consecutive insight reports."
     },
     "error_rate": {
       "value": 0.0,
-      "threshold": 0.05,
+      "unit": "%",
+      "threshold": "<= 5%",
       "healthy": true,
-      "detail": "0/1034 tool calls had error tag"
+      "detail": "0/2969 tool calls tagged as error. Zero error rate across the analysis period."
     },
     "block_rate": {
-      "value": 0.0,
-      "threshold": 0.02,
+      "value": 0.03,
+      "unit": "%",
+      "threshold": "<= 2%",
       "healthy": true,
-      "detail": "0/1034 tool calls were blocked"
+      "detail": "1/2969 tool calls were blocked. Minimal security intervention needed."
     },
     "topic_diversity": {
       "value": 1.0,
-      "threshold": 0.5,
+      "unit": "ratio",
+      "threshold": ">= 0.5",
       "healthy": true,
-      "detail": "133 unique topics / 133 entries in 7 days (perfect diversity)"
+      "detail": "15 unique topics / 15 entries in research-registry (perfect diversity, no duplicates)"
     },
     "auto_task_fairness": {
-      "value": 1.6733,
-      "threshold": 0.5,
+      "value": 1.066,
+      "unit": "CV",
+      "threshold": "<= 0.5",
       "healthy": false,
-      "detail": "CV=1.67 (stddev=0.44, mean=0.26) - early in day, only 5/19 tasks executed so far"
+      "detail": "CV=1.066 (stddev=0.729, mean=0.684). 9/19 tasks have 0 executions today. Intraday snapshot; round-robin will redistribute in remaining hours."
     },
     "avg_io_per_call": {
-      "value": 0,
-      "threshold": 5000,
+      "value": 518.5,
+      "unit": "chars",
+      "threshold": "<= 5000",
       "healthy": true,
-      "detail": "output_len not populated in JSONL entries (field exists but values are 0)"
+      "detail": "Average input_len=518.5 chars (2927 entries with input_len > 0). output_len not populated by hooks (always 0)."
     },
     "behavior_pattern_count": {
-      "value": 160,
-      "threshold": 20,
+      "value": 161,
+      "unit": "count",
+      "threshold": ">= 20",
       "healthy": true,
-      "detail": "160 patterns tracked in behavior-patterns.json"
+      "detail": "161 unique behavior patterns in behavior-patterns.json (up from 160 last report)"
     },
     "high_confidence_patterns": {
       "value": 1,
-      "threshold": 5,
+      "unit": "count",
+      "threshold": ">= 5",
       "healthy": false,
-      "detail": "Only 1 pattern with confidence >= 0.5 (most patterns are new/low-count today)"
+      "detail": "1 pattern with confidence >= 0.5, 6 medium (0.3-0.5), 154 low (< 0.3). Expected to improve with more observation cycles."
     }
   },
   "alerts": [
     {
-      "level": "warning",
+      "severity": "warning",
       "metric": "cache_hit_ratio",
-      "message": "快取命中率偏低 (12.2%)，遠低於 40% 門檻。建議檢查快取策略是否有效運作，或 API 呼叫模式是否改變。",
-      "value": 0.1222,
-      "threshold": 0.4
+      "message": "快取命中率持續偏低 (12.1%)，連續兩次 insight 報告低於 40% 門檻。376 次 API 呼叫中僅 52 次命中快取，顯示快取策略未充分發揮效益。",
+      "value": 12.1,
+      "threshold": 40
     },
     {
-      "level": "info",
+      "severity": "info",
       "metric": "auto_task_fairness",
-      "message": "自動任務公平性 CV=1.67 超過 0.5 門檻，但因今日僅執行 5 個任務（日初階段），屬預期內的時序偏差，非結構性問題。",
-      "value": 1.6733,
+      "message": "自動任務公平性 CV=1.066（門檻 0.5），9/19 任務今日未執行。日內快照偏差屬正常，round-robin 機制將在後續時段補齊。相較上次報告 CV=1.67 已有改善。",
+      "value": 1.066,
       "threshold": 0.5
     },
     {
-      "level": "info",
+      "severity": "info",
       "metric": "high_confidence_patterns",
-      "message": "高信心度模式僅 1 個（門檻 5），behavior-patterns.json 今日重建後含 160 個模式，多為首次觀測（confidence=0.1），隨執行次數增加將自然提升。",
+      "message": "高信心度模式僅 1 個（門檻 5）。161 個行為模式中大多數為低信心度（< 0.3），需持續累積觀測次數。",
       "value": 1,
       "threshold": 5
     },
     {
-      "level": "info",
+      "severity": "info",
       "metric": "loop_suspected",
-      "message": "JSONL 中有 124 次 loop-suspected 標籤，佔總呼叫 12%。建議檢視 LoopDetector 閾值是否過於敏感，或是否存在真正的迴圈行為。"
+      "message": "JSONL 中有 142 次 loop-suspected 標籤（占 4.8% 呼叫），較上次報告的 124 次略增。建議持續監控 LoopDetector 閾值是否需要調整。",
+      "value": 142,
+      "threshold": null
     }
   ],
   "recommendations": [
-    "【快取優化】cache_hit_ratio 12.2% 遠低於目標 40%。建議：(1) 檢查 cache-policy.yaml 的 TTL 設定是否過短；(2) 確認 API 呼叫前是否正確執行快取檢查；(3) 特別關注 Todoist API（31 次呼叫）和 Knowledge API（48 次呼叫）的快取利用率。",
-    "【迴圈偵測調校】loop-suspected 標籤出現 124 次（12% 呼叫），可能 LoopDetector 閾值過低導致誤報。建議審查 agent_guardian.py 的迴圈偵測參數，降低雜訊。",
-    "【行為模式累積】behavior-patterns.json 有 160 個模式但高信心度僅 1 個，需更多執行週期累積。持續觀察即可，無需立即行動。",
-    "【維持高成功率】98.9% 成功率優秀，2 次失敗分析：(1) daily-digest-team 組裝失敗（chatroom/gmail 子元件失敗）；(2) todoist-team phase 1 失敗。建議關注 chatroom 和 gmail 子元件的穩定性。",
-    "【Skill 覆蓋率滿分】26/26 Skill 全部使用，Skill-First 策略執行良好。"
+    "【快取優化 - 持續議題】cache_hit_ratio 連續偏低（上次 12.2%→本次 12.1%）。建議：(1) 審查 cache-policy.yaml 的 TTL 是否足夠覆蓋 hourly 排程間隔；(2) 確認 Todoist（103 次呼叫）和 Knowledge（152 次呼叫）API 的快取讀取路徑正確；(3) 新增 cache-miss 標籤追蹤以量化改善效果。",
+    "【迴圈偵測調校】loop-suspected 標籤從 124 增至 142（7 天範圍擴大）。若多為誤報，建議調高 LoopDetector 的 similarity_threshold 或增加 window_size，降低雜訊。",
+    "【行為模式累積】161 個模式但高信心度僅 1 個，為系統初期正常現象。建議持續觀察 2-3 週，無需立即調整。",
+    "【output_len 追蹤缺失】post_tool_logger.py 的 output_len 始終為 0，無法精確評估 IO 效率。建議在 PostToolUse hook 中解析 tool_output 並記錄實際輸出長度。",
+    "【維持高成功率】99.0% 成功率優秀（191/193），僅 2 次失敗且無高失敗率時段。繼續維持現有容錯機制。",
+    "【Skill 覆蓋率滿分】全部 26 個 Skill 均有使用記錄（27 個偵測含 SKILL_INDEX.md），Skill-First 策略執行完善。"
   ],
   "skill_heatmap": {
-    "todoist": 11,
-    "ntfy-notify": 11,
-    "knowledge-query": 10,
-    "groq": 10,
-    "hackernews-ai-digest": 6,
-    "api-cache": 5,
-    "kb-research-strategist": 4,
-    "system-insight": 4,
-    "web-research": 3,
-    "atomic-habits": 3,
-    "chatroom-query": 3,
-    "digest-memory": 3,
-    "git-smart-commit": 3,
-    "gmail": 3,
-    "learning-mastery": 3,
-    "pingtung-news": 3,
-    "pingtung-policy-expert": 3,
-    "scheduler-state": 3,
-    "arch-evolution": 2,
-    "game-design": 2,
-    "github-scout": 2,
-    "kb-curator": 2,
-    "skill-scanner": 2,
-    "system-audit": 2,
-    "task-manager": 2,
-    "todoist-task-creator": 2
+    "todoist": 103,
+    "knowledge": 152,
+    "ntfy": 29,
+    "groq": 0,
+    "hackernews-ai-digest": 0,
+    "api-cache": 52,
+    "skill-read_total": 203,
+    "skill-index_reads": 23,
+    "cache-read": 52,
+    "cache-write": 18,
+    "sub-agent": 15,
+    "git": 32
   },
-  "high_failure_hours": [
-    {
-      "hour": 5,
-      "total": 7,
-      "failures": 1,
-      "failure_rate": 0.143,
-      "note": "UTC+8 05:00 (1/7 failed: todoist-team phase 1 failure on 2026-03-01)"
+  "tool_heatmap": {
+    "Read": 1051,
+    "Bash": 861,
+    "TodoWrite": 397,
+    "Write": 297,
+    "Grep": 118,
+    "Glob": 58,
+    "WebSearch": 57,
+    "WebFetch": 57,
+    "Edit": 52,
+    "Task": 18,
+    "TaskOutput": 3
+  },
+  "high_failure_hours": [],
+  "agent_stats": {
+    "todoist-team": {
+      "success": 134,
+      "failed": 1,
+      "total": 135,
+      "success_rate": 99.3
+    },
+    "daily-digest-team": {
+      "success": 10,
+      "failed": 1,
+      "total": 11,
+      "success_rate": 90.9
+    },
+    "todoist": {
+      "success": 47,
+      "failed": 0,
+      "total": 47,
+      "success_rate": 100.0
     }
-  ],
-  "summary": {
-    "scheduler": {
-      "total_runs_7d": 179,
-      "success_runs": 177,
-      "failed_runs": 2,
-      "agents": {
-        "todoist-team": "主力執行引擎，含 auto-task 輪轉",
-        "todoist": "單一模式備用",
-        "daily-digest-team": "每日摘要團隊並行"
-      }
-    },
-    "jsonl_today": {
-      "total_tool_calls": 1034,
-      "sessions": 35,
-      "top_tools": {
-        "Read": 388,
-        "Bash": 337,
-        "TodoWrite": 133,
-        "Write": 95,
-        "Grep": 25,
-        "Edit": 14,
-        "Glob": 13,
-        "WebSearch": 12,
-        "Task": 7,
-        "WebFetch": 7
-      },
-      "top_tags": {
-        "team-mode": 471,
-        "api-call": 158,
-        "todowrite": 133,
-        "loop-suspected": 124,
-        "skill-read": 107,
-        "python": 105,
-        "api-read": 80,
-        "api-write": 78,
-        "knowledge": 48,
-        "todoist": 31
-      }
-    },
-    "auto_tasks_today": {
-      "executed": 5,
-      "tasks_with_activity": ["ai_github_research", "ai_sysdev", "skill_audit", "log_audit", "git_push"],
-      "next_execution_order": 14
-    },
-    "research_7d": {
-      "total_entries": 133,
-      "unique_topics": 133,
-      "diversity_score": 1.0,
-      "note": "研究去重機制運作良好，無重複主題"
-    }
+  },
+  "scheduler_summary": {
+    "avg_duration_seconds": 735.2,
+    "total_runs_7d": 193,
+    "active_agents": 3,
+    "total_runs_in_file": 200
+  },
+  "auto_tasks_today": {
+    "date": "2026-03-04",
+    "total_executed": 13,
+    "tasks_with_zero": 9,
+    "tasks_active": ["jingtu", "tech_research", "ai_deep_research", "ai_github_research", "ai_sysdev", "skill_audit", "log_audit", "git_push", "creative_game_optimize", "qa_optimize"],
+    "tasks_pending": ["shurangama", "jiaoguangzong", "fahua", "unsloth_research", "ai_smart_city", "system_insight", "self_heal", "github_scout", "chatroom_optimize"],
+    "next_execution_order": 16
+  },
+  "research_summary": {
+    "total_entries": 15,
+    "unique_topics": 15,
+    "unique_task_types": 10,
+    "task_types": ["ai_deep_research", "ai_github_research", "ai_sysdev", "creative_game", "fahua", "jiaoguangzong", "jingtu", "shurangama", "tech_research", "todoist_research"],
+    "diversity_score": 1.0,
+    "note": "研究去重機制運作良好，7 天窗口內 15 筆研究全部為不同主題"
+  },
+  "trend_vs_last_report": {
+    "success_rate": "98.9% → 99.0% (improved)",
+    "cache_hit_ratio": "12.2% → 12.1% (stable, still below threshold)",
+    "behavior_patterns": "160 → 161 (growing)",
+    "high_confidence": "1 → 1 (unchanged)",
+    "loop_suspected": "124 → 142 (monitoring)",
+    "auto_task_fairness_cv": "1.67 → 1.07 (improved)"
   }
 }

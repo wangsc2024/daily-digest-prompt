@@ -17,6 +17,14 @@ _compiled_regex_cache: dict = {}
 # 模組層級 YAML 配置快取（避免同一進程多次開檔讀取 hook-rules.yaml）
 _yaml_config_cache: dict = {"loaded": False, "data": None}
 
+# 模組層級 PyYAML 可用性旗標（避免 hot path 中 try/except ImportError）
+try:
+    import yaml as _yaml_module
+    _YAML_AVAILABLE = True
+except ImportError:
+    _yaml_module = None
+    _YAML_AVAILABLE = False
+
 
 def get_compiled_regex(pattern: str, flags: int = 0):
     """從快取取得已編譯正則，未命中時編譯並快取。"""
@@ -88,16 +96,14 @@ def _load_yaml_config():
         _yaml_config_cache["data"] = None
         return None
 
-    try:
-        import yaml
-    except ImportError:
+    if not _YAML_AVAILABLE:
         _yaml_config_cache["loaded"] = True
         _yaml_config_cache["data"] = None
         return None
 
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+            data = _yaml_module.safe_load(f)
         _yaml_config_cache["loaded"] = True
         _yaml_config_cache["data"] = data
         return data
@@ -289,6 +295,12 @@ class file_lock:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._lock_fd:
+            # Windows msvcrt 必須先解鎖再關閉檔案，否則鎖可能殘留
+            try:
+                import msvcrt
+                msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_UNLCK, 1)
+            except (ImportError, OSError, ValueError):
+                pass
             self._lock_fd.close()
             try:
                 os.remove(self.lock_path)
@@ -360,3 +372,27 @@ def atomic_write_lines(filepath: str, lines: list) -> None:
             except OSError:
                 pass
         raise
+
+
+def safe_load_json(filepath: str, default=None):
+    """安全載入 JSON 檔案，失敗時回傳預設值。
+
+    統一的 JSON 載入函數，取代散布在各模組中的重複 try/except 模式：
+      - 檔案不存在 → 回傳 default
+      - JSON 解析失敗 → 回傳 default
+      - IO 錯誤 → 回傳 default
+
+    Args:
+        filepath: JSON 檔案路徑
+        default: 載入失敗時的預設值（預設 None）
+
+    Returns:
+        解析後的 JSON 資料，或 default
+    """
+    if not os.path.exists(filepath):
+        return default
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return default

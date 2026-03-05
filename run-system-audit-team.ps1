@@ -237,6 +237,38 @@ function Update-SchedulerState {
     $state | ConvertTo-Json -Depth 10 | Set-Content $StateFile -Encoding UTF8
 }
 
+function Write-Span {
+    param(
+        [string]$TraceId,
+        [string]$SpanType,
+        [string]$Phase,
+        [string]$Agent = "",
+        [datetime]$StartTime,
+        [datetime]$EndTime,
+        [string]$Status
+    )
+    $spansFile = "$ResultsDir\spans-$TraceId.json"
+    $spans = @()
+    if (Test-Path $spansFile) {
+        try { $spans = @(Get-Content $spansFile -Raw | ConvertFrom-Json) } catch { $spans = @() }
+    }
+    $span = [PSCustomObject]@{
+        span_id    = [guid]::NewGuid().ToString("N").Substring(0, 8)
+        trace_id   = $TraceId
+        span_type  = $SpanType
+        phase      = $Phase
+        agent      = $Agent
+        start_time = $StartTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        end_time   = $EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        duration_s = [int]($EndTime - $StartTime).TotalSeconds
+        status     = $Status
+    }
+    $spans += $span
+    try {
+        $spans | ConvertTo-Json -Depth 3 | Set-Content $spansFile -Encoding UTF8
+    } catch { Write-Host "[Span] Write failed: $_" }
+}
+
 # ============================================
 # Main Execution
 # ============================================
@@ -436,6 +468,9 @@ if (-not $phase1Success) {
 $phase1Seconds = [int]((Get-Date) - $phase1Start).TotalSeconds
 Write-Log "Phase 1 completed successfully (${phase1Seconds}s)" "INFO"
 Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "system-audit" -Detail "4 agents completed"
+# Level 3-A: Phase 1 span
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase1" `
+    -StartTime $phase1Start -EndTime (Get-Date) -Status "ok"
 
 # Clean up stderr files from Phase 1
 Get-ChildItem "$LogDir\*-stderr-*.log" -ErrorAction SilentlyContinue | ForEach-Object {
@@ -606,5 +641,20 @@ $phaseBreakdown = [PSCustomObject]@{
 }
 Write-Log "Total: ${totalAuditSeconds}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s)" "INFO"
 
+# Level 3-A: Phase 2 + Overall span
+$auditEnd = Get-Date
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
+    -StartTime $phase2Start -EndTime $auditEnd `
+    -Status (if ($phase2Success) { "ok" } else { "failed" })
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "overall" `
+    -StartTime $auditStartTime -EndTime $auditEnd `
+    -Status (if ($phase2Success) { "ok" } else { "failed" })
+
 Update-SchedulerState -Status "success" -Message "Team audit completed" -ExitCode 0 -PhaseBreakdown $phaseBreakdown
+
+# Clean up spans files older than 7 days
+Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
+    Remove-Item -Force
+
 exit 0

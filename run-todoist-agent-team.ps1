@@ -240,6 +240,18 @@ function Set-FsmState {
         $fsm = [PSCustomObject]@{ runs = [PSCustomObject]@{}; updated = "" }
     }
 
+    # P2-A: 殭屍狀態清理（running 超過 stale_timeout_hours → timeout）
+    $staleHours = 2  # 與 config/timeouts.yaml fsm.stale_timeout_hours 同步
+    $staleCutoff = (Get-Date).AddHours(-$staleHours).ToString("yyyy-MM-ddTHH:mm:ss")
+    foreach ($existingRun in @($fsm.runs.PSObject.Properties)) {
+        foreach ($existingPhase in @($existingRun.Value.phases.PSObject.Properties)) {
+            if ($existingPhase.Value.state -eq "running" -and $existingPhase.Value.updated -lt $staleCutoff) {
+                $existingPhase.Value | Add-Member -NotePropertyName "state" -NotePropertyValue "timeout" -Force
+                $existingPhase.Value | Add-Member -NotePropertyName "detail" -NotePropertyValue "auto-timeout: running > ${staleHours}h" -Force
+            }
+        }
+    }
+
     $runKey = "${AgentType}_${RunId}"
     if (-not $fsm.runs.$runKey) {
         $fsm.runs | Add-Member -NotePropertyName $runKey -NotePropertyValue ([PSCustomObject]@{
@@ -258,12 +270,31 @@ function Set-FsmState {
 
     $fsm | Add-Member -NotePropertyName "updated" -NotePropertyValue $now -Force
 
-    $cutoff = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
-    $oldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
-        $_.Value.started -lt $cutoff
+    # 清理：已完成/失敗/timeout 超過 24 小時的 runs（不清除仍 running 的 runs）
+    $cutoff24h = (Get-Date).AddHours(-24).ToString("yyyy-MM-ddTHH:mm:ss")
+    $doneOldKeys = @($fsm.runs.PSObject.Properties | Where-Object {
+        $run = $_.Value
+        $phases = @($run.phases.PSObject.Properties.Value)
+        $isOld = $run.started -lt $cutoff24h
+        $allDone = $phases.Count -gt 0 -and ($phases | Where-Object { $_.state -eq "running" }).Count -eq 0
+        $isOld -and $allDone
     } | Select-Object -ExpandProperty Name)
-    foreach ($k in $oldKeys) {
+    foreach ($k in $doneOldKeys) {
         $fsm.runs.PSObject.Properties.Remove($k)
+    }
+
+    # max_entries 限制（超過 20 則移除最舊的已完成 run）
+    $maxEntries = 20  # 與 config/timeouts.yaml fsm.max_entries 同步
+    $runCount = ($fsm.runs.PSObject.Properties | Measure-Object).Count
+    if ($runCount -gt $maxEntries) {
+        $toRemoveCount = $runCount - $maxEntries
+        $doneRunsToRemove = @($fsm.runs.PSObject.Properties | Where-Object {
+            $phases = @($_.Value.phases.PSObject.Properties.Value)
+            $phases.Count -gt 0 -and ($phases | Where-Object { $_.state -eq "running" }).Count -eq 0
+        } | Sort-Object { $_.Value.started } | Select-Object -First $toRemoveCount -ExpandProperty Name)
+        foreach ($k in $doneRunsToRemove) {
+            $fsm.runs.PSObject.Properties.Remove($k)
+        }
     }
 
     $tmpFile = "$fsmFile.tmp"
@@ -286,6 +317,38 @@ function Set-FsmState {
     }
 
     Add-Content -Path $transitionFile -Value $transitionJson -Encoding UTF8
+}
+
+function Write-Span {
+    param(
+        [string]$TraceId,
+        [string]$SpanType,
+        [string]$Phase,
+        [string]$Agent = "",
+        [datetime]$StartTime,
+        [datetime]$EndTime,
+        [string]$Status
+    )
+    $spansFile = "$ResultsDir\spans-$TraceId.json"
+    $spans = @()
+    if (Test-Path $spansFile) {
+        try { $spans = @(Get-Content $spansFile -Raw | ConvertFrom-Json) } catch { $spans = @() }
+    }
+    $span = [PSCustomObject]@{
+        span_id    = [guid]::NewGuid().ToString("N").Substring(0, 8)
+        trace_id   = $TraceId
+        span_type  = $SpanType
+        phase      = $Phase
+        agent      = $Agent
+        start_time = $StartTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        end_time   = $EndTime.ToString("yyyy-MM-ddTHH:mm:ss")
+        duration_s = [int]($EndTime - $StartTime).TotalSeconds
+        status     = $Status
+    }
+    $spans += $span
+    try {
+        $spans | ConvertTo-Json -Depth 3 | Set-Content $spansFile -Encoding UTF8
+    } catch { Write-Log "[Span] Write failed: $_" }
 }
 
 # ============================================
@@ -556,6 +619,10 @@ if ($phase1Success) {
 } else {
     Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "failed" -AgentType "todoist" -Detail "query/plan failed"
 }
+# Level 3-A: Phase 1 span
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase1" `
+    -StartTime $phase1Start -EndTime $phase1End `
+    -Status (if ($phase1Success) { "ok" } else { "failed" })
 
 # ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
 if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
@@ -863,6 +930,17 @@ $phase2FailCount = @($phase2Jobs | Where-Object { $_.AgentName } | ForEach-Objec
     $n = $_.AgentName; $sections[$n]
 } | Where-Object { $_ -eq "failed" -or $_ -eq "timeout" }).Count
 Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "todoist" -Detail "$($phase2Jobs.Count) agents done, $phase2FailCount failed"
+# Level 3-A: per-agent spans + Phase 2 span
+foreach ($agentKey in $sections.Keys) {
+    if ($sections[$agentKey] -ne "pending") {
+        Write-Span -TraceId $traceId -SpanType "agent" -Phase "phase2" -Agent $agentKey `
+            -StartTime $phase2Start -EndTime (Get-Date) `
+            -Status ($sections[$agentKey] -ne $null ? $sections[$agentKey] : "unknown")
+    }
+}
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
+    -StartTime $phase2Start -EndTime (Get-Date) `
+    -Status (if ($phase2FailCount -eq 0) { "ok" } else { "failed" })
 
 # ============================================
 # Phase 3: Assembly (close + update + notify)
@@ -956,6 +1034,15 @@ $phaseBreakdown = [PSCustomObject]@{
     plan_type      = $plan.plan_type
 }
 
+# Level 3-A: Phase 3 + Overall span
+$runEnd = Get-Date
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase3" `
+    -StartTime $phase3StartOuter -EndTime $runEnd `
+    -Status (if ($phase3Success) { "ok" } else { "failed" })
+Write-Span -TraceId $traceId -SpanType "phase" -Phase "overall" `
+    -StartTime $startTime -EndTime $runEnd `
+    -Status (if ($phase3Success) { "ok" } else { "failed" })
+
 if ($phase3Success) {
     Write-Log ""
     Write-Log "=== Todoist Agent Team done (success): $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
@@ -971,5 +1058,10 @@ else {
 
 # Clean up logs older than 7 days
 Get-ChildItem -Path $LogDir -Filter "todoist-team_*.log" |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
+    Remove-Item -Force
+
+# Clean up spans files older than 7 days
+Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
     Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
     Remove-Item -Force

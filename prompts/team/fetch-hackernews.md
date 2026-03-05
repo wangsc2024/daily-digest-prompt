@@ -14,11 +14,11 @@
 - `skills/groq/SKILL.md`
 - `config/llm-router.yaml`（確認 `en_to_zh` 規則的 provider）
 
-### 步驟 2：檢查快取
-依 api-cache SKILL.md 指示，用 Read 讀取 `cache/hackernews.json`。
-- 若存在且 cached_at 在 2 小時內 → 使用快取資料，跳到步驟 5
-- 若 age < 0（未來時間）→ 視為無效快取，刪除檔案，呼叫 API
-- 若不存在或已過期 → 進入步驟 3
+### 步驟 2：讀取快取狀態（PS 預計算）
+優先讀取 `cache/status.json`（由 PowerShell 在本次執行啟動時預計算，勿自行計算時間差）：
+- `apis.hackernews.valid == true` → 直接讀取 `cache/hackernews.json` 使用快取資料，跳到步驟 5
+- `apis.hackernews.reason == "missing"` 或 `cache/status.json` 不存在 → 進入步驟 3
+- `apis.hackernews.reason == "expired"` → 進入步驟 3；若 API 失敗則降級讀取舊快取（source="cache_degraded"，results 中加入 `"data_freshness":"stale","cache_age_minutes":apis.hackernews.age_min`）
 
 ### 步驟 3：取得熱門文章
 依 hackernews-ai-digest SKILL.md 指示：

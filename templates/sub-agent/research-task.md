@@ -18,14 +18,15 @@
 ## 研究註冊表檢查（跨任務去重）
 
 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
-用 Read 讀取 `context/research-registry.json`：
-- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
-- 存在 → 列出近 7 天內的 entries（所有 task_type）
+優先讀取 `context/research-registry.json` 的 `summary` 欄位：
+- 不存在 → 用 Write 建立空 registry：`{"version":1,"summary":{"total":0,"last_updated":"","by_type":{},"recent_3d_topics":[],"saturated_types":[]},"entries":[]}`
+- 存在 → 讀 `summary.recent_3d_topics`（3 天冷卻判定）、`summary.by_type`（飽和度判定）
+- 僅在邊界判定時才讀完整 entries
 
 **判定規則（必須遵守）：**
-1. 若 registry 中 3 天內有 topic 與本次候選主題完全相同 → **必須換主題**
-2. 若 registry 中 7 天內有 ≥3 個相似的 topic → 優先探索不同方向
-3. 列出「近期已研究主題」供去重查詢交叉比對
+1. 若 `summary.recent_3d_topics` 中有與本次候選主題完全相同的 topic → **必須換主題**（3 天冷卻）
+2. 若 `summary.by_type.{task_type}` ≥ 3 → 優先探索不同方向
+3. 比對 `summary.recent_3d_topics`，避免跨類型重複
 
 ## 去重查詢（研究前必做，兩階段）
 
@@ -112,6 +113,7 @@ rm kb_notes.json
 }
 ```
 同時移除超過 7 天的舊 entry。
+**同步更新 summary**：total+1、by_type.{task_type}+1、recent_3d_topics 前插本次主題（保留最多 10 條）、last_updated 更新為今日日期。
 
 ## 品質自評迴圈
 1. 筆記結構是否完整？引用是否足夠？

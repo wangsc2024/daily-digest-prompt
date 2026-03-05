@@ -97,6 +97,20 @@ print(json.dumps(dupes, ensure_ascii=False, indent=2))
 - API 回應超時 → 重試 1 次（間隔 5 秒），仍失敗則跳過
 - 筆記數量為 0 → 輸出空報告，不報錯
 
+## 批次導入後清理
+
+批次導入（如大量匯入 `cache/notes_temp.json`）完成後，必須清理暫存檔，避免 cache/ 目錄累積大型檔案：
+
+```bash
+# 批次導入完成後執行
+rm -f cache/notes_temp.json
+```
+
+如 `cache/generate_site.py` 或其他非快取用途的腳本出現在 cache/ 目錄，請移至 `tools/` 目錄：
+```bash
+mv cache/generate_site.py tools/generate_site.py
+```
+
 ## 安全邊界
 - 僅分析和建議，不自動刪除任何筆記
 - 透過 API 操作，不直接修改資料庫

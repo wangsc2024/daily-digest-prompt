@@ -66,6 +66,13 @@ metrics:
     source: behavior-patterns.json
     weight: 5
 
+# 配置膨脹警戒閾值（analyze-config.ps1 使用）
+config_complexity:
+  claude_md_lines_warn: 300      # > 300 行警告（P0-A 優化後基準 ~220 行）
+  yaml_total_lines_warn: 3000    # > 3000 行警告
+  skill_index_lines_warn: 150    # > 150 行警告（P1-C 優化後基準 ~90 行）
+  auto_task_templates_warn: 25   # > 25 個模板警告
+
 # 參考專案比較（github-scout Skill 使用）
 comparison:
   reference_projects:

@@ -16,7 +16,7 @@
 # ============================================
 
 param(
-    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score", "trace", "task-board", "timeline")]
+    [ValidateSet("summary", "detail", "errors", "todoist", "trend", "health-score", "trace", "task-board", "timeline", "regression", "waterfall")]
     [string]$Mode = "summary",
 
     [int]$Days = 7,
@@ -1222,6 +1222,290 @@ function Show-Timeline {
 }
 
 # ============================================
+# Mode: waterfall
+# ============================================
+function Show-Waterfall {
+    <#
+    .SYNOPSIS
+        讀取 results/spans-{trace_id}.json 渲染 ASCII Waterfall 視覺化
+    .DESCRIPTION
+        顯示最近 N 次 Team Run 的 Phase/Agent 時序瀑布圖，
+        自動標注 P95 超時的 Phase。（Level 3-D）
+    #>
+    $ResultsDir = "$AgentDir\results"
+
+    if (-not (Test-Path $ResultsDir)) {
+        Write-Host "[Waterfall] results/ 目錄不存在（尚未有 Team Run 完成）" -ForegroundColor DarkGray
+        return
+    }
+
+    # 讀取最近 $Days 天內的 spans-*.json（以修改時間排序，最新優先）
+    $spansFiles = Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -ge (Get-Date).AddDays(-$Days) } |
+        Sort-Object LastWriteTime -Descending
+
+    if ($spansFiles.Count -eq 0) {
+        Write-Host "[Waterfall] 過去 $Days 天內無 Span 記錄（spans-*.json 不存在）" -ForegroundColor DarkGray
+        Write-Host "  提示：下次 Team Run 後將自動生成 Span 檔案" -ForegroundColor DarkGray
+        return
+    }
+
+    Write-Host "=== Waterfall 視覺化（最近 $Days 天，最多 5 次 Run）===" -ForegroundColor Cyan
+    Write-Host ""
+
+    $BAR_WIDTH = 40   # 橫軸總寬度（字元）
+    $shown = 0
+
+    foreach ($spansFile in $spansFiles) {
+        if ($shown -ge 5) { break }
+
+        try {
+            $spans = @(Get-Content $spansFile.FullName -Raw | ConvertFrom-Json)
+        } catch {
+            continue
+        }
+
+        if ($spans.Count -eq 0) { continue }
+        $shown++
+
+        # 取 overall span 作為基準時間軸
+        $overallSpan = $spans | Where-Object { $_.span_type -eq "phase" -and $_.phase -eq "overall" } | Select-Object -First 1
+        if (-not $overallSpan) {
+            # 若無 overall，用所有 span 的最小 start 和最大 end
+            $allStarts = $spans | ForEach-Object { [datetime]$_.start_time }
+            $allEnds   = $spans | ForEach-Object { [datetime]$_.end_time }
+            $runStart  = ($allStarts | Measure-Object -Minimum).Minimum
+            $totalSecs = [int](($allEnds | Measure-Object -Maximum).Maximum - $runStart).TotalSeconds
+        } else {
+            $runStart  = [datetime]$overallSpan.start_time
+            $totalSecs = $overallSpan.duration_s
+        }
+        if ($totalSecs -le 0) { continue }
+
+        $traceId = $spans[0].trace_id
+        $runDate = $runStart.ToString("yyyy-MM-dd HH:mm:ss")
+        Write-Host "Run: $traceId  [$runDate]  Total: ${totalSecs}s" -ForegroundColor White
+
+        # 依 phase 排序顯示（overall 最後）
+        $phaseOrder = @("phase1", "phase2", "phase3", "overall")
+        $phaseSpans = $spans | Where-Object { $_.span_type -eq "phase" } |
+            Sort-Object { $phaseOrder.IndexOf($_.phase) }
+        $agentSpans = $spans | Where-Object { $_.span_type -eq "agent" }
+
+        foreach ($span in $phaseSpans) {
+            $spanStart = [datetime]$span.start_time
+            $offsetS = [int]($spanStart - $runStart).TotalSeconds
+            $durS    = $span.duration_s
+            $pct     = [Math]::Min(1.0, $durS / $totalSecs)
+            $barLen  = [Math]::Max(1, [int]($pct * $BAR_WIDTH))
+            $offsetChars = [Math]::Min($BAR_WIDTH - 1, [int](($offsetS / $totalSecs) * $BAR_WIDTH))
+
+            $bar = " " * $offsetChars + "█" * $barLen
+
+            $color = switch ($span.status) {
+                "ok"      { "Green" }
+                "failed"  { "Red" }
+                "timeout" { "Yellow" }
+                "cache"   { "Cyan" }
+                default   { "DarkGray" }
+            }
+
+            $label = "$($span.phase.PadRight(8)) [$($span.status.PadRight(7))] ${durS}s"
+            Write-Host "  $($label.PadRight(30))" -NoNewline
+            Write-Host "|$bar" -ForegroundColor $color
+        }
+
+        # 顯示 agent 子 span（僅 phase1/phase2）
+        $agentGroups = $agentSpans | Group-Object { $_.phase }
+        foreach ($grp in $agentGroups) {
+            foreach ($span in $grp.Group) {
+                $durS  = $span.duration_s
+                $pct   = [Math]::Min(1.0, $durS / $totalSecs)
+                $barLen = [Math]::Max(1, [int]($pct * $BAR_WIDTH))
+                $bar   = "░" * $barLen
+
+                $color = switch ($span.status) {
+                    "success" { "Green" }
+                    "cache"   { "Cyan" }
+                    "failed"  { "Red" }
+                    "timeout" { "Yellow" }
+                    default   { "DarkGray" }
+                }
+
+                $label = "  └$($grp.Name)/$($span.agent.PadRight(12)) ${durS}s"
+                Write-Host "  $($label.PadRight(30))" -NoNewline
+                Write-Host "|$bar" -ForegroundColor $color
+            }
+        }
+
+        Write-Host ""
+    }
+
+    Write-Host "  ──── 圖例：█=Phase  ░=Agent  綠=ok  紅=failed  黃=timeout  青=cache ────" -ForegroundColor DarkGray
+}
+
+# Mode: regression
+# ============================================
+function Show-Regression {
+    $MetricsFile = "$AgentDir\context\metrics-daily.json"
+
+    if ($Format -eq "json") {
+        if (-not (Test-Path $MetricsFile)) {
+            @{ error = "metrics-daily.json 不存在" } | ConvertTo-Json
+            return
+        }
+        $data = Get-Content -Path $MetricsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $data | ConvertTo-Json -Depth 5
+        return
+    }
+
+    Write-Header "指標回歸分析（本週 vs 上週）"
+
+    if (-not (Test-Path $MetricsFile)) {
+        Write-Host "  尚無指標歷史（metrics-daily.json 不存在）" -ForegroundColor Gray
+        Write-Host "  提示：每次 Agent session 結束後自動更新" -ForegroundColor DarkGray
+        return
+    }
+
+    try {
+        $data = Get-Content -Path $MetricsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $records = @($data.records)
+    }
+    catch {
+        Write-Host "  metrics-daily.json 讀取失敗: $_" -ForegroundColor Red
+        return
+    }
+
+    if ($records.Count -lt 2) {
+        Write-Host "  資料不足（需至少 2 天記錄，目前 $($records.Count) 天）" -ForegroundColor Yellow
+        return
+    }
+
+    $today = (Get-Date).Date
+    $thisWeekStart = $today.AddDays(-7)
+    $lastWeekStart = $today.AddDays(-14)
+
+    $thisWeekRecs = @($records | Where-Object {
+        try { [datetime]$_.date -ge $thisWeekStart } catch { $false }
+    })
+    $lastWeekRecs = @($records | Where-Object {
+        try { [datetime]$_.date -ge $lastWeekStart -and [datetime]$_.date -lt $thisWeekStart } catch { $false }
+    })
+
+    Write-Section "對比窗口"
+    Write-Host "  本週（近 7 天）: $($thisWeekRecs.Count) 天記錄" -ForegroundColor White
+    Write-Host "  上週（7-14 天前）: $($lastWeekRecs.Count) 天記錄" -ForegroundColor White
+    Write-Host ""
+
+    if ($thisWeekRecs.Count -eq 0) {
+        Write-Host "  本週無記錄" -ForegroundColor Gray
+        return
+    }
+
+    $metrics = @(
+        @{ key = "cache_hit_ratio";      label = "快取命中率";    unit = "%";  higherBetter = $true  }
+        @{ key = "api_calls";            label = "API 呼叫數";    unit = "";   higherBetter = $false }
+        @{ key = "blocked_count";        label = "攔截次數/天";   unit = "";   higherBetter = $false }
+        @{ key = "error_count";          label = "錯誤次數/天";   unit = "";   higherBetter = $false }
+        @{ key = "loop_suspected_count"; label = "迴圈疑似/天";   unit = "";   higherBetter = $false }
+        @{ key = "total_tool_calls";     label = "工具呼叫/天";   unit = "";   higherBetter = $null  }
+        @{ key = "skill_reads";          label = "Skill 讀取/天"; unit = "";   higherBetter = $null  }
+        @{ key = "session_success_rate"; label = "Session成功率"; unit = "%";  higherBetter = $true  }
+    )
+
+    function Avg-Metric { param($recs, $key)
+        $vals = @($recs | ForEach-Object { $_.($key) } | Where-Object { $null -ne $_ })
+        if ($vals.Count -eq 0) { return $null }
+        return [math]::Round(($vals | Measure-Object -Average).Average, 1)
+    }
+
+    Write-Section "回歸對比（>20% 變化標注警示）"
+    Write-Host ("  {0,-22} {1,8}  {2,8}  {3,8}  {4}" -f "指標", "本週均值", "上週均值", "變化%", "評估") -ForegroundColor Gray
+    Write-Host ("  " + "-" * 60) -ForegroundColor Gray
+
+    $regressions = @()
+    $improvements = @()
+
+    foreach ($m in $metrics) {
+        $thisAvg = Avg-Metric -recs $thisWeekRecs -key $m.key
+        $lastAvg = Avg-Metric -recs $lastWeekRecs -key $m.key
+
+        if ($null -eq $thisAvg) { continue }
+
+        $thisStr = if ($null -ne $thisAvg) { "{0}{1}" -f $thisAvg, $m.unit } else { "N/A" }
+        $lastStr = if ($null -ne $lastAvg) { "{0}{1}" -f $lastAvg, $m.unit } else { "N/A" }
+
+        $changePct = $null
+        $eval = "→ 持平"
+        $evalColor = "White"
+
+        if ($null -ne $lastAvg -and $lastAvg -ne 0) {
+            $changePct = [math]::Round((($thisAvg - $lastAvg) / [math]::Abs($lastAvg)) * 100, 1)
+            $changeStr = if ($changePct -ge 0) { "+$changePct%" } else { "$changePct%" }
+
+            if ([math]::Abs($changePct) -lt 5) {
+                $eval = "→ 持平"
+                $evalColor = "White"
+            }
+            elseif ([math]::Abs($changePct) -ge 20) {
+                # 顯著變化
+                if ($null -ne $m.higherBetter) {
+                    $improved = ($changePct -gt 0 -and $m.higherBetter) -or ($changePct -lt 0 -and -not $m.higherBetter)
+                    if ($improved) {
+                        $eval = "▲ 改善 $changeStr"
+                        $evalColor = "Green"
+                        $improvements += "$($m.label): $changeStr"
+                    } else {
+                        $eval = "▼ 劣化 $changeStr"
+                        $evalColor = "Red"
+                        $regressions += "$($m.label): $changeStr"
+                    }
+                } else {
+                    $eval = "~ 變化 $changeStr"
+                    $evalColor = "Yellow"
+                }
+            }
+            else {
+                # 小變化 5-20%
+                if ($null -ne $m.higherBetter) {
+                    $improved = ($changePct -gt 0 -and $m.higherBetter) -or ($changePct -lt 0 -and -not $m.higherBetter)
+                    $eval = if ($improved) { "↑ $changeStr" } else { "↓ $changeStr" }
+                    $evalColor = if ($improved) { "Cyan" } else { "Yellow" }
+                } else {
+                    $eval = "~ $changeStr"
+                    $evalColor = "White"
+                }
+            }
+        }
+        elseif ($null -eq $lastAvg) {
+            $eval = "（上週無資料）"
+            $evalColor = "DarkGray"
+        }
+
+        Write-Host ("  {0,-22} {1,8}  {2,8}  " -f $m.label, $thisStr, $lastStr) -NoNewline -ForegroundColor White
+        Write-Host $eval -ForegroundColor $evalColor
+    }
+
+    # 摘要
+    Write-Host ""
+    if ($regressions.Count -gt 0) {
+        Write-Section "顯著劣化（需關注）"
+        foreach ($r in $regressions) { Write-Host "  ▼ $r" -ForegroundColor Red }
+    }
+    if ($improvements.Count -gt 0) {
+        Write-Section "顯著改善"
+        foreach ($i in $improvements) { Write-Host "  ▲ $i" -ForegroundColor Green }
+    }
+    if ($regressions.Count -eq 0 -and $improvements.Count -eq 0) {
+        Write-Host "  無顯著變化（所有指標變化 <20%）" -ForegroundColor Green
+    }
+
+    Write-Host ""
+    Write-Host "  資料來源: context/metrics-daily.json | 更新時間: $($data.updated)" -ForegroundColor DarkGray
+    Write-Host ""
+}
+
+# ============================================
 # Main dispatch
 # ============================================
 switch ($Mode) {
@@ -1234,4 +1518,6 @@ switch ($Mode) {
     "trace"        { Show-Trace }
     "task-board"   { Show-TaskBoard -BoardDays $Days }
     "timeline"     { Show-Timeline }
+    "regression"   { Show-Regression }
+    "waterfall"    { Show-Waterfall }
 }

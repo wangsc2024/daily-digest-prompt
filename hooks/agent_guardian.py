@@ -284,10 +284,14 @@ class CircuitBreaker:
     def _load_state(self) -> Dict:
         """載入狀態"""
         try:
-            with open(self.state_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return {}
+            from hook_utils import safe_load_json
+            return safe_load_json(self.state_file, default={})
+        except ImportError:
+            try:
+                with open(self.state_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return {}
 
     def _save_state(self, state: Dict):
         """保存狀態（原子寫入，防止並行 Agent 競態損壞）"""
@@ -333,6 +337,12 @@ class CircuitBreaker:
                 self._save_state(state)
             finally:
                 if lock_fd:
+                    # Windows msvcrt 必須先解鎖再關閉檔案
+                    try:
+                        import msvcrt
+                        msvcrt.locking(lock_fd.fileno(), msvcrt.LK_UNLCK, 1)
+                    except (ImportError, OSError, ValueError):
+                        pass
                     lock_fd.close()
                     try:
                         os.remove(lock_path)

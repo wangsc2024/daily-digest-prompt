@@ -1,0 +1,80 @@
+# SLO (Service Level Objectives) 定義
+# Level 4-A: 可量化的服務承諾與 Error Budget 治理
+# 由 on_stop_alert.py 和 check-health.ps1 讀取計算 Error Budget 消耗率
+# ---
+# Error Budget 計算公式：
+#   consumed_pct = (1 - actual / target) / (1 - target) × 100
+#   remaining_pct = 100 - consumed_pct
+#   Clamp to [-∞, 100]（可能超耗盡，顯示負值）
+# ---
+# warning_threshold: 剩餘預算低於此百分比時升級為 warning
+# critical_threshold: 剩餘預算低於此百分比（或耗盡）時升級為 critical
+
+version: 1
+
+slos:
+  - id: SLO-001
+    name: 每日摘要執行成功率
+    description: Phase 2 組裝成功的比例
+    metric: session_success_rate        # metrics-daily.json 欄位
+    metric_direction: higher_is_better  # higher → 越高越好
+    target: 0.995                       # 99.5%
+    window_days: 30
+    error_budget_pct: 0.5              # 30 天內允許失敗 0.5%（≈ 0.15 天）
+    warning_threshold: 30              # 剩餘預算 < 30% 時警告
+    critical_threshold: 10             # 剩餘預算 < 10% 時嚴重
+
+  - id: SLO-002
+    name: 快取命中率
+    description: cache-read 中命中（非 cache-miss）的比例
+    metric: cache_hit_ratio             # metrics-daily.json 欄位
+    metric_direction: higher_is_better
+    target: 0.40                        # 40%
+    window_days: 7
+    error_budget_pct: 60.0             # 目前 12.1%，預算較寬鬆（目標是改善）
+    warning_threshold: 20
+    critical_threshold: 0              # 耗盡即嚴重
+
+  - id: SLO-003
+    name: 攔截率上限
+    description: 被 Hook 攔截的工具呼叫比例
+    metric: blocked_count               # metrics-daily.json 欄位（次數，非比例）
+    metric_direction: lower_is_better   # lower → 越低越好
+    target: 3                           # 每日 ≤3 次攔截
+    window_days: 7
+    error_budget_pct: 100.0            # 超過 target 就開始消耗
+    warning_threshold: 30
+    critical_threshold: 10
+
+  - id: SLO-004
+    name: 錯誤率上限
+    description: 有 has_error=true 的工具呼叫比例
+    metric: error_count                 # metrics-daily.json 欄位（次數）
+    metric_direction: lower_is_better
+    target: 5                           # 每日 ≤5 次錯誤
+    window_days: 7
+    error_budget_pct: 100.0
+    warning_threshold: 30
+    critical_threshold: 10
+
+  - id: SLO-005
+    name: 迴圈疑似率上限
+    description: 觸發 loop-suspected 的次數
+    metric: loop_suspected              # metrics-daily.json 欄位
+    metric_direction: lower_is_better
+    target: 0                           # 每日 0 次迴圈（理想）
+    window_days: 14
+    error_budget_pct: 100.0            # 任何迴圈都消耗預算
+    warning_threshold: 50
+    critical_threshold: 20
+
+  - id: SLO-006
+    name: Skill 讀取完整率
+    description: Skill 在工作流中被實際讀取的次數
+    metric: skill_reads                 # metrics-daily.json 欄位
+    metric_direction: higher_is_better
+    target: 3                           # 每日 ≥3 次 Skill 使用（確保 Skill-First 落實）
+    window_days: 7
+    error_budget_pct: 100.0
+    warning_threshold: 30
+    critical_threshold: 10
