@@ -21,7 +21,19 @@
       "tool_calls": 152,
       "input_chars": 88472,
       "output_chars": 210747
+    },
+    "2026-03-06": {
+      "estimated_tokens": 2265932.0000000014,
+      "tool_calls": 1507,
+      "input_chars": 668923,
+      "output_chars": 7261839
+    },
+    "2026-03-07": {
+      "estimated_tokens": 1898473.1428571402,
+      "tool_calls": 1080,
+      "input_chars": 402788,
+      "output_chars": 6241868
     }
   },
-  "updated": "2026-03-05T18:14:34.529655"
+  "updated": "2026-03-07T08:35:00.241478"
 }

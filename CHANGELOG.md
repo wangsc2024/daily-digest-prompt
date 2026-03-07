@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `context/research-series.json` - 永久系列研究追蹤
 - `templates/shared/kb-depth-check.md` - 共用 4-Phase KB 深度模板
 - 自動任務新增至 19 個（+4：system-insight、self-heal、github-scout、chatroom-optimize）
-- 測試從 292 → 556 個（hooks 529 + skills 27）
+- 測試從 292 → 659 個（hooks 632 + skills 27）
 - `circuit-breaker-utils.ps1` - 斷路器工具（5 個 API 健康追蹤）
 - `state/failure-stats.json` - 失敗統計（5 種類型 + 30 天保留）
 - `state/run-fsm.json` - 有限狀態機追蹤

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-04T06:39:19.359782+08:00",
+  "updated_at": "2026-03-06T23:36:25.208859+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -433,7 +433,7 @@
       "domain": "法華經 / Lotus Sutra 佛學研究",
       "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-04",
+      "last_active": "2026-03-06",
       "tags": [
         "法華經",
         "佛學",
@@ -526,7 +526,8 @@
           "kb_notes": [
             "法華經一佛乘義理的系統總結",
             "法華經勸持品研究：比丘尼授記與末法弘經的二十行誓偈",
-            "法華經普賢菩薩勸發品研究：四法成就與法華圓經的究竟歸依"
+            "法華經普賢菩薩勸發品研究：四法成就與法華圓經的究竟歸依",
+            "法華經分別功德品研究：壽量品後的信解功德與天台五品弟子位"
           ],
           "covered_concepts": [
             "一佛乘系統總結",
@@ -546,7 +547,14 @@
             "法華全經流通分結構",
             "從序品到勸發品的首尾呼應",
             "法華經與華嚴經普賢菩薩會通",
-            "千佛授手往生兜率天"
+            "千佛授手往生兜率天",
+            "分別功德品全品義理",
+            "壽量品後即時證悟（六百八十萬億那由他恆河沙得無生法忍）",
+            "持經功德超越八十萬億那由他劫五波羅蜜",
+            "天台五品弟子位（隨喜/讀誦/說法/兼行六度/正行六度）",
+            "觀行即佛與六即佛體系",
+            "本門流通分起始",
+            "功德階梯（無生法忍→陀羅尼→無礙辯才→旋陀羅尼→不退法輪）"
           ]
         }
       },
@@ -556,14 +564,14 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "普賢菩薩勸發品完成。synthesis 階段可繼續補充分別功德品、隨喜功德品、法師功德品、囑累品、陀羅尼品、妙莊嚴王本事品"
+      "next_research_hint": "分別功德品完成。synthesis 階段可繼續補充隨喜功德品、法師功德品、囑累品、陀羅尼品、妙莊嚴王本事品、序品"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
       "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
       "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-04",
+      "last_active": "2026-03-06",
       "tags": [
         "淨土宗",
         "佛學",
@@ -651,7 +659,8 @@
           "status": "in_progress",
           "started_at": "2026-03-04",
           "kb_notes": [
-            "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進"
+            "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
+            "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀"
           ],
           "covered_concepts": [
             "淨土判教體系系統整理",
@@ -659,7 +668,15 @@
             "要門與弘願門的深層區分",
             "五願開示（善導大師三心釋）",
             "橫出三界與豎出三界的比較",
-            "淨土宗判教在中日兩國的不同發展"
+            "淨土宗判教在中日兩國的不同發展",
+            "華嚴淨土會通",
+            "普賢十大願王導歸極樂",
+            "毗盧遮那與阿彌陀佛同體",
+            "彭際清華嚴念佛三昧論五門",
+            "善財五十三參念佛法門",
+            "三經一體（華嚴大本/無量壽中本/阿彌陀小本）",
+            "念佛三昧為三昧之王",
+            "華嚴奧藏"
           ]
         }
       },
@@ -669,7 +686,7 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "synthesis 階段首篇：判教體系整理完成後，可繼續研究淨土宗與華嚴宗的會通（普賢十大願王導歸極樂）"
+      "next_research_hint": "華嚴淨土會通完成。可繼續研究省庵大師《勸發菩提心文》、天親菩薩《往生論》五念門、或淨土五經體系整理"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -771,6 +788,94 @@
         "ai-security-testing"
       ],
       "next_research_hint": "完成後進入 application：實作指南——如何在 CI/CD 管線中部署 AI Code Review"
+    },
+    "test-time-compute-reasoning": {
+      "series_id": "test-time-compute-reasoning",
+      "domain": "Test-Time Compute / Reasoning Models / Inference Scaling",
+      "description": "Test-Time Compute 與推理模型研究系列，涵蓋推理縮放定律、動態計算分配、PRM/ORM、主流模型架構",
+      "initiated_at": "2026-03-06",
+      "last_active": "2026-03-06",
+      "tags": [
+        "AI深度研究",
+        "Test-Time Compute",
+        "推理模型",
+        "Reasoning",
+        "推理縮放定律"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-06",
+          "kb_notes": [],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 PRM/ORM 訓練方法、Tree Search 演算法、推理 token 經濟學"
+    },
+    "aiops-devops-intelligence": {
+      "series_id": "aiops-devops-intelligence",
+      "domain": "AIOps / AI-Driven DevOps Intelligence",
+      "description": "AI 驅動的 DevOps 智能化研究系列：智能日誌分析、自動事件回應、預測性監控與自我修復基礎設施",
+      "initiated_at": "2026-03-06",
+      "last_active": "2026-03-06",
+      "tags": [
+        "AI",
+        "AIOps",
+        "DevOps",
+        "智能監控",
+        "日誌分析",
+        "事件回應"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-06",
+          "completed_at": "2026-03-06",
+          "kb_notes": [
+            "AIOps — AI 驅動的 DevOps 智能化完整指南：智能日誌分析、自動事件回應、預測性監控與自我修復基礎設施的工業級實踐（2026）"
+          ],
+          "covered_concepts": [
+            "AIOps定義",
+            "三大AI範式",
+            "平台比較",
+            "事件回應管線",
+            "根因分析",
+            "自動修復",
+            "MTTR量化"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism 階段：深入異常偵測演算法、因果 AI 原理、RAG 輔助診斷機制"
     }
   }
 }

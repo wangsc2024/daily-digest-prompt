@@ -8,20 +8,6 @@ schedules:
     retry: 0
     description: "每日健康檢查（07:15，寫 log + 推 ntfy）"
 
-  daily-digest-0615:
-    cron: "15 6 * * *"
-    script: run-agent-team.ps1
-    timeout: 900
-    retry: 1
-    description: "每日摘要 - 早（06:15）"
-
-  daily-digest-1645:
-    cron: "45 16 * * *"
-    script: run-agent-team.ps1
-    timeout: 900
-    retry: 1
-    description: "每日摘要 - 傍晚（16:45）"
-
   daily-digest-pm:
     cron: "15 21 * * *"
     script: run-agent-team.ps1
@@ -36,33 +22,18 @@ schedules:
     retry: 1
     description: "每日系統審查 - 團隊模式（00:40）"
 
-  todoist-single:
-    cron: "0 2-23 * * *"
-    interval: 60m
-    script: run-todoist-agent.ps1
-    timeout: 3600
-    retry: 0
-    description: "Todoist 單一模式（每小時整點）"
-
   todoist-team:
-    cron: "30 2-23 * * *"
+    cron: "30 1-23 * * *"
     interval: 60m
     script: run-todoist-agent-team.ps1
-    timeout: 3600
+    timeout: 4000
     retry: 0
     description: "Todoist 團隊模式（每小時半點）"
-
-  media-video-research:
-    cron: "20 13 * * *"
-    script: run-video-latest-research.ps1
-    timeout: 2400
-    retry: 0
-    description: "每日影片製作（13:20）：KB 最新深度研究報告 → Remotion MP4"
 
   media-podcast-buddhist:
     cron: "20 15 * * *"
     script: run-podcast-latest-buddhist.ps1
-    timeout: 2400
+    timeout: 4000
     retry: 0
     description: "每日 Podcast 製作（15:20）：KB 最新教觀綱宗筆記 → 雙主持人 MP3"
 
@@ -72,13 +43,6 @@ schedules:
     timeout: 300
     retry: 0
     description: "知識庫統一備份（每日 00:15，週日含 JSON 匯出）"
-
-  kb-verify-backup:
-    cron: "30 0 * * *"
-    script: kb-verify-backup.ps1
-    timeout: 60
-    retry: 0
-    description: "知識庫備份審查（每日 00:30，備份後驗證完整性，失敗時 ntfy 告警）"
 
   bot-server-restart:
     cron: "15 0 * * *"
@@ -91,9 +55,9 @@ schedules:
   bot-startup:
     trigger: startup
     delay: 30
-    command: "node bot.js"
+    script: bot/restart-bot.ps1
     workdir: "D:/Source/daily-digest-prompt/bot"
-    description: "Bot.js 聊天室伺服器（開機啟動，延遲 30s 等待網路）"
+    description: "Bot Server + Gun Relay 開機啟動（延遲 30s 等待網路）"
 
   groq-relay-startup:
     trigger: startup
@@ -120,18 +84,13 @@ schedules:
 | 排程名稱 | 觸發時間 | 腳本 | 超時 | 說明 |
 |---------|---------|------|------|------|
 | health-check | 每日 07:15 | check-health.ps1 -Scheduled | 120s (2min) | 健康檢查（log + ntfy） |
-| daily-digest-0615 | 每日 06:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 早 |
-| daily-digest-1645 | 每日 16:45 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 傍晚 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
-| todoist-single | 每小時整點 02:00-23:00 | run-todoist-agent.ps1 | 3600s (60min) | Todoist 單一模式 |
-| todoist-team | 每小時半點 02:30-23:30 | run-todoist-agent-team.ps1 | 3600s (60min) | Todoist 團隊模式 |
-| media-video-research | 每日 13:20 | run-video-latest-research.ps1 | 2400s (40min) | KB 最新深度研究報告 → Remotion MP4 |
-| media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 2400s (40min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
+| todoist-team | 每小時半點 01:30-23:30 | run-todoist-agent-team.ps1 | 4000s (~67min) | Todoist 團隊模式 |
+| media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 4000s (~67min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
-| kb-verify-backup | 每日 00:30 | kb-verify-backup.ps1 | 60s (1min) | 備份完整性審查（失敗時 ntfy 告警） |
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot Server + Gun Relay 重啟（確保 WebSocket 穩定） |
-| bot-startup | 開機啟動 +30s | node bot.js | 無限制 | Bot.js 聊天室伺服器 |
+| bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot Server + Gun Relay 開機啟動 |
 | groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
 | chatroom-scheduler-startup | 開機啟動 +60s | uv run python chatroom-scheduler.py | 無限制 | Chatroom 任務排程器 |
 
@@ -144,12 +103,6 @@ schedules:
 > **說明：** Todoist 任務 11:20 到期 → 11:30 的 todoist-team 排程查詢後執行。
 > Claude Agent 會讀取任務描述，按 MAINTENANCE.md 規範執行同步流程。
 > 同步輔助腳本：`D:\Source\game_web\sync-games.ps1`（非 AI 步驟用）
-
-## 雙軌比較說明
-
-兩種 Todoist 模式時間錯開 30 分鐘，比較效能與成功率：
-- **single-mode**：一個 claude 完成查詢+執行+通知，CLI 啟動快（~20s）
-- **team-mode**：Phase 1 查詢 → Phase 2 並行執行 → Phase 3 組裝，適合多任務
 
 ## 使用方式
 

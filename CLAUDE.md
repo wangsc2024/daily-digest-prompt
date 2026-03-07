@@ -141,9 +141,12 @@
 
 > **如何新增 ADR**：執行 `arch-evolution 模組 A`，自動從 `context/improvement-backlog.json` 轉化為 ADR。
 
-## Skills（共 26 個）
+## Skills（專案 26 個 + 全域 54 個）
 
-完整清單見 `skills/SKILL_INDEX.md`。Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含。
+- **專案 Skills**（26 個）：完整清單見 `skills/SKILL_INDEX.md`（19 核心 + 7 工具）
+- **全域 Cursor Skills**（54 個）：完整清單見 `C:\Users\user\.cursor\skills\SKILLS_INDEX.md`
+- **全域 Claude Skills**（56 個）：位於 `C:\Users\user\.claude\skills\`（含 code-assistant、issue-resolver-skill、knowledge-query、pingtung-news 等專屬 skills）
+- Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含
 
 ## ntfy 通知注意事項
 - Windows 環境必須用 JSON 檔案方式發送，不可用 inline JSON 字串（會亂碼）
