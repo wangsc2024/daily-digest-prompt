@@ -728,7 +728,10 @@ def check_gmail_token_expiry() -> "dict | None":
     except (json.JSONDecodeError, OSError):
         return None
 
-    refresh_token = token_data.get("refresh_token", "")
+    # 只取 refresh_token，立即清除其餘敏感欄位，避免 exception path 洩漏
+    refresh_token = token_data.pop("refresh_token", "")
+    token_data.clear()
+    del token_data
     if not refresh_token:
         return None
 

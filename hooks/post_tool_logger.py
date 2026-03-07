@@ -411,9 +411,10 @@ def main():
 
             output_snippet = tool_output[:500] if tool_output else ""
 
-            # 讀取 session 狀態
+            # 讀取 session 狀態（使用絕對路徑，防止 CWD 漂移）
             sid_prefix = (session_id or "unknown")[:8]
-            loop_state_file = os.path.join("state", f"loop-state-{sid_prefix}.json")
+            _proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            loop_state_file = os.path.join(_proj_root, "state", f"loop-state-{sid_prefix}.json")
             initial_state = None
             if os.path.exists(loop_state_file):
                 try:
@@ -427,7 +428,7 @@ def main():
 
             # 寫回新狀態
             try:
-                os.makedirs("state", exist_ok=True)
+                os.makedirs(os.path.join(_proj_root, "state"), exist_ok=True)
                 with open(loop_state_file, "w", encoding="utf-8") as f:
                     json.dump(detector.get_state(), f)
             except OSError:

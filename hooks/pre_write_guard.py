@@ -90,14 +90,12 @@ def _check_basename_in(rule, basename, file_path):
 
 
 def _check_path_traversal(file_path, project_root):
-    """檢查路徑是否逃逸專案目錄。僅在路徑含 .. 時觸發。"""
-    if ".." not in file_path:
-        return False, None
-
+    """檢查路徑是否逃逸專案目錄。對所有路徑解析後比對 project_root。"""
     try:
         resolved = os.path.abspath(os.path.normpath(file_path))
         norm_root = os.path.normpath(project_root)
-        if not resolved.startswith(norm_root):
+        # 確保 resolved 在 project_root 之內（含 root 本身）
+        if resolved != norm_root and not resolved.startswith(norm_root + os.sep):
             return True, resolved
     except (ValueError, OSError):
         return True, file_path

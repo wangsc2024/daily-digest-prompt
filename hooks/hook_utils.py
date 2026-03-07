@@ -251,7 +251,7 @@ def log_blocked_event(session_id, tool, summary, reason, guard_tag):
         "tool": tool,
         "event": "blocked",
         "reason": reason,
-        "summary": summary[:200],
+        "summary": sanitize_sensitive_data(summary[:200]),
         "tags": ["blocked", guard_tag],
     }
     with open(log_file, "a", encoding="utf-8") as f:
@@ -313,13 +313,16 @@ class file_lock:
         self._lock_fd = open(self.lock_path, "w")
         try:
             import msvcrt
-            msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
-        except (ImportError, OSError):
+            # 使用 LK_LOCK（阻塞等待）而非 LK_NBLCK，避免競態時靜默退化為無鎖
+            msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_LOCK, 1)
+        except ImportError:
             try:
                 import fcntl
-                fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX)
             except (ImportError, OSError):
                 pass  # 無鎖可用時退化為無鎖模式
+        except OSError:
+            pass  # Windows 上鎖定失敗時退化為無鎖（避免中斷 Agent 流程）
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

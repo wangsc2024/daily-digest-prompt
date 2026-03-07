@@ -58,13 +58,14 @@ class TestNulFile:
         assert tag == "nul-guard"
 
     @pytest.mark.parametrize("path", [
-        r"d:\Source\null.txt",
-        r"d:\Source\annul.txt",
-        r"d:\Source\file.nul.bak",
-        r"d:\Source\nully.txt",
+        "null.txt",
+        "annul.txt",
+        "file.nul.bak",
+        "nully.txt",
         "normal_file.txt",
     ])
     def test_should_allow(self, path):
+        """非 nul basename 的檔案應放行（使用相對路徑避免觸發路徑遍歷規則）。"""
         blocked, _, _ = check_write_path(path)
         assert not blocked, f"Should not block: {path}"
 
@@ -209,3 +210,53 @@ class TestEdgeCases:
         rules = [{"id": "bad", "check": "nonexistent_type", "guard_tag": "test"}]
         blocked, _, _ = check_write_path("anything", rules)
         assert not blocked
+
+
+class TestPathTraversalAbsolutePath:
+    """回歸測試：絕對路徑逃逸（P0-1 修復驗證）。
+
+    修復前 _check_path_traversal 僅檢查 '..' 字元，
+    攻擊者可用不含 '..' 的絕對路徑直接逃逸專案目錄。
+    """
+
+    def test_absolute_path_outside_project_blocked(self, tmp_path):
+        """不含 .. 的絕對路徑指向專案外應被攔截。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        evil_path = str(tmp_path / "outside" / "evil.txt")
+        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
+        assert blocked, f"Expected block for absolute escape: {evil_path}"
+        assert tag == "traversal-guard"
+
+    def test_absolute_path_system_dir_blocked(self, tmp_path):
+        """寫入系統目錄（如 C:\\Windows）應被攔截。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        system_path = r"C:\Windows\System32\evil.dll"
+        blocked, _, tag = check_write_path(system_path, project_root=fake_root)
+        assert blocked, f"Expected block for system path: {system_path}"
+        assert tag == "traversal-guard"
+
+    def test_absolute_path_within_project_allowed(self, tmp_path):
+        """絕對路徑仍在專案內應放行。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        safe_path = os.path.join(fake_root, "config", "test.yaml")
+        blocked, _, _ = check_write_path(safe_path, project_root=fake_root)
+        assert not blocked, f"Should not block: {safe_path}"
+
+    def test_project_root_itself_allowed(self, tmp_path):
+        """寫入專案根目錄本身應放行。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        blocked, _, _ = check_write_path(fake_root, project_root=fake_root)
+        assert not blocked
+
+    def test_similar_prefix_dir_blocked(self, tmp_path):
+        """路徑前綴類似但非子目錄應被攔截（如 project-evil/ vs project/）。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        evil_path = str(tmp_path / "project-evil" / "payload.txt")
+        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
+        assert blocked, f"Expected block for prefix trick: {evil_path}"
+        assert tag == "traversal-guard"
