@@ -1,0 +1,500 @@
+# config/kb-content-scoring.yaml
+# KB 知識庫內容評分系統配置
+# 關聯組件：
+#   - skills/kb-curator/SKILL.md → 模組 E 使用此配置
+#   - bot/groq-relay.js          → kb_score mode
+#   - config/llm-router.yaml     → kb_content_score 路由
+#   - specs/kb-content-scoring/spec.md → 完整規格
+
+version: 3
+
+# ============================================================
+# 維度定義與權重（合計 100）
+# ============================================================
+# v3 變更：新增維度 D「知識價值」，四維度權重重分配
+#   v1: A=50%, B=50%
+#   v2: A=30%, B=30%, C=40%
+#   v3: A=15%, B=15%, C=35%, D=35%
+#   設計理念：A/B 是表層篩選，C/D 是深層價值判斷
+#     A「非知識」：快速排除明顯非知識
+#     B「完整性」：結構面檢查
+#     C「保留價值」：排除衍生品/中間產物
+#     D「知識價值」：正面評估真正的知識含量
+dimensions:
+
+  # --- 維度 A：非知識訊號（權重 15%）---
+  non_knowledge:
+    label: "非知識訊號"
+    weight: 15
+    description: "偵測非知識性內容：stub、模板殘留、任務日誌、純連結、極短/空白、重複"
+    sub_items:
+
+      - id: "A.1"
+        name: "Stub / 佔位符"
+        max_score: 5
+        check_type: regex_negative
+        pattern: "TODO|TBD|待補充|待續|\\.\\.\\.|___"
+        scoring:
+          no_match: 5
+          match_once: 1
+          match_multiple: 0
+
+      - id: "A.2"
+        name: "Meta / 模板語言"
+        max_score: 5
+        check_type: regex_negative
+        pattern: "請填寫|請補充|本模板|\\{\\{.*\\}\\}"
+        scoring:
+          no_match: 5
+          match_once: 1
+          match_multiple: 0
+
+      - id: "A.3"
+        name: "任務 / 日誌型"
+        max_score: 5
+        check_type: regex_negative
+        pattern: "完成時間|執行結果|步驟\\s*\\d|status:|exit_code"
+        scoring:
+          no_match: 5
+          match_once: 2
+          match_multiple: 0
+
+      - id: "A.4"
+        name: "純連結無脈絡"
+        max_score: 5
+        check_type: link_density
+        thresholds:
+          min_links: 3
+          min_text_after_strip: 50
+        scoring:
+          normal: 5
+          link_heavy: 2
+          link_only: 0
+
+      - id: "A.5"
+        name: "空 / 極短內容"
+        max_score: 5
+        check_type: length
+        thresholds:
+          - { max: 29, score: 0 }
+          - { max: 49, score: 1 }
+          - { max: 99, score: 2 }
+          - { max: 199, score: 4 }
+          - { min: 200, score: 5 }
+
+      - id: "A.6"
+        name: "重複 / 樣板"
+        max_score: 5
+        check_type: similarity
+        algorithm: "difflib.SequenceMatcher"
+        thresholds:
+          - { min_ratio: 0.95, score: 0, label: "完全重複" }
+          - { min_ratio: 0.90, score: 1, label: "高度相似" }
+          - { min_ratio: 0.80, score: 3, label: "部分相似" }
+          - { below: 0.80, score: 5, label: "獨特" }
+
+  # --- 維度 B：完整性訊號（權重 15%）---
+  completeness:
+    label: "完整性訊號"
+    weight: 15
+    description: "評估知識完整度：結構、密度、概念、引用、深度、結尾"
+    sub_items:
+
+      - id: "B.1"
+        name: "結構完整性"
+        max_score: 5
+        check_type: structure
+        indicators:
+          heading_count: "##"
+          list_line_count: "^\\s*[-*]|^\\s*\\d+\\."
+        scoring:
+          - { heading: 0, list: 0, score: 0 }
+          - { heading: 0, list_min: 1, score: 2 }
+          - { heading_min: 1, list: 0, score: 2 }
+          - { heading_min: 1, list_min: 1, score: 4 }
+          - { heading_min: 3, list_min: 3, score: 5 }
+
+      - id: "B.2"
+        name: "資訊密度"
+        max_score: 5
+        check_type: composite
+        layers:
+          paragraph:
+            min_paragraphs: 2
+            optimal_avg_length: [40, 200]
+          entropy:
+            min_text_length: 50
+            char_entropy:
+              optimal_range: [7, 11]
+              low_flag: 7
+              high_flag: 12
+            redundancy:
+              threshold: 0.5
+        scoring:
+          - { paragraphs_lt: 2, score: 1 }
+          - { avg_len_lt: 40, score: 2 }
+          - { entropy_low: true, score: 1, reason: "H < 7, 疑似重複" }
+          - { entropy_high: true, score: 2, reason: "H > 12, 需人工檢查" }
+          - { redundancy_high: true, score: 2, reason: "R > 0.5, 高冗餘" }
+          - { all_normal: true, score: 5 }
+
+      - id: "B.3"
+        name: "概念覆蓋"
+        max_score: 5
+        check_type: keyword_or_llm
+        heuristic_keywords: "是|即|指|定義|說明|意指|原理|概念|機制|方法"
+        llm_field: "concept_count"
+        scoring:
+          - { keywords: 0, score: 0, label: "無定義性語言" }
+          - { keywords_min: 1, score: 2, label: "有少量定義" }
+          - { keywords_min: 3, score: 4, label: "有多處定義" }
+          - { llm_concepts_min: 5, score: 5, label: "LLM 確認概念充足" }
+
+      - id: "B.4"
+        name: "來源 / 引用"
+        max_score: 5
+        check_type: regex_positive
+        pattern: "\\[\\d+\\]|參考|來源|引用|https?://|\\[\\["
+        scoring:
+          no_match: 0
+          match_once: 3
+          match_multiple: 5
+
+      - id: "B.5"
+        name: "深度層級"
+        max_score: 5
+        check_type: keyword_or_llm
+        stage_keywords:
+          foundation: "概念|定義|架構|簡介|總覽"
+          mechanism: "原理|機制|演算法|內部|實作細節"
+          application: "範例|實作|部署|案例|程式碼"
+          optimization: "效能|優化|benchmark|最佳實踐|trade-off"
+          synthesis: "整合|跨|連結|比較|未來展望"
+        llm_field: "depth_level"
+        scoring:
+          none: 0
+          foundation: 1
+          mechanism: 2
+          application: 3
+          optimization: 4
+          synthesis: 5
+
+      - id: "B.6"
+        name: "結尾完整性"
+        max_score: 5
+        check_type: regex_negative
+        check_scope: "tail_100"
+        pattern: "待續|\\.\\.\\.$|\\(未完\\)|\\(to be continued\\)"
+        scoring:
+          no_match: 5
+          match: 0
+
+  # --- 維度 C：保留價值（權重 35%）--- [v2 新增]
+  # 核心原則：知識庫應存放「可檢索、可複用的原創知識」，
+  #           而非衍生產物、過渡中間檔、或已有其他載體的內容。
+  retention_value:
+    label: "保留價值"
+    weight: 35
+    description: "評估筆記是否值得長期保留：原創性、可檢索性、獨立價值、是否有更好的載體"
+    sub_items:
+
+      - id: "C.1"
+        name: "衍生內容偵測"
+        max_score: 5
+        check_type: regex_negative
+        description: "由其他內容自動改寫/生成的衍生品（Podcast 腳本、翻譯稿等）"
+        # 偵測典型衍生內容格式特徵
+        patterns:
+          podcast_script: "主持人\\s*[A-Z（]|Podcast\\s*腳本|對話腳本|雙主持人"
+          auto_generated: "生成時間|自動生成|Auto-generated|輸出：.*\\.mp3|輸出：.*\\.wav"
+          translation: "^翻譯稿|^譯文|原文：|Original:"
+        scoring:
+          no_match: 5                 # 非衍生 → 滿分
+          match_one_pattern: 0        # 命中任一衍生模式 → 0 分
+        hard_cap: "命中時，維度 C 總分上限 10"
+
+      - id: "C.2"
+        name: "已有其他載體"
+        max_score: 5
+        check_type: regex_negative
+        description: "內容已有 MP3/PDF/DOCX 等最終產物，文字稿僅為中間過渡"
+        pattern: "\\.mp3|\\.wav|\\.pdf|\\.docx|output.*podcasts|output.*audio"
+        scoring:
+          no_match: 5                 # 無其他載體引用 → 滿分
+          match: 0                    # 有最終產物 → 文字稿價值為 0
+
+      - id: "C.3"
+        name: "可檢索參考價值"
+        max_score: 5
+        check_type: format_analysis
+        description: "知識庫內容應是可被搜尋、引用、再組合的原子化知識"
+        # 口語化對話格式的可檢索性極低
+        negative_indicators:
+          - "你好|歡迎來到|今天我們|聽眾朋友"
+          - "哇|嗯|對|沒錯|好問題"
+          - "節目|集|下一集|本集"
+        scoring:
+          conversational_ratio_high: 0  # 口語化比例 > 30% → 0 分
+          conversational_ratio_mid: 2   # 口語化比例 10-30% → 2 分
+          conversational_ratio_low: 5   # 口語化比例 < 10% → 5 分
+
+      - id: "C.4"
+        name: "原創獨立價值"
+        max_score: 5
+        check_type: composite
+        description: "內容是否為原創研究/分析/整理，而非格式轉換或工作流程中間產物"
+        indicators:
+          # 原創知識的正向訊號
+          original_signals: "研究發現|分析結果|本文提出|本研究|歸納|比較分析|系統整理"
+          # 格式轉換的負向訊號
+          format_conversion: "改寫|腳本化|口語化|對話化|將.*轉為|based on note"
+          # 工作流程中間產物的負向訊號（Agent 執行結果/變更紀錄/任務日誌）
+          workflow_artifact: "前置步驟.*結果|\\[前置步驟|執行摘要|驗收條件.*通過|所有.*均已通過|✅.*完成|## 優化概述|## 優化項目|### 問題\\n|### 解法\\n|### 效益"
+        scoring:
+          has_original: 5             # 有原創訊號 → 滿分
+          neutral: 3                  # 無明顯訊號 → 中等
+          has_conversion: 0           # 格式轉換 → 0 分
+          has_workflow_artifact: 0    # 工作流程中間產物 → 0 分
+
+      - id: "C.5"
+        name: "標題資訊性"
+        max_score: 5
+        check_type: title_analysis
+        description: "標題應描述知識主題，而非以 ID/代號/任務指令命名"
+        patterns:
+          # 低資訊量：ID 命名
+          low_info: "^Podcast\\s*腳本：note-|^翻譯：note-|^note-[0-9a-f]|^untitled"
+          # 低資訊量：任務指令型（動詞開頭的執行指令，非知識主題）
+          task_instruction: "^將.*匯出|^根據.*撰寫|^收集並|^蒐集.*並|^進行.*蒐集|^提供一份|^於今天.*提出|^\\[WORKDIR"
+          # 中等（有主題但有格式前綴）
+          mid_info: "^Podcast\\s*腳本：[^n]"
+          # 高資訊量（直接描述知識主題）
+          high_info: null
+        scoring:
+          low_info: 0                 # ID 命名 → 0 分
+          task_instruction: 0         # 任務指令 → 0 分
+          mid_info: 2                 # 有主題但有前綴
+          high_info: 5                # 直接描述知識主題
+
+      - id: "C.6"
+        name: "工作流程中間產物"
+        max_score: 5
+        check_type: regex_negative
+        description: "Agent 執行結果、變更紀錄、commit log 等過渡性質的產出"
+        patterns:
+          agent_output: "前置步驟\\s*s\\d|\\[前置步驟|執行摘要|驗收條件|所有.*均已通過"
+          changelog: "## 優化概述|## 優化項目|### 問題$|### 解法$|### 效益|## 變更紀錄"
+          task_result: "✅.*完成|✅.*執行|📚.*主要發現|任務完成|task completed"
+        scoring:
+          no_match: 5                 # 非工作流程產物 → 滿分
+          match_one_pattern: 0        # 命中任一 → 0 分
+
+  # --- 維度 D：知識價值（權重 35%）--- [v3 新增]
+  # 核心原則：正面評估內容的真正知識含量。
+  #           知識 ≠ 操作紀錄。知識應具備通用性、解釋深度、時效獨立性。
+  knowledge_value:
+    label: "知識價值"
+    weight: 35
+    description: "正面評估內容的知識含量：通用性、解釋深度、時效獨立性、複用潛力、知識密度"
+    sub_items:
+
+      - id: "D.1"
+        name: "通用性"
+        max_score: 5
+        check_type: composite
+        description: "知識是否可跨專案/跨場景複用，而非僅限於特定專案的操作紀錄"
+        indicators:
+          project_specific: "daily-digest-prompt|D:\\\\Source|C:\\\\Users|D:/Source|hook_utils|post_tool_logger|kb_scoring|groq-relay|run-agent|run-todoist|HEARTBEAT\\.md"
+          implementation_detail: "\\w+\\.py|\\w+\\.js|\\w+\\.ps1|\\w+\\.yaml|def \\w+|function \\w+|class \\w+"
+          general_knowledge: "理論|原理|方法論|框架|模式|策略|思想|哲學|歷史|比較|分析|研究|文獻"
+        scoring:
+          project_specific_heavy: 0    # 專案特定詞彙 >= 5 次
+          project_specific_some: 1     # 專案特定詞彙 1-4 次
+          implementation_heavy: 2      # 實作細節多但有些通用
+          mixed: 3
+          general: 5                   # 通用知識
+
+      - id: "D.2"
+        name: "解釋深度"
+        max_score: 5
+        check_type: keyword_ratio
+        description: "內容是否解釋 WHY/HOW（知識），而非僅記錄 WHAT（操作）"
+        indicators:
+          explanatory: "因為|因此|所以|原因|這是因為|其原理|之所以|本質上|換言之|意味著|根本原因|背後|邏輯是"
+          procedural: "先|然後|接著|最後|步驟|執行|完成|建立|修改|更新|刪除|部署|安裝|設定|啟動"
+        scoring:
+          explanatory_dominant: 5
+          balanced: 3
+          procedural_dominant: 1
+          procedural_only: 0
+
+      - id: "D.3"
+        name: "時效獨立性"
+        max_score: 5
+        check_type: regex_negative
+        description: "知識不應綁定特定時間點；時效性內容隨時間貶值"
+        patterns:
+          date_specific: "2026-\\d{2}-\\d{2}|20260\\d{5}|今天|昨天|明天|今日|本週|上週|本月"
+          time_specific: "於.*\\d{1,2}[：:]\\d{2}|\\d{1,2}點|今天\\s*\\d"
+          version_specific: "v\\d+\\.\\d+\\.\\d+.*優化|v\\d+\\.\\d+\\.\\d+.*記錄|v\\d+\\.\\d+\\.\\d+.*更新"
+        scoring:
+          no_time_refs: 5
+          few_time_refs: 3             # 1-2 個時間引用
+          time_bound: 0                # 3+ 個或標題含日期
+
+      - id: "D.4"
+        name: "複用潛力"
+        max_score: 5
+        check_type: composite
+        description: "內容是否適合被搜尋、引用、再組合到其他知識體系中"
+        indicators:
+          reusable: "## 一|## 二|## 三|什麼是|如何|為什麼|常見|最佳實踐|完整指南|深度分析|研究報告|文獻回顧"
+          one_time: "## 任務|## 執行結果|## 優化項目|## 變更|修正紀錄|commit|PR #|issue #"
+        scoring:
+          reusable_dominant: 5
+          mixed: 3
+          one_time_dominant: 0
+
+      - id: "D.5"
+        name: "知識密度"
+        max_score: 5
+        check_type: keyword_ratio
+        description: "知識性詞彙 vs 操作性詞彙的比例"
+        indicators:
+          knowledge_terms: "概念|原理|方法|技術|框架|模式|策略|理論|思想|哲學|傳統|分析|研究|比較|歷史|演進|文獻|學術|定義|分類|系統|體系|脈絡"
+          operational_terms: "執行|完成|建立|修改|更新|刪除|部署|安裝|設定|啟動|修正|優化|重構|遷移|備份|測試|驗證|輸出|匯出|匯入"
+        scoring:
+          knowledge_dominant: 5
+          knowledge_more: 4
+          balanced: 3
+          operational_more: 1
+          operational_dominant: 0
+
+# ============================================================
+# 評分公式
+# ============================================================
+formula:
+  description: "總分 = 維度A + 維度B + 維度C + 維度D"
+  dimension_score: "(Σ子項分數 / Σ子項滿分) × 維度權重"
+  total: "dim_A + dim_B + dim_C + dim_D"
+  range: [0, 100]
+  # A(15%) + B(15%) = 30% 表層篩選
+  # C(35%) + D(35%) = 70% 深層價值判斷
+  # hard_cap：衍生內容命中 → C 維度上限 10
+
+# ============================================================
+# 等級門檻
+# ============================================================
+grade_thresholds:
+  S:
+    min: 90
+    label: "卓越"
+    action: "可作為範本"
+  A:
+    min: 75
+    label: "優秀"
+    action: "保留"
+  B:
+    min: 60
+    label: "良好"
+    action: "保留，可優化"
+  C:
+    min: 45
+    label: "及格"
+    action: "建議優化補強"
+  D:
+    min: 30
+    label: "低價值"
+    action: "建議歸檔或刪除"
+  F:
+    min: 0
+    label: "無保留價值"
+    action: "優先刪除"
+
+# ============================================================
+# 校準規則（Hard Caps，防止誤判）
+# ============================================================
+calibration:
+  baseline: |
+    四維度設計理念（v3）：
+    - A（非知識）15%：快速排除明顯非知識
+    - B（完整性）15%：結構面篩選
+    - C（保留價值）35%：排除衍生品/中間產物
+    - D（知識價值）35%：正面評估通用性、解釋深度、時效獨立性、複用潛力、知識密度
+    典型得分：通用知識 70-90，專案技術文件 50-65，變更紀錄/任務結果 25-45，廢棄內容 0-20。
+
+  hard_caps:
+    - condition: "contentText 少於 30 字"
+      effect: "max_total_score = 20"
+
+    - condition: "含 TODO 或 TBD 或 待補充"
+      dimension: "non_knowledge"
+      effect: "penalty = -15"
+
+    - condition: "無任何 ## 標題且無列表"
+      dimension: "completeness"
+      effect: "max_dimension_score = 40"
+
+    - condition: "字元熵 H < 5"
+      dimension: "non_knowledge"
+      effect: "penalty = -10"
+      reason: "極高重複性"
+
+    - condition: "C.1 衍生內容偵測命中"
+      dimension: "retention_value"
+      effect: "max_dimension_score = 10"
+      reason: "衍生品不應得到高保留分數"
+
+    - condition: "C.2 已有其他載體命中 且 C.1 命中"
+      effect: "max_total_score = 35"
+      reason: "衍生品 + 已有最終產物 → 文字稿完全多餘"
+
+  evidence_policy: |
+    每個子項需有可驗證的證據（正則匹配結果、字數、熵值、模式命中）。
+    不可用「看起來不錯」等主觀描述。
+    保留價值維度的證據應記錄具體命中的模式名稱與匹配文字。
+
+# ============================================================
+# LLM 語義評分配置
+# ============================================================
+llm:
+  enabled: true
+  provider: groq_relay
+  mode: kb_score
+  endpoint: "http://localhost:3002/groq/chat"
+  health_check: "http://localhost:3002/groq/health"
+
+  # 觸發條件（僅篩選後子集才呼叫 LLM）
+  trigger:
+    condition: "total_heuristic_score < 60 OR non_knowledge_flags >= 2"
+    description: "規則評分低於 60 分，或非知識標記 >= 2 項"
+
+  # 速率與批次
+  batch:
+    max_per_run: 20
+    delay_between_ms: 13000         # ~4.6 req/min，低於 5 req/min 限制
+    strategy: sequential
+    timeout_per_item_s: 20
+
+  # 快取
+  cache:
+    ttl_hours: 24
+    key_pattern: "kb_score::{noteId}::{contentHash_first500}"
+
+  # 降級策略
+  fallback:
+    on_unavailable: use_heuristics  # 用關鍵字近似取代 LLM
+    on_429: skip_and_log            # 不重試，避免阻塞
+    on_timeout: skip_and_log
+    log_field: "llm_skipped"
+    log_reason_field: "llm_skip_reason"
+
+# ============================================================
+# 輸出配置
+# ============================================================
+output:
+  report_path: "results/kb-content-score-report.json"
+  include_per_note: true            # 每筆筆記的詳細評分
+  include_summary: true             # 彙總統計
+  include_recommendations: true     # 建議動作列表
+  score_precision: 0                # 分數取整數

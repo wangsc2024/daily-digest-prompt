@@ -34,6 +34,7 @@ $ToolsDir = Join-Path $AgentDir "tools"
 $LogDir = Join-Path $AgentDir "logs"
 $OutputDir = Join-Path $AgentDir "output\podcasts"
 $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$FileTimestamp = Get-Date -Format "yyyyMMddHHmm"
 
 # ─── 短 ID → 完整 UUID 解析 ───
 if ($NoteId -and $NoteId.Length -lt 36) {
@@ -152,15 +153,24 @@ Write-Log "腳本生成完成，共 $turnCount 段對話"
 # 讀取 Phase 1 記錄的筆記 meta（供後續更新歷史）
 $selectedNoteId = ""
 $selectedNoteTitle = ""
+$podcastTitle = ""
 if (Test-Path $MetaFile) {
     try {
         $podcastMeta = Get-Content $MetaFile -Raw -Encoding UTF8 | ConvertFrom-Json
         $selectedNoteId    = $podcastMeta.note_id
         $selectedNoteTitle = $podcastMeta.note_title
+        $podcastTitle      = $podcastMeta.podcast_title
         Write-Log "選用筆記：$selectedNoteTitle（ID: $selectedNoteId）"
+        if ($podcastTitle) { Write-Log "播客主題標題：$podcastTitle" }
     } catch {
         Write-Log "[WARN] 讀取 podcast-meta.json 失敗: $_"
     }
+}
+
+# 若 meta 未提供 podcast_title，以 Query 或 note 短 ID 作為後備
+if (-not $podcastTitle) {
+    $podcastTitle = if ($Query) { $Query } else { "note-$($NoteId.Substring(0, [Math]::Min(8, $NoteId.Length)))" }
+    Write-Log "[WARN] podcast_title 未寫入 meta，使用後備值：$podcastTitle"
 }
 
 # ============================================================
@@ -201,7 +211,10 @@ if (-not $phase2Success) {
 # ============================================================
 Write-Log "--- Phase 3: 音訊合併 + 正規化 → MP3 ---"
 
-$OutFile = Join-Path $OutputDir "${Slug}_$Timestamp.mp3"
+# 以 podcast_title 建立檔名（移除非法字元，限 20 字）
+$safeTitle = $podcastTitle -replace '[/\\:*?"<>|\r\n]', '' -replace '\s+', ''
+$safeTitle = $safeTitle.Substring(0, [Math]::Min(20, $safeTitle.Length))
+$OutFile = Join-Path $OutputDir "${safeTitle}_${FileTimestamp}.mp3"
 $phase3Start = Get-Date
 
 $concatArgs = @(
@@ -233,11 +246,7 @@ try {
         ForEach-Object { try { $_ | ConvertFrom-Json } catch { $null } } |
         Where-Object { $_ }
 
-    $kbTitle = if ($NoteId) {
-        "Podcast 腳本：note-$($NoteId.Substring(0, [Math]::Min(8, $NoteId.Length)))"
-    } else {
-        "Podcast 腳本：$Query"
-    }
+    $kbTitle = "Podcast 腳本：$podcastTitle"
 
     $sb = [System.Text.StringBuilder]::new()
     [void]$sb.AppendLine("# $kbTitle")
@@ -283,8 +292,8 @@ try {
     if (-not (Test-Path $uploadScript)) {
         Write-Log "[WARN] 找不到 upload-podcast.ps1，跳過上傳"
     } else {
-        $uploadTitle = if ($Query) { $Query } else { "note-$($NoteId.Substring(0, [Math]::Min(8, $NoteId.Length)))" }
-        $uploadTopic  = $uploadTitle
+        $uploadTitle = if ($selectedNoteTitle) { $selectedNoteTitle } elseif ($Query) { $Query } else { $podcastTitle }
+        $uploadTopic  = $podcastTitle
         $phase5Start = Get-Date
         $uploadJson = pwsh -ExecutionPolicy Bypass -File $uploadScript -LocalPath $OutFile -Title $uploadTitle -Topic $uploadTopic -Slug $Slug 2>&1 |
             Where-Object { $_ -match '^\{' } | Select-Object -Last 1
@@ -341,11 +350,7 @@ if ($selectedNoteId -and (Test-Path $OutFile)) {
 # ============================================================
 Write-Log "--- Phase 6: ntfy 通知 ---"
 try {
-    $title = if ($NoteId) {
-        "Podcast 完成：note-$($NoteId.Substring(0, [Math]::Min(8, $NoteId.Length)))"
-    } else {
-        "Podcast 完成：$Query"
-    }
+    $title = "Podcast 完成：$podcastTitle"
     $sizeMBDisplay = if (Test-Path $OutFile) {
         [math]::Round((Get-Item $OutFile).Length / 1MB, 1)
     } else { "?" }

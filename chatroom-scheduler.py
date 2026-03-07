@@ -11,21 +11,32 @@ chatroom-scheduler.py — 聊天室任務排程器
 
 import schedule
 import subprocess
+import sys
 import time
 import os
 import logging
 import urllib.request
 import urllib.error
 
-# 設定日誌
+# 設定日誌（寫入 bot/logs/ 目錄）
+# Windows 上 Start-Process -WindowStyle Hidden 啟動的進程沒有 console，
+# StreamHandler 寫入 sys.stderr 會觸發異常導致進程崩潰，故僅在 stderr 可用時才加。
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s"
-logging.basicConfig(
-    level=logging.INFO,
-    format=LOG_FORMAT,
-    handlers=[
-        logging.StreamHandler(),
-    ]
-)
+_log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bot", "logs")
+os.makedirs(_log_dir, exist_ok=True)
+_log_file = os.path.join(_log_dir, "chatroom-scheduler.log")
+
+_handlers: list[logging.Handler] = [
+    logging.FileHandler(_log_file, encoding="utf-8"),
+]
+if sys.stderr is not None and hasattr(sys.stderr, "write"):
+    try:
+        sys.stderr.write("")
+        _handlers.append(logging.StreamHandler())
+    except (OSError, ValueError):
+        pass
+
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, handlers=_handlers)
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +44,7 @@ BOT_PROCESS_SCRIPT = os.path.join(PROJECT_DIR, "bot", "process_messages.ps1")
 BOT_HEALTH_URL = "http://localhost:3001/api/health"
 SCHEDULE_INTERVAL_MINUTES = 5
 HEALTH_CHECK_TIMEOUT = 5
-PROCESS_TIMEOUT_SECONDS = 300
+PROCESS_TIMEOUT_SECONDS = 1800  # 30 min：研究型任務含 kb-strategist + claude -p 實測需 11-17 min
 
 # M2 修復：防重入 flag
 _is_running = False
@@ -98,16 +109,29 @@ def trigger_process_messages():
 def main():
     logger.info(f"Chatroom scheduler 啟動（每 {SCHEDULE_INTERVAL_MINUTES} 分鐘執行）")
     logger.info(f"專案目錄: {PROJECT_DIR}")
+    logger.info(f"Python: {sys.executable}, PID: {os.getpid()}")
 
     schedule.every(SCHEDULE_INTERVAL_MINUTES).minutes.do(trigger_process_messages)
 
-    # 啟動時立即執行一次
     trigger_process_messages()
 
+    logger.info("進入主迴圈")
+    loop_count = 0
     while True:
         schedule.run_pending()
         time.sleep(10)
+        loop_count += 1
+        if loop_count % 30 == 0:  # ~5 min
+            logger.info(f"心跳: 迴圈 #{loop_count}, PID {os.getpid()}")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        logger.exception("chatroom-scheduler 異常退出")
+        raise
+    except KeyboardInterrupt:
+        logger.info("chatroom-scheduler 收到中斷信號，正常退出")
+    finally:
+        logger.info(f"chatroom-scheduler 結束 (PID {os.getpid()})")

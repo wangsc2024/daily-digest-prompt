@@ -29,6 +29,15 @@ curl -s "http://localhost:3000/api/notes/{{NOTE_ID}}"
 ```
 取得回應的 `title` 和 `contentText` 欄位。
 
+根據筆記標題與內容，構思一個 **4-12 個中文字的播客主題標題**（`podcast_title`）。
+原則：簡潔點題，讓聽眾一眼知道主題。
+- 例：「法華普賢品解析」、「天台止觀修行要義」、「楞嚴唯識義理對話」
+
+**立即**用 Write 工具建立 `results/article-{{SLUG}}/podcast-meta.json`：
+```json
+{"note_id": "{{NOTE_ID}}", "note_title": "<筆記標題>", "query": "", "podcast_title": "<4-12字主題標題>"}
+```
+
 **若有 QUERY（{{QUERY}}）**：
 
 本次需排除的已用筆記 ID（JSON 陣列）：`{{USED_NOTE_IDS}}`
@@ -45,9 +54,13 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 2. 若所有結果都已用過，選分數**最低**的一筆（即最舊使用的，允許循環）
 3. 讀取選定筆記全文：`curl -s "http://localhost:3000/api/notes/<noteId>"`
 
+根據筆記標題與內容，構思一個 **4-12 個中文字的播客主題標題**（`podcast_title`）。
+原則：簡潔點題，讓聽眾一眼知道主題。
+- 例：「法華普賢品解析」、「天台止觀修行要義」、「楞嚴唯識義理對話」
+
 選定筆記後，**立即**用 Write 工具建立 `results/article-{{SLUG}}/podcast-meta.json`，記錄本次使用的筆記（供去重歷史追蹤）：
 ```json
-{"note_id": "<實際筆記 ID>", "note_title": "<筆記標題>", "query": "{{QUERY}}"}
+{"note_id": "<實際筆記 ID>", "note_title": "<筆記標題>", "query": "{{QUERY}}", "podcast_title": "<4-12字主題標題>"}
 ```
 
 文章的 `contentText`（Markdown 格式）即為腳本素材。

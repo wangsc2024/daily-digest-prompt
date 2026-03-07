@@ -16,6 +16,7 @@ context/digest-memory.json
 context/auto-tasks-today.json
 context/research-registry.json
 context/metrics-daily.json
+context/behavior-patterns.json
 
 # ── 影片 / Podcast 媒體輸出（大型二進位，不進版控）──────────
 output/
@@ -46,9 +47,10 @@ temp_*
 *.txt.tmp
 {
 
-# ── Gun.js 暫存資料 ─────────────────────────────────────────
+# ── Gun.js 暫存資料與金鑰 ────────────────────────────────────
 bot/radata-*/
 bot/radata-*.tmp
+bot/data/keypair.json
 
 # ── 根目錄雜項暫存文件 ──────────────────────────────────────
 強化方案.md

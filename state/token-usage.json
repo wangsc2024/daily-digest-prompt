@@ -29,11 +29,17 @@
       "output_chars": 7261839
     },
     "2026-03-07": {
-      "estimated_tokens": 1898473.1428571402,
-      "tool_calls": 1080,
-      "input_chars": 402788,
-      "output_chars": 6241868
+      "estimated_tokens": 16338404.000000004,
+      "tool_calls": 4879,
+      "input_chars": 2773945,
+      "output_chars": 54410469
+    },
+    "2026-03-08": {
+      "estimated_tokens": 2766545.1428571427,
+      "tool_calls": 1191,
+      "input_chars": 480176,
+      "output_chars": 9202732
     }
   },
-  "updated": "2026-03-07T08:35:00.241478"
+  "updated": "2026-03-08T07:34:26.186910"
 }

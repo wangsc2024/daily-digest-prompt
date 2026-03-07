@@ -1,0 +1,727 @@
+{
+  "metadata": {
+    "title": "楞嚴經研究資料庫",
+    "version": "1.1.0",
+    "created": "2026-03-07",
+    "total_entries": {
+      "scriptures": 8,
+      "commentaries": 21,
+      "academic_research": 25,
+      "version_systems": 9,
+      "digital_resources": 6
+    },
+    "last_updated": "2026-03-07"
+  },
+  "scriptures": [
+    {
+      "id": "S001",
+      "title": "大佛頂如來密因修證了義諸菩薩萬行首楞嚴經",
+      "short_title": "楞嚴經",
+      "translator": "般剌蜜帝 (Paramiti/Pramiti)",
+      "scribe": "房融",
+      "interpreter": "彌伽釋迦（懷迪）",
+      "language": "漢譯",
+      "year": 705,
+      "dynasty": "唐中宗神龍元年",
+      "location": "廣州制旨道場",
+      "volumes": 10,
+      "cbeta_id": "T19, No. 945",
+      "format": "大正新脩大藏經底本：高麗藏",
+      "notes": "唯一漢譯本。房融以典雅文筆潤色，文學價值極高。般剌蜜帝傳說剖臂藏經帶出印度。",
+      "translation_team": {
+        "reciter": "般剌蜜帝 (Paramiti)",
+        "interpreter": "彌迦釋迦 (Megaśākya)，烏萇國沙門",
+        "scribe": "房融，前正諫大夫、同中書門下平章事",
+        "verifier": "懷迪，循州羅浮山南樓寺沙門"
+      },
+      "translation_controversy": {
+        "source_1": "《開元釋教錄》卷九：713年後，不知名梵僧與懷迪合譯",
+        "source_2": "《續古今譯經圖紀》：705年五月二十三日，般剌蜜帝團隊譯",
+        "zhisheng_recommendation": "智昇建議以《開元釋教錄》為準",
+        "fang_rong_issue": "房融705年因親附張易之下獄流放欽州，參與譯經時間矛盾"
+      },
+      "literary_features": [
+        "駢散兼備的華麗文體",
+        "詩偈與散文交織",
+        "精緻的蘇格拉底式師徒問答",
+        "中國文學典故的融入（文化適應性翻譯）"
+      ]
+    },
+    {
+      "id": "S002",
+      "title": "藏譯楞嚴經（殘卷）",
+      "translator": "不詳",
+      "language": "藏文",
+      "year_approx": "8世紀末-9世紀初",
+      "volumes": "殘存卷九、卷十部分",
+      "notes": "朗達瑪滅佛期間大部分佚失。布敦仁欽朱認為其中一本可能從漢文翻譯。"
+    },
+    {
+      "id": "S003",
+      "title": "乾隆帝敕譯四體楞嚴經",
+      "translator": "章嘉呼圖克圖（若必多吉）監譯，富鼐協助",
+      "language": "滿文、蒙文、藏文、漢文四體合璧",
+      "year": 1763,
+      "notes": "乾隆帝敕命翻譯。完整藏譯本收入那塘版甘珠爾補遺。"
+    },
+    {
+      "id": "S004",
+      "title": "The Surangama Sutra (Goddard & Wai-tao)",
+      "translator": "Dwight Goddard & Bhikshu Wai-tao",
+      "language": "English",
+      "year": 1938,
+      "publication": "A Buddhist Bible",
+      "notes": "最早的英譯選本。"
+    },
+    {
+      "id": "S005",
+      "title": "Shurangama Sutra (Charles Luk)",
+      "translator": "Charles Luk (陸寬昱)",
+      "language": "English",
+      "year": 1967,
+      "notes": "早期完整英譯本。"
+    },
+    {
+      "id": "S006",
+      "title": "The Shurangama Sutra with Commentary",
+      "translator": "Buddhist Text Translation Society",
+      "commentator": "宣化上人",
+      "language": "English-Chinese bilingual",
+      "year": 2003,
+      "volumes": 8,
+      "publisher": "Buddhist Text Translation Society",
+      "notes": "最完整的英譯本，含宣化上人評註。2009年出版修訂新譯本。"
+    },
+    {
+      "id": "S007",
+      "title": "高麗藏本楞嚴經",
+      "language": "漢文",
+      "year_approx": "11世紀",
+      "notes": "大正藏底本來源。高麗藏為現存最可靠的漢文大藏經版本之一。"
+    },
+    {
+      "id": "S008",
+      "title": "梵文貝葉殘片",
+      "language": "梵文",
+      "location": "彭雪楓紀念館",
+      "notes": "226葉（缺6葉）梵文貝葉手稿，學者尚未確認是否為楞嚴經本身或首楞嚴三昧經。"
+    }
+  ],
+  "commentaries": [
+    {
+      "id": "C001",
+      "author": "惟愨",
+      "title": "楞嚴經疏",
+      "dynasty": "唐（中唐）",
+      "year_approx": 766,
+      "school": "不詳",
+      "volumes": null,
+      "cbeta_id": null,
+      "features": "現存最早的楞嚴經注疏之一",
+      "notes": "為最早的楞嚴經註釋記錄（766年）。"
+    },
+    {
+      "id": "C002",
+      "author": "海印信",
+      "title": "楞嚴經疏（楞嚴經纂）",
+      "dynasty": "唐（晚唐）",
+      "school": "不詳",
+      "features": "對後世影響甚大",
+      "notes": null
+    },
+    {
+      "id": "C003",
+      "author": "資中弘沇",
+      "title": "楞嚴經疏",
+      "dynasty": "唐（晚唐）",
+      "school": "密宗",
+      "features": "密宗視角的早期詮釋",
+      "notes": null
+    },
+    {
+      "id": "C004",
+      "author": "長水子璿（965-1038）",
+      "title": "楞嚴經義疏",
+      "dynasty": "北宋",
+      "year_approx": 1010,
+      "school": "華嚴宗（賢首宗）",
+      "volumes": 20,
+      "features": "科判精密，首創「以禪解經」方法論。宋代以後研讀楞嚴經的基本參考。",
+      "notes": "子璿本為禪宗弟子，後因精研楞嚴轉入賢首宗，反映楞嚴經融通各宗特質。",
+      "cbeta_id": "X12, No. 0270"
+    },
+    {
+      "id": "C005",
+      "author": "咸輝",
+      "title": "楞嚴經義海",
+      "dynasty": "宋",
+      "school": "不詳",
+      "volumes": 30,
+      "features": "大型彙編，集合唐宋諸家注解。保存已佚注疏片段。",
+      "notes": null,
+      "cbeta_id": "X12, No. 0272"
+    },
+    {
+      "id": "C006",
+      "author": "戒環",
+      "title": "楞嚴經要解",
+      "dynasty": "宋",
+      "school": "天台宗",
+      "volumes": 20,
+      "features": "以天台三觀解經，為蕅益智旭天台式解讀奠基。",
+      "notes": null,
+      "cbeta_id": "X12, No. 0275"
+    },
+    {
+      "id": "C007",
+      "author": "岳珂（岳飛之孫）",
+      "title": "楞嚴經集註",
+      "dynasty": "宋",
+      "school": "文人集成",
+      "features": "匯集唐宋各家注解，開集成式注疏先河。",
+      "notes": null
+    },
+    {
+      "id": "C008",
+      "author": "惟則",
+      "title": "楞嚴經會解",
+      "dynasty": "元",
+      "school": "融合",
+      "volumes": 10,
+      "features": "會通前代諸家注疏，加以取捨評論。承前啟後。",
+      "notes": null,
+      "cbeta_id": "X12, No. 0276"
+    },
+    {
+      "id": "C009",
+      "author": "交光真鑑（約1520-1600）",
+      "title": "楞嚴經正脈疏",
+      "dynasty": "明（萬曆年間）",
+      "school": "華嚴宗",
+      "volumes": 40,
+      "features": "提出「捨識用根」獨到見解。批評長水子璿。科判精密，被譽「注疏之冠」。",
+      "notes": "與長水子璿《義疏》並列為楞嚴經兩大經典注疏。政大黃琛傑博士論文專門研究此疏。",
+      "cbeta_id": "X12, No. 0277"
+    },
+    {
+      "id": "C010",
+      "author": "憨山德清（1546-1623）",
+      "title": "楞嚴經通議",
+      "dynasty": "明（萬曆年間）",
+      "school": "禪宗",
+      "volumes": 10,
+      "features": "禪宗「直指人心」風格解經典範。結合自身禪修經驗印證義理。",
+      "notes": "明代四大高僧之一。名言：「此經乃修行之大綱要、開悟之大關鍵。」",
+      "cbeta_id": "X12, No. 0288"
+    },
+    {
+      "id": "C011",
+      "author": "蕅益智旭（1599-1655）",
+      "title": "楞嚴經文句（10卷）+ 楞嚴經玄義（2卷）",
+      "dynasty": "明",
+      "school": "天台宗",
+      "volumes": 12,
+      "features": "以天台五重玄義解析全經。融會天台、華嚴、禪宗、唯識。批評交光「捨識用根」。",
+      "notes": "天台宗楞嚴經註疏集大成之作。提出「理具事造」詮釋框架。",
+      "cbeta_id": "X13, No. 0282 + X13, No. 0283"
+    },
+    {
+      "id": "C012",
+      "author": "蓮池袾宏（1535-1615）",
+      "title": "楞嚴經摸象記",
+      "dynasty": "明",
+      "school": "淨土宗",
+      "features": "書名「摸象」謙稱僅得部分義理。特重大勢至念佛圓通章。",
+      "notes": "明代四大高僧之一。禪淨雙修理論依據。",
+      "cbeta_id": "X13, No. 0285"
+    },
+    {
+      "id": "C013",
+      "author": "傳燈大師（1554-1628）",
+      "title": "楞嚴經前茅",
+      "dynasty": "明",
+      "school": "天台宗",
+      "features": "以楞嚴經中興天台。被譽「楞嚴之中興」。",
+      "notes": "中唐至清末間天台宗系註疏楞嚴經者不下十九家，佔全部註家五分之一。"
+    },
+    {
+      "id": "C014",
+      "author": "錢謙益（1582-1664）",
+      "title": "楞嚴經疏解蒙鈔",
+      "dynasty": "清初",
+      "school": "文人考證",
+      "volumes": 60,
+      "features": "卷帙浩繁（60卷），楞嚴經注疏中最大一部。廣引各家，兼顧考證與義理。",
+      "notes": "清初著名文人學者、前明大臣。",
+      "cbeta_id": "X13, No. 0278"
+    },
+    {
+      "id": "C015",
+      "author": "伯亭續法（1641-1728）",
+      "title": "楞嚴經灌頂疏",
+      "dynasty": "清",
+      "school": "華嚴宗+密宗",
+      "features": "融合華嚴與密宗思想，「顯密並彰」。對楞嚴咒詮釋尤為詳盡。",
+      "notes": null,
+      "cbeta_id": "X13, No. 0279"
+    },
+    {
+      "id": "C016",
+      "author": "通理",
+      "title": "楞嚴經指掌疏",
+      "dynasty": "清",
+      "volumes": 10,
+      "features": "簡明扼要，適合初學入門。",
+      "notes": null,
+      "cbeta_id": "X13, No. 0287"
+    },
+    {
+      "id": "C017",
+      "author": "圓瑛法師（1878-1953）",
+      "title": "大佛頂首楞嚴經講義",
+      "dynasty": "近代",
+      "school": "融合",
+      "volumes": 24,
+      "features": "前後講授十三次，歷時五十年。近代集大成之作。最廣泛使用的學習教材。",
+      "notes": "中國佛教協會首任會長。名言：「吾一生所志在楞嚴」。"
+    },
+    {
+      "id": "C018",
+      "author": "太虛大師（1890-1947）",
+      "title": "楞嚴經攝論",
+      "dynasty": "近代",
+      "school": "唯識宗",
+      "features": "以唯識學觀點解讀，嘗試會通如來藏與唯識。",
+      "notes": "人間佛教先驅。"
+    },
+    {
+      "id": "C019",
+      "author": "宣化上人（1918-1995）",
+      "title": "大佛頂首楞嚴經淺釋",
+      "dynasty": "現代",
+      "school": "禪宗",
+      "features": "完全白話逐句講解。英中雙語出版，推動楞嚴經國際化。",
+      "notes": "萬佛聖城創辦人。"
+    },
+    {
+      "id": "C020",
+      "author": "淨界法師（當代）",
+      "title": "楞嚴經講記",
+      "dynasty": "當代",
+      "school": "天台宗+唯識",
+      "features": "系統性極強，以圖表和條理化方式呈現。適合現代學佛者。",
+      "notes": "台灣法雲學苑主持者。"
+    },
+    {
+      "id": "C021",
+      "author": "聖嚴法師（1931-2009）",
+      "title": "楞嚴經講記",
+      "dynasty": "當代",
+      "school": "禪宗",
+      "features": "以禪宗實修角度解讀。法鼓山系統講授。",
+      "notes": "法鼓山創辦人。"
+    }
+  ],
+  "academic_research": [
+    {
+      "id": "A001",
+      "author": "呂澂",
+      "title": "楞嚴百偽",
+      "year": "1940s",
+      "type": "專論",
+      "language": "中文",
+      "stance": "疑偽",
+      "methodology": "文獻學/語言學",
+      "key_findings": "提出101個疑問，認為「集偽說之大成」。質疑經題、譯者身份、義理混入中國本土概念、文辭風格過美。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A002",
+      "author": "梁啟超",
+      "title": "楞嚴經真偽考",
+      "year": "1920s",
+      "type": "學術論文",
+      "language": "中文",
+      "stance": "疑偽",
+      "methodology": "文化比較",
+      "key_findings": "認為經文竊取道教術語、文學中文過於優美非翻譯體、缺乏梵文原本。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A003",
+      "author": "釋愍生",
+      "title": "辯破楞嚴百偽",
+      "year": "1940s-50s",
+      "type": "專書",
+      "language": "中文",
+      "stance": "護持",
+      "methodology": "經典互證",
+      "key_findings": "逐條反駁呂澂楞嚴百偽，引用多部經論證明呂澂誤解。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A004",
+      "author": "Ron Epstein",
+      "title": "Shurangama Sutra: A Reappraisal of Its Authenticity",
+      "year": "1976/revised",
+      "type": "學術論文",
+      "language": "English",
+      "stance": "傾向真（印度材料中國編輯本）",
+      "methodology": "文獻學/比較研究",
+      "key_findings": "結論：「很可能是印度原材料的編輯本」。結構精妙使中國人自撰假說難以成立。發現127部中國注疏。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A005",
+      "author": "Jinhua Jia（賈晉華）",
+      "title": "Translation and Interaction: A New Examination of the Controversy over the Translation and Authenticity of the Surangama-sutra",
+      "year": 2022,
+      "type": "期刊論文",
+      "journal": "Religions 13(6)",
+      "language": "English",
+      "stance": "傾向真（文化適應翻譯）",
+      "methodology": "歷史批判/文獻學",
+      "key_findings": "中國元素僅佔極小比例，是翻譯替換而非中國人自撰。房融和懷迪的編輯貢獻反映當代知識環境。",
+      "peer_reviewed": true,
+      "doi": "10.3390/rel13060xxx"
+    },
+    {
+      "id": "A006",
+      "author": "Keyworth",
+      "title": "楞嚴經文獻學新考證",
+      "year": 2022,
+      "type": "期刊論文",
+      "journal": "Hualin International Journal of Buddhist Studies 5.2",
+      "language": "English",
+      "stance": "學術中立",
+      "methodology": "文獻學",
+      "key_findings": "新的文獻學考證。頁92-130。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A007",
+      "author": "Charles Muller",
+      "title": "楞嚴經中的本土元素分析",
+      "type": "學術論文/百科條目",
+      "language": "English",
+      "stance": "偏疑（本土元素主導）",
+      "methodology": "思想史/比較研究",
+      "key_findings": "指出本覺（innate enlightenment）等概念和道教影響的術語佔主導角色。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A008",
+      "author": "James A. Benn",
+      "title": "楞嚴經中的中國元素研究",
+      "type": "學術論文",
+      "language": "English",
+      "stance": "偏疑",
+      "methodology": "比較研究/文化史",
+      "key_findings": "識別出反映中國人對動物生活理解的段落（水母蝦目、蜾蠃螟蛉）和道教仙人觀念。與《圓覺經》有顯著相似性。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A009",
+      "author": "David Rounds",
+      "title": "楞嚴經印度元素研究",
+      "type": "學術論文",
+      "language": "English",
+      "stance": "傾向真",
+      "methodology": "比較研究",
+      "key_findings": "識別出「兩個無可爭辯的印度元素」：佛教邏輯推理方法和楞嚴咒（密教陀羅尼）。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A010",
+      "author": "望月信亨",
+      "title": "楞嚴經真偽考（日文）",
+      "year": "1930s",
+      "type": "專論",
+      "language": "日文",
+      "stance": "疑偽",
+      "methodology": "文獻學",
+      "key_findings": "日本最早系統質疑楞嚴經真偽的學者之一。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A011",
+      "author": "道元禪師（1200-1253）",
+      "title": "正法眼藏（相關引用）",
+      "year": "13世紀",
+      "type": "禪宗著作",
+      "language": "日文",
+      "stance": "疑偽但認可教理",
+      "methodology": "義理分析",
+      "key_findings": "認為楞嚴經非印度原典，但仍引用經文、評述其偈頌，反映「即使懷疑來源仍認可教理價值」的態度。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A012",
+      "author": "羅卓仁謙",
+      "title": "楞嚴經義理考辨",
+      "type": "學術論文",
+      "language": "中文",
+      "stance": "疑偽（藏傳佛教觀點）",
+      "methodology": "義理分析",
+      "key_findings": "認為楞嚴經違背佛法三法印：違背「諸行無常」、「涅槃寂靜」，常住真心墮入外道我論。",
+      "peer_reviewed": false
+    },
+    {
+      "id": "A013",
+      "author": "黃琛傑",
+      "title": "楞嚴經正脈疏「十番顯見」之研究",
+      "year": 2012,
+      "type": "博士論文",
+      "institution": "國立政治大學",
+      "language": "中文",
+      "methodology": "義理分析/注疏比較",
+      "key_findings": "專門研究交光真鑑《正脈疏》對十番顯見的詮釋。",
+      "peer_reviewed": true
+    },
+    {
+      "id": "A014",
+      "author": "圭峰宗密（780-841）",
+      "title": "楞嚴經相關引用（宗鏡錄等）",
+      "dynasty": "唐",
+      "type": "經典引用",
+      "language": "中文",
+      "key_findings": "華嚴禪融合的重要人物，頻繁引用楞嚴經來詮釋圓覺經，視為教禪一致的至高表達。"
+    },
+    {
+      "id": "A015",
+      "author": "永明延壽（904-975）",
+      "title": "宗鏡錄中的楞嚴經引用",
+      "dynasty": "宋",
+      "type": "經典引用",
+      "language": "中文",
+      "key_findings": "在宗鏡錄中大量引用楞嚴經，強化教禪一致的主題。"
+    },
+    {
+      "id": "A016",
+      "author": "布敦仁欽朱（Buton Rinchen Drub）",
+      "title": "藏譯楞嚴經相關記載",
+      "year": "14世紀",
+      "type": "藏傳佛教文獻學",
+      "language": "藏文",
+      "key_findings": "提及兩部古代藏譯殘本，認為其中一本可能從漢文翻譯。"
+    },
+    {
+      "id": "A017",
+      "author": "空海（弘法大師，774-835）",
+      "title": "大佛頂經開題 (Daibutcho-kyo kaidai)",
+      "dynasty": "日本平安時代",
+      "type": "注釋",
+      "language": "日文",
+      "key_findings": "真言宗開祖將楞嚴經稱為「了義經」(nitartha sutra)，肯定其為佛陀直接教導。"
+    },
+    {
+      "id": "A018",
+      "author": "最澄（傳教大師，767-822）",
+      "title": "天台宗相關著作中的楞嚴經引用",
+      "dynasty": "日本平安時代",
+      "type": "經典引用",
+      "language": "日文",
+      "key_findings": "日本天台宗創始人，在著作中引用楞嚴經。"
+    },
+    {
+      "id": "A019",
+      "author": "保唐無住（714-774）",
+      "title": "禪宗著作中最早大量引用楞嚴經",
+      "dynasty": "唐",
+      "type": "禪宗文獻",
+      "language": "中文",
+      "key_findings": "保唐宗創始人，首位大量引用楞嚴經支持禪宗教學的人物。"
+    },
+    {
+      "id": "A020",
+      "author": "蘇軾（1037-1101）、蘇轍（1039-1112）",
+      "title": "楞嚴經對宋代文人的影響",
+      "dynasty": "宋",
+      "type": "文化影響研究",
+      "language": "中文",
+      "key_findings": "楞嚴經影響了宋代多位文人知識分子的思想與創作。"
+    },
+    {
+      "id": "A021",
+      "author": "慧進（1355-1436）",
+      "title": "明代楞嚴經講經記錄",
+      "dynasty": "明中期",
+      "type": "弘法記錄",
+      "language": "中文",
+      "key_findings": "華嚴宗僧慧進受邀在帝都講楞嚴經，聽眾逾萬人。晚明70年間楞嚴經注疏產量為歷朝之最。"
+    },
+    {
+      "id": "A022",
+      "author": "智昇",
+      "title": "開元釋教錄（730年）",
+      "year": 730,
+      "type": "目錄學文獻",
+      "language": "中文",
+      "key_findings": "最早記錄楞嚴經翻譯過程的佛教目錄。記載般剌蜜帝、房融、彌伽釋迦、懷迪的翻譯團隊。"
+    },
+    {
+      "id": "A023",
+      "author": "Ron Epstein & David Rounds",
+      "title": "楞嚴經歷史背景與主題研究",
+      "type": "學術論文",
+      "language": "English",
+      "methodology": "歷史批判",
+      "key_findings": "認為楞嚴經主題反映印度佛教末期面臨的壓力：非佛教宗教復興、僧團制度衰退、密教興起。經文回應了道德挑戰與佛教混亂。"
+    },
+    {
+      "id": "A024",
+      "author": "Encyclopedia of Buddhism",
+      "title": "Surangama Sutra 條目",
+      "type": "百科全書條目",
+      "language": "English",
+      "key_findings": "學術共識的最新概述。介紹教義、歷史、真偽之爭的平衡觀點。"
+    },
+    {
+      "id": "A025",
+      "author": "普照（Fusho）",
+      "title": "楞嚴經傳入日本記錄",
+      "year": 754,
+      "type": "歷史文獻",
+      "language": "日文",
+      "key_findings": "754年將楞嚴經帶入日本，引發真偽辯論。聖武天皇召集三論宗和法相宗僧人審查，最終認定為真經。"
+    }
+  ],
+  "version_systems": [
+    {
+      "name": "開寶藏",
+      "era": "北宋初年",
+      "system": "最早刊本",
+      "status": "已佚，文本流入趙城金藏與高麗藏"
+    },
+    {
+      "name": "趙城金藏",
+      "era": "金代",
+      "system": "開寶藏系",
+      "status": "現存最早可見版本",
+      "cbeta_code": "A"
+    },
+    {
+      "name": "高麗藏（再雕本）",
+      "era": "高麗",
+      "system": "開寶藏系",
+      "status": "大正藏底本來源",
+      "cbeta_code": "K"
+    },
+    {
+      "name": "磧砂藏",
+      "era": "南宋至元",
+      "system": "宋元系",
+      "cbeta_code": "S"
+    },
+    {
+      "name": "永樂南藏",
+      "era": "明",
+      "system": "明代系",
+      "cbeta_code": "U"
+    },
+    {
+      "name": "永樂北藏",
+      "era": "明",
+      "system": "明代系",
+      "status": "較南藏精審",
+      "cbeta_code": "P"
+    },
+    {
+      "name": "嘉興藏（徑山藏）",
+      "era": "明",
+      "system": "明代系",
+      "status": "方冊本，流通最廣",
+      "cbeta_code": "J"
+    },
+    {
+      "name": "乾隆大藏經",
+      "era": "清",
+      "system": "清代集成",
+      "status": "現代流通本底本",
+      "cbeta_code": "L"
+    },
+    {
+      "name": "房山石經",
+      "era": "隋至明",
+      "system": "石刻版本",
+      "cbeta_code": "F"
+    }
+  ],
+  "textual_variants": {
+    "mantra_section": "楞嚴咒部分差異最大：趙城金藏本每句咒文旁有注解，清版（乾隆藏）全部刪除",
+    "main_text": "十卷正文部分各版本差異較小，主要為異體字替換",
+    "key_difference": "趙城金藏本在楞嚴咒前有一行註文，乾隆藏無"
+  },
+  "sanskrit_reconstruction": {
+    "full_text": "經文正文無梵文還原（缺乏比對基礎）",
+    "mantra_heart": "Om anale anale visade visade vira vajradhare bandha bandhani vajrapani phat hum phat svaha",
+    "related_dharani": "大白傘蓋咒 (Sitatapatra Usnisa Dharani)，與楞嚴咒高度相似，現存梵文本",
+    "dunhuang_fragments": "敦煌寫本中有悉曇文字 (Siddham script) 抄本提供音韻參照"
+  },
+  "digital_resources": [
+    {
+      "name": "CBETA Online",
+      "url": "https://cbetaonline.dila.edu.tw/zh/T0945",
+      "description": "經文閱讀、校勘、匯出"
+    },
+    {
+      "name": "SAT 大正藏文本資料庫",
+      "url": "https://21dzk.l.u-tokyo.ac.jp/SAT2018/",
+      "description": "全文檢索、版面影像對照、DDB辭典連動"
+    },
+    {
+      "name": "BDRC",
+      "url": "https://library.bdrc.io/",
+      "description": "藏文甘珠爾掃描影像、四體合璧版相關文獻"
+    },
+    {
+      "name": "DDB",
+      "url": "http://www.buddhism-dict.net/ddb/",
+      "description": "佛學術語辭典（guest帳號可用）"
+    },
+    {
+      "name": "IDP (International Dunhuang Project)",
+      "description": "敦煌出土楞嚴咒相關寫本"
+    },
+    {
+      "name": "INBUDS",
+      "description": "日本印度學佛教學會論文檢索"
+    }
+  ],
+  "narrative_structure": {
+    "arc": "阿難示墮 → 佛陀救護 → 破妄顯真 → 修行法門 → 辨識魔境",
+    "teaching_strategy": [
+      {
+        "stage": "破（破妄）",
+        "volumes": "卷一～二",
+        "method": "七處徵心、十番顯見"
+      },
+      {
+        "stage": "顯（顯真）",
+        "volumes": "卷三～四",
+        "method": "會通四科七大歸如來藏"
+      },
+      {
+        "stage": "修（修行）",
+        "volumes": "卷五～七",
+        "method": "25圓通、四清淨明誨、楞嚴咒壇場"
+      },
+      {
+        "stage": "證（證果）",
+        "volumes": "卷八",
+        "method": "57階位（乾慧地至妙覺）"
+      },
+      {
+        "stage": "辨（辨魔）",
+        "volumes": "卷九～十",
+        "method": "五陰各十魔境（共50種魔事）"
+      }
+    ],
+    "key_metaphors": [
+      "客塵喻：旅客來去主人不動",
+      "第二月喻：按目見二月非實有",
+      "演若達多喻：怖頭狂走喻迷失本心",
+      "礦中真金喻：如來藏在煩惱中本性清淨"
+    ]
+  }
+}

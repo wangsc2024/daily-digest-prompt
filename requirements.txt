@@ -1,5 +1,0 @@
-# 已廢棄（Deprecated）
-# 依賴管理已遷移至 pyproject.toml + uv
-# 請使用：uv sync
-# 舊依賴（已由 pyproject.toml dependencies 覆蓋）：
-# pyyaml>=6.0

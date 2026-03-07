@@ -54,6 +54,14 @@ routing_rules:
     description: 從非結構化文字萃取關鍵資訊（JSON 輸出）
     used_by: []                     # 預留
 
+  kb_content_score:
+    provider: groq
+    mode: kb_score
+    description: 知識庫筆記內容品質語義評分（概念數、深度、密度、是否知識）
+    used_by: [skills/kb-curator/SKILL.md]
+    max_input_chars: 2000           # 取 contentText 前 2000 字
+    config_ref: config/kb-content-scoring.yaml
+
   # ── 保留給 Claude（深度推理、隱私、安全）──────────────────────
   policy_analysis:
     provider: claude
@@ -104,6 +112,12 @@ batch:
     max_items: 5
     strategy: sequential
     delay_between_ms: 300
+
+  kb_scoring:
+    rule: kb_content_score
+    max_items: 20                   # 單次最多評分 20 筆（低分篩選後）
+    strategy: sequential
+    delay_between_ms: 13000         # 13 秒/筆 → ~4.6 req/min
 
 # 降級策略
 fallback:

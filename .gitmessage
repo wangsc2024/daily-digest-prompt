@@ -1,0 +1,19 @@
+# <type>(<scope>): <description>
+#
+# Types: feat, fix, refactor, docs, chore, test, perf, ci, style
+# Scope: hooks, config, skills, prompts, tools, scripts, state, docs
+#
+# Examples:
+#   feat(skills): add kb-research-strategist Skill
+#   fix(hooks): resolve MinGW double-slash path normalization
+#   refactor(config): extract hardcoded timeout to timeouts.yaml
+#   docs(operations): add troubleshooting guide
+#   chore(state): clean up stale loop-state files
+#   test(hooks): add 45 behavior_tracker tests
+#
+# Rules:
+#   - Subject line: imperative mood, no period, max 72 chars
+#   - Body: explain WHY, not WHAT (the diff shows WHAT)
+#   - Footer: reference issue/ADR if applicable
+#
+# Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>

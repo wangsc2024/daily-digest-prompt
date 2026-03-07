@@ -1,12 +1,12 @@
 {
-  "date": "2026-03-06",
-  "topic": "Test-Time Compute 與推理模型（Reasoning Models）— 從 Chain-of-Thought 到動態計算分配的推理範式革命",
+  "date": "2026-03-07",
+  "topic": "Small Language Models (SLMs) 與 On-Device AI — 從雲端推理到邊緣智能的範式轉移",
   "research_questions": [
-    "Test-Time Compute 的核心機制與理論基礎是什麼？推理縮放定律（Inference Scaling Laws）如何定量描述「思考越久答案越好」？",
-    "主流推理模型（OpenAI o1/o3、Claude Extended Thinking、Gemini Thinking、DeepSeek R1）的架構差異與技術路線為何？",
-    "TTC 方法論的完整分類學：Chain-of-Thought、Best-of-N、Tree Search、Process Reward Model、Majority Voting 等技術如何協同運作？"
+    "2026 年主流 SLM 模型（Phi-4-mini, Gemma 3, Llama 3.2, Qwen 2.5）的架構差異與效能比較為何？",
+    "從量化技術（GPTQ/AWQ/GGUF）到推理框架（llama.cpp/MLX/MLC-LLM），On-Device 推理的完整技術棧如何組成？",
+    "SLM 在隱私保護、延遲降低、離線運作等應用場景的實際優勢與限制為何？邊緣智能對雲端推理的取代程度？"
   ],
-  "methodology": "多源交叉驗證：學術論文（arXiv）+ 技術部落格（OpenAI/Anthropic/Google 官方）+ 產業分析報告，中英文各至少 2 篇",
-  "keywords": ["Test-Time Compute", "inference scaling laws", "reasoning models", "chain of thought", "process reward model", "dynamic compute allocation", "o1 o3 reasoning", "extended thinking"],
+  "methodology": "多源交叉比對：學術調查論文 + 模型官方技術報告 + 獨立基準測試 + 產業部署案例",
+  "keywords": ["Small Language Models", "On-Device AI", "SLM", "model quantization", "edge inference", "NPU", "llama.cpp", "Phi-4", "Gemma 3", "knowledge distillation"],
   "stage_completed": 1
 }

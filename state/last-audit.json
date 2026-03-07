@@ -1,30 +1,31 @@
 {
-  "total_score": 87.51,
+  "total_score": 85.45,
   "grade": "A",
-  "date": "2026-03-04",
-  "timestamp": "2026-03-04 00:41:00",
+  "date": "2026-03-08",
+  "timestamp": "2026-03-08 09:00:00",
   "dimensions": {
-    "1_information_security": 86,
-    "2_system_architecture": 85,
-    "3_system_quality": 91,
-    "4_system_workflow": 93,
-    "5_technology_stack": 80,
-    "6_system_documentation": 84,
-    "7_system_completeness": 92
+    "1_information_security": 82,
+    "2_system_architecture": 86,
+    "3_system_quality": 88,
+    "4_system_workflow": 92,
+    "5_technology_stack": 76,
+    "6_system_documentation": 85,
+    "7_system_completeness": 87
   },
   "previous": {
-    "total_score": 85.70,
+    "total_score": 86.13,
     "grade": "A",
-    "date": "2026-03-03",
-    "delta": 1.81
+    "date": "2026-03-07",
+    "delta": -0.68
   },
-  "note_id": "2c326b54-8565-406c-9910-4701da4e9878",
-  "fixes_applied": 4,
+  "note_id": "4b48f080-c313-42c7-ac4d-6da3b475de03",
+  "fixes_applied": 5,
   "fixes_list": [
-    "pyproject.toml 加入 pyyaml 依賴（同步 requirements.txt）",
-    "清理 ooda-workflow.yaml TODO 註解",
-    "移除 4 個 prompt inline nul 殘留（已由 preamble.md 覆蓋）",
-    "補充 health-scoring.yaml 注釋"
+    "刪除已廢棄 requirements.txt",
+    "刪除不完整 requirements.lock（消除雙重 lock 混淆）",
+    "writing-masters SKILL.md 補齊 triggers 陣列",
+    "writing-plans SKILL.md 補齊 triggers 陣列",
+    "CHANGELOG.md 測試數量更新 + 移除過時參考"
   ],
-  "message": "Team mode audit completed with 4 auto-fixes. Score improved +1.81 from 85.70 to 87.51."
+  "message": "Team mode audit completed with 5 auto-fixes. Score decreased -0.68 from 86.13 to 85.45. Tech stack dimension dropped -3 due to stricter tech_debt evaluation (309 TODO/FIXME)."
 }

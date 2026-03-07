@@ -44,6 +44,14 @@ schedules:
     retry: 0
     description: "知識庫統一備份（每日 00:15，週日含 JSON 匯出）"
 
+  evening-verse:
+    cron: "5 17 * * *"
+    script: run-morning-verse.ps1
+    args: "-Session evening"
+    timeout: 120
+    retry: 1
+    description: "每日黃昏佛偈推播（17:05，回歸本性・借假修真）"
+
   bot-server-restart:
     cron: "15 0 * * *"
     script: bot/restart-bot.ps1
@@ -66,13 +74,6 @@ schedules:
     workdir: "D:/Source/daily-digest-prompt/bot"
     description: "Groq Relay 服務（開機啟動，延遲 45s，port 3002，為 Claude Agent 提供快速翻譯/摘要前處理）"
 
-  chatroom-scheduler-startup:
-    trigger: startup
-    delay: 60
-    command: "uv run python chatroom-scheduler.py"
-    workdir: "D:/Source/daily-digest-prompt"
-    description: "Chatroom 任務排程器（開機啟動，延遲 60s 等待 bot.js 就緒）"
-
 ---
 
 # Heartbeat 排程定義
@@ -89,10 +90,10 @@ schedules:
 | todoist-team | 每小時半點 01:30-23:30 | run-todoist-agent-team.ps1 | 4000s (~67min) | Todoist 團隊模式 |
 | media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 4000s (~67min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
-| bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot Server + Gun Relay 重啟（確保 WebSocket 穩定） |
-| bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot Server + Gun Relay 開機啟動 |
+| evening-verse | 每日 17:05 | run-morning-verse.ps1 -Session evening | 120s (2min) | 黃昏佛偈推播（回歸本性・借假修真） |
+| bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot + Gun Relay + Chatroom Scheduler 重啟 |
+| bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot + Gun Relay + Chatroom Scheduler 開機啟動 |
 | groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
-| chatroom-scheduler-startup | 開機啟動 +60s | uv run python chatroom-scheduler.py | 無限制 | Chatroom 任務排程器 |
 
 ## Todoist 驅動任務（由每小時排程撿起）
 

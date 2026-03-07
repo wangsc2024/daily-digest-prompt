@@ -1,0 +1,36 @@
+{
+  "entries": [
+    {
+      "channel": "ntfy/wangsc2025",
+      "time": "2026-03-07 11:14:51",
+      "status": "success",
+      "verse_text": "是日已過，命亦隨減，如少水魚，斯有何樂？大眾當勤精進，如救頭燃，但念無常，慎勿放逸。",
+      "source": "《佛遺教經》（又名《佛垂般涅槃略說教誡經》）",
+      "date": "2026-03-07",
+      "author": "釋迦牟尼佛",
+      "verse_id": 1
+    },
+    {
+      "time": "2026-03-07 18:04:31",
+      "verse_text": "若人靜坐一須臾，勝造恆沙七寶塔；寶塔畢竟化為塵，一念淨心成正覺。",
+      "source": "《法華經》",
+      "session": "evening",
+      "status": "success",
+      "author": "釋迦牟尼佛",
+      "verse_id": 2,
+      "date": "2026-03-07",
+      "channel": "ntfy/wangsc2025"
+    },
+    {
+      "session": "morning",
+      "status": "success",
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-08",
+      "source": "《金剛般若波羅蜜經》",
+      "author": "釋迦牟尼佛",
+      "verse_text": "不應住色生心，不應住聲香味觸法生心，應無所住而生其心。",
+      "verse_id": 3,
+      "time": "2026-03-08 06:30:02"
+    }
+  ]
+}

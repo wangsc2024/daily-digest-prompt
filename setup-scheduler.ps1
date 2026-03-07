@@ -1,4 +1,4 @@
-﻿# ============================================
+# ============================================
 # 一鍵設定 Claude Agent 工作排程器
 # 以系統管理員身份執行此腳本
 # ============================================
@@ -39,11 +39,12 @@ if ($FromHeartbeat) {
             if ($currentSchedule -and $currentSchedule.Name) {
                 $schedules += $currentSchedule
             }
-            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Description = ""; Interval = ""; Timeout = 0; Trigger = ""; Command = ""; WorkDir = ""; Delay = 0 }
+            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Args = ""; Description = ""; Interval = ""; Timeout = 0; Trigger = ""; Command = ""; WorkDir = ""; Delay = 0; Retry = 0 }
         }
         elseif ($currentSchedule) {
             if ($line -match '^\s{4}cron:\s*"(.+)"') { $currentSchedule.Cron = $Matches[1] }
             if ($line -match '^\s{4}script:\s*(\S+)') { $currentSchedule.Script = $Matches[1] }
+            if ($line -match '^\s{4}args:\s*"(.+)"') { $currentSchedule.Args = $Matches[1] }
             if ($line -match '^\s{4}description:\s*"(.+)"') { $currentSchedule.Description = $Matches[1] }
             if ($line -match '^\s{4}interval:\s*(\S+)') { $currentSchedule.Interval = $Matches[1] }
             if ($line -match '^\s{4}timeout:\s*(\d+)') { $currentSchedule.Timeout = [int]$Matches[1] }
@@ -51,6 +52,7 @@ if ($FromHeartbeat) {
             if ($line -match '^\s{4}command:\s*"(.+)"') { $currentSchedule.Command = $Matches[1] }
             if ($line -match '^\s{4}workdir:\s*"(.+)"') { $currentSchedule.WorkDir = $Matches[1] }
             if ($line -match '^\s{4}delay:\s*(\d+)') { $currentSchedule.Delay = [int]$Matches[1] }
+            if ($line -match '^\s{4}retry:\s*(\d+)') { $currentSchedule.Retry = [int]$Matches[1] }
         }
     }
     if ($currentSchedule -and $currentSchedule.Name) { $schedules += $currentSchedule }
@@ -93,8 +95,13 @@ if ($FromHeartbeat) {
                 -Argument "-NoProfile -WindowStyle Hidden -Command `"Set-Location '$workDir'; $($s.Command)`"" `
                 -WorkingDirectory $workDir
         } else {
+            # 組合 -File 與 args 參數
+            $argStr = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`""
+            if ($s.Args) {
+                $argStr += " $($s.Args)"
+            }
             $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
-                -Argument "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`"" `
+                -Argument $argStr `
                 -WorkingDirectory $AgentDir
         }
 
@@ -232,7 +239,7 @@ Register-ScheduledTask `
 
 Write-Host ""
 Write-Host "✅ 排程建立成功！" -ForegroundColor Green
-Write-Host "   名稱: $TaskName" 
+Write-Host "   名稱: $TaskName"
 Write-Host "   時間: 每天 $Time"
 Write-Host "   腳本: $ScriptPath"
 Write-Host ""

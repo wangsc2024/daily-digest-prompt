@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-06T21:37:57",
+  "updated_at": "2026-03-07T15:23:31",
   "entries": [
     {
       "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
@@ -41,6 +41,22 @@
       "note_id_input": "ac237f47-fb19-4bea-a423-5831a4a15a99",
       "slug": "note-ac237f47-20260306",
       "used_at": "2026-03-06T21:37:57"
+    },
+    {
+      "note_id": "e6a8995d-805a-4013-84b5-237920edbbfe",
+      "note_title": "法華經學術研究綜述：文獻學考據、譯本比較、注釋傳統與歷史傳播（2026）",
+      "query": "法華經",
+      "note_id_input": "",
+      "slug": "法華經-20260307",
+      "used_at": "2026-03-07T12:27:54"
+    },
+    {
+      "note_id": "c835ef81-faeb-4bd1-8518-0581b622452d",
+      "note_title": "Podcast 腳本：教觀綱宗",
+      "query": "",
+      "note_id_input": "c835ef81-faeb-4bd1-8518-0581b622452d",
+      "slug": "note-c835ef81-20260307",
+      "used_at": "2026-03-07T15:23:31"
     }
   ]
 }

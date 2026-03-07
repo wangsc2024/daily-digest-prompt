@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `context/research-series.json` - 永久系列研究追蹤
 - `templates/shared/kb-depth-check.md` - 共用 4-Phase KB 深度模板
 - 自動任務新增至 19 個（+4：system-insight、self-heal、github-scout、chatroom-optimize）
-- 測試從 292 → 659 個（hooks 632 + skills 27）
+- 測試從 292 → 675 個（hooks 14 測試檔 + skills 3 測試檔 + bot 4 測試檔）
 - `circuit-breaker-utils.ps1` - 斷路器工具（5 個 API 健康追蹤）
 - `state/failure-stats.json` - 失敗統計（5 種類型 + 30 天保留）
 - `state/run-fsm.json` - 有限狀態機追蹤
@@ -74,4 +74,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Security
 - Hook 攔截：nul 重導向、scheduler-state 寫入、force push、敏感環境變數、路徑遍歷
 - 機密管理：環境變數 + .gitignore + .env.example
-- 依賴鎖定：requirements.lock
+- 依賴鎖定：uv.lock（完整 hash 鎖定）
