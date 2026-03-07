@@ -18,7 +18,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { STATES, transition, isClaimExpired, getClaimTimeout } = require('./fsm');
+const { STATES, transition, isClaimExpired, getClaimTimeout, getProcessingTimeout } = require('./fsm');
 
 // M9: 測試可透過環境變數使用隔離目錄，避免與生產 data 互相干擾
 const DATA_DIR = process.env.WSC_BOT_DATA_DIR || path.join(__dirname, '..', 'data');
@@ -325,6 +325,35 @@ function releaseExpiredClaims() {
 }
 
 /**
+ * 回收卡在 processing 狀態超過 timeout 的任務（worker 崩潰/超時恢復）。
+ * 將 processing → pending，重設 claimed_by，遞增 claim_generation。
+ * @returns {number} 回收的任務數
+ */
+function recoverStaleProcessing() {
+    let recovered = 0;
+    const now = Date.now();
+    records.forEach(rec => {
+        if (rec.state !== STATES.PROCESSING) return;
+        const taskType = rec.is_research ? 'research' : (rec.task_type || 'general');
+        const ttl = getProcessingTimeout(taskType);
+        const claimedTime = rec.claimed_at ? new Date(rec.claimed_at).getTime() : 0;
+        if (Number.isNaN(claimedTime) || (now - claimedTime > ttl)) {
+            logTransition(rec.uid, STATES.PROCESSING, STATES.PENDING, 'processing_timeout');
+            rec.state = STATES.PENDING;
+            rec.claimed_by = null;
+            rec.claimed_at = null;
+            rec.claim_generation = (rec.claim_generation || 0) + 1;
+            recovered++;
+        }
+    });
+    if (recovered > 0) {
+        saveJSON(RECORDS_PATH, records);
+        console.log(`[processing 回收] 已回收 ${recovered} 個超時 processing 任務`);
+    }
+    return recovered;
+}
+
+/**
  * 強制將任務標為失敗（僅供工作流取消使用，C3）。不驗證 worker_id，允許 pending/claimed/processing → failed。
  * @returns {boolean} 是否已處理（含 not_found）
  */
@@ -544,6 +573,7 @@ module.exports = {
     transitionState,
     claimRecord,
     releaseExpiredClaims,
+    recoverStaleProcessing,
     forceTaskFailed,
     removeRecord,
     forceFailRecord,

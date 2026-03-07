@@ -1,10 +1,13 @@
 # ============================================================
-# Bot Server + Gun Relay 重啟腳本
-# 順序：停 bot → 停 relay → 啟 relay → 等待 → 啟 bot → 驗證
+# Bot Server + Gun Relay + Chatroom Scheduler 重啟腳本
+# 順序：停 bot → 停 relay → 停 scheduler →
+#       啟 relay → 等待 → 啟 bot → 驗證 → 啟 scheduler
 # ============================================================
 $BotDir     = $PSScriptRoot                        # d:\Source\daily-digest-prompt\bot
+$ProjectDir = Split-Path $BotDir -Parent           # d:\Source\daily-digest-prompt
 $RelayDir   = "D:\Source\my-gun-relay"
 $NodeExe    = "D:\nodejs\node.exe"
+$UvExe      = "uv"
 $BotPort    = 3001
 $RelayPort  = 8765
 
@@ -53,6 +56,22 @@ Stop-ByPort -port $BotPort -name "bot server"
 # ---- Step 2: 停止 Gun relay ----
 Stop-ByPort -port $RelayPort -name "Gun relay"
 
+# ---- Step 2.5: 停止 chatroom-scheduler ----
+$schedProcs = Get-Process -Name "python*" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -match "chatroom-scheduler" }
+if ($schedProcs) {
+    foreach ($p in $schedProcs) {
+        try {
+            Stop-Process -Id $p.Id -Force -ErrorAction Stop
+            Write-RLog "已停止 chatroom-scheduler (PID $($p.Id))"
+        } catch {
+            Write-RLog "停止 chatroom-scheduler PID $($p.Id) 失敗: $_"
+        }
+    }
+} else {
+    Write-RLog "chatroom-scheduler 未在執行，略過"
+}
+
 # ---- Step 3: 啟動 Gun relay ----
 $ts = Get-Date -Format "yyyyMMdd_HHmmss"
 Start-Process -FilePath $NodeExe `
@@ -87,4 +106,26 @@ if ($null -eq $health) {
 
 $gunStatus = if ($health.gunConnected) { "已連線" } else { "未連線（Gun WebSocket 握手中，稍後自動重試）" }
 Write-RLog "bot server 狀態: $($health.status) | Gun: $gunStatus | 任務佇列: pending=$($health.pendingTasks)"
+
+# ---- Step 7: 啟動 chatroom-scheduler ----
+# 不使用 -RedirectStandardOutput/-RedirectStandardError（會導致 Python 長駐進程提前結束）。
+# 日誌由 chatroom-scheduler.py 自行寫入 bot/logs/chatroom-scheduler.log。
+$schedulerScript = Join-Path $ProjectDir "chatroom-scheduler.py"
+$venvPython = Join-Path $ProjectDir ".venv\Scripts\python.exe"
+if ((Test-Path $schedulerScript) -and (Test-Path $venvPython)) {
+    Start-Process -FilePath $venvPython `
+        -ArgumentList $schedulerScript `
+        -WorkingDirectory $ProjectDir `
+        -WindowStyle Hidden
+    Write-RLog "chatroom-scheduler 已啟動（venv python，日誌→ bot/logs/chatroom-scheduler.log）"
+} elseif (Test-Path $schedulerScript) {
+    Start-Process -FilePath "pwsh.exe" `
+        -ArgumentList "-NoProfile","-WindowStyle","Hidden","-Command","Set-Location '$ProjectDir'; uv run python chatroom-scheduler.py" `
+        -WorkingDirectory $ProjectDir `
+        -WindowStyle Hidden
+    Write-RLog "chatroom-scheduler 已啟動（uv fallback）"
+} else {
+    Write-RLog "[WARN] chatroom-scheduler.py 不存在，略過"
+}
+
 Write-RLog "====== Bot 重啟完成 ======"

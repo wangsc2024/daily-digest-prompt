@@ -178,9 +178,12 @@ if ($records.Count -eq 0) {
     exit
 }
 
-Write-Log "找到 $($records.Count) 個待處理任務"
+# 每次只處理 1 筆：讓 scheduler 的 timeout 是 per-task 而非 per-batch，
+# 避免研究型任務（11-17 min）累計超時導致整批被殺。
+$record = $records[0]
+Write-Log "找到 $($records.Count) 個待處理任務，本輪處理第 1 筆"
 
-foreach ($record in $records) {
+foreach ($record in @($record)) {
     $uid = $record.uid
     $filename = $record.filename
     $isResearch = $record.is_research

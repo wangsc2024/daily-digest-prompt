@@ -21,7 +21,7 @@ const STATES = {
 const TRANSITIONS = {
     [STATES.PENDING]:    [STATES.CLAIMED, STATES.COMPLETED],
     [STATES.CLAIMED]:    [STATES.PROCESSING, STATES.PENDING, STATES.COMPLETED],
-    [STATES.PROCESSING]: [STATES.COMPLETED, STATES.FAILED],
+    [STATES.PROCESSING]: [STATES.COMPLETED, STATES.FAILED, STATES.PENDING],
     [STATES.FAILED]:     [STATES.PENDING],
     [STATES.COMPLETED]:  []
 };
@@ -35,6 +35,17 @@ const CLAIM_TIMEOUTS = {
     code:     30 * 60 * 1000,  // 30 分鐘（程式碼生成）
     general:  10 * 60 * 1000,  // 10 分鐘（一般任務，原預設）
 };
+
+// Processing 狀態超時（毫秒）：worker 崩潰時自動回收
+const PROCESSING_TIMEOUTS = {
+    research: 120 * 60 * 1000, // 2 小時（研究任務含 claude -p 執行）
+    code:      90 * 60 * 1000, // 1.5 小時
+    general:   60 * 60 * 1000, // 1 小時
+};
+
+function getProcessingTimeout(taskType) {
+    return PROCESSING_TIMEOUTS[taskType] || PROCESSING_TIMEOUTS.general;
+}
 
 /**
  * 依任務類型取得對應的 claim timeout（毫秒）
@@ -97,9 +108,11 @@ module.exports = {
     TRANSITIONS,
     CLAIM_TIMEOUT_MS,
     CLAIM_TIMEOUTS,
+    PROCESSING_TIMEOUTS,
     canTransition,
     transition,
     isClaimExpired,
     isValidState,
-    getClaimTimeout
+    getClaimTimeout,
+    getProcessingTimeout
 };

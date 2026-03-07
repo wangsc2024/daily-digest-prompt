@@ -534,7 +534,7 @@ async function init() {
     }
     classifier.init(process.env.GROQ_API_KEY.trim());
 
-    // 從既有 records + scheduledTasks 填充去重快取，防止重啟後 Gun.js 重播訊息導致重複處理
+    // 從既有 records + scheduledTasks + workflows 填充去重快取，防止重啟後 Gun.js 重播訊息導致重複處理
     for (const rec of store.records) {
         const ts = new Date(rec.time).getTime();
         processedMessages.set(rec.uid, Number.isNaN(ts) ? Date.now() : ts);
@@ -543,6 +543,12 @@ async function init() {
         if (st.source_id && !processedMessages.has(st.source_id)) {
             const ts = new Date(st.created_at).getTime();
             processedMessages.set(st.source_id, Number.isNaN(ts) ? Date.now() : ts);
+        }
+    }
+    for (const wf of store.workflows) {
+        if (wf.source_id && !processedMessages.has(wf.source_id)) {
+            const ts = new Date(wf.created_at).getTime();
+            processedMessages.set(wf.source_id, Number.isNaN(ts) ? Date.now() : ts);
         }
     }
     if (processedMessages.size > 0) {
@@ -613,9 +619,10 @@ async function init() {
     const cronCount = Object.keys(app.locals.activeCronJobs).length;
     if (cronCount > 0) console.log(`已重新載入 ${cronCount} 個 cron 排程`);
 
-    // s11: 每分鐘自動釋放逾時的認領，並檢查到期的單次定時任務
+    // s11: 每分鐘自動釋放逾時的認領 + 回收卡住的 processing + 檢查到期定時任務
     cron.schedule('* * * * *', () => {
         store.releaseExpiredClaims();
+        store.recoverStaleProcessing();
         purgeStaleMessages();
         checkDueScheduledTasks().catch(err => console.error('[checkDueScheduledTasks]', err.message));
     });

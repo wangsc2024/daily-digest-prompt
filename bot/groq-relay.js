@@ -86,13 +86,24 @@ const SYSTEM_PROMPTS = {
     translate: '你是技術翻譯助手。將英文翻譯為正體中文，保留技術術語（如 LLM、RAG、API 等）原文括弧附上。只回覆譯文，不加說明。',
     classify: '你是主題分類助手。將輸入內容分類並回傳 JSON 格式：{"tags":["標籤1","標籤2"]}。標籤使用正體中文，最多5個。只回覆 JSON，不加說明。',
     extract: '你是結構化萃取助手。從輸入內容中萃取關鍵資訊並回傳 JSON 格式：{"key_points":["要點1","要點2"],"summary":"摘要","confidence":"high|medium|low"}。只回覆 JSON，不加說明。',
+    kb_score: '你是知識品質評分助手（v2）。評估知識庫筆記的品質與保留價值，以 JSON 回傳：' +
+        '{"concept_count":N,"depth_level":"foundation|mechanism|application|optimization|synthesis",' +
+        '"info_density":"high|medium|low","is_knowledge":true,' +
+        '"is_derived":false,"retention_value":"high|medium|low","issues":["問題1"]}。' +
+        '判斷標準：concept_count = 可辨識的獨立概念數；' +
+        'depth_level = 知識深度（foundation/mechanism/application/optimization/synthesis）；' +
+        'info_density = 資訊密度（high/medium/low）；' +
+        'is_knowledge = 是否為知識性內容（false = 任務日誌/模板/樣板/純連結）；' +
+        'is_derived = 是否為衍生內容（true = Podcast腳本/翻譯稿/對話改寫/自動生成等由既有知識改寫而成，無新增知識價值）；' +
+        'retention_value = 保留價值（low = 衍生品/已有MP3等最終產物/口語對話格式不適合檢索; medium = 有一定價值但不完整; high = 原創可複用知識）；' +
+        'issues = 具體問題列表。只回覆 JSON，不加說明。',
 };
 
 const VALID_MODES = new Set(Object.keys(SYSTEM_PROMPTS));
 
 async function callGroq(mode, content) {
     const systemPrompt = SYSTEM_PROMPTS[mode];
-    const isJson = (mode === 'classify' || mode === 'extract');
+    const isJson = (mode === 'classify' || mode === 'extract' || mode === 'kb_score');
 
     const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error(`Groq 逾時 (${GROQ_TIMEOUT_MS}ms)`)), GROQ_TIMEOUT_MS)
