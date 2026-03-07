@@ -7,6 +7,7 @@ tools/compose_video.py
 """
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -55,23 +56,89 @@ def duration_to_frames(duration_s: float, fps: int, min_frames: int = 30) -> int
     return max(frames, min_frames)
 
 
-def fetch_scene_image(prompt: str, dest_path: Path, width: int = 1280, height: int = 720) -> bool:
-    """從 Pollinations.ai 下載 AI 生成場景圖（免費，無需 API Key）。
-    成功回傳 True，失敗回傳 False（供 graceful fallback 使用）。
+# 專有名詞／抽象詞 → 圖庫可搜到的具體英文關鍵字（依內容選圖用）
+CONTENT_TO_KEYWORDS = {
+    "avalokitesvara": "statue,buddha,temple",
+    "guanyin": "statue,buddha,temple",
+    "lotus sutra": "lotus,flower,pond",
+    "sutra": "book,ancient,scroll",
+    "meditation": "meditation,person,sitting",
+    "zen": "zen,garden,stones",
+    "fire water wind": "fire,water,nature",
+    "elements": "fire,water,nature",
+    "seven elements": "fire,water,nature",
+    "golden light": "sunlight,golden,morning",
+    "radiating": "light,sun,glow",
+    "prayer beads": "beads,wood,hands",
+    "mountain temple": "mountain,temple,clouds",
+    "misty mountain": "mountain,mist,forest",
+    "thousand-armed": "statue,buddha,temple",
+    "buddhist": "temple,buddha,lotus",
+    "buddha": "buddha,statue,temple",
+    "dharma": "book,temple,lotus",
+    "wisdom": "book,light,candle",
+}
+
+# 場景類型專用 fallback 關鍵字（當主關鍵字導致重複圖時使用）
+SCENE_TYPE_FALLBACK_KEYWORDS = {
+    "title_card": "landscape,sunset,horizon",
+    "content_slide": "nature,forest,path",
+    "code_highlight": "computer,code,keyboard",
+    "quote": "book,candle,wood",
+    "split_view": "balance,minimal,two",
+    "outro": "sunrise,mountain,light",
+}
+
+
+def _extract_loremflickr_keywords(image_prompt: str) -> str:
+    """從 imagePrompt 提取圖庫可搜到的關鍵字（最多 5 個）。
+    先做內容映射（專有名詞→具體詞），再取前段主題詞，過濾 stop words。
     """
+    if not image_prompt or not image_prompt.strip():
+        return "nature,landscape"
+
+    STOP_WORDS = {
+        "a", "an", "the", "at", "in", "on", "of", "to", "and", "or", "with",
+        "cinematic", "dark", "16:9", "no", "text", "light", "glowing",
+        "abstract", "soft", "view", "aerial", "closeup", "close",
+        "radiating", "merging", "streams", "nodes", "flow",
+    }
+    subject = image_prompt.split(",")[0].strip().lower()
+    max_keywords = 5
+
+    # 先做整句內容映射（最長匹配優先）
+    mapped = subject
+    for phrase, replacement in sorted(CONTENT_TO_KEYWORDS.items(), key=lambda x: -len(x[0])):
+        if phrase in mapped:
+            mapped = mapped.replace(phrase, replacement.replace(",", " "))
+
+    words = mapped.split()
+    keywords = [w for w in words if w not in STOP_WORDS and len(w) > 2][:max_keywords]
+    return ",".join(keywords) if keywords else "nature,landscape"
+
+
+def fetch_scene_image(
+    image_prompt: str,
+    dest_path: Path,
+    scene_index: int = 0,
+    width: int = 1280,
+    height: int = 720,
+    keywords_override: str | None = None,
+    lock_offset: int = 0,
+) -> bool:
+    """從 LoremFlickr 下載場景圖（依關鍵字搜尋）。keywords_override 用於重試時改用 fallback 關鍵字。"""
     if not HAS_REQUESTS:
         print("[WARN] requests 未安裝，跳過圖片下載。執行 uv add requests 後重試。", file=sys.stderr)
         return False
 
-    api_key = os.getenv("POLLINATIONS_API_KEY", "")
-    encoded_prompt = url_quote(prompt)
-    url = f"https://gen.pollinations.ai/image/{encoded_prompt}"
-    params = {"width": width, "height": height, "nologo": "true", "model": "flux", "seed": 42}
-    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    keywords = keywords_override if keywords_override else _extract_loremflickr_keywords(image_prompt)
+    lock = 1000 + scene_index + lock_offset
+    url = f"https://loremflickr.com/{width}/{height}/{url_quote(keywords)}"
+    params = {"lock": lock}
 
     for attempt in range(1, 4):
         try:
-            resp = requests.get(url, params=params, headers=headers, timeout=90)
+            resp = requests.get(url, params=params, timeout=30, allow_redirects=True)
             resp.raise_for_status()
             content_type = resp.headers.get("Content-Type", "")
             if "image" not in content_type:
@@ -83,13 +150,18 @@ def fetch_scene_image(prompt: str, dest_path: Path, width: int = 1280, height: i
         except Exception as e:
             print(f"[WARN] 圖片下載失敗（第 {attempt}/3 次）: {e}", file=sys.stderr)
             if attempt < 3:
-                time.sleep(3 * attempt)
+                time.sleep(2 * attempt)
 
     return False
 
 
+def _file_md5(path: Path) -> str:
+    """檔案的 MD5 前 8 字元，用於偵測重複圖。"""
+    return hashlib.md5(path.read_bytes()).hexdigest()[:8]
+
+
 def fetch_images_for_scenes(scenes: list, public_dir: Path, slug: str) -> dict[str, str]:
-    """為所有場景下載 AI 背景圖，回傳 {scene_id: relative_image_path} 對應表。"""
+    """為所有場景下載背景圖（依內容關鍵字）。若與前一張重複則用場景類型 fallback 重試。"""
     if not HAS_REQUESTS:
         return {}
 
@@ -99,16 +171,36 @@ def fetch_images_for_scenes(scenes: list, public_dir: Path, slug: str) -> dict[s
     image_dir.mkdir(parents=True)
 
     image_map: dict[str, str] = {}
-    for scene in scenes:
+    seen_md5: set[str] = set()
+
+    for idx, scene in enumerate(scenes):
         scene_id = scene.get("id", "")
+        scene_type = scene.get("type", "content_slide")
         image_prompt = scene.get("imagePrompt", "")
         if not image_prompt:
             continue
 
         dest_path = image_dir / f"{scene_id}.jpg"
         print(f"  [IMG] {scene_id}: 下載圖片... prompt={image_prompt[:50]}")
-        success = fetch_scene_image(image_prompt, dest_path)
-        if success:
+        success = fetch_scene_image(image_prompt, dest_path, scene_index=idx)
+
+        if success and dest_path.exists():
+            current_md5 = _file_md5(dest_path)
+            if current_md5 in seen_md5:
+                fallback_kw = SCENE_TYPE_FALLBACK_KEYWORDS.get(
+                    scene_type, "nature,landscape"
+                )
+                print(f"  [IMG] {scene_id}: 與前面某張重複，改用 fallback 關鍵字 [{fallback_kw}] 重試")
+                retry_ok = fetch_scene_image(
+                    image_prompt,
+                    dest_path,
+                    scene_index=idx,
+                    keywords_override=fallback_kw,
+                    lock_offset=2000 + idx,
+                )
+                if retry_ok and dest_path.exists():
+                    current_md5 = _file_md5(dest_path)
+            seen_md5.add(current_md5)
             image_map[scene_id] = f"images/{slug}/{scene_id}.jpg"
             print(f"  [IMG] {scene_id}: ✓ 儲存完成")
         else:

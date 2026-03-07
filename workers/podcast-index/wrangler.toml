@@ -1,0 +1,11 @@
+# workers/podcast-index/wrangler.toml
+# 部署：npx wrangler deploy
+# Custom Domain 請在 Dashboard 手動加入：podcast.pdoont.us.kg
+
+name = "podcast-index"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "PODCASTS"
+bucket_name = "podcasts"

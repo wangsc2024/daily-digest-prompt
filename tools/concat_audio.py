@@ -57,13 +57,31 @@ def normalize_to_wav(input_path: Path, output_path: Path):
     )
 
 
-def generate_tone(freq_hz: int, duration_s: float, fade_s: float, output: Path):
-    """生成 sine 音調 WAV（統一格式：24000Hz mono pcm_s16le）。"""
-    fade_out_start = max(0.0, duration_s - fade_s)
+def generate_chord(
+    freqs: list[float],
+    weights: list[float],
+    duration_s: float,
+    fade_in_s: float,
+    fade_out_s: float,
+    output: Path,
+):
+    """生成和弦 WAV（aevalsrc 多頻率合成，比單音更悅耳）。
+
+    freqs   : 頻率列表（Hz），例如 [264, 330, 396]
+    weights : 對應權重（建議總和 ≤ 1 以防削波）
+    """
+    if len(freqs) != len(weights):
+        raise ValueError("freqs 與 weights 長度必須相同")
+
+    # 建立 aevalsrc 運算式：Σ(weight * sin(2π * t * freq))
+    terms = [f"{w:.3f}*sin(2*PI*t*{f})" for f, w in zip(freqs, weights)]
+    expr = "+".join(terms)
+
+    fade_out_start = max(0.0, duration_s - fade_out_s)
     ffmpeg(
         "-f", "lavfi",
-        "-i", f"sine=frequency={freq_hz}:sample_rate={SAMPLE_RATE}:duration={duration_s}",
-        "-filter:a", f"afade=t=in:d={fade_s},afade=t=out:st={fade_out_start}:d={fade_s}",
+        "-i", f"aevalsrc={expr}:s={SAMPLE_RATE}:d={duration_s}",
+        "-af", f"afade=t=in:d={fade_in_s},afade=t=out:st={fade_out_start}:d={fade_out_s}",
         "-ar", str(SAMPLE_RATE),
         "-ac", str(CHANNELS),
         "-acodec", CODEC,
@@ -200,10 +218,15 @@ def main():
     target_lufs = cfg.get("target_lufs", -14)
     bitrate_kbps = cfg.get("output_bitrate_kbps", 128)
     silence_ms = cfg.get("silence_between_turns_ms", 100)
-    intro_freq = cfg.get("intro_freq_hz", 440)
-    outro_freq = cfg.get("outro_freq_hz", 330)
-    tone_duration = cfg.get("tone_duration_s", 5)
-    tone_fade = cfg.get("tone_fade_s", 1)
+    tone_duration = cfg.get("tone_duration_s", 2.5)
+    fade_in_s = cfg.get("fade_in_s", 0.3)
+    fade_out_s = cfg.get("fade_out_s", 1.2)
+
+    # 和弦設定（支援新格式；回退舊格式 intro_freq_hz / outro_freq_hz）
+    intro_freqs = cfg.get("intro_freqs_hz", [cfg.get("intro_freq_hz", 440)])
+    intro_weights = cfg.get("intro_weights", [0.35] * len(intro_freqs))
+    outro_freqs = cfg.get("outro_freqs_hz", [cfg.get("outro_freq_hz", 330)])
+    outro_weights = cfg.get("outro_weights", [0.35] * len(outro_freqs))
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp = Path(tmp_dir)
@@ -213,11 +236,11 @@ def main():
         norm_dir = tmp / "normalized"
         norm_dir.mkdir()
 
-        print("[INFO] 生成 Intro 音調...")
-        generate_tone(intro_freq, tone_duration, tone_fade, intro_wav)
+        print(f"[INFO] 生成 Intro 和弦（{intro_freqs} Hz）...")
+        generate_chord(intro_freqs, intro_weights, tone_duration, fade_in_s, fade_out_s, intro_wav)
 
-        print("[INFO] 生成 Outro 音調...")
-        generate_tone(outro_freq, tone_duration, tone_fade, outro_wav)
+        print(f"[INFO] 生成 Outro 和弦（{outro_freqs} Hz）...")
+        generate_chord(outro_freqs, outro_weights, tone_duration, fade_in_s, fade_out_s, outro_wav)
 
         print(f"[INFO] 生成 {silence_ms}ms 靜音段落...")
         generate_silence(silence_ms, silence_wav)

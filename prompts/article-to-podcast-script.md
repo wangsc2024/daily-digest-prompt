@@ -30,14 +30,24 @@ curl -s "http://localhost:3000/api/notes/{{NOTE_ID}}"
 取得回應的 `title` 和 `contentText` 欄位。
 
 **若有 QUERY（{{QUERY}}）**：
+
+本次需排除的已用筆記 ID（JSON 陣列）：`{{USED_NOTE_IDS}}`
+
+以 topK:5 搜尋，從結果中選取**第一個不在排除清單**的筆記：
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json; charset=utf-8" \
-  -d "{\"query\": \"{{QUERY}}\", \"topK\": 1}"
+  -d "{\"query\": \"{{QUERY}}\", \"topK\": 5}"
 ```
-取得最高分數的筆記 ID，再讀取全文：
-```bash
-curl -s "http://localhost:3000/api/notes/<noteId>"
+
+選取規則（依序）：
+1. 跳過 ID 在 `{{USED_NOTE_IDS}}` 中的筆記
+2. 若所有結果都已用過，選分數**最低**的一筆（即最舊使用的，允許循環）
+3. 讀取選定筆記全文：`curl -s "http://localhost:3000/api/notes/<noteId>"`
+
+選定筆記後，**立即**用 Write 工具建立 `results/article-{{SLUG}}/podcast-meta.json`，記錄本次使用的筆記（供去重歷史追蹤）：
+```json
+{"note_id": "<實際筆記 ID>", "note_title": "<筆記標題>", "query": "{{QUERY}}"}
 ```
 
 文章的 `contentText`（Markdown 格式）即為腳本素材。
@@ -54,6 +64,12 @@ curl -s "http://localhost:3000/api/notes/<noteId>"
 - 開場：host_a 引介主題，host_b 引發好奇心（2-3 段）
 - 主體：交替深入主題各個要點（8-14 段）
 - 結尾：host_a 總結，host_b 分享感想或提出思考（2-3 段）
+
+**禁止內容重複**（重要）：
+- 每段對話必須推進**新資訊**，禁止重複已說過的要點
+- 同一概念或例子只說一次，不得在不同段落換句話說
+- 避免冗餘的過渡句（如「就像剛才說的」「再次強調」）
+- 若 host_b 提問，host_a 的回答應補充新內容，而非覆述前文
 
 **縮寫展開規則（tts_text 欄位必須套用）**：
 - 全大寫英文縮寫加字母間空格（LLM → L L M，API → A P I，TTS → T T S）
@@ -77,7 +93,9 @@ curl -s "http://localhost:3000/api/notes/<noteId>"
 - `text`：原始對話文字（含縮寫，供閱讀）
 - `tts_text`：TTS 用文字（縮寫已展開）
 
-### 步驟 6：完成
+### 步驟 6：完成前檢查
+
+撰寫完成後，**快速掃描各段文字**：確認無重複概念、無冗餘覆述，再寫入檔案。
 
 確認 `results/article-{{SLUG}}/podcast-script.jsonl` 已成功寫入，回報：
 - 總段數
