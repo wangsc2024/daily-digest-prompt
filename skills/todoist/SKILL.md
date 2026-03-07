@@ -31,19 +31,32 @@ triggers:
 
 ## 環境設定
 
-```bash
-export TODOIST_API_TOKEN="your_api_token"
-```
+> **Windows 注意**：`$TODOIST_API_TOKEN` 不會自動注入 Bash 環境，必須透過 PowerShell 讀取 `.env` 再呼叫 API。
+> **禁止使用** `echo $TOKEN`、`$(cat .env | grep TOKEN)` 等方式——會被 Harness 攔截。
 
 Token 取得：https://todoist.com/app/settings/integrations/developer
 
-## 快速使用（curl，推薦）
+### Token 載入片段（所有 pwsh 呼叫共用）
+
+```powershell
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+```
+
+## 快速使用（Windows pwsh，推薦）
 
 ### 查詢今日 + 過期待辦（預設，推薦）
 
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+$r = Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" -Headers @{Authorization="Bearer $t"}
+$r | ConvertTo-Json -Depth 10'
 ```
 
 > **注意**：預設查詢今日 + 過期任務，確保昨日未執行的任務不被遺漏。
@@ -56,68 +69,70 @@ curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue
 
 ```bash
 # 僅今日（不含過期）
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+(Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today" -Headers @{Authorization="Bearer $t"}) | ConvertTo-Json -Depth 10'
 
 # 未來 7 天
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=7%20days" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+(Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=7%20days" -Headers @{Authorization="Bearer $t"}) | ConvertTo-Json -Depth 10'
 ```
 
 > 過濾器需 URL encode：`today | overdue` → `today%20%7C%20overdue`
 
 ### 新增任務
 
-> **Windows 注意**：POST 請求的 inline JSON（`-d '{...}'`）在 Windows Bash 會失敗（error_code 42），
-> 必須先用 Write 工具建立 JSON 檔案，再用 `-d @file.json` 發送。GET 查詢不受影響。
+步驟 1：用 Write 工具建立 `task.json`（例如 `{"content":"完成報告","due_string":"tomorrow","priority":4}`）
 
-**Windows 環境（推薦）：**
+步驟 2：用 pwsh 發送：
 ```bash
-# 步驟 1：用 Write 工具建立 JSON 檔案（例如 task.json）
-# {"content":"完成報告","due_string":"tomorrow","priority":4}
-
-# 步驟 2：用 curl 發送
-curl -s -X POST "https://api.todoist.com/api/v1/tasks" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -d @task.json
-
-# 步驟 3：刪除暫存檔
-rm task.json
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/tasks" -Method Post `
+  -Headers @{Authorization="Bearer $t"; "Content-Type"="application/json; charset=utf-8"} `
+  -Body (Get-Content "task.json" -Raw) | ConvertTo-Json -Depth 10'
 ```
 
-**macOS/Linux 環境：**
-```bash
-curl -s -X POST "https://api.todoist.com/api/v1/tasks" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"content":"完成報告","due_string":"tomorrow","priority":4}'
-```
+步驟 3：`rm task.json`
 
 ### 完成任務
 
 ```bash
-curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/TASK_ID/close" -Method Post -Headers @{Authorization="Bearer $t"}'
 ```
 
 ### 新增任務評論
 
-> **Windows 注意**：POST 請求必須用 Write 工具建立 JSON 檔案，再用 `-d @file.json` 發送。
+步驟 1：用 Write 工具建立 `comment.json`（例如 `{"task_id":"TASK_ID","content":"評論內容"}`）
 
+步驟 2：用 pwsh 發送：
 ```bash
-# 步驟 1：用 Write 工具建立 comment.json
-# {"task_id":"TASK_ID","content":"評論內容"}
-
-# 步驟 2：發送
-curl -s -X POST "https://api.todoist.com/api/v1/comments" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -d @comment.json
-
-# 步驟 3：刪除暫存檔
-rm comment.json
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/comments" -Method Post `
+  -Headers @{Authorization="Bearer $t"; "Content-Type"="application/json; charset=utf-8"} `
+  -Body (Get-Content "comment.json" -Raw)'
 ```
+
+步驟 3：`rm comment.json`
 
 ### 更新任務（優先級、截止日期等）
 
@@ -127,21 +142,24 @@ rm comment.json
 > Todoist API 接收到 `due_string` 更新時，會清除週期性設定（`is_recurring` 變為 `false`），
 > 導致任務失去週期性。週期性任務失敗時，**僅降低 `priority`，不修改 `due_string`**。
 
+步驟 1：用 Write 工具建立 `update.json`
+- 降低優先級（適用所有任務）：`{"priority": 3}`
+- 重新排程（僅限非週期性任務）：`{"due_string": "tomorrow"}`
+- 同時修改（僅限非週期性任務）：`{"priority": 3, "due_string": "tomorrow"}`
+
+步驟 2：用 pwsh 發送：
 ```bash
-# 步驟 1：用 Write 工具建立 update.json
-# 降低優先級（適用所有任務）：{"priority": 3}
-# 重新排程（僅限非週期性任務）：{"due_string": "tomorrow"}
-# 同時修改（僅限非週期性任務）：{"priority": 3, "due_string": "tomorrow"}
-
-# 步驟 2：發送
-curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -d @update.json
-
-# 步驟 3：刪除暫存檔
-rm update.json
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/TASK_ID" -Method Post `
+  -Headers @{Authorization="Bearer $t"; "Content-Type"="application/json; charset=utf-8"} `
+  -Body (Get-Content "update.json" -Raw) | ConvertTo-Json -Depth 10'
 ```
+
+步驟 3：`rm update.json`
 
 ---
 

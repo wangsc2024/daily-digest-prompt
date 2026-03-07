@@ -116,10 +116,15 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 2. 以此指針為起點，按 execution_order 順序（到最後繞回第 1 個）逐一檢查
 3. 找到第一個 `計數 < daily_limit` 的任務 → 載入其 `template` 模板檔案
 4. 若模板有 `template_params`（如教觀綱宗、法華經、淨土宗）→ 替換 `{{SUBJECT}}`、`{{AUTHOR}}`、`{{SEARCH_TERMS}}`、`{{TAGS}}`、`{{STUDY_PATH}}`
-5. 依模板指示建立 `task_prompt.md` 並執行子 Agent
-6. 完成後更新 `context/auto-tasks-today.json`：計數 +1、`next_execution_order` 推進到下一個
-7. 同步更新 `state/todoist-history.json`
-8. 清理 `task_prompt.md`
+5. **讀取任務模型**：從 `config/frequency-limits.yaml` 取得執行模型：
+   - 任務有 `model` 欄位且非空 → 使用任務指定模型
+   - 否則讀取全域 `default_model`，非空 → 使用全域預設模型
+   - 兩者皆空 → 不帶 `--model` 旗標（使用 Claude Code 當前預設）
+   - 記錄：`📦 自動任務：{task.name} | 模型：{resolved_model 或 "預設"}`
+6. 依模板指示建立 `task_prompt.md` 並執行子 Agent
+7. 完成後更新 `context/auto-tasks-today.json`：計數 +1、`next_execution_order` 推進到下一個
+8. 同步更新 `state/todoist-history.json`
+9. 清理 `task_prompt.md`
 
 ### 2.7 每次僅執行 1 個
 每觸發一次步驟 2.5-2.8，僅執行 **1 個** 自動任務。
@@ -166,10 +171,18 @@ NOW_UTC=$(python -c "from datetime import datetime, timezone; print(datetime.now
 用 Write 工具建立 `task_prompt.md`，依模板填入任務資料。
 
 ### 4.2 執行（含輸出捕獲，timeout 600000ms）
+依步驟 2.6 或步驟 3 解析出的 `resolved_model` 組裝命令：
 ```bash
-AGENT_OUTPUT=$(cat task_prompt.md | claude -p --allowedTools "工具清單" 2>&1)
+# resolved_model 非空時加入 --model 旗標
+MODEL_FLAG=""
+if [ -n "$RESOLVED_MODEL" ]; then
+  MODEL_FLAG="--model $RESOLVED_MODEL"
+fi
+AGENT_OUTPUT=$(cat task_prompt.md | claude -p $MODEL_FLAG --allowedTools "工具清單" 2>&1)
 echo "$AGENT_OUTPUT"
 ```
+- **Todoist 任務**：`resolved_model` = 空（Todoist 任務不從此處設定，使用 Claude Code 預設）
+- **自動任務**：`resolved_model` = 步驟 2.6 第 5 步解析結果
 將輸出寫入 `task_result.txt`。
 
 ### 4.2.5 驗證閘門

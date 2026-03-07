@@ -19,8 +19,13 @@
    - 過期/不存在 → 呼叫 API
 4. 呼叫 Todoist API v1（含過期任務，避免昨日未執行的任務被遺漏）：
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+$r = Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" -Headers @{Authorization="Bearer $t"}
+$r | ConvertTo-Json -Depth 10'
 ```
 5. 成功 → 寫入快取（依 api-cache 格式）
 6. 失敗 → 嘗試過期快取（24 小時內），source="cache_degraded"

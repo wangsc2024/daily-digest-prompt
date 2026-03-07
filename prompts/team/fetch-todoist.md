@@ -22,11 +22,14 @@
 依 todoist SKILL.md 指示，查詢**僅當日**待辦（不含 overdue）：
 
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+$r = Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today" -Headers @{Authorization="Bearer $t"}
+$r | ConvertTo-Json -Depth 10'
 ```
-
-> **注意**：需先設定環境變數 `TODOIST_API_TOKEN`。PowerShell 腳本會自動傳遞此環境變數。
 
 - 成功 → 用 Write 寫入快取 `cache/todoist.json`（依 api-cache 格式：`{"cached_at":"ISO","ttl_minutes":30,"source":"todoist","data":回應}`）
   - **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`

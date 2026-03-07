@@ -67,7 +67,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | 指標 | 計算方式 | 健康門檻 |
 |------|---------|---------|
 | daily_success_rate | 成功 runs / 總 runs（近 7 天） | >= 90% |
-| skill_usage_coverage | 被使用的 Skill 數 / 24（從 JSONL `skill-read` 標籤統計 unique Skill 名稱；總數：17 核心 + 7 工具） | >= 70% |
+| skill_usage_coverage | 被使用的 Skill 數 / 26（從 JSONL `skill-read` 標籤統計 unique Skill 名稱；總數：19 核心 + 7 工具） | >= 70% |
 | cache_hit_ratio | cache-read / (cache-read + api-call) | >= 40% |
 | error_rate | error 標籤 / 總呼叫數 | <= 5% |
 | block_rate | blocked 標籤 / 總呼叫數 | <= 2% |
@@ -77,7 +77,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | behavior_pattern_count | behavior-patterns.json 中模式總數（可選，null 不扣分） | >= 20（有資料時） |
 | high_confidence_patterns | confidence >= 0.5 的模式數（可選，null 不扣分） | >= 5（有資料時） |
 
-> **注意**：Skill 總數（24）應隨 SKILL_INDEX.md 速查表同步更新。
+> **注意**：Skill 總數（26）應隨 SKILL_INDEX.md 速查表同步更新。
 
 ### 步驟 3：產出報告
 用 Write 建立 `context/system-insight.json`：
@@ -87,7 +87,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
   "version": 2,
   "generated_at": "ISO timestamp",
   "period_days": 7,
-  "total_skills": 24,
+  "total_skills": 26,
   "metrics": {
     "daily_success_rate": 0.95,
     "skill_usage_coverage": 0.80,

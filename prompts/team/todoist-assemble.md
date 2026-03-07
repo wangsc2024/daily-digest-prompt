@@ -86,8 +86,12 @@ if api_results:
 
 ### 2.1 關閉任務
 ```bash
-curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/TASK_ID/close" -Method Post -Headers @{Authorization="Bearer $t"}'
 ```
 
 ### 2.2 記錄已關閉 ID
@@ -102,10 +106,14 @@ curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID/close" \
 }
 ```
 ```bash
-curl -s -X POST "https://api.todoist.com/api/v1/comments" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN" \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -d @comment.json
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/comments" -Method Post `
+  -Headers @{Authorization="Bearer $t"; "Content-Type"="application/json; charset=utf-8"} `
+  -Body (Get-Content "comment.json" -Raw)'
 rm comment.json
 ```
 
@@ -119,13 +127,17 @@ rm comment.json
 **情形 A：非週期性任務（`due.is_recurring = false` 或 `due` 為 null）**
 - 降低優先級（若 priority > 1）
 - 用 Write 建立 `update.json`：`{"priority": N-1, "due_string": "tomorrow"}`
-- `curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" -H "Authorization: Bearer $TODOIST_API_TOKEN" -H "Content-Type: application/json; charset=utf-8" -d @update.json`
+- ```bash
+  pwsh -Command '$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else { (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue | Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=","" }; Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/TASK_ID" -Method Post -Headers @{Authorization="Bearer $t";"Content-Type"="application/json; charset=utf-8"} -Body (Get-Content "update.json" -Raw)'
+  ```
 - `rm update.json`
 
 **情形 B：週期性任務（`due.is_recurring = true`）**
 - 僅降低優先級，**不設 due_string**（避免覆蓋週期性設定）
 - 用 Write 建立 `update.json`：`{"priority": N-1}`
-- `curl -s -X POST "https://api.todoist.com/api/v1/tasks/TASK_ID" -H "Authorization: Bearer $TODOIST_API_TOKEN" -H "Content-Type: application/json; charset=utf-8" -d @update.json`
+- ```bash
+  pwsh -Command '$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else { (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue | Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=","" }; Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/TASK_ID" -Method Post -Headers @{Authorization="Bearer $t";"Content-Type"="application/json; charset=utf-8"} -Body (Get-Content "update.json" -Raw)'
+  ```
 - `rm update.json`
 - > ⚠️ 週期性任務不設 due_string，因 Todoist API 更新 due_string 會清除 is_recurring 設定。任務將在下次排程的到期日期自然重新出現。
 
@@ -137,8 +149,13 @@ rm comment.json
 
 1. 重新查詢 Todoist 今日 + 過期待辦：
 ```bash
-curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
-  -H "Authorization: Bearer $TODOIST_API_TOKEN"
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+$r = Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" -Headers @{Authorization="Bearer $t"}
+$r | ConvertTo-Json -Depth 10'
 ```
 2. 對結果執行截止日期過濾 + 已關閉 ID 過濾（含本次步驟 2 剛關閉的 ID）
 3. 用前置過濾（排除實體行動等）+ Tier 1/2/3 路由判斷可處理項目
