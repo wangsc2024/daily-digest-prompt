@@ -796,8 +796,12 @@ def _find_token_usage_file_for_stop() -> str:
 def _check_token_budget() -> "str | None":
     """檢查今日 Token 估算是否超過 1.5M。
 
+    每日只通知一次（冷卻機制）：在 state/token-budget-state.json 記錄
+    last_alerted_date，同一天內只發出第一次警告，避免每個 session
+    結束都重複通知。
+
     Returns:
-        警告字串（若超過上限），否則 None。
+        警告字串（若超過上限且今日尚未通知），否則 None。
     """
     try:
         token_file = _find_token_usage_file_for_stop()
@@ -811,9 +815,39 @@ def _check_token_budget() -> "str | None":
         day_data = usage.get("daily", {}).get(today, {})
         estimated = day_data.get("estimated_tokens", 0)
 
-        if estimated > 1_500_000:
-            return f"今日 Token 估算超過 1.5M：{estimated / 1_000_000:.1f}M"
-        return None
+        if estimated <= 1_500_000:
+            return None
+
+        # 冷卻機制：今日已通知過則跳過
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        state_path = os.path.join(project_root, "state", "token-budget-state.json")
+
+        state: dict = {}
+        if os.path.exists(state_path):
+            try:
+                with open(state_path, "r", encoding="utf-8") as f:
+                    state = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                state = {}
+
+        if state.get("last_alerted_date") == today:
+            return None  # 今日已通知，冷卻中
+
+        # 更新冷卻狀態
+        state["last_alerted_date"] = today
+        try:
+            from hook_utils import atomic_write_json
+            atomic_write_json(state_path, state)
+        except ImportError:
+            try:
+                os.makedirs(os.path.dirname(state_path), exist_ok=True)
+                with open(state_path, "w", encoding="utf-8") as f:
+                    json.dump(state, f, ensure_ascii=False)
+            except OSError:
+                pass
+
+        return f"今日 Token 估算超過 1.5M：{estimated / 1_000_000:.1f}M"
     except Exception:
         return None
 

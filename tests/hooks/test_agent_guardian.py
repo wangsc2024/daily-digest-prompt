@@ -483,13 +483,16 @@ class TestLoopDetector:
     # === Excessive Turns Detection ===
 
     def test_excessive_turns_detected(self, detector):
-        """Excessive Turns：超過 100 次呼叫"""
-        for i in range(100):
+        """Excessive Turns：超過閾值（config 或 fallback 100）次呼叫後觸發"""
+        threshold = detector.EXCESSIVE_TURNS_THRESHOLD
+        for i in range(threshold):
             result = detector.check_loop("Read", f"file_{i}.txt", f"content_{i}")
             assert result["loop_detected"] is False
 
-        # 第 101 次應該觸發
-        result = detector.check_loop("Read", "file_101.txt", "content_101")
+        # 第 threshold+1 次應該觸發
+        result = detector.check_loop(
+            "Read", f"file_{threshold}.txt", f"content_{threshold}"
+        )
         assert result["loop_detected"] is True
         assert result["loop_type"] == "excessive_turns"
 
@@ -603,6 +606,44 @@ class TestLoopDetector:
         state2 = d2.get_state()
 
         assert state2["session_call_count"] == 4
+
+
+    def test_initial_state_corrupted_non_list_window(self):
+        """損壞的 initial_state（window 非 list）應安全回退至空 deque。"""
+        from agent_guardian import LoopDetector
+
+        corrupted = {
+            "session_call_count": 10,
+            "tool_hash_window": "not_a_list",
+            "content_hash_window": 42,
+        }
+        detector = LoopDetector(warning_mode=True, initial_state=corrupted)
+        # 應安全回退而非 crash
+        assert detector.session_call_count == 10
+        assert len(detector.tool_hash_window) == 0
+        assert len(detector.content_hash_window) == 0
+
+    def test_initial_state_corrupted_non_int_count(self):
+        """損壞的 initial_state（count 非 int）應安全回退至 0。"""
+        from agent_guardian import LoopDetector
+
+        corrupted = {
+            "session_call_count": "invalid",
+            "tool_hash_window": [],
+            "content_hash_window": [],
+        }
+        detector = LoopDetector(warning_mode=True, initial_state=corrupted)
+        assert detector.session_call_count == 0
+
+    def test_initial_state_missing_keys(self):
+        """initial_state 缺少部分鍵時應使用預設值。"""
+        from agent_guardian import LoopDetector
+
+        partial = {"session_call_count": 5}
+        detector = LoopDetector(warning_mode=True, initial_state=partial)
+        assert detector.session_call_count == 5
+        assert len(detector.tool_hash_window) == 0
+        assert len(detector.content_hash_window) == 0
 
 
 if __name__ == "__main__":

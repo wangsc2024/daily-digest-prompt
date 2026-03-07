@@ -57,6 +57,35 @@ INJECTION_PATTERNS = [
 ]
 
 
+# Pre-compiled regex for sensitive data sanitization (shared by post_tool_logger + behavior_tracker)
+_RE_SANITIZE_AUTH = re.compile(
+    r'(-H\s+["\']?Authorization:\s*)(Bearer|Basic)\s+\S+',
+    re.IGNORECASE
+)
+_RE_SANITIZE_TOKEN_HEADER = re.compile(
+    r'(-H\s+["\']?[Xx][-\w]*(?:Token|Key|Secret):\s*)\S+',
+    re.IGNORECASE
+)
+_RE_SANITIZE_ENV_VAR = re.compile(
+    r'(\$(?:env:)?[A-Z_]*(?:TOKEN|SECRET|KEY|PASSWORD)(?:\s*=\s*|\s+))\S+',
+    re.IGNORECASE
+)
+
+
+def sanitize_sensitive_data(text: str) -> str:
+    """Remove sensitive tokens/keys/secrets from text for safe logging.
+
+    Strips:
+      - Authorization: Bearer/Basic <token>
+      - X-...-Token/Key/Secret: <value>
+      - $env:TOKEN / $TOKEN = <value>
+    """
+    result = _RE_SANITIZE_AUTH.sub(r'\1\2 <REDACTED>', text)
+    result = _RE_SANITIZE_TOKEN_HEADER.sub(r'\1<REDACTED>', result)
+    result = _RE_SANITIZE_ENV_VAR.sub(r'\1<REDACTED>', result)
+    return result
+
+
 def find_config_path(filename="hook-rules.yaml"):
     """從 hooks/ 上層或 cwd 尋找配置檔，找不到回傳 None。"""
     # 優先：以本腳本位置推算 hooks/../config/
@@ -372,6 +401,56 @@ def atomic_write_lines(filepath: str, lines: list) -> None:
             except OSError:
                 pass
         raise
+
+
+# 通用 YAML 檔案快取（任意路徑，與 _yaml_config_cache 的 hook-rules.yaml 分開）
+_yaml_file_cache: dict = {}
+
+
+def load_yaml_file(filename: str, fallback=None):
+    """載入任意 YAML 配置檔案（含模組層級快取）。
+
+    支援兩種路徑模式：
+      1. 相對於 config/ 目錄的檔名（如 "benchmark.yaml"）
+      2. 絕對路徑
+
+    Args:
+        filename: 檔名或絕對路徑
+        fallback: 載入失敗時的預設值
+
+    Returns:
+        解析後的 YAML 資料，或 fallback
+    """
+    if filename in _yaml_file_cache:
+        return _yaml_file_cache[filename]
+
+    if not _YAML_AVAILABLE:
+        _yaml_file_cache[filename] = fallback
+        return fallback
+
+    # 解析檔案路徑
+    if os.path.isabs(filename):
+        config_path = filename
+    else:
+        config_path = find_config_path(filename)
+
+    if config_path is None or not os.path.isfile(config_path):
+        _yaml_file_cache[filename] = fallback
+        return fallback
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            data = _yaml_module.safe_load(f)
+        _yaml_file_cache[filename] = data
+        return data
+    except Exception:
+        _yaml_file_cache[filename] = fallback
+        return fallback
+
+
+def clear_yaml_file_cache():
+    """清除通用 YAML 檔案快取。"""
+    _yaml_file_cache.clear()
 
 
 def safe_load_json(filepath: str, default=None):

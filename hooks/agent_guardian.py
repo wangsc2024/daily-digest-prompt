@@ -318,36 +318,10 @@ class CircuitBreaker:
                 updater(state)
                 self._save_state(state)
         else:
-            # Fallback：hook_utils 不可用時退化為無鎖模式
-            lock_path = self.state_file + ".lock"
-            lock_fd = None
-            try:
-                lock_fd = open(lock_path, "w")
-                try:
-                    import msvcrt
-                    msvcrt.locking(lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
-                except (ImportError, OSError):
-                    try:
-                        import fcntl
-                        fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    except (ImportError, OSError):
-                        pass
-                state = self._load_state()
-                updater(state)
-                self._save_state(state)
-            finally:
-                if lock_fd:
-                    # Windows msvcrt 必須先解鎖再關閉檔案
-                    try:
-                        import msvcrt
-                        msvcrt.locking(lock_fd.fileno(), msvcrt.LK_UNLCK, 1)
-                    except (ImportError, OSError, ValueError):
-                        pass
-                    lock_fd.close()
-                    try:
-                        os.remove(lock_path)
-                    except OSError:
-                        pass
+            # Fallback：hook_utils 不可用時退化為無鎖模式（直接讀寫）
+            state = self._load_state()
+            updater(state)
+            self._save_state(state)
 
     def _get_api_state(self, api_source: str) -> Dict:
         """取得特定 API 的狀態"""
@@ -443,14 +417,36 @@ from collections import deque
 import hashlib
 
 
+def _load_loop_thresholds() -> dict:
+    """從 config/benchmark.yaml 讀取 loop_detection 閾值，失敗時回傳空 dict。"""
+    try:
+        from hook_utils import load_yaml_file
+        data = load_yaml_file("benchmark.yaml", fallback={})
+        return data.get("loop_detection", {}) or {}
+    except ImportError:
+        # hook_utils 不可用時回退至獨立讀取
+        try:
+            import yaml
+            config_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "config",
+                "benchmark.yaml",
+            )
+            with open(config_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            return data.get("loop_detection", {}) or {}
+        except Exception:
+            return {}
+
+
 class LoopDetector:
     """
     偵測工具呼叫迴圈（Loop Detection）。
 
     3 層偵測演算法：
-      1. Tool Hash 重複：同一工具 + 相同參數連續呼叫 >=5 次
-      2. Content 重複：相同 output 連續出現 >=3 次（SHA-256 hash）
-      3. Excessive Turns：單一 session 超過 100 個 tool calls
+      1. Tool Hash 重複：同一工具 + 相同參數連續呼叫 >=N 次（預設 5）
+      2. Content 重複：相同 output 連續出現 >=N 次（預設 3，SHA-256 hash）
+      3. Excessive Turns：單一 session 超過 N 個 tool calls（預設由 config 讀取，fallback 100）
 
     白名單機制：
       - 允許重複：SKILL_INDEX.md 讀取（正常載入 + 路由 + 驗證）
@@ -461,10 +457,10 @@ class LoopDetector:
       - 累積數據後調整閾值
     """
 
-    # 閾值設定
-    TOOL_HASH_THRESHOLD = 5       # Tool Hash 重複閾值
-    CONTENT_HASH_THRESHOLD = 3    # Content Hash 重複閾值
-    EXCESSIVE_TURNS_THRESHOLD = 100  # Session 呼叫次數閾值
+    # 閾值預設值（config 未提供時使用）
+    TOOL_HASH_THRESHOLD = 5
+    CONTENT_HASH_THRESHOLD = 3
+    EXCESSIVE_TURNS_THRESHOLD = 100
 
     # 白名單 patterns
     WHITELIST_PATTERNS = [
@@ -484,16 +480,31 @@ class LoopDetector:
           warning_mode: True=僅警告，False=阻斷執行（預設為 True，2 週觀察期）
           initial_state: 從 JSON 還原的跨進程持久化狀態（PostToolUse hook 使用）
         """
+        cfg = _load_loop_thresholds()
+        self.TOOL_HASH_THRESHOLD = cfg.get(
+            "tool_hash_threshold", self.TOOL_HASH_THRESHOLD
+        )
+        self.CONTENT_HASH_THRESHOLD = cfg.get(
+            "content_hash_threshold", self.CONTENT_HASH_THRESHOLD
+        )
+        self.EXCESSIVE_TURNS_THRESHOLD = cfg.get(
+            "excessive_turns_threshold", self.EXCESSIVE_TURNS_THRESHOLD
+        )
+
         self.warning_mode = warning_mode
         if initial_state:
-            self.session_call_count = initial_state.get("session_call_count", 0)
+            # 防禦性驗證：損壞的 JSON 狀態不應使偵測器 crash
+            count = initial_state.get("session_call_count", 0)
+            self.session_call_count = count if isinstance(count, int) else 0
+            th_raw = initial_state.get("tool_hash_window", [])
+            ch_raw = initial_state.get("content_hash_window", [])
             self.tool_hash_window = deque(
-                initial_state.get("tool_hash_window", []),
-                maxlen=self.TOOL_HASH_THRESHOLD
+                th_raw if isinstance(th_raw, list) else [],
+                maxlen=self.TOOL_HASH_THRESHOLD,
             )
             self.content_hash_window = deque(
-                initial_state.get("content_hash_window", []),
-                maxlen=self.CONTENT_HASH_THRESHOLD
+                ch_raw if isinstance(ch_raw, list) else [],
+                maxlen=self.CONTENT_HASH_THRESHOLD,
             )
         else:
             self.tool_hash_window = deque(maxlen=self.TOOL_HASH_THRESHOLD)

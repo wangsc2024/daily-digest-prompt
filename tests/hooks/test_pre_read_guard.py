@@ -201,6 +201,31 @@ class TestIsWithinProject:
         attack_path = os.path.join(project, "..", "other", "secret.txt")
         assert _is_within_project(attack_path, project) is False
 
+    def test_prefix_collision_attack(self, tmp_path):
+        """路徑前綴碰撞：project_root='daily' 不應匹配 'daily-backup'。
+
+        修復 2026-03-07：startswith 字串比對會將 daily-backup 視為
+        daily 的子目錄，必須使用路徑分隔符安全比對。
+        """
+        project = str(tmp_path / "daily")
+        os.makedirs(project, exist_ok=True)
+        attack_path = str(tmp_path / "daily-backup" / "secret.json")
+        assert _is_within_project(attack_path, project) is False
+
+    def test_prefix_collision_with_suffix(self, tmp_path):
+        """更多前綴碰撞邊界案例。"""
+        project = str(tmp_path / "myproject")
+        os.makedirs(project, exist_ok=True)
+        # myproject-dev 不應被視為 myproject 的子目錄
+        attack_path = str(tmp_path / "myproject-dev" / "config.json")
+        assert _is_within_project(attack_path, project) is False
+
+    def test_exact_root_path(self, tmp_path):
+        """專案根目錄本身應被視為 within project。"""
+        project = str(tmp_path / "project")
+        os.makedirs(project, exist_ok=True)
+        assert _is_within_project(project, project) is True
+
 
 # ---------------------------------------------------------------------------
 # Regression: false positives (2026-02-16 harness alert)

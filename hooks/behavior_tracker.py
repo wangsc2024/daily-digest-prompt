@@ -24,7 +24,10 @@ import hashlib
 from datetime import datetime, timedelta
 
 
-PATTERNS_FILE = os.path.join("context", "behavior-patterns.json")
+# Use script-relative path to avoid CWD dependency in team mode
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
+PATTERNS_FILE = os.path.join(_PROJECT_ROOT, "context", "behavior-patterns.json")
 MAX_PATTERNS = 500  # 避免無限增長
 DECAY_DAYS = 30     # 超過 30 天未觀察的模式信心歸零
 CONFIDENCE_INCREMENT = 0.05
@@ -35,36 +38,13 @@ CONFIDENCE_INITIAL = 0.1
 def _sanitize_summary(summary: str) -> str:
     """消毒摘要，移除可能的敏感資訊。
 
-    從 summary 中移除：
-      - Authorization / Bearer token headers
-      - API token / Key / Secret header 值
-      - $env: 環境變數引用值
-    保留結構與工具名稱，確保模式辨識不受影響。
+    委派至 hook_utils.sanitize_sensitive_data() 共用實作。
     """
-    import re
-    sanitized = summary
-    # 移除 Authorization header 值（Bearer xxx / Basic xxx）
-    sanitized = re.sub(
-        r'(-H\s+["\']?Authorization:\s*)(Bearer|Basic)\s+\S+',
-        r'\1\2 <REDACTED>',
-        sanitized,
-        flags=re.IGNORECASE
-    )
-    # 移除 -H "X-...-Token: xxx" 或 -H "X-...-Key: xxx" header 值
-    sanitized = re.sub(
-        r'(-H\s+["\']?[Xx][-\w]*(?:Token|Key|Secret):\s*)\S+',
-        r'\1<REDACTED>',
-        sanitized,
-        flags=re.IGNORECASE
-    )
-    # 移除 $TODOIST_API_TOKEN 等環境變數展開值
-    sanitized = re.sub(
-        r'(\$(?:env:)?[A-Z_]*(?:TOKEN|SECRET|KEY|PASSWORD)(?:\s*=\s*|\s+))\S+',
-        r'\1<REDACTED>',
-        sanitized,
-        flags=re.IGNORECASE
-    )
-    return sanitized
+    try:
+        from hook_utils import sanitize_sensitive_data
+        return sanitize_sensitive_data(summary)
+    except ImportError:
+        return summary  # hook_utils 不可用時原樣返回
 
 
 def _compute_signature(tool: str, summary: str) -> str:

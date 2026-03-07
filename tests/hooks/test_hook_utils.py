@@ -14,7 +14,8 @@ sys.path.insert(0, os.path.join(project_root, "hooks"))
 from hook_utils import (
     find_config_path, load_yaml_rules, load_yaml_section, log_blocked_event,
     get_compiled_regex, get_rule_patterns, get_rule_re_flags,
-    atomic_write_lines, safe_load_json,
+    atomic_write_lines, safe_load_json, sanitize_sensitive_data,
+    load_yaml_file, clear_yaml_file_cache,
 )
 
 
@@ -418,3 +419,106 @@ class TestSafeLoadJson:
 
         result = safe_load_json(filepath)
         assert result == data
+
+
+# ============================================
+# sanitize_sensitive_data 敏感資料消毒
+# ============================================
+
+class TestSanitizeSensitiveData:
+    """共用消毒函式測試（供 post_tool_logger + behavior_tracker 共用）。"""
+
+    def test_redact_bearer_token(self):
+        text = 'curl -H "Authorization: Bearer abc123secret" https://api.example.com'
+        result = sanitize_sensitive_data(text)
+        assert "abc123secret" not in result
+        assert "Bearer <REDACTED>" in result
+
+    def test_redact_basic_auth(self):
+        text = 'curl -H "Authorization: Basic dXNlcjpwYXNz" https://example.com'
+        result = sanitize_sensitive_data(text)
+        assert "dXNlcjpwYXNz" not in result
+
+    def test_redact_x_api_token(self):
+        text = 'curl -H "X-Api-Token: my_secret_value" https://api.todoist.com'
+        result = sanitize_sensitive_data(text)
+        assert "my_secret_value" not in result
+        assert "<REDACTED>" in result
+
+    def test_redact_x_api_key(self):
+        text = "curl -H 'X-Api-Key: sk-abc123' https://api.openai.com"
+        result = sanitize_sensitive_data(text)
+        assert "sk-abc123" not in result
+
+    def test_redact_env_var(self):
+        text = "$TODOIST_API_TOKEN abc123xyz"
+        result = sanitize_sensitive_data(text)
+        assert "abc123xyz" not in result
+        assert "<REDACTED>" in result
+
+    def test_redact_powershell_env(self):
+        text = "$env:API_KEY sk-secret123"
+        result = sanitize_sensitive_data(text)
+        assert "sk-secret123" not in result
+
+    def test_preserve_non_sensitive(self):
+        text = "git push origin main --force"
+        assert sanitize_sensitive_data(text) == text
+
+    def test_empty_string(self):
+        assert sanitize_sensitive_data("") == ""
+
+    def test_case_insensitive_auth(self):
+        text = 'curl -H "AUTHORIZATION: BEARER MyToken" https://example.com'
+        result = sanitize_sensitive_data(text)
+        assert "MyToken" not in result
+
+    def test_preserves_url_structure(self):
+        text = 'curl -H "Authorization: Bearer secret" https://api.todoist.com/api/v1/tasks'
+        result = sanitize_sensitive_data(text)
+        assert "https://api.todoist.com/api/v1/tasks" in result
+
+
+class TestLoadYamlFile:
+    """通用 YAML 檔案載入函式測試。"""
+
+    def setup_method(self):
+        clear_yaml_file_cache()
+
+    def test_loads_existing_config(self):
+        """載入存在的配置檔案。"""
+        data = load_yaml_file("benchmark.yaml")
+        assert data is not None
+        assert isinstance(data, dict)
+        assert "version" in data
+
+    def test_returns_fallback_for_missing(self):
+        """不存在的檔案回傳 fallback。"""
+        result = load_yaml_file("nonexistent-file.yaml", fallback={"default": True})
+        assert result == {"default": True}
+
+    def test_caches_result(self):
+        """同一檔案第二次讀取應使用快取。"""
+        data1 = load_yaml_file("benchmark.yaml")
+        data2 = load_yaml_file("benchmark.yaml")
+        assert data1 is data2  # 同一物件（快取命中）
+
+    def test_loads_different_files(self):
+        """不同檔案各自獨立快取。"""
+        data1 = load_yaml_file("benchmark.yaml")
+        data2 = load_yaml_file("notification.yaml")
+        assert data1 is not data2
+
+    def test_absolute_path(self, tmp_path):
+        """支援絕對路徑載入。"""
+        yaml_file = tmp_path / "test.yaml"
+        yaml_file.write_text("key: value\n", encoding="utf-8")
+        data = load_yaml_file(str(yaml_file))
+        assert data == {"key": "value"}
+
+    def test_clear_cache(self):
+        """清除快取後重新載入。"""
+        load_yaml_file("benchmark.yaml")
+        clear_yaml_file_cache()
+        from hook_utils import _yaml_file_cache
+        assert len(_yaml_file_cache) == 0

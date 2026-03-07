@@ -83,13 +83,20 @@ def _normalize_windows_path(file_path):
 
 
 def _is_within_project(file_path, project_root):
-    """檢查路徑是否在專案目錄內（專案內路徑不攔截 .env 等）。"""
+    """檢查路徑是否在專案目錄內（專案內路徑不攔截 .env 等）。
+
+    使用 os.sep 安全比對，避免路徑前綴碰撞（如 daily vs daily-backup）。
+    """
     try:
         # 先轉換 Unix-style drive path (/d/... -> D:\...)，否則 Windows 上會誤判
         normalized_input = _normalize_windows_path(file_path)
         resolved = os.path.abspath(os.path.normpath(normalized_input))
-        norm_root = os.path.normpath(project_root)
-        return resolved.startswith(norm_root)
+        norm_root = os.path.abspath(os.path.normpath(project_root))
+        # 確保根目錄以 os.sep 結尾，防止前綴碰撞
+        # 例如 norm_root="D:\daily" 不應匹配 resolved="D:\daily-backup\x"
+        if resolved == norm_root:
+            return True
+        return resolved.startswith(norm_root + os.sep)
     except (ValueError, OSError):
         return False
 

@@ -44,8 +44,8 @@ try:
 except ImportError:
     BEHAVIOR_TRACKER_AVAILABLE = False
 
-# Import shared API source patterns
-from hook_utils import API_SOURCE_PATTERNS
+# Import shared API source patterns and sanitization
+from hook_utils import API_SOURCE_PATTERNS, sanitize_sensitive_data
 
 # Error keywords in tool output
 ERROR_KEYWORDS = [
@@ -94,15 +94,7 @@ _BENIGN_PATTERNS_FALLBACK = [
 ]
 
 
-# Pre-compiled regex patterns for summary sanitization (module-level for performance)
-_RE_AUTH_HEADER = re.compile(
-    r'(-H\s+["\']?Authorization:\s*)(Bearer|Basic)\s+\S+',
-    re.IGNORECASE
-)
-_RE_TOKEN_HEADER = re.compile(
-    r'(-H\s+["\']?[Xx][-\w]*(?:Token|Key|Secret):\s*)\S+',
-    re.IGNORECASE
-)
+# Summary sanitization delegated to hook_utils.sanitize_sensitive_data()
 
 
 def _load_benign_patterns_from_yaml() -> list:
@@ -157,14 +149,9 @@ def _cmd_has_word(command: str, word: str) -> bool:
 def _sanitize_bash_summary(summary: str) -> str:
     """消毒 Bash 命令摘要，移除可能的敏感資訊。
 
-    從摘要中移除：
-      - curl -H "Authorization: Bearer <token>" 中的 token 值
-      - curl -H "X-...-Token: <value>" 中的 value
-    保留命令結構，確保日誌仍具可讀性與偵錯價值。
+    委派至 hook_utils.sanitize_sensitive_data() 共用實作。
     """
-    sanitized = _RE_AUTH_HEADER.sub(r'\1\2 <REDACTED>', summary)
-    sanitized = _RE_TOKEN_HEADER.sub(r'\1<REDACTED>', sanitized)
-    return sanitized
+    return sanitize_sensitive_data(summary)
 
 
 def classify_bash(command: str) -> tuple:
