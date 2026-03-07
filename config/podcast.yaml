@@ -1,0 +1,34 @@
+# config/podcast.yaml
+# Podcast 生成與雲端上傳配置
+# 修改此檔案調整雲端行為，不需修改 tools/ 腳本
+
+version: 1
+
+cloud_upload:
+  enabled: true
+  provider: cloudflare_r2
+
+  r2:
+    # 環境變數名稱（值由 Windows 使用者環境變數提供）
+    account_id_env: R2_ACCOUNT_ID
+    api_token_env: R2_API_TOKEN
+    bucket: podcasts
+    public_base_url: "https://podcasts.pdoont.us.kg"
+
+  # Content-Type 對應表
+  content_type_map:
+    mp3: "audio/mpeg"
+    mp4: "video/mp4"
+    m4a: "audio/mp4"
+    wav: "audio/wav"
+
+  # 上傳失敗行為（warn = 非致命，不中斷管線；error = 中斷）
+  on_failure: warn
+
+# ntfy 通知（Podcast 完成時發送）
+notification:
+  enabled: true
+  topic: "wangsc2025"
+  # click 欄位填入雲端 URL，手機點通知即可直接播放
+  include_play_link: true
+  tags: ["headphones", "white_check_mark"]

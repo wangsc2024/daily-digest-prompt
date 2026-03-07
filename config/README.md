@@ -24,6 +24,10 @@
 | `creative-game-mode.yaml` | 創意遊戲模式配置 | creative-game-optimize 自動任務 | 調整遊戲創意評估參數 |
 | `ooda-workflow.yaml` | OODA 閉環工作流配置 | system-insight、arch-evolution | 調整 OODA 步驟啟用狀態 |
 | `retro-games.yaml` | 復古遊戲評鑑配置 | game-design SKILL | 調整遊戲品質評估標準 |
+| `slo.yaml` | SLO 服務等級目標 | check-health.ps1 | 調整可用性與延遲目標門檻 |
+| `podcast.yaml` | Podcast 生成配置 | article-to-podcast.ps1 | 調整語音合成、音訊格式參數 |
+| `media-pipeline.yaml` | 媒體管線配置（影片/音訊） | compose_video.py、concat_audio.py | 調整影片合成與音訊串接參數 |
+| `tts-abbreviation-rules.yaml` | TTS 縮寫展開規則 | article-to-podcast.ps1 | 調整語音合成的縮寫念法 |
 | `schemas/` | YAML 驗證 Schema 目錄 | validate_config.py | 修改配置驗證規則 |
 
 ## 版本管理

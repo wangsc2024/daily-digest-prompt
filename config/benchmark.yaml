@@ -85,3 +85,9 @@ comparison:
     - name: everything-claude-code
       url: https://github.com/affaan-m/everything-claude-code
       strengths: [instinct-learning, token-economy, agent-hierarchy, agentshield]
+
+# 迴圈偵測閾值（LoopDetector 讀取）
+loop_detection:
+  tool_hash_threshold: 5        # 同一工具+參數連續 N 次觸發
+  content_hash_threshold: 3     # 相同輸出連續 N 次觸發
+  excessive_turns_threshold: 200  # Session 呼叫次數上限（100 → 200）

@@ -7,6 +7,10 @@ version: 3
 
 tracking_file: "context/auto-tasks-today.json"
 
+# 預設模型（空字串 = 使用 Claude Code 當前預設模型）
+# 各任務可用 model: 欄位覆寫；未設定則回退此值
+default_model: ""
+
 # 自動任務觸發條件
 trigger_modes:
   - name: "無可處理項目"
@@ -67,6 +71,9 @@ initial_schema: |
 # ============================================================
 # 自動任務定義（execution_order 為輪轉排序依據）
 # ============================================================
+# 任務欄位說明：
+#   model: （選填）執行此任務的 Claude 模型，例如 claude-sonnet-4-5
+#           未設定（或空字串）→ 回退 default_model；default_model 亦空 → Claude Code 預設模型
 tasks:
 
   # --- 佛學研究群組（共 4 次/日）---
@@ -78,7 +85,8 @@ tasks:
     template_version: 1
     history_type: "shurangama"
     execution_order: 1
-    skill: knowledge-query
+    model: "claude-haiku-4-5"
+    skills: [knowledge-query, web-research, kb-research-strategist]
 
   jiaoguangzong:
     name: "教觀綱宗研究"
@@ -94,7 +102,8 @@ tasks:
       study_path: "概論 → 五時判教 → 八教分類 → 化法四教（藏通別圓）→ 化儀四教 → 觀法修持 → 判教實例"
     history_type: "jiaoguangzong"
     execution_order: 2
-    skill: knowledge-query
+    model: "claude-sonnet-4-5"
+    skills: [knowledge-query, web-research, kb-research-strategist]
 
   fahua:
     name: "法華經研究"
@@ -110,7 +119,8 @@ tasks:
       study_path: "經典概論 → 方便品（開權顯實）→ 譬喻品（三車火宅）→ 信解品 → 藥草喻品 → 化城喻品 → 壽量品 → 觀世音菩薩普門品 → 一佛乘義理"
     history_type: "fahua"
     execution_order: 3
-    skill: knowledge-query
+    model: "claude-sonnet-4-5"
+    skills: [knowledge-query, web-research, kb-research-strategist]
 
   jingtu:
     name: "淨土宗研究"
@@ -126,7 +136,8 @@ tasks:
       study_path: "淨土三經概論 → 阿彌陀經要義 → 觀無量壽經十六觀 → 無量壽經四十八願 → 善導大師五正行 → 念佛法門修持 → 淨土十疑論 → 臨終正念"
     history_type: "jingtu"
     execution_order: 4
-    skill: knowledge-query
+    model: "claude-haiku-4-5"
+    skills: [knowledge-query, web-research, kb-research-strategist]
 
   # --- AI / 技術研究群組（共 7 次/日）---
   tech_research:
@@ -137,7 +148,7 @@ tasks:
     template_version: 1
     history_type: "tech_research"
     execution_order: 5
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research, todoist]
     description: "分析今日 Todoist 已完成任務所需技術，選擇一項深入研究並寫入 RAG 知識庫"
 
   ai_deep_research:
@@ -148,7 +159,7 @@ tasks:
     template_version: 1
     history_type: "ai_deep_research"
     execution_order: 6
-    skills: [knowledge-query, hackernews-ai-digest]
+    skills: [knowledge-query, hackernews-ai-digest, web-research, kb-research-strategist, groq]
     description: "每日規劃一個 AI 技術深度研究，分 4 階段完成（規劃→蒐集→分析→報告）"
     stages:
       1: "規劃：選定主題、定義研究問題、設計方法論"
@@ -164,7 +175,7 @@ tasks:
     template_version: 1
     history_type: "unsloth_research"
     execution_order: 7
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research]
     description: "研究 Unsloth LLM fine-tuning 框架的最新技術、最佳實踐、與其他工具比較"
 
   ai_github_research:
@@ -175,7 +186,8 @@ tasks:
     template_version: 1
     history_type: "ai_github_research"
     execution_order: 8
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research, github-scout, kb-research-strategist]
+    model: "claude-sonnet-4-5"
     description: "研究 AI 相關 GitHub 熱門專案，分析架構與應用，將報告寫入 RAG 知識庫"
 
   ai_smart_city:
@@ -186,10 +198,11 @@ tasks:
     template_version: 2
     history_type: "ai_smart_city"
     execution_order: 9
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research, kb-research-strategist]
     description: "研究 AI 應用於智慧城市（交通、能源、公共安全、環境監測等），將報告寫入 RAG 知識庫"
     template_params:
       domain_name: "AI 智慧城市"
+      model: "claude-haiku-4-5"
       task_type: "ai_smart_city"
       search_terms: ["AI 智慧城市 smart city", "智慧城市 AI 應用"]
       kb_search_en: "AI smart city urban computing"
@@ -217,7 +230,7 @@ tasks:
     template_version: 2
     history_type: "ai_sysdev"
     execution_order: 10
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research, kb-research-strategist]
     description: "研究 AI 應用於系統開發（AI-assisted coding、自動測試、架構優化、DevOps 智能化），將報告寫入 RAG 知識庫"
     template_params:
       domain_name: "AI 系統開發"
@@ -250,7 +263,7 @@ tasks:
     template_version: 1
     history_type: "skill_audit"
     execution_order: 11
-    skills: [knowledge-query, skill-scanner]
+    skills: [knowledge-query, skill-scanner, system-insight]
     description: "審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證"
 
   # --- 系統維護群組（共 2 次/日）---
@@ -262,7 +275,7 @@ tasks:
     template_version: 1
     history_type: "log_audit"
     execution_order: 12
-    skills: [scheduler-state, knowledge-query]
+    skills: [scheduler-state, knowledge-query, system-insight]
 
   git_push:
     name: "專案推送 GitHub + 知識庫同步"
@@ -273,6 +286,7 @@ tasks:
     history_type: "git_push"
     execution_order: 13
     skills: [knowledge-query, git-smart-commit]
+    model: "claude-haiku-4-5"
     description: "同步知識庫至網站，用 Smart Commit 分群提交後推送 daily-digest-prompt + shurangama-web 至 GitHub"
 
   # --- 遊戲創意群組（共 0 次/日，暫停）---
@@ -284,7 +298,7 @@ tasks:
     template_version: 1
     history_type: "creative_game_optimize"
     execution_order: 14
-    skills: [game-design, knowledge-query]
+    skills: [game-design, knowledge-query, web-research]
     description: "階段一：依優先級創建 10 個經典復古小遊戲（Space Invaders、Pac-Man、Tetris 等）；階段二：90% 優化復古遊戲 + 10% 優化佛學遊戲"
 
   # --- 專案品質優化群組（共 0 次/日，暫停）---
@@ -296,7 +310,7 @@ tasks:
     template_version: 1
     history_type: "qa_optimize"
     execution_order: 15
-    skills: [knowledge-query]
+    skills: [knowledge-query, web-research, system-insight]
     description: "以最嚴格資訊安全標準漸進式優化 D:\\Source\\qa_system，每次基於前次成果持續改進"
 
   # --- 系統自省群組（共 2 次/日）---
@@ -308,7 +322,7 @@ tasks:
     template_version: 1
     history_type: "system_insight"
     execution_order: 16
-    skills: [system-insight]
+    skills: [system-insight, scheduler-state, knowledge-query]
     description: "分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出洞察報告"
 
   self_heal:
@@ -319,7 +333,7 @@ tasks:
     template_version: 1
     history_type: "self_heal"
     execution_order: 17
-    skills: [system-insight]
+    skills: [system-insight, scheduler-state, knowledge-query]
     description: "識別可自動修復的問題（過期快取/過期 registry/跨日未歸零/殘留檔案）並自動修復"
 
   # --- Chatroom 整合優化群組（共 1 次/日）---
@@ -331,7 +345,8 @@ tasks:
     template_version: 1
     history_type: "chatroom_optimize"
     execution_order: 19
-    skills: [chatroom-query]
+    skills: [chatroom-query, api-cache, knowledge-query]
+    model: "claude-sonnet-4-6"
     description: "評估 bot.js 任務佇列執行品質（成功率/衝突率/耗時），自動清除過期快取或調整 max_tasks_per_run"
 
   # --- AI 工作流自動化研究群組（共 1 次/日）---
@@ -343,7 +358,7 @@ tasks:
     template_version: 1
     history_type: "ai_workflow_github"
     execution_order: 20
-    skills: [knowledge-query, kb-research-strategist]
+    skills: [knowledge-query, kb-research-strategist, web-research, github-scout]
     description: "從 GitHub 選出 AI 工作流自動化熱門專案（n8n/Dify/AutoGen/LangGraph 等），經 kb-research-strategist 優化選題後深度研究並將報告納入知識庫"
 
   # --- GitHub 靈感群組（共 0 次/日，暫停）---
@@ -355,7 +370,7 @@ tasks:
     template_version: 1
     history_type: "github_scout"
     execution_order: 18
-    skills: [github-scout, knowledge-query]
+    skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
     description: "自動蒐集 GitHub 熱門專案靈感，分析與本系統的改進機會（僅週三/週日執行）"
 
 # ============================================================

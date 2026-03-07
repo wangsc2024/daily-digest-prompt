@@ -62,11 +62,11 @@ slos:
     description: 觸發 loop-suspected 的次數
     metric: loop_suspected              # metrics-daily.json 欄位
     metric_direction: lower_is_better
-    target: 0                           # 每日 0 次迴圈（理想）
+    target: 5                           # 每日允許少量 legitimate 長 session
     window_days: 14
     error_budget_pct: 100.0            # 任何迴圈都消耗預算
-    warning_threshold: 50
-    critical_threshold: 20
+    warning_threshold: 30
+    critical_threshold: 10
 
   - id: SLO-006
     name: Skill 讀取完整率

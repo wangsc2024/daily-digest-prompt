@@ -55,9 +55,29 @@
       "enum": ["round_robin", "priority", "random"],
       "description": "選取策略"
     },
+    "default_model": {
+      "type": "string",
+      "description": "預設模型（空字串 = 使用 Claude Code 當前預設模型）"
+    },
     "initial_schema": {
       "type": "string",
       "description": "初始檔案格式說明（可選，僅供參考）"
+    },
+    "max_auto_per_run": {
+      "type": "object",
+      "description": "每次觸發最多執行的自動任務數",
+      "properties": {
+        "single_mode": { "type": "integer", "minimum": 1 },
+        "team_mode": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "history": {
+      "type": "object",
+      "description": "歷史追蹤設定"
+    },
+    "all_exhausted_action": {
+      "type": "string",
+      "description": "全部達上限時的動作"
     },
     "tasks": {
       "type": "object",
@@ -98,19 +118,8 @@
         },
         "template_params": {
           "type": "object",
-          "description": "模板參數（可選）",
-          "properties": {
-            "subject": {
-              "type": "string"
-            },
-            "category": {
-              "type": "string"
-            },
-            "time": {
-              "type": "string",
-              "pattern": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
-            }
-          }
+          "description": "模板參數（可選，鍵值對傳入模板）",
+          "additionalProperties": true
         },
         "history_type": {
           "type": "string",
@@ -154,6 +163,10 @@
           "type": "integer",
           "minimum": 1,
           "description": "模板版本號（G10：≥1 啟用 prompt_content 展開，可選）"
+        },
+        "model": {
+          "type": "string",
+          "description": "執行此任務的 Claude 模型（可選，如 claude-haiku-4-5、claude-sonnet-4-5）"
         }
       },
       "additionalProperties": false

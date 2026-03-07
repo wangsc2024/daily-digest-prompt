@@ -37,11 +37,16 @@ podcast:
   # 音訊後製
   target_lufs: -14                     # 正規化目標（Podcast 廣播標準）
   output_bitrate_kbps: 128             # MP3 位元率
-  # Intro/Outro 音調（FFmpeg sine wave 生成）
-  intro_freq_hz: 440                   # A4 音
-  outro_freq_hz: 330                   # E4 音（稍低）
-  tone_duration_s: 5
-  tone_fade_s: 1                       # 淡入/淡出各 1 秒
+  # Intro/Outro 和弦音效（FFmpeg aevalsrc 多頻率合成，比單音更悅耳）
+  # C major 和弦：C4(264Hz) + E4(330Hz) + G4(396Hz) + 高八度 C5(528Hz)
+  intro_freqs_hz: [264, 330, 396, 528]
+  intro_weights:  [0.32, 0.26, 0.22, 0.12]   # 加權比例（總和 < 1 以防削波）
+  # G major 和弦（低八度）：G3(196Hz) + B3(247Hz) + D4(294Hz)
+  outro_freqs_hz: [196, 247, 294]
+  outro_weights:  [0.38, 0.30, 0.24]
+  tone_duration_s: 2.5                 # 縮短為 2.5 秒（原 5 秒，更簡潔）
+  fade_in_s: 0.3                       # 淡入 0.3 秒（更俐落）
+  fade_out_s: 1.2                      # 淡出 1.2 秒（自然消散）
 
 # 輸出路徑
 output:
