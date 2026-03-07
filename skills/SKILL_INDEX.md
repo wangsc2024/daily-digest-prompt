@@ -1,8 +1,8 @@
 # Skills 索引與路由引擎
 
-> **更新時間:** 2026-03-06 | **能用 Skill 就用 Skill，絕不自行拼湊。**
+> **更新時間:** 2026-03-08 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 7 個工具 = 26 個 Skills）
+## 速查表（19 個核心 + 10 個工具 = 29 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -23,7 +23,7 @@
 | 13 | game-design | 遊戲設計與優化（HTML5/JS） | 遊戲、game、遊戲優化、遊戲設計、HTML5 遊戲、遊戲品質、Canvas 遊戲、JavaScript 遊戲、遊戲部署、遊戲效能 |
 | 14 | system-insight | 系統自省分析（執行品質/Skill 使用/失敗模式/自動任務公平性） | 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、system-insight、自省、洞察、趨勢分析、統計報告、執行品質 |
 | 15 | web-research | 網路研究標準化框架（搜尋/篩選/品質評分/KB匯入，depends-on: knowledge-query） | 研究、WebSearch、web research、來源品質、研究報告、網路搜尋、技術調查、趨勢分析、深度研究、資料蒐集、文獻回顧、調研 |
-| 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator、清理、重複筆記、品質檢查、知識庫清理、筆記統計 |
+| 16 | kb-curator | 知識庫治理（去重/品質評分/過期清理/四維度內容評分） | 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、kb-curator、清理、重複筆記、品質檢查、知識庫清理、筆記統計、內容評分、非知識、不完整、知識價值、content scoring |
 | 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進、架構借鑑、開源分析、GitHub trending、trending repos、專案靈感、改進建議 |
 | 18 | kb-research-strategist | 研究前 KB 全文分析 + 長期系列研究管理（五階段進度追蹤，無 TTL）+ 結構化深化計畫 | 研究策略、系列研究、深化研究、知識差距分析、研究計畫、KB 擴充、知識系列、kb-research-strategist |
 | 19 | groq | Groq 快速推理前處理層（透過本機 Relay，supports 摘要/翻譯/分類/萃取，depends-on: bot/groq-relay.js） | groq、快速摘要、快速翻譯、en_to_zh、英文摘要、批次翻譯、輕量分類、groq-relay、前處理 |
@@ -39,6 +39,9 @@
 | 24 | arch-evolution | 架構演化追蹤器（ADR/技術債/依賴圖/OODA，depends-on: system-audit、system-insight） | 架構決策、ADR、技術債、依賴圖、OODA、arch-evolution、架構治理、漸進式改進、改進計畫、架構演化 |
 | 25 | git-smart-commit | 智慧分群提交（Conventional Commit） | git commit、smart commit、智慧提交、conventional commit、分群提交、git push、自動提交 |
 | 26 | chatroom-query | bot.js REST API 互動（查詢/認領/執行 Gun.js 聊天室任務，depends-on: api-cache） | chatroom、聊天室、bot.js、Gun.js 任務、任務佇列、pending 任務、wsc-bot、聊天室任務、bot 任務 |
+| 27 | knowledge-domain-builder | 一鍵搭建 Obsidian 知識領域庫（對話釐清→研究→大綱→建庫） | 建立知識庫、搭建知識領域、Obsidian vault、知識體系、knowledge domain、build vault、知識架構、一鍵建庫 |
+| 28 | writing-masters | 西方文學巨匠寫作技巧（海明威/奧威爾/史蒂芬金） | 寫作技巧、writing、寫作、文字、創作、冰山理論、極簡、海明威、史蒂芬金、show don't tell |
+| 29 | writing-plans | 實作計畫撰寫（TDD 任務拆解，2-5 分鐘粒度） | write plan、create plan、implementation plan、計畫、規劃、怎麼實作、步驟、拆解任務 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

@@ -9,6 +9,7 @@ allowed-tools: Bash, Read, Write, WebSearch, WebFetch
 cache-ttl: N/A
 depends-on:
   - knowledge-query
+  - ntfy-notify
 triggers:
   - "研究"
   - "WebSearch"
@@ -52,7 +53,10 @@ triggers:
 研究前必須檢查是否近期已研究相同主題：
 
 1. 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略
-2. 用 Read 讀取 `context/research-registry.json`
+2. 用 Read 讀取 `context/research-registry.json` 的 `summary` 欄位快速預檢：
+   - `summary.by_type` 可快速判斷同類型研究是否已飽和
+   - `summary.total` 可知整體研究量
+   - 若 summary 不存在則讀取完整 entries 陣列
 3. 判定規則：
    - 3 天內有完全相同 topic -> 必須換主題
    - 7 天內同 task_type >= 3 個 topic -> 建議換方向
@@ -170,6 +174,11 @@ rm dedup_query.json
   "sources_count": 5
 }
 ```
+
+寫入新 entry 後，**必須同步更新頂層 `summary` 欄位**：
+- `summary.total` += 1
+- `summary.by_type[task_type]` += 1
+- `summary.last_updated` = 今日日期
 
 ## 引用格式
 

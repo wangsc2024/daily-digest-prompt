@@ -116,7 +116,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 ```
 
 ### 步驟 4：異常時通知
-若有 critical 等級的 alert → 透過 ntfy 發送系統洞察警告。
+若有 critical 等級的 alert → 先讀取 `skills/ntfy-notify/SKILL.md`，依其標準流程（Write JSON → curl 發送 → rm 暫存檔）發送系統洞察警告至 ntfy。
 
 ## 錯誤處理
 - 若 JSONL 日誌不存在或為空 → 跳過該資料源，metrics 中標記 `"data_source": "partial"`
