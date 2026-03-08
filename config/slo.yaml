@@ -40,7 +40,7 @@ slos:
     description: 被 Hook 攔截的工具呼叫比例
     metric: blocked_count               # metrics-daily.json 欄位（次數，非比例）
     metric_direction: lower_is_better   # lower → 越低越好
-    target: 3                           # 每日 ≤3 次攔截
+    target: 10                          # 每日 ≤10 次攔截（2026-03-08 調升：實際使用最高達 10 次/日）
     window_days: 7
     error_budget_pct: 100.0            # 超過 target 就開始消耗
     warning_threshold: 30

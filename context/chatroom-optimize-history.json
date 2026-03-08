@@ -135,6 +135,35 @@
       "gun_bot_state": "closed",
       "optimized": false,
       "notes": "JSONL 日誌中無 chatroom 標記記錄；api-health.json 無 gun-bot 條目；所有指標正常無需調整"
+    },
+    {
+      "date": "2026-03-08",
+      "run_at": "2026-03-08T00:00:00+08:00",
+      "metrics": {
+        "total_calls": 193,
+        "success_rate": 100.0,
+        "conflict_rate": 0.0,
+        "avg_exec_seconds": null,
+        "breakdown": {
+          "health_checks": 100,
+          "broadcasts": 29,
+          "record_queries": 64,
+          "claims": 0
+        }
+      },
+      "actions_taken": [],
+      "gun_bot_state": "not_tracked",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "pending_tasks": 33,
+        "claimed_tasks": 0,
+        "active_cron_jobs": 28,
+        "uptime_seconds": 40630
+      },
+      "optimized": false,
+      "notes": "兩日 193 筆呼叫全數成功；bot 正常運行 11.3 小時；33 筆 pending 任務待處理；28 個 cron 排程活躍"
     }
   ]
 }

@@ -94,8 +94,10 @@ def _check_path_traversal(file_path, project_root):
     try:
         resolved = os.path.abspath(os.path.normpath(file_path))
         norm_root = os.path.normpath(project_root)
-        # 確保 resolved 在 project_root 之內（含 root 本身）
-        if resolved != norm_root and not resolved.startswith(norm_root + os.sep):
+        # Windows 路徑大小寫不敏感，用 lower() 比對避免磁碟代號不一致
+        resolved_l = resolved.lower()
+        root_l = norm_root.lower()
+        if resolved_l != root_l and not resolved_l.startswith(root_l + os.sep.lower()):
             return True, resolved
     except (ValueError, OSError):
         return True, file_path
@@ -117,7 +119,8 @@ def check_write_path(file_path, rules=None, project_root=None):
     if rules is None:
         rules = load_write_rules()
     if project_root is None:
-        project_root = os.getcwd()
+        # 從 __file__ 推導專案根目錄，比 os.getcwd() 更可靠
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     basename = os.path.basename(file_path) if file_path else ""
 

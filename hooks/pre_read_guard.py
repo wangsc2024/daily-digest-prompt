@@ -96,7 +96,9 @@ def _is_within_project(file_path, project_root):
         # 例如 norm_root="D:\daily" 不應匹配 resolved="D:\daily-backup\x"
         if resolved == norm_root:
             return True
-        return resolved.startswith(norm_root + os.sep)
+        resolved_l = resolved.lower()
+        root_l = norm_root.lower()
+        return resolved_l == root_l or resolved_l.startswith(root_l + os.sep.lower())
     except (ValueError, OSError):
         return False
 
@@ -110,7 +112,7 @@ def check_read_path(file_path, rules=None, project_root=None):
     if rules is None:
         rules = load_read_rules()
     if project_root is None:
-        project_root = os.getcwd()
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     if not file_path:
         return False, None, None

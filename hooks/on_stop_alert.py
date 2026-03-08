@@ -868,6 +868,24 @@ def main():
 
     today = datetime.now().strftime("%Y-%m-%d")
 
+    # Session 去重：同一 session 在 10 分鐘內不重複發送告警
+    if session_id:
+        dedup_path = os.path.join("state", f"stop-alert-{session_id[:8]}.json")
+        try:
+            from datetime import timezone
+            dedup_data = json.loads(open(dedup_path, encoding="utf-8").read()) if os.path.exists(dedup_path) else {}
+            last_sent = dedup_data.get("last_sent", "")
+            if last_sent:
+                last_dt = datetime.fromisoformat(last_sent)
+                if last_dt.tzinfo is None:
+                    last_dt = last_dt.replace(tzinfo=timezone.utc)
+                now_dt = datetime.now(tz=timezone.utc)
+                if (now_dt - last_dt).total_seconds() < 600:  # 10 分鐘冷卻
+                    print(json.dumps({"dedup": True, "last_sent": last_sent}))
+                    sys.exit(0)
+        except Exception:
+            pass
+
     if session_id:
         # Session-isolated analysis (preferred): only analyze THIS session's entries
         sid_prefix = session_id[:12]
@@ -894,6 +912,15 @@ def main():
     if alert:
         severity, title, message = alert
         send_ntfy_alert(title, message, severity)
+        # 記錄本次發送時間（用於 session 去重）
+        if session_id:
+            try:
+                dedup_path = os.path.join("state", f"stop-alert-{session_id[:8]}.json")
+                from datetime import timezone
+                with open(dedup_path, "w", encoding="utf-8") as _f:
+                    json.dump({"last_sent": datetime.now(tz=timezone.utc).isoformat(), "sid": session_id[:12]}, _f)
+            except Exception:
+                pass
         # 寫入每日去重標記（僅在 Gmail 到期告警觸發時）
         if gmail_expiry and gmail_expiry.get("needs_alert"):
             _state_path = os.path.join(
