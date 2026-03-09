@@ -2846,21 +2846,18 @@
       "total_input": 6051,
       "total_output": 0
     },
-    "48a61540e94c": {
+    "66d9016a0170": {
       "tool": "Bash",
-      "summary_sample": "cd D:/Source/daily-digest-prompt && git add \\\n  .claude/settings.json \\\n  .env.example \\\n  .gitignore \\\n  config/frequency-limits.yaml \\\n  config/mode",
+      "summary_sample": "cd D:/Source/daily-digest-prompt && git status --porcelain",
       "tags": [
-        "cognitive-routing",
-        "git",
-        "cognitive-skill-select",
-        "git-commit"
+        "git"
       ],
       "count": 1,
       "confidence": 0.1,
       "success_count": 1,
-      "first_seen": "2026-03-09T08:02:00.752552+08:00",
-      "last_seen": "2026-03-09T08:02:00.752552+08:00",
-      "total_input": 1055,
+      "first_seen": "2026-03-09T08:22:56.104506+08:00",
+      "last_seen": "2026-03-09T08:22:56.104506+08:00",
+      "total_input": 127,
       "total_output": 0
     }
   },
