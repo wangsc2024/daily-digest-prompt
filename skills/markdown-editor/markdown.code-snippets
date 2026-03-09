@@ -1,0 +1,185 @@
+{
+  "Markdown: 標題 H1": {
+    "prefix": "h1",
+    "body": ["# ${1:標題}", "", "$0"],
+    "description": "一級標題"
+  },
+  "Markdown: 標題 H2": {
+    "prefix": "h2",
+    "body": ["## ${1:標題}", "", "$0"],
+    "description": "二級標題"
+  },
+  "Markdown: 標題 H3": {
+    "prefix": "h3",
+    "body": ["## ${1:標題}", "", "$0"],
+    "description": "三級標題"
+  },
+  "Markdown: 粗體": {
+    "prefix": "bold",
+    "body": ["**${1:text}**$0"],
+    "description": "粗體文字"
+  },
+  "Markdown: 斜體": {
+    "prefix": "italic",
+    "body": ["*${1:text}*$0"],
+    "description": "斜體文字"
+  },
+  "Markdown: 粗斜體": {
+    "prefix": "bolditalic",
+    "body": ["***${1:text}***$0"],
+    "description": "粗斜體文字"
+  },
+  "Markdown: 刪除線": {
+    "prefix": "strike",
+    "body": ["~~${1:text}~~$0"],
+    "description": "刪除線 (GFM)"
+  },
+  "Markdown: 行內碼": {
+    "prefix": "code",
+    "body": ["`${1:code}`$0"],
+    "description": "行內程式碼"
+  },
+  "Markdown: 程式碼區塊": {
+    "prefix": "codeblock",
+    "body": ["```${1:language}", "${2:// code}", "```", "$0"],
+    "description": "圍欄式程式碼區塊"
+  },
+  "Markdown: 連結": {
+    "prefix": "link",
+    "body": ["[${1:文字}](${2:url})$0"],
+    "description": "行內連結"
+  },
+  "Markdown: 圖片": {
+    "prefix": "img",
+    "body": ["![${1:替代文字}](${2:url})$0"],
+    "description": "圖片"
+  },
+  "Markdown: 表格 2x2": {
+    "prefix": "table2",
+    "body": [
+      "| ${1:標題一} | ${2:標題二} |",
+      "|--------|--------|",
+      "| ${3:資料} | ${4:資料} |",
+      "$0"
+    ],
+    "description": "2 欄表格"
+  },
+  "Markdown: 表格 3x3": {
+    "prefix": "table3",
+    "body": [
+      "| ${1:標題一} | ${2:標題二} | ${3:標題三} |",
+      "|--------|--------|--------|",
+      "| ${4:資料} | ${5:資料} | ${6:資料} |",
+      "| ${7:資料} | ${8:資料} | ${9:資料} |",
+      "$0"
+    ],
+    "description": "3 欄 3 列表格"
+  },
+  "Markdown: 任務清單": {
+    "prefix": "task",
+    "body": ["- [ ] ${1:任務描述}", "$0"],
+    "description": "未完成任務清單項 (GFM)"
+  },
+  "Markdown: 任務清單（已完成）": {
+    "prefix": "taskdone",
+    "body": ["- [x] ${1:任務描述}", "$0"],
+    "description": "已完成任務清單項 (GFM)"
+  },
+  "Markdown: 引用區塊": {
+    "prefix": "quote",
+    "body": ["> ${1:引用文字}", "$0"],
+    "description": "區塊引用"
+  },
+  "Markdown: 警示 NOTE": {
+    "prefix": "note",
+    "body": ["> [!NOTE]", "> ${1:提示訊息}", "$0"],
+    "description": "GitHub 警示區塊 - NOTE"
+  },
+  "Markdown: 警示 WARNING": {
+    "prefix": "warn",
+    "body": ["> [!WARNING]", "> ${1:警告訊息}", "$0"],
+    "description": "GitHub 警示區塊 - WARNING"
+  },
+  "Markdown: 警示 TIP": {
+    "prefix": "tip",
+    "body": ["> [!TIP]", "> ${1:建議}", "$0"],
+    "description": "GitHub 警示區塊 - TIP"
+  },
+  "Markdown: 警示 IMPORTANT": {
+    "prefix": "important",
+    "body": ["> [!IMPORTANT]", "> ${1:重要訊息}", "$0"],
+    "description": "GitHub 警示區塊 - IMPORTANT"
+  },
+  "Markdown: 摺疊區": {
+    "prefix": "details",
+    "body": [
+      "<details>",
+      "<summary>${1:點擊展開}</summary>",
+      "",
+      "${2:隱藏的內容}",
+      "",
+      "</details>",
+      "$0"
+    ],
+    "description": "HTML 可摺疊區域"
+  },
+  "Markdown: 腳註": {
+    "prefix": "footnote",
+    "body": ["${1:text}[^${2:id}]", "", "[^${2:id}]: ${3:腳註內容}", "$0"],
+    "description": "腳註 (GFM)"
+  },
+  "Markdown: 數學公式（行內）": {
+    "prefix": "math",
+    "body": ["\\$${1:formula}\\$$0"],
+    "description": "行內數學公式"
+  },
+  "Markdown: 數學公式（區塊）": {
+    "prefix": "mathblock",
+    "body": ["$$", "${1:formula}", "$$", "$0"],
+    "description": "區塊數學公式"
+  },
+  "Markdown: Mermaid 流程圖": {
+    "prefix": "mermaid",
+    "body": [
+      "```mermaid",
+      "graph ${1|TD,LR,BT,RL|}",
+      "    ${2:A}[${3:開始}] --> ${4:B}[${5:結束}]",
+      "```",
+      "$0"
+    ],
+    "description": "Mermaid 流程圖"
+  },
+  "Markdown: YAML Frontmatter": {
+    "prefix": "front",
+    "body": [
+      "---",
+      "title: ${1:標題}",
+      "date: ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}",
+      "tags: [${2:tag}]",
+      "---",
+      "",
+      "$0"
+    ],
+    "description": "YAML Frontmatter"
+  },
+  "Markdown: TOC 標記": {
+    "prefix": "toc",
+    "body": ["<!-- TOC -->", "", "<!-- /TOC -->", "$0"],
+    "description": "目錄注入標記（搭配 markdown-tools.py toc --inject）"
+  },
+  "Markdown: 分隔線": {
+    "prefix": "hr",
+    "body": ["", "---", "", "$0"],
+    "description": "水平分隔線"
+  },
+  "Markdown: 鍵盤按鍵": {
+    "prefix": "kbd",
+    "body": ["<kbd>${1:Ctrl}</kbd>$0"],
+    "description": "鍵盤按鍵標記"
+  },
+  "Markdown: 參考連結定義": {
+    "prefix": "reflink",
+    "body": ["[${1:id}]: ${2:url} \"${3:標題}\"", "$0"],
+    "description": "參考式連結定義"
+  }
+}
