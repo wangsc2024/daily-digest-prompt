@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added（2026-02-16 ~ 2026-03-03）
+### Added（2026-02-16 ~ 2026-03-09）
+- 系統熵增治理優化計畫全部完成（11 個核心優化項目）
+- CLAUDE.md 587→~220 行，新建 docs/ARCHITECTURE.md、docs/OPERATIONS.md
+- `config/dedup-policy.yaml` - 研究去重策略（三層防護）
+- `config/topic-rotation.yaml` - 主題輪替演算法（LRU + 同日去重）
+- `analyze-config.ps1` - 配置膨脹度量工具（9 指標、30 天歷史）
+- `new-auto-task.ps1` - 自動任務一鍵建立工具
+- `context/metrics-daily.json` - 每日指標聚合（14 天滾動）
+- `config/slo.yaml` - SLO 配置（6 個 SLO 定義）
+- ADR-009 自建輕量級可觀測性框架（OTel 語義相容）
+- 測試數量 675 → 682 個
+
+### Previously Added（2026-02-16 ~ 2026-03-03）
 - `skills/arch-evolution/` - 架構演進 Skill（OODA Decide 層，ADR 管理）
 - `skills/kb-research-strategist/` - 知識庫研究策略 Skill（五階段深度模型）
 - `skills/groq/` - Groq 超快推論 Skill（透過 groq-relay 中繼）

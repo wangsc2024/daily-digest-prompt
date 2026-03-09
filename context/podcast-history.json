@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-07T15:23:31",
+  "updated_at": "2026-03-08T15:23:38",
   "entries": [
     {
       "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
@@ -57,6 +57,14 @@
       "note_id_input": "c835ef81-faeb-4bd1-8518-0581b622452d",
       "slug": "note-c835ef81-20260307",
       "used_at": "2026-03-07T15:23:31"
+    },
+    {
+      "note_id": "35420ab5-a433-43c5-859d-6e2cb44b19ef",
+      "note_title": "完成法華經研究報告的工作流，包括文獻蒐集、報告大綱設計、草稿撰寫、編輯校對等多步驟，並生成最終 Markdown 報告文…",
+      "query": "",
+      "note_id_input": "35420ab5-a433-43c5-859d-6e2cb44b19ef",
+      "slug": "note-35420ab5-20260308",
+      "used_at": "2026-03-08T15:23:38"
     }
   ]
 }

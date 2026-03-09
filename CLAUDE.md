@@ -158,6 +158,7 @@
 - 全程使用正體中文；日誌檔名：`yyyyMMdd_HHmmss.log`；保留 7 天自動清理
 - 所有 .ps1 腳本使用 PowerShell 7 (`pwsh`)；`.ps1` 建議 UTF-8 with BOM
 - Python 依賴由 uv 管理，使用 `uv run python` 執行（非裸 `python`）
+- **計畫檔存放**：一律放在 `docs/plans/` 目錄下（格式：`{feature}-plan.md`），禁止存放至專案目錄外（pre_write_guard.py 會攔截路徑遍歷）
 
 ### 嚴禁產生 nul 檔案（最高優先級 — Hook 機器強制）
 - 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`（cmd 語法，在 bash 中會建立實體檔案）

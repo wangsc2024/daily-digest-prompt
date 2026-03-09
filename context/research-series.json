@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-07T21:35:07.184541+08:00",
+  "updated_at": "2026-03-09T00:14:22.947837+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -137,7 +137,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-08",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -267,7 +267,8 @@
             "楞嚴經綜合研究報告：注釋傳統的多元詮釋體系、國際學術研究回顧與梵藏漢文本比較分析",
             "楞嚴經注釋傳統與學術研究全景：歷代五大注疏比較、現代國際學術回顧與跨宗派定位分析",
             "楞嚴經版本學、梵文還原與數位典藏研究 — 從 stemmatology 到 digital humanities 的方法論框架",
-            "楞嚴經與大乘起信論的如來藏思想比較 — 一心二門、真如緣起與不變隨緣的跨經論對話"
+            "楞嚴經與大乘起信論的如來藏思想比較 — 一心二門、真如緣起與不變隨緣的跨經論對話",
+            "楞嚴經研究：八還辨見與見見非見 — 從對境之見到離見真見的修證轉折"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -329,21 +330,24 @@
             "起信論真如三昧與首楞嚴大定比較",
             "馬鳴菩薩造論",
             "法藏大師隨緣不變八字心要",
-            "星雲大師處世哲學應用"
+            "星雲大師處世哲學應用",
+            "八還辨見的結構化義理",
+            "見精與真見的修證分際",
+            "日常觀照操作化"
           ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "楞嚴經 synthesis 階段已有 8 篇（天台會通+唯識對話+十番顯見+注釋全景+版本學+起信論比較），接近完成。最後可補：楞嚴咒密教面向（楞嚴咒與準提咒、大悲咒的功能比較）或楞嚴經與中觀學的空有辯證"
+      "next_research_hint": "可再補一篇楞嚴咒／戒定慧整合面向，作為系列收束"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-08",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -478,7 +482,8 @@
           "status": "in_progress",
           "kb_notes": [
             "教觀綱宗 synthesis 研究：注疏傳統文獻蒐集與分析、跨系列教觀會通框架及全書核心要點結構化報告",
-            "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合"
+            "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
+            "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -492,7 +497,10 @@
             "兼但對帶的系統性分析",
             "五時與化法四教的矩陣式交叉對應",
             "通五時與別五時的辯證關係",
-            "蕅益智旭「兼但對帶」的教觀融合創見"
+            "蕅益智旭「兼但對帶」的教觀融合創見",
+            "不定教的原典依據",
+            "不定教與四悉檀的對應",
+            "不定教在現代修學分層中的應用"
           ]
         }
       },
@@ -501,14 +509,14 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "synthesis 階段持續深化：下次可研究「教觀綱宗與摩訶止觀的教觀互補」或「天台判教的現代應用」"
+      "next_research_hint": "補齊不定教後，可做「教觀綱宗與摩訶止觀的教觀互補」作為系列收束。"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
       "domain": "法華經 / Lotus Sutra 佛學研究",
       "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-09",
       "tags": [
         "法華經",
         "佛學",
@@ -596,7 +604,7 @@
           ]
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-02",
           "kb_notes": [
             "法華經一佛乘義理的系統總結",
@@ -606,7 +614,18 @@
             "法華經學術研究深度分析：注釋傳統的多元詮釋體系、歷史傳播脈絡與現代佛教學方法論",
             "法華經注釋傳統深度研究：窺基《法華玄贊》與吉藏《法華義疏》的詮釋分歧、鳩摩羅什譯經策略與梵漢核心術語對照",
             "法華經跨語言文獻對照與結構化引用索引 — 梵巴藏漢四語術語比較、CSV 經文索引及延伸研究路線圖",
-            "法華經與一心三觀的現代生活實踐 — 從天台圓教觀法到日常修持的轉化路徑與跨領域對話"
+            "法華經與一心三觀的現代生活實踐 — 從天台圓教觀法到日常修持的轉化路徑與跨領域對話",
+            "法華經方便品研究：開權顯實與一佛乘宣說的教判轉折",
+            "法華經研究方法論：跨語言文獻蒐集、數位校勘與研究報告編輯校對工作流",
+            "法華經一心三觀學術研究報告 — CBETA 文獻基礎、智顗原典引文與當代詮釋分歧的系統整理",
+            "法華經一心三觀完整研究報告 — 從龍樹中觀到天台圓教的理論溯源、經文依據、空假中三觀解析、歷代祖師詮釋演變與現代生活實踐",
+            "一心三觀的思想淵源（龍樹中觀→智顗天台）— 三諦偈種子、慧文慧思智顗三代傳承、CBETA 原典 17 處引文與四大學術爭議",
+            "法華經一心三觀研究工作流 — 從選題到知識庫上傳的端到端流程與品質驗證機制",
+            "法華經一心三觀精華研究報告 — 四代傳承、六段經證、五大實踐場景的知識轉化",
+            "Podcast 腳本：法華經一心三觀 — 四代傳承、經文解讀與三分鐘三觀練習",
+            "法華經一心三觀的知識轉化 — 從研究報告到 Podcast 的跨媒介傳播方法論",
+            "法華經一心三觀的知識產品化策略 — 從知識庫到 Podcast 系列與多層次報告的系統化轉化框架",
+            "法華經一心三觀的視覺化與 Podcast 系列延伸計畫 — 概念圖設計、分集規劃與自動化管線方案"
           ],
           "covered_concepts": [
             "一佛乘系統總結",
@@ -665,17 +684,64 @@
             "情緒管理與三諦圓融的實踐",
             "人際關係中的開權顯實智慧",
             "現代佛教學的實踐轉向（Engaged Buddhism）",
-            "法華經譬喻在現代教育與心理諮商的應用"
-          ]
+            "法華經譬喻在現代教育與心理諮商的應用",
+            "方便品（開權顯實）",
+            "會三歸一的次第展開",
+            "天台五時八教中的法華定位",
+            "鳩摩羅什譯語義分析",
+            "現代實修轉化",
+            "跨語言校讎學方法論（collation methodology / textual criticism workflow）",
+            "數位校勘工具鏈（CollateX / Juxta / TEI-XML 標記）",
+            "佛典翻譯研究的系統性文獻回顧方法（systematic literature review）",
+            "學術報告的編輯校對 checklist（引用格式、術語一致性、交叉引用驗證）",
+            "多語言平行語料庫建構方法（parallel corpus construction for Buddhist texts）",
+            "CBETA 一心三觀專題文獻系統檢索策略",
+            "一心三觀學術研究報告的標準格式與引用規範",
+            "智顗《摩訶止觀》中一心三觀的原典精確引文與科判",
+            "當代天台學者對一心三觀的詮釋分歧（日本天台 vs 中國天台 vs 西方佛學）",
+            "一心三觀與其他佛教觀法的學術比較（唯識五重觀 vs 華嚴法界觀 vs 天台一心三觀）",
+            "CBETA T46n1911《摩訶止觀》、T33n1716《法華文句》等核心典籍的結構化引用",
+            "一心三觀完整 12 章研究報告（19,500 字）",
+            "龍樹→慧文→慧思→智顗四代傳承系統梳理",
+            "17 處 CBETA 原典引文彙整",
+            "四大學術爭議（原創性/一心詮釋/批判佛教/山家山外）",
+            "五大生活場景三觀實踐（職場/親子/情緒/消費/社會）",
+            "跨宗派三觀比較（天台/唯識/華嚴）",
+            "與當代正念（MBSR/ACT）的系統對話",
+            "一心三觀研究的完整工作流文件（從選題→研究→撰寫→校對→上傳→驗證的端到端流程）",
+            "知識庫上傳的品質驗證檢查清單（筆記完整性、標籤一致性、交叉引用驗證）",
+            "研究測試結果的結構化記錄格式（預期vs實際、品質指標、改進建議）",
+            "知識轉化方法論（研究報告→精華版→Podcast）",
+            "佛學術語口語化對照（9 組術語）",
+            "三分鐘三觀練習（空觀30秒→假觀1分→中觀1.5分）",
+            "Podcast 雙主持人對話設計（曉晨/云哲 29 輪）",
+            "法華經一心三觀的 Podcast 腳本設計（章節結構、敘事節奏、聽眾互動）",
+            "佛學研究報告的精華摘要模板（從 19,500 字→3,000 字精華版）",
+            "一心三觀知識的跨媒介傳播策略（文字→音頻→視覺的轉化規則）",
+            "Podcast 中佛學專有名詞的口語化處理方法",
+            "知識庫筆記→播客單集的選題與組織框架",
+            "知識庫→Podcast 的自動化管線設計（KB 筆記自動摘要→腳本生成→音頻產出）",
+            "Podcast 分集規劃策略（從 17 筆 synthesis 筆記中選題排序）",
+            "報告分級出版（學術版/通俗版/社群分享版）的系統化方法",
+            "知識庫標籤體系治理與筆記間交叉引用網絡",
+            "視覺化呈現（一心三觀概念圖、修行次第心智圖、跨宗派比較資訊圖）",
+            "Podcast 系列的後續集數規劃（第2集起）",
+            "一心三觀的視覺化概念圖實作",
+            "修行次第心智圖設計",
+            "跨宗派比較資訊圖製作",
+            "Podcast 聽眾回饋與迭代機制",
+            "一心三觀與當代心理治療的實證研究比較"
+          ],
+          "completed_at": "2026-03-09"
         }
       },
-      "current_stage": "synthesis",
-      "completion_pct": 80,
+      "current_stage": "completed",
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "完成現代生活實踐研究後，lotus-sutra synthesis 可提升至 90%+。最終可補充：法華經與中觀學的空有辯證，或法華經在全球當代佛教運動中的角色"
+      "next_research_hint": "系列五階段已全部完成。延伸方向：(1) 視覺化呈現（概念圖/心智圖/資訊圖）(2) Podcast 系列化（第2-4集腳本）(3) 知識庫→Podcast 自動化管線"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
@@ -1003,7 +1069,7 @@
       "domain": "Gun.js Decentralized Database",
       "description": "Gun.js 去中心化圖形資料庫研究系列",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-08",
       "tags": [
         "Gun.js",
         "去中心化",
@@ -1051,7 +1117,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-08",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1075,7 +1141,18 @@
           "completed_at": "2026-03-07"
         },
         "mechanism": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "Temporal 深度研究報告 - AI工作流自動化"
+          ],
+          "covered_concepts": [
+            "workflow_orchestration",
+            "agent_coordination",
+            "observability",
+            "deployment",
+            "integration",
+            "governance"
+          ]
         },
         "application": {
           "status": "pending"
@@ -1090,14 +1167,14 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism 階段：深入 Dify 工作流引擎的執行模型、RAG Pipeline 內部機制、Plugin Daemon 隔離架構"
+      "next_research_hint": "完成本次專案拆解後，繼續補齊該系列下一個階段的基準比較與實作模板"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
       "domain": "大悲懺法 / Great Compassion Repentance Liturgy 佛學研究",
       "description": "大悲懺法深度研究系列，涵蓋歷史源流、儀軌結構、修持方法、天台懺法傳統與現代實踐",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-08",
       "tags": [
         "大悲懺法",
         "佛學",
@@ -1109,8 +1186,9 @@
       ],
       "stages": {
         "foundation": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-07",
+          "completed_at": "2026-03-08",
           "kb_notes": [
             "大悲懺法概論：歷史源流、儀軌結構與天台懺法傳統"
           ],
@@ -1129,7 +1207,7 @@
           ]
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
             "大悲懺法的觀行原理與 CBETA 文獻學研究 — 從知禮科判到天台圓頓止觀的懺法機制與大悲咒密教義理"
           ],
@@ -1146,24 +1224,39 @@
           ]
         },
         "application": {
-          "status": "pending"
+          "status": "completed",
+          "kb_notes": [
+            "大悲懺應用實踐研究：跨懺法系統比較、歷史演變脈絡與實修指南"
+          ],
+          "covered_concepts": [
+            "大悲懺實修日課安排與計數方法",
+            "大悲懺共修法會的組織與執行",
+            "大悲懺與法華懺法的系統比較（儀軌結構、觀法差異、適用對象）",
+            "大悲懺與金光明懺的系統比較",
+            "大悲懺與水懺的系統比較",
+            "大悲懺在中國佛教歷史中的地位演變（宋→元→明→清→近現代）",
+            "大悲咒持誦的具體方法（音聲、觀想、迴向完整操作）",
+            "初學者大悲懺入門路線圖",
+            "大悲懺感應錄的歷史文獻分析",
+            "當代大悲懺弘傳道場與傳承系譜"
+          ]
         },
         "optimization": {
-          "status": "pending"
+          "status": "completed"
         },
         "synthesis": {
-          "status": "pending"
+          "status": "completed"
         }
       },
-      "current_stage": "foundation",
-      "completion_pct": 0,
+      "current_stage": "synthesis",
+      "completion_pct": 95,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong",
         "lotus-sutra",
         "pure-land-buddhism"
       ],
-      "next_research_hint": "完成 mechanism 後進入 application：大悲懺的實修指南（個人日課安排、共修儀軌實操、初學者入門路線），以及大悲咒持誦的具體方法（計數、觀想、迴向）"
+      "next_research_hint": "可選後續：田野調查（台灣道場質性訪談）、跨文化比較（藏傳金剛薩埵懺/南傳四正勤）、心理學實證（fMRI/HRV）、數位人文（CBETA 演變脈絡）、線上共修效果研究；或深化 optimization：持誦品質提升、常見障礙排除、進階觀法與感應道交"
     },
     "slm-on-device-ai": {
       "series_id": "slm-on-device-ai",
@@ -1198,6 +1291,208 @@
       "completion_pct": 0,
       "related_series": [],
       "next_research_hint": "完成後進入 mechanism：深入量化演算法原理（GPTQ vs AWQ vs GGUF）、知識蒸餾技術、Speculative Decoding 與 NPU 硬體加速機制"
+    },
+    "markdown-gfm-writing": {
+      "series_id": "markdown-gfm-writing",
+      "domain": "Markdown, 語法指令, 編輯技巧, 摘要, GitHub Flavored Markdown",
+      "description": "",
+      "initiated_at": "2026-03-08",
+      "last_active": "2026-03-08",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-08",
+          "kb_notes": [
+            "Markdown 與 GitHub Flavored Markdown 完整指南 — 語法規範、編輯技巧與技術文件撰寫最佳實踐",
+            "Markdown/GFM 編輯技巧與摘要撰寫方法論 — 從語法規範到高效技術寫作工作流"
+          ],
+          "covered_concepts": [
+            "Markdown 解析規範（CommonMark spec）",
+            "GFM 特有擴展（表格、任務清單、自動連結、刪除線、腳注）",
+            "技術文件撰寫最佳實踐",
+            "Markdown 編輯工具與工作流",
+            "摘要撰寫技巧（executive summary、TL;DR）",
+            "Markdown 在 CI/CD 中的應用（README lint、文件生成）",
+            "Markdown 與其他標記語言比較（reStructuredText、AsciiDoc）"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入 Markdown 解析器原理（AST、rendering pipeline）、各解析器差異（markdown-it、remark、unified）"
+    },
+    "knowledge-base-architecture": {
+      "series_id": "knowledge-base-architecture",
+      "domain": "Knowledge Base Architecture / Information Application / Deep Analysis Methodology",
+      "description": "知識庫架構與資訊應用研究系列，涵蓋知識管理系統設計、DIKW 轉化模型、深度分析方法論與研究報告結構",
+      "initiated_at": "2026-03-08",
+      "last_active": "2026-03-08",
+      "tags": [
+        "知識庫",
+        "架構設計",
+        "資訊應用",
+        "深度分析",
+        "知識管理",
+        "DIKW",
+        "研究報告"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-08",
+          "kb_notes": [
+            "知識庫架構與資訊應用概論 — 設計模式、DIKW 轉化模型與深度分析方法論框架"
+          ],
+          "covered_concepts": [
+            "知識庫架構設計模式（Graph DB / Vector DB / Hybrid）",
+            "知識管理系統分類學（PKM / Team KB / Enterprise KM）",
+            "資訊應用層次模型（DIKW 金字塔）",
+            "深度分析方法論（結構化分析 / 根因分析 / 系統性文獻回顧）",
+            "知識表示與本體論（Ontology / Taxonomy / Folksonomy）",
+            "研究報告結構設計（IMRaD / 系統性綜述 / Meta-analysis）",
+            "知識圖譜與語義網技術（RDF / OWL / SPARQL）"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入向量嵌入原理、知識圖譜構建演算法、混合檢索機制與知識品質評估指標"
+    },
+    "open-webui-platform": {
+      "series_id": "open-webui-platform",
+      "domain": "Open WebUI / Self-Hosted AI Platform",
+      "description": "Open WebUI 平台型研究系列，聚焦自託管 AI 入口層、模型閘道、RAG 工作台與企業治理能力。",
+      "initiated_at": "2026-03-08",
+      "last_active": "2026-03-08",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Open WebUI"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-08",
+          "kb_notes": [
+            "Open WebUI — 自託管 AI 平台深度研究：統一模型閘道、Functions/Pipelines 擴充架構、內建 RAG 與企業級治理能力（123k Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "統一模型閘道",
+            "Functions/Pipelines 擴充模型",
+            "內建 RAG/Knowledge",
+            "RBAC 與企業部署",
+            "OpenTelemetry 與水平擴展"
+          ],
+          "completed_at": "2026-03-08"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "ai-workflow-automation"
+      ],
+      "next_research_hint": "下一步可深入 Open WebUI 的控制面/資料面拆分、工具執行生命週期，以及與 Dify/LibreChat/AnythingLLM 的平台比較。"
+    },
+    "ai-assisted-coding-workflows": {
+      "series_id": "ai-assisted-coding-workflows",
+      "domain": "AI-Assisted Coding / Spec-Driven Development / Prompt Contracts",
+      "description": "AI 輔助編碼工作流研究系列，聚焦 spec、上下文工程、prompt 契約、驗證迴圈與 repo 級導入實踐。",
+      "initiated_at": "2026-03-08",
+      "last_active": "2026-03-08",
+      "tags": [
+        "AI",
+        "系統開發",
+        "AI-Assisted Coding",
+        "Spec-Driven Development",
+        "Prompt Engineering"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-08",
+          "completed_at": "2026-03-08",
+          "kb_notes": [
+            "AI-Assisted Coding 實作指南：Spec-Driven Development 與 Prompt 契約工作流"
+          ],
+          "covered_concepts": [
+            "AI-Assisted Coding 定義",
+            "Spec-Driven Development 流程",
+            "Prompt contract",
+            "Context engineering",
+            "Verify loop"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-08",
+          "completed_at": "2026-03-08",
+          "kb_notes": [
+            "AI-Assisted Coding 實作指南：Spec-Driven Development 與 Prompt 契約工作流"
+          ],
+          "covered_concepts": [
+            "specify-plan-tasks-implement 鏈條",
+            "gather context -> take action -> verify work -> repeat",
+            "repo map 與 just-in-time context",
+            "subagent 平行調查模式",
+            "prompt 契約欄位設計"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [
+        "ai-code-review"
+      ],
+      "next_research_hint": "下一步可深化 application：針對 monorepo、前端專案、CLI 專案整理可直接複用的 contract 範本與 CI 驗證閘門。"
     }
   }
 }

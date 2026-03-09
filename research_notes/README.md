@@ -2,8 +2,9 @@
 
 > 研究日期：2026-03-07
 > 研究系列：da-bei-chan-fa（kb-research-strategist 五階段模型）
-> 當前階段：mechanism → application（進行中）
+> **當前階段：已完成**（Foundation → Mechanism → Application → Optimization → Synthesis）
 > 總字數：約 15,800 字（14 篇研究筆記 + 1 篇校對報告）
+> 追蹤狀態：`context/research-series.json` 已更新，completion_pct: 95%
 
 ## 目錄
 
@@ -98,3 +99,33 @@ Optimization ─→ Task 9-11（寺院現況、日常落實、持咒生活化）
     │
 Synthesis ───→ Task 12-14（懺法比較、導論、結論）
 ```
+
+## 後續建議（已完成項目）
+
+### 1. 研究追蹤已更新
+
+- **`context/research-series.json`** 中 `da-bei-chan-fa` 已更新：
+  - 五階段（foundation / mechanism / application / optimization / synthesis）均標為 `completed`
+  - `current_stage`: `synthesis`，`completion_pct`: 95%
+  - `next_research_hint` 已改為可選後續方向（田野調查、跨文化比較、心理學實證、數位人文、線上共修研究等）
+
+### 2. 知識庫匯入建議
+
+若知識庫服務（localhost:3000）已啟動，可依 **`skills/knowledge-query/SKILL.md`** 將重點篇目匯入 RAG：
+
+| 建議匯入篇目 | 用途 |
+|-------------|------|
+| task13_章節統整與導論.md | 全文架構與研究方法 |
+| task14_結論與實踐手冊.md | 七大發現、入門七日、每日/每週/每月實踐指引 |
+| task12_與其他懺法的比較.md | 五懺法比較、大悲懺定位 |
+| task03_儀軌完整結構分析.md | 十科結構與正修核心 |
+
+**匯入步驟摘要**：  
+1. 用 Write 建立 `import_note.json`，欄位 `contentText` 放 Markdown 內容（勿填 `content`）  
+2. `curl -s -X POST "http://localhost:3000/api/import" -H "Content-Type: application/json; charset=utf-8" -d @import_note.json`  
+3. 匯入前去重：hybrid search 若 score > 0.85 可跳過或改為更新既有筆記  
+4. 標籤建議：`大悲懺法`、`佛學`、`天台宗`、`懺法`、`da-bei-chan-fa`
+
+### 3. 可選後續研究方向
+
+見 `research-series.json` → `da-bei-chan-fa.next_research_hint`，或 Task 14 第四節「對未來研究的建議方向」。

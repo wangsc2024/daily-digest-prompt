@@ -1,0 +1,4811 @@
+{
+  "version": 1,
+  "scored_at": "2026-03-08T15:39:46.069989+00:00",
+  "total_notes": 201,
+  "top_10": [
+    {
+      "note_id": "52f6a3b0-d7e7-45ff-86db-cdfb241304e6",
+      "title": "Dify 深度研究報告 - AI 工作流自動化：蜂巢架構、Plugin 生態系統與 LLMOps 全景（132K Stars, 2026-03）",
+      "total": 100,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T06:40:51.609Z",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Dify",
+        "No-code 工作流"
+      ]
+    },
+    {
+      "note_id": "f908d566-99fa-4ba4-8c66-68da1b5eb0a6",
+      "title": "OpenClaw — 史上增長最快的開源個人 AI Agent 深度研究：Gateway 控制平面架構、Heartbeat 自主排程、Markdown 記憶系統與 700+ Skill 插件生態的技術洞察（250K Stars, 2026-03）",
+      "total": 99,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-08T02:36:17.352Z",
+      "tags": [
+        "GitHub",
+        "OpenClaw",
+        "AI Agent",
+        "Gateway架構",
+        "Heartbeat",
+        "Skill生態系統",
+        "本地優先",
+        "MCP",
+        "開源專案",
+        "技術洞察",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "11363f65-deca-49eb-9878-eca3869e5ba3",
+      "title": "Zed — Rust 驅動的 AI 時代協作式程式碼編輯器深度研究：GPUI GPU 加速框架、不可變分層變換管線、ACP Agent 通訊協議與 Headless Mode 自主編碼架構（76.5K Stars, 2026-03）",
+      "total": 98,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-07T02:40:09.017Z",
+      "tags": [
+        "GitHub",
+        "Zed",
+        "Rust",
+        "GPUI",
+        "程式碼編輯器",
+        "ACP",
+        "Agent Client Protocol",
+        "CRDT",
+        "Headless Mode",
+        "Tree-sitter",
+        "GPU加速",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "4acb4713-b6cc-44af-a1cf-b6a31f73a05a",
+      "title": "結構化分析技術（Structured Analytic Techniques）— 情報分析界的系統性思維方法論與認知偏誤對抗框架",
+      "total": 98,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T06:39:25.822Z",
+      "tags": [
+        "邏輯思維",
+        "結構化分析技術",
+        "SATs",
+        "ACH",
+        "批判性思考",
+        "認知偏誤",
+        "決策框架",
+        "情報分析",
+        "CIA",
+        "方法論"
+      ]
+    },
+    {
+      "note_id": "96473d7a-c97d-4d91-b689-0ceaee69e670",
+      "title": "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運",
+      "total": 97,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T06:35:23.926Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "化儀四教中的不定教",
+        "化儀四教",
+        "不定教",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "c6f23755-68eb-46cb-948f-c76f24ea708b",
+      "title": "Shannon — 全自主 AI 滲透測試工具深度研究：白箱原始碼分析 + 動態漏洞利用的三階段 Agent 管線架構、XBOW Benchmark 96.15% 準確率與持續安全測試範式（32K Stars, 2026-03）",
+      "total": 97,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T07:37:11.480Z",
+      "tags": [
+        "GitHub",
+        "Shannon",
+        "AI滲透測試",
+        "Autonomous Pentesting",
+        "XBOW Benchmark",
+        "白箱測試",
+        "安全工具",
+        "Claude Agent SDK",
+        "Temporal",
+        "開源專案",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "c28e439f-7514-4408-9038-32b16f9d4e0f",
+      "title": "Temporal 深度研究報告 - AI工作流自動化",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.097097+00:00",
+      "created_at": "2026-03-08T05:10:36.840Z",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Temporal",
+        "工作流引擎 + AI"
+      ]
+    },
+    {
+      "note_id": "3f7f88b8-0875-466c-bcc0-1b77540b0d0a",
+      "title": "Paperclip — 開源零人力公司 AI Agent 編排框架深度研究：Bring-Your-Own-Agent 架構、原子化預算治理、組織圖驅動任務流與 Heartbeat 持久化狀態管理（7.7K Stars, 2026-03）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T20:38:35.689Z",
+      "tags": [
+        "GitHub",
+        "Paperclip",
+        "零人力公司",
+        "Agent編排",
+        "BYOA",
+        "組織治理",
+        "預算管理",
+        "Heartbeat",
+        "TypeScript",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "e02a6acc-ebae-4100-9d1f-5a971286d208",
+      "title": "深度思維洞見報告 — 2026-03-05 知識庫分析：「知識轉化日」— 從研究筆記到多媒體內容的原子化轉製機制與跨媒介知識傳播策略",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 17,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T07:38:20.007Z",
+      "tags": [
+        "深度思維",
+        "洞見報告",
+        "知識庫分析",
+        "內容原子化",
+        "知識轉化",
+        "多媒體轉製",
+        "知識生命週期",
+        "Content Atomization",
+        "RAG",
+        "2026-03-05"
+      ]
+    },
+    {
+      "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
+      "title": "MCP（Model Context Protocol）生態系統完整指南 — 從 Anthropic 提案到 Linux Foundation 治理的 AI Agent 互操作標準、四大協議對比（MCP/A2A/ACP/ANP）與企業採用實踐（2026）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T19:57:03.868Z",
+      "tags": [
+        "AI",
+        "MCP",
+        "Model Context Protocol",
+        "Anthropic",
+        "AAIF",
+        "Linux Foundation",
+        "A2A",
+        "ACP",
+        "ANP",
+        "AI Agent",
+        "互操作標準",
+        "開放協議",
+        "企業採用",
+        "2026"
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "note_id": "52f6a3b0-d7e7-45ff-86db-cdfb241304e6",
+      "title": "Dify 深度研究報告 - AI 工作流自動化：蜂巢架構、Plugin 生態系統與 LLMOps 全景（132K Stars, 2026-03）",
+      "total": 100,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T06:40:51.609Z",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Dify",
+        "No-code 工作流"
+      ]
+    },
+    {
+      "note_id": "f908d566-99fa-4ba4-8c66-68da1b5eb0a6",
+      "title": "OpenClaw — 史上增長最快的開源個人 AI Agent 深度研究：Gateway 控制平面架構、Heartbeat 自主排程、Markdown 記憶系統與 700+ Skill 插件生態的技術洞察（250K Stars, 2026-03）",
+      "total": 99,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-08T02:36:17.352Z",
+      "tags": [
+        "GitHub",
+        "OpenClaw",
+        "AI Agent",
+        "Gateway架構",
+        "Heartbeat",
+        "Skill生態系統",
+        "本地優先",
+        "MCP",
+        "開源專案",
+        "技術洞察",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "11363f65-deca-49eb-9878-eca3869e5ba3",
+      "title": "Zed — Rust 驅動的 AI 時代協作式程式碼編輯器深度研究：GPUI GPU 加速框架、不可變分層變換管線、ACP Agent 通訊協議與 Headless Mode 自主編碼架構（76.5K Stars, 2026-03）",
+      "total": 98,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-07T02:40:09.017Z",
+      "tags": [
+        "GitHub",
+        "Zed",
+        "Rust",
+        "GPUI",
+        "程式碼編輯器",
+        "ACP",
+        "Agent Client Protocol",
+        "CRDT",
+        "Headless Mode",
+        "Tree-sitter",
+        "GPU加速",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "4acb4713-b6cc-44af-a1cf-b6a31f73a05a",
+      "title": "結構化分析技術（Structured Analytic Techniques）— 情報分析界的系統性思維方法論與認知偏誤對抗框架",
+      "total": 98,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T06:39:25.822Z",
+      "tags": [
+        "邏輯思維",
+        "結構化分析技術",
+        "SATs",
+        "ACH",
+        "批判性思考",
+        "認知偏誤",
+        "決策框架",
+        "情報分析",
+        "CIA",
+        "方法論"
+      ]
+    },
+    {
+      "note_id": "96473d7a-c97d-4d91-b689-0ceaee69e670",
+      "title": "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運",
+      "total": 97,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T06:35:23.926Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "化儀四教中的不定教",
+        "化儀四教",
+        "不定教",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "c6f23755-68eb-46cb-948f-c76f24ea708b",
+      "title": "Shannon — 全自主 AI 滲透測試工具深度研究：白箱原始碼分析 + 動態漏洞利用的三階段 Agent 管線架構、XBOW Benchmark 96.15% 準確率與持續安全測試範式（32K Stars, 2026-03）",
+      "total": 97,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T07:37:11.480Z",
+      "tags": [
+        "GitHub",
+        "Shannon",
+        "AI滲透測試",
+        "Autonomous Pentesting",
+        "XBOW Benchmark",
+        "白箱測試",
+        "安全工具",
+        "Claude Agent SDK",
+        "Temporal",
+        "開源專案",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "c28e439f-7514-4408-9038-32b16f9d4e0f",
+      "title": "Temporal 深度研究報告 - AI工作流自動化",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.097097+00:00",
+      "created_at": "2026-03-08T05:10:36.840Z",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Temporal",
+        "工作流引擎 + AI"
+      ]
+    },
+    {
+      "note_id": "3f7f88b8-0875-466c-bcc0-1b77540b0d0a",
+      "title": "Paperclip — 開源零人力公司 AI Agent 編排框架深度研究：Bring-Your-Own-Agent 架構、原子化預算治理、組織圖驅動任務流與 Heartbeat 持久化狀態管理（7.7K Stars, 2026-03）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T20:38:35.689Z",
+      "tags": [
+        "GitHub",
+        "Paperclip",
+        "零人力公司",
+        "Agent編排",
+        "BYOA",
+        "組織治理",
+        "預算管理",
+        "Heartbeat",
+        "TypeScript",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "e02a6acc-ebae-4100-9d1f-5a971286d208",
+      "title": "深度思維洞見報告 — 2026-03-05 知識庫分析：「知識轉化日」— 從研究筆記到多媒體內容的原子化轉製機制與跨媒介知識傳播策略",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 17,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T07:38:20.007Z",
+      "tags": [
+        "深度思維",
+        "洞見報告",
+        "知識庫分析",
+        "內容原子化",
+        "知識轉化",
+        "多媒體轉製",
+        "知識生命週期",
+        "Content Atomization",
+        "RAG",
+        "2026-03-05"
+      ]
+    },
+    {
+      "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
+      "title": "MCP（Model Context Protocol）生態系統完整指南 — 從 Anthropic 提案到 Linux Foundation 治理的 AI Agent 互操作標準、四大協議對比（MCP/A2A/ACP/ANP）與企業採用實踐（2026）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T19:57:03.868Z",
+      "tags": [
+        "AI",
+        "MCP",
+        "Model Context Protocol",
+        "Anthropic",
+        "AAIF",
+        "Linux Foundation",
+        "A2A",
+        "ACP",
+        "ANP",
+        "AI Agent",
+        "互操作標準",
+        "開放協議",
+        "企業採用",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "5724812a-fb18-4f1f-b8b6-5b64155d8883",
+      "title": "論證謬誤的認知心理機制 — 從認知捷徑到系統性識別與防禦的完整框架",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:55:25.168Z",
+      "tags": [
+        "邏輯思維",
+        "批判性思考",
+        "論證謬誤",
+        "認知偏誤",
+        "決策框架",
+        "心理機制",
+        "四不架構",
+        "Logical Fallacies",
+        "Cognitive Biases"
+      ]
+    },
+    {
+      "note_id": "c13f05ab-8a03-4f61-bc5b-0edb479a626a",
+      "title": "RAGFlow — 開源 RAG 引擎深度洞察：DeepDoc 深層文件理解、TreeRAG 階層檢索、PTI 攝取管線架構與從 RAG 到 Context Engine 的典範轉移（74K Stars, 2026-03）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:57:49.172Z",
+      "tags": [
+        "GitHub",
+        "RAGFlow",
+        "RAG",
+        "Context Engine",
+        "DeepDoc",
+        "TreeRAG",
+        "文件理解",
+        "知識檢索",
+        "PTI管線",
+        "混合搜尋",
+        "Agent",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "a124ed30-5199-4214-befd-65fb607d3df5",
+      "title": "WiFi DensePose (RuView) — 開源 WiFi 訊號人體姿態估計系統深度研究：CSI 通道狀態資訊分析、Rust 高效能重寫（810x 加速）、多人穿牆感測與隱私安全雙刃劍（24.1K Stars, 2026-03）",
+      "total": 95,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T10:58:48.468Z",
+      "tags": [
+        "GitHub",
+        "WiFi DensePose",
+        "CSI",
+        "人體姿態估計",
+        "Rust",
+        "物聯網",
+        "隱私安全",
+        "訊號處理",
+        "開源專案",
+        "CMU",
+        "機器學習",
+        "穿牆感測",
+        "生命徵象",
+        "深度思維",
+        "研究",
+        "知識庫"
+      ]
+    },
+    {
+      "note_id": "5efa48de-e757-461d-8d57-efe459a8752b",
+      "title": "Gun.js 效能優化與分布式系統最佳實踐 -- 基準測試、替代方案比較與生產環境容錯策略",
+      "total": 93,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 20,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:06:49.539Z",
+      "tags": [
+        "Gun.js",
+        "去中心化資料庫",
+        "效能優化",
+        "分布式系統",
+        "CRDT",
+        "最佳實踐",
+        "benchmark",
+        "容錯策略",
+        "Yjs",
+        "Automerge"
+      ]
+    },
+    {
+      "note_id": "06aa9229-d7ef-4501-ab9b-6797a536f097",
+      "title": "n8n 開源 AI 工作流自動化平台深度研究 — 前後端分離架構、Queue Mode 水平擴展、LangChain 原生 AI Agent 節點與 400+ 整合的插件生態系統（177K Stars, 2026-03）",
+      "total": 93,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 15,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T07:39:16.781Z",
+      "tags": [
+        "GitHub",
+        "n8n",
+        "工作流自動化",
+        "AI Agent",
+        "LangChain",
+        "開源專案",
+        "架構設計",
+        "插件生態",
+        "Queue Mode",
+        "技術研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "a3518450-e8f1-4314-9c23-039e1a6b0665",
+      "title": "知識庫架構深度研究報告 — 資料模型、搜尋引擎分析、資訊擷取-分析-報告 SOP（2026-03-08）",
+      "total": 92,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:19:51.494Z",
+      "tags": [
+        "知識庫",
+        "系統架構",
+        "RAG",
+        "搜尋策略",
+        "SOP",
+        "研究報告",
+        "daily-digest-prompt",
+        "Qdrant",
+        "FTS5",
+        "BM25",
+        "知識管理"
+      ]
+    },
+    {
+      "note_id": "f111e7c0-13b3-4fe9-82fc-66347e6391b8",
+      "title": "AI 驅動的持續整合優化完整指南 — Flaky Test 智能偵測、Predictive Test Selection、Build Failure 預測與 AI-Native CI/CD 管線設計模式（2026）",
+      "total": 92,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:36:15.330Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "持續整合",
+        "CI/CD",
+        "Predictive Test Selection",
+        "Flaky Test",
+        "Build Prediction",
+        "DevOps",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "0a4514f9-3320-411d-a5eb-a5642ddfa3a1",
+      "title": "Crawl4AI — 開源 AI 友好型 Web 爬取框架深度研究：Playwright 瀏覽器自動化、多策略內容萃取、BM25 語義過濾與 RAG 管線整合最佳實踐（61.5K Stars, 2026-03）",
+      "total": 92,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:35:00.443Z",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Crawl4AI",
+        "Web爬取",
+        "RAG",
+        "Playwright",
+        "LLM",
+        "Markdown",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "d7ca1eec-8297-4077-af84-65ee33f618da",
+      "title": "Gun server 穩定性與安全性優化計畫",
+      "total": 92,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T09:19:54.183Z",
+      "tags": [
+        "Gun server",
+        "穩定性",
+        "安全性",
+        "優化",
+        "知識庫",
+        "系統設計",
+        "gunjs-decentralized-db"
+      ]
+    },
+    {
+      "note_id": "0d1ac1e9-9f8a-44f2-aaa9-fe28fa3c898f",
+      "title": "Langfuse 深度研究報告 - AI 工作流自動化觀測性平台：OpenTelemetry 原生追蹤、LLM-as-Judge 評估引擎與 ClickHouse 高效能分析架構（22.6K Stars, 2026-03）",
+      "total": 92,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 17,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-04T01:04:42.428Z",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Langfuse",
+        "AI Pipeline 觀測",
+        "LLM Observability",
+        "ClickHouse",
+        "OpenTelemetry",
+        "LLMOps",
+        "開源專案",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "2fd81618-765e-4aa9-bb61-f6b2b5fcf3d7",
+      "title": "Browser Use — 開源 AI 瀏覽器自動化框架深度研究：七層 Sense-Think-Act 架構、DOM 壓縮管線、Event-Driven Watchdog 模式與 MCP 整合的 LLM 瀏覽器控制標竿（79.8K Stars, 2026-03）",
+      "total": 90,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 10,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T10:37:43.060Z",
+      "tags": [
+        "GitHub",
+        "Browser Use",
+        "AI瀏覽器自動化",
+        "Playwright",
+        "CDP",
+        "DOM壓縮",
+        "Watchdog",
+        "MCP",
+        "Agent架構",
+        "Event-Driven",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "36298497-4f37-467e-9a78-edbc792c114a",
+      "title": "LLM Function Calling 與 Tool Use 架構設計完整指南 — 從 API 規範、Agentic Loop 到自建 Chat Agent 的系統設計模式與安全實踐（2026）",
+      "total": 90,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T06:40:40.350Z",
+      "tags": [
+        "Function Calling",
+        "Tool Use",
+        "LLM",
+        "Agent架構",
+        "Agentic Loop",
+        "MCP",
+        "Claude",
+        "OpenAI",
+        "Structured Outputs",
+        "安全設計",
+        "Chat系統",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "3631df3a-e006-4f85-aab2-170df622c7ac",
+      "title": "Docling — IBM 開源智慧文件解析平台深度研究：統一文件表徵架構、Granite-Docling 258M VLM 單次推理、DocTags 標記語言與 MCP Agentic 文件處理管線（54.7K Stars, 2026-03）",
+      "total": 90,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 15,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:41:11.716Z",
+      "tags": [
+        "GitHub",
+        "Docling",
+        "IBM Research",
+        "文件解析",
+        "Document Understanding",
+        "Granite-Docling",
+        "VLM",
+        "DocTags",
+        "MCP",
+        "RAG",
+        "TableFormer",
+        "OCR",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "研究"
+      ]
+    },
+    {
+      "note_id": "9a8096b8-d06f-4285-b1aa-8081a1f9be78",
+      "title": "Open WebUI — 自託管 AI 平台深度研究：統一模型閘道、Functions/Pipelines 擴充架構、內建 RAG 與企業級治理能力（123k Stars, 2026-03）",
+      "total": 89,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T13:38:08.461Z",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Open WebUI"
+      ]
+    },
+    {
+      "note_id": "0fe3b280-1cdf-4b48-92c0-5c4f4415a3a2",
+      "title": "法華經方便品研究：開權顯實與一佛乘宣說的教判轉折",
+      "total": 89,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 20,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T07:36:16.351Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "方便品"
+      ]
+    },
+    {
+      "note_id": "67473f46-7c3e-49eb-90cc-359c8fe3beb8",
+      "title": "AI-Assisted Coding 實作指南：Spec-Driven Development 與 Prompt 契約工作流",
+      "total": 88,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 20,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:37:06.385Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "AI-Assisted Coding",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "6ab4b416-a443-412d-bd1d-2d751923ba3f",
+      "title": "Cloudflare Workers 完整指南 — V8 Isolate 架構、R2/D1/KV 儲存整合、Podcast 媒體管線與 Edge Computing 最佳實踐（2026）",
+      "total": 88,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 10,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T12:36:05.386Z",
+      "tags": [
+        "技術研究",
+        "Cloudflare Workers",
+        "Edge Computing",
+        "V8 Isolate",
+        "R2",
+        "D1",
+        "KV",
+        "Serverless",
+        "Podcast管線",
+        "daily-digest"
+      ]
+    },
+    {
+      "note_id": "8998bf6e-f2a0-4176-ae33-9a9c6739bb68",
+      "title": "報告法華經一心三觀研究的工作流完成情形，包括暫存檔清理、知識庫上傳、測試結果與研究報告摘要。",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 7,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T15:14:03.351Z",
+      "tags": []
+    },
+    {
+      "note_id": "d6efb094-b540-449d-b61f-7d2bd66e5a1a",
+      "title": "大悲懺法Podcast研究",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 7,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:29:44.554Z",
+      "tags": []
+    },
+    {
+      "note_id": "6e1b3c73-adff-43f3-91b1-ee24d6f36d08",
+      "title": "大悲懺法及其如何於生活中落實",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 7,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T13:45:12.433Z",
+      "tags": []
+    },
+    {
+      "note_id": "7319e2e1-86d9-422a-8783-3707fc1e7828",
+      "title": "RAG-Anything — HKUDS 開源多模態 RAG 框架深度研究：MinerU 解析引擎、雙圖融合知識圖譜、向量-圖譜混合檢索與跨模態文件智慧問答（14K Stars, 2026-03）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 13,
+        "podcast_suit": 16,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T14:36:07.153Z",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "RAG-Anything",
+        "多模態RAG",
+        "知識圖譜",
+        "LightRAG",
+        "MinerU",
+        "向量檢索",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "c747a50f-4643-4084-a76b-abfd8207cdf8",
+      "title": "Goose 深度洞察報告 v2 — block/goose AI Agent 框架完整研究（architecture × autogen × rag × MCP生態 × Block戰略 × 2026趨勢）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-04T14:08:30.911Z",
+      "tags": [
+        "AI",
+        "Agent框架",
+        "Goose",
+        "MCP",
+        "Rust",
+        "開源工具",
+        "架構分析",
+        "AutoGen",
+        "CrewAI",
+        "LangGraph",
+        "OpenHands",
+        "RAG",
+        "上下文管理",
+        "SWE-bench",
+        "Block",
+        "AAIF",
+        "LinuxFoundation",
+        "software-architect",
+        "自主軟體工程",
+        "2026趨勢",
+        "Daily-Digest",
+        "安全架構",
+        "LATS",
+        "推理模型"
+      ]
+    },
+    {
+      "note_id": "2a23908c-ac76-4602-91a0-0cbdfc55076a",
+      "title": "Biome — 取代 ESLint + Prettier 的 Rust 超高速前端工具鏈深度研究：Red-Green CST 架構、423+ Lint 規則、Type-Aware 推論引擎與 2026 Roadmap（23.9K Stars）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:54:32.945Z",
+      "tags": [
+        "GitHub",
+        "Biome",
+        "前端工具鏈",
+        "Rust",
+        "ESLint替代",
+        "Prettier替代",
+        "Linter",
+        "Formatter",
+        "Type-Aware",
+        "開源專案",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "0f4b9d0c-d476-4112-bb36-d5010f0a1b8c",
+      "title": "OWL — CAMEL-AI 開源多 Agent 協作框架深度研究：Planner-Coordinator-Worker 三層架構、WORKFORCE 強化學習訓練、GAIA Benchmark 開源第一（69.09%）與 30+ 工具鏈生態系統（19.1K Stars, 2026-03）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T18:37:48.134Z",
+      "tags": [
+        "GitHub",
+        "OWL",
+        "CAMEL-AI",
+        "多Agent框架",
+        "GAIA Benchmark",
+        "WORKFORCE",
+        "MCP",
+        "強化學習",
+        "GRPO",
+        "開源專案",
+        "NeurIPS",
+        "深度思維",
+        "知識庫",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "ab457c91-c5a8-4289-8804-8305283aee07",
+      "title": "ntfy 推播通知系統完整指南 — HTTP API 進階功能、Action Buttons 互動通知、模板引擎、自架部署與自動化整合最佳實踐（2026）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T17:53:56.024Z",
+      "tags": [
+        "技術研究",
+        "ntfy",
+        "推播通知",
+        "Push Notification",
+        "自架部署",
+        "Action Buttons",
+        "模板引擎",
+        "自動化整合",
+        "daily-digest"
+      ]
+    },
+    {
+      "note_id": "02a62706-e9c7-4098-b619-9cf6817c6cbe",
+      "title": "Firecrawl -- AI 時代的 Web Data API 深度研究：多引擎爬取架構、LLM-Ready 結構化輸出、Spark Agent 自主資料蒐集與 MCP 整合生態系統（87.6K Stars, 2026-03）",
+      "total": 87,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 20,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T12:11:34.416Z",
+      "tags": [
+        "GitHub",
+        "Firecrawl",
+        "Web Scraping",
+        "AI",
+        "LLM",
+        "Web Data API",
+        "Playwright",
+        "MCP",
+        "Agent",
+        "Spark",
+        "結構化資料",
+        "開源專案",
+        "深度思維",
+        "知識庫",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "c79c8639-995a-4a3b-a684-0b92798b429f",
+      "title": "Task 9: 大悲懺在現代寺院的實踐現況",
+      "total": 86,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 13,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:50:06.039Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "現代實踐",
+        "道場",
+        "法會"
+      ]
+    },
+    {
+      "note_id": "52ede4cb-2a6b-4e8a-b7dd-849e068a1585",
+      "title": "uv — Astral 的 Rust 驅動 Python 套件管理器完整指南：效能基準、核心命令、pyproject.toml 配置與 daily-digest-prompt 專案實踐（2026）",
+      "total": 86,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 15,
+        "source_citation": 20,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T12:35:51.924Z",
+      "tags": [
+        "技術研究",
+        "uv",
+        "Python套件管理",
+        "Astral",
+        "Rust",
+        "pyproject.toml",
+        "效能基準",
+        "daily-digest"
+      ]
+    },
+    {
+      "note_id": "14898cfe-1605-41a4-b908-78ea6ed746f1",
+      "title": "楞嚴經研究：八還辨見與見見非見 — 從對境之見到離見真見的修證轉折",
+      "total": 83,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 13,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.097097+00:00",
+      "created_at": "2026-03-08T05:36:10.881Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "八還辨見與見見非見"
+      ]
+    },
+    {
+      "note_id": "e5880557-4f52-473d-b9cc-496a9a1d047b",
+      "title": "✅ **工作流完成：法華經一心三觀研究**\n\n---\n\n本次任務建立的 3 個暫存檔已全部刪除（剩餘的 `temp_kb…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T15:02:52.935Z",
+      "tags": []
+    },
+    {
+      "note_id": "407461a3-fd43-481d-8ff1-f7e1224ab4f8",
+      "title": "法華經一心三觀研究",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:23:37.296Z",
+      "tags": []
+    },
+    {
+      "note_id": "19be31e8-9a10-491b-8b00-e0ba95d7308a",
+      "title": "法華經一心三觀的理論與生活實踐",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:22:57.262Z",
+      "tags": [
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "佛學研究",
+        "止觀"
+      ]
+    },
+    {
+      "note_id": "04e57618-c97d-44ca-9c4b-9d4f760dd66e",
+      "title": "Task 14: 結論與實踐手冊編撰",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:55:23.661Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "實踐手冊",
+        "七日計畫",
+        "入門指引"
+      ]
+    },
+    {
+      "note_id": "f39fc289-2567-46bb-8aaf-430f6a2470f3",
+      "title": "Task 6: 知禮大師與天台懺法傳統",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:52.730Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "知禮大師",
+        "天台宗",
+        "四種三昧"
+      ]
+    },
+    {
+      "note_id": "88e76bc9-135e-44f7-9bd2-fbb808345dab",
+      "title": "般若波羅蜜多心經深意研究 — 從經題密義、五蘊皆空到究竟涅槃的義理層次與跨宗派詮釋",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:41:37.386Z",
+      "tags": [
+        "心經",
+        "般若波羅蜜多",
+        "佛學",
+        "空性",
+        "色即是空",
+        "緣起性空",
+        "中觀",
+        "天台宗",
+        "唯識",
+        "華嚴宗",
+        "五蘊皆空",
+        "跨宗派比較",
+        "般若時"
+      ]
+    },
+    {
+      "note_id": "965a46d5-d38d-409d-80ef-b1a66c2123c7",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T08:13:10.855Z",
+      "tags": []
+    },
+    {
+      "note_id": "537ee5b7-1836-4bbe-9fc9-fb02afd0cee3",
+      "title": "提供法華經研究報告的完成情況與等待您選擇方案（1/2/3）後繼續執行的提示。",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T08:07:11.969Z",
+      "tags": []
+    },
+    {
+      "note_id": "3c9f5147-b80f-4686-8092-90312ae688c3",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T07:59:28.328Z",
+      "tags": []
+    },
+    {
+      "note_id": "b2e9219a-cf12-4c86-8d7c-2496c543fb0b",
+      "title": "系統思考（Systems Thinking）完整指南 — 從 Donella Meadows 十二槓桿點到 Peter Senge 第五項修練的複雜系統分析方法論（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T20:40:58.282Z",
+      "tags": [
+        "邏輯思維",
+        "系統思考",
+        "Systems Thinking",
+        "Donella Meadows",
+        "Peter Senge",
+        "槓桿點",
+        "回饋迴路",
+        "系統基模",
+        "因果迴路圖",
+        "決策框架",
+        "複雜系統",
+        "第五項修練",
+        "研究",
+        "知識庫"
+      ]
+    },
+    {
+      "note_id": "c31a2378-8336-4dc0-9f36-4af169ef2d7e",
+      "title": "深度思維洞見報告 — 2026-03-07 知識庫分析：「體系建構日」— 分層漸進教化智慧、Sense-Think-Act Agent 循環與跨領域 Synthesis 的三重同構性發現",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T18:38:22.080Z",
+      "tags": [
+        "深度思維",
+        "知識庫",
+        "研究",
+        "跨領域洞見",
+        "分層漸進",
+        "Sense-Think-Act",
+        "Synthesis",
+        "結構同構性",
+        "2026-03-07"
+      ]
+    },
+    {
+      "note_id": "d633d9a8-36e4-41c7-97f8-c79df77fbca3",
+      "title": "執行意圖（Implementation Intentions）— 從 If-Then 計畫、意圖-行動落差到 WOOP 策略的行為科學完整框架（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T17:41:10.720Z",
+      "tags": [
+        "深度思維",
+        "知識庫",
+        "研究",
+        "執行意圖",
+        "Implementation Intentions",
+        "If-Then計畫",
+        "意圖行動落差",
+        "WOOP",
+        "MCII",
+        "行為科學",
+        "Peter Gollwitzer",
+        "Gabriele Oettingen",
+        "待辦事項",
+        "生產力",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "50acbfe1-d048-4a4c-9c50-738ec1596507",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T16:18:17.329Z",
+      "tags": []
+    },
+    {
+      "note_id": "ca9fe2db-845e-43f6-a55b-45d2515e7244",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:21:53.660Z",
+      "tags": []
+    },
+    {
+      "note_id": "998ce848-220c-4ebb-9ab4-a60a3b6ed073",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:11:09.977Z",
+      "tags": []
+    },
+    {
+      "note_id": "05e8439a-6460-40f1-9f53-49593cf185a5",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:08:55.256Z",
+      "tags": []
+    },
+    {
+      "note_id": "978fa099-da57-4472-b9f6-7733a9309358",
+      "title": "法華經序品研究：六瑞放光與法華會上的殊勝因緣",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T09:37:51.286Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "序品",
+        "六瑞",
+        "六成就",
+        "無量義處三昧",
+        "日月燈明佛",
+        "通序別序",
+        "彌勒問文殊",
+        "一佛乘"
+      ]
+    },
+    {
+      "note_id": "2a558a73-0196-4081-8c0e-b5f59703816c",
+      "title": "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T08:38:54.975Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "兼但對帶",
+        "五時判教",
+        "化法四教",
+        "藏通別圓",
+        "判教邏輯",
+        "教觀融合",
+        "蕅益智旭",
+        "synthesis",
+        "深度研究"
+      ]
+    },
+    {
+      "note_id": "fe82eb7f-b5a2-47e7-9294-fefaf4cec0dc",
+      "title": "楞嚴經與大乘起信論的如來藏思想比較 — 一心二門、真如緣起與不變隨緣的跨經論對話",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T07:38:30.519Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "大乘起信論",
+        "如來藏",
+        "一心二門",
+        "真如緣起",
+        "不變隨緣",
+        "覺明為咎",
+        "本覺始覺",
+        "跨經論比較",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "a8440312-97bb-4f12-9353-1099b9959ede",
+      "title": "教觀綱宗學術文獻蒐集與深度研究報告框架 — 40篇文獻的系統分析、注疏傳統譜系與五方向研究議程",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:38:23.800Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "文獻研究",
+        "學術文獻",
+        "注疏傳統",
+        "蕅益智旭",
+        "判教",
+        "研究報告框架",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "82eb045a-e29b-4606-a0f0-16bc17e7a1fc",
+      "title": "楞嚴經綜合研究報告：注釋傳統的多元詮釋體系、國際學術研究回顧與梵藏漢文本比較分析",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T04:44:45.841Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "注釋傳統",
+        "學術研究",
+        "文獻學",
+        "梵藏漢比較",
+        "真偽考辨",
+        "宗派詮釋",
+        "synthesis",
+        "綜合報告"
+      ]
+    },
+    {
+      "note_id": "e6a8995d-805a-4013-84b5-237920edbbfe",
+      "title": "法華經學術研究綜述：文獻學考據、譯本比較、注釋傳統與歷史傳播（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:41:31.812Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "文獻學",
+        "學術研究",
+        "梵文原典",
+        "譯本比較",
+        "注疏傳統",
+        "天台宗",
+        "辛嶋靜志",
+        "歷史傳播",
+        "跨宗派",
+        "數位人文"
+      ]
+    },
+    {
+      "note_id": "a3d25ccb-07e9-4b1a-bc5e-3c5ba4060850",
+      "title": "貝氏推理與機率思維完整指南 — 從先驗更新、校準訓練到超預測的決策科學方法論（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-07T02:36:45.584Z",
+      "tags": [
+        "邏輯思維",
+        "貝氏推理",
+        "機率思維",
+        "決策框架",
+        "超預測",
+        "校準訓練",
+        "認知偏誤",
+        "Bayesian Reasoning",
+        "批判性思考",
+        "研究"
+      ]
+    },
+    {
+      "note_id": "9f0c879d-d93e-43f0-a6f6-391b45bea72b",
+      "title": "Inference-Time Compute Scaling 完整指南 — 從 Test-Time Compute、推理 Token 最佳化到 2026 開源推理模型生態的技術全景與效能基準",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-07T01:38:31.552Z",
+      "tags": [
+        "AI",
+        "Inference-Time Scaling",
+        "Test-Time Compute",
+        "推理模型",
+        "Reasoning Model",
+        "CoT",
+        "MoE",
+        "OpenAI o3",
+        "DeepSeek R1",
+        "開源模型",
+        "技術研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "1f66447b-1cc3-43f1-86db-ca149cd647a9",
+      "title": "深度思維洞見報告 — 2026-03-06 知識庫分析：「全光譜知識日」— 分層架構同構性、決策-執行分離模式與跨領域會通的五大發現",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T19:38:57.934Z",
+      "tags": [
+        "深度思維",
+        "洞見報告",
+        "知識庫分析",
+        "跨領域洞見",
+        "分層架構",
+        "同構性",
+        "2026-03-06"
+      ]
+    },
+    {
+      "note_id": "e21bf562-2372-4623-bf33-666d3b81410e",
+      "title": "Daily-Digest-Prompt 跨 Phase 資料契約與防禦性編排模式優化建議 — 結果檔案 Schema 治理、命名一致性修復與中間驗證閘門設計（2026-03-07）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T18:41:32.937Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "知識庫",
+        "資料契約",
+        "Schema治理",
+        "防禦性編排",
+        "結果檔案",
+        "Phase間驗證",
+        "daily-digest-prompt",
+        "2026-03-07"
+      ]
+    },
+    {
+      "note_id": "2e00a552-4650-4994-b381-da1ab9a888d4",
+      "title": "遊戲設計心理學完整指南 — 心流理論（Flow Theory）、自我決定論（SDT）、玩家動機模型與留存機制設計的科學方法（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T18:40:12.807Z",
+      "tags": [
+        "遊戲設計心理學",
+        "心流理論",
+        "Flow Theory",
+        "自我決定論",
+        "SDT",
+        "玩家動機",
+        "留存機制",
+        "Bartle",
+        "Quantic Foundry",
+        "參與循環",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "f0b50871-3289-4d03-9273-d2c28413bea0",
+      "title": "AI 驅動的自動測試生成完整指南 -- 從 LLM 單元測試生成、Mutation Testing 自動化到工業級部署的工程實踐與工具鏈（2026）",
+      "total": 80,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 13,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T18:56:29.058Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "自動測試生成",
+        "Mutation Testing",
+        "單元測試",
+        "LLM",
+        "覆蓋率",
+        "TestGen-LLM",
+        "Qodo Cover",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "ed7d4a91-a2b4-41d2-9fe9-a1c6864502be",
+      "title": "法華經一心三觀完整研究報告 — 從龍樹中觀到天台圓教的理論溯源、經文依據、空假中三觀解析、歷代祖師詮釋演變與現代生活實踐",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:38:39.427Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "一心三觀",
+        "三諦圓融",
+        "空觀",
+        "假觀",
+        "中觀",
+        "智顗",
+        "知禮",
+        "龍樹",
+        "止觀",
+        "生活實踐",
+        "學術研究",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "14e7bb2d-1790-44e2-9172-4cbe315aa285",
+      "title": "Task 11: 大悲咒持誦的生活化實踐",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:55:18.603Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "大悲咒",
+        "持咒",
+        "日常課誦"
+      ]
+    },
+    {
+      "note_id": "fa970c6c-893c-40ed-960d-1f095ad2db34",
+      "title": "Task 7: 大悲懺的修持方法與禪觀要領",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:54.565Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "修持方法",
+        "禪觀",
+        "一心三觀"
+      ]
+    },
+    {
+      "note_id": "8e033ed8-a9b6-4c19-a87b-effbf9831a58",
+      "title": "Task 1: 大悲懺的歷史源流",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:45.003Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "歷史源流",
+        "知禮大師",
+        "唐宋"
+      ]
+    },
+    {
+      "note_id": "b9957ceb-77a8-4472-888e-abf07ec65847",
+      "title": "法華經一心三觀的理論與生活實踐（研究報告）",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:19:33.731Z",
+      "tags": [
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "研究報告",
+        "生活實踐",
+        "空觀",
+        "假觀",
+        "中觀",
+        "止觀",
+        "佛學研究"
+      ]
+    },
+    {
+      "note_id": "4bfa78a9-9882-4cfe-943e-82c22c92aa42",
+      "title": "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T11:38:28.594Z",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "五經一論",
+        "印光大師",
+        "信願行",
+        "教典體系",
+        "淨土三經",
+        "大勢至菩薩",
+        "普賢行願品",
+        "往生論",
+        "魏源",
+        "跨系列整合",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "3eb2a371-a939-4fa2-b88f-dd1e12717ce7",
+      "title": "教觀綱宗研究：法華涅槃時的完整教觀意涵 — 醍醐味統攝前四時與開權顯實、扶律談常的教觀分工",
+      "total": 79,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:53:08.182Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "法華涅槃時",
+        "五時判教",
+        "醍醐味",
+        "開權顯實",
+        "扶律談常",
+        "純圓獨妙",
+        "會三歸一",
+        "一佛乘",
+        "蕅益智旭",
+        "智者大師",
+        "深度研究"
+      ]
+    },
+    {
+      "note_id": "8e162989-c51c-4b46-8dad-ed63de3bf492",
+      "title": "提供一份心經要意報告",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T13:02:37.997Z",
+      "tags": []
+    },
+    {
+      "note_id": "440dec1d-a182-4a96-af31-222d99d77514",
+      "title": "Task 5: 觀世音菩薩信仰在大悲懺中的角色與意義",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:51.440Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "觀世音菩薩",
+        "大悲本願",
+        "感應道交"
+      ]
+    },
+    {
+      "note_id": "9c4e50ee-b46c-4df0-82a8-738de1c47765",
+      "title": "Task 4: 懺悔法門的佛學理論基礎",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:49.832Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "懺悔",
+        "業障",
+        "事懺理懺"
+      ]
+    },
+    {
+      "note_id": "e5c3a26b-c18a-4594-91e6-3c4a95ee4009",
+      "title": "Task 3: 大悲懺儀軌完整結構分析",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:48.346Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "儀軌",
+        "十科結構",
+        "觀行"
+      ]
+    },
+    {
+      "note_id": "b9a14b78-aac7-44cc-84a8-909aa1c48a49",
+      "title": "楞嚴經文本學與版本學研究：翻譯爭議、版本系統、梵文還原與數位典藏",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T04:50:42.349Z",
+      "tags": [
+        "楞嚴經",
+        "文本學",
+        "版本學",
+        "梵文還原",
+        "翻譯史",
+        "數位典藏",
+        "佛學研究"
+      ]
+    },
+    {
+      "note_id": "eea87735-27f5-48d4-9611-70c30968eb30",
+      "title": "法華經學術研究深度分析：注釋傳統的多元詮釋體系、歷史傳播脈絡與現代佛教學方法論",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T04:28:51.046Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "學術文獻",
+        "注釋傳統",
+        "歷史背景",
+        "佛教研究",
+        "天台宗",
+        "法相宗",
+        "三論宗",
+        "日蓮宗",
+        "文獻學",
+        "跨系列整合",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "6915af87-0cb1-4e4b-9870-e8db3e9a38bc",
+      "title": "法華經分別功德品研究：壽量品後的信解功德與天台五品弟子位",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T10:36:43.796Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "分別功德品",
+        "五品弟子位",
+        "觀行即佛",
+        "一佛乘",
+        "開權顯實",
+        "信解功德",
+        "六即佛"
+      ]
+    },
+    {
+      "note_id": "e11eb889-2ae2-4f4b-9184-47f6c3a49cd3",
+      "title": "楞嚴經研究：圓頓止觀 — 從奢摩他、三摩、禪那到首楞嚴大定的修證體系",
+      "total": 78,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T05:36:38.801Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "圓頓止觀",
+        "奢摩他",
+        "三摩",
+        "禪那",
+        "首楞嚴大定",
+        "三種漸次",
+        "理頓事漸",
+        "修證體系",
+        "止觀"
+      ]
+    },
+    {
+      "note_id": "58b18606-39a5-479d-88a6-8baf6dc357c8",
+      "title": "提供一份心經要意報告",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:56:44.955Z",
+      "tags": []
+    },
+    {
+      "note_id": "795a2422-6b60-486b-9540-b50e193ef83f",
+      "title": "Task 10: 懺悔精神在日常生活中的落實",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:55:16.264Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "日常修持",
+        "懺悔精神",
+        "慈悲心"
+      ]
+    },
+    {
+      "note_id": "902d54a8-9bab-46c0-99eb-2b9a125d6153",
+      "title": "Task 8: 歷代祖師與修行者的感應事蹟",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:50:04.124Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "感應事蹟",
+        "聖嚴法師",
+        "印光大師"
+      ]
+    },
+    {
+      "note_id": "1be7a181-c9b4-4139-bc34-8169565a1228",
+      "title": "Gun Relay Server 生產環境指南 — 高可用部署、安全強化與效能最佳化策略",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:03:40.834Z",
+      "tags": [
+        "Gun.js",
+        "去中心化資料庫",
+        "安全強化",
+        "穩定性",
+        "效能最佳化",
+        "生產環境",
+        "高可用",
+        "monitoring",
+        "gunjs-decentralized-db",
+        "系統設計"
+      ]
+    },
+    {
+      "note_id": "e66f9cab-888b-40a7-96ca-27d65125292f",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T08:21:12.141Z",
+      "tags": []
+    },
+    {
+      "note_id": "a2322581-44e5-4151-bf29-0868a7b49814",
+      "title": "Context Engineering（上下文工程）完整指南 — 從 Prompt Engineering 演進到生產級 AI Agent 的上下文設計方法論、四大策略框架與反模式防範（2026）",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T20:42:57.972Z",
+      "tags": [
+        "AI",
+        "Context Engineering",
+        "上下文工程",
+        "Prompt Engineering",
+        "LLM",
+        "Agent架構",
+        "RAG",
+        "記憶系統",
+        "WSCI框架",
+        "Context Rot",
+        "生產系統",
+        "MCP",
+        "技術研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "c504a7d4-ef7c-4ff5-a6b7-b5ec084e8a92",
+      "title": "Daily-Digest-Prompt Prompt 模板生態系統治理 — 模板膨脹度量、跨模板重複消除與共用片段抽取策略（2026-03-08）",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T17:39:49.532Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "知識庫",
+        "模板治理",
+        "Template Bloat",
+        "DRY原則",
+        "共用片段",
+        "daily-digest-prompt",
+        "2026-03-08"
+      ]
+    },
+    {
+      "note_id": "eade4dc2-3b6f-44cd-ade5-6161af95ae39",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T16:07:34.714Z",
+      "tags": []
+    },
+    {
+      "note_id": "9e8be79e-417c-4565-8c1f-543b5fb67fc5",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T16:02:08.510Z",
+      "tags": []
+    },
+    {
+      "note_id": "7d7dec07-22e6-4a66-b150-85f386f092eb",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T15:56:07.599Z",
+      "tags": []
+    },
+    {
+      "note_id": "ed662a40-37b0-4ec9-adfc-1e762a46273b",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T15:45:06.842Z",
+      "tags": []
+    },
+    {
+      "note_id": "78efb842-bc3f-4c79-9e33-405174b3e165",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T15:39:07.063Z",
+      "tags": []
+    },
+    {
+      "note_id": "7dd16e54-3714-4431-9369-5115acb3155a",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:33:33.067Z",
+      "tags": []
+    },
+    {
+      "note_id": "ae0a6db3-651b-49f5-8d3b-e18438ffe49a",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:27:55.377Z",
+      "tags": []
+    },
+    {
+      "note_id": "930783af-eb5a-490c-b920-47be24d0f551",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T15:05:16.046Z",
+      "tags": []
+    },
+    {
+      "note_id": "683d217f-f43e-4e3e-9c80-c099a7db905a",
+      "title": "✅ **工作流完成：法華經報告**\n\n---\n\n背景任務的結果我已經讀取過了。等待您選擇方案（1/2/3）後繼續執行。\n…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:25:45.847Z",
+      "tags": []
+    },
+    {
+      "note_id": "a3f74a3b-beb4-47cb-b9c5-2037a64ebd1c",
+      "title": "法華經報告",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T11:42:12.173Z",
+      "tags": []
+    },
+    {
+      "note_id": "4a390b57-5f06-45d1-907e-fd68e0617d7a",
+      "title": "將報告匯出為 PDF（或 DOCX）檔案，檔名為 LingYanJing_Report.pdf，儲存至 knowledg…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T06:20:55.620Z",
+      "tags": []
+    },
+    {
+      "note_id": "c26d7b98-741c-42bb-933c-a0ef31c9fd6d",
+      "title": "[WORKDIR: C:\\\\KnowledgeBase\\\\]\n若目錄不存在先建立 C:\\\\KnowledgeBase\\\\…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T06:13:12.596Z",
+      "tags": []
+    },
+    {
+      "note_id": "bf0db9ee-f0af-46a1-b386-dc53baaa23a6",
+      "title": "根據蒐集的資料，規劃研究報告的大綱與章節結構\n\n[前置步驟 s1 的結果]\n全部完成。以下是結構化摘要：\n\n---\n\n*…",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T06:05:35.685Z",
+      "tags": []
+    },
+    {
+      "note_id": "ee9e5dbc-6078-49dd-93f6-05d7393c722e",
+      "title": "教觀綱宗研究：方等時的彈偏斥小 — 五時判教中第三時期「四教並談」的回小向大教觀智慧",
+      "total": 77,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T09:36:56.540Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "方等時",
+        "五時判教",
+        "彈偏斥小",
+        "歎大褒圓",
+        "四教並談",
+        "維摩詰經",
+        "生酥味",
+        "回小向大"
+      ]
+    },
+    {
+      "note_id": "8bfbe57e-b770-4fcc-ab89-631d03721ebc",
+      "title": "Task 13: 章節統整與導論撰寫",
+      "total": 76,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:55:22.466Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "研究導論",
+        "研究方法"
+      ]
+    },
+    {
+      "note_id": "fd4bc953-3021-4cfc-b2e3-ae9186965f3e",
+      "title": "《法華經》一心三觀研究筆記 — 從龍樹中觀到天台圓教的理論溯源、三觀解析與現代生活實踐",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:56:58.027Z",
+      "tags": [
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "佛學研究",
+        "三諦圓融",
+        "空觀",
+        "假觀",
+        "中觀",
+        "智顗",
+        "龍樹",
+        "知禮",
+        "止觀",
+        "生活實踐",
+        "研究筆記",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "f87d151d-564c-4e30-97b5-d246b2d0431a",
+      "title": "Task 12: 與其他懺法的比較",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:55:20.161Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "懺法比較",
+        "法華懺法",
+        "水懺"
+      ]
+    },
+    {
+      "note_id": "7e4131fc-0aa6-4d73-97ed-3cd496bb3710",
+      "title": "法華經學術文獻補充篇：CiNii/CrossRef 驗證的日文論文12篇與書評10篇（2026）",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:51:10.261Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "學術研究",
+        "CiNii",
+        "CrossRef",
+        "日文論文",
+        "書評",
+        "數位人文",
+        "寫本研究",
+        "過程哲學"
+      ]
+    },
+    {
+      "note_id": "8cacd900-c041-478f-815e-5f7a23ef203d",
+      "title": "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T11:36:49.109Z",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "華嚴宗",
+        "華嚴經",
+        "普賢菩薩",
+        "十大願王",
+        "華嚴念佛三昧",
+        "彭際清",
+        "毗盧遮那",
+        "導歸極樂",
+        "善財五十三參",
+        "信願行"
+      ]
+    },
+    {
+      "note_id": "1b5eb493-3b86-40bd-9c2f-65fb5a12729f",
+      "title": "AI Agent 記憶架構完整指南 — 從 Mem0 到 Letta/MemGPT 的長期記憶系統設計、Graph Memory、LoCoMo 基準評測與上下文工程最佳實踐（2026）",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T06:38:34.765Z",
+      "tags": [
+        "AI",
+        "Agent記憶架構",
+        "Memory Architecture",
+        "Mem0",
+        "Letta",
+        "MemGPT",
+        "Graph Memory",
+        "上下文工程",
+        "Context Engineering",
+        "LoCoMo",
+        "長期記憶",
+        "技術研究",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "27b39fa4-f2ad-4bc1-8c24-869396c8c6cf",
+      "title": "AI 自主編碼 Agent 深度研究 — 從輔助補全到端對端軟體工程的範式轉移：技術架構全景、SWE-bench 演進與 2026 前沿方向",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T23:34:45.679Z",
+      "tags": [
+        "AI深度研究",
+        "自主編碼Agent",
+        "Autonomous Coding Agent",
+        "SWE-bench",
+        "Agent架構",
+        "2026"
+      ]
+    },
+    {
+      "note_id": "4f2e2568-0a35-47ad-90a8-acb3115bc2b5",
+      "title": "法華經普賢菩薩勸發品研究：四法成就與法華圓經的究竟歸依",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T22:37:35.035Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "普賢菩薩勸發品",
+        "四法成就",
+        "普賢行願",
+        "一佛乘",
+        "開權顯實",
+        "華嚴法華會通",
+        "流通分"
+      ]
+    },
+    {
+      "note_id": "0b358c70-f16b-40fa-9b87-d1ec7958b074",
+      "title": "教觀綱宗研究：華嚴時的頓教初示 — 五時判教中初始時期的圓頓教觀、海印三昧與「如聾如啞」的教化因緣",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T21:56:15.381Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "華嚴時",
+        "頓教",
+        "海印三昧",
+        "如聾如啞",
+        "五時判教",
+        "盧舍那佛",
+        "乳味",
+        "華嚴經",
+        "日照高山",
+        "擬宜"
+      ]
+    },
+    {
+      "note_id": "957561b0-2464-460d-b243-c89a657cc2b5",
+      "title": "楞嚴經研究：十番顯見 — 卷二佛陀十次開示見性不生不滅的義理體系與修行啟示",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T21:37:46.685Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "十番顯見",
+        "見性",
+        "如來藏",
+        "破妄顯真",
+        "客塵",
+        "寂常妙明"
+      ]
+    },
+    {
+      "note_id": "5a544fe9-5ed1-413a-a692-deee0623119e",
+      "title": "深度思維洞見報告 — 2026-03-03 知識庫分析：「認知基礎設施」— 從決策框架、安全攻防到知識引擎的三重架構同構性發現",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T18:07:48.615Z",
+      "tags": [
+        "深度思維",
+        "洞見報告",
+        "知識庫分析",
+        "認知基礎設施",
+        "架構同構",
+        "四階段管線",
+        "零誤報原則",
+        "階層式聚合",
+        "OODA",
+        "Shannon",
+        "RAGFlow",
+        "佛學",
+        "2026-03-03"
+      ]
+    },
+    {
+      "note_id": "c160f3d6-3153-4b39-8894-29c8d3f0927e",
+      "title": "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T16:56:27.791Z",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "判教",
+        "難行道",
+        "易行道",
+        "聖道門",
+        "淨土門",
+        "善導大師",
+        "龍樹菩薩",
+        "曇鸞大師",
+        "道綽大師",
+        "要門",
+        "弘願門",
+        "二河白道",
+        "信願行"
+      ]
+    },
+    {
+      "note_id": "c3682546-402f-4a34-8905-9a56ed9f01c2",
+      "title": "截流大師淨土思想研究 — 淨土宗十祖的念佛百日期與起信發願的修行綱領",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T16:54:55.930Z",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "截流大師",
+        "十祖",
+        "念佛七",
+        "真為生死",
+        "淨土警語",
+        "勸發真信文",
+        "禪淨雙修",
+        "信願行"
+      ]
+    },
+    {
+      "note_id": "5c0fbeba-74f9-4664-88f2-f00ac5120db4",
+      "title": "法華經妙音菩薩品研究：現一切色身三昧與他方菩薩的法華弘傳",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T15:55:14.910Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "妙音菩薩品",
+        "現一切色身三昧",
+        "妙音菩薩",
+        "音聲供養",
+        "本門流通",
+        "開近顯遠",
+        "一佛乘"
+      ]
+    },
+    {
+      "note_id": "761901f5-5e02-49f3-b580-9e05b387d745",
+      "title": "教觀綱宗研究：阿含時的析法明義 — 五時判教中鹿苑時期的教觀意涵與聲聞修行次第",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T15:39:26.066Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "阿含時",
+        "五時判教",
+        "藏教",
+        "析空觀",
+        "聲聞",
+        "四諦",
+        "七賢七聖",
+        "鹿苑時",
+        "酪味",
+        "生滅四諦"
+      ]
+    },
+    {
+      "note_id": "e3d87f67-4714-4f93-907b-ad252de364e3",
+      "title": "楞嚴經研究：七處徵心 — 卷一佛陀七破妄心的義理脈絡與修行啟示",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T14:57:15.065Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "七處徵心",
+        "破妄顯真",
+        "妄心",
+        "阿難",
+        "心在何處",
+        "如來藏",
+        "攀緣心",
+        "常住真心",
+        "修行啟示"
+      ]
+    },
+    {
+      "note_id": "ac237f47-fb19-4bea-a423-5831a4a15a99",
+      "title": "楞嚴經與唯識學的義理對話 — 如來藏與阿賴耶識的同異辨析及會通路徑",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T14:55:44.727Z",
+      "tags": [
+        "楞嚴經",
+        "佛學",
+        "唯識學",
+        "如來藏",
+        "阿賴耶識",
+        "跨宗派比較",
+        "義理對話",
+        "三性說",
+        "轉識成智",
+        "陀那微細識",
+        "真妄和合"
+      ]
+    },
+    {
+      "note_id": "7f971400-1ec9-44f4-af02-72bbaccaae31",
+      "title": "Daily-Digest-Prompt 可觀測性成熟度演進路線圖 — 從結構化日誌到預測性 AIOps 的四階段升級策略與 SLO/Error Budget 治理框架（2026-03）",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T12:03:37.473Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "daily-digest-prompt",
+        "可觀測性",
+        "Observability",
+        "AIOps",
+        "SLO",
+        "Error Budget",
+        "分散式追蹤",
+        "指標聚合",
+        "成熟度模型"
+      ]
+    },
+    {
+      "note_id": "a085364f-21ad-4358-a395-4a6d9429fe09",
+      "title": "Daily-Digest-Prompt 可觀測性成熟度演進路線圖 — 從結構化日誌到預測性 AIOps 的四階段升級策略與 SLO/Error Budget 治理框架（2026-03）",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T12:02:32.842Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "daily-digest-prompt",
+        "可觀測性",
+        "Observability",
+        "AIOps",
+        "SLO",
+        "Error Budget",
+        "分散式追蹤",
+        "指標聚合",
+        "成熟度模型"
+      ]
+    },
+    {
+      "note_id": "400e5bfd-e2dd-439b-82e3-a81c523e6a3d",
+      "title": "認知偏誤系統分類與去偏策略（Cognitive Biases Taxonomy & Debiasing）— 從 Kahneman 雙系統理論到 Cognitive Bias Codex 188 項偏誤四大象限分類與 AI 時代去偏實踐",
+      "total": 75,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T10:58:21.872Z",
+      "tags": [
+        "認知偏誤",
+        "Cognitive Bias",
+        "Kahneman",
+        "雙系統理論",
+        "去偏策略",
+        "邏輯思維",
+        "批判性思考",
+        "決策框架",
+        "心智模型",
+        "AI去偏",
+        "Cognitive Bias Codex"
+      ]
+    },
+    {
+      "note_id": "c056e572-2f37-4613-b541-83fa372200b5",
+      "title": "法華經一心三觀精華研究報告 — 四代傳承、六段經證、五大實踐場景的知識轉化",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 15,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T15:29:58.841Z",
+      "tags": [
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "精華報告",
+        "三諦圓融",
+        "知識轉化",
+        "synthesis",
+        "研究報告"
+      ]
+    },
+    {
+      "note_id": "da82feab-056a-468d-935d-2d92ffbb9c54",
+      "title": "整理 markdown 格式指令的用法，深度瞭解後，建立 md 格式編輯及總結 skill",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T11:06:55.685Z",
+      "tags": []
+    },
+    {
+      "note_id": "d002a451-e064-415b-8928-cb44debafd09",
+      "title": "法華經學術文獻完整書目與研究成果報告：42篇論文、28本專書、13篇書評的系統性整理（2026）",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:46:05.085Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "學術研究",
+        "文獻綜述",
+        "Literature Review",
+        "Lotus Sutra",
+        "方便思想",
+        "一乘",
+        "天台宗",
+        "日蓮",
+        "翻譯研究",
+        "敦煌藝術",
+        "辛島靜志",
+        "比較佛學"
+      ]
+    },
+    {
+      "note_id": "a6c5b1d8-4d5a-4bcb-9f4e-93533d86958f",
+      "title": "影片腳本：法華經觀世音菩薩普門品研究：三十三應身與大悲救度的圓教行門",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-05T10:27:04.378Z",
+      "tags": [
+        "影片製作",
+        "逐字稿",
+        "Remotion",
+        "法華經-20260305"
+      ]
+    },
+    {
+      "note_id": "db718a9d-c124-4821-9a74-b68eb8f7f652",
+      "title": "教觀綱宗研究：華嚴時的擬宜說法 — 五時判教中最初三七日的教觀意涵與頓教圓兼別教的判教智慧",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T21:56:33.673Z",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "華嚴時",
+        "五時判教",
+        "擬宜",
+        "頓教",
+        "圓教",
+        "別教一乘",
+        "日出先照",
+        "乳味",
+        "兼但對帶",
+        "華嚴經"
+      ]
+    },
+    {
+      "note_id": "d70271af-3c94-4767-a45f-3660c78c0179",
+      "title": "每日知識庫洞見報告 — 2026-03-02：「不確定性下的決斷力」— 從極簡設計哲學到不完全資訊博弈，跨越 AI 推理、佛學信心與遊戲設計的認知架構統一性發現",
+      "total": 74,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:00:53.101Z",
+      "tags": [
+        "深度思維",
+        "洞見報告",
+        "知識庫分析",
+        "不確定性管理",
+        "極簡設計",
+        "信任跳躍",
+        "跨領域洞見",
+        "CFR",
+        "辯證法",
+        "佛學",
+        "AI Safety",
+        "遊戲設計",
+        "2026-03-02"
+      ]
+    },
+    {
+      "note_id": "9d31158d-4fb7-4bb4-b00c-3d35efb4f6a7",
+      "title": "一心三觀的思想淵源（龍樹中觀→智顗天台）— 三諦偈種子、慧文慧思智顗三代傳承、CBETA 原典 17 處引文與四大學術爭議",
+      "total": 73,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 13,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:39:45.974Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "一心三觀",
+        "龍樹",
+        "中觀",
+        "三諦偈",
+        "慧文",
+        "慧思",
+        "智顗",
+        "思想淵源",
+        "CBETA",
+        "學術研究",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "6307c15f-ce8d-4b55-bb88-fb8abe6933bd",
+      "title": "Task 2: 大悲咒的經典依據與核心義理",
+      "total": 73,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 15,
+        "source_citation": 0,
+        "podcast_suit": 18,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:46.597Z",
+      "tags": [
+        "大悲懺法",
+        "佛學",
+        "天台宗",
+        "懺法",
+        "da-bei-chan-fa",
+        "大悲咒",
+        "大悲心陀羅尼經",
+        "核心義理"
+      ]
+    },
+    {
+      "note_id": "a7ad63d4-b8ed-4271-aef4-c82ea9484c73",
+      "title": "Gun.js 最佳實踐完整指南 -- 去中心化即時圖形資料庫的安裝初始化、資料模型設計、P2P同步、SEA加密授權、RAD持久化、HAM衝突解決與效能優化（v0.2020.1241, 18.9K Stars）",
+      "total": 73,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T04:09:18.081Z",
+      "tags": [
+        "Gun.js",
+        "去中心化資料庫",
+        "P2P",
+        "SEA加密",
+        "HAM衝突解決",
+        "RAD儲存",
+        "最佳實踐",
+        "即時同步",
+        "離線優先",
+        "CRDT"
+      ]
+    },
+    {
+      "note_id": "9f8e4a2a-0637-4979-8d25-ff48c502d2bf",
+      "title": "提出一份優化 gun server 穩定性及安全性的計畫並儲存至知識庫",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:04:55.506Z",
+      "tags": []
+    },
+    {
+      "note_id": "d5a383bd-e7d1-41b1-9f5e-c8897747b879",
+      "title": "法華經一心三觀：十議題系統研究筆記（思想淵源、經證基礎、空假中三觀、止觀關係、祖師詮釋、現代實踐、學術爭議）",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T12:28:04.492Z",
+      "tags": [
+        "佛學研究",
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "智顗",
+        "空觀",
+        "假觀",
+        "中觀",
+        "止觀",
+        "現代生活實踐",
+        "CBETA",
+        "學術研究",
+        "龍樹",
+        "中論",
+        "摩訶止觀",
+        "三諦圓融",
+        "一念三千",
+        "lotus-sutra-series"
+      ]
+    },
+    {
+      "note_id": "a52ef04b-502f-454c-bdde-5e72e358aa47",
+      "title": "法華經學術文獻補充篇二：OpenAlex API 檢索的30篇英日文論文與4本專書（2026）",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:57:42.065Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "學術研究",
+        "OpenAlex",
+        "文獻學",
+        "寫本研究",
+        "敦煌",
+        "鍵陀羅",
+        "數位人文",
+        "跨宗教比較",
+        "法華經藝術"
+      ]
+    },
+    {
+      "note_id": "27c51691-1a6b-4eea-9cfb-ded91dbf86c4",
+      "title": "AIOps — AI 驅動的 DevOps 智能化完整指南：智能日誌分析、自動事件回應、預測性監控與自我修復基礎設施的工業級實踐（2026）",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T15:35:54.402Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "AIOps",
+        "DevOps",
+        "智能監控",
+        "日誌分析",
+        "事件回應",
+        "根因分析",
+        "異常偵測",
+        "自我修復",
+        "MTTR",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "ede57882-2584-4214-bb76-93e81c8ccaed",
+      "title": "法華經勸持品研究：比丘尼授記與末法弘經的二十行誓偈",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 20,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T15:56:57.273Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "勸持品",
+        "比丘尼授記",
+        "二十行偈",
+        "三類強敵",
+        "末法弘經",
+        "一佛乘",
+        "開權顯實"
+      ]
+    },
+    {
+      "note_id": "c3186df3-a031-4c0f-81b8-e2763993a179",
+      "title": "Daily-Digest-Prompt 自動任務產能配比與知識品質回饋閉環優化建議 — 從 731 筆 KB 的量產軌跡反思動態優先級、內容生命週期與品質驅動排程（2026-03）",
+      "total": 72,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:57:03.848Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "知識庫",
+        "產能配比",
+        "品質回饋閉環",
+        "內容生命週期",
+        "動態排程",
+        "daily-digest-prompt",
+        "2026-03"
+      ]
+    },
+    {
+      "note_id": "555ff65e-1e08-4252-bf22-7549b390cb17",
+      "title": "Skill 品質審查報告（2026-03-03）：groq + kb-research-strategist 深度審查",
+      "total": 71,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T12:56:16.999Z",
+      "tags": [
+        "Skill",
+        "審查",
+        "品質優化",
+        "groq",
+        "kb-research-strategist"
+      ]
+    },
+    {
+      "note_id": "35420ab5-a433-43c5-859d-6e2cb44b19ef",
+      "title": "完成法華經研究報告的工作流，包括文獻蒐集、報告大綱設計、草稿撰寫、編輯校對等多步驟，並生成最終 Markdown 報告文…",
+      "total": 70,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T13:34:13.777Z",
+      "tags": []
+    },
+    {
+      "note_id": "0982bf39-0d2e-4089-ac83-7b307be0095f",
+      "title": "Daily-Digest-Prompt 系統成熟度評估與 Phase 3 演進路線圖 — 從 26 Skill 自動化到智慧化自適應 Agent 的架構演進策略（2026-03-06）",
+      "total": 70,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T08:38:33.730Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "知識庫",
+        "系統成熟度",
+        "自適應Agent",
+        "架構演進",
+        "daily-digest-prompt",
+        "2026-03-06"
+      ]
+    },
+    {
+      "note_id": "bf4be731-a27a-46ab-8145-372f6b2843d9",
+      "title": "整理markdown 格式指令的用法，深度瞭解後，建立md格式編輯及總結 skill",
+      "total": 69,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 19,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T10:55:20.159Z",
+      "tags": []
+    },
+    {
+      "note_id": "cf1e2830-450a-4ccd-8201-1286ad53f3d9",
+      "title": "法華經一心三觀研究的資料蒐集、上傳至本地知識庫、生成報告與 Podcast 已完成。",
+      "total": 68,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.055087+00:00",
+      "created_at": "2026-03-08T15:35:35.123Z",
+      "tags": []
+    },
+    {
+      "note_id": "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "title": "完成法華經一心三觀研究的知識庫上傳、ntfy 通知、暫存檔清理、研究報告撰寫與 Podcast 生成",
+      "total": 68,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:44:56.261Z",
+      "tags": []
+    },
+    {
+      "note_id": "39b3bce7-8533-4663-b2a5-1be30ac80008",
+      "title": "法華經深度研究計畫 — 28品系統覆蓋、譯本比較、跨宗派詮釋與哲學對話的完整研究提綱",
+      "total": 68,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:41:32.953Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "研究計畫",
+        "天台宗",
+        "一佛乘",
+        "開權顯實",
+        "跨宗派",
+        "譯本比較",
+        "KB研究策略"
+      ]
+    },
+    {
+      "note_id": "d2e58804-181b-48b0-b398-42571f52edd7",
+      "title": "Daily-Digest-Prompt Hooks 子系統優化（2026-03-07）",
+      "total": 68,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T20:47:53.879Z",
+      "tags": [
+        "專案優化",
+        "Hooks",
+        "安全修復",
+        "TDD",
+        "測試覆蓋",
+        "daily-digest-prompt"
+      ]
+    },
+    {
+      "note_id": "2a2f2404-cf3e-4c58-95a8-5a9185f1e33c",
+      "title": "影片腳本：教觀綱宗研究：華嚴時的頓教初示",
+      "total": 68,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-05T07:24:10.103Z",
+      "tags": [
+        "影片製作",
+        "逐字稿",
+        "Remotion",
+        "note-0b358c70-20260305"
+      ]
+    },
+    {
+      "note_id": "ecaed8f0-a9d1-492c-ba96-24dff2dbc2a4",
+      "title": "Hook 安全加固：MD5→SHA-256 遷移 + 日誌摘要消毒（2026-03-04）",
+      "total": 68,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T21:01:07.098Z",
+      "tags": [
+        "資訊安全",
+        "Hook加固",
+        "SHA-256",
+        "憑證防護",
+        "日誌消毒",
+        "系統優化"
+      ]
+    },
+    {
+      "note_id": "5bfa370e-9cfe-4a1f-ad03-89cd7551fe9f",
+      "title": "Podcast 腳本：法華經一心三觀 — 四代傳承、經文解讀與三分鐘三觀練習",
+      "total": 67,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T15:29:58.841Z",
+      "tags": [
+        "Podcast",
+        "法華經",
+        "一心三觀",
+        "天台宗",
+        "知識電台",
+        "腳本",
+        "synthesis"
+      ]
+    },
+    {
+      "note_id": "9935705d-d01c-4f14-b9ef-275d09f1e075",
+      "title": "根據收集的資料撰寫深度研究報告，包含摘要、章節安排、分析與結論，並列出參考文獻\n\n[前置步驟 s1 的結果]\n文本版本研…",
+      "total": 67,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:53:27.416Z",
+      "tags": []
+    },
+    {
+      "note_id": "d3b9de45-6af5-48f2-a806-909ccafeb029",
+      "title": "進行教觀綱宗的文獻蒐集與分析，形成深度研究報告的框架與要點",
+      "total": 67,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:39:51.884Z",
+      "tags": []
+    },
+    {
+      "note_id": "9b456253-88e0-4f0b-903d-2c8d9e295f4a",
+      "title": "系統審查報告 - 2026-03-07",
+      "total": 67,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T16:52:05.462Z",
+      "tags": [
+        "系統審查",
+        "自動化",
+        "品質評估"
+      ]
+    },
+    {
+      "note_id": "73340069-a992-4043-b6a1-7c12929ddbc7",
+      "title": "AI 程式碼審查的內部機制 — LLM 差異感知審查架構、多 Agent 並行審查模式、SAST-LLM 融合分析與大規模 Code Review 系統設計模式（2026）",
+      "total": 67,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T18:55:11.666Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "Code Review",
+        "程式碼審查",
+        "LLM機制",
+        "多Agent架構",
+        "SAST融合",
+        "差異感知",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "793d1c02-bd27-4d55-8d75-fc98ebd1ffaf",
+      "title": "系統 Log 審查報告 - 2026-03-03",
+      "total": 67,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T13:04:16.290Z",
+      "tags": [
+        "系統審查",
+        "log分析",
+        "daily-digest-prompt",
+        "2026-03-03",
+        "自動任務"
+      ]
+    },
+    {
+      "note_id": "f42001d0-8a31-40a1-bffd-5ac9758ab551",
+      "title": "Skill 品質審查報告（2026-03-03）：hackernews-ai-digest + groq 深度審查",
+      "total": 67,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T12:55:38.923Z",
+      "tags": [
+        "Skill",
+        "審查",
+        "品質優化",
+        "hackernews-ai-digest",
+        "groq"
+      ]
+    },
+    {
+      "note_id": "f7dd17ae-8e10-4067-9ac3-3cc3bf003338",
+      "title": "AI-Driven Requirements Engineering — LLM 輔助需求分析、使用者故事自動生成、驗收條件形式化與需求追溯性矩陣的工業級實踐（2026）",
+      "total": 67,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T12:35:40.767Z",
+      "tags": [
+        "AI",
+        "系統開發",
+        "需求工程",
+        "Requirements Engineering",
+        "使用者故事",
+        "User Story",
+        "驗收條件",
+        "追溯性矩陣",
+        "Prompt Engineering",
+        "software-engineering"
+      ]
+    },
+    {
+      "note_id": "56ef83d6-5a01-4997-ad8a-4eabda0e06e0",
+      "title": "✅ **工作流完成：法華經報告**",
+      "total": 66,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T13:11:39.269Z",
+      "tags": []
+    },
+    {
+      "note_id": "b9763424-7602-411c-a90b-76411f159521",
+      "title": "Skill 品質審查報告（2026-03-04）：chatroom-query + arch-evolution 深度審查",
+      "total": 66,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:09:48.898Z",
+      "tags": [
+        "Skill",
+        "審查",
+        "品質優化",
+        "chatroom-query",
+        "arch-evolution"
+      ]
+    },
+    {
+      "note_id": "87853f05-8b84-48c8-a004-4e9d913da0f1",
+      "title": "Daily-Digest-Prompt 執行管線效率與容錯架構優化建議 — 狀態機衛生、並行競爭消除與資源生命週期治理（2026-03）",
+      "total": 66,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:40:27.410Z",
+      "tags": [
+        "專案優化",
+        "深度思維",
+        "執行管線",
+        "容錯架構",
+        "FSM",
+        "並行安全",
+        "資源治理",
+        "daily-digest-prompt",
+        "2026-03"
+      ]
+    },
+    {
+      "note_id": "bba64440-d023-4de0-8537-ddac26f8a004",
+      "title": "運用skill瞭解知識庫現有架構，研究如何運用知識庫中的資訊，讓未來的研究型任務可以提出更有深度的研究報告",
+      "total": 65,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:20:27.567Z",
+      "tags": []
+    },
+    {
+      "note_id": "2a57d3d9-ad15-406b-a539-e2c98e344fe9",
+      "title": "Podcast 腳本：法華經一心三觀解析",
+      "total": 65,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 8,
+        "source_citation": 0,
+        "podcast_suit": 17,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T07:23:30.844Z",
+      "tags": [
+        "Podcast製作",
+        "對話腳本",
+        "雙主持人",
+        "note-35420ab5-20260308"
+      ]
+    },
+    {
+      "note_id": "6f553e97-b923-4347-aa90-489a7b8dee39",
+      "title": "於今天 16：20 提出一份優化gun server 穩定性及安全性的計畫並儲存至知識庫",
+      "total": 65,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.100097+00:00",
+      "created_at": "2026-03-07T09:20:53.424Z",
+      "tags": []
+    },
+    {
+      "note_id": "8f5a0dbb-27b8-4d68-8b42-e17f0a501db8",
+      "title": "蒐集法華經相關的學術文獻、注釋與歷史背景資料",
+      "total": 65,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:22:46.533Z",
+      "tags": []
+    },
+    {
+      "note_id": "519d9a54-1aa3-4f43-ae26-925aaa5817a2",
+      "title": "系統 Log 審查報告 - 2026-03-07",
+      "total": 65,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T22:35:47.877Z",
+      "tags": [
+        "系統審查",
+        "log分析",
+        "優化",
+        "快取清理"
+      ]
+    },
+    {
+      "note_id": "041c5d71-dcc7-4f68-af9f-3846f7dfe76b",
+      "title": "Skill 品質審查報告（2026-03-07）：system-insight + skill-scanner 深度審查",
+      "total": 65,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 0,
+        "podcast_suit": 9,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T21:37:06.606Z",
+      "tags": [
+        "Skill",
+        "審查",
+        "品質優化",
+        "system-insight",
+        "skill-scanner"
+      ]
+    },
+    {
+      "note_id": "9004ac42-4ef5-425a-af29-c63ac421c70c",
+      "title": "專案優化：Hook 工具模組品質提升（2026-03-04）",
+      "total": 65,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 13,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T21:04:55.670Z",
+      "tags": [
+        "專案優化",
+        "Hook系統",
+        "程式碼品質",
+        "測試覆蓋",
+        "資訊安全",
+        "safe_load_json",
+        "behavior_tracker"
+      ]
+    },
+    {
+      "note_id": "6ca005ee-a1ca-42a8-84cf-177bbbf93ed1",
+      "title": "YAML 配置驅動架構完整指南 — 從 Configuration as Code 到聲明式系統設計的最佳實踐與反模式（2026）",
+      "total": 65,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 10,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T17:52:56.065Z",
+      "tags": [
+        "技術研究",
+        "YAML",
+        "配置驅動架構",
+        "Configuration as Code",
+        "Schema驗證",
+        "聲明式設計",
+        "軟體工程",
+        "daily-digest"
+      ]
+    },
+    {
+      "note_id": "e4400419-19bf-412d-9365-28c31b1c10cc",
+      "title": "Skill 品質審查報告（2026-03-08）：system-insight + web-research 深度審查",
+      "total": 64,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 16,
+        "source_citation": 0,
+        "podcast_suit": 8,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T19:40:28.380Z",
+      "tags": [
+        "Skill",
+        "審查",
+        "品質優化",
+        "system-insight",
+        "web-research"
+      ]
+    },
+    {
+      "note_id": "4e11c05c-03cf-4018-acb3-f6a0af20ea1b",
+      "title": "✅ 工作流完成：法華經報告",
+      "total": 64,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:49:16.289Z",
+      "tags": []
+    },
+    {
+      "note_id": "4c194470-c6f5-4d8f-83e4-295709cf3ac6",
+      "title": "法華經學術文獻完整資料庫：162筆跨語言文獻索引（學術文獻72＋注釋45＋歷史背景45）",
+      "total": 64,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T03:45:27.281Z",
+      "tags": [
+        "法華經",
+        "佛學",
+        "學術文獻",
+        "文獻資料庫",
+        "注釋傳統",
+        "歷史背景",
+        "梵文原典",
+        "天台宗",
+        "CBETA",
+        "跨語言研究",
+        "bibliography"
+      ]
+    },
+    {
+      "note_id": "1bca335b-599f-4fdd-9665-b45926bffa5c",
+      "title": "工作流完成：法華經報告，已完成文獻蒐集、報告大綱、撰寫草稿、編輯校對等步驟。",
+      "total": 63,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 15,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:59:27.926Z",
+      "tags": []
+    },
+    {
+      "note_id": "20be3c0e-e408-4de1-9a5b-5962ab40c35d",
+      "title": "專案優化報告 2026-03-04：並行安全與文件一致性",
+      "total": 63,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T20:41:13.561Z",
+      "tags": [
+        "專案優化",
+        "並行安全",
+        "atomic_write",
+        "file_lock",
+        "文件一致性",
+        "daily-digest-prompt"
+      ]
+    },
+    {
+      "note_id": "505c57c8-dc55-4d16-b027-e81cf0721126",
+      "title": "系統 Log 審查報告 - 2026-03-08",
+      "total": 62,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T21:37:14.353Z",
+      "tags": [
+        "系統審查",
+        "log分析",
+        "優化",
+        "健康度"
+      ]
+    },
+    {
+      "note_id": "462e2a8a-76d5-4d5c-ace1-4115e4e7a825",
+      "title": "以下列報告為基礎，提出一份優化系統的細部方案規劃，方案需以穩定與效率為目標，反覆審查與優化方案，直至方案最佳化為止 ht…",
+      "total": 61,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 13,
+        "source_citation": 7,
+        "podcast_suit": 8,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.058087+00:00",
+      "created_at": "2026-03-08T12:32:35.994Z",
+      "tags": []
+    },
+    {
+      "note_id": "88bbd9f3-13a8-4488-a2a9-e9065da9063d",
+      "title": "專案優化報告：Hooks 代碼品質與配置一致性修正（2026-03-03）",
+      "total": 61,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:45:27.933Z",
+      "tags": [
+        "專案優化",
+        "代碼品質",
+        "配置一致性",
+        "資訊安全",
+        "Hooks系統",
+        "Schema驗證"
+      ]
+    },
+    {
+      "note_id": "4d2126ab-1abf-42be-ae17-f1629d5b7462",
+      "title": "✅ 工作流完成：法華經報告",
+      "total": 59,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 12,
+        "source_citation": 0,
+        "podcast_suit": 14,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:43:02.452Z",
+      "tags": []
+    },
+    {
+      "note_id": "5f312467-14ea-4df5-9865-fc00ab7cceb9",
+      "title": "QA System 優化報告 #24 - list_questions 過濾策略重構 + zeep 升級 (2026-03-04)",
+      "total": 59,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:37:46.591Z",
+      "tags": [
+        "QA System",
+        "安全優化",
+        "過濾重構",
+        "品質改善",
+        "zeep升級"
+      ]
+    },
+    {
+      "note_id": "82368164-7786-4537-bccf-864773eed1e5",
+      "title": "將《法華經》一心三觀研究內容上傳至本地知識庫，產生筆記並透過 ntfy 發送完成通知，最後清理暫存檔案。",
+      "total": 58,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.056086+00:00",
+      "created_at": "2026-03-08T14:57:32.026Z",
+      "tags": []
+    },
+    {
+      "note_id": "8bf46309-005b-49b0-b176-1ef046804655",
+      "title": "Daily-Digest-Prompt 專案資安優化報告（2026-03-08）",
+      "total": 58,
+      "dims": {
+        "content_length": 25,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 5,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T22:44:03.060Z",
+      "tags": [
+        "資安優化",
+        "系統設計",
+        "架構決策",
+        "hooks",
+        "路徑遍歷",
+        "競態條件",
+        "敏感資訊防護"
+      ]
+    },
+    {
+      "note_id": "4b48f080-c313-42c7-ac4d-6da3b475de03",
+      "title": "系統審查報告 - 2026-03-08 (A 等級 85.45/100)",
+      "total": 58,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 20,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.098097+00:00",
+      "created_at": "2026-03-07T16:49:56.307Z",
+      "tags": [
+        "系統審查",
+        "自動化",
+        "品質評估"
+      ]
+    },
+    {
+      "note_id": "9bb6f018-cb5e-4c11-9602-4ed4d593ea5e",
+      "title": "工作流完成：法華經報告",
+      "total": 54,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 12,
+        "source_citation": 0,
+        "podcast_suit": 16,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:20:22.392Z",
+      "tags": []
+    },
+    {
+      "note_id": "ad76bb85-126e-4492-8f0b-30ddc8e4c20a",
+      "title": "法華經一心三觀的理論與生活實踐 — 研究報告",
+      "total": 53,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 12,
+        "source_citation": 0,
+        "podcast_suit": 15,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T13:33:24.454Z",
+      "tags": [
+        "天台宗",
+        "一心三觀",
+        "法華經",
+        "佛學研究",
+        "三諦圓融",
+        "止觀",
+        "生活實踐",
+        "研究報告"
+      ]
+    },
+    {
+      "note_id": "f67a893b-2e82-4b8c-93f0-ce83bea8372e",
+      "title": "Space Invaders v2.4 成就解鎖系統實作心得 — HTML5 遊戲中的成就架構設計模式",
+      "total": 52,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 16,
+        "source_citation": 0,
+        "podcast_suit": 8,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:38:12.539Z",
+      "tags": [
+        "遊戲設計",
+        "HTML5",
+        "Canvas",
+        "成就系統",
+        "JavaScript",
+        "Space Invaders",
+        "設計模式",
+        "localStorage"
+      ]
+    },
+    {
+      "note_id": "d38f11d9-fe7f-4f1a-b200-8a91b44a6713",
+      "title": "系統 Log 審查報告 - 2026-03-04",
+      "total": 51,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 10,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.105098+00:00",
+      "created_at": "2026-03-03T19:37:45.915Z",
+      "tags": [
+        "系統審查",
+        "log分析",
+        "優化",
+        "Instance Lock"
+      ]
+    },
+    {
+      "note_id": "2c326b54-8565-406c-9910-4701da4e9878",
+      "title": "系統審查報告 - 2026-03-04",
+      "total": 50,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 12,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T16:48:30.022Z",
+      "tags": [
+        "系統審查",
+        "自動化",
+        "品質評估"
+      ]
+    },
+    {
+      "note_id": "7223ac43-eaf6-4dfa-a449-e229af73d14d",
+      "title": "Hook 跨平台檔案鎖重構：抽取 file_lock context manager 至 hook_utils.py",
+      "total": 49,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 8,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.107098+00:00",
+      "created_at": "2026-03-03T11:59:06.765Z",
+      "tags": [
+        "專案優化",
+        "daily-digest-prompt",
+        "程式碼品質",
+        "DRY原則",
+        "重構",
+        "hooks"
+      ]
+    },
+    {
+      "note_id": "db32a204-41ce-4d6b-83f8-85b5ea41d7ce",
+      "title": "等待您選擇方案（1/2/3）後繼續執行。",
+      "total": 48,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 9,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T13:17:28.926Z",
+      "tags": []
+    },
+    {
+      "note_id": "baca233c-28d5-4626-88e6-d78f7751aa4e",
+      "title": "收集並分析楞嚴經相關經文、注釋與學術研究資料",
+      "total": 48,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 16,
+        "source_citation": 0,
+        "podcast_suit": 6,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T04:50:56.322Z",
+      "tags": []
+    },
+    {
+      "note_id": "e7c7abef-e45b-47c3-a2e1-61bcaf50d1a3",
+      "title": "Daily-Digest-Prompt 安全合規優化：DRY消毒、CWD修復、斷路器簡化",
+      "total": 48,
+      "dims": {
+        "content_length": 18,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 4,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.103097+00:00",
+      "created_at": "2026-03-06T08:43:56.287Z",
+      "tags": [
+        "安全合規",
+        "Hooks",
+        "DRY",
+        "程式碼品質",
+        "daily-digest-prompt",
+        "重構"
+      ]
+    },
+    {
+      "note_id": "03808c1d-1852-4a4a-9cec-a8d2f70e45da",
+      "title": "等待使用者選擇方案（1/2/3）後繼續執行。",
+      "total": 47,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 17,
+        "source_citation": 0,
+        "podcast_suit": 10,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:31:16.500Z",
+      "tags": []
+    },
+    {
+      "note_id": "1ec02b89-7926-4a97-979b-82d10ba6d84b",
+      "title": "Claude's Cycles — Knuth 對 Claude 循環結構的學術分析（HN 369 分, 2026-03-03）",
+      "total": 46,
+      "dims": {
+        "content_length": 11,
+        "structure_quality": 13,
+        "source_citation": 7,
+        "podcast_suit": 5,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-03T22:20:59.388Z",
+      "tags": [
+        "AI動態",
+        "HN",
+        "Claude",
+        "Knuth",
+        "演算法",
+        "學術論文"
+      ]
+    },
+    {
+      "note_id": "60d68135-00f5-4a56-85e8-5ae3d1cd009e",
+      "title": "完成《妙法蓮華經》學術研究報告的編輯、校對與格式化",
+      "total": 45,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 12,
+        "source_citation": 0,
+        "podcast_suit": 13,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T13:43:32.216Z",
+      "tags": []
+    },
+    {
+      "note_id": "d5e44cf8-6d8b-4949-93b8-a6bdc6dec494",
+      "title": "✅ **工作流完成：法華經報告**\n已完成文獻蒐集、報告大綱規劃、草稿撰寫、編輯校對等多步驟的法華經學術研究報告，產出最…",
+      "total": 44,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 11,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.099098+00:00",
+      "created_at": "2026-03-07T14:36:49.087Z",
+      "tags": []
+    },
+    {
+      "note_id": "05fa968c-4982-489d-baae-a8e96f481f3b",
+      "title": "GPT-5.3 Instant — OpenAI 新一代即時推理模型（HN 341 分, 2026-03-04）",
+      "total": 40,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 13,
+        "source_citation": 7,
+        "podcast_suit": 5,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-04T08:51:39.962Z",
+      "tags": [
+        "AI動態",
+        "HN",
+        "OpenAI",
+        "GPT-5",
+        "LLM",
+        "即時推理"
+      ]
+    },
+    {
+      "note_id": "f8093bbb-e3db-4573-937f-afc13c312859",
+      "title": "屏東市崇陽里崇武里社區照顧關懷據點揭牌 全縣423處布建率95.4%（2026-03-06）",
+      "total": 39,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 8,
+        "recency": 13
+      },
+      "scored_at": "2026-03-08T15:32:18.102097+00:00",
+      "created_at": "2026-03-06T13:20:46.834Z",
+      "tags": [
+        "屏東新聞",
+        "政策",
+        "長照",
+        "社區照顧",
+        "全齡照顧"
+      ]
+    },
+    {
+      "note_id": "2cd215c2-b869-402c-a9a1-cccbd1d7a823",
+      "title": "屏東縣第15座玉山圖書館啟用 — 地磨兒國小閱讀之光（2026-03-03）",
+      "total": 37,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 9,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.106098+00:00",
+      "created_at": "2026-03-03T13:21:25.655Z",
+      "tags": [
+        "屏東新聞",
+        "教育",
+        "閱讀",
+        "玉山圖書館",
+        "偏鄉教育"
+      ]
+    },
+    {
+      "note_id": "eebc1eff-b75d-4dca-b57f-d900e0917434",
+      "title": "屏東縣全齡長照通識國小扎根 涵蓋率114.8%大幅超越全國（2026-03-04）",
+      "total": 36,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 13,
+        "source_citation": 0,
+        "podcast_suit": 8,
+        "recency": 10
+      },
+      "scored_at": "2026-03-08T15:32:18.104097+00:00",
+      "created_at": "2026-03-04T08:51:40.828Z",
+      "tags": [
+        "屏東新聞",
+        "政策",
+        "長照",
+        "教育",
+        "全齡照顧"
+      ]
+    },
+    {
+      "note_id": "e0138e1f-8d41-4ca1-b4bb-63f381f54aae",
+      "title": "研究 Gun.js 去中心化資料庫的最佳實踐",
+      "total": 34,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 8,
+        "source_citation": 0,
+        "podcast_suit": 6,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:32:18.101098+00:00",
+      "created_at": "2026-03-07T05:08:40.391Z",
+      "tags": []
+    },
+    {
+      "note_id": "24dc09dc-c4cc-43b6-8bd0-7587ac21b117",
+      "title": "提供一篇關於心經深意的研究",
+      "total": 33,
+      "dims": {
+        "content_length": 5,
+        "structure_quality": 8,
+        "source_citation": 0,
+        "podcast_suit": 5,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:43:10.178Z",
+      "tags": []
+    },
+    {
+      "note_id": "030890fc-6598-4e05-9b56-0fffc8202099",
+      "title": "提供一篇關於心經深意的研究",
+      "total": 28,
+      "dims": {
+        "content_length": 0,
+        "structure_quality": 8,
+        "source_citation": 0,
+        "podcast_suit": 5,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:50:51.516Z",
+      "tags": []
+    },
+    {
+      "note_id": "a7f1853c-4c48-4410-b66e-f22ff74a592c",
+      "title": "test",
+      "total": 15,
+      "dims": {
+        "content_length": 0,
+        "structure_quality": 0,
+        "source_citation": 0,
+        "podcast_suit": 0,
+        "recency": 15
+      },
+      "scored_at": "2026-03-08T15:39:46.057086+00:00",
+      "created_at": "2026-03-08T12:49:38.341Z",
+      "tags": []
+    }
+  ]
+}

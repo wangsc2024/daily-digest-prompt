@@ -52,6 +52,13 @@ schedules:
     retry: 1
     description: "每日黃昏佛偈推播（17:05，回歸本性・借假修真）"
 
+  model-report:
+    cron: "0 19 * * *"
+    script: report-model-status.ps1
+    timeout: 60
+    retry: 0
+    description: "每日 19:00 模型執行狀態報告（ntfy 推送各後端任務結果、品質評分、Token 用量）"
+
   bot-server-restart:
     cron: "15 0 * * *"
     script: bot/restart-bot.ps1

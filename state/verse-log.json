@@ -31,6 +31,28 @@
       "verse_text": "不應住色生心，不應住聲香味觸法生心，應無所住而生其心。",
       "verse_id": 3,
       "time": "2026-03-08 06:30:02"
+    },
+    {
+      "session": "evening",
+      "date": "2026-03-08",
+      "source": "《金剛般若波羅蜜經》",
+      "verse_text": "一切有為法，如夢幻泡影，如露亦如電，應作如是觀。",
+      "time": "2026-03-08 17:05:01",
+      "channel": "ntfy/wangsc2025",
+      "author": "釋迦牟尼佛",
+      "verse_id": 4,
+      "status": "success"
+    },
+    {
+      "date": "2026-03-09",
+      "time": "2026-03-09 06:30:01",
+      "status": "success",
+      "channel": "ntfy/wangsc2025",
+      "verse_text": "菩提本無樹，明鏡亦非臺，本來無一物，何處惹塵埃。",
+      "author": "六祖惠能大師",
+      "session": "morning",
+      "verse_id": 5,
+      "source": "《六祖大師法寶壇經》"
     }
   ]
 }

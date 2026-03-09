@@ -1,8 +1,7 @@
 {
-  "current_step": "decide",
-  "run_id": "9ab22b9610a5",
   "status": "skipped",
-  "updated_at": "2026-03-08T00:51:23+08:00",
+  "current_step": "decide",
+  "updated_at": "2026-03-09T00:55:39+08:00",
   "history": [
     {
       "step": "idle",
@@ -73,6 +72,22 @@
       "ts": "2026-03-08T00:51:23+08:00",
       "step": "orient",
       "status": "completed"
+    },
+    {
+      "ts": "2026-03-08T00:51:23+08:00",
+      "status": "skipped",
+      "step": "decide"
+    },
+    {
+      "ts": "2026-03-09T00:40:02+08:00",
+      "status": "running",
+      "step": "orient"
+    },
+    {
+      "ts": "2026-03-09T00:55:39+08:00",
+      "status": "completed",
+      "step": "orient"
     }
-  ]
+  ],
+  "run_id": "108f1508ebdd"
 }
