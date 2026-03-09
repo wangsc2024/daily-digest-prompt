@@ -309,7 +309,7 @@ tasks:
     execution_order: 13
     skills: [knowledge-query, git-smart-commit]
     model: "claude-haiku-4-5"
-    description: "同步知識庫至網站，用 Smart Commit 分群提交後推送 daily-digest-prompt + shurangama-web 至 GitHub"
+    description: "同步知識庫 Vite 網站（wangsc2024/knowledge），用 Smart Commit 分群提交後推送 daily-digest-prompt + knowledge 至 GitHub"
 
   # --- 遊戲創意群組（共 0 次/日，暫停）---
   creative_game_optimize:

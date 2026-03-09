@@ -295,14 +295,6 @@ $r | ConvertTo-Json -Depth 10'
 - 未匹配標籤：[列表]
 ```
 
-### 隱私警告（附加於通知末尾，僅 plan_type=auto 且 git-push 結果存在時）
-讀取 `results/todoist-auto-git_push.json` 的 `knowledge_sync.privacy_warnings`（若檔案不存在則跳過）：
-- 若 `privacy_warnings > 0`，在通知末尾加入：
-```
-⚠️ 隱私審查：{N} 筆內容已標記警告
-🔍 建議手動確認：cd D:/Source/knowledge/shurangama-web && git diff HEAD~1 -- data/articles.json | head -50
-```
-
 ### 發送步驟
 1. 用 Write 建立 `ntfy_temp.json`（UTF-8）
 2. `curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh`

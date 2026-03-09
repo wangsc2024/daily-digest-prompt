@@ -20,33 +20,35 @@ pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1"
 > 注意：若腳本提示「gameMetadata.js 尚無記錄」，用 Edit 工具將新遊戲加入
 > `D:\Source\game_web\js\gameMetadata.js` 後，重新執行一次（不帶 -Full）。
 
-### 1. 同步知識庫網站
+### 1. 同步知識庫 Vite 網站（wangsc2024/knowledge）
+
 ```bash
-python D:/Source/knowledge/shurangama-web/scripts/sync_knowledge.py
+cd D:/Source/knowledge && python sync_knowledge.py
 ```
-- 腳本自動查詢 KB API → 篩選 → 增量合併至 `data/articles.json`
+- 腳本查詢 KB API → 篩選 → 增量更新 `public/data/`
 - KB API 不可用 → 跳過同步，繼續後續步驟
 
 ```bash
-cd D:/Source/knowledge/shurangama-web && npm run generate
+cd D:/Source/knowledge && npm run build
 ```
-- 重新生成網站 HTML
+- 建置 Vite 網站到 `dist/`
+- 建置失敗 → 記錄錯誤，跳到步驟 2
 
 ```bash
-python D:/Source/knowledge/shurangama-web/scripts/privacy_check.py
+cd D:/Source/knowledge && python scripts/privacy_check.py
 ```
 - exit 0（通過）→ 繼續推送
-- exit 1（BLOCK）→ **禁止推送**，記錄錯誤，跳到步驟 1
+- exit 1（BLOCK）→ 禁止推送，記錄錯誤，跳到步驟 2
 - exit 2（WARN）→ 允許推送，記錄警告
 
 ```bash
-cd D:/Source/knowledge/shurangama-web && git status --porcelain
+cd D:/Source/knowledge && git status --porcelain
 ```
 - 有變更且審查通過 → commit 並 push：
 ```bash
-cd D:/Source/knowledge/shurangama-web && git add -A && git commit -m "sync: KB 同步 $(date +%Y-%m-%d_%H%M)" && git push origin master
+cd D:/Source/knowledge && git add -A && git commit -m "sync: KB 同步 $(date +%Y-%m-%d_%H%M)" && git push origin main
 ```
-- 無變更或審查攔截 → 跳過
+- 無變更 → 跳過
 
 ### 2. 檢查 daily-digest-prompt 是否有變更
 ```bash
