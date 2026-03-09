@@ -296,7 +296,7 @@ $r | ConvertTo-Json -Depth 10'
 ```
 
 ### 隱私警告（附加於通知末尾，僅 plan_type=auto 且 git-push 結果存在時）
-讀取 `results/todoist-auto-gitpush.json` 的 `knowledge_sync.privacy_warnings`（若檔案不存在則跳過）：
+讀取 `results/todoist-auto-git_push.json` 的 `knowledge_sync.privacy_warnings`（若檔案不存在則跳過）：
 - 若 `privacy_warnings > 0`，在通知末尾加入：
 ```
 ⚠️ 隱私審查：{N} 筆內容已標記警告
@@ -352,7 +352,7 @@ curl -s --max-time 5 http://localhost:3001/api/health 2>/dev/null
 
 ### 5.5.3 發送廣播
 
-用 Write 建立 `/tmp/broadcast_payload.json`（UTF-8）：
+用 Write 建立 `results/broadcast_payload.json`（UTF-8）：
 ```json
 {"message": "上面組裝的摘要文字"}
 ```
@@ -363,9 +363,9 @@ curl -s --max-time 10 \
   -X POST http://localhost:3001/api/broadcast \
   -H "Content-Type: application/json; charset=utf-8" \
   -H "Authorization: Bearer $BOT_API_SECRET" \
-  -d @/tmp/broadcast_payload.json \
+  -d @results/broadcast_payload.json \
   2>/dev/null
-rm -f /tmp/broadcast_payload.json
+rm -f results/broadcast_payload.json
 ```
 
 若 curl 失敗（非零退出碼）或回應含 `"error"` 欄位，記錄警告但繼續執行。

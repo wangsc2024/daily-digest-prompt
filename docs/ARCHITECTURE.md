@@ -134,7 +134,7 @@ daily-digest-prompt/
     todoist-auto-ai-sysdev.md     # Phase 2: 自動 AI 系統開發研究
     todoist-auto-skill-audit.md   # Phase 2: 自動 Skill 審查
     todoist-auto-logaudit.md      # Phase 2: 自動 Log 審查
-    todoist-auto-gitpush.md       # Phase 2: 自動 Git 推送
+    todoist-auto-git_push.md      # Phase 2: 自動 Git 推送
     todoist-auto-creative-game.md # Phase 2: 自動創意遊戲優化
     todoist-auto-qa-optimize.md   # Phase 2: 自動 QA 優化
     todoist-auto-system-insight.md # Phase 2: 自動系統洞察

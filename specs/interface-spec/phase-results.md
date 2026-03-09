@@ -313,7 +313,7 @@ Phase 2 各自動任務 Agent 的輸出。檔名中的 `{key}` 必須與 `config
 
 ### Git 推送類範例（git_push）
 
-檔案名稱：`results/todoist-auto-gitpush.json`（注意：key 為 `gitpush`，非 `git_push`）
+檔案名稱：`results/todoist-auto-git_push.json`（key 為 `git_push`，與 frequency-limits.yaml 一致）
 
 ```json
 {
