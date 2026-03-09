@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-03-08T08:35:00+08:00",
+  "generated_at": "2026-03-09T00:00:00+08:00",
   "period_days": 7,
   "total_skills": 26,
   "data_files_analyzed": [
@@ -10,140 +10,156 @@
     "logs/structured/2026-03-06.jsonl",
     "logs/structured/2026-03-07.jsonl",
     "logs/structured/2026-03-08.jsonl",
+    "logs/structured/2026-03-09.jsonl",
     "state/scheduler-state.json",
     "context/auto-tasks-today.json",
-    "context/research-registry.json",
-    "context/behavior-patterns.json"
+    "context/research-registry.json"
   ],
   "metrics": {
-    "daily_success_rate": 0.9936,
-    "skill_usage_coverage": 1.0,
-    "cache_hit_ratio": 0.1248,
+    "daily_success_rate": 0.9816,
+    "skill_usage_coverage": 1.1923,
+    "cache_hit_ratio": 0.1294,
     "error_rate": 0.0,
-    "block_rate": 0.0006,
+    "block_rate": 0.0016,
     "topic_diversity": 1.0,
-    "auto_task_fairness": 2.442,
-    "avg_io_per_call": 27046,
-    "behavior_pattern_count": 500,
-    "high_confidence_patterns": 109
+    "auto_task_fairness": 3.0822,
+    "avg_io_per_call": 26060,
+    "behavior_pattern_count": null,
+    "high_confidence_patterns": null
   },
   "alerts": [
     {
-      "level": "warning",
+      "level": "critical",
       "metric": "cache_hit_ratio",
-      "value": 0.1248,
-      "threshold": 0.40,
-      "detail": "247 cache-read vs 1732 api-call；快取命中率遠低於 40% 門檻，建議檢查 cache-policy.yaml TTL 設定及快取 key 匹配邏輯"
+      "value": 0.1294,
+      "threshold": 0.4,
+      "detail": "309 cache-read vs 2080 api-call；快取命中率僅 12.94%，遠低於 40% 門檻，快取機制幾乎失效，建議檢查 cache-policy.yaml TTL 設定與 Phase 0 預計算邏輯"
+    },
+    {
+      "level": "critical",
+      "metric": "avg_io_per_call",
+      "value": 26060,
+      "threshold": 5000,
+      "detail": "平均每次工具呼叫輸出 26KB，超過 5KB 門檻 5.2 倍，I/O 經濟性嚴重不佳，主因為頻繁讀取大型 SKILL.md、JSONL 日誌；建議實施 Progressive Disclosure 或分頁機制"
+    },
+    {
+      "level": "critical",
+      "metric": "auto_task_fairness",
+      "value": 3.0822,
+      "threshold": 0.5,
+      "detail": "自動任務公平性指標 3.08（stddev/mean），遠超 0.5 門檻，部分任務執行頻率失衡，round-robin 輪轉機制可能未生效，需審查 frequency-limits.yaml 與輪轉邏輯"
     },
     {
       "level": "warning",
-      "metric": "avg_io_per_call",
-      "value": 27046,
-      "threshold": 5000,
-      "detail": "平均每次工具呼叫輸出 27K 字元，主因為頻繁讀取大型檔案（SKILL.md、JSONL 日誌）；建議評估是否可減少不必要的全檔讀取"
-    },
-    {
-      "level": "info",
-      "metric": "auto_task_fairness",
-      "value": 2.442,
-      "threshold": 0.5,
-      "detail": "今日僅部分自動任務已執行（skill_audit=1, log_audit=1, git_push=1），CV 偏高為正常現象（日間尚早），非系統性公平問題"
-    },
-    {
-      "level": "info",
       "metric": "skill_index_drift",
-      "value": 29,
+      "value": 31,
       "threshold": 26,
-      "detail": "JSONL 日誌中偵測到 29 個 Skill 被使用，超出 SKILL_INDEX.md 登記的 26 個。新增 Skill：todoist-task-creator、knowledge-domain-builder、chatroom-query"
+      "detail": "實際使用 31 個 Skill 超過 SKILL_INDEX.md 登記的 26 個，需同步更新速查表與 benchmark.yaml 的 total_skills 欄位"
     }
   ],
   "recommendations": [
-    "快取命中率 12.5% 遠低於 40% 門檻，建議檢查 config/cache-policy.yaml 的 TTL 設定是否合理，以及 Phase 0 預計算是否正常運作",
-    "avg_io_per_call 27K 偏高，建議評估 SKILL.md 讀取是否可改為摘要式快取，減少重複全檔讀取",
-    "SKILL_INDEX.md 需更新，新增 todoist-task-creator、knowledge-domain-builder、chatroom-query 共 3 個 Skill 登記",
-    "研究主題多樣性 100%（61 主題全部唯一），佛學系列研究進度優秀（法華 7 + 教觀綱宗 6 + 楞嚴 5 + 淨土 4 = 22 筆）"
+    {
+      "priority": "P0",
+      "area": "快取效率",
+      "action": "快取命中率僅 12.94%，需緊急修復 — 檢查 cache-policy.yaml TTL 設定、Phase 0 預計算 cache/status.json 寫入邏輯、快取 key 匹配規則"
+    },
+    {
+      "priority": "P0",
+      "area": "Token 經濟學",
+      "action": "平均輸出 26KB 超過門檻 5 倍 — 實施 Progressive Disclosure（按需載入）、SKILL.md 摘要式快取、JSONL 分頁查詢，參考 everything-claude-code Token Economy 最佳實踐"
+    },
+    {
+      "priority": "P1",
+      "area": "任務公平性",
+      "action": "自動任務分佈失衡（CV=3.08）— 審查 frequency-limits.yaml 與 run-todoist-agent-team.ps1 的 round-robin 輪轉邏輯，確保各任務公平輪轉"
+    },
+    {
+      "priority": "P1",
+      "area": "配置同步",
+      "action": "更新 SKILL_INDEX.md 速查表 total_skills 為 31（含新增的 todoist-task-creator、knowledge-domain-builder、chatroom-query 等 Skill），同步更新 benchmark.yaml"
+    },
+    {
+      "priority": "P2",
+      "area": "主題多樣性",
+      "action": "主題多樣性 100% 表現優異（76 個研究全部獨特），研究去重三層防護運作良好，持續維持"
+    }
   ],
   "scheduler_stats": {
-    "total_runs_7d": 157,
-    "success_count": 156,
-    "failure_count": 1,
-    "agent_breakdown": {
-      "todoist-team": 97,
-      "todoist": 52,
-      "daily-digest-team": 8
-    },
-    "only_failure": {
-      "timestamp": "2026-03-03T09:55:03",
-      "agent": "daily-digest-team",
-      "error": "assembly failed after 2 attempts"
-    }
+    "total_runs_7d": 163,
+    "success_count": 160,
+    "failure_count": 3,
+    "success_rate_pct": "98.16%",
+    "high_failure_hours": [17, 12, 13],
+    "agent_breakdown_note": "scheduler-state.json 已改為 runs 陣列格式，無分類統計"
   },
   "skill_heatmap": {
-    "ntfy-notify": 135,
-    "knowledge-query": 129,
-    "todoist": 128,
-    "kb-research-strategist": 66,
-    "web-research": 28,
-    "api-cache": 24,
-    "groq": 22,
-    "system-insight": 16,
-    "hackernews-ai-digest": 15,
-    "chatroom-query": 13,
-    "digest-memory": 11,
-    "skill-scanner": 11,
-    "atomic-habits": 10,
-    "gmail": 10,
-    "kb-curator": 10,
-    "learning-mastery": 10,
-    "pingtung-news": 10,
-    "pingtung-policy-expert": 10,
-    "git-smart-commit": 9,
-    "scheduler-state": 9,
-    "system-audit": 8,
-    "arch-evolution": 6,
-    "game-design": 6,
-    "github-scout": 6,
-    "task-manager": 5,
-    "todoist-task-creator": 5,
-    "writing-plans": 5,
-    "writing-masters": 3,
-    "knowledge-domain-builder": 3
+    "ntfy-notify": 163,
+    "knowledge-query": 155,
+    "todoist": 151,
+    "kb-research-strategist": 87,
+    "web-research": 38,
+    "api-cache": 30,
+    "groq": 24,
+    "system-insight": 18,
+    "hackernews-ai-digest": 17,
+    "chatroom-query": 16
   },
-  "high_failure_hours": [9],
   "research_stats": {
-    "total_entries": 61,
-    "unique_topics": 61,
+    "total_entries": 76,
+    "unique_topics": 76,
+    "topic_diversity_pct": "100%",
     "by_type": {
-      "todoist_research": 22,
-      "fahua": 7,
-      "jiaoguangzong": 6,
-      "shurangama": 5,
-      "jingtu": 4,
+      "todoist_research": 29,
+      "fahua": 10,
+      "jiaoguangzong": 7,
+      "shurangama": 6,
+      "ai_sysdev": 5,
       "tech_research": 4,
-      "ai_sysdev": 4,
-      "ai_github_research": 3,
-      "ai_workflow_github": 2,
+      "ai_github_research": 4,
+      "jingtu": 4,
+      "ai_workflow_github": 3,
       "ai_deep_research": 1,
       "creative_game": 1,
       "logic_research": 1,
       "ai_research": 1
     },
-    "saturated_types_count": 8
+    "saturated_types": [
+      "fahua",
+      "jiaoguangzong",
+      "shurangama",
+      "jingtu",
+      "tech_research",
+      "todoist_research",
+      "ai_github_research",
+      "ai_sysdev",
+      "ai_workflow_github"
+    ]
   },
   "jsonl_stats": {
-    "total_tool_calls": 13896,
-    "files_analyzed": 6,
-    "tag_highlights": {
-      "team-mode": 6005,
-      "api-call": 1732,
-      "todowrite": 1254,
-      "skill-read": 723,
-      "api-read": 1077,
-      "api-write": 655,
-      "loop-suspected": 652,
-      "cache-read": 247,
-      "blocked": 8,
-      "error": 0
-    }
-  }
+    "total_tool_calls": 17423,
+    "files_analyzed": 7,
+    "cache_reads": 309,
+    "api_calls": 2080,
+    "errors": 0,
+    "blocked": 28,
+    "unique_skills_detected": 31
+  },
+  "auto_tasks_stats": {
+    "task_count": 21,
+    "mean_count": 0.1,
+    "stddev": 0.29,
+    "fairness_index": 3.0822,
+    "note": "今日尚早，僅 skill_audit=1 與 log_audit=1 已執行，CV 偏高為正常現象"
+  },
+  "data_source": "partial",
+  "missing_sources": [
+    "context/behavior-patterns.json（尚無自動產出程式，3 個指標設為 null）"
+  ],
+  "notes": [
+    "近 7 天執行 163 次，成功率 98.16%，遠超 95% 門檻",
+    "研究主題多樣性 100%，去重機制運作良好",
+    "快取命中率 12.94% 為嚴重問題，需 P0 修復",
+    "平均輸出 26KB 超過門檻 5 倍，需實施 Token 經濟學優化",
+    "自動任務公平性失衡（CV=3.08），輪轉機制需檢修"
+  ]
 }
