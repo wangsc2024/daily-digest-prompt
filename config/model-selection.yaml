@@ -1,0 +1,180 @@
+# config/model-selection.yaml
+# Todoist 多後端模型分派規則
+# 版本：1.1（2026-03-08）
+#
+# 此檔案控制 run-todoist-agent-team.ps1 的 Get-TaskBackend 函式
+# 決定每個 Phase 2 自動任務使用哪個後端（Claude / Codex / OpenRouter）
+#
+# fallback 鏈：codex_exec -> openrouter_research -> claude_sonnet45 -> claude_sonnet
+# 所有後端失效時，回退至預設 claude_code（空 cli_flag）
+
+version: "1.1"
+
+# ============================================================
+# Token 用量閾值（對應 state/token-usage.json 的 estimated_tokens）
+# ============================================================
+token_thresholds:
+  warn: 1500000      # 1.5M：正常警告線
+  critical: 8000000  # 8M：觸發 phase_overrides 的 critical 邏輯
+  emergency: 12000000 # 12M：觸發 phase_overrides 的 emergency 邏輯
+
+# ============================================================
+# 後端定義
+# ============================================================
+backends:
+  claude_sonnet:
+    type: claude_code
+    cli_flag: ""             # 空字串 = 使用 Claude Code 預設模型
+    description: "Claude Sonnet（預設，Phase 1/3 主力）"
+
+  claude_haiku:
+    type: claude_code
+    cli_flag: "--model claude-haiku-4-5"
+    fallback: claude_sonnet
+    description: "Claude Haiku（低成本，緊急降級用）"
+
+  claude_sonnet45:
+    type: claude_code
+    cli_flag: "--model claude-sonnet-4-5"
+    fallback: claude_sonnet
+    description: "Claude Sonnet 4.5（系統任務：self_heal/log_audit/system_insight/chatroom_optimize/skill_audit）"
+
+  codex_exec:
+    type: codex
+    cmd: "codex exec --full-auto"
+    model_flag: "-m gpt-5.4"  # 研究任務使用最強推理模型
+    websearch: "cached"       # 預設 cached；live_websearch_tasks 會加 --search 改即時
+    fallback: openrouter_research
+    description: "Codex gpt-5.4（研究任務：11 個佛學/AI/技術研究，內建 WebSearch）"
+
+  codex_standard:
+    type: codex
+    cmd: "codex exec --full-auto"
+    model_flag: ""            # 使用 Codex 預設模型（gpt-5.3-codex）
+    websearch: "cached"
+    fallback: claude_sonnet45
+    description: "Codex gpt-5.3-codex（創意/QA/GitHub 偵察任務）"
+
+  openrouter_research:
+    type: openrouter_runner
+    model: "openrouter/free"
+    tools: [Read, Write, Bash, Grep, WebFetch]
+    fallback: claude_sonnet45
+    description: "OpenRouter 研究後端（Codex fallback，free tier 自動路由）"
+
+  openrouter_standard:
+    type: openrouter_runner
+    model: "openrouter/free"
+    tools: [Read, Write, Bash, Grep]
+    fallback: claude_sonnet45
+    description: "OpenRouter 標準後端（git_push 維護任務，free tier 自動路由）"
+
+# ============================================================
+# 任務 -> 後端對應規則
+# ============================================================
+# 注意：未列入任何規則的任務，預設使用 claude_sonnet
+task_rules:
+  claude_sonnet45:
+    - self_heal        # 系統自愈：需完整 Claude 工具鏈存取本地狀態
+    - system_insight   # 系統洞察：需分析 logs/state，claude-sonnet-4-5 推理更強
+    - log_audit        # Log 審查：需讀大量結構化日誌
+    - chatroom_optimize  # Chatroom 優化：需評估 bot.js 品質指標
+    - skill_audit      # Skill 審查：需讀取並分析所有 SKILL.md
+    - podcast_create   # Podcast：需創意對話撰寫 + Bash TTS/concat + R2 上傳
+
+  codex_exec:           # gpt-5.4，內建 WebSearch
+    - shurangama
+    - jingtu
+    - jiaoguangzong
+    - fahua
+    - ai_sysdev
+    - ai_workflow_github
+    - ai_github_research
+    - ai_deep_research
+    - tech_research
+    - unsloth_research
+    - ai_smart_city
+
+  codex_standard:       # gpt-5.3-codex 預設，適合創意/分析型任務
+    - creative_game_optimize  # 遊戲創意優化：程式碼生成能力強
+    - qa_optimize             # QA 品質優化：程式碼審查推理
+    - github_scout            # GitHub 靈感偵察：程式碼理解
+
+  openrouter_standard:
+    - git_push         # 固定 Bash 序列，LLaMA 3.3-70b 足夠
+
+# ============================================================
+# Codex 特殊設定
+# ============================================================
+codex:
+  require_installed: true
+  fallback_if_missing: openrouter_research   # codex 未安裝時自動降級
+
+  # 以下任務加 --search 啟用即時 WebSearch（官方 CLI：--search = web_search "live"，預設為 cached）
+  live_websearch_tasks:
+    - ai_deep_research       # 4 階段深度研究，需最新論文/資料
+    - tech_research          # 技術研究，需即時技術資訊
+    - ai_github_research     # GitHub 熱門專案，需即時 star/fork 數
+    - ai_workflow_github     # AI 工作流研究，需最新 n8n/Dify/AutoGen
+    - unsloth_research       # Unsloth 快速迭代，需最新版本資訊
+    - shurangama             # 楞嚴經現代詮釋研究
+    - jingtu                 # 淨土宗現代弘法動態
+    - ai_sysdev              # AI 系統開發最新工具/框架
+
+  # Codex prompt 前綴（確保正體中文輸出 + 說明可用工具）
+  prompt_prefix: "請以正體中文輸出。使用內建 WebSearch 搜尋多個來源（至少 3 個不同網域）。\n\n"
+
+# ============================================================
+# 各後端 Skill 應用指引（供 prompt 前綴參考）
+# ============================================================
+skill_guidance:
+  codex_exec:   # gpt-5.4：研究任務
+    strengths:
+      - "內建 WebSearch（cached + live），搜尋多個不同來源"
+      - "強推理能力適合跨來源交叉比對與深度分析"
+      - "支援 Read/Write/Bash/Grep 工具存取本地知識庫"
+    optimization:
+      - "每次研究至少搜尋 3 個不同網域的來源"
+      - "用 Bash 呼叫 PowerShell 查詢本地知識庫（KB API localhost:3000）"
+      - "研究結果寫入 results/todoist-auto-{task_key}.json"
+  codex_standard:   # gpt-5.3-codex：創意/QA/GitHub 任務
+    strengths:
+      - "強程式碼生成與理解能力"
+      - "適合遊戲開發（HTML5/Canvas/JavaScript）"
+      - "GitHub 程式碼分析與架構理解"
+    optimization:
+      - "遊戲任務：產出完整可玩的單一 HTML 檔案"
+      - "QA 任務：分析現有程式碼，提出具體改善 diff"
+      - "GitHub 偵察：分析 README + 核心程式碼結構"
+  claude_sonnet45:   # claude-sonnet-4-5：系統 + Podcast 任務
+    strengths:
+      - "完整 Claude 工具鏈（knowledge-query/system-insight/scheduler-state）"
+      - "本地狀態檔案讀寫（state/*.json, context/*.json）"
+      - "ntfy 通知整合（skills/ntfy-notify）"
+      - "Bash 執行 Python 工具鏈（TTS/FFmpeg/R2 上傳）"
+      - "創意對話撰寫（Podcast 雙主持人腳本）"
+    optimization:
+      - "先讀 skills/SKILL_INDEX.md 確認可用 Skill"
+      - "system-insight 任務必讀 context/system-insight.json"
+      - "self-heal 任務需同時讀 state/run-fsm.json + context/research-registry.json"
+      - "podcast_create：先執行 score-kb-notes.py 選材，再用 Write 工具寫 JSONL 腳本"
+      - "podcast_create：TTS 後需等待 concat_audio.py 完成才能上傳 R2"
+
+# ============================================================
+# Phase 1/3 Token Budget 控制（critical/emergency 時降級）
+# ============================================================
+phase_overrides:
+  normal:
+    phase1_cli_flag: ""
+    phase1_max_tokens: 80000   # 防止單次超限
+    phase3_cli_flag: ""
+
+  critical:
+    phase1_cli_flag: "--model claude-haiku-4-5"
+    phase1_max_tokens: 30000
+    phase3_cli_flag: "--model claude-haiku-4-5"
+
+  emergency:
+    phase1_cli_flag: "--model claude-haiku-4-5"
+    phase1_max_tokens: 20000
+    phase3_cli_flag: "--model claude-haiku-4-5"

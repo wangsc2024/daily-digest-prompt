@@ -352,155 +352,6 @@ function Write-Span {
 }
 
 # ============================================
-# Multi-Backend Model Selection Functions
-# ============================================
-
-function ConvertFrom-YamlViapy {
-    param([string]$YamlPath)
-    try {
-        $json = uv run --project $AgentDir python -c @"
-import json, sys
-try:
-    import yaml
-    with open(r'$YamlPath', encoding='utf-8') as f:
-        data = yaml.safe_load(f)
-    print(json.dumps(data, ensure_ascii=False))
-except Exception as e:
-    sys.exit(1)
-"@
-        return $json | ConvertFrom-Json
-    } catch {
-        return $null
-    }
-}
-
-function Get-TaskBackend {
-    param([string]$TaskKey)
-    $default = @{ type = "claude_code"; cli_flag = ""; model = ""; reason = "default" }
-    try {
-        # 讀 model-selection.yaml
-        $selPath = "$AgentDir\config\model-selection.yaml"
-        if (-not (Test-Path $selPath)) { return $default }
-        $sel = ConvertFrom-YamlViapy -YamlPath $selPath
-        if (-not $sel) { return $default }
-
-        # 決定後端名稱
-        $backendName = "claude_sonnet"
-        foreach ($bName in @("claude_sonnet45","claude_haiku","codex_exec","codex_standard","openrouter_standard","openrouter_research")) {
-            $rules = $sel.task_rules.$bName
-            if ($rules -and ($rules -contains $TaskKey)) {
-                $backendName = $bName
-                break
-            }
-        }
-
-        $bCfg = $sel.backends.$backendName
-
-        # codex_exec / codex_standard：偵測安裝（訂閱制不需 API Key）
-        if ($backendName -in @("codex_exec","codex_standard")) {
-            if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
-                Write-Log "[ModelSelect] WARN: codex not installed, fallback -> openrouter_research ($TaskKey)"
-                $backendName = "openrouter_research"
-                $bCfg = $sel.backends.openrouter_research
-            }
-        }
-
-        # openrouter_*：偵測 API Key
-        if ($backendName -like "openrouter*" -and -not $env:OPENROUTER_API_KEY) {
-            Write-Log "[ModelSelect] WARN: OPENROUTER_API_KEY not set, fallback -> claude_haiku ($TaskKey)"
-            $backendName = "claude_haiku"
-            $bCfg = $sel.backends.claude_haiku
-        }
-
-        # 讀 token_level（供呼叫方查詢）
-        $tokenLevel = "normal"
-        $tokenPath = "$AgentDir\state\token-usage.json"
-        if (Test-Path $tokenPath) {
-            try {
-                $tu = Get-Content $tokenPath -Raw | ConvertFrom-Json
-                $_tdKey = (Get-Date).ToString("yyyy-MM-dd")
-                $est = [long]($tu.daily.$_tdKey.estimated_tokens ?? $tu.estimated_tokens ?? 0)
-                $thresholds = $sel.token_thresholds
-                if ($est -ge [long]$thresholds.emergency) { $tokenLevel = "emergency" }
-                elseif ($est -ge [long]$thresholds.critical) { $tokenLevel = "critical" }
-                elseif ($est -ge [long]$thresholds.warn) { $tokenLevel = "warn" }
-            } catch {}
-        }
-
-        $liveWs = $false
-        if ($backendName -in @("codex_exec","codex_standard")) {
-            $lwTasks = $sel.codex.live_websearch_tasks
-            $liveWs = ($lwTasks -and ($lwTasks -contains $TaskKey))
-        }
-
-        Write-Log "[ModelSelect] $TaskKey -> $backendName (token_level=$tokenLevel)"
-        return @{
-            type         = $bCfg.type ?? "claude_code"
-            backend      = $backendName
-            cli_flag     = $bCfg.cli_flag ?? ""
-            model        = $bCfg.model ?? ""
-            model_flag   = $bCfg.model_flag ?? ""   # Codex -m <model> 旗標
-            live_ws      = $liveWs
-            token_level  = $tokenLevel
-            sel_config   = $sel
-            reason       = "model-selection.yaml rule"
-        }
-    } catch {
-        Write-Log "[ModelSelect] ERROR in Get-TaskBackend: $_ -> fallback default"
-        return $default
-    }
-}
-
-function Start-CodexJob {
-    param(
-        [string]$TaskKey,
-        [string]$PromptContent,
-        [bool]$LiveWebSearch = $false,
-        [string]$TraceId = "",
-        [string]$AgentName = "",
-        [string]$ModelFlag = ""   # 例如 "-m gpt-5.4" 或 "" (使用 Codex 預設)
-    )
-    $codexCmd = "codex exec --full-auto"
-    if ($ModelFlag) { $codexCmd += " $ModelFlag" }
-    # codex exec 在 pipe prompt 時會把 --search 當成 [PROMPT] 導致參數錯誤；即時 WebSearch 改由 ~/.codex/config.toml 的 features.web_search_request 或執行時 --enable web_search_request 啟用
-    # if ($LiveWebSearch) { $codexCmd += " --search" }
-    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($prompt, $cmd, $traceId, $agentName, $dir)
-        $env:CLAUDE_TEAM_MODE   = "1"
-        $env:DIGEST_TRACE_ID    = $traceId
-        $env:AGENT_PHASE        = "2"
-        $env:AGENT_NAME         = $agentName
-        Set-Location $dir
-        $fullPrompt = "請以正體中文輸出。`n`n$prompt"
-        $result = $fullPrompt | & cmd /c "$cmd" 2>&1
-        $result
-    } -ArgumentList $PromptContent, $codexCmd, $TraceId, $AgentName, $AgentDir
-    return $job
-}
-
-function Start-OpenRouterJob {
-    param(
-        [string]$TaskKey,
-        [string]$PromptContent,
-        [string]$TraceId = "",
-        [string]$AgentName = ""
-    )
-    $runnerPath = "$AgentDir\tools\agentic-openrouter-runner.js"
-    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($prompt, $runner, $traceId, $agentName, $orKey, $dir)
-        $env:OPENROUTER_API_KEY = $orKey
-        $env:CLAUDE_TEAM_MODE   = "1"
-        $env:DIGEST_TRACE_ID    = $traceId
-        $env:AGENT_PHASE        = "2"
-        $env:AGENT_NAME         = $agentName
-        Set-Location $dir
-        $result = $prompt | node $runner 2>&1
-        $result
-    } -ArgumentList $PromptContent, $runnerPath, $TraceId, $AgentName, $env:OPENROUTER_API_KEY, $AgentDir
-    return $job
-}
-
-# ============================================
 # Start execution
 # ============================================
 $startTime = Get-Date
@@ -542,23 +393,6 @@ if (-not $env:BOT_API_SECRET) {
             Write-Host "[Token] BOT_API_SECRET loaded from .env"
         }
         # 無 BOT_API_SECRET 時靜默略過（chatroom 為可選整合）
-    }
-}
-
-# Codex CLI 訂閱制：不需要 API Key，由使用者帳號授權
-# （已移除 CODEX_API_KEY 檢查）
-
-# OPENROUTER_API_KEY（OpenRouter 維護/研究任務後端）
-if (-not $env:OPENROUTER_API_KEY) {
-    if (Test-Path $envFile) {
-        $orLine = Get-Content $envFile | Where-Object { $_ -match '^OPENROUTER_API_KEY=' }
-        if ($orLine) {
-            $orKey = ($orLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
-            [System.Environment]::SetEnvironmentVariable("OPENROUTER_API_KEY", $orKey, "Process")
-            Write-Host "[Token] OPENROUTER_API_KEY loaded from .env"
-        } else {
-            Write-Host "[WARN] OPENROUTER_API_KEY not set -> openrouter tasks will fallback to claude_haiku"
-        }
     }
 }
 
@@ -636,38 +470,6 @@ $queryContent = Get-Content -Path $queryPrompt -Raw -Encoding UTF8
 $phase1Success = $false
 $phase1Attempt = 0
 
-# ── Step 6: Phase 1 Token Budget 控制 ──
-# 讀取今日 token 用量，決定 Phase 1 模型旗標與 max-tokens
-$phase1ModelFlag = ""
-$phase1MaxTokens = 80000   # 預設：防止單次超限
-$_tokenPath = "$AgentDir\state\token-usage.json"
-$_selPath   = "$AgentDir\config\model-selection.yaml"
-if ((Test-Path $_tokenPath) -and (Test-Path $_selPath)) {
-    try {
-        $tu  = Get-Content $_tokenPath -Raw | ConvertFrom-Json
-        $sel = ConvertFrom-YamlViapy -YamlPath $_selPath
-        $_tdKey = (Get-Date).ToString("yyyy-MM-dd")
-        $est = [long]($tu.daily.$_tdKey.estimated_tokens ?? $tu.estimated_tokens ?? 0)
-        if ($sel -and $sel.token_thresholds) {
-            if ($est -ge [long]$sel.token_thresholds.emergency) {
-                $phase1ModelFlag  = "--model claude-haiku-4-5"
-                $phase1MaxTokens  = [int]$sel.phase_overrides.emergency.phase1_max_tokens
-                Write-Log "[Phase1] token_level=emergency -> haiku + max-tokens=$phase1MaxTokens"
-            } elseif ($est -ge [long]$sel.token_thresholds.critical) {
-                $phase1ModelFlag  = "--model claude-haiku-4-5"
-                $phase1MaxTokens  = [int]$sel.phase_overrides.critical.phase1_max_tokens
-                Write-Log "[Phase1] token_level=critical -> haiku + max-tokens=$phase1MaxTokens"
-            } elseif ($est -ge [long]$sel.token_thresholds.warn) {
-                Write-Log "[Phase1] token_level=warn -> default model + max-tokens=$phase1MaxTokens"
-            } else {
-                Write-Log "[Phase1] token_level=normal -> default model + max-tokens=$phase1MaxTokens"
-            }
-        }
-    } catch {
-        Write-Log "[Phase1] WARN: token budget check failed: $_"
-    }
-}
-
 while ($phase1Attempt -le $MaxPhase1Retries) {
     if ($phase1Attempt -gt 0) {
         $p1Backoff = 30 + (Get-Random -Minimum 0 -Maximum 10)
@@ -679,7 +481,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
 
     try {
         $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-            param($prompt, $logDir, $timestamp, $traceId, $apiToken, $modelFlag)
+            param($prompt, $logDir, $timestamp, $traceId, $apiToken)
 
             # 明確設定 Process 級別環境變數（會傳遞到子 process）
             [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
@@ -694,9 +496,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             $OutputEncoding = [System.Text.Encoding]::UTF8
 
             $stderrFile = "$logDir\query-stderr-$timestamp.log"
-            $claudeArgs = @("-p", "--allowedTools", "Read,Bash,Write")
-            if ($modelFlag) { $claudeArgs += ($modelFlag -split '\s+') }
-            $output = $prompt | claude @claudeArgs 2>$stderrFile
+            $output = $prompt | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
 
             # 執行成功且 stderr 為空 → 刪除
             if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
@@ -707,7 +507,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             }
 
             return $output
-        } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId, $todoistToken, $phase1ModelFlag
+        } -ArgumentList $queryContent, $LogDir, $Timestamp, $traceId, $todoistToken
 
         # G28: chatroom-query Phase 1 並行 Job（軟依賴，失敗不影響主流程）
         $chatroomQueryPrompt = "$AgentDir\prompts\team\chatroom-query.md"
@@ -1006,8 +806,6 @@ elseif ($plan.plan_type -eq "auto") {
                 "ai_deep"            = "ai_deep_research"
                 "ai_smart"           = "ai_smart_city"
                 "creative_game"      = "creative_game_optimize"
-                "podcastcreate"      = "podcast_create"
-                "podcast"            = "podcast_create"
             }
             if ($keyAliases.ContainsKey($normalizedKey)) {
                 $normalizedKey = $keyAliases[$normalizedKey]
@@ -1041,52 +839,38 @@ elseif ($plan.plan_type -eq "auto") {
 
             $agentName = "auto-$taskKey"
 
-            # ── Multi-backend routing (Step 5) ──
-            $backend = Get-TaskBackend -TaskKey $taskKey
-            Write-Log "[ModelSelect] $taskKey -> backend=$($backend.backend) type=$($backend.type) token_level=$($backend.token_level)"
+            $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
-            if ($backend.type -eq "codex") {
-                $job = Start-CodexJob -TaskKey $taskKey -PromptContent $promptContent `
-                    -LiveWebSearch $backend.live_ws -TraceId $traceId -AgentName $agentName `
-                    -ModelFlag $backend.model_flag
-            } elseif ($backend.type -eq "openrouter_runner") {
-                $job = Start-OpenRouterJob -TaskKey $taskKey -PromptContent $promptContent `
-                    -TraceId $traceId -AgentName $agentName
-            } else {
-                # claude_code: 原有 Start-Job，注入可選的 cli_flag（如 --model claude-haiku-4-5）
-                $cliFlag = $backend.cli_flag
-                $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                    param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken, $cliFlag)
+                # 明確設定 Process 級別環境變數（會傳遞到子 process）
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
+                if ($apiToken) {
+                    [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+                }
 
-                    [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
-                    [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
-                    [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
-                    [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
-                    if ($apiToken) {
-                        [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process")
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+
+                $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
+                $output = $prompt | claude -p --allowedTools "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch" 2>$stderrFile
+
+                # 執行成功且 stderr 為空 → 刪除
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
+                    $stderrSize = (Get-Item $stderrFile).Length
+                    if ($stderrSize -eq 0) {
+                        Remove-Item $stderrFile -Force
                     }
+                }
 
-                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                    $OutputEncoding = [System.Text.Encoding]::UTF8
+                return $output
+            } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken
 
-                    $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
-                    # 動態組合 claude 參數（支援 --model 旗標注入）
-                    $claudeArgs = @("-p", "--allowedTools", "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch")
-                    if ($cliFlag) { $claudeArgs += ($cliFlag -split '\s+') }
-                    $output = $prompt | claude @claudeArgs 2>$stderrFile
-
-                    if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) {
-                        $stderrSize = (Get-Item $stderrFile).Length
-                        if ($stderrSize -eq 0) { Remove-Item $stderrFile -Force }
-                    }
-                    return $output
-                } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken, $cliFlag
-            }
-
-            $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName -Force
-            $job | Add-Member -NotePropertyName "BackendName" -NotePropertyValue $backend.backend -Force
+            $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName
             $phase2Jobs += $job
-            Write-Log "[Phase2] Started: $agentName ($taskName) backend=$($backend.backend) (Job $($job.Id))"
+            Write-Log "[Phase2] Started: $agentName ($taskName) (Job $($job.Id))"
         }
     }
 }
@@ -1116,19 +900,6 @@ foreach ($job in $phase2Jobs) {
         }
         $sections[$agentName] = "success"
         Write-Log "[Phase2] $agentName completed"
-
-        # Codex 後端：完整 stdout 補存到 result 檔，供品質評分讀取 URL/深度
-        if ($job.BackendName -eq "codex_exec" -and $output) {
-            $tkKey = $agentName -replace '^auto-', ''
-            $rFile = "$AgentDir\results\todoist-auto-$tkKey.json"
-            $fullOutput = ($output -join "`n")
-            if (-not (Test-Path $rFile) -or (Get-Item $rFile).Length -lt 500) {
-                @{ output = $fullOutput; task_key = $tkKey; backend = "codex_exec" } |
-                    ConvertTo-Json -Depth 2 |
-                    Set-Content -Path $rFile -Encoding UTF8 -Force
-                Write-Log "[Phase2] ${agentName} result file補寫 ($($fullOutput.Length) chars)"
-            }
-        }
     }
     elseif ($job.State -eq "Running") {
         Write-Log "[Phase2] $agentName TIMEOUT - stopping"
@@ -1170,40 +941,6 @@ foreach ($agentKey in $sections.Keys) {
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
     -StartTime $phase2Start -EndTime (Get-Date) `
     -Status (if ($phase2FailCount -eq 0) { "ok" } else { "failed" })
-
-# ── Step 9A: Backend 分布日誌 + 研究品質評分 ──
-$backendDist = @{}
-foreach ($j in $phase2Jobs) {
-    $bn = $j.BackendName ?? "claude_code"
-    $backendDist[$bn] = ($backendDist[$bn] ?? 0) + 1
-}
-$distStr = ($backendDist.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ", "
-Write-Log "[ModelSelect] backend 分布: $distStr"
-
-# 研究品質評分（針對研究類任務）
-$researchTasks = @("shurangama","jingtu","jiaoguangzong","fahua","ai_sysdev","ai_workflow_github","ai_github_research","ai_deep_research","tech_research")
-$qualityScores = @()
-$scoreScript = "$AgentDir\tools\score-research-quality.py"
-if (Test-Path $scoreScript) {
-    foreach ($rTask in $researchTasks) {
-        $rFile = "$AgentDir\results\todoist-auto-$rTask.json"
-        if (Test-Path $rFile) {
-            try {
-                $scoreOut = uv run --project $AgentDir python $scoreScript $rFile 2>$null
-                $scoreJson = $scoreOut | Where-Object { $_.TrimStart().StartsWith('{') } | Select-Object -Last 1
-                if ($scoreJson) {
-                    $scoreData = $scoreJson | ConvertFrom-Json
-                    $qualityScores += @{ task = $rTask; score = $scoreData.score }
-                }
-            } catch { Write-Log "[QualityScore] WARN: scoring failed for $rTask : $_" }
-        }
-    }
-    if ($qualityScores.Count -gt 0) {
-        $avgScore = [int](($qualityScores | ForEach-Object { $_.score } | Measure-Object -Average).Average)
-        $scoreStr = ($qualityScores | ForEach-Object { "$($_.task)=$($_.score)" }) -join ", "
-        Write-Log "[QualityScore] $scoreStr avg=$avgScore"
-    }
-}
 
 # ============================================
 # Phase 3: Assembly (close + update + notify)
@@ -1248,10 +985,7 @@ while ($attempt -le $MaxPhase3Retries) {
         $env:AGENT_NAME = "todoist-assemble"
 
         $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
-        # Step 6: Phase 3 token budget（使用與 Phase 1 相同的 token_level）
-        $phase3Args = @("-p", "--allowedTools", "Read,Bash,Write")
-        if ($phase1ModelFlag) { $phase3Args += ($phase1ModelFlag -split '\s+') }
-        $output = $assembleContent | claude @phase3Args 2>$stderrFile
+        $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
 
         # 清理 stderr（空檔或僅含已知無害警告）
         Remove-StderrIfBenign $stderrFile
@@ -1331,27 +1065,3 @@ Get-ChildItem -Path $LogDir -Filter "todoist-team_*.log" |
 Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
     Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
     Remove-Item -Force
-
-# Clean up stale loop-state files older than 48 hours
-$loopStateFiles = Get-ChildItem "$AgentDir\state\loop-state-*.json" -ErrorAction SilentlyContinue |
-    Where-Object { $_.LastWriteTime -lt (Get-Date).AddHours(-48) }
-if ($loopStateFiles) {
-    $loopStateFiles | Remove-Item -Force
-    Write-Log "[Cleanup] Removed $($loopStateFiles.Count) stale loop-state files (>48h)"
-}
-
-# Clean up stale stop-alert files older than 7 days
-$stopAlertFiles = Get-ChildItem "$AgentDir\state\stop-alert-*.json" -ErrorAction SilentlyContinue |
-    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) }
-if ($stopAlertFiles) {
-    $stopAlertFiles | Remove-Item -Force
-    Write-Log "[Cleanup] Removed $($stopAlertFiles.Count) stale stop-alert files (>7d)"
-}
-
-# Clean up stale results files older than 7 days (exclude spans, handled above)
-$staleResults = Get-ChildItem "$ResultsDir\*" -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -notlike "spans-*" -and $_.LastWriteTime -lt (Get-Date).AddDays(-7) }
-if ($staleResults) {
-    $staleResults | Remove-Item -Force
-    Write-Log "[Cleanup] Removed $($staleResults.Count) stale result files (>7d)"
-}

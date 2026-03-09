@@ -89,20 +89,41 @@ def _check_basename_in(rule, basename, file_path):
     return False, None
 
 
-def _check_path_traversal(file_path, project_root):
+# 允許寫入的例外路徑（Claude Code 內部作業需要）
+_TRAVERSAL_ALLOWLIST = [
+    os.path.normpath(os.path.expanduser("~/.claude")).lower(),  # Claude Code plans/settings
+]
+
+
+def _build_allowlist(rules):
+    """從規則的 allowed_paths 欄位補充白名單（外部化到 YAML）。"""
+    extra = []
+    for rule in rules:
+        if rule.get("check") == "path_traversal":
+            for p in rule.get("allowed_paths", []):
+                extra.append(os.path.normpath(p).lower())
+    return _TRAVERSAL_ALLOWLIST + extra
+
+
+def _check_path_traversal(file_path, project_root, allowlist=None):
     """檢查路徑是否逃逸專案目錄。對所有路徑解析後比對 project_root。"""
+    if allowlist is None:
+        allowlist = _TRAVERSAL_ALLOWLIST
     try:
         resolved = os.path.abspath(os.path.normpath(file_path))
         norm_root = os.path.normpath(project_root)
         # Windows 路徑大小寫不敏感，用 lower() 比對避免磁碟代號不一致
         resolved_l = resolved.lower()
         root_l = norm_root.lower()
-        if resolved_l != root_l and not resolved_l.startswith(root_l + os.sep.lower()):
-            return True, resolved
+        if resolved_l == root_l or resolved_l.startswith(root_l + os.sep.lower()):
+            return False, resolved  # 在專案目錄內，放行
+        # 例外允許清單（內建 + YAML 外部化）
+        for allowed in allowlist:
+            if resolved_l == allowed or resolved_l.startswith(allowed + os.sep.lower()):
+                return False, resolved
+        return True, resolved
     except (ValueError, OSError):
         return True, file_path
-
-    return False, None
 
 
 def check_write_path(file_path, rules=None, project_root=None):
@@ -123,6 +144,7 @@ def check_write_path(file_path, rules=None, project_root=None):
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     basename = os.path.basename(file_path) if file_path else ""
+    allowlist = _build_allowlist(rules)
 
     for rule in rules:
         check_type = rule.get("check", "")
@@ -143,7 +165,7 @@ def check_write_path(file_path, rules=None, project_root=None):
                 return True, _get_reason(rule, matched=matched_value), guard_tag
 
         elif check_type == "path_traversal":
-            escaped, resolved = _check_path_traversal(file_path, project_root)
+            escaped, resolved = _check_path_traversal(file_path, project_root, allowlist)
             if escaped:
                 return True, _get_reason(rule, resolved=resolved), guard_tag
 

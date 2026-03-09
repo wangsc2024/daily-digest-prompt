@@ -63,7 +63,6 @@ initial_schema: |
     "github_scout_count": 0,
     "chatroom_optimize_count": 0,
     "ai_workflow_github_count": 0,
-    "podcast_create_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -73,26 +72,8 @@ initial_schema: |
 # 自動任務定義（execution_order 為輪轉排序依據）
 # ============================================================
 # 任務欄位說明：
-#   name:             顯示名稱（日誌與通知用）
-#   daily_limit:      每日最多執行次數（0 = 停用）
-#   counter_field:    tracking_file 中的計數欄位名稱
-#   template:         執行時載入的 Markdown 模板路徑
-#   template_version: 模板版本號（配合模板內部版本控制）
-#   template_params:  傳入模板的參數（僅參數化模板使用）
-#   history_type:     歷史記錄分類 key
-#   execution_order:  round-robin 輪轉順序（1-20）
-#   model:            （選填）Claude 模型 ID，空 → 回退 default_model → Claude Code 預設
-#   skills:           此任務依賴的 Skills 清單
-#
-# 群組摘要（8 群組，20 任務，合計 47 次/日）：
-#   佛學研究:     #1-#4   (4 次/日) — 楞嚴經、教觀綱宗、法華經、淨土宗
-#   AI/技術研究:  #5-#11  (7 次/日) — 技術研究、AI深度、Unsloth、GitHub AI、智慧城市、系統開發、AI工作流
-#   系統維護:     #12-#13 (5 次/日) — Skill審查、日誌審查
-#   專案品質:     #14-#15 (4 次/日) — Git推送、QA優化
-#   遊戲創意:     #16     (2 次/日) — 創意遊戲優化
-#   系統自省:     #17-#18 (4 次/日) — 系統洞察、自我修復
-#   GitHub靈感:   #19     (1 次/日) — GitHub Scout（僅週三/週日）
-#   聊天室/媒體:  #20     (2 次/日) — 聊天室優化、Podcast
+#   model: （選填）執行此任務的 Claude 模型，例如 claude-sonnet-4-5
+#           未設定（或空字串）→ 回退 default_model；default_model 亦空 → Claude Code 預設模型
 tasks:
 
   # --- 佛學研究群組（共 4 次/日）---
@@ -121,7 +102,7 @@ tasks:
       study_path: "概論 → 五時判教 → 八教分類 → 化法四教（藏通別圓）→ 化儀四教 → 觀法修持 → 判教實例"
     history_type: "jiaoguangzong"
     execution_order: 2
-    model: "claude-haiku-4-5"
+    model: "claude-sonnet-4-5"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   fahua:
@@ -138,7 +119,7 @@ tasks:
       study_path: "經典概論 → 方便品（開權顯實）→ 譬喻品（三車火宅）→ 信解品 → 藥草喻品 → 化城喻品 → 壽量品 → 觀世音菩薩普門品 → 一佛乘義理"
     history_type: "fahua"
     execution_order: 3
-    model: "claude-haiku-4-5"
+    model: "claude-sonnet-4-5"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   jingtu:
@@ -249,7 +230,6 @@ tasks:
     template_version: 2
     history_type: "ai_sysdev"
     execution_order: 10
-    model: "claude-haiku-4-5"
     skills: [knowledge-query, web-research, kb-research-strategist]
     description: "研究 AI 應用於系統開發（AI-assisted coding、自動測試、架構優化、DevOps 智能化），將報告寫入 RAG 知識庫"
     template_params:
@@ -283,7 +263,6 @@ tasks:
     template_version: 1
     history_type: "skill_audit"
     execution_order: 11
-    model: "claude-sonnet-4-5"
     skills: [knowledge-query, skill-scanner, system-insight]
     description: "審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證"
 
@@ -296,7 +275,6 @@ tasks:
     template_version: 1
     history_type: "log_audit"
     execution_order: 12
-    model: "claude-sonnet-4-5"
     skills: [scheduler-state, knowledge-query, system-insight]
 
   git_push:
@@ -344,7 +322,6 @@ tasks:
     template_version: 1
     history_type: "system_insight"
     execution_order: 16
-    model: "claude-sonnet-4-5"
     skills: [system-insight, scheduler-state, knowledge-query]
     description: "分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出洞察報告"
 
@@ -356,7 +333,6 @@ tasks:
     template_version: 1
     history_type: "self_heal"
     execution_order: 17
-    model: "claude-sonnet-4-5"
     skills: [system-insight, scheduler-state, knowledge-query]
     description: "識別可自動修復的問題（過期快取/過期 registry/跨日未歸零/殘留檔案）並自動修復"
 
@@ -370,7 +346,7 @@ tasks:
     history_type: "chatroom_optimize"
     execution_order: 19
     skills: [chatroom-query, api-cache, knowledge-query]
-    model: "claude-sonnet-4-5"
+    model: "claude-sonnet-4-6"
     description: "評估 bot.js 任務佇列執行品質（成功率/衝突率/耗時），自動清除過期快取或調整 max_tasks_per_run"
 
   # --- AI 工作流自動化研究群組（共 1 次/日）---
@@ -382,7 +358,6 @@ tasks:
     template_version: 1
     history_type: "ai_workflow_github"
     execution_order: 20
-    model: "claude-haiku-4-5"
     skills: [knowledge-query, kb-research-strategist, web-research, github-scout]
     description: "從 GitHub 選出 AI 工作流自動化熱門專案（n8n/Dify/AutoGen/LangGraph 等），經 kb-research-strategist 優化選題後深度研究並將報告納入知識庫"
 
@@ -398,19 +373,6 @@ tasks:
     skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
     description: "自動蒐集 GitHub 熱門專案靈感，分析與本系統的改進機會（僅週三/週日執行）"
 
-  # --- Podcast 生成群組（共 1 次/日）---
-  podcast_create:
-    name: "Podcast 生成（AI 雙主持人）"
-    daily_limit: 1
-    counter_field: "podcast_create_count"
-    template: "templates/auto-tasks/podcast-create.md"
-    template_version: 1
-    history_type: "podcast_create"
-    execution_order: 21
-    model: "claude-sonnet-4-5"
-    skills: [knowledge-query, ntfy-notify]
-    description: "評分 KB 筆記，選出最佳 3 篇，生成雙主持人對話腳本，TTS 合成後上傳 R2 並通知"
-
 # ============================================================
 # 每日上限摘要
 # ============================================================
@@ -424,8 +386,7 @@ tasks:
 # Chatroom 整合：品質優化(1) = 1
 # AI 工作流自動化：GitHub 研究(1) = 1
 # GitHub 靈感：靈感蒐集(0) = 0
-# Podcast 生成：AI 雙主持人(1) = 1
-# 合計：19 次/日
+# 合計：18 次/日
 
 # 歷史追蹤寫入規則
 history:

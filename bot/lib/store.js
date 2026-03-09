@@ -459,9 +459,28 @@ function getTaskContent(uid) {
 
 // ---- Cron Jobs CRUD ----
 
+function normalizeCronContent(content) {
+    // 移除時間前綴（如「每天17:05」「每天 17：05」），正規化空白與全形冒號
+    return (content || '')
+        .replace(/每天\s*[\d]+\s*[:\uff1a]\s*[\d]+\s*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function addCronJob(job) {
+    const newExpr = job.cron_expression || '';
+    const newNorm = normalizeCronContent(job.task_content);
+    const duplicate = cronJobs.find(j =>
+        j.cron_expression === newExpr &&
+        normalizeCronContent(j.task_content) === newNorm
+    );
+    if (duplicate) {
+        console.log(`[store] 略過重複 cron job（已存在 ${duplicate.id}）：${newExpr} "${job.task_content}"`);
+        return duplicate;
+    }
     cronJobs.push(job);
     saveJSON(CRON_JOBS_PATH, cronJobs);
+    return job;
 }
 
 function removeCronJob(cronId) {

@@ -214,14 +214,15 @@ function generateId(prefix) {
 async function sendSystemReply(text) {
     if (app.locals.sharedSecrets.size === 0) return;
     try {
-        // G25: 加密含時間戳的 JSON payload，供前端排序使用
-        const payload = JSON.stringify({ text, ts: Date.now() });
+        const ts = Date.now();
         const replyId = generateId('reply');
         let i = 0;
         for (const ss of app.locals.sharedSecrets.values()) {
+            const nodeId = `${replyId}_${i}`;
+            const payload = JSON.stringify({ id: nodeId, text, ts, updatedAt: ts });
             const encrypted = await SEA.encrypt(payload, ss);
-            // 每個用戶分配獨立 node id，確保各自接收
-            gun.get(chatRoomName).get(`${replyId}_${i++}`).put(encrypted);
+            gun.get(chatRoomName).get(nodeId).put(encrypted);
+            i++;
         }
     } catch (err) {
         console.error('[sendSystemReply] 失敗:', err.message);
@@ -323,6 +324,17 @@ const classifyQueue = createQueue({
                     `[系統回覆] 排程間隔過短（最少 ${CRON_MIN_INTERVAL_MINUTES} 分鐘），已降級為單次任務。`
                 );
                 store.addRecord(item.id, decision.task_content, decision.is_research);
+                return;
+            }
+
+            // 去重：同 expression + 同內容已存在則跳過（防 Gun.js 重播重複建立）
+            const existingJob = store.cronJobs.find(j => {
+                if (j.cron_expression !== decision.cron_expression) return false;
+                const norm = s => (s || '').replace(/每天\s*[\d]+\s*[:\uff1a]\s*[\d]+\s*/g, '').replace(/\s+/g, ' ').trim();
+                return norm(j.task_content) === norm(decision.task_content);
+            });
+            if (existingJob) {
+                console.log(`[cron] 已存在相同排程（${existingJob.id}），略過重複建立`);
                 return;
             }
 

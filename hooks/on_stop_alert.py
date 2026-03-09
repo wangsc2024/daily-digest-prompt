@@ -880,9 +880,9 @@ def main():
                 if last_dt.tzinfo is None:
                     last_dt = last_dt.replace(tzinfo=timezone.utc)
                 now_dt = datetime.now(tz=timezone.utc)
-                if (now_dt - last_dt).total_seconds() < 600:  # 10 分鐘冷卻
-                    print(json.dumps({"dedup": True, "last_sent": last_sent}))
-                    sys.exit(0)
+                # 每個 session 最多發一次告警（無論間隔多長）
+                print(json.dumps({"dedup": True, "last_sent": last_sent}))
+                sys.exit(0)
         except Exception:
             pass
 

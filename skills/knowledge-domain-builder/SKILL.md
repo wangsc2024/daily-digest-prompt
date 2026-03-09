@@ -98,6 +98,38 @@ Phase 4  同步與交付      →  跨設備同步建議 + 完成通知
 | 需要快速摘要 | Groq API（llama-3.3-70b） | 速度快 |
 | 需要深度長文分析 | Claude 自身能力 | 長上下文處理 |
 
+### WebSearch 具體範例
+
+**第一輪：領域全景搜尋**
+```bash
+# 使用 WebSearch 工具搜尋領域概述
+WebSearch: "{領域名稱} 核心概念 定義 體系"
+WebSearch: "{領域名稱} history development evolution"
+WebSearch: "{領域名稱} 主要分支 分類 taxonomy"
+```
+
+**第二輪：深度概念搜尋**
+```bash
+# 針對每個核心概念進行深度搜尋
+WebSearch: "{概念名稱} 詳細說明 原理 mechanism"
+WebSearch: "{概念名稱} 實例 案例 example application"
+WebSearch: "{概念名稱} vs {相近概念} 比較 差異"
+```
+
+**第三輪：權威來源**
+```bash
+WebSearch: "{領域名稱} 經典書籍 推薦 必讀"
+WebSearch: "{領域名稱} 權威論文 seminal papers"
+```
+
+### WebFetch 使用時機
+
+當 WebSearch 返回優質來源時，使用 WebFetch 取得完整內容：
+```bash
+# 範例
+WebFetch: "https://example.com/comprehensive-guide"
+```
+
 ### 研究維度
 
 1. **領域全景**：核心定義、主要分支、歷史脈絡
@@ -298,7 +330,35 @@ MOC 是知識索引與導覽頁：
 
 ### 3-5. 執行方式
 
-使用 `scripts/build_vault.sh`（或等效 Python 腳本），輸入四個參數：`outline.md`、`domain_profile.json`、`content_materials.json`、`output_dir`。
+**優先方案**：使用 `scripts/build_vault.sh`（若存在）
+
+```bash
+bash scripts/build_vault.sh outline.md domain_profile.json content_materials.json output_dir
+```
+
+**降級方案**：若腳本不存在，使用內建建置邏輯
+
+逐步執行以下操作：
+1. 讀取 `outline.md` 解析目錄結構
+2. 讀取 `content_materials.json` 載入筆記素材
+3. 使用 Bash `mkdir -p` 建立所有目錄
+4. 使用 Write 工具逐一生成：
+   - 知識筆記（從 content_materials.json 填充）
+   - MOC 檔案（從 outline.md 生成）
+   - _Overview-MOC.md 和 _Homepage.md
+   - .obsidian/workspace.json（基本配置）
+5. 驗證雙向連結完整性
+
+**驗證步驟**：
+```bash
+# 確認所有檔案存在
+find {output_dir} -name "*.md" | wc -l
+
+# 驗證 frontmatter 格式
+grep -r "^---$" {output_dir} | wc -l
+
+# 檢查連結完整性（所有 [[wikilink]] 目標都存在）
+```
 
 ---
 
@@ -344,6 +404,47 @@ Phase 0 完成後，Phase 1-4 **完全自動串接，無需人工介入**：
     │
     └─ Phase 4：同步指南 + 品質報告 + 通知
 ```
+
+---
+
+## 錯誤處理與降級策略
+
+| 錯誤情境 | 處理方式 | 降級策略 |
+|----------|---------|---------|
+| **WebSearch 失敗或無結果** | 記錄警告，改用 Claude 內建知識 | 基於訓練資料生成內容，標註「未經外部驗證」 |
+| **WebFetch 超時或 404** | 跳過該來源，繼續其他來源 | 若所有來源都失敗，回退至 Claude 內建知識 |
+| **Phase 2.5 素材不足 1500 字** | 自動補充「詳細說明」區塊 | 使用 Claude 深度推理補足缺失內容 |
+| **build_vault.sh 腳本不存在** | 改用內建 Python 建置邏輯 | 逐一建立目錄和檔案，使用 Write 工具 |
+| **Obsidian 配置檔案生成失敗** | 跳過 `.obsidian/` 配置，僅建立 Markdown | 使用者可手動設定 Obsidian |
+| **筆記名稱重複** | 自動在重複名稱後加序號（如「概念-2」） | 記錄警告，建議使用者手動重新命名 |
+| **JSON 解析失敗** | 清理 JSON 格式錯誤後重試 | 若仍失敗，回退至單筆手動建立 |
+| **磁碟空間不足** | 中止建置，輸出已完成的部分清單 | 建議使用者清理空間後重新執行 |
+
+### 品質閘門
+
+在每個 Phase 結束時執行驗證：
+
+**Phase 1 閘門**：
+- 研究報告字數 ≥ 3000 字
+- 至少涵蓋 10 個核心概念
+- 包含至少 3 個權威來源
+
+**Phase 2 閘門**：
+- 大綱結構符合規範（最多 3 層巢狀）
+- 筆記總數在 15-50 之間
+- 所有筆記名稱唯一
+
+**Phase 2.5 閘門**：
+- 每則筆記素材 ≥ 1500 字
+- 所有必填欄位完整
+- related_notes 連結目標都存在
+
+**Phase 3 閘門**：
+- 所有目錄和檔案成功建立
+- 雙向連結完整性驗證通過
+- Dataview 查詢語法正確
+
+若任何閘門失敗，自動觸發對應的降級策略。
 
 ---
 

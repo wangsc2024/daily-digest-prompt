@@ -240,6 +240,91 @@ python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', enco
   - SKILL_INDEX.md（若涉及新 Skill）
 ```
 
+### Step 7：完整案例演示（模式 A）
+
+**案例：新增「技術文件寫作」自動任務**
+
+使用者需求：「我想新增一個自動任務，每天寫 2 次技術文件，幫助我整理學到的知識。」
+
+**Step 1：收集規格（從對話推斷）**
+```yaml
+task_key: "tech_writing"
+task_name: "技術文件寫作計畫"
+daily_limit: 2
+group: "專案品質"
+skills: ["knowledge-query", "writing-masters"]
+description: "整理技術知識，產出結構化文件"
+```
+
+**Step 2：自動計算衍生值**
+```
+counter_field: "tech_writing_count"
+execution_order: 19  # 假設現有最大值為 18
+template_path: "templates/auto-tasks/tech-writing.md"
+team_prompt_path: "prompts/team/todoist-auto-tech-writing.md"
+```
+
+**Step 3：前置讀取**
+```bash
+# 確認現有 execution_order
+grep "execution_order:" config/frequency-limits.yaml | sort -n | tail -1
+# 輸出：execution_order: 18
+```
+
+**Step 4：依序生成 6 個檔案**
+
+4.1 & 4.2：編輯 `frequency-limits.yaml`（追加 task + initial_schema）
+
+4.3：建立 `templates/auto-tasks/tech-writing.md`（組合 _base.md）
+
+4.4：建立 `prompts/team/todoist-auto-tech-writing.md`
+
+4.5：驗證動態掃描（檔名符合 `todoist-auto-*.md` 規範）
+
+4.6：更新 frequency-limits.yaml 底部摘要
+
+**Step 5：驗證矩陣（6/6 通過）**
+```bash
+# 5.1 YAML 語法檢查
+python -c "import yaml; yaml.safe_load(open('config/frequency-limits.yaml', encoding='utf-8'))"
+# ✅ 無輸出表示成功
+
+# 5.2 團隊 prompt 命名檢查
+ls prompts/team/todoist-auto-tech-writing.md
+# ✅ 檔案存在
+
+# 5.3 counter_field 一致性
+grep "tech_writing_count" config/frequency-limits.yaml | wc -l
+# ✅ 輸出 2（task 定義 + initial_schema）
+
+# 5.4 execution_order 無重複
+grep "execution_order: 19" config/frequency-limits.yaml | wc -l
+# ✅ 輸出 1
+
+# 5.5 模板包含 DONE_CERT
+grep "DONE_CERT" templates/auto-tasks/tech-writing.md
+# ✅ 有匹配
+
+# 5.6 SKILL_INDEX.md 同步確認
+# knowledge-query 和 writing-masters 已在索引中
+```
+
+**Step 6：輸出變更摘要**
+```
+新增自動任務完成：
+  - 任務: 技術文件寫作計畫 (key: tech_writing)
+  - 每日上限: 2
+  - 執行順序: 19
+  - 群組: 專案品質
+  - 模板: templates/auto-tasks/tech-writing.md
+  - 團隊 prompt: prompts/team/todoist-auto-tech-writing.md
+  - 動態掃描: ✅ 檔名符合 todoist-auto-*.md 規範
+  - 驗證: 6/6 通過
+
+需人工確認：
+  - CLAUDE.md 架構段落（自動任務數量已從 18 增至 19）
+```
+
 ---
 
 ## 模式 B：新增排程任務（add-scheduled-task）

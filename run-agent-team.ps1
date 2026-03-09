@@ -371,6 +371,19 @@ else {
     Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
 }
 
+# ─── 載入 BOT_API_SECRET（chatroom 認證，選用）───
+if (-not $env:BOT_API_SECRET) {
+    if (Test-Path "$AgentDir\.env") {
+        $botSecretLine = Get-Content "$AgentDir\.env" | Where-Object { $_ -match '^BOT_API_SECRET=' }
+        if ($botSecretLine) {
+            $botSecret = ($botSecretLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable("BOT_API_SECRET", $botSecret, "Process")
+            Write-Host "[Token] BOT_API_SECRET loaded from .env"
+        }
+        # 無 BOT_API_SECRET 時靜默略過（chatroom 為可選整合）
+    }
+}
+
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
@@ -815,6 +828,30 @@ Get-ChildItem -Path $LogDir -Filter "*.log" |
 Get-ChildItem "$ResultsDir\spans-*.json" -ErrorAction SilentlyContinue |
     Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) } |
     Remove-Item -Force
+
+# Clean up stale loop-state files older than 48 hours
+$loopStateFiles = Get-ChildItem "$AgentDir\state\loop-state-*.json" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddHours(-48) }
+if ($loopStateFiles) {
+    $loopStateFiles | Remove-Item -Force
+    Write-Log "[Cleanup] Removed $($loopStateFiles.Count) stale loop-state files (>48h)"
+}
+
+# Clean up stale stop-alert files older than 7 days
+$stopAlertFiles = Get-ChildItem "$AgentDir\state\stop-alert-*.json" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-7) }
+if ($stopAlertFiles) {
+    $stopAlertFiles | Remove-Item -Force
+    Write-Log "[Cleanup] Removed $($stopAlertFiles.Count) stale stop-alert files (>7d)"
+}
+
+# Clean up stale results files older than 7 days (exclude spans, handled above)
+$staleResults = Get-ChildItem "$ResultsDir\*" -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notlike "spans-*" -and $_.LastWriteTime -lt (Get-Date).AddDays(-7) }
+if ($staleResults) {
+    $staleResults | Remove-Item -Force
+    Write-Log "[Cleanup] Removed $($staleResults.Count) stale result files (>7d)"
+}
 
 # 清理 Instance Lock
 Remove-Item $LockFile -Force -ErrorAction SilentlyContinue

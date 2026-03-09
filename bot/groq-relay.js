@@ -31,6 +31,7 @@ const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 const GROQ_RELAY_CACHE_TTL_MS = 5 * 60 * 1000; // 5 分鐘快取
 const GROQ_TIMEOUT_MS = 15000;
 const GROQ_MAX_TOKENS = 2048;
+const HEALTH_PROBE_TTL_MS = 5 * 60 * 1000; // 健康探測結果快取 5 分鐘
 
 const apiKey = (process.env.GROQ_API_KEY || '').trim();
 if (!apiKey) {
@@ -43,6 +44,7 @@ const app = express();
 app.use(express.json({ limit: '1mb' }));
 
 // 速率限制：免費方案 5 req/min，付費可調高（環境變數 GROQ_RELAY_RATE_LIMIT）
+// 注意：僅套用到 /groq/chat，health 端點不計入配額
 const limiter = rateLimit({
     windowMs: 60 * 1000,
     max: parseInt(process.env.GROQ_RELAY_RATE_LIMIT || '5', 10),
@@ -50,7 +52,47 @@ const limiter = rateLimit({
     legacyHeaders: false,
     message: { error: '速率限制：請稍後再試（Groq 免費方案 5 req/min）' },
 });
-app.use('/groq', limiter);
+
+// 健康探測狀態（5 分鐘 TTL 快取，避免每次 health 請求都消耗 API 配額）
+let _healthState = {
+    api_reachable: null,  // null = 尚未探測
+    last_check: null,
+    latency_ms: null,
+    error: null,
+    checked_at: 0,
+};
+
+async function probeApi() {
+    const start = Date.now();
+    try {
+        await Promise.race([
+            groq.chat.completions.create({
+                model: GROQ_MODEL,
+                messages: [{ role: 'user', content: 'hi' }],
+                max_tokens: 1,
+            }),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('health probe 逾時 (5s)')), 5000)
+            ),
+        ]);
+        _healthState = {
+            api_reachable: true,
+            last_check: new Date().toISOString(),
+            latency_ms: Date.now() - start,
+            error: null,
+            checked_at: Date.now(),
+        };
+    } catch (err) {
+        _healthState = {
+            api_reachable: false,
+            last_check: new Date().toISOString(),
+            latency_ms: Date.now() - start,
+            error: err.message,
+            checked_at: Date.now(),
+        };
+        console.warn('[groq-relay] health probe 失敗:', err.message);
+    }
+}
 
 // 5 分鐘記憶體快取（key = mode + content 前 200 字）
 const _cache = new Map();
@@ -127,8 +169,8 @@ async function callGroq(mode, content) {
     return (completion?.choices?.[0]?.message?.content || '').trim();
 }
 
-// POST /groq/chat
-app.post('/groq/chat', async (req, res) => {
+// POST /groq/chat（套用速率限制）
+app.post('/groq/chat', limiter, async (req, res) => {
     const { mode, content } = req.body || {};
 
     if (!mode || !VALID_MODES.has(mode)) {
@@ -162,20 +204,44 @@ app.post('/groq/chat', async (req, res) => {
     }
 });
 
-// GET /groq/health
-app.get('/groq/health', (_req, res) => {
-    res.json({
-        status: 'ok',
+// GET /groq/health（不套用速率限制，TTL 5 分鐘探測一次真實 API）
+app.get('/groq/health', async (_req, res) => {
+    const stale = Date.now() - _healthState.checked_at > HEALTH_PROBE_TTL_MS;
+
+    if (_healthState.api_reachable === null) {
+        // 首次：等待探測完成後再回應
+        await probeApi();
+    } else if (stale) {
+        // 非首次：背景更新，本次用舊結果即時回應
+        probeApi();
+    }
+
+    const ok = _healthState.api_reachable !== false;
+    res.status(ok ? 200 : 503).json({
+        status: ok ? 'ok' : 'error',
         model: GROQ_MODEL,
         port: PORT,
         cache_size: _cache.size,
         rate_limit_per_min: parseInt(process.env.GROQ_RELAY_RATE_LIMIT || '5', 10),
+        api_reachable: _healthState.api_reachable,
+        api_latency_ms: _healthState.latency_ms,
+        last_api_check: _healthState.last_check,
+        ...(_healthState.error ? { api_error: _healthState.error } : {}),
     });
 });
 
 app.listen(PORT, '127.0.0.1', () => {
     console.log(`[groq-relay] 已啟動 → http://localhost:${PORT}/groq`);
     console.log(`[groq-relay] 模型：${GROQ_MODEL}，速率限制：${process.env.GROQ_RELAY_RATE_LIMIT || 5} req/min`);
+    // 啟動後背景執行初始健康探測（不阻塞 listen）
+    probeApi().then(() => {
+        const state = _healthState;
+        if (state.api_reachable) {
+            console.log(`[groq-relay] API 連線正常（${state.latency_ms}ms）`);
+        } else {
+            console.warn(`[groq-relay] API 連線失敗：${state.error}`);
+        }
+    });
 });
 
 module.exports = app; // 供測試使用

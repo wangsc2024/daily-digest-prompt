@@ -18,6 +18,11 @@ $ApiBaseUrl = "http://127.0.0.1:3001"
 $TempDir = $PWD
 $WorkerId = "$env:COMPUTERNAME-$PID"
 
+# ── 知識庫根目錄（集中定義，避免在 workflows.json 硬編碼路徑）
+# workflows.json 使用 {KB_DIR} 佔位符，task content 在執行前自動展開
+$KbDir = "$PSScriptRoot\..\knowledge_base"
+$KbDir = [System.IO.Path]::GetFullPath($KbDir)  # 展開為絕對路徑
+
 # 編碼任務關鍵字（符合其中一個即視為編碼任務）
 $CodingKeywords = @(
     '程式', '程式碼', '寫程式', '修程式', '實作', '重構', '除錯', 'debug',
@@ -272,6 +277,10 @@ foreach ($record in @($record)) {
         }
 
         $isCoding = Test-IsCodingTask -Content $optimizedContent
+
+        # ── 展開 {KB_DIR} 佔位符（避免 workflows.json 硬編碼絕對路徑）──
+        $taskContent = $taskContent -replace '\{KB_DIR\}', $KbDir
+        $optimizedContent = $optimizedContent -replace '\{KB_DIR\}', $KbDir
 
         # ── 偵測 [WORKDIR: path] 標記或訊息中的 Windows 路徑（優先從原始內容偵測，確保意圖不失真）──
         $workDir = $null

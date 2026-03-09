@@ -28,8 +28,8 @@ from datetime import datetime, timedelta
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_ROOT = os.path.dirname(_SCRIPT_DIR)
 PATTERNS_FILE = os.path.join(_PROJECT_ROOT, "context", "behavior-patterns.json")
-MAX_PATTERNS = 500  # 避免無限增長
-DECAY_DAYS = 30     # 超過 30 天未觀察的模式信心歸零
+MAX_PATTERNS = 200  # 控制檔案大小 ~100KB（原 500 → 248KB 膨脹）
+DECAY_DAYS = 14     # 超過 14 天未觀察的模式移除（原 30 天過於寬鬆）
 CONFIDENCE_INCREMENT = 0.05
 CONFIDENCE_MAX = 1.0
 CONFIDENCE_INITIAL = 0.1

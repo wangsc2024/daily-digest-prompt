@@ -25,13 +25,13 @@
 
 ### 1.2 認領任務（Claim）
 ```bash
-python -c "import json; print(json.dumps({'worker_id': 'claude-todoist-agent'}))" > /tmp/claim_body.json
+python -c "import json; print(json.dumps({'worker_id': 'claude-todoist-agent'}))" > cache/claim_body.json
 curl -s -X PATCH \
   -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json" \
-  -d @/tmp/claim_body.json \
+  -d @cache/claim_body.json \
   "http://localhost:3001/api/records/{uid}/claim"
-rm -f /tmp/claim_body.json
+rm -f cache/claim_body.json
 ```
 
 **結果處理**：
@@ -45,13 +45,13 @@ python -c "
 import json
 body = {'state': 'processing', 'worker_id': 'claude-todoist-agent', 'claim_generation': {claim_generation}}
 print(json.dumps(body))
-" > /tmp/state_body.json
+" > cache/state_body.json
 curl -s -X PATCH \
   -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json" \
-  -d @/tmp/state_body.json \
+  -d @cache/state_body.json \
   "http://localhost:3001/api/records/{uid}/state"
-rm -f /tmp/state_body.json
+rm -f cache/state_body.json
 ```
 
 ---
@@ -84,7 +84,7 @@ body = {
     'claim_generation': {claim_generation},
     'result': result_text
 }
-with open('/tmp/complete_body.json', 'w', encoding='utf-8') as f:
+with open('cache/complete_body.json', 'w', encoding='utf-8') as f:
     json.dump(body, f, ensure_ascii=False)
 "
 ```
@@ -94,9 +94,9 @@ with open('/tmp/complete_body.json', 'w', encoding='utf-8') as f:
 curl -s -X PATCH \
   -H "Authorization: Bearer $BOT_API_SECRET" \
   -H "Content-Type: application/json; charset=utf-8" \
-  -d @/tmp/complete_body.json \
+  -d @cache/complete_body.json \
   "http://localhost:3001/api/records/{uid}/processed"
-rm -f /tmp/complete_body.json
+rm -f cache/complete_body.json
 ```
 
 **失敗處理**：
