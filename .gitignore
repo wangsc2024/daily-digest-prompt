@@ -12,7 +12,9 @@ results/
 state/scheduler-state.json
 state/todoist-history.json
 state/loop-state-*.json
+state/stop-alert-*.json
 state/api-health.json
+state/api-health.json.backup
 state/last-audit.json
 state/gmail-oauth-state.json
 context/digest-memory.json
@@ -108,6 +110,9 @@ key/
 *.crt
 *.p12
 *.pfx
+*.secret.json
+.env.local
+.env.production.local
 
 # ── Claude Code 本地設定（settings.json 為專案共享 hooks 設定，需 commit）──
 .claude/settings.local.json
@@ -120,3 +125,8 @@ key/
 *~
 Thumbs.db
 .DS_Store
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example

@@ -21,9 +21,42 @@
 
 **預防**：prompt 檔命名必須遵循 `todoist-auto-{plan_key}.md`（底線），與 `frequency-limits.yaml` key 一致。
 
+### 1.1 plan_type = "tasks" 時某任務顯示「Phase 2 結果缺失、已降優先級」
+
+**症狀**：通知顯示「成功 2 / 失敗 1」，失敗項為「Phase 2 結果缺失，已降優先級」；或日誌出現 `[Phase2] Missing result file: todoist-result-N.json`。
+
+**可能原因**：
+- 該任務 Phase 2 逾時被強制結束（`Wait-Job -Timeout` 到期後 `Stop-Job`），agent 尚未寫入 `results/todoist-result-{rank}.json` 即被終止。
+- 多 run 並行（排程重疊或手動與排程同時跑），共用同一 `results/`，結果檔被覆寫或只讀到部分檔案。
+- Agent 未依 prompt 產出結果檔（罕見，可查該 task 的 Phase 2 日誌是否有錯誤）。
+
+**排查步驟**：
+1. 查該次 run 的 Phase 2 日誌：是否有 `[Phase2] task-N TIMEOUT - stopping` 或 `[Phase2] task-N failed`。
+2. 若有 Missing result file 日誌：對照 `job state=`（timeout / failed / success）與任務內容，確認是否為逾時導致。
+3. 查 `config/timeouts.yaml` 的 `todoist_team.phase2_timeout_by_type`（code / research / skill）與動態 timeout 日誌 `[Dynamic] Phase2 timeout = ...`，必要時略為提高對應類型或依 HEARTBEAT 確認排程未重疊。
+4. 確認同一時段僅有一個 Todoist 團隊模式 run（避免兩次排程或手動與排程並行）。
+
+**預防**：
+- 腳本已對多任務並行加約 15% 或最多 120s 的 Phase 2 緩衝；若仍常逾時，可調高 `config/timeouts.yaml` 的 `phase2_timeout_by_type.code` / `research`。
+- 排程設定避免相鄰整點/半點重疊（見 HEARTBEAT.md），必要時以 `state/scheduler-state.json` 或檔案鎖避免多 run 同時寫入 `results/`。
+
 ---
 
 ## 2. Todoist API 呼叫失敗
+
+### 2.1 401 Unauthorized
+
+**症狀**：API 回傳 401，快取降級模式下任務關閉/評論失敗。
+
+**根因**：`TODOIST_API_TOKEN` 無效、已撤銷或已過期；或排程執行時未載入 `.env`。
+
+**解決方案**：
+1. 前往 [Todoist 設定 → 整合 → API token](https://todoist.com/prefs/integrations)
+2. 複製 token 或點「重新產生」取得新 token
+3. 更新專案 `.env`：`TODOIST_API_TOKEN=<新 token>`
+4. **排程未使用 .env**：重新執行 `.\setup-scheduler.ps1 -FromHeartbeat` 註冊排程，會改經 `run-with-env.ps1` 載入 `.env` 後再執行腳本
+
+### 2.2 410 Gone / 篩選結果為空
 
 **症狀**：API 回傳 410 Gone 或篩選結果為空。
 

@@ -67,6 +67,14 @@ schedules:
     retry: 0
     description: "Bot Server + Gun Relay 每日重啟（00:15，確保 WebSocket 連線穩定）"
 
+  chatroom-watchdog:
+    cron: "*/10 * * * *"
+    script: bot/watchdog-chatroom.ps1
+    workdir: "D:/Source/daily-digest-prompt"
+    timeout: 60
+    retry: 0
+    description: "Chatroom-Scheduler Watchdog（每 10 分鐘，進程死亡即自動重啟 + ntfy 告警）"
+
   bot-startup:
     trigger: startup
     delay: 30
@@ -81,6 +89,14 @@ schedules:
     workdir: "D:/Source/daily-digest-prompt/bot"
     description: "Groq Relay 服務（開機啟動，延遲 45s，port 3002，為 Claude Agent 提供快速翻譯/摘要前處理）"
 
+  groq-relay-watchdog:
+    cron: "*/5 * * * *"
+    script: bot/watchdog-groq-relay.ps1
+    workdir: "D:/Source/daily-digest-prompt"
+    timeout: 30
+    retry: 0
+    description: "Groq-Relay Watchdog（每 5 分鐘，進程死亡即自動重啟 + ntfy 告警）"
+
 ---
 
 # Heartbeat 排程定義
@@ -94,13 +110,20 @@ schedules:
 | health-check | 每日 07:15 | check-health.ps1 -Scheduled | 120s (2min) | 健康檢查（log + ntfy） |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 900s (15min) | 每日摘要 - 晚 |
 | system-audit | 每日 00:40 | run-system-audit-team.ps1 | 1800s (30min) | 每日系統審查 - 團隊模式 |
-| todoist-team | 每小時半點 01:30-23:30 | run-todoist-agent-team.ps1 | 4000s (~67min) | Todoist 團隊模式 |
+| todoist-team | 每小時半點 01:30-23:30 | run-todoist-agent-team.ps1 | 4000s (~67min) | Todoist 團隊模式（逾 60min 可能與下一班重疊，見 troubleshooting §1.1） |
 | media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 4000s (~67min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
 | evening-verse | 每日 17:05 | run-morning-verse.ps1 -Session evening | 120s (2min) | 黃昏佛偈推播（回歸本性・借假修真） |
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot + Gun Relay + Chatroom Scheduler 重啟 |
 | bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot + Gun Relay + Chatroom Scheduler 開機啟動 |
+| chatroom-watchdog | 每 10 分鐘 | bot/watchdog-chatroom.ps1 | 60s | Chatroom-Scheduler Watchdog（死亡自動重啟 + ntfy 告警） |
 | groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
+| groq-relay-watchdog | 每 5 分鐘 | bot/watchdog-groq-relay.ps1 | 30s | Groq-Relay Watchdog（死亡自動重啟 + ntfy 告警） |
+
+## 注意：Todoist 團隊模式與排程重疊
+
+- todoist-team 每小時半點執行，單次 timeout 約 67 分鐘；若執行超過約 60 分鐘，可能與下一小時半點 run 重疊，共用同一 `results/` 導致「Phase 2 結果缺失」。
+- 手動執行時請避開整點半前後數分鐘；排查與預防見 `docs/troubleshooting.md` §1.1。
 
 ## Todoist 驅動任務（由每小時排程撿起）
 

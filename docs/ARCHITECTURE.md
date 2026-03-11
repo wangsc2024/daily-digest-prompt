@@ -167,7 +167,10 @@ daily-digest-prompt/
     task-manager/ skill-scanner/
     system-audit/ todoist-task-creator/
     arch-evolution/ git-smart-commit/
-    chatroom-query/               # 共 7 工具 Skill（合計 26 個，各含 SKILL.md）
+    chatroom-query/
+    knowledge-domain-builder/
+    writing-masters/ writing-plans/
+    markdown-editor/              # 共 11 工具 Skill（合計 30 個，各含 SKILL.md）
 
   # 規格與文件
   specs/system-docs/              # 系統文件（SRD/SSD/ops-manual）
@@ -201,14 +204,14 @@ Timeout 設定集中在 `config/timeouts.yaml`。
 
 ---
 
-## Skills 總覽（共 26 個）
+## Skills 總覽（共 30 個）
 
 完整路由邏輯見 `docs/skill-routing-guide.md`。
 
 | 類別 | Skills |
 |------|--------|
 | 核心資料（19 個） | todoist、pingtung-news、hackernews-ai-digest、atomic-habits、learning-mastery、pingtung-policy-expert、knowledge-query、ntfy-notify、digest-memory、api-cache、scheduler-state、gmail、game-design、system-insight、web-research、kb-curator、github-scout、kb-research-strategist、groq |
-| 工具（7 個） | task-manager、skill-scanner、system-audit、todoist-task-creator、arch-evolution、git-smart-commit、chatroom-query |
+| 工具（11 個） | task-manager、skill-scanner、system-audit、todoist-task-creator、arch-evolution、git-smart-commit、chatroom-query、knowledge-domain-builder、writing-masters、writing-plans、markdown-editor |
 
 ---
 

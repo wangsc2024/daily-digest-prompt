@@ -160,6 +160,27 @@
 - Python 依賴由 uv 管理，使用 `uv run python` 執行（非裸 `python`）
 - **計畫檔存放**：一律放在 `docs/plans/` 目錄下（格式：`{feature}-plan.md`），禁止存放至專案目錄外（pre_write_guard.py 會攔截路徑遍歷）
 
+### 自動任務命名規範（嚴禁使用連字號）
+
+> **背景**：連字號（`-`）vs 底線（`_`）命名不一致已多次導致「Phase 2 未產出結果檔案」靜默錯誤。
+
+| 項目 | 規範 | 反例 |
+|------|------|------|
+| **task_key**（frequency-limits.yaml 定義） | `ai_github_research` | ~~`ai-github-research`~~ |
+| **Prompt 檔名** | `todoist-auto-{task_key}.md` | 連字號 task_key 部分禁用 |
+| **結果 JSON 檔名** | `results/todoist-auto-{task_key}.json` | ~~`todoist-auto-ai-github.json`~~ |
+| **結果 JSON `agent` 欄位** | `"agent": "todoist-auto-{task_key}"` | ~~`"agent": "todoist-auto-ai-github"`~~ |
+
+**黃金規則**：`frequency-limits.yaml` 的 key 是**唯一真相來源**，prompt 檔名、結果 JSON 檔名、`agent` 欄位三者必須完全一致（含底線）。
+
+**新增自動任務 checklist**：
+1. `config/frequency-limits.yaml` 加入 task_key（底線）
+2. `prompts/team/todoist-auto-{task_key}.md`（底線）
+3. Prompt 內 `results/todoist-auto-{task_key}.json`（底線）
+4. Prompt 內 `"agent": "todoist-auto-{task_key}"`（底線）
+5. `run-todoist-agent-team.ps1` 的 `$AutoTaskTimeoutOverride`（底線）
+6. `config/timeouts.yaml` 的 `phase2_timeout_by_task`（底線）
+
 ### 嚴禁產生 nul 檔案（最高優先級 — Hook 機器強制）
 - 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`（cmd 語法，在 bash 中會建立實體檔案）
 - 禁止使用 Write 工具寫入任何名為 `nul` 的檔案路徑
