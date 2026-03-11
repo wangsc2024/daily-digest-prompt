@@ -33,6 +33,9 @@ const STATE_LOG_PATH = path.join(DATA_DIR, 'state_transitions.log');
 // S11: task_content 寫入 .md 的最大長度 (bytes)
 const MAX_TASK_CONTENT_LENGTH = 50000;
 
+// DLQ: 最大重試次數，超過後移入 Dead Letter Queue
+const MAX_RETRY_COUNT = 3;
+
 // 確保目錄存在
 [DATA_DIR, TASKS_DIR].forEach(dir => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -114,6 +117,7 @@ records.forEach(r => {
     if (r.claim_generation === undefined) {
         r.claim_generation = 0;
     }
+    if (r.retry_count === undefined) r.retry_count = 0;
 });
 
 // 啟動時去重：同一 UID 僅保留狀態最優先的記錄
@@ -170,7 +174,8 @@ function addRecord(uid, taskContent, isResearch) {
         claimed_by: null,
         claimed_at: null,
         claim_generation: 0,
-        result: null
+        result: null,
+        retry_count: 0
     });
     try {
         saveJSON(RECORDS_PATH, records);
@@ -573,6 +578,38 @@ function removeWorkflow(workflowId) {
     return true;
 }
 
+/**
+ * 任務失敗後：retry_count < MAX_RETRY_COUNT → 重回 pending；否則 → dead_letter
+ * @returns {'requeued'|'dead_letter'|'not_found'|'invalid_state'}
+ */
+function requeueOrDeadLetter(uid, workerId, errorMsg) {
+    const rec = records.find(r => r.uid === uid);
+    if (!rec) return 'not_found';
+    if (rec.state !== STATES.PROCESSING && rec.state !== STATES.CLAIMED && rec.state !== STATES.FAILED) {
+        return 'invalid_state';
+    }
+    rec.retry_count = (rec.retry_count || 0) + 1;
+    rec.last_error = errorMsg ? String(errorMsg).slice(0, 500) : undefined;
+    rec.claimed_by = null;
+    rec.claimed_at = null;
+    if (rec.retry_count >= MAX_RETRY_COUNT) {
+        const from = rec.state;
+        rec.state = STATES.DEAD_LETTER;
+        rec.dead_at = new Date().toISOString();
+        saveJSON(RECORDS_PATH, records);
+        logTransition(uid, from, STATES.DEAD_LETTER, workerId || 'system');
+        console.log(`[DLQ] 任務 ${uid} 已移入 Dead Letter Queue（重試 ${rec.retry_count} 次）`);
+        return 'dead_letter';
+    } else {
+        const from = rec.state;
+        rec.state = STATES.PENDING;
+        saveJSON(RECORDS_PATH, records);
+        logTransition(uid, from, STATES.PENDING, 'retry');
+        console.log(`[retry] 任務 ${uid} 重回佇列（第 ${rec.retry_count} 次重試）`);
+        return 'requeued';
+    }
+}
+
 // ---- Keypair ----
 
 function loadKeypair() { return loadJSON(KEYPAIR_PATH, null); }
@@ -614,5 +651,7 @@ module.exports = {
     saveWorkflows,
     removeWorkflow,
     loadKeypair,
-    saveKeypair
+    saveKeypair,
+    requeueOrDeadLetter,
+    MAX_RETRY_COUNT
 };

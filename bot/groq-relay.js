@@ -169,12 +169,58 @@ async function callGroq(mode, content) {
     return (completion?.choices?.[0]?.message?.content || '').trim();
 }
 
+/**
+ * P4-A：Hono 式 Schema 驗證層（422 Unprocessable Entity + 欄位明細）
+ * 借鑑 @hono/zod-validator 的回應格式，不引入額外依賴。
+ *
+ * 驗證規則：
+ *   - mode:      必填，必須是 VALID_MODES 之一
+ *   - content:   必填，字串，max 8000 字元
+ *   - max_tokens: 選填，整數，50–2048（超出時 clamp 而非拒絕）
+ */
+function validateChatSchema(body) {
+    const errors = [];
+    const { mode, content, max_tokens } = body || {};
+
+    if (!mode) {
+        errors.push({ field: 'mode', message: '必填欄位缺失' });
+    } else if (!VALID_MODES.has(mode)) {
+        errors.push({ field: 'mode', message: `無效值 '${mode}'，允許：${[...VALID_MODES].join(', ')}` });
+    }
+
+    if (content === undefined || content === null) {
+        errors.push({ field: 'content', message: '必填欄位缺失' });
+    } else if (typeof content !== 'string') {
+        errors.push({ field: 'content', message: '必須為字串' });
+    } else if (content.length > 8000) {
+        errors.push({ field: 'content', message: `超過最大長度（${content.length} > 8000）` });
+    }
+
+    if (max_tokens !== undefined) {
+        const n = Number(max_tokens);
+        if (!Number.isInteger(n) || n < 50 || n > 2048) {
+            errors.push({ field: 'max_tokens', message: `必須為 50–2048 之整數，得到 ${max_tokens}` });
+        }
+    }
+
+    return errors;
+}
+
 // POST /groq/chat（套用速率限制）
 app.post('/groq/chat', limiter, async (req, res) => {
     const { mode, content } = req.body || {};
 
+    // P4-A Schema 驗證（422 Unprocessable Entity，符合 RFC 9110）
+    const validationErrors = validateChatSchema(req.body);
+    if (validationErrors.length > 0) {
+        return res.status(422).json({
+            error: '請求格式驗證失敗',
+            details: validationErrors,
+        });
+    }
+
     if (!mode || !VALID_MODES.has(mode)) {
-        return res.status(400).json({
+        return res.status(422).json({
             error: `無效 mode：${mode}，可用值：${[...VALID_MODES].join(', ')}`
         });
     }

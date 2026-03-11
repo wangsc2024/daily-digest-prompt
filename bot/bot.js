@@ -452,6 +452,14 @@ function startMessageLoop() {
     gun.get(chatRoomName).map().on(async (data, id) => {
         if (processedMessages.has(id)) return;
 
+        // 三層去重防護：bot 自產節點前綴過濾（reply_/broadcast_/msg_）
+        // reply_ 由 sendSystemReply 產生，broadcast_ 由 /api/broadcast 產生
+        // 這些 ID 從未加入 store，重啟後 Gun 重播會被誤判為新用戶訊息
+        if (id.startsWith('reply_') || id.startsWith('broadcast_')) {
+            processedMessages.set(id, Date.now());
+            return;
+        }
+
         // 二層去重：Map 被 TTL 清除後，仍可靠 store 避免重複處理
         if (store.getRecord(id)) {
             processedMessages.set(id, Date.now());

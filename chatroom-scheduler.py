@@ -9,6 +9,7 @@ chatroom-scheduler.py — 聊天室任務排程器
 - M2: 防重入鎖，避免並行觸發
 """
 
+import json
 import schedule
 import subprocess
 import sys
@@ -17,6 +18,7 @@ import os
 import logging
 import urllib.request
 import urllib.error
+from datetime import datetime
 
 # 設定日誌（寫入 bot/logs/ 目錄）
 # Windows 上 Start-Process -WindowStyle Hidden 啟動的進程沒有 console，
@@ -45,9 +47,25 @@ BOT_HEALTH_URL = "http://localhost:3001/api/health"
 SCHEDULE_INTERVAL_MINUTES = 5
 HEALTH_CHECK_TIMEOUT = 5
 PROCESS_TIMEOUT_SECONDS = 1800  # 30 min：研究型任務含 kb-strategist + claude -p 實測需 11-17 min
+HEARTBEAT_FILE = os.path.join(PROJECT_DIR, "state", "scheduler-heartbeat.json")
 
 # M2 修復：防重入 flag
 _is_running = False
+
+
+def update_heartbeat(status: str = "running") -> None:
+    """寫入心跳檔案，供 watchdog-chatroom.ps1 判斷 scheduler 是否存活。"""
+    try:
+        os.makedirs(os.path.dirname(HEARTBEAT_FILE), exist_ok=True)
+        data = {
+            "timestamp": datetime.now().isoformat(),
+            "status": status,
+            "pid": os.getpid(),
+        }
+        with open(HEARTBEAT_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+    except Exception as exc:
+        logger.warning(f"無法更新心跳檔案: {exc}")
 
 
 def check_bot_health() -> bool:
@@ -75,8 +93,10 @@ def trigger_process_messages():
 
     if not check_bot_health():
         logger.info("bot.js 未啟動，跳過本輪處理")
+        update_heartbeat("bot_unhealthy")
         return
 
+    update_heartbeat("running")
     logger.info("觸發 process_messages.ps1")
     _is_running = True
     try:
@@ -110,6 +130,7 @@ def main():
     logger.info(f"Chatroom scheduler 啟動（每 {SCHEDULE_INTERVAL_MINUTES} 分鐘執行）")
     logger.info(f"專案目錄: {PROJECT_DIR}")
     logger.info(f"Python: {sys.executable}, PID: {os.getpid()}")
+    update_heartbeat("started")
 
     schedule.every(SCHEDULE_INTERVAL_MINUTES).minutes.do(trigger_process_messages)
 
@@ -123,6 +144,7 @@ def main():
         loop_count += 1
         if loop_count % 30 == 0:  # ~5 min
             logger.info(f"心跳: 迴圈 #{loop_count}, PID {os.getpid()}")
+            update_heartbeat("idle")
 
 
 if __name__ == "__main__":

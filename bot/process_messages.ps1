@@ -178,6 +178,32 @@ if ($null -eq $response -or $null -eq $response.records) {
 
 $records = $response.records
 
+# ---- SLA Check: 告警卡住的任務 ----
+try {
+    $allResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records" -Method Get -Headers $DlHeaders -TimeoutSec 5
+    $now = Get-Date
+    $ic = [System.Globalization.CultureInfo]::InvariantCulture
+    $slaWarns = @()
+    foreach ($t in $allResp.records) {
+        $shortId = if ($t.uid.Length -ge 8) { $t.uid.Substring(0,8) } else { $t.uid }
+        if ($t.state -eq "pending") {
+            try {
+                $age = [int]($now - [datetime]::Parse($t.time, $ic)).TotalMinutes
+                if ($age -gt 10) { $slaWarns += "⏳pending[$shortId] ${age}m" }
+            } catch {}
+        } elseif ($t.state -in @("claimed","processing")) {
+            try {
+                $refStr = if ($t.claimed_at) { $t.claimed_at } else { $t.time }
+                $age = [int]($now - [datetime]::Parse($refStr, $ic)).TotalMinutes
+                if ($age -gt 35) { $slaWarns += "⚠️$($t.state)[$shortId] ${age}m" }
+            } catch {}
+        }
+    }
+    if ($slaWarns.Count -gt 0) {
+        Write-Log "[SLA 告警] $($slaWarns -join ' | ')"
+    }
+} catch { Write-Log "[SLA] 無法查詢: $_" }
+
 if ($records.Count -eq 0) {
     Write-Log "目前沒有新任務需要處理。"
     exit
@@ -332,6 +358,46 @@ foreach ($record in @($record)) {
         $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
         $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $kbSeriesContext + $qualityReqs
 
+        # ── Podcast 快速路徑：偵測到 podcast 製作任務時，直接呼叫 article-to-podcast.ps1 ──
+        # 避免 claude -p 自由詮釋「製作podcast」為「僅生成腳本」，確保走完整管線（TTS→MP3→R2）
+        $podcastHandled = $false
+        $podcastQuery = ""
+        $podcastCount = 1
+
+        # 匹配格式：「製作N則X podcast/播客」或「X podcast/播客」（不分大小寫）
+        if ($taskContent -match '製作\s*(\d+)\s*則?\s*(.+?)\s*[Pp]odcast|製作\s*(\d+)\s*則?\s*(.+?)\s*播客') {
+            $podcastCount = [int]$(if ($matches[1]) { $matches[1] } else { $matches[3] })
+            $podcastQuery = $(if ($matches[2]) { $matches[2] } else { $matches[4] }).Trim()
+            $podcastHandled = $true
+        } elseif ($taskContent -match '製作\s*(.+?)\s*[Pp]odcast|製作\s*(.+?)\s*播客') {
+            $podcastQuery = $(if ($matches[1]) { $matches[1] } else { $matches[2] }).Trim()
+            $podcastHandled = $true
+        }
+
+        if ($podcastHandled -and -not [string]::IsNullOrWhiteSpace($podcastQuery)) {
+            Write-Log "🎙️ 偵測到 Podcast 製作任務（主題：$podcastQuery，集數：$podcastCount）"
+            Write-Log "直接呼叫 article-to-podcast.ps1（略過 claude -p 自由詮釋）"
+            Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
+            $ClaudeStartTime = Get-Date
+            $podcastOutputParts = @()
+            $podcastScript = Join-Path $ProjectRoot "tools\article-to-podcast.ps1"
+
+            $savedClaudeCode = $env:CLAUDECODE
+            Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+            try {
+                for ($epIdx = 1; $epIdx -le $podcastCount; $epIdx++) {
+                    Write-Log "--- 第 ${epIdx}/${podcastCount} 集：Query=$podcastQuery ---"
+                    $epOutput = pwsh -ExecutionPolicy Bypass -File $podcastScript -Query $podcastQuery 2>&1
+                    $podcastOutputParts += "=== 第 ${epIdx}/${podcastCount} 集（$podcastQuery）==="
+                    $podcastOutputParts += ($epOutput -join "`n")
+                }
+            } finally {
+                if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
+                else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
+            }
+            $output = $podcastOutputParts -join "`n`n"
+        } else {
+
         Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
         Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
         $ClaudeStartTime = Get-Date
@@ -354,6 +420,8 @@ foreach ($record in @($record)) {
             # 還原環境變數
             if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
         }
+
+        } # end podcast else
         $toolUsed = "Claude CLI"
         $claudeDurationSec = [int]((Get-Date) - $ClaudeStartTime).TotalSeconds
         $outputStr = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
@@ -399,13 +467,21 @@ foreach ($record in @($record)) {
         Write-CompletionLog -Uid $uid -Filename $filename -Event "failed" `
             -DurationSec $failDurationSec -ErrorMsg $errMsg
 
-        # 標記為 failed（讓系統知道此任務失敗，可觸發重試）
+        # 呼叫 /fail 端點（含自動重試 / Dead Letter Queue 邏輯）
         try {
-            $failBody = @{ state = "failed"; worker_id = $WorkerId } | ConvertTo-Json
-            Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/state" -Method Patch -Body $failBody -Headers $JsonHeaders | Out-Null
-            Write-Log "已將任務標記為 failed"
+            $failBody = @{ worker_id = $WorkerId; error = $errMsg.Substring(0, [Math]::Min($errMsg.Length, 300)) } | ConvertTo-Json
+            $failResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/fail" -Method Post -Body $failBody -Headers $JsonHeaders
+            if ($failResp.status -eq "dead_letter") {
+                Write-Log "任務已移入 Dead Letter Queue（重試 $($failResp.retry_count) 次後放棄）"
+            } else {
+                Write-Log "任務已重回佇列（第 $($failResp.retry_count) 次重試）"
+            }
         } catch {
-            Write-Log "標記 failed 失敗: $_"
+            Write-Log "呼叫 /fail 失敗，改用舊方式: $_"
+            try {
+                $oldFailBody = @{ state = "failed"; worker_id = $WorkerId } | ConvertTo-Json
+                Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/state" -Method Patch -Body $oldFailBody -Headers $JsonHeaders | Out-Null
+            } catch {}
         }
     } finally {
         if (Test-Path $localFilePath) {

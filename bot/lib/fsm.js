@@ -10,20 +10,22 @@
  */
 
 const STATES = {
-    PENDING:    'pending',
-    CLAIMED:    'claimed',
-    PROCESSING: 'processing',
-    COMPLETED:  'completed',
-    FAILED:     'failed'
+    PENDING:      'pending',
+    CLAIMED:      'claimed',
+    PROCESSING:   'processing',
+    COMPLETED:    'completed',
+    FAILED:       'failed',
+    DEAD_LETTER:  'dead_letter'
 };
 
-// 合法的狀態轉換表（COMPLETED 為終態，明確標記空陣列）
+// 合法的狀態轉換表（COMPLETED / DEAD_LETTER 為終態，明確標記空陣列）
 const TRANSITIONS = {
-    [STATES.PENDING]:    [STATES.CLAIMED, STATES.COMPLETED],
-    [STATES.CLAIMED]:    [STATES.PROCESSING, STATES.PENDING, STATES.COMPLETED],
-    [STATES.PROCESSING]: [STATES.COMPLETED, STATES.FAILED, STATES.PENDING],
-    [STATES.FAILED]:     [STATES.PENDING],
-    [STATES.COMPLETED]:  []
+    [STATES.PENDING]:      [STATES.CLAIMED, STATES.COMPLETED],
+    [STATES.CLAIMED]:      [STATES.PROCESSING, STATES.PENDING, STATES.COMPLETED],
+    [STATES.PROCESSING]:   [STATES.COMPLETED, STATES.FAILED, STATES.PENDING],
+    [STATES.FAILED]:       [STATES.PENDING, STATES.DEAD_LETTER],
+    [STATES.COMPLETED]:    [],
+    [STATES.DEAD_LETTER]:  []
 };
 
 // 任務認領預設逾時（毫秒）：10 分鐘

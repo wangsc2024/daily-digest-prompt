@@ -369,6 +369,17 @@ function mount(app, opts = {}) {
         }
     });
 
+    // DLQ: 任務失敗端點（含自動重試 / Dead Letter Queue 邏輯）
+    app.post('/api/records/:uid/fail', (req, res) => {
+        const { worker_id, error } = req.body || {};
+        const result = store.requeueOrDeadLetter(req.params.uid, worker_id, error);
+        const rec = store.getRecord(req.params.uid);
+        const retry_count = rec ? rec.retry_count : undefined;
+        if (result === 'not_found') return res.status(404).json({ error: '找不到指定的任務' });
+        if (result === 'invalid_state') return res.status(400).json({ error: '任務狀態不允許執行失敗處理' });
+        res.json({ status: result, retry_count });
+    });
+
     // S4: 取消任務（只允許 pending 狀態）
     app.delete('/api/records/:uid', (req, res) => {
         const result = store.removeRecord(req.params.uid);

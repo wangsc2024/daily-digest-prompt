@@ -56,21 +56,22 @@ Stop-ByPort -port $BotPort -name "bot server"
 # ---- Step 2: 停止 Gun relay ----
 Stop-ByPort -port $RelayPort -name "Gun relay"
 
-# ---- Step 2.5: 停止 chatroom-scheduler ----
-$schedProcs = Get-Process -Name "python*" -ErrorAction SilentlyContinue |
-    Where-Object { $_.CommandLine -match "chatroom-scheduler" }
-if ($schedProcs) {
-    foreach ($p in $schedProcs) {
-        try {
-            Stop-Process -Id $p.Id -Force -ErrorAction Stop
-            Write-RLog "已停止 chatroom-scheduler (PID $($p.Id))"
-        } catch {
-            Write-RLog "停止 chatroom-scheduler PID $($p.Id) 失敗: $_"
-        }
+# ---- Step 2.5: 停止 chatroom-scheduler（完整 process tree 清除）----
+# 搜尋所有 process（python / uv / pwsh）CommandLine 含 "chatroom-scheduler"
+$killedCount = 0
+$allProcs = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -match "chatroom-scheduler" -and $_.ProcessId -ne $PID }
+foreach ($p in $allProcs) {
+    try {
+        Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop
+        Write-RLog "已停止 $($p.Name) (PID $($p.ProcessId)) [chatroom-scheduler]"
+        $killedCount++
+    } catch {
+        Write-RLog "停止 PID $($p.ProcessId) 失敗: $_"
     }
-} else {
-    Write-RLog "chatroom-scheduler 未在執行，略過"
 }
+if ($killedCount -eq 0) { Write-RLog "chatroom-scheduler 未在執行，略過" }
+else { Start-Sleep -Seconds 1 }  # 等進程完全退出
 
 # ---- Step 3: 啟動 Gun relay ----
 $ts = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -95,35 +96,50 @@ Start-Process -FilePath $NodeExe `
     -WindowStyle Hidden
 Write-RLog "bot server 已啟動 (port $BotPort)"
 
-# ---- Step 6: 等待 bot 初始化後驗證 ----
-Start-Sleep -Seconds 5
+# ---- Step 6: 等待 bot 初始化後驗證（指數退避重試 3 次）----
+$health = $null
+$waitSecs = @(8, 12, 15)   # bot init 需 10~15s：SEA 金鑰 + Gun 握手 + 224 筆快取
+for ($i = 0; $i -lt $waitSecs.Count; $i++) {
+    Write-RLog "健康檢查等待 $($waitSecs[$i])s（嘗試 $($i+1)/$($waitSecs.Count)）..."
+    Start-Sleep -Seconds $waitSecs[$i]
+    $health = Test-BotHealth
+    if ($null -ne $health) { break }
+}
 
-$health = Test-BotHealth
 if ($null -eq $health) {
-    Write-RLog "[ERROR] bot server 健康檢查失敗，請手動確認"
+    $errMsg = "[ERROR] bot server 健康檢查失敗（已重試 $($waitSecs.Count) 次），chatroom-scheduler 未啟動"
+    Write-RLog $errMsg
+
+    # ntfy 告警
+    $ntfyFile = Join-Path $ProjectDir "ntfy_restart_fail.json"
+    $ntfyPayload = @{
+        topic    = "wangsc2025"
+        title    = "🔴 Bot 重啟失敗"
+        message  = "chatroom-scheduler 未啟動。$errMsg`n時間: $(Get-Date -Format 'MM-dd HH:mm')`n請手動執行 restart-bot.ps1"
+        priority = 5
+        tags     = @("rotating_light", "robot")
+    } | ConvertTo-Json -Compress
+    [System.IO.File]::WriteAllText($ntfyFile, $ntfyPayload, [System.Text.UTF8Encoding]::new($false))
+    try {
+        curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyFile" https://ntfy.sh 2>/dev/null
+    } catch {}
+    Remove-Item $ntfyFile -Force -ErrorAction SilentlyContinue
     exit 1
 }
 
-$gunStatus = if ($health.gunConnected) { "已連線" } else { "未連線（Gun WebSocket 握手中，稍後自動重試）" }
+$gunStatus = if ($health.gunConnected) { "已連線" } else { "未連線（Gun 握手中，稍後自動重試）" }
 Write-RLog "bot server 狀態: $($health.status) | Gun: $gunStatus | 任務佇列: pending=$($health.pendingTasks)"
 
-# ---- Step 7: 啟動 chatroom-scheduler ----
+# ---- Step 7: 啟動 chatroom-scheduler（統一用 uv）----
 # 不使用 -RedirectStandardOutput/-RedirectStandardError（會導致 Python 長駐進程提前結束）。
 # 日誌由 chatroom-scheduler.py 自行寫入 bot/logs/chatroom-scheduler.log。
 $schedulerScript = Join-Path $ProjectDir "chatroom-scheduler.py"
-$venvPython = Join-Path $ProjectDir ".venv\Scripts\python.exe"
-if ((Test-Path $schedulerScript) -and (Test-Path $venvPython)) {
-    Start-Process -FilePath $venvPython `
-        -ArgumentList $schedulerScript `
-        -WorkingDirectory $ProjectDir `
-        -WindowStyle Hidden
-    Write-RLog "chatroom-scheduler 已啟動（venv python，日誌→ bot/logs/chatroom-scheduler.log）"
-} elseif (Test-Path $schedulerScript) {
+if (Test-Path $schedulerScript) {
     Start-Process -FilePath "pwsh.exe" `
-        -ArgumentList "-NoProfile","-WindowStyle","Hidden","-Command","Set-Location '$ProjectDir'; uv run python chatroom-scheduler.py" `
+        -ArgumentList "-NoProfile","-WindowStyle","Hidden","-Command","uv run --project '$ProjectDir' python '$schedulerScript'" `
         -WorkingDirectory $ProjectDir `
         -WindowStyle Hidden
-    Write-RLog "chatroom-scheduler 已啟動（uv fallback）"
+    Write-RLog "chatroom-scheduler 已啟動（uv，日誌→ bot/logs/chatroom-scheduler.log）"
 } else {
     Write-RLog "[WARN] chatroom-scheduler.py 不存在，略過"
 }
