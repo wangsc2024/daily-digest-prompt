@@ -68,7 +68,7 @@ if ($FromHeartbeat) {
             if ($currentSchedule -and $currentSchedule.Name) {
                 $schedules += $currentSchedule
             }
-            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Args = ""; Description = ""; Interval = ""; Timeout = 0; Trigger = ""; Command = ""; WorkDir = ""; Delay = 0; Retry = 0 }
+            $currentSchedule = @{ Name = $Matches[1]; Cron = ""; Script = ""; Args = ""; Description = ""; Interval = ""; Timeout = 0; Trigger = ""; Command = ""; WorkDir = ""; Delay = 0; Retry = 0; Disabled = $false }
         }
         elseif ($currentSchedule) {
             if ($line -match '^\s{4}cron:\s*"(.+)"') { $currentSchedule.Cron = $Matches[1] }
@@ -82,9 +82,16 @@ if ($FromHeartbeat) {
             if ($line -match '^\s{4}workdir:\s*"(.+)"') { $currentSchedule.WorkDir = $Matches[1] }
             if ($line -match '^\s{4}delay:\s*(\d+)') { $currentSchedule.Delay = [int]$Matches[1] }
             if ($line -match '^\s{4}retry:\s*(\d+)') { $currentSchedule.Retry = [int]$Matches[1] }
+            if ($line -match '^\s{4}disabled:\s*true') { $currentSchedule.Disabled = $true }
         }
     }
     if ($currentSchedule -and $currentSchedule.Name) { $schedules += $currentSchedule }
+    # 過濾停用的排程
+    $disabledCount = ($schedules | Where-Object { $_.Disabled }).Count
+    $schedules = $schedules | Where-Object { -not $_.Disabled }
+    if ($disabledCount -gt 0) {
+        Write-Host "[略過] $disabledCount 個停用排程（disabled: true）" -ForegroundColor DarkGray
+    }
 
     if ($schedules.Count -eq 0) {
         Write-Host "[錯誤] HEARTBEAT.md 中未找到排程定義" -ForegroundColor Red

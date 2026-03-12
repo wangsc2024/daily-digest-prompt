@@ -1,0 +1,17 @@
+停用的 9 個 Claude 任務（daily_limit: 0）：
+
+任務	後端	原日限 → 現在
+skill_audit	claude_sonnet45	1 → 0
+log_audit	claude_sonnet45	1 → 0
+git_push	claude_sonnet45	1 → 0
+system_insight	claude_sonnet45	1 → 0
+arch_evolution	claude_sonnet45	1 → 0
+self_heal	claude_sonnet45	1 → 0
+chatroom_optimize	claude_sonnet45	1 → 0
+podcast_create	claude_sonnet45	1 → 0
+podcast_jiaoguangzong	claude_sonnet45	3 → 0
+
+停用 daily-digest-pm,system-audit及media-podcast-buddhist 排程
+Disable-ScheduledTask -TaskName "Claude_daily-digest-pm"
+Disable-ScheduledTask -TaskName "Claude_system-audit"
+Disable-ScheduledTask -TaskName "Claude_media-podcast-buddhist"

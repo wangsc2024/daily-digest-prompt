@@ -1352,6 +1352,18 @@ foreach ($job in $phase2Jobs) {
                 $fallback | ConvertTo-Json -Depth 4 |
                     Set-Content -Path $rFile -Encoding UTF8 -Force
                 Write-Log "[Phase2] ${agentName} result file補寫 (structured failure, stdout_preview=${previewLen} chars, total=$($fullOutput.Length), ${jobElapsed}s)"
+            } else {
+                # 已有有效結構：若 status=in_progress 代表任務中途 context 耗盡 → 升級為 partial_success
+                try {
+                    $existing = Get-Content $rFile -Raw -Encoding UTF8 | ConvertFrom-Json
+                    if ($existing.status -eq "in_progress") {
+                        $existing.status  = "partial_success"
+                        $existing.summary = if ($existing.summary -and $existing.summary -ne "研究進行中") { $existing.summary } else { "研究已完成但最終步驟未執行（context 耗盡）" }
+                        $existing | ConvertTo-Json -Depth 4 |
+                            Set-Content -Path $rFile -Encoding UTF8 -Force
+                        Write-Log "[Phase2] ${agentName} result file: in_progress → partial_success (context 耗盡，研究內容已產出)"
+                    }
+                } catch { <# 讀取失敗則保留原檔案不動 #> }
             }
         }
     }

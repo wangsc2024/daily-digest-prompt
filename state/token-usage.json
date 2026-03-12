@@ -49,11 +49,11 @@
       "claude_calls": 0
     },
     "2026-03-12": {
-      "estimated_tokens": 2360371.7142857146,
-      "tool_calls": 1179,
-      "input_chars": 489948,
-      "output_chars": 7771353
+      "estimated_tokens": 3892829.7142857187,
+      "tool_calls": 1795,
+      "input_chars": 722418,
+      "output_chars": 12902486
     }
   },
-  "updated": "2026-03-12T11:36:46.722567"
+  "updated": "2026-03-12T21:33:05.060292"
 }

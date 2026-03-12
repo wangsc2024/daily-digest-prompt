@@ -2,6 +2,9 @@
 你的任務是對楞嚴經（大佛頂首楞嚴經）進行一次深度研究，並將成果寫入 RAG 知識庫。
 完成後**必須**將結果寫入工作區根目錄的 `results/todoist-auto-shurangama.json`（使用 Write 工具，不可只輸出在對話中）。
 
+> ⚠️ **輸出限制**：研究正文（含 WebSearch/WebFetch 摘錄）總字數不超過 60,000 字。
+> 過程中**只輸出研究內容本身**，不輸出「好的，我開始…」「已完成…」「接下來我會…」等確認語句。
+
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
@@ -72,6 +75,22 @@ rm kb_notes.json
 - 每次聚焦一個主題
 - 先輸出：「本次研究主題：XXX」
 
+**確認主題後，立即用 Write 建立** `results/todoist-auto-shurangama.json`（status 填 `"in_progress"`）：
+```json
+{
+  "agent": "todoist-auto-shurangama",
+  "status": "in_progress",
+  "task_id": null,
+  "type": "shurangama",
+  "topic": "（填入本次研究主題）",
+  "kb_imported": false,
+  "duration_seconds": 0,
+  "summary": "研究進行中",
+  "error": null
+}
+```
+> 此步驟確保即使後續 context 耗盡，結果檔案仍存在（PowerShell 不會覆寫有效 JSON）。
+
 ## 第三步：執行研究
 1. 使用 WebSearch 搜尋（至少 3 組關鍵詞）
 2. 使用 WebFetch 獲取 2-3 篇有價值的文章
@@ -114,8 +133,8 @@ rm kb_notes.json
 3. 內容是否超過 300 字？
 若未通過：補充搜尋 → 修正 → 重新匯入（最多自修正 2 次）。
 
-## 第五步：寫入結果 JSON（必做，否則任務視為失敗）
-用 Write 工具在工作區根目錄建立 `results/todoist-auto-shurangama.json`，且 JSON 必須含 `agent`、`type`、`status` 欄位：
+## 最後步驟：更新結果 JSON（最終狀態，必做）
+用 Write 工具在工作區根目錄覆寫 `results/todoist-auto-shurangama.json`，將 status 更新為最終值，JSON 必須含 `agent`、`type`、`status` 欄位：
 ```json
 {
   "agent": "todoist-auto-shurangama",

@@ -24,31 +24,7 @@
       "reason": "result_file_missing",
       "consecutive_count": 1,
       "reset_count": 0
-    },
-    {
-      "task_key": "git_push",
-      "first_failed_at": "2026-03-11T19:45:02",
-      "last_failed_at": "2026-03-11T19:45:02",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
-    },
-    {
-      "task_key": "ai_github_research",
-      "first_failed_at": "2026-03-11T22:55:08",
-      "last_failed_at": "2026-03-11T22:55:08",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
-    },
-    {
-      "task_key": "podcast_jiaoguangzong",
-      "first_failed_at": "2026-03-12T03:43:44",
-      "last_failed_at": "2026-03-12T03:43:44",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
     }
   ],
-  "updated_at": "2026-03-12T08:46:07"
+  "updated_at": "2026-03-12T19:33:31"
 }

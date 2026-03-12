@@ -281,7 +281,7 @@ tasks:
 
   jiaoguangzong:
     name: "教觀綱宗研究"
-    daily_limit: 1
+    daily_limit: 2
     counter_field: "jiaoguangzong_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -297,7 +297,7 @@ tasks:
 
   fahua:
     name: "法華經研究"
-    daily_limit: 1
+    daily_limit: 3
     counter_field: "fahua_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -313,7 +313,7 @@ tasks:
 
   jingtu:
     name: "淨土宗研究"
-    daily_limit: 1
+    daily_limit: 2
     counter_field: "jingtu_count"
     template: "templates/auto-tasks/buddhist-research.md"
     template_version: 1
@@ -443,7 +443,7 @@ tasks:
   # --- 系統優化群組 ---
   skill_audit:
     name: "Skill 審查優化"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "skill_audit_count"
     template: "templates/auto-tasks/skill-audit.md"
     template_version: 1
@@ -455,7 +455,7 @@ tasks:
   # --- 系統維護群組（共 2 次/日）---
   log_audit:
     name: "系統 Log 審查"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "log_audit_count"
     template: "templates/auto-tasks/log-audit.md"
     template_version: 1
@@ -465,7 +465,7 @@ tasks:
 
   git_push:
     name: "專案推送 GitHub + 知識庫同步"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "git_push_count"
     template: "templates/auto-tasks/git-push.md"
     template_version: 1
@@ -501,7 +501,7 @@ tasks:
   # --- 系統自省群組（共 2 次/日）---
   system_insight:
     name: "系統洞察分析"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "system_insight_count"
     template: "templates/auto-tasks/system-insight.md"
     template_version: 1
@@ -512,7 +512,7 @@ tasks:
 
   arch_evolution:
     name: "架構演進決策"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "arch_evolution_count"
     template: "templates/auto-tasks/arch-evolution.md"  # 佔位符，實際邏輯在 team prompt
     prompt_file: "prompts/team/todoist-auto-arch_evolution.md"
@@ -526,7 +526,7 @@ tasks:
 
   self_heal:
     name: "系統自愈迴圈"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "self_heal_count"
     template: "templates/auto-tasks/self-heal.md"
     template_version: 1
@@ -539,7 +539,7 @@ tasks:
   # --- Chatroom 整合優化群組（共 1 次/日）---
   chatroom_optimize:
     name: "Chatroom 整合品質優化"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "chatroom_optimize_count"
     template: "templates/auto-tasks/chatroom-optimize.md"
     template_version: 1
@@ -575,7 +575,7 @@ tasks:
   # --- Podcast 生成群組（共 4 次/日）---
   podcast_create:
     name: "Podcast 生成（AI 雙主持人）"
-    daily_limit: 1
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "podcast_create_count"
     template: "templates/auto-tasks/podcast-create.md"
     template_version: 1
@@ -586,7 +586,7 @@ tasks:
 
   podcast_jiaoguangzong:
     name: "教觀綱宗 Podcast 生成（每日 3 集）"
-    daily_limit: 3
+    daily_limit: 0  # 停用：使用 claude_sonnet45
     counter_field: "podcast_jiaoguangzong_count"
     template: "templates/auto-tasks/podcast-jiaoguangzong.md"
     template_version: 1
@@ -598,17 +598,17 @@ tasks:
 # ============================================================
 # 每日上限摘要
 # ============================================================
-# 佛學研究：楞嚴經(1) + 教觀綱宗(1) + 法華經(1) + 淨土宗(1) = 4
-# AI/技術：任務技術(2) + AI深度(5) + Unsloth(0) + AI GitHub(1) + AI智慧城市(0) + AI系統開發(1) + AI工作流(1) = 10
-# 系統優化：Skill審查(1) = 1
-# 系統維護：Log審查(1) + Git推送(1) = 2
-# 遊戲創意：創意遊戲優化(0) = 0
-# 專案品質：QA優化(0) = 0
-# 系統自省：系統洞察(1) + 自愈迴圈(1) = 2
-# Chatroom 整合：品質優化(1) = 1
-# GitHub 靈感：靈感蒐集(0) = 0
-# Podcast 生成：AI 雙主持人(1) + 教觀綱宗 3 集(3) = 4
-# 合計：24 次/日（含 5 個暫停任務 daily_limit=0）
+# 佛學研究（codex_exec）：楞嚴經(1) + 教觀綱宗(1) + 法華經(1) + 淨土宗(1) = 4
+# AI/技術（codex_exec）：任務技術(2) + AI深度(5) + Unsloth(0) + AI GitHub(1) + AI智慧城市(0) + AI系統開發(1) + AI工作流(1) = 10
+# 系統優化（claude_sonnet45）：Skill審查(0，停用) = 0
+# 系統維護（claude_sonnet45）：Log審查(0，停用) + Git推送(0，停用) = 0
+# 遊戲創意（codex_standard）：創意遊戲優化(0，暫停) = 0
+# 專案品質（codex_standard）：QA優化(0，暫停) = 0
+# 系統自省（claude_sonnet45）：系統洞察(0，停用) + 自愈迴圈(0，停用) = 0
+# Chatroom 整合（claude_sonnet45）：品質優化(0，停用) = 0
+# GitHub 靈感（codex_standard）：靈感蒐集(0，暫停) = 0
+# Podcast 生成（claude_sonnet45）：AI 雙主持人(0，停用) + 教觀綱宗 3 集(0，停用) = 0
+# 合計：14 次/日（純 codex_exec/codex_standard；claude_sonnet45 任務全數停用）
 
 # 歷史追蹤寫入規則
 history:

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-12T08:42:26.138032+08:00",
+  "updated_at": "2026-03-12T15:40:41.379558+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -377,7 +377,7 @@
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-11",
+      "last_active": "2026-03-12",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -515,7 +515,8 @@
             "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
             "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運",
             "教觀綱宗研究：化儀四教中的秘密教 — 同會異聞的施教結構與教觀分際",
-            "教觀綱宗研究：化儀四教中的頓教 — 從頓教部到頓教相的一時圓說與教觀合一"
+            "教觀綱宗研究：化儀四教中的頓教 — 從頓教部到頓教相的一時圓說與教觀合一",
+            "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -540,9 +541,12 @@
             "頓教相",
             "化儀四教中頓教的獨立定位",
             "頓教與法華非頓非漸之辨",
-            "頓教與圓頓止觀的關聯"
+            "頓教與圓頓止觀的關聯",
+            "一心三觀與返聞自性的操作性對映",
+            "法華非頓非漸作為圓頓修證判準的橋接位置",
+            "教觀雙運如何避免頓悟偏空或漸修著相"
           ],
-          "completed_at": "2026-03-11"
+          "completed_at": "2026-03-12"
         }
       },
       "current_stage": "synthesis",
@@ -550,14 +554,14 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "可續研「頓教相」與圓頓止觀、法華非頓非漸、楞嚴圓頓修證之跨經論會通。"
+      "next_research_hint": "後續可續研《楞嚴經》耳根圓通與天台一心三觀的修證次第，或再與《法華經》非頓非漸作三方會通。"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
       "domain": "法華經 / Lotus Sutra 佛學研究",
       "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-11",
+      "last_active": "2026-03-12",
       "tags": [
         "法華經",
         "佛學",
@@ -669,7 +673,8 @@
             "法華經一心三觀的視覺化與 Podcast 系列延伸計畫 — 概念圖設計、分集規劃與自動化管線方案",
             "法華經譬喻品研究：三車火宅與舍利弗授記的權實結構",
             "法華經藥草喻品研究：一地所生、一雨所潤與眾生根機差別的圓教會通",
-            "???????????????????????????????"
+            "???????????????????????????????",
+            "法華經藥草喻品研究：一相一味與一雨普潤的平等教化論"
           ],
           "covered_concepts": [
             "一佛乘系統總結",
@@ -783,9 +788,12 @@
             "與《楞嚴經》等他經研究的交叉對照",
             "????",
             "??????????????",
-            "??????????"
+            "??????????",
+            "藥草喻品的一相一味教化論",
+            "平等法與差別受益的二層結構",
+            "一雨普潤的現代弘法詮釋"
           ],
-          "completed_at": "2026-03-11"
+          "completed_at": "2026-03-12"
         }
       },
       "current_stage": "completed",
@@ -794,14 +802,14 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "????????????????????????????????????????????"
+      "next_research_hint": "可續從法華經各品的教化論、弘法方法與跨經會通角度做專題深化。"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
       "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
       "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-10",
+      "last_active": "2026-03-12",
       "tags": [
         "淨土宗",
         "佛學",
@@ -888,7 +896,7 @@
         "synthesis": {
           "status": "completed",
           "started_at": "2026-03-04",
-          "completed_at": "2026-03-10",
+          "completed_at": "2026-03-12",
           "kb_notes": [
             "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
             "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀",
@@ -896,7 +904,8 @@
             "阿彌陀經研究：執持名號與一心不亂的義理辨析及實修指要",
             "觀無量壽經研究：十六觀的次第結構與觀佛攝心法",
             "善導大師五正行研究：正助二業結構與專修稱名實踐",
-            "無量壽經研究：第十八願的本願稱名與平生業成"
+            "無量壽經研究：第十八願的本願稱名與平生業成",
+            "念佛法門修持研究：都攝六根、淨念相繼的攝心要訣與日課實踐"
           ],
           "covered_concepts": [
             "淨土判教體系系統整理",
@@ -937,7 +946,10 @@
             "第十八願與成就文的因果對讀",
             "本願稱名",
             "平生業成",
-            "第十八願與第十一願、第二十二願的三願結構"
+            "第十八願與第十一願、第二十二願的三願結構",
+            "都攝六根與口念耳聞的具體操作",
+            "如何把十念記數法與隨念隨聽結合",
+            "念佛攝心法與楞嚴耳根圓通的互證"
           ]
         }
       },
@@ -947,7 +959,7 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "可續做中日淨土宗對第十八願的異同詮釋，或深化第十九願、第二十願與三輩九品的關聯。"
+      "next_research_hint": "可續做「念佛攝心」與「臨終正念預備」的整合，或比較印光、蕅益、善導對攝心念佛的異同。"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2247,6 +2259,125 @@
         "llm-structured-output-pipeline"
       ],
       "next_research_hint": "下一步進入 mechanism：深入 traces、experiments、online evaluation rules 與 optimizer 的資料流與排程機制。"
+    },
+    "lmcache-kv-cache-infrastructure": {
+      "series_id": "lmcache-kv-cache-infrastructure",
+      "domain": "LMCache / LLM KV Cache Infrastructure / Inference Optimization",
+      "description": "LMCache 與 LLM 推理 KV cache 基礎設施研究系列，聚焦外部化快取、跨引擎整合與 serving 優化。",
+      "initiated_at": "2026-03-12",
+      "last_active": "2026-03-12",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "LMCache",
+        "KV Cache",
+        "Inference"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-12",
+          "completed_at": "2026-03-12",
+          "kb_notes": [
+            "LMCache 深度研究：面向 vLLM/SGLang 的 LLM KV Cache 基礎設施、架構設計與落地應用（2026-03）"
+          ],
+          "covered_concepts": [
+            "KV cache 外部化",
+            "與 vLLM/SGLang 的整合模式",
+            "分層儲存後端",
+            "高重複前綴工作負載的延遲優化"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "下一步進入 mechanism：深入 chunking、blending、cache-aware routing 與 disaggregated prefill/decode 的資料流。"
+    },
+    "ai-living-documentation-pipeline": {
+      "series_id": "ai-living-documentation-pipeline",
+      "domain": "AI Living Documentation Pipeline / OpenAPI + Release Notes + llms.txt",
+      "description": "AI 文件生成研究系列，聚焦 docs-as-code、活文件、PR 摘要、API 文件與 LLM 友善文件入口的交付管線。",
+      "initiated_at": "2026-03-12",
+      "last_active": "2026-03-12",
+      "tags": [
+        "AI",
+        "系統開發",
+        "文件生成",
+        "software-engineering",
+        "docs-as-code",
+        "llms.txt",
+        "Release Notes",
+        "OpenAPI"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-12",
+          "completed_at": "2026-03-12",
+          "kb_notes": [
+            "AI 驅動的文件自動化：API 文件生成、變更日誌自動化與 LLM 輔助文件維護（2026）",
+            "AI-Driven Documentation Generation 完整指南 — LLM 輔助 API 文件生成、程式碼自動文件化與智能變更日誌自動化的工業級實踐（2026）"
+          ],
+          "covered_concepts": [
+            "AI 文件生成",
+            "API 文件自動化",
+            "變更日誌自動化"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-12",
+          "completed_at": "2026-03-12",
+          "kb_notes": [
+            "AI 活文件管線實作：OpenAPI 文件、PR 摘要、Release Notes 與 llms.txt 自動同步"
+          ],
+          "covered_concepts": [
+            "PR 摘要作為文件草稿",
+            "GitHub release.yml 分類規則",
+            "Redocly build-docs 建置流程",
+            "llms.txt 文件入口設計"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-12",
+          "completed_at": "2026-03-12",
+          "kb_notes": [
+            "AI 活文件管線實作：OpenAPI 文件、PR 摘要、Release Notes 與 llms.txt 自動同步"
+          ],
+          "covered_concepts": [
+            "docs pipeline workflow",
+            "GitHub Actions 範本",
+            "daily-digest-prompt 映射"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "llm-structured-output-pipeline"
+      ],
+      "next_research_hint": "下一步可研究文件品質評分、docs drift 偵測、失真告警與 agent 驗收測試。"
     }
   }
 }

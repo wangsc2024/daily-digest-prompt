@@ -2,6 +2,9 @@
 你的任務是對淨土宗進行一次深度研究，並將成果寫入 RAG 知識庫。
 完成後將結果寫入 `results/todoist-auto-jingtu.json`。
 
+> ⚠️ **輸出限制**：研究正文（含 WebSearch/WebFetch 摘錄）總字數不超過 60,000 字。
+> 過程中**只輸出研究內容本身**，不輸出「好的，我開始…」「已完成…」「接下來我會…」等確認語句。
+
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
@@ -75,6 +78,22 @@ rm kb_notes.json
 - 每次聚焦一個主題，不貪多
 - 先輸出：「本次研究主題：XXX」
 
+**確認主題後，立即用 Write 建立** `results/todoist-auto-jingtu.json`（status 填 `"in_progress"`）：
+```json
+{
+  "agent": "todoist-auto-jingtu",
+  "status": "in_progress",
+  "task_id": null,
+  "type": "jingtu",
+  "topic": "（填入本次研究主題）",
+  "kb_imported": false,
+  "duration_seconds": 0,
+  "summary": "研究進行中",
+  "error": null
+}
+```
+> 此步驟確保即使後續 context 耗盡，結果檔案仍存在（PowerShell 不會覆寫有效 JSON）。
+
 ## 第三步：執行研究
 1. 使用 WebSearch 搜尋（至少 3 組關鍵詞，包含「淨土宗」「阿彌陀經」「念佛法門」「極樂世界」「善導大師」等）
 2. 使用 WebFetch 獲取 2-3 篇有價值的文章（優先祖師著作、學術論文、淨宗法師開示）
@@ -118,8 +137,8 @@ rm kb_notes.json
 4. 是否有連結具體修持方法（不只是理論闡述）？
 若未通過：補充搜尋 → 修正 → 重新匯入（最多自修正 2 次）。
 
-## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-jingtu.json`：
+## 最後步驟：更新結果 JSON（最終狀態）
+用 Write 覆寫 `results/todoist-auto-jingtu.json`，將 status 改為最終值：
 ```json
 {
   "agent": "todoist-auto-jingtu",
