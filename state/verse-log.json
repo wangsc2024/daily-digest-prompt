@@ -53,6 +53,72 @@
       "session": "morning",
       "verse_id": 5,
       "source": "《六祖大師法寶壇經》"
+    },
+    {
+      "date": "2026-03-09",
+      "verse_id": 6,
+      "verse_text": "佛法在世間，不離世間覺；離世覓菩提，恰如求兔角。",
+      "author": "六祖惠能大師",
+      "session": "evening",
+      "time": "2026-03-09 17:05:01",
+      "source": "《六祖大師法寶壇經》",
+      "channel": "ntfy/wangsc2025",
+      "status": "success"
+    },
+    {
+      "channel": "ntfy/wangsc2025",
+      "time": "2026-03-10 06:30:01",
+      "verse_text": "不經一番寒徹骨，焉得梅花撲鼻香。",
+      "author": "黃蘗希運禪師",
+      "session": "morning",
+      "verse_id": 7,
+      "status": "success",
+      "source": "《黃蘗斷際禪師宛陵錄》",
+      "date": "2026-03-10"
+    },
+    {
+      "channel": "chatroom",
+      "time": "2026-03-10 08:33:00",
+      "verse_text": "一日不作，一日不食。",
+      "author": "百丈懷海禪師",
+      "session": "morning-chatroom",
+      "verse_id": 8,
+      "status": "success",
+      "source": "百丈懷海禪師農禪家風",
+      "date": "2026-03-10"
+    },
+    {
+      "date": "2026-03-10",
+      "source": "《大乘起信論》",
+      "verse_id": 9,
+      "channel": "ntfy/wangsc2025",
+      "author": "馬鳴菩薩",
+      "status": "success",
+      "time": "2026-03-10 17:05:02",
+      "session": "evening",
+      "verse_text": "心生種種法生，心滅種種法滅。"
+    },
+    {
+      "date": "2026-03-10",
+      "source": "《大方廣圓覺修多羅了義經》",
+      "verse_id": 10,
+      "channel": "chatroom",
+      "author": "釋迦牟尼佛",
+      "status": "success",
+      "time": "2026-03-10 17:34:00",
+      "session": "evening-chatroom",
+      "verse_text": "知幻即離，不作方便；離幻即覺，亦無漸次。"
+    },
+    {
+      "verse_id": 11,
+      "verse_text": "勿以善小而不為，勿以惡小而為之。",
+      "source": "《大般涅槃經》（南本卷三十六）",
+      "author": "釋迦牟尼佛",
+      "session": "evening",
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-11",
+      "time": "2026-03-11 17:05:01",
+      "status": "success"
     }
   ]
 }

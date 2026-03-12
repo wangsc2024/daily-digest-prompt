@@ -278,14 +278,52 @@ def classify_edit(tool_input: dict) -> tuple:
     return summary, tags
 
 
+def append_with_checksum(log_path: str, entry: dict) -> None:
+    """
+    Append-only 寫入（P4-D Paperclip 不可變審計日誌模式）：
+      1. 讀取上一筆記錄的 _hash
+      2. 計算新記錄 hash（排除 _hash 欄位，避免循環依賴）
+      3. 寫入 _prev_hash + _hash 後 append
+
+    輪轉標記（50MB 後）：第一筆寫入 rotation_marker，重置鏈起點。
+    """
+    import hashlib
+
+    prev_hash = ""
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, encoding="utf-8") as f:
+                lines = f.readlines()
+            for line in reversed(lines):
+                line = line.strip()
+                if line:
+                    try:
+                        prev_hash = json.loads(line).get("_hash", "")
+                    except json.JSONDecodeError:
+                        pass
+                    break
+        except OSError:
+            pass
+
+    entry["_prev_hash"] = prev_hash
+    # 排除 _hash 本身再計算（C2 修正：避免循環依賴）
+    hash_payload = {k: v for k, v in entry.items() if k != "_hash"}
+    entry["_hash"] = hashlib.sha256(
+        json.dumps(hash_payload, sort_keys=True, ensure_ascii=False).encode()
+    ).hexdigest()[:16]
+
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
 def _find_token_usage_file() -> str:
     """找 token-usage.json 的絕對路徑。
 
     始終使用基於腳本位置的絕對路徑，避免團隊並行模式下
     多個 Agent 的 CWD 不同導致寫入不同檔案的競態條件。
     """
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(project_root, "state", "token-usage.json")
+    from hook_utils import get_project_root
+    return os.path.join(get_project_root(), "state", "token-usage.json")
 
 
 def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None:
@@ -412,16 +450,11 @@ def main():
             output_snippet = tool_output[:500] if tool_output else ""
 
             # 讀取 session 狀態（使用絕對路徑，防止 CWD 漂移）
+            from hook_utils import get_project_root, safe_load_json
             sid_prefix = (session_id or "unknown")[:8]
-            _proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            _proj_root = get_project_root()
             loop_state_file = os.path.join(_proj_root, "state", f"loop-state-{sid_prefix}.json")
-            initial_state = None
-            if os.path.exists(loop_state_file):
-                try:
-                    with open(loop_state_file, "r", encoding="utf-8") as f:
-                        initial_state = json.load(f)
-                except (json.JSONDecodeError, OSError):
-                    pass
+            initial_state = safe_load_json(loop_state_file)
 
             detector = LoopDetector(warning_mode=True, initial_state=initial_state)
             loop_result = detector.check_loop(tool_name, params_summary, output_snippet)
@@ -437,7 +470,7 @@ def main():
             if loop_result.get("loop_detected"):
                 tags.append("loop-suspected")
                 loop_detection = loop_result
-        except Exception as e:
+        except (json.JSONDecodeError, OSError, ValueError, KeyError) as e:
             print(f"[post_tool_logger] loop detection error: {e}", file=sys.stderr)
             pass  # 不中斷 Agent 流程，但記錄錯誤到 stderr
 
@@ -512,8 +545,7 @@ def main():
                     os.remove(rotated)
                 os.rename(log_file, rotated)
 
-        with open(log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        append_with_checksum(log_file, entry)
     except OSError:
         pass  # Silent fail — do not disrupt Agent workflow
 

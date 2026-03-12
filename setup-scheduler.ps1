@@ -6,10 +6,39 @@ param(
     [string]$Time,
     [string]$TaskName,
     [string]$Script,
-    [switch]$FromHeartbeat
+    [switch]$FromHeartbeat,
+    [switch]$RegisterTestTodoistEnv
 )
 
 $AgentDir = $PSScriptRoot
+
+# ============================================
+# -RegisterTestTodoistEnv: 註冊「僅執行一次」Todoist 排程環境測試（約 1 分鐘後執行，結果寫入 logs/todoist-schedule-test.log）
+# ============================================
+if ($RegisterTestTodoistEnv) {
+    $taskName = "Claude_test-todoist-env-once"
+    $logDir = "$AgentDir\logs"
+    $logFile = "$logDir\todoist-schedule-test.log"
+    New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+    $wrapperPath = "$AgentDir\run-with-env.ps1"
+    $testScript = "$AgentDir\test-todoist-schedule-env.ps1"
+    if (-not (Test-Path $wrapperPath) -or -not (Test-Path $testScript)) {
+        Write-Host "[錯誤] 找不到 run-with-env.ps1 或 test-todoist-schedule-env.ps1" -ForegroundColor Red
+        exit 1
+    }
+    $runAt = (Get-Date).AddMinutes(1).ToString("HH:mm")
+    $action = New-ScheduledTaskAction -Execute "pwsh.exe" `
+        -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command `"& { Set-Location '$AgentDir'; & '$wrapperPath' 'test-todoist-schedule-env.ps1' *> '$logFile' }`"" `
+        -WorkingDirectory $AgentDir
+    $trigger = New-ScheduledTaskTrigger -Once -At $runAt
+    $existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    if ($existing) { Unregister-ScheduledTask -TaskName $taskName -Confirm:$false }
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger `
+        -Description "一次性測試：排程環境下 Todoist API Token（run-with-env）" -RunLevel Highest | Out-Null
+    Write-Host "已註冊一次性測試排程：約 $runAt 執行，結果寫入 $logFile" -ForegroundColor Green
+    Write-Host "執行後請查看: Get-Content $logFile" -ForegroundColor Cyan
+    exit 0
+}
 
 # ============================================
 # -FromHeartbeat: 從 HEARTBEAT.md 讀取並批次建立排程
@@ -65,7 +94,14 @@ if ($FromHeartbeat) {
     Write-Host "從 HEARTBEAT.md 讀取到 $($schedules.Count) 個排程：" -ForegroundColor Cyan
     foreach ($s in $schedules) {
         # 從 cron 提取時間（分鐘 + 小時）
-        if ($s.Cron -match '^(\d+)\s+(\d+)') {
+        # 支援 */N 格式（如 "*/5 * * * *"）→ 自動轉為 interval 模式
+        if ($s.Cron -match '^\*/(\d+)\s') {
+            $autoInterval = [int]$Matches[1]
+            if (-not $s.Interval) {
+                $s | Add-Member -NotePropertyName 'Interval' -NotePropertyValue "${autoInterval}m" -Force
+            }
+            $cronTime = "00:00"  # 從午夜起算，持續全天
+        } elseif ($s.Cron -match '^(\d+)\s+(\d+)') {
             $minute = [int]$Matches[1]
             $hour = [int]$Matches[2]
             $cronTime = "{0:D2}:{1:D2}" -f $hour, $minute
@@ -95,8 +131,9 @@ if ($FromHeartbeat) {
                 -Argument "-NoProfile -WindowStyle Hidden -Command `"Set-Location '$workDir'; $($s.Command)`"" `
                 -WorkingDirectory $workDir
         } else {
-            # 組合 -File 與 args 參數
-            $argStr = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`""
+            # 經由 run-with-env.ps1 載入 .env，確保排程時 Token 等變數可用
+            $wrapperPath = "$AgentDir\run-with-env.ps1"
+            $argStr = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$wrapperPath`" `"$($s.Script)`""
             if ($s.Args) {
                 $argStr += " $($s.Args)"
             }
@@ -122,8 +159,11 @@ if ($FromHeartbeat) {
         if ($s.Interval -match '^(\d+)m$') {
             $intervalMinutes = [int]$Matches[1]
             # 從 cron 解析小時範圍（如 "0 9-22 * * *" → 起始 9, 結束 22）
+            # */N 格式 → 全天 24h
             $durationHours = 14  # 預設持續時間
-            if ($s.Cron -match '^\d+\s+(\d+)-(\d+)') {
+            if ($s.Cron -match '^\*/\d+') {
+                $durationHours = 24  # */N 全天持續
+            } elseif ($s.Cron -match '^\d+\s+(\d+)-(\d+)') {
                 $startHour = [int]$Matches[1]
                 $endHour = [int]$Matches[2]
                 $durationHours = $endHour - $startHour

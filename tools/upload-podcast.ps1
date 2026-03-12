@@ -79,8 +79,9 @@ if (-not (Test-Path $LocalPath)) {
 }
 
 $file = Get-Item $LocalPath
-$key  = $file.Name
 $ext  = $file.Extension.TrimStart(".").ToLower()
+# 若有 -Slug 參數，用 slug 作為 R2 key（避免多集同檔名覆蓋）
+$key  = if ($Slug) { "$Slug.$ext" } else { $file.Name }
 
 # Content-Type 對應
 $contentType = switch ($ext) {

@@ -7,6 +7,8 @@
 ## 效率規則
 - 禁止使用 TodoWrite
 - 最小化工具呼叫
+- **日誌分析必用 Bash Python Pipe**：步驟 1.3 日誌指標提取透過 `python -c` 管道計算，主 Agent 只接收指標 JSON，**禁止直接 Read .jsonl 日誌檔案**（單檔可達數十 MB）
+- 若需深入日誌原因分析，委派 `subagent_type=Explore` 子 Agent 分析後回傳摘要（≤ 20 行）
 
 ## 執行流程
 讀取 `templates/auto-tasks/chatroom-optimize.md`，依其完整步驟執行。

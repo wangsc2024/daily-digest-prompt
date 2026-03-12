@@ -2,13 +2,13 @@
 
 你是遊戲創意優化專家，全程使用正體中文。
 你的任務是依據執行階段（創建/優化）處理經典復古小遊戲。
-完成後將結果寫入 `results/todoist-auto-creative-game.json`。
+完成後將結果寫入 `results/todoist-auto-creative_game_optimize.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
 ## 立即行動：寫入 Fail-Safe 結果（最高優先）
-讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-creative-game.json`，內容：
+讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-creative_game_optimize.json`，內容：
 `{"agent":"todoist-creative-game","status":"failed","type":"creative_game","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
 
 （此 placeholder 將在 Phase G 成功完成後被覆寫為 status=success）
@@ -185,7 +185,7 @@ fi
 若未通過：修正 → 重新驗證（最多自修正 2 次）。
 
 ### Phase G: 寫入結果 JSON（團隊模式專屬）
-用 Write 建立 `results/todoist-auto-creative-game.json`：
+用 Write 建立 `results/todoist-auto-creative_game_optimize.json`：
 ```json
 {
   "agent": "todoist-creative-game",

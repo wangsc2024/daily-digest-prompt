@@ -1,4 +1,5 @@
 """Tests for hooks/hook_utils.py — Hook 共用工具模組測試。"""
+import io
 import json
 import os
 import re
@@ -16,6 +17,9 @@ from hook_utils import (
     get_compiled_regex, get_rule_patterns, get_rule_re_flags,
     atomic_write_lines, safe_load_json, sanitize_sensitive_data,
     load_yaml_file, clear_yaml_file_cache,
+    get_project_root, cleanup_stale_state_files,
+    filter_rules_by_preset, read_stdin_json, output_decision,
+    _compiled_regex_cache, _REGEX_CACHE_MAXSIZE,
 )
 
 
@@ -549,3 +553,183 @@ class TestLoadYamlFile:
         clear_yaml_file_cache()
         from hook_utils import _yaml_file_cache
         assert len(_yaml_file_cache) == 0
+
+
+class TestGetProjectRoot:
+    """get_project_root() 共用路徑推算函式測試。"""
+
+    def test_returns_project_root(self):
+        """應回傳 hooks/ 的上層目錄（專案根目錄）。"""
+        root = get_project_root()
+        assert os.path.isdir(root)
+        assert os.path.isdir(os.path.join(root, "hooks"))
+
+    def test_contains_config_dir(self):
+        """專案根目錄下應有 config/ 目錄。"""
+        root = get_project_root()
+        assert os.path.isdir(os.path.join(root, "config"))
+
+    def test_consistent_with_find_config_path(self):
+        """與 find_config_path 的路徑推算一致。"""
+        root = get_project_root()
+        config_path = find_config_path("hook-rules.yaml")
+        assert config_path is not None
+        assert config_path.startswith(root)
+
+
+class TestRegexCacheEviction:
+    """正則快取淘汰機制測試。"""
+
+    def setup_method(self):
+        _compiled_regex_cache.clear()
+
+    def teardown_method(self):
+        _compiled_regex_cache.clear()
+
+    def test_cache_stores_compiled_regex(self):
+        """快取存入已編譯正則物件。"""
+        regex = get_compiled_regex(r"\d+")
+        assert regex.pattern == r"\d+"
+        assert (r"\d+", 0) in _compiled_regex_cache
+
+    def test_cache_returns_same_object(self):
+        """相同 pattern 回傳同一物件。"""
+        r1 = get_compiled_regex(r"test_\w+")
+        r2 = get_compiled_regex(r"test_\w+")
+        assert r1 is r2
+
+    def test_cache_eviction_on_overflow(self):
+        """超過上限時淘汰前半快取。"""
+        # 填滿快取
+        for i in range(_REGEX_CACHE_MAXSIZE):
+            get_compiled_regex(f"pattern_{i}")
+        assert len(_compiled_regex_cache) == _REGEX_CACHE_MAXSIZE
+
+        # 再加一個觸發淘汰
+        get_compiled_regex("overflow_pattern")
+        assert len(_compiled_regex_cache) < _REGEX_CACHE_MAXSIZE
+        # 新加入的應存在
+        assert ("overflow_pattern", 0) in _compiled_regex_cache
+        # 前面的應被淘汰
+        assert ("pattern_0", 0) not in _compiled_regex_cache
+
+
+class TestCleanupStaleStateFiles:
+    """cleanup_stale_state_files() 狀態檔清理測試。"""
+
+    def test_removes_old_loop_state(self, tmp_path):
+        """超過 max_age_hours 的 loop-state 檔應被刪除。"""
+        import time
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+        old_file = state_dir / "loop-state-abc12345.json"
+        old_file.write_text("{}", encoding="utf-8")
+        # 設定修改時間為 3 天前
+        old_ts = time.time() - (72 * 3600)
+        os.utime(str(old_file), (old_ts, old_ts))
+
+        with patch("hook_utils.get_project_root", return_value=str(tmp_path)):
+            result = cleanup_stale_state_files(max_age_hours=48)
+
+        assert "loop-state-abc12345.json" in result["removed"]
+        assert not old_file.exists()
+
+    def test_keeps_recent_files(self, tmp_path):
+        """未超過 max_age_hours 的檔案應保留。"""
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+        recent_file = state_dir / "loop-state-recent01.json"
+        recent_file.write_text("{}", encoding="utf-8")
+
+        with patch("hook_utils.get_project_root", return_value=str(tmp_path)):
+            result = cleanup_stale_state_files(max_age_hours=48)
+
+        assert len(result["removed"]) == 0
+        assert recent_file.exists()
+
+    def test_removes_old_stop_alert(self, tmp_path):
+        """超過 max_age_hours 的 stop-alert 檔應被刪除。"""
+        import time
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+        old_file = state_dir / "stop-alert-xyz12345.json"
+        old_file.write_text("{}", encoding="utf-8")
+        old_ts = time.time() - (72 * 3600)
+        os.utime(str(old_file), (old_ts, old_ts))
+
+        with patch("hook_utils.get_project_root", return_value=str(tmp_path)):
+            result = cleanup_stale_state_files(max_age_hours=48)
+
+        assert "stop-alert-xyz12345.json" in result["removed"]
+
+    def test_no_state_dir(self, tmp_path):
+        """state/ 目錄不存在時不報錯。"""
+        with patch("hook_utils.get_project_root", return_value=str(tmp_path)):
+            result = cleanup_stale_state_files()
+        assert result == {"removed": [], "errors": []}
+
+
+class TestFilterRulesByPreset:
+    """filter_rules_by_preset() 依 preset 過濾規則。"""
+
+    def test_normal_preset_returns_all_rules(self):
+        """HOOK_SECURITY_PRESET=normal 時回傳原規則。"""
+        rules = [{"id": "r1", "priority": "high"}, {"id": "r2", "priority": "low"}]
+        with patch.dict(os.environ, {"HOOK_SECURITY_PRESET": "normal"}, clear=False):
+            result = filter_rules_by_preset(rules)
+        assert result == rules
+
+    def test_strict_preset_filters_by_priority(self):
+        """preset=strict 時依 enabled_priorities 過濾。"""
+        rules = [
+            {"id": "r1", "priority": "critical"},
+            {"id": "r2", "priority": "low"},
+        ]
+        strict_config = {
+            "presets": {
+                "strict": {"enabled_priorities": ["critical", "high"]},
+            },
+        }
+        with patch.dict(os.environ, {"HOOK_SECURITY_PRESET": "strict"}, clear=False), \
+             patch("hook_utils._load_yaml_config", return_value=strict_config):
+            result = filter_rules_by_preset(rules)
+        assert [r["id"] for r in result] == ["r1"]
+        assert result[0]["priority"] == "critical"
+
+
+class TestReadStdinJson:
+    """read_stdin_json() 從 stdin 讀取 JSON。"""
+
+    def test_valid_json_returns_parsed(self):
+        """stdin 為合法 JSON 時回傳解析結果。"""
+        with patch("sys.stdin", io.StringIO('{"allow": true}')):
+            result = read_stdin_json()
+        assert result == {"allow": True}
+
+    def test_invalid_json_returns_none(self):
+        """stdin 非合法 JSON 時回傳 None。"""
+        with patch("sys.stdin", io.StringIO("{ invalid }")):
+            result = read_stdin_json()
+        assert result is None
+
+
+class TestOutputDecision:
+    """output_decision() Hook 決策輸出（需 mock sys.exit 避免測試程序結束）。"""
+
+    def test_allow_decision_stdout(self, capsys):
+        """decision=allow 時輸出含 allow 的 JSON。"""
+        with patch("hook_utils.sys.exit"):
+            output_decision("allow", reason="ok")
+        out, _ = capsys.readouterr()
+        data = json.loads(out)
+        assert data.get("decision") == "allow"
+        assert data.get("reason") == "ok"
+
+    def test_block_decision_stdout(self, capsys):
+        """decision=block 時輸出含 block 的 JSON。"""
+        with patch("hook_utils.sys.exit"):
+            output_decision("block", reason="nul detected")
+        out, _ = capsys.readouterr()
+        data = json.loads(out)
+        assert data.get("decision") == "block"
+        assert "nul" in data.get("reason", "")

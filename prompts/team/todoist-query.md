@@ -161,6 +161,68 @@ curl -s --max-time 8 \
 
 初始格式依 `config/frequency-limits.yaml` 的 `initial_schema` 定義（含所有 counter 欄位）。
 
+### 補執行檢查（Makeup Run，在 OODA Act 覆蓋之前執行）
+
+用 Read 讀取 `state/makeup-needed.json`（若不存在則跳過此段）：
+
+**觸發條件**（以下條件**全部**成立時，強制觸發每日摘要補執行）：
+1. `pending = true`
+2. `schedule = "daily-digest-am"`（只補 AM 摘要，PM 不補）
+3. `context/auto-tasks-today.json` 的今日無 `daily_digest_count`（或欄位不存在）
+
+**觸發行為**：
+- 立即呼叫 `pwsh -ExecutionPolicy Bypass -File run-agent-team.ps1` 執行每日摘要（AM 補執行模式）
+- 在 plan.json 記錄：`"makeup_run": true, "makeup_reason": "daily-digest-am 缺席補執行"`
+- 補執行完成後，將 `state/makeup-needed.json` 的 `pending` 設為 `false`，加上 `resolved_at` 時間戳
+- 補執行完成後，**不再繼續 round-robin**（本次 run 僅做補執行）
+
+**不觸發**（以下任一）：
+- makeup-needed.json 不存在
+- `pending = false`（已補完或已自動清除）
+- 今日已有 daily-digest 執行記錄
+
+---
+
+### OODA Act 優先覆蓋（與是否有 Todoist 可處理任務無關，在 round-robin / tasks 之前執行）
+
+用 Read 讀取 `context/workflow-state.json`，判斷是否需要優先觸發 self_heal。**此檢查與「本次有無 Todoist 可處理任務」無關**：只要四條件成立，一律強制 self_heal 排第一。
+
+**觸發條件**（以下條件**全部**成立時，強制將 self_heal 加入本次任務清單首位）：
+1. `current_step = "act"` 且 `status` 為 `"pending"` 或 `"completed"`（decide 已完成但 act 可能尚未執行）
+2. `context/arch-decision.json` 存在
+3. `arch-decision.json` 的 `generated_at` 距今 ≤ 48 小時
+4. `context/auto-tasks-today.json` 的 `self_heal_count = 0`（今日尚未執行過 self_heal）
+
+**觸發行為**（即使本次有 Todoist 可處理任務、plan_type 原為 tasks，仍優先觸發）：
+- 強制將 `self_heal`（execution_order: 18）作為 selected_tasks 的**第一個**任務
+- 在 plan.json 記錄：`"ooda_act_override": true, "ooda_act_reason": "arch-decision 待執行，優先觸發 self_heal"`
+- 剩餘名額（至多 `max_auto_per_run.team_mode - 1` 個）依原邏輯填滿：
+  - 若有 Todoist 可處理任務 → 取排名後任務補滿（selected_tasks = [self_heal, task-1, ...]），plan_type 仍為 "tasks"
+  - 若無 Todoist 可處理任務 → 由 round-robin 補充（排除 self_heal 避免重複），plan_type 為 "auto"
+- 若 `max_auto_per_run.team_mode = 2` 且觸發 OODA → 本次只執行 self_heal + 1 個任務（或僅 self_heal），不超過上限
+
+**不觸發**（任一條件不成立）：
+- 正常邏輯（有任務則 tasks + 排名任務，無任務則 auto + round-robin），`ooda_act_override: false`
+
+### 失敗任務優先補跑（Failed Task Recovery，在 round-robin 之前執行）
+
+用 Read 讀取 `state/failed-auto-tasks.json`（不存在則跳過此段）。
+
+**觸發條件**（entry 需同時滿足以下三點）：
+1. `consecutive_count >= 1`（至少失敗過一次）
+2. `last_failed_at` 距今 ≤ 24 小時（近期失敗，非陳舊記錄）
+3. 用 Read 讀取 `context/auto-tasks-today.json`：對應 `counter_field` 值 = 0（仍有今日執行資格）
+
+**觸發行為**（符合條件的 entry，最多取 1 個插入本次任務）：
+- 將失敗任務的 task_key **插入 selected_tasks 最前方**（高於 round-robin 優先）
+- 在 plan.json 記錄：`"failed_task_recovery": true, "recovered_tasks": ["task_key"]`
+- 記錄原因：`"⚡ 失敗任務補跑：{task_key}（前次失敗：{reason}，連續 {consecutive_count} 次）"`
+- 若插入後已達 `max_auto_per_run.team_mode` 上限 → 保留失敗任務，縮減 round-robin 名額
+- 若多個 entry 符合條件 → 優先選 `consecutive_count` 最高者（最嚴重優先）
+
+**不觸發**（任一條件不成立）：
+- 正常 round-robin 邏輯，`failed_task_recovery: false`
+
 ### 決定可執行的自動任務（純輪轉 round-robin，最多 4 個並行）
 
 用 Read 讀取 `config/frequency-limits.yaml`，取出：

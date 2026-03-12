@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-09T00:14:22.947837+08:00",
+  "updated_at": "2026-03-12T08:42:26.138032+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -137,7 +137,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-12",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -257,7 +257,7 @@
           ]
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-03",
           "kb_notes": [
             "楞嚴經與天台宗的義理會通",
@@ -268,7 +268,12 @@
             "楞嚴經注釋傳統與學術研究全景：歷代五大注疏比較、現代國際學術回顧與跨宗派定位分析",
             "楞嚴經版本學、梵文還原與數位典藏研究 — 從 stemmatology 到 digital humanities 的方法論框架",
             "楞嚴經與大乘起信論的如來藏思想比較 — 一心二門、真如緣起與不變隨緣的跨經論對話",
-            "楞嚴經研究：八還辨見與見見非見 — 從對境之見到離見真見的修證轉折"
+            "楞嚴經研究：八還辨見與見見非見 — 從對境之見到離見真見的修證轉折",
+            "楞嚴經研究：六根功德與文殊揀選耳根圓通 — 從六根差別到返聞自性的修證判準",
+            "楞嚴經研究：四種清淨明誨的現代修行詮釋 — 在家居士如何以戒攝心、防範數位時代四重染緣",
+            "楞嚴經延伸研究：跨傳統修行比較與歷代實證案例",
+            "楞嚴經研究：楞嚴壇場與結界建立道場 — 卷七由戒咒入定的修法次第與象徵義",
+            "楞嚴經研究：七大圓通的修證邏輯 — 從地水火風空識見到文殊揀擇耳根的判準"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -333,21 +338,46 @@
             "星雲大師處世哲學應用",
             "八還辨見的結構化義理",
             "見精與真見的修證分際",
-            "日常觀照操作化"
-          ]
+            "日常觀照操作化",
+            "六根功德的計量邏輯與修行判準",
+            "此方真教體、清淨在音聞與耳根法門的關係",
+            "從六根解結到耳根返聞的次第連接",
+            "數位時代的淫業觸發與對治",
+            "媒體暴力與殺業習氣的心行轉化",
+            "數位盜版、資料挪用與不與取",
+            "社群平台妄語、表演性修行與大妄語",
+            "在家居士可實踐的每日自檢法",
+            "四種清淨明誨的現代修行詮釋",
+            "數位時代四重染緣",
+            "在家居士的每日四戒自檢法",
+            "社群媒體妄語與表演性修行",
+            "數位剽竊作為不與取的現代形態",
+            "楞嚴經修行實證案例（歷代與當代行者證量報告）",
+            "楞嚴經與南傳佛教止觀體系的比較",
+            "楞嚴經在當代佛教教育中的課程設計與教學法",
+            "楞嚴經與腦科學/意識研究的跨學科對話",
+            "楞嚴經藝術表現（佛教美術、經變圖、楞嚴壇城）",
+            "楞嚴壇場的象徵結構",
+            "結界的修行意義",
+            "三七日行道次第的現代詮釋",
+            "七大各別法門的內在修證邏輯",
+            "七大與耳根圓通的比較判準",
+            "七大法門對現代修行者的實踐啟示"
+          ],
+          "completed_at": "2026-03-12"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "可再補一篇楞嚴咒／戒定慧整合面向，作為系列收束"
+      "next_research_hint": "後續可延伸七大圓通與華嚴法界觀、密教曼荼羅四大觀、淨土念佛三昧之比較。"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-11",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -479,11 +509,13 @@
           "completed_at": "2026-03-07"
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
             "教觀綱宗 synthesis 研究：注疏傳統文獻蒐集與分析、跨系列教觀會通框架及全書核心要點結構化報告",
             "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
-            "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運"
+            "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運",
+            "教觀綱宗研究：化儀四教中的秘密教 — 同會異聞的施教結構與教觀分際",
+            "教觀綱宗研究：化儀四教中的頓教 — 從頓教部到頓教相的一時圓說與教觀合一"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -500,23 +532,32 @@
             "蕅益智旭「兼但對帶」的教觀融合創見",
             "不定教的原典依據",
             "不定教與四悉檀的對應",
-            "不定教在現代修學分層中的應用"
-          ]
+            "不定教在現代修學分層中的應用",
+            "秘密教的原典語義與「彼不知此，此不知彼」結構",
+            "秘密教在教觀雙運中的修行意義",
+            "秘密教與楞嚴、法華、淨土等跨系列會通",
+            "頓教部",
+            "頓教相",
+            "化儀四教中頓教的獨立定位",
+            "頓教與法華非頓非漸之辨",
+            "頓教與圓頓止觀的關聯"
+          ],
+          "completed_at": "2026-03-11"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "補齊不定教後，可做「教觀綱宗與摩訶止觀的教觀互補」作為系列收束。"
+      "next_research_hint": "可續研「頓教相」與圓頓止觀、法華非頓非漸、楞嚴圓頓修證之跨經論會通。"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
       "domain": "法華經 / Lotus Sutra 佛學研究",
       "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-09",
+      "last_active": "2026-03-11",
       "tags": [
         "法華經",
         "佛學",
@@ -625,7 +666,10 @@
             "Podcast 腳本：法華經一心三觀 — 四代傳承、經文解讀與三分鐘三觀練習",
             "法華經一心三觀的知識轉化 — 從研究報告到 Podcast 的跨媒介傳播方法論",
             "法華經一心三觀的知識產品化策略 — 從知識庫到 Podcast 系列與多層次報告的系統化轉化框架",
-            "法華經一心三觀的視覺化與 Podcast 系列延伸計畫 — 概念圖設計、分集規劃與自動化管線方案"
+            "法華經一心三觀的視覺化與 Podcast 系列延伸計畫 — 概念圖設計、分集規劃與自動化管線方案",
+            "法華經譬喻品研究：三車火宅與舍利弗授記的權實結構",
+            "法華經藥草喻品研究：一地所生、一雨所潤與眾生根機差別的圓教會通",
+            "???????????????????????????????"
           ],
           "covered_concepts": [
             "一佛乘系統總結",
@@ -730,9 +774,18 @@
             "修行次第心智圖設計",
             "跨宗派比較資訊圖製作",
             "Podcast 聽眾回饋與迭代機制",
-            "一心三觀與當代心理治療的實證研究比較"
+            "一心三觀與當代心理治療的實證研究比較",
+            "舍利弗先受記後聞譬喻的教學次第",
+            "火宅譬喻中的父子倫理與佛弟子身分重建",
+            "譬喻品與方便品、信解品之間的承轉節點",
+            "天台五時八教下《藥草喻品》的醍醐定位",
+            "平等法與差別受益的修行詮釋",
+            "與《楞嚴經》等他經研究的交叉對照",
+            "????",
+            "??????????????",
+            "??????????"
           ],
-          "completed_at": "2026-03-09"
+          "completed_at": "2026-03-11"
         }
       },
       "current_stage": "completed",
@@ -741,14 +794,14 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "系列五階段已全部完成。延伸方向：(1) 視覺化呈現（概念圖/心智圖/資訊圖）(2) Podcast 系列化（第2-4集腳本）(3) 知識庫→Podcast 自動化管線"
+      "next_research_hint": "????????????????????????????????????????????"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
       "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
       "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-07",
+      "last_active": "2026-03-10",
       "tags": [
         "淨土宗",
         "佛學",
@@ -833,12 +886,17 @@
           ]
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-04",
+          "completed_at": "2026-03-10",
           "kb_notes": [
             "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
             "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀",
-            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要"
+            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要",
+            "阿彌陀經研究：執持名號與一心不亂的義理辨析及實修指要",
+            "觀無量壽經研究：十六觀的次第結構與觀佛攝心法",
+            "善導大師五正行研究：正助二業結構與專修稱名實踐",
+            "無量壽經研究：第十八願的本願稱名與平生業成"
           ],
           "covered_concepts": [
             "淨土判教體系系統整理",
@@ -863,17 +921,33 @@
             "三經二章文獻學結構",
             "三重同心圓修行模型",
             "五經一論的日常功課安排",
-            "天親菩薩往生論五念門在體系中的定位"
+            "天親菩薩往生論五念門在體系中的定位",
+            "執持名號的語義層次與修持動作",
+            "一心不亂作為結果、方法或感應條件的辨析",
+            "如何把《阿彌陀經》行法落實為日課與攝心方法",
+            "十六觀三層次第（依報／正報／品位往生）",
+            "定善十三觀與散善三福的會通",
+            "觀佛攝心法的日課操作",
+            "由觀想會歸稱名的善導詮釋",
+            "五正行的具體功課編排",
+            "稱名作為正定業的經論根據整理",
+            "與大勢至念佛圓通章、天台淨土教觀的承接關係",
+            "第十八願與十一願、二十二願的三願結構",
+            "平生業成的日常修持操作化",
+            "第十八願與成就文的因果對讀",
+            "本願稱名",
+            "平生業成",
+            "第十八願與第十一願、第二十二願的三願結構"
           ]
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "五經一論教典體系完成。synthesis 階段已有 3 篇（判教體系 + 華嚴淨土會通 + 五經一論體系），可考慮完成 synthesis：淨土宗在中日兩國的不同發展比較，或淨土宗與禪宗的會通（禪淨雙修的歷史與理論）"
+      "next_research_hint": "可續做中日淨土宗對第十八願的異同詮釋，或深化第十九願、第二十願與三輩九品的關聯。"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -920,7 +994,7 @@
       "domain": "AI Code Review / LLM-Driven Code Quality",
       "description": "AI 程式碼審查研究系列，涵蓋 LLM 審查機制、多 Agent 架構、SAST 融合、大規模部署",
       "initiated_at": "2026-03-04",
-      "last_active": "2026-03-04",
+      "last_active": "2026-03-11",
       "tags": [
         "AI",
         "Code Review",
@@ -946,7 +1020,7 @@
           ]
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-04",
           "kb_notes": [
             "AI 程式碼審查的內部機制 — LLM 差異感知審查架構、AST/CFG 融合分析與大規模 Code Review 系統設計模式（2026）"
@@ -957,10 +1031,21 @@
             "大規模 Code Review 工程（Critique@Google/AutoCR@Meta）",
             "精確度/召回率量化評估",
             "差異感知審查（diff-aware review）"
-          ]
+          ],
+          "completed_at": "2026-03-11"
         },
         "application": {
-          "status": "pending"
+          "status": "in_progress",
+          "started_at": "2026-03-11",
+          "kb_notes": [
+            "AI 程式碼審查的 CI/CD 落地指南：SARIF、CodeQL／Semgrep 與 LLM 修補建議分級閘門"
+          ],
+          "covered_concepts": [
+            "SARIF 匯入與 Code Scanning 整合",
+            "CodeQL/Semgrep/LLM 三層審查管線",
+            "PR Gate 分級治理",
+            "AI advisory 與 blocking 分離策略"
+          ]
         },
         "optimization": {
           "status": "pending"
@@ -969,12 +1054,12 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [
         "ai-security-testing"
       ],
-      "next_research_hint": "完成後進入 application：實作指南——如何在 CI/CD 管線中部署 AI Code Review"
+      "next_research_hint": "完成後進入 optimization：評估誤報率、審查延遲與政策閾值調優"
     },
     "test-time-compute-reasoning": {
       "series_id": "test-time-compute-reasoning",
@@ -1117,7 +1202,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-12",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1141,9 +1226,10 @@
           "completed_at": "2026-03-07"
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
-            "Temporal 深度研究報告 - AI工作流自動化"
+            "Temporal 深度研究報告 - AI工作流自動化",
+            "mcp-agent 深度研究報告 - AI工作流自動化"
           ],
           "covered_concepts": [
             "workflow_orchestration",
@@ -1151,23 +1237,55 @@
             "observability",
             "deployment",
             "integration",
-            "governance"
-          ]
+            "governance",
+            "MCP-native workflow runtime",
+            "共享協議下的 agent/worker 協調模式",
+            "MCP transport 與持久化執行整合",
+            "Claude Agent 系統的 MCP workflow 借鑑"
+          ],
+          "completed_at": "2026-03-09"
         },
         "application": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-10",
+          "kb_notes": [
+            "Phoenix 深度研究報告 - AI工作流自動化"
+          ],
+          "covered_concepts": [
+            "OpenTelemetry 與 OpenInference 在 Agent 工作流中的接線方式",
+            "trace -> dataset -> experiment 的閉環驗證流程",
+            "與 Claude Agent SDK / MCP 工具的實際整合路徑"
+          ]
         },
         "optimization": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-11",
+          "kb_notes": [
+            "CrewAI 深度研究報告 - AI工作流自動化"
+          ],
+          "covered_concepts": [
+            "多 Agent 工作流的流程治理模型",
+            "角色導向任務分派與 flow orchestration 的最佳實踐",
+            "AI 工作流在生產環境的成本 / 可靠性優化策略"
+          ]
         },
         "synthesis": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-12",
+          "kb_notes": [
+            "FastMCP 深度研究報告 - AI工作流自動化"
+          ],
+          "covered_concepts": [
+            "MCP server 框架如何成為 AI 工作流的可重用工具層",
+            "MCP transport、auth 與 deployment 對工作流治理的影響",
+            "Claude Agent / daily-digest-prompt 如何採用 FastMCP 降低工具整合成本"
+          ]
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "synthesis",
+      "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "完成本次專案拆解後，繼續補齊該系列下一個階段的基準比較與實作模板"
+      "next_research_hint": "本系列已完成五階段覆蓋；下一輪可轉向實作型題目，例如將 FastMCP 接入 daily-digest-prompt 的工具層。"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -1249,7 +1367,7 @@
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 95,
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong",
@@ -1297,15 +1415,16 @@
       "domain": "Markdown, 語法指令, 編輯技巧, 摘要, GitHub Flavored Markdown",
       "description": "",
       "initiated_at": "2026-03-08",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-09",
       "tags": [],
       "stages": {
         "foundation": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-08",
           "kb_notes": [
             "Markdown 與 GitHub Flavored Markdown 完整指南 — 語法規範、編輯技巧與技術文件撰寫最佳實踐",
-            "Markdown/GFM 編輯技巧與摘要撰寫方法論 — 從語法規範到高效技術寫作工作流"
+            "Markdown/GFM 編輯技巧與摘要撰寫方法論 — 從語法規範到高效技術寫作工作流",
+            "Markdown 解析器原理與 Skill 設計機制 — AST 結構、Plugin 架構與 SKILL.md 設計模式"
           ],
           "covered_concepts": [
             "Markdown 解析規範（CommonMark spec）",
@@ -1314,8 +1433,15 @@
             "Markdown 編輯工具與工作流",
             "摘要撰寫技巧（executive summary、TL;DR）",
             "Markdown 在 CI/CD 中的應用（README lint、文件生成）",
-            "Markdown 與其他標記語言比較（reStructuredText、AsciiDoc）"
-          ]
+            "Markdown 與其他標記語言比較（reStructuredText、AsciiDoc）",
+            "Markdown 解析器原理（AST 結構、token 化流程）",
+            "各解析器差異比較（markdown-it、remark、unified、marked）",
+            "Rendering pipeline 與 plugin 架構",
+            "Claude Code SKILL.md 設計模式與觸發機制",
+            "Markdown 編輯自動化（linter、formatter、pre-commit hook）",
+            "結構化總結方法論（從原始筆記到精煉摘要的系統化流程）"
+          ],
+          "completed_at": "2026-03-09"
         },
         "mechanism": {
           "status": "pending"
@@ -1330,17 +1456,17 @@
           "status": "pending"
         }
       },
-      "current_stage": "foundation",
-      "completion_pct": 0,
+      "current_stage": "mechanism",
+      "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入 Markdown 解析器原理（AST、rendering pipeline）、各解析器差異（markdown-it、remark、unified）"
+      "next_research_hint": "完成 mechanism 後進入 application：實作 Markdown 編輯/總結 Skill（SKILL.md + 自動化腳本）"
     },
     "knowledge-base-architecture": {
       "series_id": "knowledge-base-architecture",
       "domain": "Knowledge Base Architecture / Information Application / Deep Analysis Methodology",
       "description": "知識庫架構與資訊應用研究系列，涵蓋知識管理系統設計、DIKW 轉化模型、深度分析方法論與研究報告結構",
       "initiated_at": "2026-03-08",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-10",
       "tags": [
         "知識庫",
         "架構設計",
@@ -1352,10 +1478,11 @@
       ],
       "stages": {
         "foundation": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-08",
           "kb_notes": [
-            "知識庫架構與資訊應用概論 — 設計模式、DIKW 轉化模型與深度分析方法論框架"
+            "知識庫架構與資訊應用概論 — 設計模式、DIKW 轉化模型與深度分析方法論框架",
+            "RAG 混合搜尋去重策略（SQLite FTS5 × 向量搜尋 × Reranking）— 給 daily-digest-prompt 的檢索融合、去重與重排實作指南"
           ],
           "covered_concepts": [
             "知識庫架構設計模式（Graph DB / Vector DB / Hybrid）",
@@ -1364,8 +1491,12 @@
             "深度分析方法論（結構化分析 / 根因分析 / 系統性文獻回顧）",
             "知識表示與本體論（Ontology / Taxonomy / Folksonomy）",
             "研究報告結構設計（IMRaD / 系統性綜述 / Meta-analysis）",
-            "知識圖譜與語義網技術（RDF / OWL / SPARQL）"
-          ]
+            "知識圖譜與語義網技術（RDF / OWL / SPARQL）",
+            "可操作的混合搜尋去重流程",
+            "Reranking 在召回後的落點與成本權衡",
+            "適合 daily-digest-prompt 的實作參數與陷阱"
+          ],
+          "completed_at": "2026-03-10"
         },
         "mechanism": {
           "status": "pending"
@@ -1380,17 +1511,17 @@
           "status": "pending"
         }
       },
-      "current_stage": "foundation",
-      "completion_pct": 0,
+      "current_stage": "mechanism",
+      "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入向量嵌入原理、知識圖譜構建演算法、混合檢索機制與知識品質評估指標"
+      "next_research_hint": "下一步可進一步研究查詢日誌驅動的權重自適應與離線評測基準。"
     },
     "open-webui-platform": {
       "series_id": "open-webui-platform",
       "domain": "Open WebUI / Self-Hosted AI Platform",
       "description": "Open WebUI 平台型研究系列，聚焦自託管 AI 入口層、模型閘道、RAG 工作台與企業治理能力。",
       "initiated_at": "2026-03-08",
-      "last_active": "2026-03-08",
+      "last_active": "2026-03-10",
       "tags": [
         "GitHub",
         "AI",
@@ -1414,7 +1545,21 @@
           "completed_at": "2026-03-08"
         },
         "mechanism": {
-          "status": "pending"
+          "status": "completed",
+          "started_at": "2026-03-10",
+          "completed_at": "2026-03-10",
+          "kb_notes": [
+            "Open WebUI — 開源自託管 AI 介面平台深度洞察：三層擴展架構（Functions/Tools/Pipelines）、Factory Pattern 向量資料庫抽象、Hybrid RAG + CrossEncoder 重排序與對 Daily-Digest-Prompt 系統的七大借鑑啟示（126K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "Inlet/Outlet Filter 管線機制",
+            "Valves Pydantic 配置系統",
+            "Named Parameter 依賴注入",
+            "VectorDBFactory 工廠模式",
+            "Hybrid Search + CrossEncoder 重排序",
+            "EventEmitter/EventCall 事件系統",
+            "三層擴展分離設計原理"
+          ]
         },
         "application": {
           "status": "pending"
@@ -1426,12 +1571,12 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [
         "ai-workflow-automation"
       ],
-      "next_research_hint": "下一步可深入 Open WebUI 的控制面/資料面拆分、工具執行生命週期，以及與 Dify/LibreChat/AnythingLLM 的平台比較。"
+      "next_research_hint": "下一步進入 application 階段：實際部署 Open WebUI 並實作自訂 Function/Tool，驗證架構理論。"
     },
     "ai-assisted-coding-workflows": {
       "series_id": "ai-assisted-coding-workflows",
@@ -1493,6 +1638,615 @@
         "ai-code-review"
       ],
       "next_research_hint": "下一步可深化 application：針對 monorepo、前端專案、CLI 專案整理可直接複用的 contract 範本與 CI 驗證閘門。"
+    },
+    "hono-edge-web-framework": {
+      "series_id": "hono-edge-web-framework",
+      "domain": "Hono Edge-First Web Framework / Web Standards / Multi-Runtime",
+      "description": "Hono 超輕量 Edge-First Web 框架研究系列：RegExpRouter、Web Standards 跨 Runtime 統一、RPC 型別安全",
+      "initiated_at": "2026-03-09",
+      "last_active": "2026-03-09",
+      "tags": [
+        "Hono",
+        "Edge Computing",
+        "Web Framework",
+        "Cloudflare Workers",
+        "TypeScript"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-09",
+          "completed_at": "2026-03-09",
+          "kb_notes": [
+            "Hono — 超輕量 Edge-First Web 框架深度研究：RegExpRouter 單一正則路由引擎、Web Standards 跨 Runtime 統一架構、RPC 端對端型別安全與 Cloudflare Workers 最佳實踐（29.2K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "RegExpRouter",
+            "Web Standards",
+            "Onion Middleware",
+            "RPC Type Safety",
+            "Multi-Runtime",
+            "Cloudflare Workers Bindings",
+            "SmartRouter",
+            "LinearRouter",
+            "PatternRouter"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism 階段：深入 RegExpRouter 的 Trie 正則編譯實作、SmartRouter 動態切換演算法、中介層效能最佳化"
+    },
+    "llm-structured-output-pipeline": {
+      "series_id": "llm-structured-output-pipeline",
+      "domain": "LLM Structured Output Pipeline / PydanticAI / Instructor / JSON Schema",
+      "description": "研究 LLM 結構化輸出在生產環境中的 schema-first 驗證、重試、回退與觀測設計。",
+      "initiated_at": "2026-03-09",
+      "last_active": "2026-03-09",
+      "tags": [
+        "Structured Generation",
+        "PydanticAI",
+        "Instructor",
+        "JSON Schema",
+        "結構化輸出"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-09",
+          "completed_at": "2026-03-09",
+          "kb_notes": [
+            "Structured Generation（結構化生成）完整指南 — 從 Constrained Decoding、Outlines、Instructor 到 Pydantic AI 的 LLM 受限解碼技術與可靠結構化輸出工程實踐（2026）"
+          ],
+          "covered_concepts": [
+            "Structured Generation",
+            "Constrained Decoding",
+            "Instructor",
+            "Pydantic AI",
+            "JSON Schema"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-09",
+          "completed_at": "2026-03-09",
+          "kb_notes": [
+            "Structured Generation（結構化生成）完整指南 — 從 Constrained Decoding、Outlines、Instructor 到 Pydantic AI 的 LLM 受限解碼技術與可靠結構化輸出工程實踐（2026）"
+          ],
+          "covered_concepts": [
+            "模型原生 structured output",
+            "JSON mode 與 strict schema 差異",
+            "型別模型導出 schema",
+            "驗證錯誤回饋重試"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-09",
+          "completed_at": "2026-03-09",
+          "kb_notes": [
+            "LLM 結構化輸出驗證管線實作指南 — PydanticAI、Instructor 與 JSON Schema 的雙層護欄"
+          ],
+          "covered_concepts": [
+            "雙層護欄",
+            "schema-first",
+            "結果檔驗證",
+            "KB 匯入 payload 驗證",
+            "重試與回退策略"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "ai-assisted-coding-workflows",
+        "knowledge-base-architecture"
+      ],
+      "next_research_hint": "下一步可進入 optimization：比較不同模型供應商的 strict schema 支援、token 成本與失敗觀測指標。"
+    },
+    "ai-requirements-engineering": {
+      "series_id": "ai-requirements-engineering",
+      "domain": "AI Requirements Engineering / PRD to EARS-BDD Traceability",
+      "description": "AI 需求工程研究系列，聚焦 PRD 分解、EARS/BDD 驗收條件編譯、需求品質保證與需求-測試雙向追溯。",
+      "initiated_at": "2026-03-09",
+      "last_active": "2026-03-09",
+      "tags": [
+        "AI",
+        "系統開發",
+        "需求工程",
+        "Requirements Engineering",
+        "BDD",
+        "EARS",
+        "Traceability"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-03",
+          "completed_at": "2026-03-03",
+          "kb_notes": [
+            "AI-Driven Requirements Engineering — LLM 輔助需求分析、使用者故事自動生成、驗收條件形式化與需求追溯性矩陣的工業級實踐（2026）"
+          ],
+          "covered_concepts": [
+            "LLM 輔助需求分析",
+            "使用者故事生成",
+            "驗收條件形式化",
+            "需求追溯性矩陣"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-03",
+          "completed_at": "2026-03-03",
+          "kb_notes": [
+            "AI-Driven Requirements Quality Assurance 完整指南 — Multi-Agent 需求品質自動驗證、QUS 框架 13 準則實踐與 Given-When-Then 驗收條件自動生成的工業級工作流（2026）"
+          ],
+          "covered_concepts": [
+            "QUS 13 準則",
+            "Given-When-Then 生成",
+            "需求品質保證",
+            "Multi-Agent requirements QA"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-09",
+          "completed_at": "2026-03-09",
+          "kb_notes": [
+            "AI 需求工程實作：PRD→EARS→BDD→Traceability 工作流"
+          ],
+          "covered_concepts": [
+            "PRD 分解到 user stories",
+            "EARS 驗收條件編譯",
+            "BDD/Gherkin 映射",
+            "需求-測試雙向追溯",
+            "Traceability matrix schema",
+            "RAG 輔助 traceability validation"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "ai-assisted-coding-workflows"
+      ],
+      "next_research_hint": "下一步可進入 optimization：需求漂移偵測、變更衝擊分析、coverage gap 自動發現與 CI 驗證閘門。"
+    },
+    "openclaw-personal-ai-agent": {
+      "series_id": "openclaw-personal-ai-agent",
+      "domain": "OpenClaw Personal AI Assistant Architecture",
+      "description": "OpenClaw 開源個人 AI 助手架構研究系列",
+      "initiated_at": "2026-03-10",
+      "last_active": "2026-03-10",
+      "tags": [
+        "OpenClaw",
+        "AI Agent",
+        "個人助手",
+        "架構分析",
+        "GitHub"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-10",
+          "completed_at": "2026-03-10",
+          "kb_notes": [
+            "OpenClaw — GitHub 史上最快增長的開源個人 AI 助手架構深度洞察"
+          ],
+          "covered_concepts": [
+            "Gateway 閘道架構",
+            "Skill 系統設計",
+            "Heartbeat 排程",
+            "Markdown 記憶",
+            "頻道路由",
+            "分層安全"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "深入 Gateway WebSocket 路由機制與 Skill 自動生成的實作細節"
+    },
+    "vite-knowledge-sync-pipeline": {
+      "series_id": "vite-knowledge-sync-pipeline",
+      "domain": "Vite 靜態知識庫同步管線",
+      "description": "Vite 靜態知識庫同步、build-time data 載入與 Cloudflare 發布研究系列",
+      "initiated_at": "2026-03-10",
+      "last_active": "2026-03-10",
+      "tags": [
+        "Vite",
+        "知識庫",
+        "靜態網站",
+        "Cloudflare",
+        "內容管線"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-10",
+          "completed_at": "2026-03-10",
+          "kb_notes": [
+            "Vite 靜態知識庫同步管線實作指南 — Build-Time Data、增量同步與 Cloudflare 發布最佳實踐"
+          ],
+          "covered_concepts": [
+            "build-time JSON 資料流設計",
+            "VitePress/Vite 的資料載入界線",
+            "Cloudflare Workers/Pages 的最新發布差異",
+            "大規模靜態資產限制與風險"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "knowledge-base-architecture"
+      ],
+      "next_research_hint": "下一步可進入 application：把 sync_knowledge.py、Vite build 與 Cloudflare deploy 串成可重用 CI/CD 範本。"
+    },
+    "sglang-inference-serving": {
+      "series_id": "sglang-inference-serving",
+      "domain": "SGLang / High-Performance LLM Inference & Serving",
+      "description": "SGLang 推理與服務框架研究系列，聚焦 serving 架構、排程器、prefix cache 與大規模部署。",
+      "initiated_at": "2026-03-10",
+      "last_active": "2026-03-10",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "SGLang"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-10",
+          "completed_at": "2026-03-10",
+          "kb_notes": [
+            "SGLang — 高效能 LLM 推理與服務框架深度研究：RadixAttention、Zero-Overhead Scheduler、PD/EP 大規模部署與 OpenAI 相容 API（24.3K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "SGLang 專案定位",
+            "OpenAI 相容 API",
+            "RadixAttention",
+            "prefix cache",
+            "zero-overhead batch scheduler",
+            "prefill-decode disaggregation",
+            "expert parallelism",
+            "benchmark 與部署路線"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "下一步可進入 mechanism：深入 RadixAttention、scheduler 與 PD/EP 的實作機制及與 vLLM 的取捨。"
+    },
+    "ai-model-scaling": {
+      "series_id": "ai-model-scaling",
+      "domain": "AI模型, 模型縮放, 研究規劃, 資料來源策略, 優化建議",
+      "description": "",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-11",
+          "kb_notes": [
+            "AI 模型縮放完整指南 — Scaling Laws、資料策略與優化決策框架"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 Scaling Laws 數學推導、Chinchilla 修正模型、MoE 路由演算法、資料混合最佳化演算法（DoReMi / DSIR）"
+    },
+    "ai-model-compression": {
+      "series_id": "ai-model-compression",
+      "domain": "AI模型蒸餾, AWQ量化, Wanda剪枝, DoRA微調",
+      "description": "",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "pending",
+          "started_at": "2026-03-11",
+          "kb_notes": [
+            "AI 模型壓縮核心技術機制深度解析 — AWQ 量化、Wanda 剪枝、DoRA 微調的演算法原理與聯合 Pipeline（2026）"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 application：AWQ 量化實作（AutoAWQ）、Wanda 剪枝實作（官方 repo）、DoRA 微調實作（PEFT/Unsloth），含完整程式碼範例與部署指南"
+    },
+    "multi-agent-runtime-middleware-orchestration": {
+      "series_id": "multi-agent-runtime-middleware-orchestration",
+      "domain": "多 Agent Runtime 的中介軟體鏈與雙執行緒池編排",
+      "description": "多 Agent Runtime 的中介軟體鏈、雙執行緒池、背壓與可靠性設計研究系列",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [
+        "技術研究",
+        "多 Agent Runtime",
+        "中介軟體鏈",
+        "雙執行緒池",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-11",
+          "completed_at": "2026-03-11",
+          "kb_notes": [
+            "多 Agent Runtime 的中介軟體鏈與雙執行緒池編排 — 從 DeerFlow 啟發到可落地的可靠執行模型"
+          ],
+          "covered_concepts": [
+            "雙執行緒池的角色分工與佇列模型",
+            "中介軟體鏈的責任邊界與順序設計",
+            "背壓、取消、重試與超時傳遞",
+            "可觀測性與 tracing 埋點",
+            "與 daily-digest-prompt 的落地映射"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "下一步進入 mechanism：深入工作佇列、狀態機、取消傳播與排程公平性。"
+    },
+    "regex-redos-security": {
+      "series_id": "regex-redos-security",
+      "domain": "ReDoS 防禦與正規表示式安全實務",
+      "description": "正規表示式安全、ReDoS 機制與工程防禦研究系列",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [
+        "技術研究",
+        "ReDoS",
+        "Regex 安全",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-11",
+          "completed_at": "2026-03-11",
+          "kb_notes": [
+            "Python 正規表達式安全模式與 Shell 命令注入防護完整指南（2026）"
+          ],
+          "covered_concepts": [
+            "正規表達式安全風險概覽",
+            "ReDoS 作為 regex 安全陷阱之一",
+            "Hook 系統中的 regex 過濾場景"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-11",
+          "completed_at": "2026-03-11",
+          "kb_notes": [
+            "ReDoS 防禦與正規表示式安全實務 — 從災難性回溯到 Python 3.11 原子群組的工程級防線"
+          ],
+          "covered_concepts": [
+            "災難性回溯的狀態空間成因",
+            "危險 pattern 結構辨識",
+            "Python 3.11 possessive quantifiers 與 atomic grouping",
+            "timeout 與替代引擎策略",
+            "靜態掃描與測試基準"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [],
+      "next_research_hint": "完成後進入 application：針對 pre_bash_guard.py、輸入驗證器與 CI 規則設計可執行的掃描與測試流程。"
+    },
+    "todoist-api-v1-integration": {
+      "series_id": "todoist-api-v1-integration",
+      "domain": "Todoist API v1 整合實務",
+      "description": "Todoist API v1、completed tasks、PowerShell 與 AI/MCP 整合研究系列",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [
+        "Todoist API v1",
+        "Todoist",
+        "PowerShell",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-11",
+          "completed_at": "2026-03-11",
+          "kb_notes": [
+            "Todoist API v1 整合實務指南（PowerShell、分頁、Webhook 與 MCP）"
+          ],
+          "covered_concepts": [
+            "Todoist API v1 統一 API 模型",
+            "completed tasks 查詢",
+            "cursor pagination",
+            "webhook 觸發器定位",
+            "MCP 與 HTTP 分工"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 Sync、activities、webhook 簽章驗證與失敗重送策略。"
+    },
+    "opik-llm-observability-evaluation": {
+      "series_id": "opik-llm-observability-evaluation",
+      "domain": "Opik / LLM Observability / Evaluation / Optimization",
+      "description": "Opik 開源 AI 工程平台研究系列，聚焦 tracing、evaluation、monitoring 與 optimizer 的閉環設計。",
+      "initiated_at": "2026-03-11",
+      "last_active": "2026-03-11",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Opik",
+        "LLM Observability",
+        "Evaluation"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-11",
+          "kb_notes": [
+            "Opik — 開源 LLM 觀測、評估與優化平台深度研究：Java/React/ClickHouse 架構、OpenTelemetry 追蹤、自動評估與 Agent Optimizer（18.2K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "Opik 整體架構",
+            "Opik 的追蹤-評估-優化閉環",
+            "自託管部署模型",
+            "與 daily-digest-prompt 的整合方式"
+          ],
+          "completed_at": "2026-03-11"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "llm-structured-output-pipeline"
+      ],
+      "next_research_hint": "下一步進入 mechanism：深入 traces、experiments、online evaluation rules 與 optimizer 的資料流與排程機制。"
     }
   }
 }

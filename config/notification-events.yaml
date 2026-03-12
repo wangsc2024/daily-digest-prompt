@@ -1,0 +1,155 @@
+# config/notification-events.yaml
+# 自愈機制 ntfy 通知事件集中配置
+# 引用者：prompts/team/todoist-auto-arch-evolution.md、templates/auto-tasks/self-heal.md
+#          run-agent-team.ps1、hooks/on_stop_alert.py
+#
+# 版本：1（2026-03-11 建立）
+# topic：所有通知統一發送至 wangsc2025（與 config/notification.yaml 一致）
+# 去重：warning 等級同一 alert_key 每 3 天最多 1 次（由 state/alert-registry.json 控制）
+
+version: 1
+topic: "wangsc2025"
+
+# ──────────────────────────────────────────
+# OODA 閉環事件
+# ──────────────────────────────────────────
+events:
+
+  # arch-evolution (Decide 步驟) — 啟動通知
+  ooda_decide_start:
+    title: "🔍 arch-evolution 啟動"
+    message_template: "OODA Decide 步驟開始，審查分數 {score}，待處理 {backlog_count} 項"
+    priority: 2         # low — 進度通知，不打擾手機
+    tags: ["computer", "chart"]
+    condition: "always"
+    deduplicate: false  # 每次都通知
+
+  # arch-evolution (Decide 步驟) — 完成通知（有 immediate_fix 項目）
+  ooda_decide_done_with_fixes:
+    title: "📋 架構決策完成"
+    message_template: "immediate_fix {fix_count} 項 | schedule_adr {adr_count} 項 | wontfix {wontfix_count} 項 | self-heal 將自動修復"
+    priority: 3         # default — 重要決策，適當提醒
+    tags: ["white_check_mark", "computer"]
+    condition: "has_immediate_fix"
+    deduplicate: false
+
+  # arch-evolution (Decide 步驟) — 完成通知（無 immediate_fix）
+  ooda_decide_done_no_fixes:
+    title: "📋 架構決策完成"
+    message_template: "本次無 immediate_fix 項目 | schedule_adr {adr_count} 項待人工排程"
+    priority: 2
+    tags: ["computer", "memo"]
+    condition: "no_immediate_fix"
+    deduplicate: false
+
+  # arch-evolution (Decide 步驟) — backlog 為空
+  ooda_decide_backlog_empty:
+    title: "✅ arch-evolution 完成"
+    message_template: "improvement-backlog 已清空，系統無待決策項目"
+    priority: 2
+    tags: ["white_check_mark"]
+    condition: "backlog_empty"
+    deduplicate: false
+
+# ──────────────────────────────────────────
+# self-heal (Act 步驟) 事件
+# ──────────────────────────────────────────
+
+  # 自愈完成 — 全部成功
+  self_heal_success:
+    title: "✅ 自愈完成"
+    message_template: "修復 {success}/{total} 項 | arch-decision {arch_success} 項 | {timestamp}"
+    priority: 2         # low — 常規成功，低打擾
+    tags: ["white_check_mark"]
+    condition: "all_success"
+    deduplicate: false
+
+  # 自愈完成 — 部分失敗
+  self_heal_partial:
+    title: "⚠️ 自愈部分失敗"
+    message_template: "成功 {success}/{total} 項 | 失敗：{failed_items}"
+    priority: 3         # default — 需關注
+    tags: ["warning"]
+    condition: "has_failures"
+    deduplicate: true
+    deduplicate_key: "self_heal_partial"
+    deduplicate_hours: 24  # 同日僅通知 1 次
+
+  # 自愈完成 — 全部失敗
+  self_heal_failed:
+    title: "❌ 自愈失敗 — 需人工介入"
+    message_template: "全部 {total} 項修復失敗 | 錯誤：{error_summary}"
+    priority: 5         # urgent — 需立即關注
+    tags: ["fire", "x"]
+    condition: "all_failed"
+    deduplicate: false  # critical 不去重
+
+  # 無修復項目（系統健康）
+  self_heal_nothing:
+    title: "🔧 自愈：無修復項目"
+    message_template: "系統健康，無需修復 | {timestamp}"
+    priority: 2
+    tags: ["white_check_mark"]
+    condition: "nothing_to_fix"
+    deduplicate: true
+    deduplicate_key: "self_heal_nothing"
+    deduplicate_hours: 72   # 連續健康 3 天僅通知 1 次
+
+# ──────────────────────────────────────────
+# Circuit Breaker 事件
+# ──────────────────────────────────────────
+
+  # API 斷路（closed → open）
+  circuit_breaker_open:
+    title: "🔴 API 斷路"
+    message_template: "{api_name} 連續失敗 {count} 次 → 斷路器開啟，使用快取降級"
+    priority: 4         # high — API 故障影響摘要品質
+    tags: ["x", "warning"]
+    condition: "on_state_change_to_open"
+    deduplicate: true
+    deduplicate_key: "circuit_open_{api_name}"
+    deduplicate_hours: 6    # 同一 API 斷路，6 小時內不重複通知
+
+  # API 恢復（open → closed）
+  circuit_breaker_recovered:
+    title: "✅ API 恢復"
+    message_template: "{api_name} 恢復正常，斷路器關閉"
+    priority: 2
+    tags: ["white_check_mark"]
+    condition: "on_state_change_to_closed"
+    deduplicate: false  # 恢復通知不去重
+
+# ──────────────────────────────────────────
+# 排程事件
+# ──────────────────────────────────────────
+
+  # 排程重試
+  schedule_retry:
+    title: "🔄 排程重試"
+    message_template: "{schedule_name} 失敗 → 第 {attempt}/{max} 次重試（{delay}s 後）"
+    priority: 3
+    tags: ["warning"]
+    condition: "on_retry"
+    deduplicate: true
+    deduplicate_key: "retry_{schedule_name}"
+    deduplicate_hours: 1    # 同一排程重試，1 小時內不重複通知
+
+  # 缺席偵測 — 需補執行
+  schedule_makeup_needed:
+    title: "⏳ 補執行提醒"
+    message_template: "{schedule_name} 超過 {elapsed_hours}h 未執行，已標記補執行"
+    priority: 4
+    tags: ["warning", "hourglass_flowing_sand"]
+    condition: "always"
+    deduplicate: true
+    deduplicate_key: "makeup_{schedule_name}"
+    deduplicate_hours: 8    # 同一排程缺席，8 小時內不重複通知
+
+  # 排程徹底失敗（所有重試均失敗）
+  schedule_all_failed:
+    title: "❌ 排程徹底失敗"
+    message_template: "{schedule_name} 重試 {max} 次全部失敗，今日此排程中斷"
+    priority: 5         # urgent
+    tags: ["fire", "x"]
+    condition: "always"
+    deduplicate: false  # 徹底失敗不去重

@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "generated_at": "2026-03-12T13:34:36+08:00",
+  "generated_by": "arch-evolution",
+  "source_backlog": "context/improvement-backlog.json",
+  "source_audit_score": 87.18,
+  "decisions": [
+    {
+      "backlog_id": "ADR-20260312-015",
+      "backlog_pattern": "PS1 hardcoded timeout 消除",
+      "action": "skip",
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在相同 source_pattern 的 ADR（ADR-20260312-015，status: Proposed）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260311-010",
+      "backlog_pattern": "依賴漏洞自動掃描",
+      "action": "skip",
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在對應 ADR（ADR-20260311-010，status: Accepted, implementation_status: pending）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260311-012",
+      "backlog_pattern": "YAML 注釋密度全面提升",
+      "action": "skip",
+      "priority": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在對應 ADR（ADR-20260311-012，status: Accepted, implementation_status: immediate_fix）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260311-011",
+      "backlog_pattern": "行覆蓋率提升計畫",
+      "action": "skip",
+      "priority": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在對應 ADR（ADR-20260311-011，status: Accepted, implementation_status: pending）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260311-013",
+      "backlog_pattern": "GitHub Actions CI 基礎建設",
+      "action": "skip",
+      "priority": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在對應 ADR（ADR-20260311-013，status: Proposed, implementation_status: pending）",
+      "validation_result": null
+    }
+  ],
+  "immediate_fix_summary": {
+    "count": 0,
+    "items": [],
+    "safe_to_automate": false
+  },
+  "meta": {
+    "decisions_total": 5,
+    "immediate_fix": 0,
+    "schedule_adr": 0,
+    "deferred": 0,
+    "wontfix": 0,
+    "skip": 5
+  }
+}

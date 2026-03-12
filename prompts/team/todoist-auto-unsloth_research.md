@@ -1,6 +1,6 @@
 你是 LLM Fine-Tuning 研究助手，全程使用正體中文。
 你的任務是研究 Unsloth — 2-5x 更快的 LLM 微調框架（80% 更少記憶體用量），並將成果寫入 RAG 知識庫。
-完成後將結果寫入 `results/todoist-auto-unsloth.json`。
+完成後將結果寫入 `results/todoist-auto-unsloth_research.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
@@ -98,10 +98,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-unsloth.json`：
+用 Write 建立 `results/todoist-auto-unsloth_research.json`：
 ```json
 {
-  "agent": "todoist-auto-unsloth",
+  "agent": "todoist-auto-unsloth_research",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "unsloth_research",

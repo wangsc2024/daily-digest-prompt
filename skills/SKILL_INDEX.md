@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-08 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 10 個工具 = 29 個 Skills）
+## 速查表（19 個核心 + 11 個工具 = 30 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -42,6 +42,7 @@
 | 27 | knowledge-domain-builder | 一鍵搭建 Obsidian 知識領域庫（對話釐清→研究→大綱→建庫） | 建立知識庫、搭建知識領域、Obsidian vault、知識體系、knowledge domain、build vault、知識架構、一鍵建庫 |
 | 28 | writing-masters | 西方文學巨匠寫作技巧（海明威/奧威爾/史蒂芬金） | 寫作技巧、writing、寫作、文字、創作、冰山理論、極簡、海明威、史蒂芬金、show don't tell |
 | 29 | writing-plans | 實作計畫撰寫（TDD 任務拆解，2-5 分鐘粒度） | write plan、create plan、implementation plan、計畫、規劃、怎麼實作、步驟、拆解任務 |
+| 30 | markdown-editor | Markdown 指令／編輯／總結（依知識庫完整指南，33 種語法+TOC+摘要） | Markdown、md、格式化、摘要、TOC、目錄生成、表格、連結替換、內容總結、大綱、錨點、腳註、Mermaid、告警區塊、GFM、CommonMark |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

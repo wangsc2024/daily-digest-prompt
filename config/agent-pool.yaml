@@ -1,0 +1,43 @@
+# Agent Pool 配置（P5-A）— 控制並行度、超時來源、done_cert 策略
+# 關聯：tools/agent_pool/coordinator.py、tools/agent_pool/done_cert.py
+# 在 run-todoist-agent-team.ps1 的 Phase 2 中使用
+version: 1
+
+coordination_pool:
+  max_coordinators: 1          # 同時只有一個 Coordinator 做決策（避免衝突）
+  phase_selection_timeout: 60  # Phase 選題最長 60 秒
+
+worker_pool:
+  # timeout 繼承自 config/timeouts.yaml 的 phase2_timeout_by_task
+  # Phase 2 總超時公式：max(各任務 timeout) + 300s buffer
+  timeout_source: "config/timeouts.yaml"
+  timeout_key: "phase2_timeout_by_task"
+
+  web_search:
+    max_concurrent: 3          # 同時最多 3 個 Web 搜尋
+    retry: 1                   # 失敗重試 1 次
+  kb_import:
+    max_concurrent: 5
+    retry: 2
+  file_sync:
+    max_concurrent: 2
+    retry: 1
+  notification:
+    max_concurrent: 10         # ntfy 快速，不需嚴格限制
+    timeout_override: 30       # 通知固定 30s（不依賴任務 timeout）
+    retry: 3
+
+done_cert:
+  enabled: true
+  schema_required: true        # 結果必須通過 JSON schema 驗證才能簽發
+  cert_dir: "state/done-certs"
+  # done_cert 格式：
+  # {"task_id":"...", "phase":2, "worker_type":"web_search",
+  #  "result_file":"results/todoist-auto-xxx.json",
+  #  "schema_valid":true, "issued_at":"..."}
+
+cancel_policy:
+  on_worker_failure: "cancel_siblings_of_same_type"
+  on_timeout: "cancel_and_log"
+  min_success_ratio: 0.6       # ≥60% Worker 成功才允許 Phase 3 組裝
+  # 低於 60% 時：重試一次（--retry-failed）→ 若仍低於 60% → 告警但繼續組裝有效部分

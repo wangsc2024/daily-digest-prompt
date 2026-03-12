@@ -119,6 +119,12 @@ def score_result(result_path: Path) -> dict:
         print(f"[QualityScore] ERROR reading {result_path}: {e}", file=sys.stderr)
         return {}
 
+    # 偵測「佔坑」placeholder（任務未完成即被計分）
+    placeholder_statuses = ('running', 'incomplete', 'error', 'failed')
+    if data.get('status') in placeholder_statuses:
+        print(f"[QualityScore] SKIP {result_path.name}: status={data.get('status')} (placeholder/incomplete result)")
+        return {}
+
     # 提取任務 key
     stem = result_path.stem  # e.g. todoist-auto-shurangama
     task_key = stem.replace('todoist-auto-', '')

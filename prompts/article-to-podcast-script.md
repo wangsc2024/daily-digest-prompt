@@ -10,6 +10,17 @@
 用 Read 讀取：
 - `skills/knowledge-query/SKILL.md`
 
+### 步驟 1.5：讀取 Podcast 長久記憶（若為 QUERY 模式）
+
+**僅 QUERY 模式執行此步驟**（若 `{{NOTE_ID}}` 有值則跳過）：
+
+讀取歷史記錄取得已覆蓋的主題：
+```bash
+cat context/podcast-history.json
+```
+
+記錄 `summary.recent_topics` 作為「近期主題清單」，在步驟 4 撰寫腳本時，盡量選擇**不在此清單**的切入角度或子題。
+
 ### 步驟 2：確認知識庫服務
 
 ```bash
@@ -35,8 +46,10 @@ curl -s "http://localhost:3000/api/notes/{{NOTE_ID}}"
 
 **立即**用 Write 工具建立 `results/article-{{SLUG}}/podcast-meta.json`：
 ```json
-{"note_id": "{{NOTE_ID}}", "note_title": "<筆記標題>", "query": "", "podcast_title": "<4-12字主題標題>"}
+{"note_id": "{{NOTE_ID}}", "note_title": "<筆記標題>", "query": "", "podcast_title": "<4-12字主題標題>", "topics": ["<主題標籤1>", "<主題標籤2>"]}
 ```
+
+`topics` 從筆記的 `tags` 陣列取前 2-3 個有意義的詞（排除 "Podcast製作"、"對話腳本" 等通用標籤），若 tags 為空則從 note_title 提取關鍵名詞。
 
 **若有 QUERY（{{QUERY}}）**：
 
@@ -60,8 +73,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 選定筆記後，**立即**用 Write 工具建立 `results/article-{{SLUG}}/podcast-meta.json`，記錄本次使用的筆記（供去重歷史追蹤）：
 ```json
-{"note_id": "<實際筆記 ID>", "note_title": "<筆記標題>", "query": "{{QUERY}}", "podcast_title": "<4-12字主題標題>"}
+{"note_id": "<實際筆記 ID>", "note_title": "<筆記標題>", "query": "{{QUERY}}", "podcast_title": "<4-12字主題標題>", "topics": ["<主題標籤1>", "<主題標籤2>"]}
 ```
+
+`topics` 從筆記的 `tags` 陣列取前 2-3 個有意義的詞（排除通用標籤）；若 tags 為空則從 note_title 提取關鍵名詞。
 
 文章的 `contentText`（Markdown 格式）即為腳本素材。
 

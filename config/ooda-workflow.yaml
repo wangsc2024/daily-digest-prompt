@@ -1,11 +1,20 @@
 # OODA 工作流引擎配置（G15）
 # 借鑑 wsc-bot01 工作流引擎的依賴自動推進設計
+#
+# OODA 閉環四步驟：
+#   Observe（觀察）→ Orient（定向）→ Decide（決策）→ Act（行動）
+# 對應 Skill：system-insight → system-audit → arch-evolution → self-heal
+#
+# 引用者：run-system-audit-team.ps1（orient 步驟）、
+#          todoist-auto-system_insight.md（observe 步驟）
+# 狀態追蹤：workflow-state.json 記錄當前步驟與歷史轉換
 version: 1
 workflow_name: "OODA 系統自省閉環"
-state_file: "context/workflow-state.json"
-history_file: "logs/structured/ooda-transitions.jsonl"
-cleanup_hours: 48  # 清理 48h 前的舊 run 記錄
+state_file: "context/workflow-state.json"       # 當前執行狀態（步驟+時間戳）
+history_file: "logs/structured/ooda-transitions.jsonl"  # 步驟轉換歷史（JSONL 格式）
+cleanup_hours: 48  # 清理 48h 前的舊 run 記錄（防止歷史檔案無限增長）
 
+# 四個步驟定義（順序執行，on_success 觸發下一步）
 steps:
   observe:
     name: "Observe — 系統洞察"
@@ -32,13 +41,27 @@ steps:
   decide:
     name: "Decide — 架構演進"
     auto_task_key: "arch_evolution"
-    prompt_file: "prompts/team/todoist-auto-arch-evolution.md"  # 暫以 enabled:false 封鎖，待建立專屬 prompt 後啟用
+    prompt_file: "prompts/team/todoist-auto-arch_evolution.md"
     skill: "arch-evolution"
-    enabled: false  # I3 修復：arch-evolution 尚無專屬 prompt，待建立後啟用
+    enabled: true
     timeout_seconds: 900
     on_success: "act"
     on_failure: "stop"
-    description: "基於 improvement-backlog 決定架構改善方案，寫入 adr-registry（待 prompts/team/todoist-auto-arch-evolution.md 建立後啟用）"
+    description: "基於 improvement-backlog 決定架構改善方案，寫入 adr-registry"
+    # P2-B：Decide 品質門（Quality Gates）
+    quality_gates:
+      - "至少 1 個新 ADR 或更新現有 ADR"
+      - "至少 1 個 Fitness Function 定義或驗證"
+      - "improvement-backlog.json 至少 1 項狀態更新"
+    output_schema:
+      required: [adr_changes, fitness_functions, backlog_updates]
+    dual_mode:
+      fast_track:
+        condition: "優先級 P0 且修改 < 3 個檔案"
+        timeout_seconds: 300
+      deep_track:
+        condition: "架構重構或影響 > 5 個模組"
+        timeout_seconds: 900
 
   act:
     name: "Act — 自愈迴圈"

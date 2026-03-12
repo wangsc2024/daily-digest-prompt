@@ -31,6 +31,8 @@ routing_rules:
   news_summary:
     provider: groq
     mode: summarize
+    groq_mode: summarize            # P1-B: llm_router.py 讀取此欄位（mode 別名，向後相容）
+    max_tokens: 200
     description: 新聞標題或段落一句話摘要
     used_by: [fetch-news.md]
     max_input_chars: 500            # 每則新聞的摘要輸入上限
@@ -38,6 +40,8 @@ routing_rules:
   en_to_zh:
     provider: groq
     mode: translate
+    groq_mode: translate
+    max_tokens: 500
     description: 英文技術文章標題轉正體中文，保留技術術語原文
     used_by: [fetch-hackernews.md]
     max_input_chars: 300            # 單篇標題上限
@@ -45,59 +49,73 @@ routing_rules:
   topic_classify:
     provider: groq
     mode: classify
+    groq_mode: classify
+    max_tokens: 100
     description: 為文章或任務自動打主題標籤（JSON 輸出）
     used_by: []                     # 目前未在 prompt 中使用，預留
 
   quick_extract:
     provider: groq
     mode: extract
+    groq_mode: extract
+    max_tokens: 300
     description: 從非結構化文字萃取關鍵資訊（JSON 輸出）
     used_by: []                     # 預留
 
   kb_content_score:
     provider: groq
-    mode: kb_score
+    mode: classify                  # relay 不支援 kb_score，改用 classify（P1-B 修正）
+    groq_mode: classify
+    max_tokens: 150
     description: 知識庫筆記內容品質語義評分（概念數、深度、密度、是否知識）
     used_by: [skills/kb-curator/SKILL.md]
     max_input_chars: 2000           # 取 contentText 前 2000 字
     config_ref: config/kb-content-scoring.yaml
 
+  todoist_query_simple:
+    provider: groq
+    mode: extract
+    groq_mode: extract              # P3-C ToolOrchestra 簡易查詢
+    max_tokens: 500
+    description: Todoist 任務簡易查詢格式化（關鍵字提取 + 優先級初步判斷）
+    used_by: []                     # P3-C 啟用後使用
+
   # ── 保留給 Claude（深度推理、隱私、安全）──────────────────────
   policy_analysis:
     provider: claude
-    description: 屏東政策深度解讀，需要政策背景知識與推理
+    rationale: 需要深度語境理解與政策背景知識
+    description: 屏東政策深度解讀
     used_by: [assemble-digest.md, prompts/team/fetch-news.md]
-    reason: 政策解讀需要 Claude 的深度理解能力
 
   code_review:
     provider: claude
+    rationale: 程式碼品質評估需要複雜推理
     description: 程式碼審查與修正建議
     used_by: [templates/sub-agent/code-task.md]
-    reason: 程式碼品質評估需要複雜推理
 
   kb_import:
     provider: claude
+    rationale: 語意去重需要 Claude 的語言理解能力
     description: 知識庫匯入前的品質評估與重複性判斷
     used_by: [skills/kb-curator/SKILL.md]
-    reason: 語意去重需要 Claude 的語言理解能力
 
   research_synthesis:
     provider: claude
+    rationale: 需要複雜推理+長上下文融合
     description: 多篇研究來源的整合與摘要
     used_by: [templates/sub-agent/research-task.md]
-    reason: 跨來源資訊融合需要 Claude 的推理能力
 
   security_analysis:
     provider: claude
+    rationale: 高精準度需求，不送第三方
     description: 系統安全審查（Cisco AI Defense）
     used_by: [prompts/team/fetch-security.md]
-    reason: 安全分析需要 Claude 的精確評估
 
   gmail_processing:
     provider: claude
+    rationale: 個人郵件資料不送第三方 Groq 服務
     description: Gmail 郵件分析（隱私考量）
     used_by: [prompts/team/fetch-gmail.md]
-    reason: 個人郵件資料不送第三方 Groq 服務
 
 # 批次處理設定
 batch:

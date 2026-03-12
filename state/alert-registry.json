@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "updated_at": "2026-03-11T00:00:00+08:00",
+  "alerts": {},
+  "self_healing": {
+    "last_decide_notify": null,
+    "last_heal_notify": null,
+    "total_heals_today": 0,
+    "total_fixes_today": 0
+  }
+}

@@ -26,18 +26,20 @@ init:
     mode: readonly  # Agent 只讀，PowerShell 腳本負責寫入
 
 # 主要步驟（依序執行，失敗不中斷整體流程）
+# 每步驟含：id（唯一識別）、skills（所需 Skill）、cache_key（快取鍵）、output_section（輸出區段標題）
+# 團隊模式下由 run-agent-team.ps1 拆為並行 Phase 1 子 Agent 分別執行
 steps:
   - id: todoist
     name: "查詢 Todoist 今日待辦"
-    skills: [todoist, api-cache]
+    skills: [todoist, api-cache]       # todoist SKILL 提供 API v1 格式，api-cache 提供 TTL 降級
     skill_files:
       - skills/todoist/SKILL.md
-    cache_key: todoist
+    cache_key: todoist                 # 對應 cache-policy.yaml 中的 TTL 定義
     output_section: "✅ 今日待辦"
 
   - id: news
     name: "查詢本週屏東新聞（含政策解讀）"
-    skills: [pingtung-news, pingtung-policy-expert, api-cache]
+    skills: [pingtung-news, pingtung-policy-expert, api-cache]  # 三 Skill 鏈式組合
     skill_files:
       - skills/pingtung-news/SKILL.md
       - skills/pingtung-policy-expert/SKILL.md

@@ -2,11 +2,16 @@
 # 統一快取策略 — 所有 Agent 共用
 # 操作流程仍依 skills/api-cache/SKILL.md，此文件僅定義 TTL 數值
 
+# 檔案格式版本（保留供未來 schema 變更）
 version: 1
+# 快取根目錄（相對專案根目錄）
 cache_dir: "cache/"
+# 降級模式：API 失敗時允許使用過期快取的最長時效（小時）
 degradation_max_age_hours: 24  # 降級使用過期快取的最大時效
+# 降級時顯示於摘要的標籤模板
 degradation_label: "⚠️ 資料來自快取（{time}）"
 
+# 各 API 來源的 TTL 與降級時限（依來源名稱索引）
 sources:
   todoist:
     file: "cache/todoist.json"
@@ -40,7 +45,7 @@ sources:
     degraded_ttl_minutes: 120  # 降級使用時限（2 小時）
     note: "bot.js Gun.js 任務佇列快取（G28 整合）"
 
-# 快取檔案結構（所有來源統一格式）
+# 快取檔案結構（所有來源統一格式；Agent 寫入時需符合此 JSON schema）
 schema: |
   {
     "cached_at": "ISO-8601 UTC",

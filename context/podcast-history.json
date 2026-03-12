@@ -1,7 +1,324 @@
 {
-  "version": 1,
-  "updated_at": "2026-03-08T15:23:38",
+  "version": 2,
+  "updated_at": "2026-03-12T03:40:55+08:00",
+  "summary": {
+    "total_episodes": 12,
+    "cooldown_days": 30,
+    "recent_note_ids": [
+      "62370c83-1535-4369-b9be-6c6cf5ccfeae",
+      "5cdbd1d9-8964-4d75-a7dd-665a1ea07252",
+      "ee71dca2-20af-4e4c-8888-92327a6d7b03",
+      "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "96473d7a-c97d-4d91-b689-0ceaee69e670",
+      "25aa3f0d-f6ac-4592-be40-02d5e065bdea",
+      "7562e5f7-692e-465e-ac08-8d2140b801f1",
+      "428b50ab-40e1-48d1-8f51-22af73853166",
+      "e85e8a6b-88ba-4d3a-a962-1220d3e974e4",
+      "ee9e5dbc-6078-49dd-93f6-05d7393c722e",
+      "780b6e0f-841c-4991-babd-076f8c9ca472",
+      "49913ddb-4412-4a7c-a5ff-2388a45ae688",
+      "19be31e8-9a10-491b-8b00-e0ba95d7308a",
+      "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5",
+      "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "db718a9d-c124-4821-9a74-b68eb8f7f652",
+      "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
+      "4f2e2568-0a35-47ad-90a8-acb3115bc2b5",
+      "ac237f47-fb19-4bea-a423-5831a4a15a99",
+      "e6a8995d-805a-4013-84b5-237920edbbfe",
+      "c835ef81-faeb-4bd1-8518-0581b622452d",
+      "35420ab5-a433-43c5-859d-6e2cb44b19ef",
+      "9bd4a4c0-e2c4-415e-98f6-5ca340b88c4a",
+      "7d524b1e-d0c7-4bd7-8bfd-4a9087792468",
+      "15a379d8-8114-4fdc-bb49-b4d78fd672e5"
+    ],
+    "recent_topics": [
+      "漸教",
+      "秘密教",
+      "不定教",
+      "信解品",
+      "法華經",
+      "頓教",
+      "性修不二",
+      "教觀合一",
+      "完成法華經一心三",
+      "化儀四教",
+      "因機施教",
+      "AI工作流",
+      "邏輯思維",
+      "AI Agent",
+      "架構設計",
+      "本地優先",
+      "五時八教",
+      "判教體系",
+      "蕅益大師",
+      "方等時",
+      "彈偏斥小",
+      "維摩詰經",
+      "回小向大",
+      "生酥味",
+      "山家山外",
+      "四明知禮",
+      "觀妄即真",
+      "性具思想",
+      "四種三昧",
+      "常坐三昧",
+      "常行三昧",
+      "般舟三昧",
+      "非行非坐三昧",
+      "歷緣對境",
+      "一心三觀",
+      "妄心觀",
+      "三諦圓融",
+      "空假中",
+      "圓頓止觀",
+      "天台四教儀",
+      "教觀雙美",
+      "判教教材",
+      "教觀綱宗",
+      "天台宗",
+      "止觀法門",
+      "普賢品",
+      "楞嚴經",
+      "唯識學",
+      "原子習慣",
+      "行為改變"
+    ]
+  },
+  "episodes": [
+    {
+      "episode_title": "佛陀的說法藝術：化儀四教",
+      "notes_used": [
+        "62370c83-1535-4369-b9be-6c6cf5ccfeae"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化儀四教 — 頓漸秘密不定的說法方式與判教應用"
+      ],
+      "topics": [
+        "漸教",
+        "秘密教",
+        "不定教"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-12T03:40:55+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260312-0336.mp3",
+      "slug": "教觀綱宗-20260312-0336"
+    },
+    {
+      "episode_title": "窮子認父：信解品的自我覺醒",
+      "notes_used": [
+        "5cdbd1d9-8964-4d75-a7dd-665a1ea07252"
+      ],
+      "note_titles": [
+        "法華經信解品研究：四大聲聞領解文與窮子喻中的自我認知轉化"
+      ],
+      "topics": [
+        "法華經",
+        "信解品"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-11T21:38:45+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260311-2133.mp3",
+      "slug": "教觀綱宗-20260311-2133"
+    },
+    {
+      "episode_title": "頓教雙義：經部與觀心",
+      "notes_used": [
+        "ee71dca2-20af-4e4c-8888-92327a6d7b03"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化儀四教中的頓教 — 從頓教部到頓教相的一時圓說與教觀合一"
+      ],
+      "topics": [
+        "頓教",
+        "性修不二",
+        "教觀合一"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-11T19:41:09+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260311-1934.mp3",
+      "slug": "教觀綱宗-20260311-1934"
+    },
+    {
+      "episode_title": "天台一心三觀解析",
+      "notes_used": [
+        "b1cc9595-45e6-49f1-830e-718c17f3760f"
+      ],
+      "note_titles": [
+        "完成法華經一心三觀研究的知識庫上傳、ntfy 通知、暫存檔清理、研究報告撰寫與 Podcast 生成"
+      ],
+      "topics": [
+        "完成法華經一心三"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-11T15:24:57"
+    },
+    {
+      "episode_title": "不定教的智慧：同法異益",
+      "notes_used": [
+        "96473d7a-c97d-4d91-b689-0ceaee69e670"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運"
+      ],
+      "topics": [
+        "化儀四教",
+        "不定教",
+        "因機施教"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-11T07:39:57+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260311-0735.mp3",
+      "slug": "教觀綱宗-20260311-0735"
+    },
+    {
+      "episode_title": "AI 架構三重奏：工作流自動化、邏輯思維與本地優先",
+      "notes_used": [
+        "25aa3f0d-f6ac-4592-be40-02d5e065bdea",
+        "7562e5f7-692e-465e-ac08-8d2140b801f1",
+        "428b50ab-40e1-48d1-8f51-22af73853166"
+      ],
+      "note_titles": [
+        "CrewAI 深度研究報告 - AI工作流自動化",
+        "論證映射（Argument Mapping）— 視覺化邏輯論證的方法論、工具生態與實證研究（2026）",
+        "OpenClaw — GitHub 史上最快增長的開源個人 AI 助手架構深度洞察（210K+ Stars, 2026-03）"
+      ],
+      "topics": [
+        "AI工作流",
+        "邏輯思維",
+        "AI Agent",
+        "架構設計",
+        "本地優先"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-11T07:38:43+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/ai-architecture-trio-20260311.mp3",
+      "slug": "ai-architecture-trio-20260311"
+    },
+    {
+      "episode_title": "佛陀的教學策略：五時八教判教全覽",
+      "notes_used": [
+        "e85e8a6b-88ba-4d3a-a962-1220d3e974e4"
+      ],
+      "note_titles": [
+        "教觀綱宗概論：天台宗判教體系總覽"
+      ],
+      "topics": [
+        "五時八教",
+        "判教體系",
+        "蕅益大師"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-11T04:40:00+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-ep6-20260311.mp3",
+      "slug": "教觀綱宗-ep6-20260311"
+    },
+    {
+      "episode_title": "煩惱即菩提：妄心觀的革命",
+      "notes_used": [
+        "780b6e0f-841c-4991-babd-076f8c9ca472"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：山家山外之爭 — 宋代天台宗「真心妄心」論爭與教觀綱宗的思想定位"
+      ],
+      "topics": [
+        "山家山外",
+        "四明知禮",
+        "觀妄即真",
+        "性具思想"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-11T04:36:12+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-ep5-20260311.mp3",
+      "slug": "教觀綱宗-ep5-20260311"
+    },
+    {
+      "episode_title": "維摩詰的震動：方等時彈偏斥小的智慧",
+      "notes_used": [
+        "ee9e5dbc-6078-49dd-93f6-05d7393c722e"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：方等時的彈偏斥小 — 五時判教中第三時期「四教並談」的回小向大教觀智慧"
+      ],
+      "topics": [
+        "方等時",
+        "彈偏斥小",
+        "維摩詰經",
+        "回小向大",
+        "生酥味"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-11T04:37:00+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-ep4-20260311.mp3",
+      "slug": "教觀綱宗-ep4-20260311"
+    },
+    {
+      "episode_title": "四種三昧：天台宗的全時修行地圖",
+      "notes_used": [
+        "49913ddb-4412-4a7c-a5ff-2388a45ae688"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：四種三昧 — 天台宗常坐、常行、半行半坐、非行非坐的觀行修證體系"
+      ],
+      "topics": [
+        "四種三昧",
+        "常坐三昧",
+        "常行三昧",
+        "般舟三昧",
+        "非行非坐三昧",
+        "歷緣對境"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-10T21:37:00+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/四種三昧天台宗的全時修行地圖_202603102133.mp3",
+      "slug": "教觀綱宗-ep2-20260310"
+    },
+    {
+      "episode_title": "一心三觀：煩惱即菩提的圓頓修行",
+      "notes_used": [
+        "19be31e8-9a10-491b-8b00-e0ba95d7308a"
+      ],
+      "note_titles": [
+        "法華經一心三觀的理論與生活實踐"
+      ],
+      "topics": [
+        "一心三觀",
+        "天台宗",
+        "三諦圓融",
+        "空假中",
+        "圓頓止觀",
+        "妄心觀",
+        "知禮",
+        "智顗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-10T18:30:00+08:00"
+    },
+    {
+      "episode_title": "教觀雙美：諦觀與蕅益的傳承智慧",
+      "notes_used": [
+        "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：《天台四教儀》與《教觀綱宗》的判教教材化比較 — 從諦觀到蕅益智旭的傳承與互補"
+      ],
+      "topics": [
+        "天台四教儀",
+        "教觀雙美",
+        "判教教材"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-10T10:30:00+08:00"
+    }
+  ],
   "entries": [
+    {
+      "note_id": "19be31e8-9a10-491b-8b00-e0ba95d7308a",
+      "note_title": "法華經一心三觀的理論與生活實踐",
+      "query": "一心三觀",
+      "note_id_input": "",
+      "slug": "一心三觀-15min-20260310",
+      "used_at": "2026-03-10T18:30:00"
+    },
     {
       "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
       "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
@@ -65,6 +382,70 @@
       "note_id_input": "35420ab5-a433-43c5-859d-6e2cb44b19ef",
       "slug": "note-35420ab5-20260308",
       "used_at": "2026-03-08T15:23:38"
+    },
+    {
+      "note_id": "9bd4a4c0-e2c4-415e-98f6-5ca340b88c4a",
+      "note_title": "原子習慣 — James Clear 行為改變四大法則與七大實用策略",
+      "query": "",
+      "note_id_input": "9bd4a4c0-e2c4-415e-98f6-5ca340b88c4a",
+      "slug": "atomic-habits-intro",
+      "used_at": "2026-03-09T12:37:40"
+    },
+    {
+      "note_id": "7d524b1e-d0c7-4bd7-8bfd-4a9087792468",
+      "note_title": "Hono — 超輕量 Edge-First Web 框架深度研究：RegExpRouter 單一正則路由引擎、Web Standards 跨 Runtime 統一架構、RPC 端對端型別安全與 Cloudflare Workers 最佳實踐（29.2K Stars, 2026-03）",
+      "query": "",
+      "note_id_input": "7d524b1e-d0c7-4bd7-8bfd-4a9087792468",
+      "slug": "hono-edge-framework",
+      "used_at": "2026-03-09T13:11:42"
+    },
+    {
+      "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
+      "query": "",
+      "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "slug": "note-ed138bbf-20260309",
+      "used_at": "2026-03-09T15:25:15"
+    },
+    {
+      "note_id": "15a379d8-8114-4fdc-bb49-b4d78fd672e5",
+      "note_title": "AFFiNE — 開源次世代知識庫平台深度研究：BlockSuite 協作編輯器、y-octo Rust CRDT 引擎、Edgeless 無邊界畫布與 Local-First 多平台架構",
+      "query": "",
+      "note_id_input": "15a379d8-8114-4fdc-bb49-b4d78fd672e5",
+      "slug": "note-15a379d8-20260309",
+      "used_at": "2026-03-09T18:40:08"
+    },
+    {
+      "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
+      "query": "",
+      "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "slug": "note-ed138bbf-20260310",
+      "used_at": "2026-03-10T15:24:49"
+    },
+    {
+      "note_id": "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5",
+      "note_title": "教觀綱宗研究：《天台四教儀》與《教觀綱宗》的判教教材化比較 — 從諦觀到蕅益智旭的傳承與互補",
+      "query": "教觀綱宗",
+      "note_id_input": "",
+      "slug": "教觀綱宗-15min-20260310",
+      "used_at": "2026-03-10T10:30:00"
+    },
+    {
+      "note_id": "49913ddb-4412-4a7c-a5ff-2388a45ae688",
+      "note_title": "教觀綱宗研究：四種三昧 — 天台宗常坐、常行、半行半坐、非行非坐的觀行修證體系",
+      "query": "教觀綱宗",
+      "note_id_input": "",
+      "slug": "教觀綱宗-ep2-20260310",
+      "used_at": "2026-03-10T21:37:00"
+    },
+    {
+      "note_id": "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "note_title": "完成法華經一心三觀研究的知識庫上傳、ntfy 通知、暫存檔清理、研究報告撰寫與 Podcast 生成",
+      "query": "",
+      "note_id_input": "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "slug": "note-b1cc9595-20260311",
+      "used_at": "2026-03-11T15:24:57"
     }
   ]
 }

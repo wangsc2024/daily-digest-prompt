@@ -164,6 +164,101 @@
       },
       "optimized": false,
       "notes": "兩日 193 筆呼叫全數成功；bot 正常運行 11.3 小時；33 筆 pending 任務待處理；28 個 cron 排程活躍"
+    },
+    {
+      "date": "2026-03-09",
+      "run_at": "2026-03-09T12:33:15.796875+08:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "not_tracked",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": false,
+        "pending_tasks": 54,
+        "claimed_tasks": 0,
+        "active_cron_jobs": 2,
+        "uptime_seconds": 44273
+      },
+      "optimized": false,
+      "notes": "JSONL 日誌無 chatroom 執行記錄；bot.js 運行正常，54 筆待處理任務，Gun.js 未連線；api-health.json 無 gun-bot 斷路器條目"
+    },
+    {
+      "date": "2026-03-10",
+      "run_at": "2026-03-10T12:33:06+08:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "not_tracked",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "listening": true,
+        "pending_tasks": 0,
+        "claimed_tasks": 0,
+        "active_cron_jobs": 2,
+        "classify_queue": {
+          "pending": 0,
+          "running": 0,
+          "dropped": 0
+        },
+        "uptime_seconds": 44260.59
+      },
+      "optimized": false,
+      "notes": "JSONL 日誌無 chatroom 執行記錄；bot.js 運行正常（uptime 12.3h），0 筆待處理任務；Gun.js 已連線；api-health.json 無 gun-bot 斷路器條目"
+    },
+    {
+      "date": "2026-03-11",
+      "run_at": "2026-03-11T05:34:32.680131",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "not_tracked",
+      "bot_health": {
+        "status": "ok",
+        "connected": true,
+        "gun_connected": true,
+        "listening": true,
+        "pending_tasks": 0,
+        "claimed_tasks": 0,
+        "active_cron_jobs": 2,
+        "classify_queue": {
+          "pending": 0,
+          "running": 0,
+          "dropped": 0
+        },
+        "uptime_seconds": 19139.02
+      },
+      "optimized": false,
+      "notes": "JSONL 日誌無 chatroom 執行記錄；bot.js 運行正常（uptime 5.3h），0 筆待處理任務；Gun.js 已連線；api-health.json 無 gun-bot 斷路器條目；所有指標正常無需調整"
+    },
+    {
+      "date": "2026-03-12",
+      "run_at": "2026-03-11T23:36:00+00:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "closed",
+      "optimized": false,
+      "notes": "JSONL 日誌無 chatroom 執行記錄；gun-bot 斷路器狀態 closed（健康）；無活動數據但系統正常，無需調整"
     }
   ]
 }

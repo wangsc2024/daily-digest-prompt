@@ -796,17 +796,43 @@ def _find_token_usage_file_for_stop() -> str:
     return os.path.join(_project_root, "state", "token-usage.json")
 
 
-def _check_token_budget() -> "str | None":
-    """檢查今日 Token 估算是否超過 1.5M。
+def _get_token_warn_limit() -> int:
+    """從 config/budget.yaml 讀取 Harness Token 警告門檻（80% 每日上限）。
 
+    使用 daily_budget.claude_tokens × warn_threshold（預設 0.80）。
+    若無法讀取 config，回退為 1.5M。
+    """
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(_script_dir)
+    budget_path = os.path.join(project_root, "config", "budget.yaml")
+    if not os.path.exists(budget_path):
+        return 1_500_000
+    try:
+        import yaml  # noqa: F401
+
+        with open(budget_path, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+        daily = cfg.get("daily_budget") or {}
+        limit = int(daily.get("claude_tokens", 12_000_000))
+        ratio = float(daily.get("warn_threshold", 0.80))
+        return int(limit * ratio)  # 80% 門檻
+    except (OSError, TypeError, KeyError, ValueError):
+        return 1_500_000
+
+
+def _check_token_budget() -> "str | None":
+    """檢查今日 Token 估算是否超過 80% 每日上限。
+
+    門檻來源：config/budget.yaml 的 daily_budget.claude_tokens × warn_threshold（80%）。
     每日只通知一次（冷卻機制）：在 state/token-budget-state.json 記錄
     last_alerted_date，同一天內只發出第一次警告，避免每個 session
     結束都重複通知。
 
     Returns:
-        警告字串（若超過上限且今日尚未通知），否則 None。
+        警告字串（若超過門檻且今日尚未通知），否則 None。
     """
     try:
+        warn_limit = _get_token_warn_limit()
         token_file = _find_token_usage_file_for_stop()
         if not os.path.exists(token_file):
             return None
@@ -818,7 +844,7 @@ def _check_token_budget() -> "str | None":
         day_data = usage.get("daily", {}).get(today, {})
         estimated = day_data.get("estimated_tokens", 0)
 
-        if estimated <= 1_500_000:
+        if estimated <= warn_limit:
             return None
 
         # 冷卻機制：今日已通知過則跳過
@@ -850,7 +876,8 @@ def _check_token_budget() -> "str | None":
             except OSError:
                 pass
 
-        return f"今日 Token 估算超過 1.5M：{estimated / 1_000_000:.1f}M"
+        limit_m = warn_limit / 1_000_000
+        return f"今日 Token 估算超過 80% 門檻（{limit_m:.1f}M）：{estimated / 1_000_000:.1f}M"
     except Exception:
         return None
 

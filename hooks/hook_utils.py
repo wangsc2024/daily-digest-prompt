@@ -12,6 +12,8 @@ from datetime import datetime
 
 
 # 模組層級正則編譯快取（避免重複編譯 hot path 中的 pattern）
+# 設有上限防止長時間運行進程記憶體膨脹
+_REGEX_CACHE_MAXSIZE = 512
 _compiled_regex_cache: dict = {}
 
 # 模組層級 YAML 配置快取（避免同一進程多次開檔讀取 hook-rules.yaml）
@@ -27,9 +29,18 @@ except ImportError:
 
 
 def get_compiled_regex(pattern: str, flags: int = 0):
-    """從快取取得已編譯正則，未命中時編譯並快取。"""
+    """從快取取得已編譯正則，未命中時編譯並快取。
+
+    快取上限 _REGEX_CACHE_MAXSIZE，超過時清除最舊一半條目，
+    防止長時間運行的團隊模式進程記憶體膨脹。
+    """
     key = (pattern, flags)
     if key not in _compiled_regex_cache:
+        if len(_compiled_regex_cache) >= _REGEX_CACHE_MAXSIZE:
+            # 淘汰前半快取（近似 LRU）
+            keys_to_remove = list(_compiled_regex_cache.keys())[:_REGEX_CACHE_MAXSIZE // 2]
+            for k in keys_to_remove:
+                del _compiled_regex_cache[k]
         _compiled_regex_cache[key] = re.compile(pattern, flags)
     return _compiled_regex_cache[key]
 
@@ -86,11 +97,18 @@ def sanitize_sensitive_data(text: str) -> str:
     return result
 
 
+def get_project_root() -> str:
+    """取得專案根目錄（hooks/ 的上層目錄）。
+
+    所有 hook 模組共用此函式，消除重複的路徑推算邏輯。
+    """
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 def find_config_path(filename="hook-rules.yaml"):
     """從 hooks/ 上層或 cwd 尋找配置檔，找不到回傳 None。"""
     # 優先：以本腳本位置推算 hooks/../config/
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(script_dir)
+    project_root = get_project_root()
     candidate = os.path.join(project_root, "config", filename)
     if os.path.isfile(candidate):
         return candidate
@@ -478,3 +496,56 @@ def safe_load_json(filepath: str, default=None):
             return json.load(f)
     except (json.JSONDecodeError, OSError):
         return default
+
+
+def cleanup_stale_state_files(max_age_hours: int = 48) -> dict:
+    """清理過期的 loop-state-*.json 和 stop-alert-*.json 檔案。
+
+    Args:
+        max_age_hours: 檔案最大保留時間（預設 48 小時）
+
+    Returns:
+        {"removed": [...], "errors": [...]} 清理結果摘要
+    """
+    from datetime import timedelta
+
+    project_root = get_project_root()
+    state_dir = os.path.join(project_root, "state")
+    result = {"removed": [], "errors": []}
+
+    if not os.path.isdir(state_dir):
+        return result
+
+    cutoff = datetime.now().timestamp() - (max_age_hours * 3600)
+    patterns = ["loop-state-*.json", "stop-alert-*.json"]
+
+    import glob as _glob
+    for pattern in patterns:
+        for filepath in _glob.glob(os.path.join(state_dir, pattern)):
+            try:
+                if os.path.getmtime(filepath) < cutoff:
+                    os.remove(filepath)
+                    result["removed"].append(os.path.basename(filepath))
+            except OSError as e:
+                result["errors"].append(f"{os.path.basename(filepath)}: {e}")
+
+    return result
+
+
+# ── P1-A：中介軟體組合工廠（委派到 hook_pipeline）────────────────────────
+
+def compose_middlewares(middlewares: list) -> "object":
+    """
+    工廠函數：從中介軟體清單建立 HookPipeline。
+
+    委派至 hooks/hook_pipeline.py 的 compose_pipeline()，
+    讓 hook_utils 使用者無需直接 import hook_pipeline。
+
+    Args:
+        middlewares: 中介軟體函數列表（每個函數簽章為 (context: dict) -> dict）
+
+    Returns:
+        HookPipeline 實例
+    """
+    from hook_pipeline import compose_pipeline  # noqa: F401
+    return compose_pipeline(middlewares)

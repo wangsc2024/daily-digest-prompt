@@ -31,11 +31,11 @@ depends-on:
 
 ## 依賴關係
 
-| Skill | 關係 | 說明 |
-|-------|------|------|
-| web-research | 上游 | 遵循研究標準化框架（來源分級、品質自評） |
-| knowledge-query | 下游 | 有價值的專案分析匯入知識庫 |
-| ntfy-notify | 下游 | 完成通知 |
+| Skill | 關係 | 說明 | 調用方式 |
+|-------|------|------|----------|
+| web-research | 設計繼承 | 遵循研究標準化框架（來源分級、品質自評），步驟 4 的 quality 欄位符合此規範 | 概念依賴，非直接調用 |
+| knowledge-query | 下游調用 | 有價值的專案分析匯入知識庫 | 步驟 6 使用 KB 匯入 API |
+| ntfy-notify | 下游調用 | 完成通知 | 自動任務模板調用 |
 
 ## 搜尋策略
 
@@ -135,6 +135,24 @@ depends-on:
 - 將步驟 4 的完整 JSON 作為一筆 entry 追加到 `entries` 陣列末尾
 - 保留最近 50 筆建議（超過則移除最舊的）
 - 寫入前讀取現有內容，避免覆蓋
+
+### 步驟 5.5：更新 research-registry
+
+讀取 `context/research-registry.json`，寫回本次搜尋記錄（確保去重機制生效）：
+
+```bash
+# 步驟 1：讀取現有 registry（Read 工具）
+# 步驟 2：在 entries 陣列追加本次記錄
+# {
+#   "timestamp": "ISO timestamp",
+#   "task_type": "github_scout",
+#   "topic": "本次搜尋主題",
+#   "result_count": 專案數量
+# }
+# 步驟 3：用 Write 工具寫回
+```
+
+**注意**：若 registry 不存在，建立空結構 `{"version": 1, "entries": []}`。
 
 ### 步驟 6：KB 匯入（可選）
 

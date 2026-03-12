@@ -55,9 +55,75 @@ function escapeHtml(s) {
   return s.replace(/[&<>"']/g, (c) => m[c]);
 }
 
+// ── KV 播放計數（路徑 /api/c/ 降低被廣告攔截器阻擋機率）──
+async function getPlayCount(env, key) {
+  if (!env.KNOWLEDGE_VIEWS) return 0;
+  try {
+    const val = await env.KNOWLEDGE_VIEWS.get(`podcast:${key}`);
+    return val ? parseInt(val, 10) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function incrementPlayCount(env, key) {
+  if (!env.KNOWLEDGE_VIEWS) return 0;
+  try {
+    const kvKey = `podcast:${key}`;
+    const val = await env.KNOWLEDGE_VIEWS.get(kvKey);
+    const plays = (val ? parseInt(val, 10) : 0) + 1;
+    await env.KNOWLEDGE_VIEWS.put(kvKey, String(plays)); // 無 expirationTtl，不會自動過期
+    return plays;
+  } catch {
+    return 0;
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // ── API: GET/POST /api/c/{key} — 播放計數（路徑避開 /play 以減少 ERR_BLOCKED_BY_CLIENT）──
+    const apiCMatch = url.pathname.match(/^\/api\/c\/(.+)$/);
+    if (apiCMatch) {
+      const key = decodeURIComponent(apiCMatch[1]);
+      const cors = { "Access-Control-Allow-Origin": "*" };
+      if (request.method === "POST") {
+        const plays = await incrementPlayCount(env, key);
+        return new Response(JSON.stringify({ key, plays }), {
+          headers: { "Content-Type": "application/json", ...cors },
+        });
+      }
+      if (request.method === "GET") {
+        const plays = await getPlayCount(env, key);
+        return new Response(JSON.stringify({ key, plays }), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors },
+        });
+      }
+    }
+
+    // ── API: GET /api/plays — 批次取得所有播放數 ──
+    if (url.pathname === "/api/plays" && request.method === "GET") {
+      try {
+        const listed = await env.PODCASTS.list({ limit: 1000 });
+        const keys = (listed.objects || [])
+          .filter((o) => /\.(mp3|m4a)$/i.test(o.key) && !o.key.startsWith("_meta/"))
+          .map((o) => o.key);
+        const counts = await Promise.all(keys.map(async (k) => [k, await getPlayCount(env, k)]));
+        const result = Object.fromEntries(counts);
+        return new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
+        });
+      } catch {
+        return new Response("{}", { headers: { "Content-Type": "application/json" } });
+      }
+    }
+
+    const epMatch = url.pathname.match(/^\/ep\/(.+)$/);
+    if (epMatch) {
+      const key = decodeURIComponent(epMatch[1]);
+      return Response.redirect(new URL(`/?ep=${encodeURIComponent(key)}`, url.origin), 302);
+    }
     if (url.pathname !== "/" && url.pathname !== "/index.html") {
       return new Response("Not Found", { status: 404 });
     }
@@ -77,6 +143,8 @@ export default {
         return tb - ta;
       });
 
+      const playCounts = await Promise.all(objects.map((o) => getPlayCount(env, o.key)));
+
       const tracks = objects.map((o, i) => {
         const meta = titlesMeta[o.key] || {};
         const title =
@@ -85,16 +153,17 @@ export default {
         const dateStr = o.uploaded ? formatDate(o.uploaded) : "";
         const sizeStr = formatSize(o.size ?? 0);
         const audioUrl = `${AUDIO_BASE_URL}/${encodeURIComponent(o.key)}`;
-        return { i, title, topic, dateStr, sizeStr, audioUrl };
+        const plays = playCounts[i] ?? 0;
+        return { i, key: o.key, title, topic, dateStr, sizeStr, audioUrl, plays };
       });
 
       const trackListJson = JSON.stringify(
-        tracks.map((t) => ({ title: t.title, topic: t.topic, url: t.audioUrl }))
+        tracks.map((t) => ({ title: t.title, topic: t.topic, url: t.audioUrl, key: t.key, plays: t.plays }))
       );
 
       const cards = tracks.map(
         (t) => `
-        <article class="card" data-idx="${t.i}" onclick="P.play(${t.i})">
+        <article class="card" data-idx="${t.i}" data-key="${escapeHtml(t.key)}" onclick="P.play(${t.i})">
           <div class="card-body">
             <div class="card-idx">${t.i + 1}</div>
             <div class="card-info">
@@ -103,8 +172,12 @@ export default {
                 ${t.topic ? `<span class="badge">${escapeHtml(t.topic)}</span>` : ""}
                 <span>${escapeHtml(t.dateStr)}</span>
                 <span>${t.sizeStr}</span>
+                <span class="plays" id="plays-${t.i}" title="點播次數">播放 ${t.plays} 次</span>
               </p>
             </div>
+            <button class="card-share" aria-label="分享連結" title="複製單集連結" data-key="${escapeHtml(t.key)}">
+              <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+            </button>
             <button class="card-play" aria-label="播放" data-idx="${t.i}">
               <svg class="icon-play" viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
               <svg class="icon-pause" viewBox="0 0 24 24"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
@@ -253,6 +326,13 @@ export default {
       font-size: 0.72rem;
       font-weight: 500;
     }
+    .plays {
+      color: var(--accent-yellow);
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      margin-left: 0.25rem;
+    }
 
     /* ── Card play btn ── */
     .card-play {
@@ -278,6 +358,24 @@ export default {
     .card.active.playing .card-play .icon-eq { display: block; }
     .card.active.playing .card-play { color: var(--accent-mint); }
     .card.active:not(.playing) .card-play .icon-pause { display: block; }
+
+    /* ── Card share btn ── */
+    .card-share {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .card-share:hover { background: rgba(255,255,255,0.12); color: var(--accent-mint); }
+    .card-share svg { width: 16px; height: 16px; fill: currentColor; }
 
     /* ── Bottom player bar ── */
     .player-bar {
@@ -388,6 +486,25 @@ export default {
 
     .empty { color: var(--text-secondary); text-align: center; padding: 4rem 1rem; font-size: 0.95rem; }
 
+    .card.highlight { animation: highlight-pulse 0.6s ease; }
+    @keyframes highlight-pulse { 0%,100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.04); } 50% { box-shadow: 0 0 0 2px var(--accent-mint), 0 0 20px rgba(45,212,191,0.3); } }
+    .toast {
+      position: fixed;
+      bottom: calc(var(--player-h) + 1rem);
+      left: 50%;
+      transform: translateX(-50%) translateY(1rem);
+      background: var(--surface);
+      color: var(--accent-mint);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 200;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
     @media (max-width: 480px) {
       header { padding: 2rem 1rem 0.75rem; }
       header h1 { font-size: 1.35rem; }
@@ -403,6 +520,7 @@ export default {
     <p>${escapeHtml(SITE_SUBTITLE)}</p>
   </header>
 
+  <!-- play-count-v1: 每集顯示「播放 N 次」，部署後請用「檢視網頁原始碼」搜尋此註解以確認 -->
   <div class="list">
     ${cards.length ? cards.join("") : '<p class="empty">尚無 Podcast，敬請期待 ✨</p>'}
   </div>
@@ -472,6 +590,11 @@ export default {
       }
     }
 
+    function updatePlayCount(idx, plays) {
+      const el = document.getElementById('plays-' + idx);
+      if (el) el.textContent = '播放 ' + (plays || 0) + ' 次';
+    }
+
     window.P = {
       play(idx) {
         if (idx < 0 || idx >= tracks.length) return;
@@ -495,8 +618,48 @@ export default {
         pSub.textContent = t.topic || ('第 ' + (idx + 1) + ' 集（共 ' + tracks.length + ' 集）');
         document.title = t.title + ' — ${escapeHtml(SITE_TITLE)}';
         cards[idx]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // 播放計數 +1（使用 /api/c/ 路徑降低被廣告攔截器阻擋機率）
+        fetch('/api/c/' + encodeURIComponent(t.key), { method: 'POST' })
+          .then(r => r.json())
+          .then(d => { if (d.plays != null) updatePlayCount(idx, d.plays); })
+          .catch(() => {});
+      },
+      share(key) {
+        const t = tracks.find(x => x.key === key);
+        const url = t ? t.url : location.origin + '/?ep=' + encodeURIComponent(key);
+        const text = t ? t.title + '\uFF1A' + url : url;
+        navigator.clipboard.writeText(text).then(() => {
+          const toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.textContent = '已複製連結';
+          document.body.appendChild(toast);
+          requestAnimationFrame(() => toast.classList.add('visible'));
+          setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 200); }, 1800);
+        }).catch(() => {});
       }
     };
+
+    document.querySelector('.list').addEventListener('click', (e) => {
+      const shareBtn = e.target.closest('.card-share');
+      if (shareBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const key = shareBtn.getAttribute('data-key');
+        if (key) P.share(key);
+      }
+    }, true);
+
+    const ep = new URLSearchParams(location.search).get('ep');
+    if (ep && tracks.length) {
+      const idx = tracks.findIndex(t => t.key === decodeURIComponent(ep));
+      if (idx >= 0) {
+        requestAnimationFrame(() => {
+          cards[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          cards[idx]?.classList.add('highlight');
+          setTimeout(() => cards[idx]?.classList.remove('highlight'), 2000);
+        });
+      }
+    }
 
     btnToggle.onclick = () => {
       if (current < 0) { P.play(0); return; }

@@ -40,6 +40,76 @@
 - 腳本已對多任務並行加約 15% 或最多 120s 的 Phase 2 緩衝；若仍常逾時，可調高 `config/timeouts.yaml` 的 `phase2_timeout_by_type.code` / `research`。
 - 排程設定避免相鄰整點/半點重疊（見 HEARTBEAT.md），必要時以 `state/scheduler-state.json` 或檔案鎖避免多 run 同時寫入 `results/`。
 
+### 1.2 todoist-team 排程執行中斷（日誌僅見 Phase 1 開頭即截斷）
+
+**症狀**：`logs/todoist-team_yyyyMMdd_HHmmss.log` 僅有十餘行，最後一行為 `[Phase1] G28 chatroom-query job started (Job N)`，其後無 Phase 1 完成、Phase 2/3 或「done」紀錄。
+
+**已知案例**：2026-03-11 20:30 排程（`todoist-team_20260311_203001.log`）啟動後於 Phase 1 的 `Wait-Job` 等待主 query 時程序被終止，同日 19:30 已於 19:46 正常結束，無重疊。
+
+**可能根因**：
+1. **程序遭外部終止**：主腳本在 `Wait-Job -Timeout 420` 阻塞時，pwsh 被 Task Scheduler、休眠/睡眠、或手動結束。
+2. **Task Scheduler 執行時間限制**：若工作「若執行超過下列時間就停止」被設成過短（例如 7 分鐘），會強制結束；HEARTBEAT 預期為 4000s（約 67 分鐘）。
+3. **資源或系統**：記憶體不足、系統休眠等。
+
+**排查步驟**：
+1. 確認排程的執行時間限制：以管理員開啟「工作排程器」→ 找到 `Claude_todoist-team` → 內容 → **「設定」** 索引標籤 → 「若執行超過下列時間就停止」應為 **約 67 分鐘**（或 1 小時 6 分鐘），**不是 7 分鐘**。若顯示為 7 分鐘會導致 Phase 1 約 7 分鐘時被強制結束。
+2. **修正為 4000 秒**：以**系統管理員身分**開啟 PowerShell，執行：
+   ```powershell
+   pwsh -ExecutionPolicy Bypass -File "D:\Source\daily-digest-prompt\scripts\check-task-limit.ps1" -SetTo4000
+   ```
+   或重新從 HEARTBEAT 註冊排程：`.\setup-scheduler.ps1 -FromHeartbeat`（會將 todoist-team 的 timeout 設為 4000s）。
+3. 檢查當日 19:30 是否逾時或異常延遲（若 19:30 跑超過 1 小時，可能與 20:30 重疊；腳本已加單例鎖避免並行）。
+4. 日誌開頭是否出現 `[SKIP] Another instance is running`（表示上一班仍在跑，本次依設計跳過）。
+
+**已實施改善**：
+- **單例鎖**：`run-todoist-agent-team.ps1` 使用 `state/run-todoist-agent-team.lock`，若上一班仍在執行則本班直接 exit，避免並行寫入 `results/` 與日誌混亂。
+- **防禦日誌**：Phase 1 在進入 `Wait-Job` 前寫入 `[Phase1] Waiting for main query job (timeout Ns)...` 與 `[PID] N`，便於判斷中斷發生在「等待主 query」階段。
+
+**預防**：
+- 排程建立後以 `Get-ScheduledTask -TaskName Claude_todoist-team | Select-Object *` 或工作排程器 GUI 確認 ExecutionTimeLimit 為 4000 秒。
+- 避免在執行時段內手動結束 pwsh 或讓主機進入休眠。
+
+### 1.3 自動任務結果檔損壞（Codex 執行輸出被寫入結果檔案）
+
+**症狀**：Phase 3 組裝摘要顯示「❌ [任務類型]：失敗 — 原因：執行結果檔案損壞（Codex 執行輸出被寫入結果檔案）」；日誌出現 `[Phase2] auto-tech_research result file補寫 (138841 chars, 426s)` 等大字數補寫。
+
+**損壞情形**：
+- **原因**：使用 Codex / OpenRouter 後端時，Agent 若未用 Write 產出 `results/todoist-auto-{key}.json`（或產出過小 &lt; 500 bytes），Phase 2 會以 **補寫（fallback）** 將該 Job 的 **整段 stdout** 寫入結果檔。
+- **結果**：結果檔內容變成「後端 CLI 的完整終端輸出」（可達 10 萬字以上），而非 prompt 要求的結構化 JSON（`agent`、`type`、`status`、`summary` 等）。Phase 3 讀取時無法當成有效任務結果，故判定為「結果檔損壞」。
+- **常見觸發**：`tech_research` 使用 `codex_exec`，Codex 的 stdout 為整段對話/工具輸出，若 Agent 未正確寫入結果檔即會觸發補寫。
+
+**已實施優化**（run-todoist-agent-team.ps1）：
+1. **結構化失敗取代整段 stdout**：補寫時不再寫入 `output = $fullOutput`（整段 stdout），改為寫入 **結構化失敗物件**：`agent`、`type`、`status: "failed"`、`reason: "result_file_missing_or_invalid"`、`backend_stdout_preview`（僅前 2000 字）、`backend`、`elapsed_seconds`。Phase 3 可正常解析並顯示「失敗（未產出有效結果檔）」。
+2. **既有有效檔不覆蓋**：若結果檔已存在且 ≥ 500 bytes，且含 `type`/`agent` 與 `status` 欄位，視為 Agent 已產出有效結構，不執行補寫，避免覆蓋正確結果。
+
+**若仍希望 Agent 產出有效檔**：
+- 確認對應 prompt（如 `prompts/team/todoist-auto-tech_research.md`）明確要求「第一步用 Write 建立 results/todoist-auto-xxx.json 佔位，最後一步覆寫完整內容」。
+- 必要時可將該任務改為 Claude 後端（較穩定產出 JSON），或檢查 Codex 執行環境是否導致 Write 工具未寫入預期路徑。
+
+**楞嚴經研究（shurangama）同款失敗**：若報告顯示「❌ 楞嚴經研究 — 原因：Codex 後端未產出有效結果檔（codex_exec gpt-5.4，耗時 380s）」：
+- 同上 1.3 機制：Codex 跑完但未產出 `results/todoist-auto-shurangama.json`（或檔案 &lt; 500 bytes / 缺 `agent`、`type`、`status`），腳本已寫入結構化失敗檔，Phase 3 可正常顯示失敗原因。
+- 可能原因：Codex 在 WebSearch/WebFetch 或 KB 匯入階段耗時過長或中斷，未執行到第五步寫入結果 JSON。
+- 建議：若連續失敗，可將 `config/frequency-limits.yaml` 的 `task_rules.codex_exec` 中暫時移除 `shurangama`，並在 `task_rules.claude_sonnet45` 加入 `shurangama`，改由 Claude 產出結果檔（較穩定）；或檢查當次 Phase 2 日誌中該 job 的 stdout 預覽（`backend_stdout_preview`）是否顯示錯誤或中斷。
+
+### 1.4 自動任務大量 result_file_missing（Phase 3 用錯 task key）
+
+**症狀**：ntfy 出現「自動任務失敗追蹤（10 項）、原因 result_file_missing」，且多個任務（podcast_jiaoguangzong、ai_deep_research、tech_research、arch_evolution 等）重複失敗；Phase 2 實際可能已產出 `results/todoist-auto-{key}.json`。
+
+**根因**：`plan.auto_tasks.selected_tasks` 為**物件陣列**（每項有 `.key`、`.name` 等）。Phase 3 若以「整個物件」當 task key，PowerShell 會將物件轉成字串 `@{key=podcast_jiaoguangzong; name=...}`，導致：
+- 結果檔路徑變成 `todoist-auto-@{ key=... }.json`，永遠找不到檔案；
+- `state/failed-auto-tasks.json` 的 `task_key` 被寫成該字串，失敗補跑與 self_heal 讀取時無法對應到純 key。
+
+**已實施修復**（run-todoist-agent-team.ps1）：
+1. **Get-NormalizedAutoTaskKey**：從 selected_tasks 項目（物件或字串）取出並正規化為純 key（與 Phase 2 的 key/別名一致）。
+2. Phase 3 失敗追蹤改為使用 **normalizedKey** 組 result 路徑並寫入 failed-auto-tasks，使用 **rawKey** 對應 `$sections`（timeout 判斷）。
+3. **Update-FailedAutoTasks** 讀取時正規化既有條目的 `task_key`（`@{key=...}` → 純 key），再比對與寫回。
+
+**既有資料修正**：若 `state/failed-auto-tasks.json` 已含錯誤格式的 task_key，可執行一次：
+```powershell
+pwsh -ExecutionPolicy Bypass -File scripts/normalize-failed-auto-tasks.ps1
+```
+會將 task_key 正規化為純 key 並依 key 合併重複條目。
+
 ---
 
 ## 2. Todoist API 呼叫失敗

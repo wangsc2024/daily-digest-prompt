@@ -6,6 +6,10 @@ name = "podcast-index"
 main = "index.js"
 compatibility_date = "2025-01-01"
 
+[[kv_namespaces]]
+binding = "KNOWLEDGE_VIEWS"
+id = "4d12aabfac364c32b94e7ce6978641b0"
+
 [[r2_buckets]]
 binding = "PODCASTS"
 bucket_name = "podcasts"

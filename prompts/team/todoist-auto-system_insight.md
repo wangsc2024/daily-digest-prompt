@@ -7,6 +7,7 @@
 ## 效率規則
 - 禁止使用 TodoWrite
 - 最小化工具呼叫
+- **日誌讀取委派子 Agent**：讀取多個 .log / .jsonl 時，使用 `subagent_type=Explore` 委派，主 Agent 只接收統計摘要（error 次數、timeout 次數等），不直接累積原始日誌內容
 
 ## Skill-First
 必須先讀取 `skills/system-insight/SKILL.md`，依其完整步驟執行。
@@ -17,7 +18,7 @@
 3. 若有 critical alert → 用 ntfy 通知（依 `skills/ntfy-notify/SKILL.md`）
 
 ## 輸出
-完成後用 Write 建立 `results/todoist-auto-system-insight.json`：
+完成後用 Write 建立 `results/todoist-auto-system_insight.json`：
 ```json
 {
   "task_type": "auto",

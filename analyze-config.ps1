@@ -26,7 +26,7 @@ $metrics = [ordered]@{
 # 警戒閾值（與 config/benchmark.yaml config_complexity 同步）
 $thresholds = @{
     claude_md_lines     = 300    # > 300 行警告
-    yaml_total_lines    = 3000   # > 3000 行警告
+    yaml_total_lines    = 3500   # > 3500 行警告（系統自動生成配置，原 3000 過窄）
     skill_index_lines   = 150    # > 150 行警告
     auto_task_templates = 25     # > 25 個模板警告
 }
@@ -78,4 +78,13 @@ if (-not $Brief) {
 
 # 返回超出警戒的指標數量（供 check-health.ps1 呼叫時使用）
 $violationCount = ($thresholds.Keys | Where-Object { [int]($metrics[$_]) -gt $thresholds[$_] }).Count
-return $violationCount
+if ($Brief) {
+    if ($violationCount -eq 0) {
+        Write-Output "✅ 所有指標正常（CLAUDE.md $($metrics.claude_md_lines)行 / YAML $($metrics.yaml_total_lines)行 / Templates $($metrics.auto_task_templates)個）"
+    } else {
+        $violators = @($thresholds.Keys | Where-Object { [int]($metrics[$_]) -gt $thresholds[$_] } | ForEach-Object { "$_=$($metrics[$_])" })
+        Write-Output "⚠️  $violationCount 個指標超出警戒：$($violators -join ', ')"
+    }
+} else {
+    return $violationCount
+}

@@ -3,10 +3,12 @@ name = "daily-digest-prompt"
 version = "0.1.0"
 description = "Automated daily digest system with Claude Code"
 requires-python = ">=3.9"
+# 核心依賴使用 == 鎖定（ADR-010：防止惡意版本注入；版本與 uv.lock 對齊）
+# fpdf2 維持 >= 以相容 requires-python >=3.9（fpdf2 2.8.7 需 3.10+）
 dependencies = [
-    "requests>=2.28.0",
-    "schedule>=1.2.0",
-    "pyyaml>=6.0",
+    "requests==2.32.5",
+    "schedule==1.2.2",
+    "pyyaml==6.0.3",
     "edge-tts>=6.1.0",
     "fpdf2>=2.8.4",
 ]
@@ -16,6 +18,7 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
+    "pip-audit>=2.0.0",
 ]
 gmail = [
     "google-auth-oauthlib>=1.0.0",
@@ -26,7 +29,7 @@ gmail = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --tb=short --cov=hooks --cov=skills --cov-report=term-missing --cov-fail-under=40"
+addopts = "-v --tb=short --cov=hooks --cov=skills --cov-report=term-missing --cov-fail-under=44"
 
 [tool.ruff]
 line-length = 100

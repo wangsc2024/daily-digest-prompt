@@ -1,12 +1,12 @@
 你是系統維護助手，全程使用正體中文。
 你的任務是對 daily-digest-prompt 系統進行 Log 深度審查，找出問題並執行修正。
-完成後將結果寫入 `results/todoist-auto-logaudit.json`。
+完成後將結果寫入 `results/todoist-auto-log_audit.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
 ## 立即行動：寫入 Fail-Safe 結果（最高優先）
-讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-logaudit.json`，內容：
+讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-log_audit.json`，內容：
 `{"agent":"todoist-logaudit","status":"failed","type":"log_audit","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
 
 （此 placeholder 將在步驟 8 成功完成後被覆寫為 status=success）
@@ -21,23 +21,19 @@
 1. 讀取 `state/scheduler-state.json` — 分析最近 30 筆執行記錄
 2. 讀取 `context/digest-memory.json` — 分析記憶中的異常模式
 
-## 步驟 2：掃描 Log 檔案
-用 Bash 列出最近 7 天的日誌：
-```bash
-ls -t logs/*.log | head -10
-```
+## 步驟 2：委派 Explore 子 Agent 掃描 Log 檔案
 
-逐一用 Read 讀取每個 log，搜尋：
+**禁止主 Agent 逐一 Read 每個 log 檔案**（10+ 個大型 .log 檔案會耗盡 context）。
+使用 Agent 工具（`subagent_type=Explore`）委派掃描，主 Agent 只接收摘要：
 
-| 搜尋模式 | 問題類型 | 嚴重度 |
-|---------|---------|--------|
-| `[ERROR]` | 執行錯誤 | 高 |
-| `[WARN]` | 警告 | 中 |
-| `RETRY` | 重試 | 中 |
-| `TIMEOUT` | 超時 | 高 |
-| `failed` | 區塊失敗 | 高 |
-| `cache_degraded` | 快取降級 | 低 |
-| `nul` | nul 檔案問題 | 高 |
+向子 Agent 提問（prompt 內容）：
+> 請用 Bash 掃描 `logs/` 目錄下最近 7 天的 .log 檔案（`ls -t logs/*.log | head -10`）。
+> 對每個 log 檔案用 `grep -c` 統計關鍵字出現次數：`ERROR`、`WARN`、`RETRY`、`TIMEOUT`、`failed`、`cache_degraded`、`nul`。
+> 同時擷取每種關鍵字的最新一行（`grep -m1 "PATTERN" 檔案`）作為代表樣本。
+> 回傳 JSON 格式：`{"file": "filename", "counts": {"ERROR": N, ...}, "samples": {"ERROR": "最新一行"}}`。
+> 限制回傳 ≤ 50 行 JSON。
+
+從子 Agent 回傳的摘要識別高頻問題（counts 大於 0 的類型）。
 
 ## 步驟 3：分析問題並分類
 ```
@@ -115,7 +111,7 @@ cp "目標檔案" "目標檔案.bak"
 4. 知識庫未啟動則跳過
 
 ## 步驟 8：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-logaudit.json`：
+用 Write 建立 `results/todoist-auto-log_audit.json`：
 ```json
 {
   "agent": "todoist-logaudit",

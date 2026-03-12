@@ -37,12 +37,33 @@ todoist_team:
     auto: 600       # 自動任務（10 分鐘）
     gitpush: 360    # Git 推送（6 分鐘）
   # Phase 2 動態 timeout（按 auto-task key，優先級高於 phase2_timeout_by_type）
+  # 所有 23 個自動任務均有明確 timeout，不再依賴 phase2_timeout_by_type.auto 預設值
   phase2_timeout_by_task:
-    creative_game_optimize: 900 # sync-games.ps1 npm build 最長 ~15 min
-    log_audit: 720              # 讀 10+ log + 分析修正 + KB 匯入
-    qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
-    ai_deep_research: 720       # 4 階段 WebFetch
+    # === 研究類（Codex 後端，含 WebSearch/WebFetch）===
     tech_research: 2600         # WebSearch×3 + WebFetch×4 + KB 匯入，2026-02-26 超時紀錄
+    ai_deep_research: 720       # 4 階段 WebFetch
+    unsloth_research: 720       # WebSearch + WebFetch + KB 匯入
+    ai_github_research: 900     # GitHub WebSearch×3 + WebFetch + KB（提升：原缺失於 PS1 回落 600s 超時）
+    ai_workflow_github: 720     # GitHub workflow research + KB
+    ai_smart_city: 600          # domain research（ai-domain-research.md 通用模板）
+    ai_sysdev: 600              # domain research（ai-domain-research.md 通用模板）
+    shurangama: 900             # WebFetch 楞嚴經多章 + 段落分析 + KB 匯入（PS1 已同步至 900s）
+    jiaoguangzong: 900          # WebFetch 教觀綱宗多章 + KB 匯入（PS1 已同步至 900s）
+    fahua: 900                  # WebFetch 法華 + KB 匯入
+    jingtu: 900                 # WebFetch 淨土 + KB 匯入
+    # === 系統類（claude_sonnet45 後端，重 context 任務，已導入 sub-agent）===
+    skill_audit: 720            # sub-agent 掃描 26 SKILL.md + KB 搜尋 + 修改建議
+    system_insight: 720         # sub-agent 分析 logs/state + 更新 system-insight.json
+    arch_evolution: 900         # 讀 improvement-backlog + context/*.json + 架構決策
+    self_heal: 720              # 多步驟修復（registry/快取/排程驗證）+ ntfy
+    chatroom_optimize: 480      # sub-agent log 分析 + routing.yaml 調整 + ntfy
+    git_push: 600               # git log/diff + 隱私檢查 + commit + push + KB 同步
+    log_audit: 720              # sub-agent 讀 10+ log + 分析修正 + KB 匯入
+    # === 創意類 ===
+    creative_game_optimize: 900 # sync-games.ps1 npm build 最長 ~15 min
+    qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
+    podcast_create: 2400        # 腳本生成 + TTS(40段×~10s) + concat + R2 上傳
+    podcast_jiaoguangzong: 2400 # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:

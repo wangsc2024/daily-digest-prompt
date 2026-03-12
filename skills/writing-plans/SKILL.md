@@ -1,9 +1,11 @@
 ---
 name: writing-plans
-description: |
-  Create detailed implementation plans for multi-step features. Breaks work into bite-sized TDD tasks (2-5 minutes each) with exact file paths, code examples, and verification steps.
-  Use when: planning new features, complex refactoring, multi-file changes, creating roadmaps, or when user mentions 計畫, plan, 規劃, 實作計畫, implementation plan, 步驟, 任務拆解.
 version: 1.0.0
+description: |
+  建立詳細的實作計畫（多步驟功能）。將工作拆解為微小的 TDD 任務（2-5 分鐘粒度），包含準確檔案路徑、程式碼範例與驗證步驟。
+  Use when: 規劃新功能、複雜重構、多檔案修改、建立路線圖，or when user mentions 計畫, plan, 規劃, 實作計畫, implementation plan, 步驟, 任務拆解.
+allowed-tools: Read, Write, Bash
+cache-ttl: N/A
 triggers:
   - write plan
   - create plan

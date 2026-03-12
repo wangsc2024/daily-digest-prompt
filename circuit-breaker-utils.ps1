@@ -30,7 +30,7 @@ function Test-CircuitBreaker {
     #>
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateSet("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")]
+        [ValidateSet("todoist", "pingtung-news", "hackernews", "gmail", "knowledge", "gun-bot", "chatroom-scheduler")]
         [string]$ApiName
     )
 
@@ -102,7 +102,7 @@ function Update-CircuitBreaker {
     #>
     param (
         [Parameter(Mandatory=$true)]
-        [ValidateSet("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")]
+        [ValidateSet("todoist", "pingtung-news", "hackernews", "gmail", "knowledge", "gun-bot", "chatroom-scheduler")]
         [string]$ApiName,
 
         [Parameter(Mandatory=$true)]
@@ -187,7 +187,7 @@ function Reset-CircuitBreakerCooldown {
         $now = (Get-Date).ToUniversalTime()
         $updated = $false
 
-        foreach ($apiName in @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")) {
+        foreach ($apiName in @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge", "gun-bot", "chatroom-scheduler")) {
             $circuit = $health.$apiName
             if ($null -ne $circuit -and $circuit.state -eq "open" -and $null -ne $circuit.cooldown) {
                 $cooldownTime = [DateTime]::Parse($circuit.cooldown)
@@ -196,7 +196,7 @@ function Reset-CircuitBreakerCooldown {
                     $circuit.state = "half_open"
                     $circuit.cooldown = $null
                     $updated = $true
-                    Write-Host "[Circuit Breaker] $apiName: open → half_open（冷卻已過期）" -ForegroundColor Yellow
+                    Write-Host "[Circuit Breaker] ${apiName}: open → half_open（冷卻已過期）" -ForegroundColor Yellow
                 }
             }
         }
@@ -282,7 +282,7 @@ function Get-PrecheckSummary {
     }
     #>
 
-    $apis = @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge")
+    $apis = @("todoist", "pingtung-news", "hackernews", "gmail", "knowledge", "gun-bot", "chatroom-scheduler")
     $summary = @{}
 
     foreach ($api in $apis) {
@@ -291,6 +291,57 @@ function Get-PrecheckSummary {
     }
 
     return $summary
+}
+
+function Test-GunBotHealth {
+    <#
+    .SYNOPSIS
+    即時檢測 Gun.js Bot 健康狀態並更新 Circuit Breaker
+
+    .DESCRIPTION
+    呼叫 http://localhost:3001/api/health 端點，根據回應更新
+    state/api-health.json 中 gun-bot 和 chatroom-scheduler 的斷路器狀態。
+
+    .OUTPUTS
+    String: "closed"（正常）、"open"（故障）、"unavailable"（未啟動）
+
+    .EXAMPLE
+    $gunBotState = Test-GunBotHealth
+    if ($gunBotState -ne "closed") { Write-Host "Bot 離線" }
+    #>
+
+    $endpoint = "http://localhost:3001/api/health"
+    $timeoutSec = 5
+
+    try {
+        $response = Invoke-RestMethod -Uri $endpoint -Method Get -TimeoutSec $timeoutSec -ErrorAction Stop
+        # 成功回應 → closed
+        Update-CircuitBreaker -ApiName "gun-bot" -Success $true
+        Update-CircuitBreaker -ApiName "chatroom-scheduler" -Success $true
+        Write-Verbose "[GunBot] 健康檢查通過（/api/health 回應正常）"
+        return "closed"
+    }
+    catch [System.Net.WebException] {
+        $status = $_.Exception.Response?.StatusCode
+        if ($null -eq $status) {
+            # 連線失敗（Bot 未啟動）
+            Write-Host "  [Gun-Bot] 無法連線 $endpoint（Bot 可能未啟動）" -ForegroundColor Red
+            Update-CircuitBreaker -ApiName "gun-bot" -Success $false -ErrorCategory "network_error"
+            Update-CircuitBreaker -ApiName "chatroom-scheduler" -Success $false -ErrorCategory "network_error"
+            return "unavailable"
+        }
+        else {
+            # HTTP 錯誤（Bot 啟動但端點異常）
+            Write-Host "  [Gun-Bot] /api/health 回傳 HTTP $([int]$status)" -ForegroundColor Yellow
+            Update-CircuitBreaker -ApiName "gun-bot" -Success $false -ErrorCategory "server_error"
+            return "open"
+        }
+    }
+    catch {
+        Write-Host "  [Gun-Bot] 健康檢查失敗：$($_.Exception.Message)" -ForegroundColor Yellow
+        Update-CircuitBreaker -ApiName "gun-bot" -Success $false -ErrorCategory "network_error"
+        return "open"
+    }
 }
 
 function Show-PrecheckReport {

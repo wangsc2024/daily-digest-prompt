@@ -15,7 +15,23 @@
 
 ---
 
-## 步驟 0：評分知識庫筆記，選出播客素材
+## 步驟 0：讀取 Podcast 長久記憶
+
+讀取過去的播客歷史，避免重複製作相同內容：
+
+```bash
+cat context/podcast-history.json
+```
+
+從回應中取得：
+- **`summary.recent_note_ids`**：最近 `cooldown_days` 天內已用的筆記 ID 清單（本集必須排除）
+- **`summary.recent_topics`**：最近覆蓋過的主題標籤（本集需優先選擇「不在此清單」的主題）
+
+記錄這兩個清單，供步驟 1 選材時使用。
+
+---
+
+## 步驟 1：評分知識庫筆記，選出播客素材
 
 執行評分工具，取得高品質筆記排行：
 
@@ -28,10 +44,11 @@ uv run --project . python tools/score-kb-notes.py --top 10
 cat state/kb-note-scores.json
 ```
 
-從 `top_10` 中選出 **3 筆** 最高分的筆記作為本集素材，條件：
+從 `top_10` 中選出 **3 筆** 最高分的筆記作為本集素材，條件（依序套用）：
 - `total >= 50`（低於 50 分的筆記內容不夠豐富）
 - `podcast_suit >= 10`（需有敘述性，純程式碼筆記跳過）
-- 3 筆筆記的主題需具多樣性（不全是同一類別）
+- **排除** ID 在步驟 0 的 `recent_note_ids` 清單中的筆記
+- 3 筆筆記的主題需具多樣性，且**優先選擇主題不在 `recent_topics` 清單**中的筆記
 
 若高分筆記不足 3 筆，補充查詢知識庫：
 ```bash
@@ -41,7 +58,7 @@ curl -s "http://localhost:3000/api/notes?limit=20&sort=createdAt&order=desc"
 
 ---
 
-## 步驟 1：查詢每筆選中筆記的完整內容
+## 步驟 2：查詢每筆選中筆記的完整內容
 
 對每個選中的 note_id，查詢完整內容：
 ```bash
@@ -56,7 +73,7 @@ curl -s "http://localhost:3000/api/notes/{note_id}"
 
 ---
 
-## 步驟 2：生成雙主持人對話腳本（JSONL 格式）
+## 步驟 3：生成雙主持人對話腳本（JSONL 格式）
 
 根據 3 筆筆記內容，撰寫 AI 雙主持人對話：
 
@@ -88,7 +105,7 @@ curl -s "http://localhost:3000/api/notes/{note_id}"
 
 ---
 
-## 步驟 3：儲存腳本到本地
+## 步驟 4：儲存腳本到本地
 
 取得今日日期與時間：
 ```bash
@@ -101,7 +118,7 @@ pwsh -Command "Get-Date -Format 'yyyyMMdd_HHmmss'"
 
 ---
 
-## 步驟 4：TTS 語音合成
+## 步驟 5：TTS 語音合成
 
 從 config/media-pipeline.yaml 讀取聲音設定，然後執行：
 
@@ -118,7 +135,7 @@ uv run --project . python tools/generate_podcast_audio.py \
 
 ---
 
-## 步驟 5：音訊後製（串接 + 正規化 + MP3 輸出）
+## 步驟 6：音訊後製（串接 + 正規化 + MP3 輸出）
 
 ```bash
 uv run --project . python tools/concat_audio.py \
@@ -132,7 +149,7 @@ uv run --project . python tools/concat_audio.py \
 
 ---
 
-## 步驟 6：上傳至 Cloudflare R2
+## 步驟 7：上傳至 Cloudflare R2
 
 使用現有的 `tools/upload-podcast.ps1`（已正確處理 URL 編碼、manifest 更新、環境變數讀取）：
 
@@ -154,7 +171,7 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 
 ---
 
-## 步驟 7：發送 ntfy 通知
+## 步驟 8：發送 ntfy 通知
 
 依照 skills/ntfy-notify/SKILL.md 指示，使用 Write 工具建立通知 JSON 後發送。
 
@@ -163,14 +180,14 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 標題：🎙️ Podcast 已發佈：{本集主題}
 內容：AI 雙主持人對話 | {主題1} × {主題2} × {主題3} | {對話輪數} 輪對話
 Tags: headphones, white_check_mark
-Click: {cloud_url}   ← 步驟 6 回傳的實際 MP3 URL（非網域首頁）
+Click: https://podcast.pdoont.us.kg   ← 網站首頁（播放時自動觸發計數器）
 ```
 
 若 `cloud_url = "未上傳"`：省略 Click 欄位，通知內容改為「本地檔案已就緒，尚未上傳至雲端」。
 
 ---
 
-## 步驟 8：寫入結果檔案
+## 步驟 9：寫入結果檔案
 
 使用 Write 工具寫入 `results/todoist-auto-podcast_create.json`：
 ```json
@@ -179,6 +196,7 @@ Click: {cloud_url}   ← 步驟 6 回傳的實際 MP3 URL（非網域首頁）
   "episode_title": "（本集主題摘要）",
   "notes_used": ["（note_id 1）", "（note_id 2）", "（note_id 3）"],
   "note_titles": ["（標題1）", "（標題2）", "（標題3）"],
+  "topics": ["（本集主題標籤1）", "（主題標籤2）"],
   "script_path": "podcasts/{YYYYMMDD}/script_{timestamp}.jsonl",
   "mp3_path": "podcasts/{YYYYMMDD}/podcast_{timestamp}.mp3",
   "cloud_url": "（R2 URL 或 '未上傳'）",
@@ -190,7 +208,37 @@ Click: {cloud_url}   ← 步驟 6 回傳的實際 MP3 URL（非網域首頁）
 
 ---
 
-## 步驟 9：更新 KB 筆記評分（回饋迴圈）
+## 步驟 10：更新 Podcast 長久記憶
+
+讀取現有 `context/podcast-history.json`，加入本集記錄後用 Write 工具**完整覆寫**。
+
+**更新規則：**
+
+1. 在 `episodes[]` 開頭插入新 episode（**最新集在最前**）：
+```json
+{
+  "episode_title": "（本集主題）",
+  "notes_used": ["（note_id 1）", "（note_id 2）", "（note_id 3）"],
+  "note_titles": ["（標題1）", "（標題2）", "（標題3）"],
+  "topics": ["（主題標籤1）", "（主題標籤2）", "（主題標籤3）"],
+  "source": "auto-task",
+  "created_at": "（ISO 8601）"
+}
+```
+
+2. 更新 `summary`：
+   - `total_episodes`：+1
+   - `recent_note_ids`：在清單前方加入本集 3 筆 note_id，**保留最新 30 筆**（超過截斷舊的）
+   - `recent_topics`：在清單前方加入本集 topics，**保留最新 50 個**（去重後截斷）
+   - `updated_at`：更新為當前 ISO 8601 時間
+
+3. 保留 `entries[]` 原樣（向後相容，不修改）
+
+**topics 提取原則**：從筆記的 `tags` 陣列取前 2-3 個有意義的主題詞（排除 "Podcast製作"、"對話腳本" 等通用標籤），若 tags 為空則從 note_title 提取關鍵詞（2-4 個字的主題名詞）。
+
+---
+
+## 步驟 11：更新 KB 筆記評分（回饋迴圈）
 
 將本次使用的 3 筆筆記標記為「已入播客」，避免近期重複：
 ```bash
@@ -199,7 +247,8 @@ uv run --project . python tools/score-kb-notes.py --limit 50
 
 完成！在最終輸出中列出：
 - 本集主題
-- 使用的筆記標題
+- 使用的筆記標題（含主題標籤）
 - MP3 路徑與雲端 URL
 - 對話輪數與字數
+- 更新後的 `recent_topics` 前 5 項
 ```

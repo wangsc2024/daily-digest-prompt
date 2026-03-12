@@ -1,68 +1,9 @@
 {
-  "status": "skipped",
-  "current_step": "decide",
-  "updated_at": "2026-03-09T00:55:39+08:00",
+  "run_id": "ecbf07a1c87c",
+  "status": "completed",
+  "current_step": "complete",
+  "updated_at": "2026-03-12T03:38:48+08:00",
   "history": [
-    {
-      "step": "idle",
-      "status": "idle",
-      "ts": null
-    },
-    {
-      "ts": "2026-03-01T00:40:03+08:00",
-      "step": "orient",
-      "status": "running"
-    },
-    {
-      "status": "running",
-      "ts": "2026-03-02T00:40:02+08:00",
-      "step": "orient"
-    },
-    {
-      "status": "running",
-      "ts": "2026-03-03T17:47:49+08:00",
-      "step": "orient"
-    },
-    {
-      "status": "completed",
-      "ts": "2026-03-03T18:03:27+08:00",
-      "step": "orient"
-    },
-    {
-      "status": "skipped",
-      "ts": "2026-03-03T18:03:27+08:00",
-      "step": "decide"
-    },
-    {
-      "status": "running",
-      "ts": "2026-03-04T00:40:02+08:00",
-      "step": "orient"
-    },
-    {
-      "status": "completed",
-      "ts": "2026-03-04T00:49:43+08:00",
-      "step": "orient"
-    },
-    {
-      "ts": "2026-03-04T00:49:43+08:00",
-      "status": "skipped",
-      "step": "decide"
-    },
-    {
-      "ts": "2026-03-07T00:40:02+08:00",
-      "status": "running",
-      "step": "orient"
-    },
-    {
-      "ts": "2026-03-07T00:53:16+08:00",
-      "status": "completed",
-      "step": "orient"
-    },
-    {
-      "ts": "2026-03-07T00:53:16+08:00",
-      "step": "decide",
-      "status": "skipped"
-    },
     {
       "ts": "2026-03-08T00:40:02+08:00",
       "step": "orient",
@@ -87,7 +28,112 @@
       "ts": "2026-03-09T00:55:39+08:00",
       "status": "completed",
       "step": "orient"
+    },
+    {
+      "status": "skipped",
+      "step": "decide",
+      "ts": "2026-03-09T00:55:39+08:00"
+    },
+    {
+      "status": "running",
+      "step": "orient",
+      "ts": "2026-03-10T00:40:02+08:00"
+    },
+    {
+      "status": "completed",
+      "step": "orient",
+      "ts": "2026-03-10T00:50:13+08:00"
+    },
+    {
+      "status": "skipped",
+      "step": "decide",
+      "ts": "2026-03-10T00:50:13+08:00"
+    },
+    {
+      "status": "running",
+      "step": "orient",
+      "ts": "2026-03-11T00:40:02+08:00"
+    },
+    {
+      "status": "completed",
+      "step": "orient",
+      "ts": "2026-03-11T00:52:28+08:00"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-11T01:00:00+08:00",
+      "note": "手動觸發 arch-evolution（改善清單 5 項，來源：system-audit 85.48/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-11T01:10:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（11 個 ADR：7 accepted, 2 deferred, 1 wontfix, 1 proposed）",
+        "context/arch-decision.json（9 項決策：3 immediate_fix, 5 schedule_adr, 1 wontfix）"
+      ]
+    },
+    {
+      "ts": "2026-03-11T01:10:00+08:00",
+      "step": "act",
+      "status": "completed"
+    },
+    {
+      "ts": "2026-03-12T00:40:01+08:00",
+      "step": "orient",
+      "status": "running"
+    },
+    {
+      "ts": "2026-03-12T00:49:50+08:00",
+      "step": "orient",
+      "status": "completed"
+    },
+    {
+      "ts": "2026-03-12T00:49:50+08:00",
+      "step": "decide",
+      "status": "skipped"
+    },
+    {
+      "ts": "2026-03-12T09:00:00+08:00",
+      "step": "decide",
+      "status": "running",
+      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 87.18/100）"
+    },
+    {
+      "ts": "2026-03-12T09:02:00+08:00",
+      "step": "decide",
+      "status": "completed",
+      "artifacts": [
+        "context/adr-registry.json（12 個 ADR：7 accepted, 2 deferred, 1 wontfix, 2 proposed）",
+        "context/arch-decision.json（5 項決策：0 immediate_fix, 1 schedule_adr, 4 skip）"
+      ]
+    },
+    {
+      "ts": "2026-03-12T00:49:50+08:00",
+      "step": "act",
+      "status": "completed"
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-12T03:38:48+08:00",
+      "repairs": "4/4 項（含 arch-decision 0 項）"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-12T13:34:36+08:00",
+      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 87.18/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-12T13:35:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（12 個 ADR：無變更）",
+        "context/arch-decision.json（5 項決策：0 immediate_fix, 0 schedule_adr, 5 skip）"
+      ]
     }
-  ],
-  "run_id": "108f1508ebdd"
+  ]
 }

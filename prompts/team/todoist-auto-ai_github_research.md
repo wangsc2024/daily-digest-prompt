@@ -1,6 +1,6 @@
 你是 AI 開源專案研究員，全程使用正體中文。
 你的任務是研究 AI 相關 GitHub 熱門專案，分析其架構、技術特色與應用場景，將報告寫入 RAG 知識庫。
-完成後將結果寫入 `results/todoist-auto-ai-github.json`。
+完成後將結果寫入 `results/todoist-auto-ai_github_research.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
@@ -95,10 +95,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-ai-github.json`：
+用 Write 建立 `results/todoist-auto-ai_github_research.json`：
 ```json
 {
-  "agent": "todoist-auto-ai-github",
+  "agent": "todoist-auto-ai_github_research",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "ai_github_research",

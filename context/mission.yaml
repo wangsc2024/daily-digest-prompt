@@ -1,0 +1,36 @@
+# 系統使命定義（P4-D）— 對應 Paperclip 的 Company Mission 層
+# 關聯：context/improvement-backlog.json（goal_id 欄位）
+# 關聯：config/benchmark.yaml（fitness_functions，量化驗證）
+version: 1
+mission: "每日自動彙整資訊、學習與禪語，輔助個人成長與決策"
+
+goals:
+  - id: G01
+    title: "降低 LLM 成本"
+    metric: "groq_routing_ratio >= 10%"
+    linked_fitness_function: "groq_routing_ratio"
+    description: "透過 LLM Router 將適合的任務路由到 Groq，減少 Claude token 消耗"
+
+  - id: G02
+    title: "提升系統可靠性"
+    metric: "ooda_completion >= 60%"
+    linked_fitness_function: "ooda_completion"
+    description: "確保 OODA 閉環每個 Decide 步驟都有可驗證的輸出"
+
+  - id: G03
+    title: "知識累積品質"
+    metric: "adr_coverage >= 80%"
+    linked_fitness_function: "adr_coverage"
+    description: "所有架構決策均有 ADR 記錄，確保知識傳承"
+
+  - id: G04
+    title: "架構自治治理"
+    metric: "tech_debt_velocity: resolved >= new_per_week"
+    linked_fitness_function: "tech_debt_velocity"
+    description: "每週解決的技術債 >= 新增技術債，防止熵增"
+
+  - id: G05
+    title: "安全與合規"
+    metric: "hook_precision: false_positive_rate < 5%"
+    linked_fitness_function: "hook_precision"
+    description: "Hook 攔截精準，不誤判合法操作，不放行危險操作"

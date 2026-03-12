@@ -2,12 +2,15 @@
 # TaskSense 優先級計分規則 v2
 # 修改此文件可調整排名邏輯，不需碰 prompt
 
+# 配置版本（供未來相容性檢查）
 version: 2
 
+# 分數公式說明（實際計算依下方各區塊參數）
 formula: "綜合分數 = Todoist 優先級分 × 信心度 × 描述加成 × 時間接近度 × 標籤數量加成 × 近期重複懲罰"
+# 每次 run 最多執行的任務數（Phase 2 並行上限）
 max_tasks_per_run: 3  # 每次最多執行 3 項
 
-# Todoist priority 對應分數
+# Todoist priority 對應分數（p1=4 至 p4=1）
 priority_scores:
   4: 4  # p1 (priority=4) = 4 分
   3: 3  # p2 = 3 分
@@ -78,7 +81,7 @@ allowed_tools_table:
   full_dev_with_search: "Read,Bash,Write,Edit,Glob,Grep"
   research_kb: "Read,Bash,Write,WebSearch,WebFetch"
 
-# 強制規則
+# 強制規則（路由與執行時必須遵守，優先於分數排名）
 rules:
   - "任務描述含「知識庫」或「RAG」→ allowedTools 必須包含 Write"
   - "依綜合分由高到低執行"

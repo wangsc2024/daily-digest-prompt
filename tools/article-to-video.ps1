@@ -93,12 +93,18 @@ $prompt = $promptTemplate `
 $stderrFile = Join-Path $LogDir "video-phase1-stderr-$Timestamp.log"
 $phase1Start = Get-Date
 
+# 暫時清除 CLAUDECODE 避免嵌套 Session 拒絕
+$savedClaudeCode = $env:CLAUDECODE
+$env:CLAUDECODE = $null
 try {
     $phase1Output = $prompt | claude -p --allowedTools "Read,Write,Bash" 2>$stderrFile
     $phase1Success = ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE)
 } catch {
     Write-Log "[ERROR] Phase 1 執行失敗: $_"
     $phase1Success = $false
+} finally {
+    if ($savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
+    else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
 }
 
 $phase1Seconds = [int]((Get-Date) - $phase1Start).TotalSeconds

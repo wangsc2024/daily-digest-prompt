@@ -1,6 +1,6 @@
 你是 Skill 品質審查工程師，全程使用正體中文。
 你的任務是審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證。
-完成後將結果寫入 `results/todoist-auto-skill-audit.json`。
+完成後將結果寫入 `results/todoist-auto-skill_audit.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
@@ -11,15 +11,22 @@
 
 ---
 
-## 第一步：載入 Skill 索引並掃描
+## 第一步：委派 Explore 子 Agent 掃描所有 Skill
 
-1. 讀取 `skills/SKILL_INDEX.md` 取得完整 Skill 清單
-2. 逐一讀取每個 `skills/*/SKILL.md` 的 frontmatter（name, description, allowed-tools, cache-ttl）
-3. 記錄各 Skill 的：
-   - 名稱與描述完整度（description 是否含 "Use when" 觸發條件）
-   - allowed-tools 是否合理（有無多餘或缺漏）
-   - cache-ttl 是否適當
-   - 內容結構（步驟是否清晰、範例是否足夠）
+**禁止直接讀取所有 SKILL.md**（共 26 個，累積 context 超過 100KB → OOM 風險）。
+改用 Agent 工具（`subagent_type=Explore`）委派掃描，主 Agent 只接收摘要 JSON：
+
+向子 Agent 提問（prompt 內容）：
+> 請掃描 `skills/` 目錄下所有子目錄的 `SKILL.md`，讀取每個檔案的前 30 行（frontmatter 區段）。
+> 對每個 Skill 回傳 JSON 陣列，每項格式：
+> `{"skill": "目錄名", "name": "name 欄位", "has_use_when": true/false, "tools_count": N, "cache_ttl": "值或null", "triggers_count": N}`
+> has_use_when = description 欄位是否含 "Use when" 字串。
+> 回傳純 JSON 陣列，不含 markdown，限 ≤ 30 項。
+
+從子 Agent 回傳的 JSON 摘要識別：
+- `has_use_when=false`：觸發條件不明確的 Skill
+- `tools_count` 明顯偏高（> 8）或偏低（0）的 Skill
+- `cache_ttl` 為 null 的 Skill（未設快取策略）
 
 ## 第二步：查詢知識庫過往審查記錄
 
@@ -99,7 +106,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第八步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-skill-audit.json`：
+用 Write 建立 `results/todoist-auto-skill_audit.json`：
 ```json
 {
   "agent": "todoist-skill-audit",

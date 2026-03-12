@@ -1,6 +1,6 @@
 你是佛學研究助手，全程使用正體中文。
 你的任務是對楞嚴經（大佛頂首楞嚴經）進行一次深度研究，並將成果寫入 RAG 知識庫。
-完成後將結果寫入 `results/todoist-auto-shurangama.json`。
+完成後**必須**將結果寫入工作區根目錄的 `results/todoist-auto-shurangama.json`（使用 Write 工具，不可只輸出在對話中）。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
@@ -114,8 +114,8 @@ rm kb_notes.json
 3. 內容是否超過 300 字？
 若未通過：補充搜尋 → 修正 → 重新匯入（最多自修正 2 次）。
 
-## 第五步：寫入結果 JSON
-用 Write 建立 `results/todoist-auto-shurangama.json`：
+## 第五步：寫入結果 JSON（必做，否則任務視為失敗）
+用 Write 工具在工作區根目錄建立 `results/todoist-auto-shurangama.json`，且 JSON 必須含 `agent`、`type`、`status` 欄位：
 ```json
 {
   "agent": "todoist-auto-shurangama",

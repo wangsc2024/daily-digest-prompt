@@ -1,0 +1,21 @@
+# Coverage 配置（ADR-011：行覆蓋率提升 Phase 1）
+# 優先聚焦 hooks/*.py（最高風險模組），與 pyproject.toml [tool.pytest.ini_options] 協同
+
+[run]
+source = hooks
+# 可選：納入 skills 時取消下行註解
+# source = hooks, skills
+omit =
+    */tests/*
+    */__pycache__/*
+    */venv/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+
+[html]
+directory = htmlcov

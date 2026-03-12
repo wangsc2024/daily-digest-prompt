@@ -1,141 +1,19 @@
 {
-  "date": "2026-03-08",
-  "topic": "Small Language Models (SLMs) 與 On-Device AI — 從雲端推理到邊緣智能的範式轉移",
+  "date": "2026-03-12",
+  "topic": "可驗證推理與測試時計算監控（Verifiable Reasoning & Test-Time Monitors）— 推理模型如何動態分配思考算力並在高風險任務中自我驗證",
   "research_questions": [
-    "2026 年主流 SLM 模型（Phi-4-mini, Gemma 3, Llama 3.2, Qwen 2.5）的架構差異與效能比較為何？",
-    "從量化技術（GPTQ/AWQ/GGUF）到推理框架（llama.cpp/MLX/MLC-LLM），On-Device 推理的完整技術棧如何組成？",
-    "SLM 在隱私保護、延遲降低、離線運作等應用場景的實際優勢與限制為何？邊緣智能對雲端推理的取代程度？"
+    "推理模型如何判斷何時需要更多 test-time compute，而不是一味延長思考？",
+    "verifier、judge、process reward、test-time monitor 之間的分工與互補關係是什麼？",
+    "若把這套機制用在 daily-digest-prompt 或個人 Agent 專案，應如何設計驗證閘門與失敗保護？"
   ],
-  "methodology": "多源交叉比對：學術調查論文 + 模型官方技術報告 + 獨立基準測試 + 產業部署案例",
+  "methodology": "以官方文件、技術報告與研究論文為主，先建立 reasoning model 與 extended thinking 的產品實務，再交叉比對 verifier / oversight / monitor 相關研究，最後抽象成可落地的 Agent 推理治理框架。",
   "keywords": [
-    "Small Language Models",
-    "On-Device AI",
-    "SLM",
-    "model quantization",
-    "edge inference",
-    "NPU",
-    "llama.cpp",
-    "Phi-4",
-    "Gemma 3",
-    "knowledge distillation"
+    "verifiable reasoning",
+    "test-time monitors",
+    "test-time compute",
+    "reasoning models",
+    "scalable oversight",
+    "adaptive halting"
   ],
-  "collection_queries": [
-    "2026 Small Language Models on-device AI official technical report Phi-4 mini Gemma 3",
-    "2026 on-device AI small language models quantization edge inference official documentation llama.cpp MLC-LLM",
-    "2026 小型語言模型 端側 AI 量化 推理 官方 技術",
-    "2026 邊緣 AI 小語言模型 推理 框架 量化 技術 文章",
-    "Qwen2.5 官方 博客 中文 小模型 3B 端側",
-    "developer.nvidia.com zh-cn blog llama.cpp TensorRT Edge-LLM 中文"
-  ],
-  "sources": [
-    {
-      "title": "Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone",
-      "url": "https://www.microsoft.com/en-us/research/publication/phi-3-technical-report-a-highly-capable-language-model-locally-on-your-phone/",
-      "language": "en",
-      "grade": "A",
-      "key_points": [
-        "Phi-3 技術報告把小模型能力提升歸因於高品質資料合成、課程式資料混合與訓練配方，而不只是單純縮小參數。",
-        "研究主張小模型已可在手機等本地裝置執行複雜語言任務，驗證 SLM 與 on-device AI 的可行性。",
-        "論文強調小模型的可部署性來自模型設計與資料工程共同優化。"
-      ]
-    },
-    {
-      "title": "Introducing Gemma 3: The developer guide",
-      "url": "https://developers.googleblog.com/en/introducing-gemma-3/",
-      "language": "en",
-      "grade": "A",
-      "key_points": [
-        "Gemma 3 提供 1B、4B、12B、27B 等級，並以單 GPU 或單主機可運行作為重要賣點。",
-        "官方將長上下文、多語言與視覺能力下放到較小模型族群，顯示 SLM 不再只追求『夠小』，而是追求『完整能力密度』。",
-        "Google 將本地部署、責任式開發與開源生態整合視為 Gemma 3 的核心定位。"
-      ]
-    },
-    {
-      "title": "Accelerating LLM and VLM Inference for Automotive and Robotics with NVIDIA TensorRT Edge-LLM",
-      "url": "https://developer.nvidia.com/blog/accelerating-llm-and-vlm-inference-for-automotive-and-robotics-with-nvidia-tensorrt-edge-llm/",
-      "language": "en",
-      "grade": "A",
-      "key_points": [
-        "NVIDIA 將 on-device 推理的重點放在車載與機器人場景，主打低延遲、低記憶體與高吞吐。",
-        "TensorRT Edge-LLM 整合 chunked prefilling、KV cache 最佳化與量化路徑，說明執行期最佳化已成 SLM 成敗關鍵。",
-        "官方明確把邊緣 AI 視為雲端以外的獨立部署層，而非單純縮小版雲端推理。"
-      ]
-    },
-    {
-      "title": "Qwen2.5: A Party of Foundation Models",
-      "url": "https://qwenlm.github.io/zh/blog/qwen2.5/",
-      "language": "zh",
-      "grade": "A",
-      "key_points": [
-        "Qwen2.5 中文官方文章公布 0.5B、1.5B、3B、7B 等尺寸，顯示小模型產品化已走向完整尺寸矩陣。",
-        "官方同步列出 MLX、llama.cpp、Ollama、vLLM 等推理與部署支援，突顯模型價值依賴生態兼容性。",
-        "中文語境下的在地部署、指令跟隨與多語支持是 Qwen 小模型的重要競爭面。"
-      ]
-    },
-    {
-      "title": "使用 CUDA Graphs 最佳化 llama.cpp AI 推論",
-      "url": "https://developer.nvidia.com/zh-cn/blog/optimizing-llama-cpp-ai-inference-with-cuda-graphs/",
-      "language": "zh",
-      "grade": "A",
-      "key_points": [
-        "NVIDIA 中文技術文說明 llama.cpp 可透過 CUDA Graphs 降低 CPU launch overhead，顯著改善 token generation 延遲。",
-        "文章反映 on-device 推理瓶頸已從『能不能跑』轉為『如何把每一步 runtime overhead 壓到最低』。",
-        "llama.cpp 這類輕量執行框架在本地 AI 生態中扮演標準化載體，特別適合量化模型快速落地。"
-      ]
-    },
-    {
-      "title": "TensorRT-LLM API 文件（中文）",
-      "url": "https://developer.nvidia.com/zh-cn/blog/tensorrt-llm-api/",
-      "language": "zh",
-      "grade": "A",
-      "key_points": [
-        "TensorRT-LLM 中文文件展示 paged KV caching、in-flight batching、量化與多後端支援等能力，對應 SLM 邊緣部署的核心效能需求。",
-        "官方 API 將模型編譯、快取管理與推理策略抽象化，說明 2026 的競爭焦點已延伸到 inference stack 平台層。",
-        "對高併發或受限顯存情境而言，runtime 特性與模型本身同等重要。"
-      ]
-    }
-  ],
-  "analysis": {
-    "consensus": [
-      "主流來源一致認為，小模型的競爭力已不再只是參數量更小，而是『能力密度 + 部署效率 + 生態兼容』的綜合結果。",
-      "多數來源都把量化、KV cache 管理、prefill 與 token generation 最佳化視為 on-device AI 的核心工程問題，而非附屬優化。",
-      "官方資料普遍支持混合部署觀：SLM 適合隱私敏感、低延遲、離線場景，但仍與雲端大模型形成分工，而不是完全取代。",
-      "模型產品線正快速下探到 0.5B-4B 等尺寸，同時保留長上下文、多語言甚至多模態能力，說明 SLM 已從『精簡版』走向『主力端側模型』。"
-    ],
-    "divergence": [
-      "不同陣營對最佳部署載體看法不同：Microsoft 與 Google 偏向手機/個人裝置可行性，NVIDIA 更強調車載、機器人與邊緣 GPU 場景。",
-      "量化與 runtime 路線分裂明顯，GGUF/llama.cpp、MLX、TensorRT-LLM、AWQ/GPTQ/NVFP4 等格式與工具鏈尚未完全收斂，跨平台移植仍有成本。",
-      "各模型家族的優化目標不同：有的偏重語言理解與指令跟隨，有的強調多模態或多語能力，導致『最佳 SLM』必須依場景選型，難有單一冠軍。"
-    ],
-    "insights": [
-      "真正的技術護城河正在從模型權重轉向推理堆疊。2026 年的 SLM 競爭，本質上是模型、量化格式、排程器、KV cache 與硬體編譯器的聯合作戰。",
-      "SLM 的成熟意味著 daily-digest-prompt 這類工作流可把『分類、重排、草稿生成、快取摘要』前移到本地模型，只把高難推理留給雲端模型，形成成本更低的雙層架構。",
-      "中文生態已不再落後。Qwen2.5 與 NVIDIA 中文技術內容顯示，中文開發者已能直接獲得端側模型、量化與部署文件，降低在地實驗門檻。",
-      "On-device AI 的關鍵不是追求完全離線，而是建立『可離線運作、可本地保密、必要時再升級到雲端』的彈性架構，這比純粹追求替代雲端更務實。",
-      "未來研究不應只比較模型 benchmark，還要比較 end-to-end 使用者體驗指標，例如首 token 延遲、持續吞吐、記憶體峰值、電池消耗與跨平台可移植性。"
-    ]
-  },
-  "research_quality": {
-    "research_topic": "Small Language Models (SLMs) 與 On-Device AI",
-    "queries_used": [
-      "2026 Small Language Models on-device AI official technical report Phi-4 mini Gemma 3",
-      "2026 on-device AI small language models quantization edge inference official documentation llama.cpp MLC-LLM",
-      "2026 小型語言模型 端側 AI 量化 推理 官方 技術",
-      "2026 邊緣 AI 小語言模型 推理 框架 量化 技術 文章",
-      "Qwen2.5 官方 博客 中文 小模型 3B 端側",
-      "developer.nvidia.com zh-cn blog llama.cpp TensorRT Edge-LLM 中文"
-    ],
-    "sources_count": 6,
-    "grade_distribution": {
-      "A": 6,
-      "B": 0,
-      "C": 0,
-      "D": 0
-    },
-    "cross_verified_facts": 4,
-    "unverified_claims": 0,
-    "research_depth": "thorough",
-    "confidence_level": "high"
-  },
-  "stage_completed": 3
+  "stage_completed": 1
 }

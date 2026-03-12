@@ -126,12 +126,18 @@ $prompt = $promptTemplate `
 $stderrFile = Join-Path $LogDir "podcast-phase1-stderr-$Timestamp.log"
 $phase1Start = Get-Date
 
+# 暫時清除 CLAUDECODE 避免嵌套 Session 拒絕（Todoist agent 本身在 Claude Code 內執行）
+$savedClaudeCode = $env:CLAUDECODE
+$env:CLAUDECODE = $null
 try {
     $phase1Output = $prompt | claude -p --model $Model --allowedTools "Read,Write,Bash" 2>$stderrFile
     $phase1Success = ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE)
 } catch {
     Write-Log "[ERROR] Phase 1 執行失敗: $_"
     $phase1Success = $false
+} finally {
+    if ($savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
+    else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
 }
 
 $phase1Seconds = [int]((Get-Date) - $phase1Start).TotalSeconds
@@ -316,30 +322,84 @@ try {
     Write-Log "[WARN] Phase 5 上傳失敗（非致命）: $_"
 }
 
-# ─── 更新 Podcast 歷史記錄（供下次去重使用）───
+# ─── 更新 Podcast 歷史記錄 v2（供下次去重使用）───
 if ($selectedNoteId -and (Test-Path $OutFile)) {
     try {
         $history = if (Test-Path $HistoryFile) {
             Get-Content $HistoryFile -Raw -Encoding UTF8 | ConvertFrom-Json
         } else {
-            [PSCustomObject]@{ version = 1; updated_at = ""; entries = @() }
+            [PSCustomObject]@{ version = 2; updated_at = ""; summary = [PSCustomObject]@{ total_episodes = 0; cooldown_days = 30; recent_note_ids = @(); recent_topics = @() }; episodes = @(); entries = @() }
         }
-        if ($null -eq $history.entries) { $history | Add-Member -MemberType NoteProperty -Name entries -Value @() -Force }
+
+        # 確保 summary 欄位存在（v1 升級）
+        if ($null -eq $history.summary) {
+            $history | Add-Member -MemberType NoteProperty -Name summary -Value ([PSCustomObject]@{
+                total_episodes = 0; cooldown_days = 30; recent_note_ids = @(); recent_topics = @()
+            }) -Force
+        }
+        if ($null -eq $history.episodes) { $history | Add-Member -MemberType NoteProperty -Name episodes -Value @() -Force }
+        if ($null -eq $history.entries)  { $history | Add-Member -MemberType NoteProperty -Name entries  -Value @() -Force }
+
+        $nowStr = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+
+        # 取得筆記 tags 作為主題標籤（非致命）
+        $noteTopics = @()
+        try {
+            $noteDetail = curl -s "http://localhost:3000/api/notes/$selectedNoteId" | ConvertFrom-Json
+            if ($noteDetail.tags -and $noteDetail.tags.Count -gt 0) {
+                $excludeTags = @("Podcast製作", "對話腳本", "雙主持人", "import", "manual", "web")
+                $noteTopics = @($noteDetail.tags | Where-Object { $_ -notin $excludeTags } | Select-Object -First 3)
+            }
+        } catch { }
+        # fallback：從標題擷取首個 4 字以內的詞（前兩個 ── 分隔的段落）
+        if ($noteTopics.Count -eq 0 -and $selectedNoteTitle) {
+            $titleBase = ($selectedNoteTitle -split "[\s—\-：:（(]")[0]
+            if ($titleBase.Length -ge 2) { $noteTopics = @($titleBase.Substring(0, [Math]::Min(8, $titleBase.Length))) }
+        }
+
+        # 新增 v1 entry（向後相容）
         $newEntry = [PSCustomObject]@{
-            note_id    = $selectedNoteId
-            note_title = $selectedNoteTitle
-            query      = $Query
+            note_id       = $selectedNoteId
+            note_title    = $selectedNoteTitle
+            query         = $Query
             note_id_input = $NoteId
-            slug       = $Slug
-            used_at    = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+            slug          = $Slug
+            used_at       = $nowStr
         }
+
+        # 新增 episodes 記錄
+        $newEpisode = [PSCustomObject]@{
+            episode_title = $podcastTitle
+            notes_used    = @($selectedNoteId)
+            note_titles   = @($selectedNoteTitle)
+            topics        = $noteTopics
+            source        = "manual"
+            created_at    = $nowStr
+        }
+
+        # 更新 summary
+        $oldIds     = @($history.summary.recent_note_ids)
+        $newIds     = @($selectedNoteId) + $oldIds | Select-Object -Unique | Select-Object -First 30
+        $oldTopics  = @($history.summary.recent_topics)
+        $newTopics  = ($noteTopics + $oldTopics) | Select-Object -Unique | Select-Object -First 50
+        $totalEp    = [int]($history.summary.total_episodes) + 1
+        $cooldown   = if ($history.summary.cooldown_days) { $history.summary.cooldown_days } else { 14 }
+
         $updatedHistory = [PSCustomObject]@{
-            version    = 1
-            updated_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+            version    = 2
+            updated_at = $nowStr
+            summary    = [PSCustomObject]@{
+                total_episodes  = $totalEp
+                cooldown_days   = $cooldown
+                recent_note_ids = @($newIds)
+                recent_topics   = @($newTopics)
+            }
+            episodes   = @($newEpisode) + @($history.episodes)
             entries    = @($history.entries) + $newEntry
         }
-        $updatedHistory | ConvertTo-Json -Depth 5 | Set-Content $HistoryFile -Encoding UTF8
-        Write-Log "已更新 podcast-history.json（共 $($updatedHistory.entries.Count) 筆）"
+
+        $updatedHistory | ConvertTo-Json -Depth 6 | Set-Content $HistoryFile -Encoding UTF8
+        Write-Log "已更新 podcast-history.json v2（集數: $totalEp，topics: $($noteTopics -join ', ')）"
     } catch {
         Write-Log "[WARN] 更新 podcast-history.json 失敗（非致命）: $_"
     }

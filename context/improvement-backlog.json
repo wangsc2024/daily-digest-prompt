@@ -1,65 +1,95 @@
 {
   "version": 1,
-  "generated_at": "2026-03-09T14:00:00+08:00",
+  "generated_at": "2026-03-12T09:00:00+08:00",
   "source": "system-audit",
-  "audit_date": "2026-03-09",
-  "total_score": 87,
+  "audit_date": "2026-03-12",
+  "total_score": 87.18,
   "grade": "A",
   "items": [
     {
       "rank": 1,
-      "priority": "P2",
-      "pattern": "YAML 配置註釋密度提升",
-      "description": "config/ 目錄 26 個 YAML 平均註釋率僅 9%，低於業界建議 15-20%。應逐步為 frequency-limits、hook-rules、routing 等核心配置補充內部註釋。",
-      "dimension": "系統文件",
-      "current_score": 78,
-      "target_score": 85,
-      "effort": "low",
-      "target_files": ["config/frequency-limits.yaml", "config/hook-rules.yaml", "config/routing.yaml"]
+      "priority": "P1",
+      "pattern": "PS1 hardcoded timeout 消除",
+      "description": "2.2 配置外部化 75 分。run-todoist-agent-team.ps1 第 25-68 行 hardcode 25 個 timeout 值，未讀取 timeouts.yaml。應改為動態讀取 ConvertFrom-YamlViapy，實現「改配置不改程式碼」。",
+      "dimension": "系統架構",
+      "current_score": 75,
+      "target_score": 88,
+      "effort": "medium",
+      "target_files": [
+        "run-todoist-agent-team.ps1",
+        "run-agent-team.ps1",
+        "config/timeouts.yaml"
+      ],
+      "goal_id": "G02",
+      "adr_ref": ""
     },
     {
       "rank": 2,
-      "priority": "P2",
-      "pattern": "CI/CD 基礎建設",
-      "description": "缺少 GitHub Actions CI/CD pipeline，lint/test 僅能手動觸發。建議建立 .github/workflows/ci.yaml 涵蓋 ruff lint + pytest + YAML schema 驗證。",
-      "dimension": "技術棧",
-      "current_score": 82,
-      "target_score": 90,
+      "priority": "P1",
+      "pattern": "依賴漏洞自動掃描",
+      "description": "1.4 依賴安全 75 分。無 pip-audit 自動化整合。ADR-010 已接受，待實施。",
+      "dimension": "資訊安全",
+      "current_score": 75,
+      "target_score": 85,
       "effort": "medium",
-      "target_files": [".github/workflows/ci.yaml", "pyproject.toml"]
+      "target_files": [
+        "pyproject.toml",
+        "uv.lock",
+        "check-health.ps1"
+      ],
+      "goal_id": "G02",
+      "adr_ref": "ADR-20260311-010"
     },
     {
       "rank": 3,
       "priority": "P2",
-      "pattern": "Circuit Breaker half_open 改進",
-      "description": "half_open 狀態無試探次數上限，可能連續失敗仍嘗試呼叫。應加入 max_probe_attempts 配置，超過後回到 open 狀態並延長冷卻期。",
-      "dimension": "系統架構",
-      "current_score": 78,
-      "target_score": 85,
-      "effort": "medium",
-      "target_files": ["circuit-breaker-utils.ps1", "config/timeouts.yaml"]
+      "pattern": "YAML 注釋密度全面提升",
+      "description": "6.4 配置說明 74 分。YAML 平均注釋密度 11.9%，低於 20% 目標。ADR-012 已接受（immediate_fix）。",
+      "dimension": "系統文件",
+      "current_score": 74,
+      "target_score": 84,
+      "effort": "low",
+      "target_files": [
+        "config/cache-policy.yaml",
+        "config/scoring.yaml",
+        "config/notification.yaml"
+      ],
+      "goal_id": "G04",
+      "adr_ref": "ADR-20260311-012"
     },
     {
       "rank": 4,
       "priority": "P2",
-      "pattern": "程式碼 TODO 清理",
-      "description": "49 處實際程式碼 TODO（排除 backups/tests/template），目標降至 30 處以下。優先清理已完成但未移除標記的項目。",
-      "dimension": "技術棧",
-      "current_score": 78,
-      "target_score": 85,
-      "effort": "low",
-      "target_files": ["hooks/post_tool_logger.py", "run-agent-team.ps1", "run-todoist-agent-team.ps1"]
+      "pattern": "行覆蓋率提升計畫",
+      "description": "3.1 測試覆蓋率行覆蓋率 10.49%（目標 45%）。ADR-011 已接受，Phase 1 目標 hook_utils.py 80%。",
+      "dimension": "系統品質",
+      "current_score": 88,
+      "target_score": 93,
+      "effort": "medium",
+      "target_files": [
+        "tests/hooks/test_hook_utils.py",
+        "hooks/hook_utils.py",
+        "hooks/agent_guardian.py"
+      ],
+      "goal_id": "G02",
+      "adr_ref": "ADR-20260311-011"
     },
     {
       "rank": 5,
       "priority": "P2",
-      "pattern": "preamble 引用率提升至 95%",
-      "description": "8 個檔案未引用 preamble.md（含 todoist-query.md），應補齊引用確保 Skill-First 和 nul 禁令全覆蓋。",
-      "dimension": "系統架構",
-      "current_score": 83,
-      "target_score": 88,
-      "effort": "low",
-      "target_files": ["templates/shared/preamble.md", "prompts/team/todoist-query.md"]
+      "pattern": "GitHub Actions CI 基礎建設",
+      "description": "5.3 工具鏈完整性 72 分。缺 CI/CD pipeline。ADR-013 已提議（Proposed），待人工確認。",
+      "dimension": "技術棧",
+      "current_score": 72,
+      "target_score": 85,
+      "effort": "medium",
+      "target_files": [
+        ".github/workflows/ci.yml",
+        "pyproject.toml"
+      ],
+      "goal_id": "G04",
+      "adr_ref": "ADR-20260311-013"
     }
-  ]
+  ],
+  "schema_version": 2
 }

@@ -112,7 +112,7 @@ def scan_files(paths: list[str]) -> int:
                               f"→ 應為 '{issue['correct']}'({issue['correct_codepoint']})"
                               f"  ...{issue['context']}...")
                     total_issues += len(issues)
-            except Exception as e:
+            except (OSError, UnicodeDecodeError) as e:
                 print(f"[ERROR] 無法讀取 {f}: {e}")
 
     return total_issues
@@ -142,7 +142,7 @@ def fix_files(paths: list[str]) -> int:
                     f.write_text(fixed, encoding='utf-8')
                     print(f"[FIXED] {f}：修正 {count} 個日文漢字")
                     total_fixed += count
-            except Exception as e:
+            except (OSError, UnicodeDecodeError) as e:
                 print(f"[ERROR] 無法修正 {f}: {e}")
 
     return total_fixed
@@ -156,7 +156,7 @@ def pre_commit_check() -> int:
             capture_output=True, text=True
         )
         staged_files = [f for f in result.stdout.strip().split('\n') if f]
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         print(f"[ERROR] 無法取得 staged 檔案: {e}")
         return 0
 
@@ -186,7 +186,7 @@ def pre_commit_check() -> int:
                           f"'{issue['char']}'({issue['codepoint']}) "
                           f"→ 應為 '{issue['correct']}'({issue['correct_codepoint']})")
                 total_issues += len(issues)
-        except Exception as e:
+        except (OSError, UnicodeDecodeError) as e:
             print(f"[ERROR] 無法檢查 {filepath}: {e}")
 
     if total_issues > 0:
@@ -224,7 +224,7 @@ def post_fix() -> int:
         if count > 0:
             Path(filepath).write_text(fixed, encoding='utf-8')
             print(f"[CJK Guard] {filepath}：自動修正 {count} 個日文漢字", file=sys.stderr)
-    except Exception as e:
+    except (OSError, UnicodeDecodeError) as e:
         print(f"[CJK Guard] 無法修正 {filepath}: {e}", file=sys.stderr)
 
     return 0

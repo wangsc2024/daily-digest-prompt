@@ -1,9 +1,11 @@
 ---
 name: writing-masters
+version: 1.0.0
 description: |
   西方文學巨匠的寫作技巧。涵蓋海明威、奧威爾、史蒂芬金等大師的創作心法，包含冰山理論、極簡主義、敘事技巧與修訂方法。
   Use when: 提升寫作技巧、學習極簡風格、掌握 Show don't tell、改善對話敘事，or when user mentions 寫作, writing, 文字, 創作.
-version: 1.0.0
+allowed-tools: Read, Write
+cache-ttl: N/A
 triggers:
   - 寫作技巧
   - writing

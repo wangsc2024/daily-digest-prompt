@@ -21,8 +21,8 @@ $LogDir = "$AgentDir\logs"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"
 
-# Config (Phase 2 timeout is dynamic, calculated after Phase 1)
-$Phase1TimeoutSeconds = 420   # Phase 1 可能需要寫 plan.json + N 個 task prompt 檔案（300s 偶爾不足）
+# Config (Phase 2 timeout 由 config/timeouts.yaml 載入，見 ADR-015；Phase1/Phase3 下方載入後可覆寫)
+$Phase1TimeoutSeconds = 420   # fallback：Phase 1 寫 plan.json + task prompt（300s 偶爾不足）
 $MaxPhase1Retries = 1     # Phase 1 query: max 2 attempts (30s interval)
 $Phase3TimeoutSeconds = 180
 $MaxPhase3Retries = 1
@@ -39,13 +39,33 @@ $TimeoutBudget = @{
 }
 
 # Per-key timeout override（秒）— 優先級高於群組預設
+# 注意：新增自動任務時必須同步更新此處（與 config/timeouts.yaml phase2_timeout_by_task 保持一致）
 $AutoTaskTimeoutOverride = @{
+    # === 研究類（WebSearch/WebFetch + KB 匯入）===
+    "ai_github_research"     = 900   # GitHub WebSearch×3 + WebFetch + KB 匯入（原缺失回落 600s 導致超時）
+    "ai_workflow_github"     = 720   # GitHub workflow 研究 + KB 匯入
+    "ai_deep_research"       = 720   # 4 階段 WebFetch
+    "unsloth_research"       = 720   # WebSearch + WebFetch + KB 匯入
+    "tech_research"          = 2600  # 讀 history + WebSearch×3 + WebFetch×4 + KB 匯入
+    # === 佛學研究類（WebFetch 多章 + KB 匯入）===
+    "shurangama"             = 900   # 楞嚴經 WebFetch 多章 + KB 匯入
+    "jiaoguangzong"          = 900   # 教觀綱宗多章 + KB 匯入
+    "fahua"                  = 900   # 法華多章 + KB 匯入
+    "jingtu"                 = 900   # 淨土多章 + KB 匯入
+    # === 系統類（重 context，含 sub-agent）===
+    "skill_audit"            = 720   # sub-agent 掃描 26 SKILL.md + KB 搜尋
+    "system_insight"         = 720   # sub-agent 分析 logs/state + 更新 system-insight.json
+    "log_audit"              = 720   # sub-agent 讀 10+ log + 分析修正 + KB 匯入
+    "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
+    "self_heal"              = 720   # 多步驟修復 + ntfy
+    "arch_evolution"         = 900   # 讀 improvement-backlog + context/*.json + 架構決策
+    "chatroom_optimize"      = 480   # sub-agent log 分析 + routing.yaml 調整
+    # === 創意類 ===
     "creative_game"          = 900   # sync-games.ps1 npm build 最長 ~15 min
     "creative_game_optimize" = 900
-    "log_audit"              = 720   # 讀 10+ log + 分析修正 + KB 匯入
-    "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
-    "ai_deep_research"       = 720   # 4 階段 WebFetch
-    "tech_research"          = 2600  # 讀 history + WebSearch×3 + WebFetch×4 + KB 匯入
+    # === 長時媒體類（TTS + 上傳）===
+    "podcast_create"         = 2400  # 腳本生成 + TTS(40段) + concat + R2 上傳
+    "podcast_jiaoguangzong"  = 2400  # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
 }
 
 # Create directories
@@ -192,6 +212,101 @@ function Update-FailureStats {
     $tmpFile = "$statsFile.tmp"
     $stats | ConvertTo-Json -Depth 5 | Set-Content $tmpFile -Encoding UTF8
     Move-Item $tmpFile $statsFile -Force
+}
+
+# 從 selected_tasks 項目取出正規化 key（與 Phase 2 一致，避免 result path / failed 記錄用錯 key）
+function Get-NormalizedAutoTaskKey {
+    param([object]$Item)
+    $raw = if ($null -ne $Item -and $Item.PSObject.Properties['key']) {
+        $Item.key
+    } elseif ($Item -is [string] -and $Item -match '^@{key=([^;]+)') {
+        $Matches[1].Trim()
+    } else {
+        $Item
+    }
+    $normalized = $raw -replace '-', '_'
+    $keyAliases = @{
+        "logaudit" = "log_audit"; "gitpush" = "git_push"; "techresearch" = "tech_research"
+        "aideepresearch" = "ai_deep_research"; "unsloth" = "unsloth_research"; "aigithub" = "ai_github_research"
+        "aismartcity" = "ai_smart_city"; "aisysdev" = "ai_sysdev"; "skillaudit" = "skill_audit"
+        "qaoptimize" = "qa_optimize"; "systeminsight" = "system_insight"; "selfheal" = "self_heal"
+        "githubscout" = "github_scout"; "ai_github" = "ai_github_research"; "ai_deep" = "ai_deep_research"
+        "ai_smart" = "ai_smart_city"; "creative_game" = "creative_game_optimize"; "podcastcreate" = "podcast_create"
+        "podcast" = "podcast_create"
+    }
+    if ($keyAliases.ContainsKey($normalized)) { $keyAliases[$normalized] } else { $normalized }
+}
+
+# 自動任務失敗追蹤（state/failed-auto-tasks.json）
+function Update-FailedAutoTasks {
+    param(
+        [string]$TaskKey,
+        [string]$Reason = "result_file_missing",  # "result_file_missing" | "timeout" | "job_failed"
+        [bool]$Succeeded = $false
+    )
+    $failedFile = "$AgentDir\state\failed-auto-tasks.json"
+    $nowIso = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+
+    # 讀取或初始化
+    $data = if (Test-Path $failedFile) {
+        try {
+            $parsed = Get-Content $failedFile -Raw -Encoding UTF8 -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+            if ($null -eq $parsed.entries) {
+                $parsed | Add-Member -NotePropertyName 'entries' -NotePropertyValue @() -Force
+            }
+            $parsed
+        } catch {
+            [PSCustomObject]@{ version = 1; entries = @(); updated_at = $nowIso }
+        }
+    } else {
+        [PSCustomObject]@{ version = 1; entries = @(); updated_at = $nowIso }
+    }
+
+    $entries = [System.Collections.ArrayList]@($data.entries)
+    # 正規化既有條目的 task_key（可能為 @{key=...} 字串），以便比對與後續寫回純 key
+    foreach ($e in $entries) {
+        if ($e.task_key -match '^@{key=([^;]+)') {
+            $e.task_key = (Get-NormalizedAutoTaskKey -Item $Matches[1].Trim())
+        }
+    }
+    $existing = $entries | Where-Object { $_.task_key -eq $TaskKey }
+
+    if ($Succeeded) {
+        if ($existing -and [int]$existing.consecutive_count -gt 0) {
+            $existing.consecutive_count = 0
+            $existing | Add-Member -NotePropertyName 'last_success_at' -NotePropertyValue $nowIso -Force
+            Write-Log "[FailedTasks] $TaskKey succeeded — consecutive_count reset to 0"
+        }
+    } else {
+        if ($existing) {
+            $existing.consecutive_count = [int]$existing.consecutive_count + 1
+            $existing.last_failed_at = $nowIso
+            $existing.reason = $Reason
+        } else {
+            $newEntry = [PSCustomObject]@{
+                task_key          = $TaskKey
+                first_failed_at   = $nowIso
+                last_failed_at    = $nowIso
+                reason            = $Reason
+                consecutive_count = 1
+                reset_count       = 0
+            }
+            $entries.Add($newEntry) | Out-Null
+        }
+        $curCount = if ($existing) { [int]$existing.consecutive_count } else { 1 }
+        Write-Log "[FailedTasks] $TaskKey failure recorded (reason=$Reason, consecutive=$curCount)" "WARN"
+    }
+
+    # 清除連續失敗為 0 且超過 7 天的條目
+    $cutoff = (Get-Date).AddDays(-7)
+    $filtered = $entries | Where-Object {
+        [int]$_.consecutive_count -gt 0 -or
+        (try { [datetime]$_.last_failed_at -ge $cutoff } catch { $true })
+    }
+
+    $data.entries = @($filtered)
+    $data | Add-Member -NotePropertyName 'updated_at' -NotePropertyValue $nowIso -Force
+    $data | ConvertTo-Json -Depth 5 | Set-Content $failedFile -Encoding UTF8 -Force
 }
 
 # PS 層失敗通知（Phase 3 未執行時的安全網）
@@ -374,12 +489,32 @@ except Exception as e:
     }
 }
 
+# ADR-015：從 config/timeouts.yaml 載入 timeout（覆蓋預設，失敗時保留上方 hardcoded）
+$timeoutsPath = Join-Path $AgentDir "config\timeouts.yaml"
+if (Test-Path $timeoutsPath) {
+    try {
+        $ty = ConvertFrom-YamlViapy -YamlPath $timeoutsPath
+        if ($ty -and $ty.todoist_team) {
+            $tt = $ty.todoist_team
+            if ($tt.phase1_timeout) { $Phase1TimeoutSeconds = [int]$tt.phase1_timeout }
+            if ($tt.phase3_timeout) { $Phase3TimeoutSeconds = [int]$tt.phase3_timeout }
+            if ($tt.phase2_timeout_by_task) {
+                $byTask = $tt.phase2_timeout_by_task
+                $AutoTaskTimeoutOverride = @{}
+                $byTask.PSObject.Properties | ForEach-Object { $AutoTaskTimeoutOverride[$_.Name] = [int]$_.Value }
+            }
+        }
+    } catch {
+        # 保留腳本上方定義的預設值
+    }
+}
+
 function Get-TaskBackend {
     param([string]$TaskKey)
     $default = @{ type = "claude_code"; cli_flag = ""; model = ""; reason = "default" }
     try {
-        # 讀 model-selection.yaml
-        $selPath = "$AgentDir\config\model-selection.yaml"
+        # 讀 frequency-limits.yaml（含合併後的模型選擇規則）
+        $selPath = "$AgentDir\config\frequency-limits.yaml"
         if (-not (Test-Path $selPath)) { return $default }
         $sel = ConvertFrom-YamlViapy -YamlPath $selPath
         if (-not $sel) { return $default }
@@ -443,7 +578,7 @@ function Get-TaskBackend {
             live_ws      = $liveWs
             token_level  = $tokenLevel
             sel_config   = $sel
-            reason       = "model-selection.yaml rule"
+            reason       = "frequency-limits.yaml rule"
         }
     } catch {
         Write-Log "[ModelSelect] ERROR in Get-TaskBackend: $_ -> fallback default"
@@ -507,14 +642,19 @@ $startTime = Get-Date
 
 # ─── 載入環境變數（系統環境變數優先，其次從 .env 讀取）───
 $envFile = "$AgentDir\.env"
+$todoistTokenSource = "none"
 
-# TODOIST_API_TOKEN
+# TODOIST_API_TOKEN（排程執行時依賴 run-with-env.ps1 或此處從 .env 載入）
 if (-not $env:TODOIST_API_TOKEN) {
     if (Test-Path $envFile) {
-        $envLine = Get-Content $envFile | Where-Object { $_ -match '^TODOIST_API_TOKEN=' }
+        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+        $envRaw = [System.IO.File]::ReadAllText($envFile, $utf8NoBom)
+        $envLine = ($envRaw -split "`r?`n" | Where-Object { $_ -match '^TODOIST_API_TOKEN=' } | Select-Object -First 1)
         if ($envLine) {
             $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+            if ($todoistToken.Length -gt 0 -and $todoistToken[0] -eq [char]0xFEFF) { $todoistToken = $todoistToken.TrimStart([char]0xFEFF) }
             [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
+            $todoistTokenSource = ".env"
             Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
         }
         else {
@@ -523,14 +663,16 @@ if (-not $env:TODOIST_API_TOKEN) {
         }
     }
     else {
-        Write-Host "[WARN] .env not found, TODOIST_API_TOKEN may be missing"
+        Write-Host "[WARN] .env not found at $envFile , TODOIST_API_TOKEN may be missing"
         $todoistToken = ""
     }
 }
 else {
     $todoistToken = $env:TODOIST_API_TOKEN
+    $todoistTokenSource = "environment"
     Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
 }
+Write-Log "[Token] TODOIST_API_TOKEN source=$todoistTokenSource (loaded)"
 
 # BOT_API_SECRET（chatroom 認證，從 .env 讀取作為備援）
 if (-not $env:BOT_API_SECRET) {
@@ -564,7 +706,11 @@ if (-not $env:OPENROUTER_API_KEY) {
 
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+$validPresets = @("strict", "normal", "permissive")
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+} elseif ($env:HOOK_SECURITY_PRESET -notin $validPresets) {
+    Write-Log "[Security] WARN: Invalid HOOK_SECURITY_PRESET='$($env:HOOK_SECURITY_PRESET)', falling back to 'strict'"
     $env:HOOK_SECURITY_PRESET = "strict"
 }
 Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)"
@@ -574,6 +720,29 @@ $traceId = [guid]::NewGuid().ToString("N").Substring(0, 12)
 Write-Log "=== Todoist Agent Team start: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
 Write-Log "Trace ID: $traceId"
 Write-Log "Mode: parallel (Phase 1 x1 + Phase 2 xN + Phase 3 x1)"
+Write-Log "[PID] $PID"
+
+# ─── Instance Lock（防止與上一班排程重疊，避免 results/ 衝突與日誌截斷）───
+$TodoistTeamLockFile = "$AgentDir\state\run-todoist-agent-team.lock"
+if (Test-Path $TodoistTeamLockFile) {
+    $lockContent = Get-Content $TodoistTeamLockFile -Raw -ErrorAction SilentlyContinue
+    $lockPid = ($lockContent -split "`n")[0].Trim()
+    $existingProcess = Get-Process -Id $lockPid -ErrorAction SilentlyContinue
+    if ($existingProcess) {
+        Write-Log "[SKIP] Another instance is running (PID $lockPid). Exiting to avoid overlap."
+        exit 0
+    }
+    Write-Log "[WARN] Stale lock found (PID $lockPid not running). Removing."
+    Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
+}
+$PID | Set-Content $TodoistTeamLockFile -Encoding UTF8
+try {
+    Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+        Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
+    } | Out-Null
+} catch {
+    Write-Log "[WARN] Could not register exit handler for lock cleanup: $_"
+}
 
 # Check if claude is installed
 $claudePath = Get-Command claude -ErrorAction SilentlyContinue
@@ -618,6 +787,24 @@ else {
 }
 
 # ============================================
+# Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
+# 用 Groq Llama 8B 快速判斷今日任務複雜度
+# 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
+# ============================================
+$invokeRouter = "$AgentDir\tools\invoke-llm.ps1"
+if (Test-Path $invokeRouter) {
+    try {
+        $todayTasksHint = "Todoist 任務規劃請求，日期=$((Get-Date -Format 'yyyy-MM-dd'))"
+        $routerResult = & $invokeRouter -TaskType "todoist_query_simple" -InputText $todayTasksHint -DryRun 2>$null
+        if ($routerResult -and $routerResult.provider -eq "groq") {
+            Write-Log "[P3-C] ToolOrchestra: todoist_query_simple → Groq route confirmed (dry-run)"
+        }
+    } catch {
+        Write-Log "[P3-C] ToolOrchestra 前置分類略過：$($_.Exception.Message)"
+    }
+}
+
+# ============================================
 # Phase 1: Query + Filter + Route + Plan
 # ============================================
 Write-Log ""
@@ -641,7 +828,7 @@ $phase1Attempt = 0
 $phase1ModelFlag = ""
 $phase1MaxTokens = 80000   # 預設：防止單次超限
 $_tokenPath = "$AgentDir\state\token-usage.json"
-$_selPath   = "$AgentDir\config\model-selection.yaml"
+$_selPath   = "$AgentDir\config\frequency-limits.yaml"
 if ((Test-Path $_tokenPath) -and (Test-Path $_selPath)) {
     try {
         $tu  = Get-Content $_tokenPath -Raw | ConvertFrom-Json
@@ -740,6 +927,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             Write-Log "[Phase1] G28 chatroom-query prompt not found, skipping"
         }
 
+        Write-Log "[Phase1] Waiting for main query job (timeout ${Phase1TimeoutSeconds}s)..."
         $completed = $job | Wait-Job -Timeout $Phase1TimeoutSeconds
 
         if ($null -eq $completed) {
@@ -822,7 +1010,7 @@ if ($phase1Success) {
 # Level 3-A: Phase 1 span
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase1" `
     -StartTime $phase1Start -EndTime $phase1End `
-    -Status (if ($phase1Success) { "ok" } else { "failed" })
+    -Status $(if ($phase1Success) { "ok" } else { "failed" })
 
 # ─── Circuit Breaker 自動更新（基於 Phase 1 結果）───
 if (Get-Command Update-CircuitBreaker -ErrorAction SilentlyContinue) {
@@ -878,6 +1066,12 @@ if ($plan.plan_type -eq "tasks") {
         if ($taskTimeout -gt $maxTaskTimeout) { $maxTaskTimeout = $taskTimeout }
     }
     $Phase2TimeoutSeconds += $maxTaskTimeout
+    # 多任務並行時加緩衝，避免最後寫檔的 agent 被逾時強停導致「Phase 2 結果缺失」
+    if ($plan.tasks.Count -gt 1) {
+        $multiTaskBuffer = [Math]::Min(120, [int]($maxTaskTimeout * 0.15))
+        $Phase2TimeoutSeconds += $multiTaskBuffer
+        Write-Log "[Dynamic] +${multiTaskBuffer}s buffer for $($plan.tasks.Count) parallel tasks"
+    }
 }
 elseif ($plan.plan_type -eq "auto") {
     # Auto-tasks: parallel = take max timeout across all selected tasks (not sum)
@@ -1115,18 +1309,49 @@ foreach ($job in $phase2Jobs) {
             }
         }
         $sections[$agentName] = "success"
-        Write-Log "[Phase2] $agentName completed"
+        # 計算 per-job 耗時（使用 PS Job 的 PSBeginTime/PSEndTime）
+        $jobElapsed = if ($job.PSBeginTime -and $job.PSEndTime) {
+            [int]($job.PSEndTime - $job.PSBeginTime).TotalSeconds
+        } else { $null }
+        Write-Log "[Phase2] $agentName completed$(if ($jobElapsed) { " (${jobElapsed}s)" })"
 
-        # Codex 後端：完整 stdout 補存到 result 檔，供品質評分讀取 URL/深度
-        if ($job.BackendName -eq "codex_exec" -and $output) {
+        # Codex / OpenRouter 後端：若 Agent 未產出有效結果檔，寫入結構化失敗檔（避免整段 stdout 寫入導致「結果檔損壞」）
+        $needFallback = $job.BackendName -in @("codex_exec", "codex_standard", "openrouter_research", "openrouter_standard")
+        if ($needFallback -and $output) {
             $tkKey = $agentName -replace '^auto-', ''
             $rFile = "$AgentDir\results\todoist-auto-$tkKey.json"
             $fullOutput = ($output -join "`n")
-            if (-not (Test-Path $rFile) -or (Get-Item $rFile).Length -lt 500) {
-                @{ output = $fullOutput; task_key = $tkKey; backend = "codex_exec" } |
-                    ConvertTo-Json -Depth 2 |
+            $doFallback = $false
+            if (-not (Test-Path $rFile)) {
+                $doFallback = $true
+            } elseif ((Get-Item $rFile).Length -lt 500) {
+                $doFallback = $true
+            } else {
+                # 已有檔案且足夠大：檢查是否為有效結構（含 type/agent + status），避免覆蓋
+                try {
+                    $existing = Get-Content $rFile -Raw -Encoding UTF8 | ConvertFrom-Json
+                    if (-not $existing.type -and -not $existing.agent) { $doFallback = $true }
+                    elseif (-not $existing.status) { $doFallback = $true }
+                } catch { $doFallback = $true }
+            }
+            if ($doFallback) {
+                # 僅寫入結構化失敗 + 短預覽（上限 2000 字），避免 10 萬字 stdout 導致 Phase 3 判定「結果檔損壞」
+                $previewLen = [Math]::Min(2000, [Math]::Max(0, $fullOutput.Length))
+                $stdoutPreview = if ($previewLen -gt 0) { $fullOutput.Substring(0, $previewLen) } else { "" }
+                if ($fullOutput.Length -gt 2000) { $stdoutPreview += "`n... [truncated, total $($fullOutput.Length) chars]" }
+                $fallback = @{
+                    agent   = "todoist-auto-$tkKey"
+                    type    = $tkKey
+                    status  = "failed"
+                    reason  = "result_file_missing_or_invalid"
+                    summary = "後端未產出有效結果檔，stdout 已截斷預覽"
+                    backend_stdout_preview = $stdoutPreview
+                    backend = $job.BackendName
+                }
+                if ($jobElapsed) { $fallback.elapsed_seconds = $jobElapsed }
+                $fallback | ConvertTo-Json -Depth 4 |
                     Set-Content -Path $rFile -Encoding UTF8 -Force
-                Write-Log "[Phase2] ${agentName} result file補寫 ($($fullOutput.Length) chars)"
+                Write-Log "[Phase2] ${agentName} result file補寫 (structured failure, stdout_preview=${previewLen} chars, total=$($fullOutput.Length), ${jobElapsed}s)"
             }
         }
     }
@@ -1169,7 +1394,46 @@ foreach ($agentKey in $sections.Keys) {
 }
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
     -StartTime $phase2Start -EndTime (Get-Date) `
-    -Status (if ($phase2FailCount -eq 0) { "ok" } else { "failed" })
+    -Status $(if ($phase2FailCount -eq 0) { "ok" } else { "failed" })
+
+# ── Pre-Phase-3：檢查 plan_type=tasks 的結果檔是否齊全 ──
+if ($plan.plan_type -eq "tasks" -and $null -ne $plan.tasks -and $plan.tasks.Count -gt 0) {
+    $missingResults = @()
+    for ($rank = 1; $rank -le $plan.tasks.Count; $rank++) {
+        $resultPath = "$ResultsDir\todoist-result-$rank.json"
+        if (-not (Test-Path $resultPath)) {
+            $taskContent = $plan.tasks[$rank - 1].content
+            $shortContent = if ($taskContent.Length -gt 40) { $taskContent.Substring(0, 40) + "…" } else { $taskContent }
+            $missingResults += "task-$rank (todoist-result-$rank.json)"
+            $sectionKey = "task-$rank"
+            $jobState = $sections[$sectionKey]
+            Write-Log "[Phase2] Missing result file: todoist-result-$rank.json — job state=$jobState — content: $shortContent" "WARN"
+        }
+    }
+    if ($missingResults.Count -gt 0) {
+        Write-Log "[Phase2] Missing result files: $($missingResults -join ', ') — Phase 3 will mark these tasks as failed (結果缺失)" "WARN"
+    }
+}
+
+# ── Pre-Phase-3：Auto-task 失敗追蹤（plan_type=auto）──
+# 比對 selected_tasks 與實際產出的結果檔，記錄到 state/failed-auto-tasks.json
+# 使用正規化 key 作為 result 檔名與 task_key，避免 selected_tasks 為物件時被轉成 @{key=...} 導致永遠 result_file_missing
+if ($plan.plan_type -eq "auto" -and
+    $null -ne $plan.auto_tasks -and
+    $null -ne $plan.auto_tasks.selected_tasks) {
+    foreach ($item in $plan.auto_tasks.selected_tasks) {
+        $normalizedKey = Get-NormalizedAutoTaskKey -Item $item
+        $rawKey = if ($null -ne $item -and $item.PSObject.Properties['key']) { $item.key } else { $normalizedKey }
+        $resultPath = "$ResultsDir\todoist-auto-$normalizedKey.json"
+        if (Test-Path $resultPath) {
+            Update-FailedAutoTasks -TaskKey $normalizedKey -Succeeded $true
+        } else {
+            $agentSectionKey = "auto-$rawKey"
+            $jobFailReason = if ($sections[$agentSectionKey] -eq "timeout") { "timeout" } else { "result_file_missing" }
+            Update-FailedAutoTasks -TaskKey $normalizedKey -Reason $jobFailReason -Succeeded $false
+        }
+    }
+}
 
 # ── Step 9A: Backend 分布日誌 + 研究品質評分 ──
 $backendDist = @{}
@@ -1225,6 +1489,33 @@ $phase3Success = $false
 $phase3Seconds = 0
 $attempt = 0
 $phase3StartOuter = Get-Date
+
+# ── P5-A：Phase 3 前 done_cert 驗證 ─────────────────────────────────────────
+$doneCertScript = "$AgentDir\tools\agent_pool\done_cert.py"
+if (Test-Path $doneCertScript) {
+    Write-Log "[Phase3-Pre] Verifying done_certs before assembly..."
+    try {
+        $certResult = uv run --project $AgentDir python $doneCertScript --verify-all 2>&1
+        $certJson = $certResult | Where-Object { $_ -match '^\{' } | Select-Object -Last 1
+        if ($certJson) {
+            $cert = $certJson | ConvertFrom-Json
+            $passed = $cert.passed
+            $total  = $cert.total
+            $failed = $cert.failed
+            Write-Log "[Phase3-Pre] done_cert: $passed/$total passed, $failed failed"
+            if ($failed -gt 0) {
+                $ratio = if ($total -gt 0) { [math]::Round($passed / $total, 2) } else { 1.0 }
+                if ($ratio -lt 0.6) {
+                    Write-Log "[Phase3-Pre] WARNING: success_ratio=$ratio < 0.6 (min_success_ratio), some results may be missing"
+                }
+                $certResult | ForEach-Object { Write-Log "  [cert] $_" }
+            }
+        }
+    } catch {
+        Write-Log "[Phase3-Pre] done_cert check skipped: $($_.Exception.Message)"
+    }
+}
+# ─────────────────────────────────────────────────────────────────────────────
 
 while ($attempt -le $MaxPhase3Retries) {
     if ($attempt -gt 0) {
@@ -1304,10 +1595,10 @@ $phaseBreakdown = [PSCustomObject]@{
 $runEnd = Get-Date
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase3" `
     -StartTime $phase3StartOuter -EndTime $runEnd `
-    -Status (if ($phase3Success) { "ok" } else { "failed" })
+    -Status $(if ($phase3Success) { "ok" } else { "failed" })
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "overall" `
     -StartTime $startTime -EndTime $runEnd `
-    -Status (if ($phase3Success) { "ok" } else { "failed" })
+    -Status $(if ($phase3Success) { "ok" } else { "failed" })
 
 if ($phase3Success) {
     Write-Log ""

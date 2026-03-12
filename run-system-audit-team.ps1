@@ -299,7 +299,11 @@ else {
 
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+$validPresets = @("strict", "normal", "permissive")
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+} elseif ($env:HOOK_SECURITY_PRESET -notin $validPresets) {
+    Write-Log "[Security] WARN: Invalid HOOK_SECURITY_PRESET='$($env:HOOK_SECURITY_PRESET)', falling back to 'strict'" "WARN"
     $env:HOOK_SECURITY_PRESET = "strict"
 }
 Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)" "INFO"
@@ -607,6 +611,88 @@ if (-not $phase2Success) {
     Set-OodaState -Step "orient" -Status "failed" -Meta @{ error = "phase2_failed" }
     Update-SchedulerState -Status "error" -Message "Phase 2 failed" -ExitCode 1
     exit 1
+}
+
+# ============================================
+# Phase 3: Decide（arch-evolution，Orient 完成後直接觸發）
+# ============================================
+Write-Host "[Phase 3] OODA Decide 階段" -ForegroundColor Cyan
+
+$backlogFile     = Join-Path $AgentDir "context\improvement-backlog.json"
+$archDecisionFile = Join-Path $AgentDir "context\arch-decision.json"
+$archPromptFile  = Join-Path $AgentDir "prompts\team\todoist-auto-arch_evolution.md"
+
+# 防重複執行：若今日已產出 arch-decision.json（generated_at 為今日），跳過 Phase 3
+$skipPhase3 = $false
+if (Test-Path $archDecisionFile) {
+    try {
+        $ad = Get-Content $archDecisionFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+        if ($ad.generated_at) {
+            $genDate = ([datetime]$ad.generated_at).ToString("yyyy-MM-dd")
+            if ($genDate -eq (Get-Date -Format "yyyy-MM-dd")) {
+                Write-Host "  [Phase 3] arch-decision.json 今日已產出（$($ad.generated_at)），跳過" -ForegroundColor Yellow
+                Write-Log "[Phase 3] Skipped: arch-decision.json already generated today" "INFO"
+                $skipPhase3 = $true
+            }
+        }
+    } catch {
+        Write-Log "[Phase 3] arch-decision.json 解析失敗，繼續執行: $_" "WARN"
+    }
+}
+
+if (-not $skipPhase3) {
+    # 確認 arch-evolution prompt 存在
+    if (-not (Test-Path $archPromptFile)) {
+        Write-Host "  [Phase 3] arch-evolution prompt 不存在，跳過" -ForegroundColor Yellow
+        Write-Log "[Phase 3] Skipped: $archPromptFile not found" "WARN"
+    } elseif (-not (Test-Path $backlogFile)) {
+        Write-Host "  [Phase 3] improvement-backlog.json 不存在，跳過" -ForegroundColor Yellow
+        Write-Log "[Phase 3] Skipped: improvement-backlog.json not found" "WARN"
+    } else {
+        # 確認 backlog 非空
+        $backlogHasItems = $false
+        try {
+            $backlog = Get-Content $backlogFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+            if ($backlog.items -and $backlog.items.Count -gt 0) {
+                $backlogHasItems = $true
+                Write-Host ("  [Phase 3] improvement-backlog 有 {0} 項，觸發 arch-evolution..." -f $backlog.items.Count) -ForegroundColor Green
+            } else {
+                Write-Host "  [Phase 3] improvement-backlog 為空，跳過 arch-evolution" -ForegroundColor Yellow
+                Write-Log "[Phase 3] Skipped: improvement-backlog empty" "INFO"
+            }
+        } catch {
+            Write-Log "[Phase 3] improvement-backlog.json 解析失敗: $_" "WARN"
+        }
+
+        if ($backlogHasItems) {
+            Set-OodaState -Step "decide" -Status "pending" -Meta @{ triggered_by = "phase3_direct" }
+
+            $archLogFile = "$AgentDir\logs\phase3-arch-$($traceId.Substring(0,8)).log"
+            $phase3Start = Get-Date
+
+            try {
+                $archContent = Get-Content $archPromptFile -Raw -Encoding UTF8
+                Write-Log "[Phase 3] Starting arch-evolution (direct trigger)" "INFO"
+
+                $archContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$archLogFile
+
+                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+                Write-Host ("  [Phase 3] arch-evolution 完成（{0}s）" -f $phase3Seconds) -ForegroundColor Green
+                Write-Log "[Phase 3] arch-evolution completed in ${phase3Seconds}s" "INFO"
+
+                Set-OodaState -Step "decide" -Status "completed" -Meta @{
+                    duration_s  = $phase3Seconds
+                    output_file = "context/arch-decision.json"
+                }
+            } catch {
+                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+                Write-Host "  [Phase 3] arch-evolution 失敗：$_" -ForegroundColor Red
+                Write-Log "[Phase 3] arch-evolution failed: $_" "ERROR"
+                Set-OodaState -Step "decide" -Status "failed" -Meta @{ error = $_.ToString() }
+                # Phase 3 失敗不中止整體流程（orient 已成功）
+            }
+        }
+    }
 }
 
 # ============================================

@@ -86,6 +86,47 @@ comparison:
       url: https://github.com/affaan-m/everything-claude-code
       strengths: [instinct-learning, token-economy, agent-hierarchy, agentshield]
 
+# Fitness Functions — 可量化的架構健康指標（P0-B 新增）
+# 由 check-health.ps1 [Fitness Function 評分] 區塊讀取
+fitness_functions:
+  adr_coverage:
+    description: "ADR 覆蓋率（Accepted / Total）"
+    target: ">= 80%"
+    auto_check: true
+    measure: "context/adr-registry.json .summary.accepted / .summary.total"
+    weight: 20
+
+  hook_precision:
+    description: "Hook 攔截精準率（False Positive < 5%）"
+    target: "false_positive_rate < 5%"
+    measure: "uv run python hooks/query_logs.py --mode precision"
+    weight: 20
+
+  ooda_completion:
+    description: "OODA 循環完成率（Decide 步驟有輸出）"
+    target: ">= 60%"
+    source: "logs/structured/ooda-transitions.jsonl"
+    weight: 20
+
+  tech_debt_velocity:
+    description: "每週解決技術債 >= 新增量"
+    target: "resolved >= new_per_week"
+    source: "context/improvement-backlog.json"
+    weight: 15
+
+  config_entropy:
+    description: "配置膨脹分數（analyze-config.ps1 輸出）"
+    target: "< 0.65"
+    measure: "analyze-config.ps1 -Mode score"
+    weight: 15
+
+  groq_routing_ratio:
+    description: "Groq 路由佔比（P1-B 啟用後才有意義）"
+    target: ">= 10%"
+    measure: "state/token-usage.json .daily.<today>.groq_calls / total_calls"
+    weight: 10
+    enabled_after: "P1-B"   # P1-B 實作前此指標恆為 0，不計入評分
+
 # 迴圈偵測閾值（LoopDetector 讀取）
 loop_detection:
   tool_hash_threshold: 5        # 同一工具+參數連續 N 次觸發

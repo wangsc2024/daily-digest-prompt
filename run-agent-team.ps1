@@ -1,4 +1,4 @@
-﻿# ============================================
+# ============================================
 # Claude Agent Team - Parallel Orchestrator (PowerShell 7)
 # ============================================
 # Usage:
@@ -20,10 +20,24 @@ $LogDir = "$AgentDir\logs"
 $StateFile = "$AgentDir\state\scheduler-state.json"
 $ResultsDir = "$AgentDir\results"
 
-# Config
+# Config（ADR-015：可由 config/timeouts.yaml 覆寫，失敗時使用下方 fallback）
 $MaxPhase2Retries = 1
 $Phase1TimeoutSeconds = 300
 $Phase2TimeoutSeconds = 420  # Assembly 實測最大 360s，加 60s buffer
+
+# 從 config/timeouts.yaml 讀取 daily_digest_team 的 phase1/phase2 timeout
+$timeoutsPath = Join-Path $AgentDir "config\timeouts.yaml"
+if (Test-Path $timeoutsPath) {
+    try {
+        $tPath = $timeoutsPath -replace '\\', '/'
+        $json = uv run --project $AgentDir python -c "import json,yaml; d=yaml.safe_load(open(r'$tPath',encoding='utf-8')); dd=d.get('daily_digest_team') or {}; print(json.dumps({'phase1_timeout':dd.get('phase1_timeout'),'phase2_timeout':dd.get('phase2_timeout')}))"
+        $t = $json | ConvertFrom-Json
+        if ($t.phase1_timeout) { $Phase1TimeoutSeconds = [int]$t.phase1_timeout }
+        if ($t.phase2_timeout) { $Phase2TimeoutSeconds = [int]$t.phase2_timeout }
+    } catch {
+        # 保留上方 fallback
+    }
+}
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -386,7 +400,11 @@ if (-not $env:BOT_API_SECRET) {
 
 # ─── 生產環境安全策略 ───
 # 若未設定則預設 strict（排程器執行環境），手動執行可覆蓋
+$validPresets = @("strict", "normal", "permissive")
 if (-not (Test-Path Env:HOOK_SECURITY_PRESET)) {
+    $env:HOOK_SECURITY_PRESET = "strict"
+} elseif ($env:HOOK_SECURITY_PRESET -notin $validPresets) {
+    Write-Log "[Security] WARN: Invalid HOOK_SECURITY_PRESET='$($env:HOOK_SECURITY_PRESET)', falling back to 'strict'"
     $env:HOOK_SECURITY_PRESET = "strict"
 }
 Write-Log "[Security] HOOK_SECURITY_PRESET = $($env:HOOK_SECURITY_PRESET)"

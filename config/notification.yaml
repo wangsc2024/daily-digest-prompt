@@ -2,12 +2,16 @@
 # ntfy 通知配置
 # 修改此文件可調整通知行為，不需碰 prompt
 
+# 配置版本
 version: 1
+# 預設訂閱主題（ntfy.sh 訂閱用）
 default_topic: "wangsc2025"
+# ntfy 服務網址（自架可改）
 service_url: "https://ntfy.sh"
+# 單則訊息長度上限（字元，超過需截斷）
 max_message_length: 500
 
-# 發送步驟（Windows 環境必須用 JSON 檔案方式）
+# 發送步驟（Windows 環境必須用 JSON 檔案方式，避免 inline JSON 亂碼）
 send_steps:
   1: "用 Write 工具建立 ntfy_temp.json（UTF-8）"
   2: 'curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh'
@@ -76,7 +80,7 @@ system_insight:
   priority: 2
   tags: ["gear", "chart_with_upwards_trend"]
 
-# Harness 告警配置（on_stop_alert.py）
+# Harness 告警配置（on_stop_alert.py 讀取；抑制頻率與冷卻）
 harness_alerts:
   # 團隊模式整合
   team_mode_wait_seconds: 30   # 等待所有 Agent 完成的時間窗口（秒）

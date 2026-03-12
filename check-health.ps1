@@ -1,4 +1,4 @@
-﻿# ============================================
+# ============================================
 # Claude Agent Health Check (PowerShell 7)
 # ============================================
 # Usage:
@@ -52,6 +52,21 @@ if ($Scheduled) {
     [System.IO.File]::WriteAllText($ntfyFile, $ntfyPayload, [System.Text.Encoding]::UTF8)
     curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyFile" https://ntfy.sh | Out-Null
     Remove-Item $ntfyFile -Force -ErrorAction SilentlyContinue
+
+    # ADR-010：pip-audit 發現漏洞時另發 critical 告警
+    if ($output | Select-String "pip-audit 發現漏洞") {
+        $secPayload = [ordered]@{
+            topic    = "wangsc2025"
+            title    = "🚨 依賴安全告警"
+            message  = "pip-audit 發現漏洞，請執行 uv run pip-audit 查看。Log: $logName"
+            priority = 4
+            tags     = @("warning", "skull_and_crossbones")
+        } | ConvertTo-Json -Compress
+        $secFile = "$AgentDir\logs\ntfy_pip_audit_alert.json"
+        [System.IO.File]::WriteAllText($secFile, $secPayload, [System.Text.Encoding]::UTF8)
+        curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$secFile" https://ntfy.sh | Out-Null
+        Remove-Item $secFile -Force -ErrorAction SilentlyContinue
+    }
 
     Write-Host "[Scheduled] Log: $logName" -ForegroundColor Green
     Write-Host "[Scheduled] ntfy 已推播：$body" -ForegroundColor Green
@@ -213,7 +228,9 @@ if (-not (Test-Path $CacheDir)) {
     Write-Host "  快取目錄不存在" -ForegroundColor Gray
 }
 else {
-    $cacheFiles = Get-ChildItem -Path $CacheDir -Filter "*.json" -ErrorAction SilentlyContinue
+    # 排除非標準快取格式（status.json 由 PS 預計算; groq-hn-translate.json 無 cached_at）
+    $cacheFiles = Get-ChildItem -Path $CacheDir -Filter "*.json" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notin @("status.json", "groq-hn-translate.json") }
     if ($cacheFiles.Count -eq 0) {
         Write-Host "  無快取檔案" -ForegroundColor Gray
     }
@@ -499,9 +516,9 @@ else {
                 if ([Math]::Abs($diff) -lt 0.05) { return "→" }
                 $up = $diff -gt 0
                 if ($higherIsBetter) {
-                    return if ($up) { "▲" } else { "▼" }
+                    if ($up) { return "▲" } else { return "▼" }
                 } else {
-                    return if ($up) { "▼" } else { "▲" }
+                    if ($up) { return "▼" } else { return "▲" }
                 }
             }
 
@@ -509,9 +526,9 @@ else {
                 param([string]$arrow, [bool]$higherIsBetter = $true)
                 if ($arrow -eq "→") { return "White" }
                 if ($higherIsBetter) {
-                    return if ($arrow -eq "▲") { "Green" } else { "Red" }
+                    if ($arrow -eq "▲") { return "Green" } else { return "Red" }
                 } else {
-                    return if ($arrow -eq "▲") { "Red" } else { "Green" }
+                    if ($arrow -eq "▲") { return "Red" } else { return "Green" }
                 }
             }
 
@@ -1199,8 +1216,8 @@ if (Test-Path $registryFile) {
             } else { "無" }
             Write-Host "  總條目：$total 筆 | 最後更新：$lastUpdated" -ForegroundColor White
             Write-Host "  飽和類型：$saturated" -ForegroundColor $(if ($summary.saturated_types -and $summary.saturated_types.Count -gt 0) { "Yellow" } else { "Green" })
-            if ($total -gt 100) {
-                Write-Host "  ⚠️  條目數超過 100，建議清理舊記錄" -ForegroundColor Yellow
+            if ($total -gt 150) {
+                Write-Host "  ⚠️  條目數超過 150，建議清理舊記錄（目前 $total 筆）" -ForegroundColor Yellow
             }
             if ($summary.recent_3d_topics -and $summary.recent_3d_topics.Count -gt 0) {
                 Write-Host "  近 3 日主題（$($summary.recent_3d_topics.Count) 筆）：$($summary.recent_3d_topics[0])" -ForegroundColor DarkGray
@@ -1331,6 +1348,383 @@ if (Test-Path $_qualityFile) {
     }
 } else {
     Write-Host "  (state/research-quality.json 尚未建立)" -ForegroundColor DarkGray
+}
+
+# [Bot Server & Chatroom-Scheduler 健康]
+Write-Host ""
+Write-Host "[Bot Server & Chatroom-Scheduler 健康]" -ForegroundColor Cyan
+
+# --- Bot 健康檢查 ---
+$_botPort = 3001
+try {
+    $_botResp = Invoke-RestMethod -Uri "http://127.0.0.1:$_botPort/api/health" -TimeoutSec 5 -ErrorAction Stop
+    $_gunStatus = if ($_botResp.gunConnected) { "✓ 已連線" } else { "✗ 未連線" }
+    Write-Host "  Bot Server  : ✓ 運行中 (port $_botPort)" -ForegroundColor Green
+    Write-Host "  Gun Relay   : $_gunStatus" -ForegroundColor $(if ($_botResp.gunConnected) { 'Green' } else { 'Yellow' })
+    Write-Host "  任務佇列    : pending=$($_botResp.pendingTasks)" -ForegroundColor $(if ([int]$_botResp.pendingTasks -gt 5) { 'Yellow' } else { 'Green' })
+} catch {
+    Write-Host "  Bot Server  : ✗ 無回應 (port $_botPort)" -ForegroundColor Red
+    Write-Host "  → 請執行 bot\restart-bot.ps1 重啟" -ForegroundColor Yellow
+}
+
+# --- Chatroom-Scheduler 進程檢查（以 heartbeat PID 為準）---
+$_heartbeatFile = Join-Path $PSScriptRoot "state\scheduler-heartbeat.json"
+$_schedAlive = $false
+if (Test-Path $_heartbeatFile) {
+    try {
+        $_hb = Get-Content $_heartbeatFile -Raw | ConvertFrom-Json
+        $_pid = [int]$_hb.pid
+        $_proc = Get-Process -Id $_pid -ErrorAction SilentlyContinue
+        if ($_proc) {
+            $_elapsed = (Get-Date) - $_proc.StartTime
+            $_elapsedStr = "{0:hh\:mm\:ss}" -f $_elapsed
+            Write-Host "  Chatroom-Scheduler: ✓ 運行中 (PID $_pid, 已運行 $_elapsedStr)" -ForegroundColor Green
+            $_schedAlive = $true
+        }
+    } catch {}
+}
+if (-not $_schedAlive) {
+    Write-Host "  Chatroom-Scheduler: ✗ 未運行！" -ForegroundColor Red
+    Write-Host "  → 請執行 bot\restart-bot.ps1 重啟（含 scheduler）" -ForegroundColor Yellow
+}
+
+# --- restart-bot.log 最近記錄 ---
+$_restartLog = Join-Path $PSScriptRoot "bot\logs\restart_$(Get-Date -Format 'yyyyMMdd').log"
+if (Test-Path $_restartLog) {
+    $_restartLines = Get-Content $_restartLog -Encoding UTF8 -ErrorAction SilentlyContinue | Select-Object -Last 5
+    if ($_restartLines) {
+        Write-Host "  最近重啟記錄（bot\logs\restart_today.log）："
+        $_restartLines | ForEach-Object {
+            $clr = if ($_ -match "\[ERROR\]") { 'Red' } elseif ($_ -match "\[WARN\]") { 'Yellow' } else { 'DarkGray' }
+            Write-Host "    $_" -ForegroundColor $clr
+        }
+    }
+} else {
+    Write-Host "  今日無重啟記錄" -ForegroundColor DarkGray
+}
+
+# --- chatroom-scheduler.log 最近記錄 ---
+$_schedulerLog = Join-Path $PSScriptRoot "bot\logs\chatroom-scheduler.log"
+if (Test-Path $_schedulerLog) {
+    $_schedLines = Get-Content $_schedulerLog -Encoding UTF8 -ErrorAction SilentlyContinue | Select-Object -Last 3
+    if ($_schedLines) {
+        $_lastLine = $_schedLines | Select-Object -Last 1
+        if ($_lastLine -match "(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})") {
+            $_lastTs = [datetime]::ParseExact($Matches[1], "yyyy-MM-dd HH:mm:ss", $null)
+            $_minAgo = [int]((Get-Date) - $_lastTs).TotalMinutes
+            $_stale = $_minAgo -gt 10
+            Write-Host ("  Scheduler 最後活動：{0} ({1} 分鐘前)" -f $Matches[1], $_minAgo) `
+                -ForegroundColor $(if ($_stale) { 'Yellow' } else { 'Green' })
+            if ($_stale -and -not $_schedProcs) {
+                Write-Host "  ⚠ Scheduler 已停止超過 10 分鐘，需要重啟！" -ForegroundColor Red
+            }
+        }
+        Write-Host "  最近 3 筆 scheduler 日誌："
+        $_schedLines | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkGray }
+    }
+} else {
+    Write-Host "  chatroom-scheduler.log 不存在" -ForegroundColor DarkGray
+}
+
+# --- Task Scheduler 排程狀態（bot 相關）---
+Write-Host "  排程任務狀態："
+@("Claude_bot-server-restart", "Claude_bot-startup", "Claude_chatroom-watchdog") | ForEach-Object {
+    $_taskName = $_
+    try {
+        $_t = Get-ScheduledTask -TaskName $_taskName -ErrorAction Stop
+        $_ti = $_t | Get-ScheduledTaskInfo -ErrorAction Stop
+        $_state = $_t.State
+        $_lastRun = if ($_ti.LastRunTime -and $_ti.LastRunTime -gt [datetime]"2000-01-01") {
+            $_ti.LastRunTime.ToString("MM-dd HH:mm")
+        } else { "從未" }
+        $_result = $_ti.LastTaskResult
+        $clr = if ($_state -eq "Ready" -or $_state -eq "Running") { 'Green' } else { 'Yellow' }
+        Write-Host ("    {0}: {1} | 上次: {2} | 結果: 0x{3:X}" -f $_taskName, $_state, $_lastRun, $_result) -ForegroundColor $clr
+    } catch {
+        Write-Host "    ${_taskName}: 不存在" -ForegroundColor DarkGray
+    }
+}
+
+Write-Host ""
+
+# ============================================
+# OODA 閉環健康監控（SH01/SH02/SH03）
+# ============================================
+Write-Host "[OODA 閉環健康]" -ForegroundColor Cyan
+$wfFile = "$AgentDir\context\workflow-state.json"
+$adFile = "$AgentDir\context\arch-decision.json"
+
+if (Test-Path $wfFile) {
+    try {
+        $wf = Get-Content $wfFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+
+        # SH01：OODA 週期停滯檢查（>25h 表示未正常更新）
+        if ($wf.updated_at) {
+            $staleH = ([datetime]::Now - [datetime]$wf.updated_at).TotalHours
+            if ($staleH -gt 25) {
+                Write-Host ("  ⚠️ [SH01] OODA 停滯 {0}h — 步驟：{1}（超過 25h 未更新）" -f [int]$staleH, $wf.current_step) -ForegroundColor Red
+            } else {
+                Write-Host ("  ✅ [SH01] OODA 上次更新 {0:F1}h 前（步驟：{1}）" -f $staleH, $wf.current_step) -ForegroundColor Green
+            }
+        }
+
+        # SH02：Decide→Act 延遲檢查（decide completed 但超過 2h 尚未執行 act）
+        if ($wf.history) {
+            $decideEntry = $wf.history | Where-Object { $_.step -eq "decide" -and $_.status -eq "completed" } | Select-Object -Last 1
+            $actEntry    = $wf.history | Where-Object { $_.step -eq "act"    -and $_.status -eq "completed" } | Select-Object -Last 1
+            if ($decideEntry -and -not $actEntry) {
+                $waitH = ([datetime]::Now - [datetime]$decideEntry.ts).TotalHours
+                if ($waitH -gt 2) {
+                    Write-Host ("  ⚠️ [SH02] self_heal 等待 {0}h 尚未執行（decide 完成於 {1}）" -f [int]$waitH, $decideEntry.ts) -ForegroundColor Yellow
+                } else {
+                    Write-Host ("  ✅ [SH02] decide→act 等待 {0:F1}h（正常範圍 <2h）" -f $waitH) -ForegroundColor Green
+                }
+            } elseif ($actEntry) {
+                Write-Host ("  ✅ [SH02] act 已完成（{0}）" -f $actEntry.ts) -ForegroundColor Green
+            } else {
+                Write-Host "  ℹ️ [SH02] OODA 尚未執行到 decide 步驟" -ForegroundColor DarkGray
+            }
+        }
+    } catch {
+        Write-Host "  ⚠️ workflow-state.json 解析失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ℹ️ workflow-state.json 不存在（首次執行）" -ForegroundColor DarkGray
+}
+
+# SH03：arch-decision.json 過期且有未執行項目
+if (Test-Path $adFile) {
+    try {
+        $ad = Get-Content $adFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+        if ($ad.generated_at) {
+            $ageH = ([datetime]::Now - [datetime]$ad.generated_at).TotalHours
+            $unexecuted = @($ad.decisions | Where-Object {
+                $_.action -eq "immediate_fix" -and
+                $_.execution_status -notin @("success", "failed_max_retry")
+            }).Count
+            if ($ageH -gt 48 -and $unexecuted -gt 0) {
+                Write-Host ("  ❌ [SH03] arch-decision 過期 {0}h，仍有 {1} 項未執行" -f [int]$ageH, $unexecuted) -ForegroundColor Red
+            } elseif ($unexecuted -gt 0) {
+                Write-Host ("  ℹ️ [SH03] arch-decision {0:F1}h 前產出，{1} 項 immediate_fix 待執行" -f $ageH, $unexecuted) -ForegroundColor Cyan
+            } else {
+                Write-Host ("  ✅ [SH03] arch-decision 所有 immediate_fix 已執行（{0:F1}h 前產出）" -f $ageH) -ForegroundColor Green
+            }
+        }
+    } catch {
+        Write-Host "  ⚠️ arch-decision.json 解析失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ℹ️ [SH03] arch-decision.json 不存在（尚未執行 arch-evolution）" -ForegroundColor DarkGray
+}
+
+# ============================================
+# 依賴安全掃描（ADR-010：pip-audit 整合）
+# ============================================
+Write-Host ""
+Write-Host "[依賴安全掃描]" -ForegroundColor Cyan
+$pipAuditOk = $false
+$pipAuditCritical = $false  # 有重大漏洞時觸發 ntfy critical
+try {
+    $paOut = uv run --project $AgentDir pip-audit 2>&1 | Out-String
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "  ✅ pip-audit：無已知漏洞" -ForegroundColor Green
+        $pipAuditOk = $true
+    } else {
+        Write-Host "  ⚠️ pip-audit 發現漏洞：" -ForegroundColor Yellow
+        $paOut -split "`n" | ForEach-Object { Write-Host "    $_" -ForegroundColor Gray }
+        $pipAuditCritical = $true
+        # 嘗試用 JSON 判斷是否有 CVSS >= 7（若有則告警更明確）
+        try {
+            $paJson = uv run --project $AgentDir pip-audit -f json 2>$null | Out-String
+            $paObj = $paJson | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($paObj.vulnerabilities) {
+                foreach ($v in $paObj.vulnerabilities) {
+                    $cvss = 0
+                    if ($v.advisory -and $v.advisory.cvss -and $null -ne $v.advisory.cvss) { $cvss = [double]$v.advisory.cvss }
+                    if ($cvss -ge 7.0) { $pipAuditCritical = $true; break }
+                }
+            }
+        } catch { }
+    }
+} catch {
+    Write-Host "  ⚠️ pip-audit 執行失敗（請確認 uv run pip-audit 可用）：$_" -ForegroundColor Yellow
+}
+
+# 重大漏洞告警由排程模式外層依輸出「pip-audit 發現漏洞」發送（見 -Scheduled 區塊）
+
+# ============================================
+# 缺席偵測：daily-digest-am 補執行機制（B2）
+# ============================================
+Write-Host ""
+Write-Host "[缺席偵測 — 每日摘要補執行]" -ForegroundColor Cyan
+
+$makeupFile = "$AgentDir\state\makeup-needed.json"
+$now = Get-Date
+$todayStr = $now.ToString("yyyy-MM-dd")
+$amScheduleHour = 8   # daily-digest-am 排程時間（08:00）
+$detectAfterHour = 10 # 超過此時間才啟動偵測（容忍 2h 延遲）
+
+if ($now.Hour -ge $detectAfterHour) {
+    # 從 scheduler-state.json 尋找今日 daily-digest 執行記錄
+    $digestRanToday = $false
+
+    if (Test-Path $StateFile) {
+        try {
+            $ss = Get-Content $StateFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+            $digestRanToday = @($ss.runs | Where-Object {
+                $_.agent -match "daily-digest" -and
+                (try { ([datetime]$_.start_time).ToString("yyyy-MM-dd") -eq $todayStr } catch { $false })
+            }).Count -gt 0
+        } catch {
+            Write-Host "  ⚠️ 讀取 scheduler-state.json 失敗：$_" -ForegroundColor Yellow
+        }
+    }
+
+    # 同時查 run-fsm.json（更可靠）
+    if (-not $digestRanToday -and (Test-Path $fsmFile)) {
+        try {
+            $fsm2 = Get-Content $fsmFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+            $digestRanToday = @($fsm2.runs.PSObject.Properties | Where-Object {
+                $_.Value.agent_type -match "daily-digest" -and
+                (try { ([datetime]$_.Value.started).ToString("yyyy-MM-dd") -eq $todayStr } catch { $false })
+            }).Count -gt 0
+        } catch { }
+    }
+
+    if ($digestRanToday) {
+        Write-Host "  ✅ 今日 daily-digest 已執行（排程正常）" -ForegroundColor Green
+        # 若 makeup-needed.json 存在且 pending，清除標記
+        if (Test-Path $makeupFile) {
+            try {
+                $mk = Get-Content $makeupFile -Raw -Encoding UTF8 | ConvertFrom-Json
+                if ($mk.pending -eq $true) {
+                    $mk.pending = $false
+                    $mk.resolved_at = $now.ToString("yyyy-MM-ddTHH:mm:sszzz")
+                    $mk | ConvertTo-Json -Depth 5 | Set-Content $makeupFile -Encoding UTF8
+                    Write-Host "  ℹ️ 已清除 makeup-needed.json 補執行標記" -ForegroundColor Gray
+                }
+            } catch { }
+        }
+    } else {
+        $elapsed = $now.Hour - $amScheduleHour
+        Write-Host ("  ❌ [MK01] daily-digest-am 超過 {0}h 未執行（08:00 排程可能失敗）" -f $elapsed) -ForegroundColor Red
+
+        # 寫入 makeup-needed.json 供 Todoist 排程讀取
+        $mkData = @{
+            pending       = $true
+            schedule      = "daily-digest-am"
+            expected_at   = "${todayStr}T08:00:00+08:00"
+            detected_at   = $now.ToString("yyyy-MM-ddTHH:mm:sszzz")
+            elapsed_hours = $elapsed
+        }
+        try {
+            $mkData | ConvertTo-Json -Depth 5 | Set-Content $makeupFile -Encoding UTF8
+            Write-Host "  ➤ 已寫入 state/makeup-needed.json（待下次 Todoist 排程補執行）" -ForegroundColor Yellow
+        } catch {
+            Write-Host "  ⚠️ 寫入 makeup-needed.json 失敗：$_" -ForegroundColor Yellow
+        }
+
+        # ntfy urgent 通知（priority=4 high）
+        $ntfyPayload = @{
+            topic    = "wangsc2025"
+            title    = "[MK01] 每日摘要缺席 ${elapsed}h"
+            message  = "daily-digest-am 已超過 ${elapsed} 小時未執行，已標記補執行"
+            priority = 4
+            tags     = @("warning", "hourglass_flowing_sand")
+        }
+        $ntfyTmpFile = "$AgentDir\temp\makeup-alert-$(Get-Date -Format 'HHmmss').json"
+        try {
+            if (-not (Test-Path "$AgentDir\temp")) { New-Item -ItemType Directory -Path "$AgentDir\temp" -Force | Out-Null }
+            $ntfyPayload | ConvertTo-Json -Compress | Set-Content $ntfyTmpFile -Encoding UTF8
+            curl -s -X POST https://ntfy.sh -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyTmpFile" 2>/dev/null | Out-Null
+            Remove-Item $ntfyTmpFile -Force -ErrorAction SilentlyContinue
+            Write-Host "  ➤ ntfy 通知已發送（priority=4）" -ForegroundColor Yellow
+        } catch {
+            Write-Host "  ⚠️ ntfy 通知失敗：$_" -ForegroundColor Gray
+        }
+    }
+} else {
+    Write-Host "  ℹ️ 偵測時間尚早（< 10:00），略過缺席檢查" -ForegroundColor DarkGray
+    if (Test-Path $makeupFile) {
+        try {
+            $mk = Get-Content $makeupFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($mk.pending -eq $true) {
+                Write-Host ("  ⚠️ makeup-needed.json 存在（待補執行：{0}）" -f $mk.schedule) -ForegroundColor Yellow
+            }
+        } catch { }
+    }
+}
+
+# [根因分析]（P3-B 可觀測性 Level 4）
+Write-Host ""
+Write-Host "[根因分析]" -ForegroundColor Cyan
+$traceAnalyzer = Join-Path $PSScriptRoot "tools/trace_analyzer.py"
+if (Test-Path $traceAnalyzer) {
+    try {
+        $traceOutput = uv run --project $PSScriptRoot python $traceAnalyzer --days 3 --format text 2>&1
+        $traceOutput | ForEach-Object { Write-Host "  $_" }
+    } catch {
+        Write-Host "  無法執行根因分析：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (tools/trace_analyzer.py 尚未建立)" -ForegroundColor DarkGray
+}
+
+# [Fitness Function 評分]（P0-B）
+Write-Host ""
+Write-Host "[Fitness Function 評分]" -ForegroundColor Cyan
+$benchmarkFile = Join-Path $PSScriptRoot "config/benchmark.yaml"
+if (Test-Path $benchmarkFile) {
+    try {
+        $ffOutput = uv run --project $PSScriptRoot python -c "
+import yaml
+from pathlib import Path
+cfg = yaml.safe_load(Path(r'$PSScriptRoot\config\benchmark.yaml').read_text(encoding='utf-8'))
+ff = cfg.get('fitness_functions', {})
+if not ff:
+    print('  (無 fitness_functions 定義)')
+else:
+    for name, spec in ff.items():
+        target = spec.get('target','?')
+        weight = spec.get('weight', 1)
+        print(f'  {name}: target={target} weight={weight}')
+" 2>&1
+        $ffOutput | ForEach-Object { Write-Host $_ }
+    } catch {
+        Write-Host "  無法讀取 benchmark.yaml：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (config/benchmark.yaml 尚未建立)" -ForegroundColor DarkGray
+}
+
+# [預算使用率]（P4-C）
+Write-Host ""
+Write-Host "[預算使用率]" -ForegroundColor Cyan
+$budgetGuard = Join-Path $PSScriptRoot "tools/budget_guard.py"
+if (Test-Path $budgetGuard) {
+    try {
+        $budgetOutput = uv run --project $PSScriptRoot python $budgetGuard --status 2>&1
+        $budgetOutput | ForEach-Object { Write-Host "  $_" }
+    } catch {
+        Write-Host "  無法執行 budget_guard：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (tools/budget_guard.py 尚未建立)" -ForegroundColor DarkGray
+}
+
+# [審計日誌完整性]（P4-D）
+Write-Host ""
+Write-Host "[審計日誌完整性]" -ForegroundColor Cyan
+$auditVerify = Join-Path $PSScriptRoot "tools/audit_verify.py"
+if (Test-Path $auditVerify) {
+    try {
+        $auditOutput = uv run --project $PSScriptRoot python $auditVerify --log-dir (Join-Path $PSScriptRoot "logs/structured") 2>&1
+        $auditOutput | ForEach-Object { Write-Host "  $_" }
+    } catch {
+        Write-Host "  無法執行 audit_verify：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (tools/audit_verify.py 尚未建立)" -ForegroundColor DarkGray
 }
 
 Write-Host ""

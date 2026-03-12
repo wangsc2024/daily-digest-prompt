@@ -27,14 +27,35 @@
       "circuit_open": 0,
       "parse_error": 0,
       "phase_failure": 2
+    },
+    "2026-03-09": {
+      "timeout": 0,
+      "api_error": 0,
+      "circuit_open": 0,
+      "parse_error": 0,
+      "phase_failure": 1
+    },
+    "2026-03-10": {
+      "api_error": 0,
+      "circuit_open": 0,
+      "phase_failure": 0,
+      "parse_error": 0,
+      "timeout": 1
+    },
+    "2026-03-11": {
+      "api_error": 0,
+      "circuit_open": 0,
+      "parse_error": 0,
+      "timeout": 1,
+      "phase_failure": 4
     }
   },
   "total": {
     "api_error": 0,
     "circuit_open": 0,
     "parse_error": 0,
-    "timeout": 7,
-    "phase_failure": 5
+    "timeout": 9,
+    "phase_failure": 10
   },
-  "updated": "2026-03-08T13:01:47"
+  "updated": "2026-03-11T22:42:09"
 }

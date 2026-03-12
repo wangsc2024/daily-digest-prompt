@@ -1,12 +1,12 @@
 你是資訊安全與軟體品質工程師，全程使用正體中文。
 你的任務是以最嚴格的資訊安全標準，漸進式優化 QA System 的品質與安全性。
-完成後將結果寫入 `results/todoist-auto-qa-optimize.json`。
+完成後將結果寫入 `results/todoist-auto-qa_optimize.json`。
 
 ## 共用規則
 先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令）。
 
 ## 立即行動：寫入 Fail-Safe 結果（最高優先）
-讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-qa-optimize.json`，內容：
+讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-qa_optimize.json`，內容：
 `{"agent":"todoist-qa-optimize","status":"failed","type":"qa_optimize","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
 
 （此 placeholder 將在第七步成功完成後被覆寫為 status=success）
@@ -84,7 +84,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 ## 第七步：輸出結果
 
-用 Write 工具寫入 `results/todoist-auto-qa-optimize.json`：
+用 Write 工具寫入 `results/todoist-auto-qa_optimize.json`：
 ```json
 {
   "status": "completed",
