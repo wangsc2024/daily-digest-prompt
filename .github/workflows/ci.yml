@@ -26,8 +26,17 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
+      - name: Run ruff lint
+        run: uv run ruff check hooks/ tools/ tests/
+
       - name: Run pytest (hooks)
         run: uv run pytest tests/hooks/ -v --tb=short
+
+      - name: Run pytest (skills)
+        run: uv run pytest tests/skills/ -v --tb=short
+
+      - name: Run pytest (tools)
+        run: uv run pytest tests/tools/ -v --tb=short
 
       - name: Run pip-audit
         run: uv run pip-audit
