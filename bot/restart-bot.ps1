@@ -1,15 +1,13 @@
 # ============================================================
-# Bot Server + Gun Relay + Chatroom Scheduler 重啟腳本
-# 順序：停 bot → 停 relay → 停 scheduler →
-#       啟 relay → 等待 → 啟 bot → 驗證 → 啟 scheduler
+# Bot Server + Chatroom Scheduler 重啟腳本
+# 順序：停 bot → 停 scheduler → 啟 bot → 驗證 → 啟 scheduler
+# （Gun relay 已移至 Render 雲端，本機不啟動 localhost:8765）
 # ============================================================
 $BotDir     = $PSScriptRoot                        # d:\Source\daily-digest-prompt\bot
 $ProjectDir = Split-Path $BotDir -Parent           # d:\Source\daily-digest-prompt
-$RelayDir   = "D:\Source\my-gun-relay"
 $NodeExe    = "D:\nodejs\node.exe"
 $UvExe      = "uv"
 $BotPort    = 3001
-$RelayPort  = 8765
 
 $LogDir  = Join-Path $BotDir "logs"
 $LogFile = Join-Path $LogDir ("restart_" + (Get-Date -Format "yyyyMMdd") + ".log")
@@ -53,10 +51,7 @@ Write-RLog "====== Bot 重啟開始 ======"
 # ---- Step 1: 停止 bot server ----
 Stop-ByPort -port $BotPort -name "bot server"
 
-# ---- Step 2: 停止 Gun relay ----
-Stop-ByPort -port $RelayPort -name "Gun relay"
-
-# ---- Step 2.5: 停止 chatroom-scheduler（完整 process tree 清除）----
+# ---- Step 2: 停止 chatroom-scheduler（完整 process tree 清除）----
 # 搜尋所有 process（python / uv / pwsh）CommandLine 含 "chatroom-scheduler"
 $killedCount = 0
 $allProcs = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
@@ -73,20 +68,7 @@ foreach ($p in $allProcs) {
 if ($killedCount -eq 0) { Write-RLog "chatroom-scheduler 未在執行，略過" }
 else { Start-Sleep -Seconds 1 }  # 等進程完全退出
 
-# ---- Step 3: 啟動 Gun relay ----
-$ts = Get-Date -Format "yyyyMMdd_HHmmss"
-Start-Process -FilePath $NodeExe `
-    -ArgumentList "index.js" `
-    -WorkingDirectory $RelayDir `
-    -RedirectStandardOutput (Join-Path $LogDir "relay_${ts}_out.log") `
-    -RedirectStandardError  (Join-Path $LogDir "relay_${ts}_err.log") `
-    -WindowStyle Hidden
-Write-RLog "Gun relay 已啟動 (port $RelayPort)"
-
-# ---- Step 4: 等待 relay 就緒 ----
-Start-Sleep -Seconds 3
-
-# ---- Step 5: 啟動 bot server ----
+# ---- Step 3: 啟動 bot server ----
 $ts2 = Get-Date -Format "yyyyMMdd_HHmmss"
 Start-Process -FilePath $NodeExe `
     -ArgumentList "bot.js" `

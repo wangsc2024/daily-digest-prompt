@@ -294,7 +294,7 @@ async function checkDueScheduledTasks() {
                     `[系統回覆] 定時任務已觸發：「${t.task_content}」（工作流），等待 Worker 依序處理中...`
                 );
             } else {
-                store.addRecord(generateId('sched'), t.task_content, t.is_research);
+                store.addRecord(generateId('sched'), t.task_content, t.is_research, t.task_type);
                 await sendSystemReply(
                     `[系統回覆] 定時任務已觸發：「${t.task_content}」，等待 Worker 認領處理中...`
                 );
@@ -323,7 +323,7 @@ const classifyQueue = createQueue({
                 await sendSystemReply(
                     `[系統回覆] 排程間隔過短（最少 ${CRON_MIN_INTERVAL_MINUTES} 分鐘），已降級為單次任務。`
                 );
-                store.addRecord(item.id, decision.task_content, decision.is_research);
+                store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type);
                 return;
             }
 
@@ -341,7 +341,7 @@ const classifyQueue = createQueue({
             const cronId = generateId('cron');
             const task = cron.schedule(decision.cron_expression, () => {
                 try {
-                    store.addRecord(generateId('cron'), decision.task_content, decision.is_research);
+                    store.addRecord(generateId('cron'), decision.task_content, decision.is_research, decision.task_type);
                 } catch (err) {
                     console.error(`[cron ${cronId}] 建立任務失敗:`, err.message);
                 }
@@ -353,12 +353,13 @@ const classifyQueue = createQueue({
                 cron_expression: decision.cron_expression,
                 task_content: decision.task_content,
                 is_research: decision.is_research,
+                task_type: decision.task_type,
                 created_at: new Date().toISOString()
             });
 
+            const cronTypeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
             await sendSystemReply(
-                `[系統回覆] 已設定週期任務：「${decision.task_content}」` +
-                `(研究型: ${decision.is_research})，排程：${decision.cron_expression}`
+                `[系統回覆] 已設定週期任務：「${decision.task_content}」(${cronTypeLabel})，排程：${decision.cron_expression}`
             );
             return;
         }
@@ -379,6 +380,7 @@ const classifyQueue = createQueue({
                 id: schedId,
                 task_content: decision.task_content,
                 is_research: !!decision.is_research,
+                task_type: decision.task_type,
                 is_workflow: !!decision.is_workflow && !!workflowData,
                 workflow_data: workflowData,
                 scheduled_at: decision.scheduled_at.trim(),
@@ -419,26 +421,32 @@ const classifyQueue = createQueue({
         if (decision.is_periodic) {
             console.error(`[classify] 無效的 cron 表達式: ${decision.cron_expression}`);
         }
-        store.addRecord(item.id, decision.task_content, decision.is_research);
-        await sendSystemReply(
-            `[系統回覆] 已將任務存為檔案 ${item.id}.md` +
-            ` (研究型: ${decision.is_research})，等待 Worker 認領處理中...`
-        );
-        // 簡答：僅對「一般單次、非工作流」任務立即回覆；研究型／定時由 Worker 處理，不發簡答
-        if (!decision.is_workflow && !decision.is_research) {
+        // 一般型：僅簡答回覆，不納入任務
+        const isGeneralOnly = (decision.task_type === 'general' && !decision.is_research);
+        if (isGeneralOnly) {
             try {
                 const quickAnswer = await classifier.answerQuestion(item.text);
                 if (quickAnswer) {
                     await sendSystemReply(`[系統回覆] (簡答) ${quickAnswer}`);
+                } else {
+                    await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
                 }
             } catch (err) {
                 console.error('[classify] 簡答發送失敗:', err.message);
+                await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
             }
+            return;
         }
+        // 其餘型態（研究／程式碼／Podcast／詳細回答／從知識庫回答等）：納入任務，不進行簡答
+        store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type);
+        const typeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
+        await sendSystemReply(
+            `[系統回覆] 已將任務存為檔案 ${item.id}.md (${typeLabel})，等待 Worker 認領處理中...`
+        );
     },
     onError: (item, err) => {
         console.error('[classify] AI 分類失敗:', err.message);
-        store.addRecord(item.id, item.text, false);
+        store.addRecord(item.id, item.text, false, undefined);
     }
 });
 
@@ -477,8 +485,10 @@ function startMessageLoop() {
             } catch {}
         }
 
+        // 不要把暫時無法解密的訊息標記為已處理。
+        // 這類情況可能只是握手尚未完成或 relay 稍後重送新密文，
+        // 若先寫入 processedMessages，後續同 id 重送會被永久吞掉。
         if (raw === null) {
-            processedMessages.set(id, Date.now());
             return;
         }
 
@@ -496,7 +506,7 @@ function startMessageLoop() {
 
             processedMessages.set(id, Date.now());
             if (!classifyQueue.push({ id, text })) {
-                store.addRecord(id, text, false);
+                store.addRecord(id, text, false, undefined);
                 console.warn(`[message] 佇列已滿，直接存為未分類任務: ${id}`);
             }
         } catch (err) {
@@ -628,7 +638,7 @@ async function init() {
         if (cron.validate(job.cron_expression) && isCronIntervalSafe(job.cron_expression)) {
             const task = cron.schedule(job.cron_expression, () => {
                 try {
-                    store.addRecord(generateId('cron'), job.task_content, job.is_research);
+                    store.addRecord(generateId('cron'), job.task_content, job.is_research, job.task_type);
                 } catch (err) {
                     console.error(`[cron ${job.id}] 建立任務失敗:`, err.message);
                 }

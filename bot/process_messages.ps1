@@ -1,11 +1,12 @@
 # ============================================================
-# Gun.js 孤島加密排程機器人 - 本地端自動化腳本（claude -p 方案）
+# Gun.js 孤島加密排程機器人 - 本地端自動化腳本
 # ============================================================
 # 遵循 learn-claude-code s11: "Poll, claim, work, repeat"
 # Worker 主動認領任務，支援多 Worker 安全並行。
 #
-# 使用 claude -p 執行任務，直接呼叫本機已設定的 Claude Code CLI。
-# 前置需求：claude CLI 已安裝並完成認證（claude /login）。
+# 一般任務：使用 Cursor CLI (agent -p) + cursor-composer-1-5 執行；用法依 skills/cursor-cli/SKILL.md。
+# 研究型任務：使用 Codex (codex exec --full-auto -m gpt-5.4) 以研究工作流執行；前置 kb-research-strategist 與主任務皆由 Codex 執行；完成後 research-series 更新仍用 claude -p。
+# 前置需求：agent（Cursor CLI）、codex（研究型）、claude CLI（研究後置）已安裝並完成認證。
 #
 # 流程：poll → claim → work → complete
 #
@@ -60,18 +61,15 @@ function Write-Log {
 $CompletionLogFile = Join-Path $LogDir "completion_log.jsonl"
 $ProjectRoot = "D:\Source\daily-digest-prompt"
 
-# ── Skill-First 前言（所有任務都注入，讓 Agent 主動使用 Skill）──
+# ── Skill-First + Cursor CLI 前言（一般任務由 agent -p 執行，依 skills/cursor-cli/SKILL.md）──
 $SkillFirstPreamble = @"
-## Skill-First 指引（最高優先原則）
+## Cursor CLI 與 Skill-First 指引
 
-在執行任何任務前，請先讀取以下 Skill 索引，了解所有可用技能：
-路徑：$ProjectRoot\skills\SKILL_INDEX.md
+本任務由 **Cursor CLI (agent -p)** 執行，請依 **skills/cursor-cli/SKILL.md** 之規則：
+- 先讀 **skills/SKILL_INDEX.md**，積極採用與任務相關的 Skill（knowledge-query、ntfy-notify、api-cache 等）。
+- 外部功能與 Skill 調用**必須先在 CLI 內實際執行**，僅當執行失敗時才在輸出中註明 fallback 與手動做法。
 
-**強制規則**：
-1. 能用 Skill 就用 Skill，禁止自行拼湊已有 Skill 覆蓋的邏輯
-2. 每個步驟必須先讀取對應 SKILL.md 再動手
-3. 積極串聯多個 Skill 實現更高價值（如：新聞 → 政策解讀 → 知識庫匯入 → 通知）
-4. 可用工具（--allowedTools）：Read、Bash、Write
+在執行任何步驟前，請先讀取對應 SKILL.md；禁止自行拼湊已有 Skill 覆蓋的邏輯。專案規則（CLAUDE.md、.cursor/rules/）會由 Cursor CLI 自動載入。
 "@
 
 # ── 查詢近期任務記憶（提供上下文，避免重複執行）──
@@ -218,6 +216,7 @@ foreach ($record in @($record)) {
     $uid = $record.uid
     $filename = $record.filename
     $isResearch = $record.is_research
+    $taskType = $record.task_type   # general | code | podcast | detail；舊記錄可能為空
 
     if ([string]::IsNullOrWhiteSpace($filename)) { continue }
 
@@ -286,20 +285,26 @@ foreach ($record in @($record)) {
             $isResearch = $true
         }
 
-        # ── KB 深化預處理（研究任務：執行 kb-research-strategist + 注入系列上下文）──
+        # ── 研究型一律採研究工作流：KB 深化預處理 + 系列上下文；完成後結果存知識庫（由 bot routes 完成時觸發）──
+        $CodexAvailable = Get-Command codex -ErrorAction SilentlyContinue
         $kbBriefPath = Join-Path $ProjectRoot "context\kb-research-brief.json"
         if ($isResearch -and $researchKeywords.Count -gt 0) {
             $keywords = ($researchKeywords -join ", ")
-            Write-Log "研究任務偵測到 KB 深化需求（關鍵詞：$keywords），執行 kb-research-strategist..."
-            $krsPrompt = "讀取 skills/kb-research-strategist/SKILL.md，以「$keywords」為研究主題執行完整步驟（步驟 0-5），結果輸出至 context/kb-research-brief.json。"
-            $savedClaudeCodeKRS = $env:CLAUDECODE
-            Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
-            try {
-                & claude -p $krsPrompt --allowedTools "Read,Bash,Write" --max-turns 15 2>&1 | Out-Null
-            } finally {
-                if ($null -ne $savedClaudeCodeKRS) { $env:CLAUDECODE = $savedClaudeCodeKRS }
+            Write-Log "研究型任務：KB 深化需求（關鍵詞：$keywords），以 Codex 執行 kb-research-strategist..."
+            $krsPrompt = "請以正體中文輸出。讀取 skills/kb-research-strategist/SKILL.md，以「$keywords」為研究主題執行完整步驟（步驟 0-5），結果輸出至 context/kb-research-brief.json。"
+            if ($CodexAvailable) {
+                $krsPrompt | & codex exec --full-auto -m gpt-5.4 2>&1 | Out-Null
+                Write-Log "kb-research-strategist（Codex）執行完畢"
+            } else {
+                $savedClaudeCodeKRS = $env:CLAUDECODE
+                Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+                try {
+                    & claude -p $krsPrompt --allowedTools "Read,Bash,Write" --max-turns 15 2>&1 | Out-Null
+                } finally {
+                    if ($null -ne $savedClaudeCodeKRS) { $env:CLAUDECODE = $savedClaudeCodeKRS }
+                }
+                Write-Log "kb-research-strategist（claude -p fallback）執行完畢"
             }
-            Write-Log "kb-research-strategist 執行完畢"
         }
 
         $isCoding = Test-IsCodingTask -Content $optimizedContent
@@ -355,15 +360,47 @@ foreach ($record in @($record)) {
         if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
             $workDirPrefix = "請在目錄 $workDir 中執行以下任務。若目錄不存在請先建立。所有產出的檔案必須儲存在 $workDir 目錄中。`n`n"
         }
-        $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
-        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $kbSeriesContext + $qualityReqs
+        # ── 從知識庫中回答型（kb_answer）：注入 RAG 流程，先依 knowledge-query Skill 蒐集資料再由 LLM 回答 ──
+        if ($taskType -eq 'kb_answer') {
+            $kbSkillPath = Join-Path $ProjectRoot "skills\knowledge-query\SKILL.md"
+            $ragPreamble = @"
+## 任務類型：從知識庫中回答（RAG）
 
-        # ── Podcast 快速路徑：偵測到 podcast 製作任務時，直接呼叫 article-to-podcast.ps1 ──
-        # 避免 claude -p 自由詮釋「製作podcast」為「僅生成腳本」，確保走完整管線（TTS→MP3→R2）
+請依下列步驟執行：
+1. 讀取 Skill：$kbSkillPath
+2. 依 Skill 的查詢步驟，以**使用者問題**為 query 呼叫知識庫混合搜尋（POST /api/search/hybrid），取得相關筆記。
+3. **僅根據檢索到的筆記內容**回答下列問題；若知識庫無相關筆記或服務未啟動，請如實說明。
+
+使用者問題：
+"@
+            $optimizedContent = $ragPreamble + "`n`n" + $optimizedContent
+            Write-Log "從知識庫回答型：已注入 RAG 前置（knowledge-query → 檢索 → LLM 回答）"
+        }
+
+        $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
+        $researchWorkflowPreamble = ""
+        if ($isResearch) {
+            $researchWorkflowPreamble = "`n`n## 研究工作流（本任務依研究工作流執行）`n請善用 WebSearch/WebFetch、知識庫查詢與匯入（skills/knowledge-query、skills/web-research），產出結構化報告或寫入 context/；必要時將研究成果匯入知識庫。`n"
+        }
+        $codeTaskPreamble = ""
+        if ($isCoding) {
+            $codeTaskPreamble = "`n`n## 編碼型任務（依 cursor-cli skill 執行）`n本任務為 CODE 型任務，請依 **skills/cursor-cli/SKILL.md** 執行：先讀 skills/SKILL_INDEX.md、積極採用與程式/重構/除錯相關的 Skill，所有修改與產出須在指定工作目錄內完成。`n"
+        }
+        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $researchWorkflowPreamble + $codeTaskPreamble + $kbSeriesContext + $qualityReqs
+
+        # ── Podcast 型一律採 podcast 工作流（article-to-podcast.ps1 → TTS→MP3→上傳 R2）──
         $podcastHandled = $false
         $podcastQuery = ""
         $podcastCount = 1
-
+        if ($taskType -eq 'podcast') {
+            $podcastHandled = $true
+            # 若內容未匹配下方 regex，以任務本文前段作為查詢主題；完全無內容時用預設
+            $fallbackQuery = ($taskContent -split "`n")[0].Trim()
+            if ([string]::IsNullOrWhiteSpace($fallbackQuery)) { $fallbackQuery = $taskContent.Trim() }
+            if ($fallbackQuery.Length -gt 200) { $fallbackQuery = $fallbackQuery.Substring(0, 200) }
+            if ([string]::IsNullOrWhiteSpace($fallbackQuery)) { $fallbackQuery = "未指定主題" }
+            $podcastQuery = $fallbackQuery
+        }
         # 匹配格式：「製作N則X podcast/播客」或「X podcast/播客」（不分大小寫）
         if ($taskContent -match '製作\s*(\d+)\s*則?\s*(.+?)\s*[Pp]odcast|製作\s*(\d+)\s*則?\s*(.+?)\s*播客') {
             $podcastCount = [int]$(if ($matches[1]) { $matches[1] } else { $matches[3] })
@@ -398,36 +435,75 @@ foreach ($record in @($record)) {
             $output = $podcastOutputParts -join "`n`n"
         } else {
 
-        Write-Log "--> Worker 使用 claude -p 處理任務 (研究型: $isResearch, 編碼型: $isCoding, 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
         Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
-        $ClaudeStartTime = Get-Date
-        # 清除 CLAUDECODE 環境變數：Task Scheduler 繼承此變數會導致 claude -p 拒絕啟動（巢狀 session 保護）
-        # 官方說明：「To bypass this check, unset the CLAUDECODE environment variable.」
-        $savedClaudeCode = $env:CLAUDECODE
-        Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
-        try {
-            if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-                Push-Location $workDir
+        $AgentStartTime = Get-Date
+        $toolUsed = "Cursor CLI (cursor-composer-1-5)"
+        if ($isResearch -and $CodexAvailable) {
+            # 研究型任務：以 Codex 研究工作流執行（codex exec --full-auto -m gpt-5.4，依 config/frequency-limits codex_exec）
+            Write-Log "--> Worker 使用 Codex 研究工作流 (codex exec --full-auto -m gpt-5.4) 處理研究型任務 (關鍵詞: $($researchKeywords -join ', '), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            try {
+                $codexPrompt = "請以正體中文輸出。`n`n" + $effectiveContent
+                $codexPromptFile = Join-Path $LogDir "codex-prompt-$uid-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
+                Set-Content -Path $codexPromptFile -Value $codexPrompt -Encoding UTF8 -NoNewline
                 try {
-                    $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
+                    if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                        Push-Location $workDir
+                        try {
+                            $output = Get-Content -Path $codexPromptFile -Raw -Encoding UTF8 | & codex exec --full-auto -m gpt-5.4 2>&1
+                        } finally {
+                            Pop-Location
+                        }
+                    } else {
+                        $output = Get-Content -Path $codexPromptFile -Raw -Encoding UTF8 | & codex exec --full-auto -m gpt-5.4 2>&1
+                    }
                 } finally {
-                    Pop-Location
+                    Remove-Item $codexPromptFile -Force -ErrorAction SilentlyContinue
                 }
-            } else {
-                $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" 2>&1
+                $toolUsed = "Codex (gpt-5.4, 研究工作流)"
+            } catch {
+                Write-Log "[WARN] Codex 執行失敗，fallback 至 Cursor CLI: $_"
+                $toolUsed = "Cursor CLI (cursor-composer-1-5, Codex fallback)"
+                if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                    Push-Location $workDir
+                    try {
+                        $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                    } finally {
+                        Pop-Location
+                    }
+                } else {
+                    $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                }
             }
-        } finally {
-            # 還原環境變數
-            if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
+        } else {
+            # CODE 型任務或一般任務：皆依 skills/cursor-cli/SKILL.md，排程內 agent -p 須 --workspace 與 --trust
+            if ($isCoding) {
+                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, agent -p, cursor-composer-1-5) 處理 CODE 型任務 (工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            } else {
+                Write-Log "--> Worker 使用 Cursor CLI (agent -p, cursor-composer-1-5) 處理一般任務 (從知識庫回答: $(if($taskType -eq 'kb_answer'){'是'}else{'否'}), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            }
+            try {
+                if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                    Push-Location $workDir
+                    try {
+                        $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                    } finally {
+                        Pop-Location
+                    }
+                } else {
+                    $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                }
+                if ($isCoding) { $toolUsed = "Cursor CLI (cursor-cli skill, cursor-composer-1-5)" }
+            } catch {
+                throw
+            }
         }
 
         } # end podcast else
-        $toolUsed = "Claude CLI"
-        $claudeDurationSec = [int]((Get-Date) - $ClaudeStartTime).TotalSeconds
+        $agentDurationSec = [int]((Get-Date) - $AgentStartTime).TotalSeconds
         $outputStr = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
-        Write-Log "任務執行完畢 (使用: $toolUsed，耗時: ${claudeDurationSec}s，輸出: $($outputStr.Length) 字元)"
+        Write-Log "任務執行完畢 (使用: $toolUsed，耗時: ${agentDurationSec}s，輸出: $($outputStr.Length) 字元)"
         Write-CompletionLog -Uid $uid -Filename $filename -Event "completed" `
-            -DurationSec $claudeDurationSec -OutputLen $outputStr.Length
+            -DurationSec $agentDurationSec -OutputLen $outputStr.Length
 
         # ---- Step 4: Complete — 標記為已完成（帶 claim_generation、result 供工作流下游使用）----
         # 注意：結果回傳至聊天室由 bot server 的 /processed 端點透過穩定 Gun 連線負責，

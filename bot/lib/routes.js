@@ -49,8 +49,13 @@ function saveToKnowledgeBase(taskContent, resultStr) {
     req.end();
 }
 
-function shouldSaveToKB(taskContent, isResearch) {
+/**
+ * 是否將任務結果存入知識庫。
+ * 規則：研究型一律存 KB；code 型一律存規劃結果至 KB；其餘依關鍵字。
+ */
+function shouldSaveToKB(taskContent, isResearch, taskType) {
     if (isResearch) return true;
+    if (taskType === 'code') return true;
     const lower = taskContent || '';
     return KB_KEYWORDS.some(kw => lower.includes(kw));
 }
@@ -312,9 +317,9 @@ function mount(app, opts = {}) {
                                 sendReply(finalMsg)
                                     .catch(e => console.error('[routes/processed] workflow sendReply 失敗:', e.message));
                             }
-                            // 知識庫：以工作流名稱為主題存入最終成果
+                            // 知識庫：研究型工作流一律存 KB（以工作流名稱為主題）
                             const wf = workflow.queryWorkflows({}).workflows.find(w => w.id === wfResult.workflowId);
-                            if (wf && shouldSaveToKB(wf.name, true)) {
+                            if (wf && shouldSaveToKB(wf.name, true, null)) {
                                 const allResults = (wf.steps || [])
                                     .filter(s => s.status === 'completed' && s.task_uid)
                                     .map(s => {
@@ -344,8 +349,8 @@ function mount(app, opts = {}) {
                         sendReply(`[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`)
                             .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
 
-                        // 研究型 / 規劃型 / 優化型任務自動存入知識庫
-                        if (shouldSaveToKB(taskContent, rec && rec.is_research)) {
+                        // 研究型一律存 KB；code 型一律存規劃結果至 KB；其餘依關鍵字
+                        if (shouldSaveToKB(taskContent, rec && rec.is_research, rec && rec.task_type)) {
                             saveToKnowledgeBase(taskContent, resultStr);
                         }
 

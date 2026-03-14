@@ -150,7 +150,9 @@ records.forEach(r => {
 
 // ---- Records CRUD ----
 
-function addRecord(uid, taskContent, isResearch) {
+const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer']);
+
+function addRecord(uid, taskContent, isResearch, taskType) {
     if (records.some(r => r.uid === uid)) {
         console.log(`[addRecord] UID 已存在，跳過: ${uid}`);
         return;
@@ -164,6 +166,8 @@ function addRecord(uid, taskContent, isResearch) {
         : String(taskContent).slice(0, MAX_TASK_CONTENT_LENGTH);
     saveTextFile(filePath, safeContent);
 
+    const normalizedType = (taskType && VALID_TASK_TYPES.has(taskType)) ? taskType : null;
+
     records.push({
         uid,
         filename,
@@ -171,6 +175,7 @@ function addRecord(uid, taskContent, isResearch) {
         state: STATES.PENDING,
         is_processed: false,
         is_research: !!isResearch,
+        task_type: normalizedType,
         claimed_by: null,
         claimed_at: null,
         claim_generation: 0,
@@ -184,7 +189,8 @@ function addRecord(uid, taskContent, isResearch) {
         if (fs.existsSync(filePath)) try { fs.unlinkSync(filePath); } catch {}
         throw err;
     }
-    console.log(`[新增任務記錄]: ${filename}, 研究型: ${!!isResearch}`);
+    const typeLabel = !!isResearch ? '研究型' : (normalizedType === 'code' ? '程式碼型' : normalizedType === 'podcast' ? 'Podcast 型' : normalizedType === 'detail' ? '詳細回答型' : normalizedType === 'kb_answer' ? '從知識庫回答型' : '一般型');
+    console.log(`[新增任務記錄]: ${filename}, ${typeLabel}`);
 }
 
 function markProcessed(uid, claimGeneration) {

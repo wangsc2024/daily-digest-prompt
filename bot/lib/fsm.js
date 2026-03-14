@@ -35,6 +35,9 @@ const CLAIM_TIMEOUT_MS = 10 * 60 * 1000;
 const CLAIM_TIMEOUTS = {
     research: 20 * 60 * 1000,  // 20 分鐘（研究任務）
     code:     30 * 60 * 1000,  // 30 分鐘（程式碼生成）
+    podcast:  25 * 60 * 1000,  // 25 分鐘（Podcast 腳本＋音訊生成）
+    detail:   15 * 60 * 1000,  // 15 分鐘（詳細回答型）
+    kb_answer: 12 * 60 * 1000, // 12 分鐘（從知識庫中回答：RAG＋LLM）
     general:  10 * 60 * 1000,  // 10 分鐘（一般任務，原預設）
 };
 
@@ -42,6 +45,9 @@ const CLAIM_TIMEOUTS = {
 const PROCESSING_TIMEOUTS = {
     research: 120 * 60 * 1000, // 2 小時（研究任務含 claude -p 執行）
     code:      90 * 60 * 1000, // 1.5 小時
+    podcast:  90 * 60 * 1000, // 1.5 小時（腳本＋TTS/音訊）
+    detail:    75 * 60 * 1000, // 1.25 小時（詳細論述／步驟說明）
+    kb_answer: 45 * 60 * 1000, // 45 分鐘（RAG 檢索＋LLM 回答）
     general:   60 * 60 * 1000, // 1 小時
 };
 
@@ -51,7 +57,7 @@ function getProcessingTimeout(taskType) {
 
 /**
  * 依任務類型取得對應的 claim timeout（毫秒）
- * @param {string} [taskType] - 任務類型（'research' | 'code' | 'general'）
+ * @param {string} [taskType] - 任務類型（'research' | 'code' | 'podcast' | 'detail' | 'kb_answer' | 'general'）
  * @returns {number}
  */
 function getClaimTimeout(taskType) {

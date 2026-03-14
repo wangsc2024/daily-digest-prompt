@@ -42,6 +42,8 @@ function isValidScheduledAt(scheduledAt) {
     return dt <= maxEnd;
 }
 
+const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer']);
+
 function validateDecision(parsed) {
     if (typeof parsed !== 'object' || parsed === null) return false;
     if (typeof parsed.task_content !== 'string' || parsed.task_content.length === 0) return false;
@@ -52,6 +54,7 @@ function validateDecision(parsed) {
     if (parsed.is_scheduled !== undefined && typeof parsed.is_scheduled !== 'boolean') return false;
     if (parsed.is_periodic && parsed.is_scheduled) return false;
     if (parsed.is_scheduled && !isValidScheduledAt(parsed.scheduled_at)) return false;
+    if (parsed.task_type !== undefined && !VALID_TASK_TYPES.has(parsed.task_type)) return false;
     return true;
 }
 
@@ -167,7 +170,8 @@ async function classify(userMessage, _429RetriesLeft = GROQ_429_MAX_RETRIES) {
             scheduled_at: '',
             task_content: userMessage,
             is_research: false,
-            is_workflow: false
+            is_workflow: false,
+            task_type: 'general'
         };
     }
     if (!validateDecision(parsed)) {
@@ -179,12 +183,14 @@ async function classify(userMessage, _429RetriesLeft = GROQ_429_MAX_RETRIES) {
             scheduled_at: '',
             task_content: userMessage,
             is_research: false,
-            is_workflow: false
+            is_workflow: false,
+            task_type: 'general'
         };
     }
     if (parsed.is_workflow === undefined) parsed.is_workflow = false;
     if (parsed.is_scheduled === undefined) parsed.is_scheduled = false;
     if (parsed.scheduled_at === undefined) parsed.scheduled_at = '';
+    if (!VALID_TASK_TYPES.has(parsed.task_type)) parsed.task_type = 'general';
     return parsed;
 }
 
