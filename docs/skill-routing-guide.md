@@ -59,7 +59,8 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 ├── 需要「通知/提醒」？     -> ntfy-notify
 ├── 任何 API 呼叫？         -> api-cache（包裝所有外部 API）
 ├── 執行開始？              -> digest-memory（讀取記憶）
-└── 執行結束？              -> digest-memory（寫入記憶）
+├── 執行結束？              -> digest-memory（寫入記憶）
+└── 用 Cursor CLI / agent -p 執行單次任務、重構、審查、腳本化？ -> cursor-cli
 ```
 
 > **注意**：`scheduler-state.json` 由 PowerShell 腳本負責寫入，Agent 僅讀取。

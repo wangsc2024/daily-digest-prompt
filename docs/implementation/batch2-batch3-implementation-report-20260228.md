@@ -199,7 +199,7 @@ chatroom-query.md 功能：
 | observe | 系統洞察 | 排程觸發 | → orient |
 | orient | 系統審查 | observe 完成 | → decide（backlog 非空）|
 | decide | 架構演進 | orient 完成 + backlog 非空 | → act |
-| act | 自愈迴圈 | decide 完成 | → complete |
+| act | 自癒迴圈 | decide 完成 | → complete |
 
 **注意**：`decide` 步驟已設 `enabled: false`（Code Review I3 修復），待 `prompts/team/todoist-auto-arch-evolution.md` 建立後啟用。
 

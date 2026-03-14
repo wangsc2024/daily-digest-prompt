@@ -1,4 +1,4 @@
-# 系統自愈機制強化計畫
+# 系統自癒機制強化計畫
 
 > 計畫 ID：cuddly-prancing-dove
 > 建立日期：2026-03-11
@@ -17,7 +17,7 @@
 - 排程失敗時僅能重試 1 次（無指數退避），瞬間網路抖動即導致整日無摘要
 
 **期望結果：**
-建立完整的四層自愈架構（預防→偵測→診斷→修復），使排程任務能「如實如質」完成，並在意外發生時自我發現並解決問題，無需人工介入。
+建立完整的四層自癒架構（預防→偵測→診斷→修復），使排程任務能「如實如質」完成，並在意外發生時自我發現並解決問題，無需人工介入。
 
 **2026-03-11 執行進度更新：**
 **第一次實施（2026-03-11 早）：**
@@ -36,7 +36,7 @@
 - ✅ check-health.ps1：新增 [OODA 閉環健康] 區塊（SH01/SH02/SH03）
 - ✅ run-system-audit-team.ps1：新增 Phase 3（Orient 完成後直接觸發 arch-evolution，含今日防重複保護）
 - ✅ system-insight.md：新增驗證閉環子步驟（validation loop，驗證 execution_status=success 的修復仍有效）
-- ✅ audit-scoring.yaml：dimension 4 新增子項 4.6/4.7/4.8（OODA 週期完整性/immediate_fix 執行率/自愈修復成功率）
+- ✅ audit-scoring.yaml：dimension 4 新增子項 4.6/4.7/4.8（OODA 週期完整性/immediate_fix 執行率/自癒修復成功率）
 - ✅ api-health.json：新增 gun-bot/chatroom-scheduler Circuit Breaker 條目
 
 **剩餘低優先待辦（不影響系統正常運作）：**
@@ -46,11 +46,11 @@
 
 ---
 
-## 一、自愈系統理論基礎
+## 一、自癒系統理論基礎
 
 ### 1.1 業界定義與四大核心組成
 
-根據 digital.ai 的自愈程式碼定義，自愈系統由四大組件構成：
+根據 digital.ai 的自癒程式碼定義，自癒系統由四大組件構成：
 
 | 組件 | 業界定義 | 本專案對應實作 |
 |------|---------|--------------|
@@ -59,9 +59,9 @@
 | **機器學習與 AI** | 預測故障、最佳化恢復策略、從歷史學習 | behavior-patterns.json（**待激活**）+ OODA 閉環推理 |
 | **設計模式** | 斷路器、重試、超時、艙壁（Bulkhead）隔離 | CircuitBreaker + ErrorClassifier + FSM timeout + Phase 獨立隔離 |
 
-**AI 驅動自愈的核心原則**（來自 digital.ai）：
+**AI 驅動自癒的核心原則**（來自 digital.ai）：
 - 機率匹配閾值：只有當恢復方案匹配機率 > 60% 才執行（本專案對應：arch-evolution 的 priority 評估）
-- 暫停/恢復控制：可透過開關控制自愈積極程度（本專案對應：`enabled` 旗標 + `daily_limit`）
+- 暫停/恢復控制：可透過開關控制自癒積極程度（本專案對應：`enabled` 旗標 + `daily_limit`）
 - 最小化誤操作：自動修復範圍設有安全邊界，超出邊界通知人工介入
 
 ### 1.2 SRE 核心指標
@@ -73,7 +73,7 @@
 | **Error Budget** | 允許的不可用時間預算 | 99.5% SLO → 每月 3.6 小時 |
 | **Toil** | 人工重複操作量 | 目標：所有可自動修復的問題零手動操作 |
 
-### 1.3 五層自愈能力模型
+### 1.3 五層自癒能力模型
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -96,9 +96,9 @@
 
 **艙壁（Bulkhead）隔離原則**：本專案的 Phase 獨立執行機制天然實現了艙壁隔離——Phase 1 的 6 個 Agent 彼此獨立，單一 Agent 失敗不影響其他 Agent（不全阻斷）。
 
-### 1.4 OODA 閉環作為自愈引擎
+### 1.4 OODA 閉環作為自癒引擎
 
-OODA（Boyd 循環）是本專案自愈的核心引擎：
+OODA（Boyd 循環）是本專案自癒的核心引擎：
 - **Observe**：system-insight Skill → `context/system-insight.json`（7 維度指標）
 - **Orient**：system-audit Skill → `context/improvement-backlog.json`（38 子項評分）
 - **Decide**：arch-evolution Skill → `context/adr-registry.json`（**目前停用 — 計畫最高優先修復**）
@@ -327,11 +327,11 @@ fallbacks:
 
 ### Phase F：ntfy 自主通知層（P0 — 貫穿所有 Phase）
 
-**目標**：讓自愈機制的每個關鍵決策與動作都透過 ntfy 即時告知，實現「透明自主運作」。
+**目標**：讓自癒機制的每個關鍵決策與動作都透過 ntfy 即時告知，實現「透明自主運作」。
 
 #### F1. 集中式通知事件配置
 
-新建 `config/notification-events.yaml`，集中定義所有自愈相關通知規則：
+新建 `config/notification-events.yaml`，集中定義所有自癒相關通知規則：
 
 ```yaml
 version: 1
@@ -356,28 +356,28 @@ events:
 
   # self-heal 事件
   self_heal_start:
-    title: "🔧 自愈迴圈啟動"
+    title: "🔧 自癒迴圈啟動"
     message_template: "計畫修復 {planned} 項（含 arch-decision {arch_count} 項）"
     priority: 2
     tags: ["hourglass_flowing_sand"]
     condition: "has_repairs"  # 有待修復項才通知
 
   self_heal_done_success:
-    title: "✅ 自愈完成"
+    title: "✅ 自癒完成"
     message_template: "修復 {success}/{total} 項 | {details}"
     priority: 2
     tags: ["white_check_mark"]
     condition: "always"
 
   self_heal_done_partial:
-    title: "⚠️ 自愈部分失敗"
+    title: "⚠️ 自癒部分失敗"
     message_template: "成功 {success}/{total} 項 | 失敗：{failed_items}"
     priority: 3
     tags: ["warning"]
     condition: "has_failures"
 
   self_heal_done_failed:
-    title: "❌ 自愈失敗 — 需人工介入"
+    title: "❌ 自癒失敗 — 需人工介入"
     message_template: "全部 {total} 項修復失敗 | 錯誤：{error_summary}"
     priority: 5   # urgent
     tags: ["fire", "x"]
@@ -432,7 +432,7 @@ events:
 
 #### F3. 通知格式規範
 
-所有自愈通知遵循 ntfy-notify SKILL 標準（JSON 檔案 + charset=utf-8），額外規範：
+所有自癒通知遵循 ntfy-notify SKILL 標準（JSON 檔案 + charset=utf-8），額外規範：
 - **標題**：≤ 20 字，含 emoji 前綴快速識別事件類型
 - **內容**：≤ 100 字，含關鍵數字（修復 M/N 項）與失敗原因摘要
 - **去重**：warning 級別事件同一問題每 3 天最多 1 次（讀取 `state/alert-registry.json`）
@@ -795,11 +795,11 @@ if (Test-Path "context\arch-decision.json") {
 }
 ```
 
-### 9.4 Meta-監控：自愈機制監控自身健康
+### 9.4 Meta-監控：自癒機制監控自身健康
 
 **為何不新增第 8 維度**：`config/audit-scoring.yaml` 現有 7 維度權重加總精確 100%，新增維度必須重新分配所有權重，破壞現有評分基準線和歷史比對。
 
-**替代方案：擴充現有「系統工作流」維度（dimension 4，weight: 15%）**，新增 3 個自愈子項：
+**替代方案：擴充現有「系統工作流」維度（dimension 4，weight: 15%）**，新增 3 個自癒子項：
 
 ```yaml
 # config/audit-scoring.yaml 現有 dimension 4 的末尾新增
@@ -816,7 +816,7 @@ if (Test-Path "context\arch-decision.json") {
   scoring: "5=>=80%/3=>=50%/1=>=20%/0=<20%（或 arch-decision 不存在）"
 
 - id: "4.8"
-  name: "自愈修復成功率"
+  name: "自癒修復成功率"
   max_score: 5
   check: "最近 7 天 self-heal 的 repairs_succeeded / repairs_attempted 平均"
   scoring: "5=>=80%/3=>=50%/1=>=20%/0=無資料"

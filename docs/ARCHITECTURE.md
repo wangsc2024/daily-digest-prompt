@@ -62,7 +62,7 @@ daily-digest-prompt/
       qa-system-optimize.md       # QA 系統優化
       # 系統自省（4 次/日）
       system-insight.md           # 系統洞察分析
-      self-heal.md                # 自愈迴圈
+      self-heal.md                # 自癒迴圈
       # GitHub 靈感（1 次/日）
       github-scout.md             # GitHub 靈感蒐集（週三/週日）
 
@@ -138,7 +138,7 @@ daily-digest-prompt/
     todoist-auto-creative-game.md # Phase 2: 自動創意遊戲優化
     todoist-auto-qa-optimize.md   # Phase 2: 自動 QA 優化
     todoist-auto-system-insight.md # Phase 2: 自動系統洞察
-    todoist-auto-self-heal.md     # Phase 2: 自動自愈迴圈
+    todoist-auto-self-heal.md     # Phase 2: 自動自癒迴圈
     todoist-auto-github-scout.md  # Phase 2: 自動 GitHub 靈感蒐集
   results/                        # 團隊模式中間結果（完成後清理）
 
