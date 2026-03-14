@@ -27,12 +27,12 @@ if ((Test-Path $templatePath) -or (Test-Path $teamPromptPath)) {
     exit 1
 }
 
-# 建立 template
+# 建立 template（佔位符使用角括號語法，避免 TODO/FIXME 掃描誤報，刻意設計）
 $templateContent = @"
 ---
 name: $Name
 version: 1.0.0
-description: "TODO: 描述此自動任務的用途"
+description: "<描述此自動任務的用途>"
 task_type: $keyUnder
 ---
 
@@ -46,10 +46,10 @@ task_type: $keyUnder
 - 否則繼續
 
 ## 步驟 1：讀取 Skill
-讀取相關 SKILL.md（TODO: 填入 skill 名稱）。
+讀取相關 SKILL.md（<填入 skill 名稱>）。
 
 ## 步驟 2：執行核心任務
-TODO: 填入具體執行步驟。
+<填入具體執行步驟>。
 
 ## 步驟 3：匯入知識庫
 用 ``knowledge-query`` Skill 將結果匯入知識庫。

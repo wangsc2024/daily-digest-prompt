@@ -34,24 +34,24 @@ NTFY_MAX_BYTES = 4096  # ntfy message size limit
 
 
 def _get_skill_diff(reserved_bytes: int = 0) -> str:
-    """Run git diff on SKILL.md files, truncated only if it exceeds ntfy's 4096-byte limit."""
+    """Run git diff on SKILL.md files from repo root; truncated if exceeds ntfy limit."""
     try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)
+        common = {"capture_output": True, "text": True, "timeout": 10, "cwd": project_root}
         result = subprocess.run(
             ["git", "diff", "skills/*/SKILL.md"],
-            capture_output=True,
-            text=True,
-            timeout=10,
+            **common,
         )
         diff = result.stdout.strip()
         if not diff:
-            diff = subprocess.run(
+            result = subprocess.run(
                 ["git", "diff", "--cached", "skills/*/SKILL.md"],
-                capture_output=True,
-                text=True,
-                timeout=10,
-            ).stdout.strip()
+                **common,
+            )
+            diff = result.stdout.strip()
         if not diff:
-            return "（無 unstaged/staged 差異，可能已 commit）"
+            return "（工作區無差異：可能已 commit、已還原或未寫入磁碟）"
         max_bytes = NTFY_MAX_BYTES - reserved_bytes
         encoded = diff.encode("utf-8")
         if len(encoded) > max_bytes:

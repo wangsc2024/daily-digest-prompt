@@ -154,7 +154,8 @@ def _load_yaml_config():
         _yaml_config_cache["loaded"] = True
         _yaml_config_cache["data"] = data
         return data
-    except Exception:
+    except (OSError, _yaml_module.YAMLError) as exc:
+        print(f"[hook_utils] YAML 載入失敗: {exc}", file=sys.stderr)
         _yaml_config_cache["loaded"] = True
         _yaml_config_cache["data"] = None
         return None
@@ -311,7 +312,8 @@ class file_lock:
 
     使用方式：
         with file_lock(filepath):
-            data = json.load(open(filepath))
+            with open(filepath, encoding="utf-8") as f:
+                data = json.load(f)
             data["count"] += 1
             atomic_write_json(filepath, data)
 

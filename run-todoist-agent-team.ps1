@@ -38,8 +38,26 @@ $TimeoutBudget = @{
     "buffer"   = 120   # CLI startup + safety buffer
 }
 
+# ADR-20260312-015: 優先從 config/timeouts.yaml 讀取 per-task timeout（動態載入）
+$TimeoutFromConfig = @{}
+try {
+    $timeoutYamlRaw = uv run --project $AgentDir python -c @"
+import yaml, json
+with open('config/timeouts.yaml', 'r', encoding='utf-8') as f:
+    c = yaml.safe_load(f)
+print(json.dumps(c.get('todoist_team', {}).get('phase2_timeout_by_task', {})))
+"@
+    if ($timeoutYamlRaw) {
+        $timeoutJson = ConvertFrom-Json $timeoutYamlRaw
+        $timeoutJson.PSObject.Properties | ForEach-Object { $TimeoutFromConfig[$_.Name] = $_.Value }
+    }
+} catch {
+    Write-Host "  [WARN] 無法從 config/timeouts.yaml 讀取 task timeout，使用 hardcoded fallback" -ForegroundColor Yellow
+}
+
 # Per-key timeout override（秒）— 優先級高於群組預設
-# 注意：新增自動任務時必須同步更新此處（與 config/timeouts.yaml phase2_timeout_by_task 保持一致）
+# 注意：key 必須與 config/frequency-limits.yaml 一致（底線命名）
+# ADR-20260312-015: 以下為 fallback 值，config/timeouts.yaml 有對應 key 時會被覆蓋
 $AutoTaskTimeoutOverride = @{
     # === 研究類（WebSearch/WebFetch + KB 匯入）===
     "ai_github_research"     = 900   # GitHub WebSearch×3 + WebFetch + KB 匯入（原缺失回落 600s 導致超時）
@@ -48,8 +66,8 @@ $AutoTaskTimeoutOverride = @{
     "unsloth_research"       = 720   # WebSearch + WebFetch + KB 匯入
     "tech_research"          = 2600  # 讀 history + WebSearch×3 + WebFetch×4 + KB 匯入
     # === 佛學研究類（WebFetch 多章 + KB 匯入）===
-    "shurangama"             = 900   # 楞嚴經 WebFetch 多章 + KB 匯入
-    "jiaoguangzong"          = 900   # 教觀綱宗多章 + KB 匯入
+    "shurangama"             = 1200  # 楞嚴經重型主題（如五十陰魔）偶發超過 900s
+    "jiaoguangzong"          = 1200  # 教觀綱宗會通型主題偶發超過 900s
     "fahua"                  = 900   # 法華多章 + KB 匯入
     "jingtu"                 = 900   # 淨土多章 + KB 匯入
     # === 系統類（重 context，含 sub-agent）===
@@ -57,7 +75,7 @@ $AutoTaskTimeoutOverride = @{
     "system_insight"         = 720   # sub-agent 分析 logs/state + 更新 system-insight.json
     "log_audit"              = 720   # sub-agent 讀 10+ log + 分析修正 + KB 匯入
     "qa_optimize"            = 720   # WebSearch CVE + Grep 掃描 + 程式碼修改
-    "self_heal"              = 720   # 多步驟修復 + ntfy
+    "self_heal"              = 1200  # 多步驟修復 + ntfy（延長：720s 曾超時，2026-03-12）
     "arch_evolution"         = 900   # 讀 improvement-backlog + context/*.json + 架構決策
     "chatroom_optimize"      = 480   # sub-agent log 分析 + routing.yaml 調整
     # === 創意類 ===
@@ -66,6 +84,20 @@ $AutoTaskTimeoutOverride = @{
     # === 長時媒體類（TTS + 上傳）===
     "podcast_create"         = 2400  # 腳本生成 + TTS(40段) + concat + R2 上傳
     "podcast_jiaoguangzong"  = 2400  # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
+    # === 補齊 fallback（config/timeouts.yaml 有值時會被覆蓋）===
+    "ai_smart_city"          = 600
+    "ai_sysdev"              = 600
+    "git_push"               = 600
+    "skill_forge"            = 900
+    "github_scout"           = 600
+}
+
+# 合併：config/timeouts.yaml 優先，hardcoded 為 fallback
+$TimeoutFromConfig.Keys | ForEach-Object {
+    $AutoTaskTimeoutOverride[$_] = $TimeoutFromConfig[$_]
+}
+if ($TimeoutFromConfig.Count -gt 0) {
+    Write-Host "  [INFO] Task timeout 從 config/timeouts.yaml 載入 $($TimeoutFromConfig.Count) 個 key" -ForegroundColor Cyan
 }
 
 # Create directories
@@ -212,6 +244,85 @@ function Update-FailureStats {
     $tmpFile = "$statsFile.tmp"
     $stats | ConvertTo-Json -Depth 5 | Set-Content $tmpFile -Encoding UTF8
     Move-Item $tmpFile $statsFile -Force
+}
+
+function Repair-CompletedAutoTaskResultFile {
+    param(
+        [string]$TaskKey,
+        [string]$AgentName,
+        [string]$BackendName,
+        [object[]]$Output,
+        [string]$StdErrFile,
+        [Nullable[int]]$JobElapsed
+    )
+
+    $resultFile = "$AgentDir\results\todoist-auto-$TaskKey.json"
+    $fullOutput = if ($Output) { (@($Output) -join "`n").Trim() } else { "" }
+    $stderrOutput = ""
+    if ($StdErrFile -and (Test-Path $StdErrFile)) {
+        try { $stderrOutput = (Get-Content -Path $StdErrFile -Raw -Encoding UTF8).Trim() } catch { $stderrOutput = "" }
+    }
+
+    $previewSource = if ($fullOutput) { $fullOutput } elseif ($stderrOutput) { $stderrOutput } else { "" }
+    $previewLimit = 2000
+    $preview = ""
+    if ($previewSource) {
+        $previewLen = [Math]::Min($previewLimit, $previewSource.Length)
+        $preview = $previewSource.Substring(0, $previewLen)
+        if ($previewSource.Length -gt $previewLimit) {
+            $preview += "`n... [truncated, total $($previewSource.Length) chars]"
+        }
+    }
+
+    $existing = $null
+    $existingValid = $false
+    if (Test-Path $resultFile) {
+        try {
+            $existing = Get-Content -Path $resultFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            $existingValid = (($existing.type -or $existing.agent) -and $existing.status)
+        } catch {
+            $existing = $null
+            $existingValid = $false
+        }
+    }
+
+    if ($existingValid -and $existing.status -eq "in_progress") {
+        $existing.status = "partial_success"
+        if (-not $existing.summary -or $existing.summary -eq "研究進行中") {
+            $existing.summary = "主要研究已完成，但最終結果檔未完整收尾，已由排程自動補記"
+        }
+        if ($JobElapsed) {
+            $existing | Add-Member -NotePropertyName "duration_seconds" -NotePropertyValue $JobElapsed -Force
+        }
+        if ($preview) {
+            $existing | Add-Member -NotePropertyName "backend_stdout_preview" -NotePropertyValue $preview -Force
+        }
+        $existing | ConvertTo-Json -Depth 6 |
+            Set-Content -Path $resultFile -Encoding UTF8 -Force
+        Write-Log "[Phase2] ${agentName} result file: in_progress -> partial_success (backend=$BackendName)"
+        return
+    }
+
+    if ($existingValid) { return }
+
+    $fallback = @{
+        agent   = "todoist-auto-$TaskKey"
+        type    = $TaskKey
+        status  = if ($preview) { "partial_success" } else { "failed" }
+        reason  = "result_file_missing_or_invalid"
+        summary = if ($preview) {
+            "Agent 已完成主要輸出，但未產出有效結果檔，已保留預覽"
+        } else {
+            "後端未產出有效結果檔，且無可用輸出"
+        }
+        backend = $BackendName
+    }
+    if ($JobElapsed) { $fallback.elapsed_seconds = $JobElapsed }
+    if ($preview) { $fallback.backend_stdout_preview = $preview }
+
+    $fallback | ConvertTo-Json -Depth 4 |
+        Set-Content -Path $resultFile -Encoding UTF8 -Force
+    Write-Log "[Phase2] ${agentName} result file補寫 (backend=$BackendName, status=$($fallback.status), preview=$($preview.Length) chars)"
 }
 
 # 從 selected_tasks 項目取出正規化 key（與 Phase 2 一致，避免 result path / failed 記錄用錯 key）
@@ -599,17 +710,47 @@ function Start-CodexJob {
     if ($ModelFlag) { $codexCmd += " $ModelFlag" }
     # codex exec 在 pipe prompt 時會把 --search 當成 [PROMPT] 導致參數錯誤；即時 WebSearch 改由 ~/.codex/config.toml 的 features.web_search_request 或執行時 --enable web_search_request 啟用
     # if ($LiveWebSearch) { $codexCmd += " --search" }
+    $safeAgentName = if ($AgentName) { $AgentName } else { "codex-$TaskKey" }
+    $stdoutFile = Join-Path $LogDir "$safeAgentName-stdout-$Timestamp.log"
+    $stderrFile = Join-Path $LogDir "$safeAgentName-stderr-$Timestamp.log"
+    $promptFile = Join-Path $LogDir "$safeAgentName-prompt-$Timestamp.txt"
+    $runnerFile = Join-Path $LogDir "$safeAgentName-runner-$Timestamp.cmd"
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-        param($prompt, $cmd, $traceId, $agentName, $dir)
+        param($prompt, $cmd, $traceId, $agentName, $dir, $promptFile, $stdoutFile, $stderrFile, $runnerFile)
         $env:CLAUDE_TEAM_MODE   = "1"
         $env:DIGEST_TRACE_ID    = $traceId
-        $env:AGENT_PHASE        = "2"
+        $env:AGENT_PHASE        = "phase2-auto"
         $env:AGENT_NAME         = $agentName
         Set-Location $dir
         $fullPrompt = "請以正體中文輸出。`n`n$prompt"
-        $result = $fullPrompt | & cmd /c "$cmd" 2>&1
-        $result
-    } -ArgumentList $PromptContent, $codexCmd, $TraceId, $AgentName, $AgentDir
+        Set-Content -Path $promptFile -Value $fullPrompt -Encoding UTF8
+        @(
+            "@echo off"
+            "cd /d ""$dir"""
+            "$cmd < ""$promptFile"" > ""$stdoutFile"" 2> ""$stderrFile"""
+            "exit /b %errorlevel%"
+        ) | Set-Content -Path $runnerFile -Encoding ASCII
+
+        try {
+            $proc = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d", "/c", $runnerFile) `
+                -WorkingDirectory $dir -Wait -NoNewWindow -PassThru
+            $stdout = if (Test-Path $stdoutFile) { Get-Content -Path $stdoutFile -Encoding UTF8 } else { @() }
+            $stderr = if (Test-Path $stderrFile) { Get-Content -Path $stderrFile -Encoding UTF8 } else { @() }
+
+            if ($proc.ExitCode -ne 0 -and $stdout.Count -eq 0 -and $stderr.Count -gt 0) {
+                return @("[codex-exit:$($proc.ExitCode)]") + $stderr
+            }
+            if ($stdout.Count -gt 0) { return $stdout }
+            if ($stderr.Count -gt 0) { return @("[codex-stderr]") + $stderr }
+            return @()
+        } finally {
+            foreach ($tmp in @($promptFile, $runnerFile)) {
+                if (Test-Path $tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
+            }
+        }
+    } -ArgumentList $PromptContent, $codexCmd, $TraceId, $AgentName, $AgentDir, $promptFile, $stdoutFile, $stderrFile, $runnerFile
+    $job | Add-Member -NotePropertyName "StdOutFile" -NotePropertyValue $stdoutFile -Force
+    $job | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $stderrFile -Force
     return $job
 }
 
@@ -640,37 +781,30 @@ function Start-OpenRouterJob {
 # ============================================
 $startTime = Get-Date
 
-# ─── 載入環境變數（系統環境變數優先，其次從 .env 讀取）───
+# ─── 載入環境變數（Todoist token 僅從 .env 讀取）───
 $envFile = "$AgentDir\.env"
 $todoistTokenSource = "none"
 
-# TODOIST_API_TOKEN（排程執行時依賴 run-with-env.ps1 或此處從 .env 載入）
-if (-not $env:TODOIST_API_TOKEN) {
-    if (Test-Path $envFile) {
-        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-        $envRaw = [System.IO.File]::ReadAllText($envFile, $utf8NoBom)
-        $envLine = ($envRaw -split "`r?`n" | Where-Object { $_ -match '^TODOIST_API_TOKEN=' } | Select-Object -First 1)
-        if ($envLine) {
-            $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
-            if ($todoistToken.Length -gt 0 -and $todoistToken[0] -eq [char]0xFEFF) { $todoistToken = $todoistToken.TrimStart([char]0xFEFF) }
-            [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
-            $todoistTokenSource = ".env"
-            Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
-        }
-        else {
-            Write-Host "[WARN] TODOIST_API_TOKEN not found in .env"
-            $todoistToken = ""
-        }
+# TODOIST_API_TOKEN（固定只從 .env 載入，避免被使用者/系統環境變數污染）
+if (Test-Path $envFile) {
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    $envRaw = [System.IO.File]::ReadAllText($envFile, $utf8NoBom)
+    $envLine = ($envRaw -split "`r?`n" | Where-Object { $_ -match '^TODOIST_API_TOKEN=' } | Select-Object -First 1)
+    if ($envLine) {
+        $todoistToken = ($envLine -split '=', 2)[1].Trim().Trim('"').Trim("'")
+        if ($todoistToken.Length -gt 0 -and $todoistToken[0] -eq [char]0xFEFF) { $todoistToken = $todoistToken.TrimStart([char]0xFEFF) }
+        [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $todoistToken, "Process")
+        $todoistTokenSource = ".env"
+        Write-Host "[Token] TODOIST_API_TOKEN loaded from .env"
     }
     else {
-        Write-Host "[WARN] .env not found at $envFile , TODOIST_API_TOKEN may be missing"
+        Write-Host "[WARN] TODOIST_API_TOKEN not found in .env"
         $todoistToken = ""
     }
 }
 else {
-    $todoistToken = $env:TODOIST_API_TOKEN
-    $todoistTokenSource = "environment"
-    Write-Host "[Token] TODOIST_API_TOKEN loaded from environment"
+    Write-Host "[WARN] .env not found at $envFile , TODOIST_API_TOKEN may be missing"
+    $todoistToken = ""
 }
 Write-Log "[Token] TODOIST_API_TOKEN source=$todoistTokenSource (loaded)"
 
@@ -1044,6 +1178,48 @@ catch {
     exit 1
 }
 
+$forcedAutoTasksRaw = $env:TODOIST_TEAM_FORCE_AUTO_TASKS
+if ($forcedAutoTasksRaw) {
+    $forcedTaskKeys = @($forcedAutoTasksRaw.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if ($forcedTaskKeys.Count -gt 0) {
+        $autoTaskNameMap = @{}
+        try {
+            $taskNameJson = uv run --project $AgentDir python -c @"
+import json, yaml
+with open('config/frequency-limits.yaml', 'r', encoding='utf-8') as f:
+    cfg = yaml.safe_load(f)
+print(json.dumps({k: v.get('name', k) for k, v in cfg.get('tasks', {}).items()}, ensure_ascii=False))
+"@
+            if ($taskNameJson) {
+                $taskNameObj = ConvertFrom-Json $taskNameJson
+                $taskNameObj.PSObject.Properties | ForEach-Object { $autoTaskNameMap[$_.Name] = $_.Value }
+            }
+        } catch {
+            Write-Log "[Phase1] WARN: 無法載入 auto-task 名稱對照，forced override 將使用 key 顯示"
+        }
+
+        $forcedSelectedTasks = @()
+        foreach ($taskKey in $forcedTaskKeys) {
+            $forcedSelectedTasks += [PSCustomObject]@{
+                key  = $taskKey
+                name = if ($autoTaskNameMap.ContainsKey($taskKey)) { $autoTaskNameMap[$taskKey] } else { $taskKey }
+            }
+        }
+
+        $plan.plan_type = "auto"
+        $plan.tasks = @()
+        $plan.auto_tasks = [PSCustomObject]@{
+            selected_tasks            = $forcedSelectedTasks
+            next_execution_order_after = $null
+            forced_by_env             = "TODOIST_TEAM_FORCE_AUTO_TASKS"
+        }
+
+        $plan | ConvertTo-Json -Depth 10 |
+            Set-Content -Path $planFile -Encoding UTF8 -Force
+        Write-Log "[Phase1] Forced auto-tasks override via TODOIST_TEAM_FORCE_AUTO_TASKS: $($forcedTaskKeys -join ', ')"
+    }
+}
+
 # ============================================
 # Dynamic Phase 2 Timeout Calculation
 # ============================================
@@ -1089,6 +1265,11 @@ elseif ($plan.plan_type -eq "auto") {
             if ($thisTimeout -gt $maxAutoTimeout) { $maxAutoTimeout = $thisTimeout }
         }
         $Phase2TimeoutSeconds += $maxAutoTimeout
+        if ($selectedTasks.Count -gt 1) {
+            $multiAutoBuffer = [Math]::Min(180, [int]([Math]::Ceiling($maxAutoTimeout * 0.15)))
+            $Phase2TimeoutSeconds += $multiAutoBuffer
+            Write-Log "[Dynamic] +${multiAutoBuffer}s auto buffer for $($selectedTasks.Count) parallel tasks"
+        }
     }
 }
 # plan_type == "idle" → stays at buffer only (no Phase 2 work)
@@ -1238,6 +1419,7 @@ elseif ($plan.plan_type -eq "auto") {
             # ── Multi-backend routing (Step 5) ──
             $backend = Get-TaskBackend -TaskKey $taskKey
             Write-Log "[ModelSelect] $taskKey -> backend=$($backend.backend) type=$($backend.type) token_level=$($backend.token_level)"
+            $stderrFile = $null
 
             if ($backend.type -eq "codex") {
                 $job = Start-CodexJob -TaskKey $taskKey -PromptContent $promptContent `
@@ -1249,8 +1431,9 @@ elseif ($plan.plan_type -eq "auto") {
             } else {
                 # claude_code: 原有 Start-Job，注入可選的 cli_flag（如 --model claude-haiku-4-5）
                 $cliFlag = $backend.cli_flag
+                $stderrFile = "$LogDir\$agentName-stderr-$Timestamp.log"
                 $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
-                    param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken, $cliFlag)
+                    param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken, $cliFlag, $stderrFile)
 
                     [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
                     [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
@@ -1263,7 +1446,6 @@ elseif ($plan.plan_type -eq "auto") {
                     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                     $OutputEncoding = [System.Text.Encoding]::UTF8
 
-                    $stderrFile = "$logDir\$agentName-stderr-$timestamp.log"
                     # 動態組合 claude 參數（支援 --model 旗標注入）
                     $claudeArgs = @("-p", "--allowedTools", "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch")
                     if ($cliFlag) { $claudeArgs += ($cliFlag -split '\s+') }
@@ -1274,11 +1456,14 @@ elseif ($plan.plan_type -eq "auto") {
                         if ($stderrSize -eq 0) { Remove-Item $stderrFile -Force }
                     }
                     return $output
-                } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken, $cliFlag
+                } -ArgumentList $promptContent, $agentName, $LogDir, $Timestamp, $traceId, $todoistToken, $cliFlag, $stderrFile
             }
 
             $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName -Force
             $job | Add-Member -NotePropertyName "BackendName" -NotePropertyValue $backend.backend -Force
+            if ($stderrFile) {
+                $job | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $stderrFile -Force
+            }
             $phase2Jobs += $job
             Write-Log "[Phase2] Started: $agentName ($taskName) backend=$($backend.backend) (Job $($job.Id))"
         }
@@ -1315,56 +1500,12 @@ foreach ($job in $phase2Jobs) {
         } else { $null }
         Write-Log "[Phase2] $agentName completed$(if ($jobElapsed) { " (${jobElapsed}s)" })"
 
-        # Codex / OpenRouter 後端：若 Agent 未產出有效結果檔，寫入結構化失敗檔（避免整段 stdout 寫入導致「結果檔損壞」）
-        $needFallback = $job.BackendName -in @("codex_exec", "codex_standard", "openrouter_research", "openrouter_standard")
-        if ($needFallback -and $output) {
+        if ($agentName -like "auto-*") {
             $tkKey = $agentName -replace '^auto-', ''
-            $rFile = "$AgentDir\results\todoist-auto-$tkKey.json"
-            $fullOutput = ($output -join "`n")
-            $doFallback = $false
-            if (-not (Test-Path $rFile)) {
-                $doFallback = $true
-            } elseif ((Get-Item $rFile).Length -lt 500) {
-                $doFallback = $true
-            } else {
-                # 已有檔案且足夠大：檢查是否為有效結構（含 type/agent + status），避免覆蓋
-                try {
-                    $existing = Get-Content $rFile -Raw -Encoding UTF8 | ConvertFrom-Json
-                    if (-not $existing.type -and -not $existing.agent) { $doFallback = $true }
-                    elseif (-not $existing.status) { $doFallback = $true }
-                } catch { $doFallback = $true }
-            }
-            if ($doFallback) {
-                # 僅寫入結構化失敗 + 短預覽（上限 2000 字），避免 10 萬字 stdout 導致 Phase 3 判定「結果檔損壞」
-                $previewLen = [Math]::Min(2000, [Math]::Max(0, $fullOutput.Length))
-                $stdoutPreview = if ($previewLen -gt 0) { $fullOutput.Substring(0, $previewLen) } else { "" }
-                if ($fullOutput.Length -gt 2000) { $stdoutPreview += "`n... [truncated, total $($fullOutput.Length) chars]" }
-                $fallback = @{
-                    agent   = "todoist-auto-$tkKey"
-                    type    = $tkKey
-                    status  = "failed"
-                    reason  = "result_file_missing_or_invalid"
-                    summary = "後端未產出有效結果檔，stdout 已截斷預覽"
-                    backend_stdout_preview = $stdoutPreview
-                    backend = $job.BackendName
-                }
-                if ($jobElapsed) { $fallback.elapsed_seconds = $jobElapsed }
-                $fallback | ConvertTo-Json -Depth 4 |
-                    Set-Content -Path $rFile -Encoding UTF8 -Force
-                Write-Log "[Phase2] ${agentName} result file補寫 (structured failure, stdout_preview=${previewLen} chars, total=$($fullOutput.Length), ${jobElapsed}s)"
-            } else {
-                # 已有有效結構：若 status=in_progress 代表任務中途 context 耗盡 → 升級為 partial_success
-                try {
-                    $existing = Get-Content $rFile -Raw -Encoding UTF8 | ConvertFrom-Json
-                    if ($existing.status -eq "in_progress") {
-                        $existing.status  = "partial_success"
-                        $existing.summary = if ($existing.summary -and $existing.summary -ne "研究進行中") { $existing.summary } else { "研究已完成但最終步驟未執行（context 耗盡）" }
-                        $existing | ConvertTo-Json -Depth 4 |
-                            Set-Content -Path $rFile -Encoding UTF8 -Force
-                        Write-Log "[Phase2] ${agentName} result file: in_progress → partial_success (context 耗盡，研究內容已產出)"
-                    }
-                } catch { <# 讀取失敗則保留原檔案不動 #> }
-            }
+            $stderrFile = if ($job.PSObject.Properties["StdErrFile"]) { $job.StdErrFile } else { "" }
+            Repair-CompletedAutoTaskResultFile -TaskKey $tkKey -AgentName $agentName `
+                -BackendName $job.BackendName -Output @($output) -StdErrFile $stderrFile `
+                -JobElapsed $jobElapsed
         }
     }
     elseif ($job.State -eq "Running") {

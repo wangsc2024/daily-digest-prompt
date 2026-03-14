@@ -93,11 +93,13 @@ def _validate_schema(data: dict, schema: dict) -> None:
 def _load_yaml(path: Path) -> dict:
     try:
         import yaml
-        with open(path, encoding="utf-8") as f:
-            return yaml.safe_load(f)
     except ImportError:
-        # yaml 未安裝時回退到基本解析（不支援複雜語法）
         raise ImportError("需要 pyyaml：uv add pyyaml")
+    with open(path, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    if not isinstance(data, dict):
+        raise ValueError(f"YAML 檔案格式錯誤（期望 dict）：{path}")
+    return data
 
 
 def load_config() -> dict:

@@ -9,6 +9,7 @@ tests/tools/test_trace_analyzer.py — 根因分析（P3-B）TDD
 """
 import json
 import sys
+from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
@@ -146,7 +147,7 @@ class TestRunAnalysis:
     def test_returns_summary_structure(self, tmp_path):
         log_dir = tmp_path / "structured"
         log_dir.mkdir()
-        self._make_jsonl(log_dir, "2026-03-11.jsonl", [
+        self._make_jsonl(log_dir, f"{date.today().isoformat()}.jsonl", [
             _make_entry(trace_id="t1", has_error=False),
             _make_entry(trace_id="t1", has_error=False),
         ])
@@ -169,7 +170,7 @@ class TestRunAnalysis:
     def test_trace_id_filter(self, tmp_path):
         log_dir = tmp_path / "structured"
         log_dir.mkdir()
-        self._make_jsonl(log_dir, "2026-03-11.jsonl", [
+        self._make_jsonl(log_dir, f"{date.today().isoformat()}.jsonl", [
             _make_entry(trace_id="t1", has_error=True, tags=["api-call"]),
             _make_entry(trace_id="t2", has_error=False),
         ])
@@ -181,7 +182,7 @@ class TestRunAnalysis:
     def test_entries_without_trace_id_skipped(self, tmp_path):
         log_dir = tmp_path / "structured"
         log_dir.mkdir()
-        self._make_jsonl(log_dir, "2026-03-11.jsonl", [
+        self._make_jsonl(log_dir, f"{date.today().isoformat()}.jsonl", [
             _make_entry(trace_id=""),   # 無 trace_id，應跳過
             _make_entry(trace_id="t1"),
         ])
@@ -196,7 +197,7 @@ class TestRunAnalysis:
             [_make_entry(trace_id=f"t{i}", has_error=True, tags=["api-call"]) for i in range(3)]
             + [_make_entry(trace_id="t_loop", has_error=False, tags=["loop-suspected"])]
         )
-        self._make_jsonl(log_dir, "2026-03-11.jsonl", entries)
+        self._make_jsonl(log_dir, f"{date.today().isoformat()}.jsonl", entries)
         with patch("tools.trace_analyzer.LOG_DIR", log_dir):
             report = run_analysis(days=1)
         if report["top_issues"]:

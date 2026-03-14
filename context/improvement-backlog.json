@@ -1,94 +1,92 @@
 {
   "version": 1,
-  "generated_at": "2026-03-12T09:00:00+08:00",
+  "generated_at": "2026-03-14T00:55:00+08:00",
   "source": "system-audit",
-  "audit_date": "2026-03-12",
-  "total_score": 87.18,
+  "audit_date": "2026-03-14",
+  "total_score": 86.29,
   "grade": "A",
   "items": [
     {
       "rank": 1,
       "priority": "P1",
-      "pattern": "PS1 hardcoded timeout 消除",
-      "description": "2.2 配置外部化 75 分。run-todoist-agent-team.ps1 第 25-68 行 hardcode 25 個 timeout 值，未讀取 timeouts.yaml。應改為動態讀取 ConvertFrom-YamlViapy，實現「改配置不改程式碼」。",
-      "dimension": "系統架構",
-      "current_score": 75,
-      "target_score": 88,
-      "effort": "medium",
-      "target_files": [
-        "run-todoist-agent-team.ps1",
-        "run-agent-team.ps1",
-        "config/timeouts.yaml"
-      ],
-      "goal_id": "G02",
-      "adr_ref": ""
-    },
-    {
-      "rank": 2,
-      "priority": "P1",
       "pattern": "依賴漏洞自動掃描",
-      "description": "1.4 依賴安全 75 分。無 pip-audit 自動化整合。ADR-010 已接受，待實施。",
+      "description": "1.4 依賴安全 78 分。pip-audit 僅 CI 觸發，缺少定期自動掃描排程。建議整合至 check-health.ps1 或 weekly GitHub Actions。ADR-010 已接受。",
       "dimension": "資訊安全",
-      "current_score": 75,
-      "target_score": 85,
+      "current_score": 78,
+      "target_score": 83,
       "effort": "medium",
       "target_files": [
         "pyproject.toml",
-        "uv.lock",
+        ".github/workflows/ci.yml",
         "check-health.ps1"
       ],
       "goal_id": "G02",
       "adr_ref": "ADR-20260311-010"
     },
     {
-      "rank": 3,
-      "priority": "P2",
-      "pattern": "YAML 注釋密度全面提升",
-      "description": "6.4 配置說明 74 分。YAML 平均注釋密度 11.9%，低於 20% 目標。ADR-012 已接受（immediate_fix）。",
-      "dimension": "系統文件",
-      "current_score": 74,
-      "target_score": 84,
-      "effort": "low",
-      "target_files": [
-        "config/cache-policy.yaml",
-        "config/scoring.yaml",
-        "config/notification.yaml"
-      ],
-      "goal_id": "G04",
-      "adr_ref": "ADR-20260311-012"
-    },
-    {
-      "rank": 4,
-      "priority": "P2",
-      "pattern": "行覆蓋率提升計畫",
-      "description": "3.1 測試覆蓋率行覆蓋率 10.49%（目標 45%）。ADR-011 已接受，Phase 1 目標 hook_utils.py 80%。",
-      "dimension": "系統品質",
-      "current_score": 88,
-      "target_score": 93,
-      "effort": "medium",
-      "target_files": [
-        "tests/hooks/test_hook_utils.py",
-        "hooks/hook_utils.py",
-        "hooks/agent_guardian.py"
-      ],
-      "goal_id": "G02",
-      "adr_ref": "ADR-20260311-011"
-    },
-    {
-      "rank": 5,
-      "priority": "P2",
-      "pattern": "GitHub Actions CI 基礎建設",
-      "description": "5.3 工具鏈完整性 72 分。缺 CI/CD pipeline。ADR-013 已提議（Proposed），待人工確認。",
+      "rank": 2,
+      "priority": "P1",
+      "pattern": "CI ruff lint 整合",
+      "description": "5.3 工具鏈完整性 75 分。CI 缺 ruff lint 和 PowerShell 語法驗證。已擴展 pytest 至 skills/tools，下一步加 lint。",
       "dimension": "技術棧",
-      "current_score": 72,
-      "target_score": 85,
-      "effort": "medium",
+      "current_score": 75,
+      "target_score": 80,
+      "effort": "low",
       "target_files": [
         ".github/workflows/ci.yml",
         "pyproject.toml"
       ],
       "goal_id": "G04",
       "adr_ref": "ADR-20260311-013"
+    },
+    {
+      "rank": 3,
+      "priority": "P2",
+      "pattern": "行覆蓋率提升計畫",
+      "description": "3.1 測試覆蓋率 78 分。行覆蓋率 45.81%，個別模組偏低（validate_config 5%、on_stop_alert 5%）。ADR-011 Phase 1 目標 hook_utils 80%。",
+      "dimension": "系統品質",
+      "current_score": 78,
+      "target_score": 83,
+      "effort": "medium",
+      "target_files": [
+        "tests/hooks/test_hook_utils.py",
+        "hooks/hook_utils.py",
+        "hooks/on_stop_alert.py"
+      ],
+      "goal_id": "G02",
+      "adr_ref": "ADR-20260311-011"
+    },
+    {
+      "rank": 4,
+      "priority": "P2",
+      "pattern": "TODO/FIXME 規範性清理",
+      "description": "7.1 功能完成度 84 分。265 處 TODO/FIXME 分散 56 檔（70% 規範性、30% 缺陷型），導致 D7 退步 6 分。清理規範性 TODO 可回升。",
+      "dimension": "系統完成度",
+      "current_score": 84,
+      "target_score": 88,
+      "effort": "low",
+      "target_files": [
+        "docs/plans/",
+        "templates/",
+        "prompts/"
+      ],
+      "goal_id": "G04",
+      "adr_ref": ""
+    },
+    {
+      "rank": 5,
+      "priority": "P2",
+      "pattern": "Phase 2 任務 retry 機制",
+      "description": "4.3 失敗恢復 93 分。Phase 2 任務執行無重試機制為最大缺口。建議加 max 1 retry with backoff。",
+      "dimension": "系統工作流",
+      "current_score": 93,
+      "target_score": 95,
+      "effort": "medium",
+      "target_files": [
+        "run-todoist-agent-team.ps1"
+      ],
+      "goal_id": "G02",
+      "adr_ref": ""
     }
   ],
   "schema_version": 2

@@ -577,6 +577,20 @@ foreach ($agent in $fetchAgents) {
         continue  # 跳過這個 agent
     }
 
+    # 快取命中跳過（ADR-005）：valid=true 且快取檔存在 → 直接複製結果，跳過 claude 呼叫
+    $cacheApiMap = @{ "news" = "pingtung-news"; "hackernews" = "hackernews"; "gmail" = "gmail"; "todoist" = "todoist" }
+    $cacheApiKey = $cacheApiMap[$agentName]
+    if ($cacheApiKey) {
+        $cApiStatus = $cacheStatus.apis[$cacheApiKey]
+        $cFile = "$AgentDir\cache\$cacheApiKey.json"
+        if (-not (Test-Path $cFile)) { $cFile = "$AgentDir\cache\$($cacheApiKey -replace '-', '_').json" }
+        if ($cApiStatus -and $cApiStatus.valid -eq $true -and (Test-Path $cFile)) {
+            Write-Log "[Phase1] Cache HIT: $agentName → $cacheApiKey ($($cApiStatus.age_min)min / TTL $($cApiStatus.ttl_min)min) — 跳過 claude 呼叫（ADR-005）"
+            Copy-Item $cFile $agent.Result -Force
+            continue
+        }
+    }
+
     # 正常執行（closed 或 half_open）
     if ($precheckState -eq "half_open") {
         Write-Log "[Phase1] Starting: $agentName (Circuit Breaker: HALF_OPEN, trial mode)"

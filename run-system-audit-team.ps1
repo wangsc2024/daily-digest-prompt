@@ -1,4 +1,4 @@
-﻿# ============================================
+# ============================================
 # System Audit Agent Team - Parallel Orchestrator (PowerShell 7)
 # ============================================
 # Usage:
@@ -8,6 +8,8 @@
 # Architecture:
 #   Phase 1: 4 parallel audit agents (dim1+5, dim2+6, dim3+7, dim4)
 #   Phase 2: 1 assembly agent (collect + fix + report + RAG)
+#   Phase 3: Decide（arch-evolution，backlog 非空時直接觸發）
+#   Phase 4: Act（self-heal，Phase 3 執行後直接觸發，執行 immediate_fix）
 # ============================================
 
 # PowerShell 7 defaults to UTF-8, explicit set for safety
@@ -617,6 +619,7 @@ if (-not $phase2Success) {
 # Phase 3: Decide（arch-evolution，Orient 完成後直接觸發）
 # ============================================
 Write-Host "[Phase 3] OODA Decide 階段" -ForegroundColor Cyan
+$script:phase3Ran = $false
 
 $backlogFile     = Join-Path $AgentDir "context\improvement-backlog.json"
 $archDecisionFile = Join-Path $AgentDir "context\arch-decision.json"
@@ -684,6 +687,7 @@ if (-not $skipPhase3) {
                     duration_s  = $phase3Seconds
                     output_file = "context/arch-decision.json"
                 }
+                $script:phase3Ran = $true
             } catch {
                 $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
                 Write-Host "  [Phase 3] arch-evolution 失敗：$_" -ForegroundColor Red
@@ -696,12 +700,45 @@ if (-not $skipPhase3) {
 }
 
 # ============================================
+# Phase 4: Act（self-heal，Phase 3 執行後直接觸發）
+# ============================================
+# 僅在 Phase 3 實際執行 arch-evolution 後觸發，讓 immediate_fix 在同一輪完成，無需等待 round-robin。
+$phase4Ran = $false
+if ($script:phase3Ran -eq $true) {
+    $selfHealPromptFile = Join-Path $AgentDir "prompts\team\todoist-auto-self_heal.md"
+    if (Test-Path $selfHealPromptFile) {
+        Write-Host "[Phase 4] OODA Act 階段（self-heal）" -ForegroundColor Cyan
+        $phase4LogFile = "$AgentDir\logs\phase4-selfheal-$($traceId.Substring(0,8)).log"
+        $phase4Start = Get-Date
+        try {
+            $selfHealContent = Get-Content $selfHealPromptFile -Raw -Encoding UTF8
+            Write-Log "[Phase 4] Starting self-heal (direct trigger after arch-evolution)" "INFO"
+            $selfHealContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$phase4LogFile
+            $phase4Seconds = [int]((Get-Date) - $phase4Start).TotalSeconds
+            Write-Host ("  [Phase 4] self-heal 完成（{0}s）" -f $phase4Seconds) -ForegroundColor Green
+            Write-Log "[Phase 4] self-heal completed in ${phase4Seconds}s" "INFO"
+            $phase4Ran = $true
+        } catch {
+            $phase4Seconds = [int]((Get-Date) - $phase4Start).TotalSeconds
+            Write-Host "  [Phase 4] self-heal 失敗：$_" -ForegroundColor Red
+            Write-Log "[Phase 4] self-heal failed: $_" "ERROR"
+        }
+    } else {
+        Write-Host "  [Phase 4] self-heal prompt 不存在，跳過" -ForegroundColor Yellow
+        Write-Log "[Phase 4] Skipped: $selfHealPromptFile not found" "WARN"
+    }
+}
+
+# ============================================
 # Completion
 # ============================================
 
 Write-Log "=== System Audit Team Mode Completed ===" "INFO"
 Write-Log "Phase 1 log: $phase1LogFile" "INFO"
 Write-Log "Phase 2 log: $phase2LogFile" "INFO"
+if ($phase4Ran -and (Test-Path variable:phase4LogFile)) {
+    Write-Log "Phase 4 log: $phase4LogFile" "INFO"
+}
 
 # 若 phase2 未成功賦值，用外層計時估算
 if ($phase2Seconds -eq 0) {
@@ -722,10 +759,15 @@ $totalAuditSeconds = [int]((Get-Date) - $auditStartTime).TotalSeconds
 $phaseBreakdown = [PSCustomObject]@{
     phase1_seconds  = $phase1Seconds
     phase2_seconds  = $phase2Seconds
+    phase3_seconds  = if ($script:phase3Ran) { $phase3Seconds } else { 0 }
+    phase4_seconds  = if ($phase4Ran) { $phase4Seconds } else { 0 }
     total_seconds   = $totalAuditSeconds
     phase1_agents   = @("dim1-5", "dim2-6", "dim3-7", "dim4")
 }
-Write-Log "Total: ${totalAuditSeconds}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s)" "INFO"
+$phaseLogParts = "Total: ${totalAuditSeconds}s (Phase1: ${phase1Seconds}s + Phase2: ${phase2Seconds}s"
+if ($script:phase3Ran) { $phaseLogParts += " + Phase3: ${phase3Seconds}s" }
+if ($phase4Ran) { $phaseLogParts += " + Phase4: ${phase4Seconds}s" }
+Write-Log "$phaseLogParts)" "INFO"
 
 # Level 3-A: Phase 2 + Overall span
 $auditEnd = Get-Date

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-12T15:40:41.379558+08:00",
+  "updated_at": "2026-03-14T16:55:00+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -55,7 +55,7 @@
       "domain": "Logical Thinking / Critical Thinking / Decision Frameworks",
       "description": "邏輯思維、批判性思考與決策框架研究系列",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-04",
+      "last_active": "2026-03-14",
       "tags": [
         "邏輯思維",
         "批判性思考",
@@ -89,7 +89,7 @@
           ]
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-02",
           "kb_notes": [
             "辯證法（Dialectical Thinking）",
@@ -115,10 +115,26 @@
             "謬誤與認知偏誤的對映關係",
             "日常論證中的謬誤識別實戰",
             "社交媒體與 AI 時代的新型謬誤"
-          ]
+          ],
+          "completed_at": "2026-03-14"
         },
         "application": {
-          "status": "pending"
+          "status": "in_progress",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "Scout Mindset 與 Superforecasting — 邏輯思維框架在不確定性決策中的實踐應用指南"
+          ],
+          "covered_concepts": [
+            "Scout Mindset 偵察兵心態",
+            "士兵心態 vs 偵察兵心態",
+            "五個偏誤偵測思想實驗",
+            "超級預測十誡",
+            "Brier Score 校準",
+            "Fermi 估算法",
+            "不確定性決策五步整合框架",
+            "概率性思維",
+            "輕握身份（Hold Identity Lightly）"
+          ]
         },
         "optimization": {
           "status": "pending"
@@ -127,17 +143,17 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成 mechanism 後進入 application：謬誤識別在日常決策、商業談判、學術寫作中的實踐案例"
+      "next_research_hint": "完成 application 後進入 optimization：預測校準度追蹤工具、決策日誌模板、團隊決策流程最佳化"
     },
     "shurangama-sutra": {
       "series_id": "shurangama-sutra",
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-12",
+      "last_active": "2026-03-14",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -257,7 +273,7 @@
           ]
         },
         "synthesis": {
-          "status": "completed",
+          "status": "in_progress",
           "started_at": "2026-03-03",
           "kb_notes": [
             "楞嚴經與天台宗的義理會通",
@@ -273,7 +289,12 @@
             "楞嚴經研究：四種清淨明誨的現代修行詮釋 — 在家居士如何以戒攝心、防範數位時代四重染緣",
             "楞嚴經延伸研究：跨傳統修行比較與歷代實證案例",
             "楞嚴經研究：楞嚴壇場與結界建立道場 — 卷七由戒咒入定的修法次第與象徵義",
-            "楞嚴經研究：七大圓通的修證邏輯 — 從地水火風空識見到文殊揀擇耳根的判準"
+            "楞嚴經研究：七大圓通的修證邏輯 — 從地水火風空識見到文殊揀擇耳根的判準",
+            "楞嚴經研究：阿難請問最初方便 — 從摩登伽難到七處徵心的問答入口",
+            "楞嚴經研究：最初方便與二決定義的內在呼應 — 從發心辨因到修證入門",
+            "楞嚴經研究：楞嚴心咒（咒心）— 梵音結構、五會定位、持誦儀軌與跨宗派修持詮釋",
+            "楞嚴心咒跨學科深化研究 — 音韻學分析、密教三系統比較與數位人文方法應用",
+            "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -362,22 +383,46 @@
             "三七日行道次第的現代詮釋",
             "七大各別法門的內在修證邏輯",
             "七大與耳根圓通的比較判準",
-            "七大法門對現代修行者的實踐啟示"
+            "七大法門對現代修行者的實踐啟示",
+            "阿難請問最初方便",
+            "由摩登伽難轉入七處徵心的問答設計",
+            "卷一發起因緣與最初方便之關聯",
+            "最初方便與二決定義的結構呼應",
+            "因地心與果地覺相應",
+            "由最初方便轉入捨識用根",
+            "楞嚴心咒（咒心）的具體內容與梵音還原",
+            "心咒與全咒 427 句的結構關係",
+            "心咒在密教傳統中的獨立修持地位",
+            "持誦楞嚴心咒的儀軌、觀想與迴向次第",
+            "楞嚴心咒的功德利益（經文原典依據）",
+            "歷代祖師對心咒的註解與開示",
+            "楞嚴心咒與其他佛教心咒的比較（大悲咒心、準提咒心等）",
+            "現代持咒修行的實踐指南（時間、數量、配合止觀）",
+            "心咒音韻學分析：梵文原音→悉曇轉寫→漢譯音譯的語音學對應規律",
+            "聲韻母系統：心咒各音節的聲母/韻母/聲調在悉曇文字中的對應",
+            "歷代漢譯音譯的音韻演變：唐代長安音→宋代官話→現代國語的讀誦差異",
+            "東密（日本真言宗）vs 台密（天台密教）vs 藏密對楞嚴心咒的傳持比較",
+            "密教阿字觀與心咒觀修的關係",
+            "陀羅尼學（dhāraṇī studies）的現代語言學研究進路",
+            "語料庫語言學在心咒梵漢對照中的應用方法",
+            "聲紋分析（acoustic phonetics）在持誦研究中的可能性",
+            "跨版本數位校勘：不同傳本心咒異文的自動比對",
+            "心咒的韻律結構（prosody）與持誦節奏的修行意義"
           ],
-          "completed_at": "2026-03-12"
+          "completed_at": "2026-03-14"
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "後續可延伸七大圓通與華嚴法界觀、密教曼荼羅四大觀、淨土念佛三昧之比較。"
+      "next_research_hint": "五會深度解構完成後，可續研：（1）藏傳佛教楞嚴經傳承與修法差異；（2）心咒持誦的腦科學/意識研究實證；（3）楞嚴經與現代心智科學的跨學科對話"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-12",
+      "last_active": "2026-03-14",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -509,14 +554,17 @@
           "completed_at": "2026-03-07"
         },
         "synthesis": {
-          "status": "completed",
+          "status": "in_progress",
           "kb_notes": [
             "教觀綱宗 synthesis 研究：注疏傳統文獻蒐集與分析、跨系列教觀會通框架及全書核心要點結構化報告",
             "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
             "教觀綱宗研究：化儀四教中的不定教 — 因機施教的判教彈性與教觀雙運",
             "教觀綱宗研究：化儀四教中的秘密教 — 同會異聞的施教結構與教觀分際",
             "教觀綱宗研究：化儀四教中的頓教 — 從頓教部到頓教相的一時圓說與教觀合一",
-            "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準"
+            "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準",
+            "教觀綱宗研究：四教觀法與四種四諦的相攝關係 — 由教相到觀行的內在對應",
+            "教觀綱宗研究：化法四教之圓教 — 一心三觀、一念三千、圓融三諦與圓教菩薩位次的完整教觀體系",
+            "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -544,24 +592,33 @@
             "頓教與圓頓止觀的關聯",
             "一心三觀與返聞自性的操作性對映",
             "法華非頓非漸作為圓頓修證判準的橋接位置",
-            "教觀雙運如何避免頓悟偏空或漸修著相"
+            "教觀雙運如何避免頓悟偏空或漸修著相",
+            "四教四諦四觀矩陣",
+            "由教相到觀行的內在對應",
+            "四諦作為四教觀法的義理骨架",
+            "四諦與四教觀法的整體矩陣",
+            "四教觀法作為判教實踐橋樑的說明",
+            "六即佛的六個階位詳解（理即→名字即→觀行即→相似即→分證即→究竟即）",
+            "六即佛與化法四教的對應關係",
+            "六即佛與禪宗修證階位的比較",
+            "六即佛在現代修行中的實踐意義"
           ],
-          "completed_at": "2026-03-12"
+          "completed_at": "2026-03-13"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 100,
+      "completion_pct": 80,
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "後續可續研《楞嚴經》耳根圓通與天台一心三觀的修證次第，或再與《法華經》非頓非漸作三方會通。"
+      "next_research_hint": "synthesis 階段持續深化：完成六即佛後，可續研一念三千義理展開、天台三大部與教觀綱宗關係、或與唯識宗的判教對話"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
       "domain": "法華經 / Lotus Sutra 佛學研究",
       "description": "法華經深度研究系列，涵蓋二十八品逐品深入與一佛乘義理系統整理",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-12",
+      "last_active": "2026-03-14",
       "tags": [
         "法華經",
         "佛學",
@@ -649,7 +706,7 @@
           ]
         },
         "synthesis": {
-          "status": "completed",
+          "status": "in_progress",
           "started_at": "2026-03-02",
           "kb_notes": [
             "法華經一佛乘義理的系統總結",
@@ -674,7 +731,12 @@
             "法華經譬喻品研究：三車火宅與舍利弗授記的權實結構",
             "法華經藥草喻品研究：一地所生、一雨所潤與眾生根機差別的圓教會通",
             "???????????????????????????????",
-            "法華經藥草喻品研究：一相一味與一雨普潤的平等教化論"
+            "法華經藥草喻品研究：一相一味與一雨普潤的平等教化論",
+            "法華經化城喻品研究：化城非真與寶處在近的退轉心理學",
+            "法華經壽量品研究：良醫病子喻與如來示滅方便的救度論",
+            "法華經隨喜功德品研究：聞法隨喜的功德校量與展轉教化的五十展轉",
+            "法華經囑累品研究：佛頂摩頂付囑與本門流通分的開啟",
+            "法華經囑累品研究：佛頂摩頂付囑與本門流通分的開啟"
           ],
           "covered_concepts": [
             "一佛乘系統總結",
@@ -791,25 +853,42 @@
             "??????????",
             "藥草喻品的一相一味教化論",
             "平等法與差別受益的二層結構",
-            "一雨普潤的現代弘法詮釋"
+            "一雨普潤的現代弘法詮釋",
+            "退轉心理與修行疲憊的對治",
+            "化城與寶處的權實辨析",
+            "與天台判教及楞嚴經修行研究的交叉",
+            "良醫病子喻的救度結構分析",
+            "示滅方便與常住不滅的辯證",
+            "常在此說法的常住教化觀",
+            "第五十人功德",
+            "隨喜迴向",
+            "重重轉化",
+            "校量譬喻",
+            "隨喜品在本門流通的地位",
+            "囑累品",
+            "佛頂摩頂付囑",
+            "三摩地王三昧",
+            "六萬菩薩得陀羅尼",
+            "囑累與神力品的承接關係",
+            "付囑儀式的象徵意義"
           ],
-          "completed_at": "2026-03-12"
+          "completed_at": "2026-03-13"
         }
       },
       "current_stage": "completed",
-      "completion_pct": 100,
+      "completion_pct": 80,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "可續從法華經各品的教化論、弘法方法與跨經會通角度做專題深化。"
+      "next_research_hint": "囑累品研究後，synthesis 階段尚缺：法師功德品（六根清淨）、授學無學人記品（阿難羅睺羅授記）、陀羅尼品（護持法華咒語）、妙莊嚴王本事品（在家修行典範）。完成後可進入跨系列整合：法華經 × 楞嚴經 × 教觀綱宗的三經會通。"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
       "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
       "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-12",
+      "last_active": "2026-03-14",
       "tags": [
         "淨土宗",
         "佛學",
@@ -896,7 +975,7 @@
         "synthesis": {
           "status": "completed",
           "started_at": "2026-03-04",
-          "completed_at": "2026-03-12",
+          "completed_at": "2026-03-14",
           "kb_notes": [
             "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
             "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀",
@@ -905,7 +984,12 @@
             "觀無量壽經研究：十六觀的次第結構與觀佛攝心法",
             "善導大師五正行研究：正助二業結構與專修稱名實踐",
             "無量壽經研究：第十八願的本願稱名與平生業成",
-            "念佛法門修持研究：都攝六根、淨念相繼的攝心要訣與日課實踐"
+            "念佛法門修持研究：都攝六根、淨念相繼的攝心要訣與日課實踐",
+            "無量壽經研究：攝生三願（十八、十九、二十願）的願門結構與念佛次第",
+            "智者大師《淨土十疑論》研究：天台教觀解疑與念佛攝心法門",
+            "智者大師《淨土十疑論》研究：天台教觀解疑與念佛攝心法門",
+            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要",
+            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要"
           ],
           "covered_concepts": [
             "淨土判教體系系統整理",
@@ -949,17 +1033,32 @@
             "第十八願與第十一願、第二十二願的三願結構",
             "都攝六根與口念耳聞的具體操作",
             "如何把十念記數法與隨念隨聽結合",
-            "念佛攝心法與楞嚴耳根圓通的互證"
+            "念佛攝心法與楞嚴耳根圓通的互證",
+            "攝生三願的願文對讀",
+            "三願攝機的次第判釋",
+            "從雜行回入稱名的實修路徑",
+            "淨土十疑論",
+            "天台止觀與念佛攝心",
+            "圓教念佛三昧",
+            "十疑詳解",
+            "淨土十疑論",
+            "天台止觀與念佛攝心",
+            "圓教念佛三昧",
+            "十疑詳解",
+            "五經一論的整體結構",
+            "印光大師選定五經一論的判攝智慧",
+            "五經之間的經論關係與互補性",
+            "五經一論在修行次第上的配合運用"
           ]
         }
       },
-      "current_stage": "synthesis",
+      "current_stage": "completed",
       "completion_pct": 100,
       "related_series": [
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "可續做「念佛攝心」與「臨終正念預備」的整合，或比較印光、蕅益、善導對攝心念佛的異同。"
+      "next_research_hint": "synthesis 階段完成後，pure-land-buddhism 系列達 100% 完成度。未來可開啟新系列：淨土宗與現代心理學對話、淨土宗在台灣的弘揚史等"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -1214,7 +1313,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-12",
+      "last_active": "2026-03-14",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1282,22 +1381,35 @@
           ]
         },
         "synthesis": {
-          "status": "completed",
-          "completed_at": "2026-03-12",
+          "status": "in_progress",
+          "completed_at": "2026-03-13",
           "kb_notes": [
-            "FastMCP 深度研究報告 - AI工作流自動化"
+            "FastMCP 深度研究報告 - AI工作流自動化",
+            "n8n — 開源 AI 工作流自動化平台深度洞察（85K+ Stars, 2026-03）",
+            "modelcontextprotocol/servers 深度研究報告 - AI工作流自動化"
           ],
           "covered_concepts": [
             "MCP server 框架如何成為 AI 工作流的可重用工具層",
             "MCP transport、auth 與 deployment 對工作流治理的影響",
-            "Claude Agent / daily-digest-prompt 如何採用 FastMCP 降低工具整合成本"
+            "Claude Agent / daily-digest-prompt 如何採用 FastMCP 降低工具整合成本",
+            "n8n Queue Mode",
+            "Main/Worker 分離",
+            "六大 Agent 類型",
+            "三層記憶系統",
+            "Workflow-as-Tool",
+            "官方 MCP server repository 的模組化架構",
+            "server 類型與工作流觸發/資料源的對映方式",
+            "daily-digest-prompt 可直接借鑑的工具治理模式",
+            "full-stack MCP framework 的 client-agent-server-inspector 一體化設計",
+            "mcp-use 與 FastMCP / 官方 servers 的定位差異",
+            "對 Claude Agent / daily-digest-prompt 的具體工具治理借鑑"
           ]
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 100,
+      "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "本系列已完成五階段覆蓋；下一輪可轉向實作型題目，例如將 FastMCP 接入 daily-digest-prompt 的工具層。"
+      "next_research_hint": "後續可做 MCP framework 對照：mcp-use vs FastMCP vs 官方 SDK/servers，在治理、觀測與部署模式上形成選型矩陣。"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -1780,7 +1892,7 @@
       "domain": "AI Requirements Engineering / PRD to EARS-BDD Traceability",
       "description": "AI 需求工程研究系列，聚焦 PRD 分解、EARS/BDD 驗收條件編譯、需求品質保證與需求-測試雙向追溯。",
       "initiated_at": "2026-03-09",
-      "last_active": "2026-03-09",
+      "last_active": "2026-03-14",
       "tags": [
         "AI",
         "系統開發",
@@ -1836,18 +1948,29 @@
           ]
         },
         "optimization": {
-          "status": "pending"
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "completed_at": "2026-03-14",
+          "kb_notes": [
+            "AI 需求品質閘門實作：逐字稿→User Story→EARS→Linting→Traceability 的優化工作流"
+          ],
+          "covered_concepts": [
+            "requirements linting quality gate",
+            "逐字稿到 user story 結構化萃取",
+            "EARS 可測試性檢查",
+            "需求 drift 與追溯覆蓋率檢查"
+          ]
         },
         "synthesis": {
           "status": "pending"
         }
       },
-      "current_stage": "optimization",
-      "completion_pct": 60,
+      "current_stage": "synthesis",
+      "completion_pct": 80,
       "related_series": [
         "ai-assisted-coding-workflows"
       ],
-      "next_research_hint": "下一步可進入 optimization：需求漂移偵測、變更衝擊分析、coverage gap 自動發現與 CI 驗證閘門。"
+      "next_research_hint": "下一步進入 synthesis：把需求品質閘門與 spec-driven development、AI coding agents、測試生成與 release governance 串成端到端交付閉環。"
     },
     "openclaw-personal-ai-agent": {
       "series_id": "openclaw-personal-ai-agent",
@@ -2378,6 +2501,350 @@
         "llm-structured-output-pipeline"
       ],
       "next_research_hint": "下一步可研究文件品質評分、docs drift 偵測、失真告警與 agent 驗收測試。"
+    },
+    "research-writing-methodology": {
+      "series_id": "research-writing-methodology",
+      "domain": "寫作計畫方法論 / 研究規劃框架 / 資料來源策略 / 章節大綱設計 / 驗收條件形式化",
+      "description": "研究寫作方法論系列，涵蓋寫作計畫框架、研究規劃流程、資料來源分級評估、章節大綱設計原則與驗收條件定義。",
+      "initiated_at": "2026-03-13",
+      "last_active": "2026-03-13",
+      "tags": [
+        "寫作計畫",
+        "研究規劃",
+        "資料來源策略",
+        "章節大綱",
+        "驗收條件",
+        "方法論"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-13",
+          "kb_notes": [
+            "研究寫作方法論概論 — 寫作計畫框架、資料來源分級、章節大綱設計與驗收條件形式化"
+          ],
+          "covered_concepts": [
+            "寫作計畫方法論（writing plan methodology）",
+            "研究規劃框架（research planning framework）",
+            "資料來源評估與分級策略（source evaluation & tiering）",
+            "章節大綱設計原則（chapter outline design principles）",
+            "驗收條件定義與形式化（acceptance criteria formalization）",
+            "研究問題到寫作產出的端到端流程",
+            "文獻回顧策略（literature review strategy）",
+            "研究倫理與引用規範"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [
+        "ai-requirements-engineering",
+        "knowledge-base-architecture"
+      ],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入寫作計畫的內部運作機制 — 大綱迭代演算法、資料來源可信度評分模型、驗收條件的自動化驗證邏輯"
+    },
+    "agentic-security-research": {
+      "series_id": "agentic-security-research",
+      "domain": "Agentic Security / Browser Agent Security / Coding Agent Security / Prompt Injection Defense",
+      "description": "AI Agent 安全研究系列：涵蓋 Agentic Security 威脅模型、Prompt Injection 攻防、Browser Agent 與 Coding Agent 安全架構",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "Agentic Security",
+        "Prompt Injection",
+        "Browser Agent",
+        "Coding Agent",
+        "AI安全",
+        "威脅模型",
+        "Guardrails",
+        "Sandboxing"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-14",
+          "kb_notes": [],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [
+        "ai-security-testing"
+      ],
+      "next_research_hint": "建立 Agentic Security 威脅模型概論、Prompt Injection 攻擊分類、Browser/Coding Agent 安全挑戰"
+    },
+    "eighty-eight-buddhas-repentance-writing": {
+      "series_id": "eighty-eight-buddhas-repentance-writing",
+      "domain": "八十八佛大懺悔文 × 西方寫作精準法 × CBETA × 宗教比較研究",
+      "description": "跨領域研究系列：以奧威爾六原則與海明威精準法為修辭分析工具，研究八十八佛大懺悔文的文本結構、CBETA 文獻基礎，並進行跨宗教懺悔機制比較。",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "佛學",
+        "八十八佛",
+        "懺悔文",
+        "CBETA",
+        "奧威爾",
+        "海明威",
+        "宗教比較研究",
+        "修辭分析"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "八十八佛大懺悔文研究概論 — 經典依據、文本結構與奧威爾/海明威修辭分析框架"
+          ],
+          "covered_concepts": [
+            "八十八佛名號來源與經典依據（《佛說觀藥王藥上二菩薩經》五十三佛 + 《決定毘尼經》三十五佛）",
+            "大懺悔文完整結構分析（禮佛、懺悔、迴向三段）",
+            "CBETA 相關典籍系統整理（T14n0441、T24n1470 等）",
+            "奧威爾六原則概述與宗教文本適用性分析",
+            "海明威精準法（冰山理論）在宗教經典修辭的應用框架",
+            "懺悔機制的佛教教理基礎（業障論、無生懺、實相懺）",
+            "跨宗教懺悔比較框架（基督教告解、伊斯蘭 Tawbah、猶太教 Teshuvah）",
+            "八十八佛懺悔文的歷史流傳與版本演變"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [
+        "da-bei-chan-fa",
+        "lotus-sutra",
+        "shurangama-sutra"
+      ],
+      "next_research_hint": "完成 foundation 後進入 mechanism：懺悔心理機制深度分析、奧威爾六原則逐條應用於懺悔文的修辭檢驗、海明威精準法在宗教經典翻譯中的體現、CBETA 文獻計量分析"
+    },
+    "powershell-quality-gates": {
+      "series_id": "powershell-quality-gates",
+      "domain": "PowerShell PSScriptAnalyzer 自訂規則與品質閘門",
+      "description": "PowerShell 品質閘門、靜態分析與測試治理研究系列",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "PowerShell",
+        "PSScriptAnalyzer",
+        "品質閘門",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "PowerShell PSScriptAnalyzer 自訂規則與品質閘門實務"
+          ],
+          "covered_concepts": [
+            "PSScriptAnalyzer 規則分類",
+            "自訂規則撰寫",
+            "Pester 與靜態分析整合",
+            "CI/本機 preflight 品質閘門"
+          ],
+          "completed_at": "2026-03-14"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入自訂規則 AST、baseline/suppression 治理與大型腳本模組化配套。"
+    },
+    "nvidia-bionemo-platform": {
+      "series_id": "nvidia-bionemo-platform",
+      "domain": "NVIDIA BioNeMo",
+      "description": "BioNeMo 生命科學 AI 平台研究系列",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "技術研究",
+        "NVIDIA BioNeMo",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "NVIDIA BioNeMo 平台深度研究：生命科學 AI 模型訓練、NIM 微服務與 Lab-in-the-Loop 工作流"
+          ],
+          "covered_concepts": [
+            "平台組成（Framework / NIM / Recipes / Data Libraries）",
+            "Evo 2 與生命科學模型版圖",
+            "訓練與部署路徑",
+            "企業導入與 lab-in-the-loop 流程"
+          ],
+          "completed_at": "2026-03-14"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "下一步可深入 mechanism：Evo2 / ESM2 / MolMIM 等模型的資料流、並行策略與 NIM 部署機制。"
+    },
+    "github-ai-open-source-projects": {
+      "series_id": "github-ai-open-source-projects",
+      "domain": "GitHub AI 開源專案",
+      "description": "GitHub AI 開源專案研究系列，聚焦非重複且可落地的熱門專案。",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Unsloth"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "Unsloth — 開源 LLM 微調與 RL 加速專案深度研究：Triton 核心、手寫反向傳播、500K 長上下文與低 VRAM 訓練落地（53.9K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "Triton 核心最佳化",
+            "手寫反向傳播設計",
+            "長上下文 fine-tuning",
+            "RL 訓練/推理記憶共享"
+          ],
+          "completed_at": "2026-03-14"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "下一步可研究同系列的機制層，例如 Axolotl、Liger Kernel 或 torchtune 與 Unsloth 的內核差異。"
+    },
+    "urban-digital-twin-decision-platforms": {
+      "series_id": "urban-digital-twin-decision-platforms",
+      "domain": "Urban Digital Twin / Instant Scenario Analysis / Infrastructure Decision Platform",
+      "description": "智慧城市數位孿生研究系列，聚焦即時情境分析、工務治理、防災與跨域決策平台。",
+      "initiated_at": "2026-03-14",
+      "last_active": "2026-03-14",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "數位孿生",
+        "smart-city",
+        "digital-twin"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "completed_at": "2026-03-14",
+          "kb_notes": [
+            "AI 驅動的城市數位孿生技術：架構、全球實踐與台灣機會",
+            "AI 驅動的城市防災韌性數位孿生：災害模擬、即時預警與應急決策支援系統（2026）"
+          ],
+          "covered_concepts": [
+            "城市數位孿生概念",
+            "IoT 即時同步",
+            "防災韌性情境模擬"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-14",
+          "kb_notes": [
+            "AI 驅動的城市數位孿生即時情境分析與工務決策平台：從 Amsterdam Digital Twin、歐盟 Local Digital Twins 到高雄 5D 平台的技術路線（2026）"
+          ],
+          "covered_concepts": [
+            "BIM-GIS-IoT 融合",
+            "GeoAI 與時空預測",
+            "VLM 事件摘要",
+            "工務決策控制台",
+            "台灣高雄 5D 平台路徑"
+          ],
+          "completed_at": "2026-03-14"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [],
+      "next_research_hint": "下一步可進入 application：針對防災道路、橋梁監測、園區開發與交通控制建立 PoC 實作藍圖。"
     }
   }
 }

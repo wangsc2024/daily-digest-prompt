@@ -1,0 +1,19 @@
+﻿{
+  "date": "2026-03-14",
+  "topic": "多模態模型的投機解碼（Speculative Decoding for Vision-Language Models）",
+  "research_questions": [
+    "投機解碼如何從純文字 LLM 延伸到視覺語言模型，核心瓶頸是什麼？",
+    "MASSV、DREAM 與 Mirror-SD／EAGLE 類方法在架構、接受率與延遲改善上有何差異？",
+    "這些多模態推理優化技術如何應用到 daily-digest-prompt 或個人 AI 專案的低延遲 RAG/Agent 介面？"
+  ],
+  "methodology": "先以官方技術部落格、ACL/Apple/arXiv 論文與框架文件建立基礎，再交叉比對 benchmark、accepted length、throughput、latency 與部署成本；同時結合知識庫既有 AI 深度研究與 research registry 做去重與知識缺口分析，最後輸出可落地的推理優化研究報告。",
+  "keywords": [
+    "multimodal speculative decoding",
+    "vision-language model inference optimization",
+    "MASSV",
+    "DREAM multimodal speculative decoding",
+    "Mirror speculative decoding",
+    "TensorRT-LLM speculative decoding"
+  ],
+  "stage_completed": 1
+}

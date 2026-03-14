@@ -13,20 +13,18 @@
 $AgentDir = $PSScriptRoot
 $envFile = Join-Path $AgentDir ".env"
 
-# 若尚未從 run-with-env 載入，則從 .env 讀取（與 run-with-env 相同邏輯）
-if (-not $env:TODOIST_API_TOKEN) {
-    if (Test-Path $envFile) {
-        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-        $raw = [System.IO.File]::ReadAllText($envFile, $utf8NoBom)
-        $lines = $raw -split "`r?`n"
-        foreach ($line in $lines) {
-            $line = $line.Trim()
-            if ($line.Length -gt 0 -and [int][char]$line[0] -eq 0xFEFF) { $line = $line.Substring(1) }
-            if ($line -match '^\s*#|^\s*$') { continue }
-            if ($line -match '^TODOIST_API_TOKEN=(.*)$') {
-                $env:TODOIST_API_TOKEN = $Matches[1].Trim().Trim('"').Trim("'")
-                break
-            }
+# 固定只從 .env 讀取（不信任使用者/系統環境變數）
+if (Test-Path $envFile) {
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    $raw = [System.IO.File]::ReadAllText($envFile, $utf8NoBom)
+    $lines = $raw -split "`r?`n"
+    foreach ($line in $lines) {
+        $line = $line.Trim()
+        if ($line.Length -gt 0 -and [int][char]$line[0] -eq 0xFEFF) { $line = $line.Substring(1) }
+        if ($line -match '^\s*#|^\s*$') { continue }
+        if ($line -match '^TODOIST_API_TOKEN=(.*)$') {
+            $env:TODOIST_API_TOKEN = $Matches[1].Trim().Trim('"').Trim("'")
+            break
         }
     }
 }

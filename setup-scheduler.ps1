@@ -83,6 +83,7 @@ if ($FromHeartbeat) {
             if ($line -match '^\s{4}delay:\s*(\d+)') { $currentSchedule.Delay = [int]$Matches[1] }
             if ($line -match '^\s{4}retry:\s*(\d+)') { $currentSchedule.Retry = [int]$Matches[1] }
             if ($line -match '^\s{4}disabled:\s*true') { $currentSchedule.Disabled = $true }
+            if ($line -match '^\s{4}disabled:\s*false') { $currentSchedule.Disabled = $false }
         }
     }
     if ($currentSchedule -and $currentSchedule.Name) { $schedules += $currentSchedule }

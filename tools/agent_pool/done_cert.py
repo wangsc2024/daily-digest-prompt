@@ -35,13 +35,16 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 CERT_DIR = REPO_ROOT / "state" / "done-certs"
 
 
-def _file_hash(path: Path) -> str:
-    """串流讀取計算 SHA256（64KB 塊，防 OOM）"""
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(65536), b""):
-            h.update(chunk)
-    return h.hexdigest()[:16]
+def _file_hash(path: Path) -> str | None:
+    """串流讀取計算 SHA256（64KB 塊，防 OOM）。檔案不存在時回傳 None。"""
+    try:
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        return h.hexdigest()[:16]
+    except FileNotFoundError:
+        return None
 
 
 def issue_cert(

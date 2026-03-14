@@ -6,8 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added（2026-02-16 ~ 2026-03-10）
+### Added（2026-02-16 ~ 2026-03-14）
+- 系統審查報告 2026-03-14（Phase 2 組裝 + 2 項自動修正，86.29/A）
+- 系統審查報告 2026-03-12（87.18/A，+1.70）
 - 系統審查報告 2026-03-10（Phase 2 組裝 + 3 項自動修正）
+- AI 架構治理方案完整實施（912 測試，14 項交付物）
+- CI 擴展 tests/skills/ 和 tests/tools/ 覆蓋範圍
+- `config/codex-auto-task-result.schema.json` — Codex 自動任務結果 schema
+- `skills/academic-paper-research/` — 學術論文研究 Skill
+- `skills/cache-optimizer/` — 快取優化 Skill
+- `skills/chatroom-task-delivery/` — 聊天室任務交付 Skill
+- `skills/skill-forge/` — Skill 鍛造工具 Skill
+- `templates/research/` — 研究模板目錄
 
 ### Removed
 - 無項目移除（保留此章節供未來記錄）

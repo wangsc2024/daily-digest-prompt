@@ -216,10 +216,14 @@ rm -f task_prompt_refine.md
 2. **新增條件**：步驟 4 所有任務執行完畢後，檢查剩餘待辦
 
 ### 執行流程（僅在步驟 4 有成功完成任務時執行）
-1. 重新查詢 Todoist API（不使用快取，需即時數據）：
+1. 重新查詢 Todoist API（不使用快取，需即時數據）：**必須依 `skills/todoist/SKILL.md` 正確做法**，使用 pwsh -Command 或 Python 讀 token，**禁止**在 Bash 內用 `curl -H "Bearer $(cat .env ...)"`（會被 Harness 攔截）。範例（pwsh）：
    ```bash
-   curl -s "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" \
-     -H "Authorization: Bearer $TODOIST_API_TOKEN"
+   pwsh -Command '
+   $t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+     (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+      Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+   }
+   (Invoke-RestMethod "https://api.todoist.com/api/v1/tasks/filter?query=today%20%7C%20overdue" -Headers @{Authorization="Bearer $t"}) | ConvertTo-Json -Depth 10'
    ```
 2. 對結果執行過濾 A（截止日期）+ 過濾 B（已關閉 ID，含本次剛關閉的 ID）
 3. 對剩餘任務執行步驟 2 的三層路由

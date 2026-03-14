@@ -1,30 +1,5 @@
 {
   "version": 1,
-  "entries": [
-    {
-      "task_key": "shurangama",
-      "first_failed_at": "2026-03-12T05:39:51",
-      "last_failed_at": "2026-03-12T05:39:51",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
-    },
-    {
-      "task_key": "arch_evolution",
-      "first_failed_at": "2026-03-12T05:39:51",
-      "last_failed_at": "2026-03-12T05:39:51",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
-    },
-    {
-      "task_key": "self_heal",
-      "first_failed_at": "2026-03-12T03:43:44",
-      "last_failed_at": "2026-03-12T03:43:44",
-      "reason": "result_file_missing",
-      "consecutive_count": 1,
-      "reset_count": 0
-    }
-  ],
-  "updated_at": "2026-03-12T19:33:31"
+  "entries": [],
+  "updated_at": "2026-03-14T16:39:39"
 }

@@ -20,6 +20,7 @@ from hook_utils import (
     get_project_root, cleanup_stale_state_files,
     filter_rules_by_preset, read_stdin_json, output_decision,
     _compiled_regex_cache, _REGEX_CACHE_MAXSIZE,
+    _yaml_config_cache,
 )
 
 
@@ -733,3 +734,50 @@ class TestOutputDecision:
         data = json.loads(out)
         assert data.get("decision") == "block"
         assert "nul" in data.get("reason", "")
+
+
+class TestLoadYamlConfigExceptionNarrowing:
+    """_load_yaml_config 例外處理收窄 — 只捕捉 OSError 與 YAMLError。"""
+
+    def setup_method(self):
+        """每個測試前清除快取。"""
+        _yaml_config_cache["loaded"] = False
+        _yaml_config_cache["data"] = None
+
+    def teardown_method(self):
+        """每個測試後還原快取。"""
+        _yaml_config_cache["loaded"] = False
+        _yaml_config_cache["data"] = None
+
+    def test_handles_oserror_gracefully(self, capsys):
+        """OSError（如檔案權限不足）應被捕捉並回傳 None。"""
+        from hook_utils import _load_yaml_config
+        with patch("hook_utils.find_config_path", return_value="/fake/hook-rules.yaml"), \
+             patch("hook_utils._YAML_AVAILABLE", True), \
+             patch("builtins.open", side_effect=PermissionError("模擬權限不足")):
+            result = _load_yaml_config()
+        assert result is None
+        assert _yaml_config_cache["loaded"] is True
+        captured = capsys.readouterr()
+        assert "YAML 載入失敗" in captured.err
+
+    def test_handles_yaml_error_gracefully(self, capsys):
+        """YAMLError（如格式損壞）應被捕捉並回傳 None。"""
+        import yaml
+        from hook_utils import _load_yaml_config
+        mock_file = io.StringIO("invalid: yaml: [broken")
+        with patch("hook_utils.find_config_path", return_value="/fake/hook-rules.yaml"), \
+             patch("hook_utils._YAML_AVAILABLE", True), \
+             patch("builtins.open", return_value=mock_file), \
+             patch("hook_utils._yaml_module.safe_load", side_effect=yaml.YAMLError("模擬解析失敗")):
+            result = _load_yaml_config()
+        assert result is None
+        captured = capsys.readouterr()
+        assert "YAML 載入失敗" in captured.err
+
+    def test_docstring_context_manager_example(self):
+        """file_lock docstring 範例使用 with open() 而非裸 open()。"""
+        from hook_utils import file_lock
+        docstring = file_lock.__doc__
+        assert "with open(" in docstring
+        assert "json.load(open(" not in docstring

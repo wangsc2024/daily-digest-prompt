@@ -130,6 +130,28 @@
       "time": "2026-03-12 17:05:01",
       "verse_text": "若能轉物，即同如來。",
       "author": "釋迦牟尼佛"
+    },
+    {
+      "status": "success",
+      "verse_id": 13,
+      "date": "2026-03-13",
+      "channel": "ntfy/wangsc2025",
+      "session": "evening",
+      "time": "2026-03-13 17:05:01",
+      "author": "釋迦牟尼佛",
+      "verse_text": "制心一處，無事不辦。",
+      "source": "《佛遺教經》"
+    },
+    {
+      "verse_text": "千里之行，始於足下；菩薩萬行，始於發心。",
+      "verse_id": 14,
+      "status": "success",
+      "session": "evening",
+      "author": "釋迦牟尼佛",
+      "source": "《華嚴經・淨行品》意旨",
+      "date": "2026-03-14",
+      "channel": "ntfy/wangsc2025",
+      "time": "2026-03-14 17:05:01"
     }
   ]
 }

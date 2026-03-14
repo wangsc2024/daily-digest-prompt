@@ -43,11 +43,17 @@ if (-not $scriptName) {
 }
 
 $scriptPath = Join-Path $AgentDir $scriptName
-if (-not (Test-Path $scriptPath)) {
-    Write-Host "[錯誤] 找不到腳本: $scriptPath" -ForegroundColor Red
+# 路徑遍歷防護：確保解析後的絕對路徑仍在專案目錄內
+$resolvedPath = [System.IO.Path]::GetFullPath($scriptPath)
+if (-not $resolvedPath.StartsWith($AgentDir)) {
+    Write-Host "[錯誤] 路徑遍歷攻擊偵測: $scriptName 超出專案目錄" -ForegroundColor Red
+    exit 1
+}
+if (-not (Test-Path $resolvedPath)) {
+    Write-Host "[錯誤] 找不到腳本: $resolvedPath" -ForegroundColor Red
     exit 1
 }
 
 $scriptArgs = $args[1..($args.Length - 1)]
-& $scriptPath @scriptArgs
+& $resolvedPath @scriptArgs
 exit $LASTEXITCODE

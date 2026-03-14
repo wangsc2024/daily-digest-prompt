@@ -1,94 +1,108 @@
 {
   "version": 1,
-  "generated_at": "2026-02-24T10:10:00+08:00",
+  "generated_at": "2026-03-14T12:00:00+08:00",
   "modules_executed": ["A", "B", "C", "D"],
   "adr_summary": {
-    "total": 5,
-    "new_this_run": 5,
-    "proposed": 5,
-    "accepted": 0,
-    "rejected": 0
+    "total": 15,
+    "new_this_run": 0,
+    "proposed": 2,
+    "accepted": 10,
+    "deferred": 2,
+    "wontfix": 1,
+    "rejected": 0,
+    "superseded": 0,
+    "note": "improvement-backlog 全部 5 條均已轉化為 ADR，本次去重通過，無需新增。"
   },
   "debt_summary": {
-    "total": 2,
+    "total": 4,
     "p1_count": 0,
-    "p2_count": 2,
-    "new_since_last": 2,
+    "p2_count": 4,
+    "new_since_last": 4,
     "resolved_since_last": 0,
-    "health_grade": "A+"
+    "false_positives_excluded": 2,
+    "health_grade": "A",
+    "note": "核心 .py/.ps1 程式碼幾乎無真實技術債；主要 TODO 集中文件層（prompts/），已由 ADR-017 追蹤。"
   },
-  "dependency_suggestions": {
-    "skills_with_undeclared_deps": 4,
-    "details": [
+  "dependency_suggestions": 4,
+  "dependency_analysis": {
+    "skills_scanned": 34,
+    "skills_with_declared_deps": 15,
+    "suggestions": [
       {
-        "skill": "github-scout",
-        "suggested_depends_on": ["web-research", "knowledge-query", "ntfy-notify"],
-        "evidence": [
-          "步驟使用 research-registry.json（web-research 的核心機制）",
-          "整合表顯示 knowledge-query 為下游 Skill",
-          "整合表顯示 ntfy-notify 為下游 Skill"
-        ]
+        "skill": "skill-forge",
+        "current_depends_on": ["kb-research-strategist", "skill-scanner"],
+        "suggested_add": ["ntfy-notify", "knowledge-query"],
+        "evidence": "步驟 9 讀取 skills/knowledge-query/SKILL.md 並匯入 KB（line 334）；步驟 10a 發送 ntfy 通知（lines 370-394）",
+        "confidence": "high"
       },
       {
         "skill": "kb-curator",
-        "suggested_depends_on": ["knowledge-query"],
-        "evidence": [
-          "步驟 4 明確透過 knowledge-query Skill 匯入知識庫"
-        ]
+        "current_depends_on": ["knowledge-query"],
+        "suggested_add": ["groq"],
+        "evidence": "步驟包含 groq health check 並呼叫 http://localhost:3002/groq/chat（lines 556-567）",
+        "confidence": "high"
       },
       {
-        "skill": "system-insight",
-        "suggested_depends_on": ["ntfy-notify"],
-        "evidence": [
-          "critical alert 時透過 ntfy 發送系統洞察警告"
-        ]
+        "skill": "knowledge-domain-builder",
+        "current_depends_on": [],
+        "suggested_add": ["ntfy-notify"],
+        "evidence": "步驟 3 透過 ntfy 發送完成通知（line 381）",
+        "confidence": "medium"
       },
       {
-        "skill": "task-manager",
-        "suggested_depends_on": ["web-research"],
-        "evidence": [
-          "研究類模板含 research-registry，與 web-research 的去重機制耦合"
-        ]
+        "skill": "gmail",
+        "current_depends_on": [],
+        "suggested_add": ["api-cache"],
+        "evidence": "步驟明確說明「配合 api-cache Skill（TTL: 30min）」（line 150）",
+        "confidence": "high"
       }
     ],
-    "note": "模組 C 僅產出建議，不自動修改 SKILL.md。請人工確認後修改對應 SKILL.md 的 depends-on 欄位。"
+    "note": "以上建議為唯讀輸出，不自動修改任何 SKILL.md，需人工確認後執行。"
   },
   "ooda_cycle": {
     "observe": {
-      "timestamp": "2026-02-23T23:36:00+08:00",
+      "timestamp": "2026-03-11T00:00:00+08:00",
       "metrics_available": true,
-      "alerts_count": 2,
-      "alerts": [
-        { "level": "warning", "metric": "cache_hit_ratio", "value": 0.164, "threshold": 0.40 },
-        { "level": "warning", "metric": "auto_task_fairness", "value": 0.92, "threshold": 0.50 }
-      ]
+      "data_age_hours": 84,
+      "status": "stale"
     },
     "orient": {
-      "last_audit_date": "2026-02-16",
-      "total_score": 90.47,
-      "grade": "S",
-      "lowest_dimension": "2_system_architecture",
-      "lowest_score": 84,
-      "note": "last-audit.json 距今 8 天，建議本週重新執行 system-audit 取得最新評分"
+      "last_audit_date": "2026-03-14",
+      "audit_score": 86.29,
+      "audit_grade": "A",
+      "dimension_scores": {
+        "1_information_security": 85,
+        "2_system_architecture": 86,
+        "3_system_quality": 86,
+        "4_system_workflow": 94,
+        "5_technology_stack": 78,
+        "6_system_documentation": 86,
+        "7_system_completeness": 87
+      },
+      "lowest_dimension": "5_technology_stack",
+      "lowest_score": 78,
+      "delta_from_last": -0.89,
+      "regression_note": "D7 退步 6 分（TODO count increase）；D5 技術棧持續最低（跨平台 60 分拖累，ADR-014 Wontfix）"
     },
     "decide": {
-      "alert_level": "warning",
-      "rule_applied": "warning → effort=low ADR（無 effort=low 可選，退而求 P0 中選最小風險步驟）",
-      "selected_adr_id": "ADR-20260224-002",
-      "selected_adr_title": "Guardrails 輸入輸出驗證層",
-      "rationale": "兩個 warning 中 cache_hit_ratio 最關鍵（16.4% vs 40% 門檻）。ADR-005（可組合工作流）最能解決快取跳過問題，但 effort=medium 且需改腳本。ADR-002 則可先用 quality-gate.md 小幅改動驗證方向（effort=medium 但可拆分為 1 個小步驟），且直接影響 auto_task_fairness 的輸出品質可量化性。",
-      "cache_alert_note": "cache_hit_ratio 問題的根本修復在 ADR-20260224-005（可組合工作流），但其 effort=medium 且影響範圍大。建議本輪先做 ADR-002 的步驟 1（quality-gate 新增 schema 驗證段落），同時在 CLAUDE.md ADR 索引中新增 ADR-009 專門追蹤快取命中率改善。"
+      "status": "degraded",
+      "reason": "system-insight.json 產生於 2026-03-11，距今 84 小時（超過 24 小時門檻）",
+      "recommendation": "建議先執行 system-insight 自動任務更新觀測資料，再重新執行 arch-evolution 模組 D",
+      "partial_analysis": {
+        "known_critical_alert": "cache_hit_ratio 14.57%（目標 ≥40%），ADR-005 可組合工作流已接受此問題，implementation_status=partial",
+        "highest_priority_proposed_adr": "ADR-20260314-017（TODO/FIXME 規範性清理，P2，effort=low）",
+        "second_proposed_adr": "ADR-20260314-018（Phase 2 retry 機制，P2，effort=medium）"
+      }
     },
     "act": {
-      "next_action_title": "Guardrails 輸入輸出驗證層（步驟 1）",
-      "estimated_sessions": 1,
-      "steps": [
-        "步驟 1：在 templates/shared/quality-gate.md 新增「輸出 Schema 驗證」段落，定義 3 個基本驗證規則（研究筆記 ≥300 字、摘要含 ≥3 個 Todoist 任務、通知標題 ≤50 字）",
-        "步驟 2：在 templates/shared/done-cert.md 的 DONE_CERT 格式中加入 schema_check 欄位（pass/fail/skip）",
-        "步驟 3：在 hooks/on_stop_alert.py 的 session summary 中新增 schema_violations 計數，供告警邏輯使用",
-        "步驟 4：更新 context/adr-registry.json 的 ADR-20260224-002 status 為 Accepted（人工確認後）"
+      "status": "pending_fresh_data",
+      "recommended_next_steps": [
+        "步驟 1：執行 system-insight 自動任務（更新 context/system-insight.json）",
+        "步驟 2：重新執行 arch-evolution 模組 D 以取得有效 OODA 行動建議",
+        "步驟 3（可並行）：確認 ADR-20260314-016（CI ruff lint）的 immediate_fix 是否已落實至 .github/workflows/ci.yml",
+        "步驟 4（可並行）：處理模組 C 的 4 個依賴宣告補強（low cost / high readability）"
       ],
-      "parallel_suggestion": "同時可將 tech-debt-backlog 的 TD-20260224-001/002（'XXX chars' 佔位符）順手修復，約 5 分鐘，消除未來誤報干擾。"
+      "estimated_sessions": 1
     }
   }
 }

@@ -259,6 +259,35 @@
       "gun_bot_state": "closed",
       "optimized": false,
       "notes": "JSONL 日誌無 chatroom 執行記錄；gun-bot 斷路器狀態 closed（健康）；無活動數據但系統正常，無需調整"
+    },
+    {
+      "date": "2026-03-13",
+      "run_at": "2026-03-13T12:33:25+00:00",
+      "metrics": {
+        "total_calls": 0,
+        "success_rate": null,
+        "conflict_rate": null,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "closed",
+      "optimized": false,
+      "notes": "JSONL 日誌無 chatroom 執行記錄；gun-bot 斷路器狀態 closed（健康，failures=1）；無活動數據但系統正常，無需調整"
+    },
+    {
+      "date": "2026-03-14",
+      "run_at": "2026-03-14T00:34:10+00:00",
+      "metrics": {
+        "total_calls": 156,
+        "success_rate": 100.0,
+        "conflict_rate": 0.0,
+        "avg_exec_seconds": null
+      },
+      "actions_taken": [],
+      "gun_bot_state": "closed",
+      "bot_health": null,
+      "optimized": false,
+      "notes": "兩日 156 筆呼叫全數成功（localhost:3001 雙軌匹配）；bot.js 未啟動（連線失敗）；斷路器狀態 closed（failures=0）；所有指標正常無需調整"
     }
   ]
 }

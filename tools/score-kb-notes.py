@@ -30,7 +30,11 @@ from pathlib import Path
 # ─── 設定 ────────────────────────────────────────────────
 PROJECT_DIR   = Path(__file__).parent.parent
 SCORES_PATH   = PROJECT_DIR / "state" / "kb-note-scores.json"
-KB_API_BASE   = "http://localhost:3000"
+try:
+    from tools.config_loader import get_kb_api_base
+    KB_API_BASE = get_kb_api_base()
+except ImportError:
+    KB_API_BASE = "http://localhost:3000"
 ROLLING_DAYS  = 30
 DEFAULT_LIMIT = 200
 

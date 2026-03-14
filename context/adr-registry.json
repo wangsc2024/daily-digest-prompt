@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "updated_at": "2026-03-12",
+  "updated_at": "2026-03-14",
   "summary": {
-    "total": 12,
+    "total": 15,
     "proposed": 0,
-    "accepted": 9,
+    "accepted": 12,
     "deferred": 2,
     "wontfix": 1,
     "rejected": 0,
@@ -159,9 +159,10 @@
       "id": "ADR-20260224-005",
       "title": "可組合工作流模式（Composable Workflow）",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-02-24",
       "decided_at": "2026-03-11",
+      "implemented_at": "2026-03-14",
       "source": "improvement-backlog",
       "source_pattern": "可組合工作流模式（Composable Workflow Patterns）",
       "priority": "P1",
@@ -238,7 +239,7 @@
       "id": "ADR-20260311-010",
       "title": "依賴漏洞自動掃描（pip-audit 整合）",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-03-11",
       "decided_at": "2026-03-11",
       "source": "improvement-backlog",
@@ -353,7 +354,7 @@
       "id": "ADR-20260311-013",
       "title": "GitHub Actions 最小 CI pipeline",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-03-11",
       "decided_at": "2026-03-11",
       "source": "improvement-backlog",
@@ -381,7 +382,7 @@
         ".github/workflows/ci.yml",
         "pyproject.toml"
       ],
-      "notes": "狀態設為 Proposed 等待人工確認 GitHub 環境是否就緒。若已有 repo，建立 ci.yml 約需 30 分鐘。最小 workflow 模板已有充足參考（uv + pytest 組合）。",
+      "notes": "狀態設為 Proposed 等待人工確認 GitHub 環境是否就緒。若已有 repo，建立 ci.yml 約需 30 分鐘。最小 workflow 模板已有充足參考（uv + pytest 組合）。ci.yml 已建立並同步至 repo。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -426,7 +427,7 @@
       "id": "ADR-20260312-015",
       "title": "PS1 Hardcoded Timeout 消除（配置外部化）",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-03-12",
       "decided_at": "2026-03-12",
       "source": "improvement-backlog",
@@ -459,6 +460,114 @@
       "tech_debt_score": 0.0,
       "auto_generated": true,
       "review_due": "2026-06-10"
+    },
+    {
+      "id": "ADR-20260314-016",
+      "title": "CI ruff lint 整合",
+      "status": "Accepted",
+      "implementation_status": "immediate_fix",
+      "created_at": "2026-03-14",
+      "decided_at": "2026-03-14",
+      "source": "improvement-backlog",
+      "source_pattern": "CI ruff lint 整合",
+      "priority": "P1",
+      "dimension": "技術棧",
+      "effort": "low",
+      "current_score": 75,
+      "target_score": 80,
+      "context": "系統審查（2026-03-14）5.3 工具鏈完整性 75 分。CI（ADR-013）已建立 pytest + pip-audit，但缺 ruff lint 和 PowerShell 語法驗證。ruff lint 可在 CI 中自動偵測程式碼品質回歸。",
+      "decision": "接受（立即修復）。在 .github/workflows/ci.yml 的 Install dependencies 之後、pytest 之前，新增 ruff check 步驟：`uv run ruff check hooks/ tools/ tests/`。effort=low，操作明確，不影響現有 CI 流程。",
+      "consequences": {
+        "positive": [
+          "程式碼品質回歸自動偵測",
+          "與現有 CI pipeline 無縫整合",
+          "工具鏈評分預計 75→80"
+        ],
+        "negative": [
+          "現有程式碼若有 lint 問題需先修正才能通過 CI"
+        ]
+      },
+      "related_files": [
+        ".github/workflows/ci.yml",
+        "pyproject.toml"
+      ],
+      "notes": "ADR-013 的延伸。ruff 已在 pyproject.toml 的 dev 依賴中，無需新增依賴。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-12"
+    },
+    {
+      "id": "ADR-20260314-017",
+      "title": "TODO/FIXME 規範性清理",
+      "status": "Accepted",
+      "implementation_status": "pending",
+      "created_at": "2026-03-14",
+      "decided_at": "2026-03-14",
+      "source": "improvement-backlog",
+      "source_pattern": "TODO/FIXME 規範性清理",
+      "priority": "P2",
+      "dimension": "系統完成度",
+      "effort": "low",
+      "current_score": 84,
+      "target_score": 88,
+      "context": "系統審查（2026-03-14）7.1 功能完成度 84 分。265 處 TODO/FIXME 分散 56 檔（70% 規範性、30% 缺陷型），導致 D7 退步 6 分。需人工分類哪些是規範性（可直接移除）、哪些是缺陷型（需修復後移除）。",
+      "decision": "接受（分階段、人工排程）。理由：265 處 TODO/FIXME 導致 D7 完成度 84 分，多數為規範性可清理。具體行動：(1) 用 grep 掃描並產出分類報告；(2) 規範性 TODO（如「考慮…」「可能需要…」）直接移除；(3) 缺陷型 TODO 轉 issue 追蹤；(4) 目標 265→80 處以下，優先清理 docs/plans/、再 templates/、再 prompts/。刻意設計的模板佔位符（如 new-auto-task.ps1）改用角括號語法以消除掃描誤報。不自動修復，由人工分批執行。",
+      "consequences": {
+        "positive": [
+          "功能完成度評分預計 84→88",
+          "減少程式碼噪音，提升可維護性"
+        ],
+        "negative": [
+          "需人工判斷每個 TODO 的性質，工作量不低",
+          "誤刪缺陷型 TODO 可能遺失問題追蹤"
+        ]
+      },
+      "related_files": [
+        "docs/plans/",
+        "templates/",
+        "prompts/"
+      ],
+      "notes": "建議分批處理：先清理 docs/plans/（最多規範性 TODO），再處理 templates/，最後 prompts/。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-12"
+    },
+    {
+      "id": "ADR-20260314-018",
+      "title": "Phase 2 任務執行 retry 機制",
+      "status": "Accepted",
+      "implementation_status": "pending",
+      "created_at": "2026-03-14",
+      "decided_at": "2026-03-14",
+      "source": "improvement-backlog",
+      "source_pattern": "Phase 2 任務 retry 機制",
+      "priority": "P2",
+      "dimension": "系統工作流",
+      "effort": "medium",
+      "current_score": 93,
+      "target_score": 95,
+      "context": "系統審查（2026-03-14）4.3 失敗恢復 93 分。Phase 2 任務執行無重試機制為最大缺口。單次失敗即終止，無 backoff 重試。",
+      "decision": "接受（人工排程）。理由：失敗恢復 93 分，Phase 2 單次失敗即終止為主要缺口。具體行動：(1) 在 run-todoist-agent-team.ps1 Phase 2 迴圈加入 max 1 retry、exponential backoff 初始 30s；(2) 僅對 timeout/transient 錯誤重試，permanent 不重試；(3) retry 事件寫入 spans JSON；(4) 同步檢視 config/timeouts.yaml 的 phase2_timeout 是否需放大以容納 retry。因涉及核心腳本，由人工實施與驗證。",
+      "consequences": {
+        "positive": [
+          "失敗恢復評分預計 93→95",
+          "暫時性錯誤（網路抖動、API 限速）可自動恢復"
+        ],
+        "negative": [
+          "retry 增加執行時間，需確保不超出排程窗口",
+          "需區分 transient vs permanent failure"
+        ]
+      },
+      "related_files": [
+        "run-todoist-agent-team.ps1"
+      ],
+      "notes": "與 ADR-005（可組合工作流）的品質閘門重試邏輯相關。建議實施時同步更新 config/timeouts.yaml 的 phase2_timeout 以容納 retry 時間。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-12"
     }
   ]
 }

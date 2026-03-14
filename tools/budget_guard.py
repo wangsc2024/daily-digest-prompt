@@ -42,9 +42,13 @@ def check_budget(task_type: str, provider: str, estimated_tokens: int = 50) -> d
     try:
         config = _load_budget_config()
         usage_data = json.loads(TOKEN_USAGE.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError, Exception):
-        # 配置或用量檔案缺失時，允許通過（向後相容）
+    except FileNotFoundError:
+        # 配置或用量檔案尚未建立，允許通過（向後相容）
         return {"allowed": True, "utilization": 0.0}
+    except (ImportError, json.JSONDecodeError) as e:
+        # 配置損壞或依賴缺失：允許通過但記錄警告
+        print(f"[budget_guard] 配置載入異常（預算檢查跳過）：{e}", file=sys.stderr)
+        return {"allowed": True, "utilization": 0.0, "warning": str(e)}
 
     today = date.today().isoformat()
     day_data = usage_data.get("daily", {}).get(today, {})

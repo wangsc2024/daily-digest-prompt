@@ -13,7 +13,7 @@ schedules:
     script: run-agent-team.ps1
     timeout: 900
     retry: 1
-    disabled: true
+    disabled: false
     description: "每日摘要 - 晚（21:15）"
 
   system-audit:
@@ -21,7 +21,7 @@ schedules:
     script: run-system-audit-team.ps1
     timeout: 1800
     retry: 1
-    disabled: true
+    disabled: false
     description: "每日系統審查 - 團隊模式（00:40）"
 
   todoist-team:
@@ -37,7 +37,7 @@ schedules:
     script: run-podcast-latest-buddhist.ps1
     timeout: 4000
     retry: 0
-    disabled: true
+    disabled: false
     description: "每日 Podcast 製作（15:20）：KB 最新教觀綱宗筆記 → 雙主持人 MP3"
 
   kb-backup-all:

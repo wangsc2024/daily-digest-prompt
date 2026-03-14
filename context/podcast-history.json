@@ -1,10 +1,23 @@
 {
   "version": 2,
-  "updated_at": "2026-03-12T12:38:46+08:00",
+  "updated_at": "2026-03-14T15:26:03",
   "summary": {
-    "total_episodes": 14,
+    "total_episodes": 23,
     "cooldown_days": 30,
     "recent_note_ids": [
+      "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "d2244bea-4935-46f2-a933-91928adf982a",
+      "e2eb9dec-f5b4-4c1a-8d75-fb4edc69586d",
+      "539bf8cc-3400-4309-bed1-efea59c37c9a",
+      "59b08680-68ef-47f4-a02f-8f99a7defde5",
+      "f8270fdc-767a-4830-b6cb-f7c6966f6865",
+      "b38d34d1-0a68-45ce-b216-2c8e32de688b",
+      "ac237f47-fb19-4bea-a423-5831a4a15a99",
+      "c4c5f326-f98a-4593-b9fb-993200a425b0",
+      "1e418b40-6f08-46f7-ad09-1f43a2fa404a",
+      "d90898d3-ecc3-41dc-8f22-0f4e3dc6d52d",
+      "cc231ade-9ad2-44f2-b966-9b09bca21880",
+      "b1cc9595-45e6-49f1-830e-718c17f3760f",
       "d5a383bd-e7d1-41b1-9f5e-c8897747b879",
       "2fc1607a-541c-4d9c-892c-6cb7fccb40e6",
       "0d87ae69-44be-4c52-8229-c2c24103be33",
@@ -12,7 +25,6 @@
       "62370c83-1535-4369-b9be-6c6cf5ccfeae",
       "5cdbd1d9-8964-4d75-a7dd-665a1ea07252",
       "ee71dca2-20af-4e4c-8888-92327a6d7b03",
-      "b1cc9595-45e6-49f1-830e-718c17f3760f",
       "96473d7a-c97d-4d91-b689-0ceaee69e670",
       "25aa3f0d-f6ac-4592-be40-02d5e065bdea",
       "7562e5f7-692e-465e-ac08-8d2140b801f1",
@@ -22,20 +34,43 @@
       "780b6e0f-841c-4991-babd-076f8c9ca472",
       "49913ddb-4412-4a7c-a5ff-2388a45ae688",
       "19be31e8-9a10-491b-8b00-e0ba95d7308a",
-      "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5",
-      "ed138bbf-b608-4f05-8311-f6fc2e865392",
-      "db718a9d-c124-4821-9a74-b68eb8f7f652",
-      "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
-      "4f2e2568-0a35-47ad-90a8-acb3115bc2b5",
-      "ac237f47-fb19-4bea-a423-5831a4a15a99",
-      "e6a8995d-805a-4013-84b5-237920edbbfe",
-      "c835ef81-faeb-4bd1-8518-0581b622452d",
-      "35420ab5-a433-43c5-859d-6e2cb44b19ef",
-      "9bd4a4c0-e2c4-415e-98f6-5ca340b88c4a",
-      "7d524b1e-d0c7-4bd7-8bfd-4a9087792468",
-      "15a379d8-8114-4fdc-bb49-b4d78fd672e5"
+      "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5"
     ],
     "recent_topics": [
+      "教觀綱宗",
+      "佛學",
+      "天台宗",
+      "唯識",
+      "第八識",
+      "阿賴耶識",
+      "八識",
+      "佛教",
+      "別教",
+      "次第三觀",
+      "無量四諦",
+      "淨土宗",
+      "他力本願",
+      "念佛",
+      "曇鸞大師",
+      "六即佛",
+      "修證階位",
+      "楞嚴咒",
+      "五會",
+      "密教",
+      "五方佛",
+      "楞嚴經",
+      "唯識學",
+      "四教觀法",
+      "四種四諦",
+      "教觀雙運",
+      "工作流自動化",
+      "Queue Mode",
+      "隨喜功德品",
+      "展轉教化",
+      "TypeScript",
+      "Observational Memory",
+      "Agent Network",
+      "完成法華經一心三",
       "空觀",
       "假觀",
       "中觀",
@@ -50,46 +85,183 @@
       "頓教",
       "性修不二",
       "教觀合一",
-      "完成法華經一心三",
       "化儀四教",
-      "因機施教",
-      "AI工作流",
-      "邏輯思維",
-      "AI Agent",
-      "架構設計",
-      "本地優先",
-      "五時八教",
-      "判教體系",
-      "蕅益大師",
-      "方等時",
-      "彈偏斥小",
-      "維摩詰經",
-      "回小向大",
-      "生酥味",
-      "山家山外",
-      "四明知禮",
-      "觀妄即真",
-      "性具思想",
-      "四種三昧",
-      "常坐三昧",
-      "常行三昧",
-      "般舟三昧",
-      "非行非坐三昧",
-      "歷緣對境",
-      "一心三觀",
-      "妄心觀",
-      "三諦圓融",
-      "空假中",
-      "圓頓止觀",
-      "天台四教儀",
-      "教觀雙美",
-      "判教教材",
-      "教觀綱宗",
-      "天台宗"
-    ],
-    "updated_at": "2026-03-12T12:38:46+08:00"
+      "因機施教"
+    ]
   },
   "episodes": [
+    {
+      "episode_title": "天台止觀修行實踐",
+      "notes_used": [
+        "ed138bbf-b608-4f05-8311-f6fc2e865392"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-14T15:26:03"
+    },
+    {
+      "episode_title": "唯識第八識義理對話",
+      "notes_used": [
+        "d2244bea-4935-46f2-a933-91928adf982a"
+      ],
+      "note_titles": [
+        "唯識第八識（阿賴耶識）深度洞察報告"
+      ],
+      "topics": [
+        "唯識",
+        "第八識",
+        "阿賴耶識"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-14T15:07:13"
+    },
+    {
+      "episode_title": "唯識八識義理對話",
+      "notes_used": [
+        "e2eb9dec-f5b4-4c1a-8d75-fb4edc69586d"
+      ],
+      "note_titles": [
+        "唯識八識深度洞察報告"
+      ],
+      "topics": [
+        "唯識",
+        "八識",
+        "佛教"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-14T14:44:22"
+    },
+    {
+      "episode_title": "別教的階梯：次第三觀",
+      "notes_used": [
+        "539bf8cc-3400-4309-bed1-efea59c37c9a"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之別教 — 次第三觀、無量四諦與菩薩歷別行位的教觀體系"
+      ],
+      "topics": [
+        "別教",
+        "次第三觀",
+        "無量四諦"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-14T11:38:42+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260314-1133.mp3",
+      "slug": "教觀綱宗-20260314-1133"
+    },
+    {
+      "episode_title": "三宗修證智慧：淨土他力本願、天台六即佛與楞嚴咒五會",
+      "notes_used": [
+        "59b08680-68ef-47f4-a02f-8f99a7defde5",
+        "f8270fdc-767a-4830-b6cb-f7c6966f6865",
+        "b38d34d1-0a68-45ce-b216-2c8e32de688b"
+      ],
+      "note_titles": [
+        "曇鸞大師他力本願思想的跨時代影響：從道綽善導到法然親鸞，兼論與中觀天台的思想對話（synthesis 深化）",
+        "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話",
+        "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第"
+      ],
+      "topics": [
+        "淨土宗",
+        "他力本願",
+        "念佛",
+        "曇鸞大師",
+        "天台宗",
+        "六即佛",
+        "修證階位",
+        "楞嚴咒",
+        "五會",
+        "密教",
+        "五方佛"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-14T11:38:11+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/three-paths-20260314.mp3",
+      "slug": "three-paths-20260314"
+    },
+    {
+      "episode_title": "如來藏與阿賴耶識",
+      "notes_used": [
+        "ac237f47-fb19-4bea-a423-5831a4a15a99"
+      ],
+      "note_titles": [
+        "楞嚴經與唯識學的義理對話 — 如來藏與阿賴耶識的同異辨析及會通路徑"
+      ],
+      "topics": [
+        "楞嚴經",
+        "佛學",
+        "唯識學"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-14T10:42:14"
+    },
+    {
+      "episode_title": "從四諦到四觀：天台修證地圖",
+      "notes_used": [
+        "c4c5f326-f98a-4593-b9fb-993200a425b0"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：四教觀法與四種四諦的相攝關係 — 由教相到觀行的內在對應"
+      ],
+      "topics": [
+        "四教觀法",
+        "四種四諦",
+        "教觀雙運"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-13T22:39:04+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260313-2232.mp3",
+      "slug": "教觀綱宗-20260313-2232"
+    },
+    {
+      "episode_title": "知識傳遞與轉化：從 n8n 工作流、法華經展轉教化到 Mastra Agent 協作",
+      "notes_used": [
+        "1e418b40-6f08-46f7-ad09-1f43a2fa404a",
+        "d90898d3-ecc3-41dc-8f22-0f4e3dc6d52d",
+        "cc231ade-9ad2-44f2-b966-9b09bca21880"
+      ],
+      "note_titles": [
+        "n8n — 開源 AI 工作流自動化平台深度洞察：六大 Agent 類型、Queue Mode 水平擴展架構、三層記憶系統與對 Daily-Digest-Prompt 系統的五大借鑑啟示（85K+ Stars, 2026-03）",
+        "法華經隨喜功德品研究：聞法隨喜的功德校量與展轉教化的五十展轉",
+        "Mastra — TypeScript 原生 AI Agent 框架深度洞察：Observational Memory 觀測式記憶、Agent Network 動態路由、Supervisor 多 Agent 協調與對 Agent 系統設計的六大借鑑啟示（22K Stars, 2026-03）"
+      ],
+      "topics": [
+        "工作流自動化",
+        "AI Agent",
+        "Queue Mode",
+        "法華經",
+        "隨喜功德品",
+        "展轉教化",
+        "TypeScript",
+        "Observational Memory",
+        "Agent Network"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-13T21:39:51+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/knowledge-transmission-20260313.mp3",
+      "slug": "knowledge-transmission-20260313"
+    },
+    {
+      "episode_title": "法華經一心三觀解析",
+      "notes_used": [
+        "b1cc9595-45e6-49f1-830e-718c17f3760f"
+      ],
+      "note_titles": [
+        "完成法華經一心三觀研究的知識庫上傳、ntfy 通知、暫存檔清理、研究報告撰寫與 Podcast 生成"
+      ],
+      "topics": [
+        "完成法華經一心三"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-13T15:23:46"
+    },
     {
       "episode_title": "從龍樹到智顗：一心三觀十議題",
       "notes_used": [
@@ -491,6 +663,46 @@
       "note_id_input": "b1cc9595-45e6-49f1-830e-718c17f3760f",
       "slug": "note-b1cc9595-20260311",
       "used_at": "2026-03-11T15:24:57"
+    },
+    {
+      "note_id": "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "note_title": "完成法華經一心三觀研究的知識庫上傳、ntfy 通知、暫存檔清理、研究報告撰寫與 Podcast 生成",
+      "query": "",
+      "note_id_input": "b1cc9595-45e6-49f1-830e-718c17f3760f",
+      "slug": "note-b1cc9595-20260313",
+      "used_at": "2026-03-13T15:23:46"
+    },
+    {
+      "note_id": "ac237f47-fb19-4bea-a423-5831a4a15a99",
+      "note_title": "楞嚴經與唯識學的義理對話 — 如來藏與阿賴耶識的同異辨析及會通路徑",
+      "query": "一個有關於唯識學詳細解說的",
+      "note_id_input": "",
+      "slug": "一個有關於唯識學詳細解說的-20260314",
+      "used_at": "2026-03-14T10:42:14"
+    },
+    {
+      "note_id": "e2eb9dec-f5b4-4c1a-8d75-fb4edc69586d",
+      "note_title": "唯識八識深度洞察報告",
+      "query": "",
+      "note_id_input": "e2eb9dec-f5b4-4c1a-8d75-fb4edc69586d",
+      "slug": "weishi-bashi-20260314",
+      "used_at": "2026-03-14T14:44:22"
+    },
+    {
+      "note_id": "d2244bea-4935-46f2-a933-91928adf982a",
+      "note_title": "唯識第八識（阿賴耶識）深度洞察報告",
+      "query": "",
+      "note_id_input": "d2244bea-4935-46f2-a933-91928adf982a",
+      "slug": "weishi-dibashi-20260314",
+      "used_at": "2026-03-14T15:07:13"
+    },
+    {
+      "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
+      "query": "",
+      "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "slug": "note-ed138bbf-20260314",
+      "used_at": "2026-03-14T15:26:03"
     }
   ]
 }
