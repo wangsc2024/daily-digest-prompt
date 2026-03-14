@@ -31,9 +31,22 @@ depends-on:
 ```
 Observe  → system-insight（metrics 感測）
 Orient   → system-audit（維度評分診斷）
-Decide   → arch-evolution（本 Skill：ADR 選擇 + +1 行動）← 缺失的一環
-Act      → self-heal（異常修復）/ 手動實作 ADR
+Decide   → arch-evolution（本 Skill：自動擬訂 ADR decision + 分類 immediate_fix / schedule_adr）← 缺失的一環
+Act      → self-heal（immediate_fix 自動備份後立即執行）/ 人工決策（schedule_adr）
 ```
+
+---
+
+## 核心設計原則
+
+| 原則 | 說明 |
+|------|------|
+| **積極主動完成優化建議** | effort=low 且安全的項目，自動擬訂 decision、自動接受 ADR，由 self-heal 立即執行，不等待人工確認 |
+| **動手前進行 git 備份** | 執行任何 immediate_fix 前，self-heal 必須對 `related_files` 執行 `git add + git commit` 備份，確保可回滾 |
+| **優化後以 ntfy 詳細通知** | 修復完成後，ntfy 推播詳細說明：列出每個修改的檔案、改善摘要、驗證結果 |
+| **自動擬訂並接受 ADR** | `immediate_fix` 的 `decision` 欄位由 arch-evolution 自動填寫接受理由；`schedule_adr` 才通知人工填寫 |
+
+> **四個步驟缺一不可**：擬訂 decision → git 備份 → 執行修復 → ntfy 詳細通知。若任一步驟失敗，修復中止並告警。
 
 ## 功能模組速查
 
@@ -351,7 +364,8 @@ kb-curator → 建議新增 depends-on: [knowledge-query]
 ## 注意事項
 
 - **互動式工具**：由使用者手動觸發，不透過 Todoist 路由
-- **ADR decision 人工填寫**：`decision` 欄位初始為空，需人工判斷後填寫接受/拒絕理由
+- **ADR decision 自動填寫（immediate_fix）**：`decision` 欄位由 arch-evolution 自動填寫「自動接受：操作安全且步驟明確，由 self-heal 執行」；wontfix/deferred 填寫對應理由
+- **ADR decision 人工填寫（schedule_adr）**：需人工前提條件的 ADR，`decision` 欄位留空，assemble-audit 推播提醒填寫
 - **+1 原則**：OODA 模組 D 每次只選 1 個行動，避免多頭並進導致改進效果分散
 - **scheduler-state.json 唯讀**：此 Skill 不寫入 scheduler-state.json（PowerShell 腳本獨佔寫入）
 - **執行時間估計**：完整 4 模組約 5–10 分鐘；單一模組 1–3 分鐘

@@ -24,6 +24,7 @@ triggers:
   - "content scoring"
 depends-on:
   - "knowledge-query"
+  - "groq"
 ---
 
 # KB Curator Skill（知識庫治理工具）

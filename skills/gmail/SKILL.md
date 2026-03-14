@@ -7,6 +7,8 @@ description: |
   Use when: 讀取郵件、檢查收件匣、郵件摘要、未讀郵件。
 allowed-tools: Bash, Read, Write
 cache-ttl: 30min
+depends-on:
+  - api-cache
 triggers:
   - "gmail"
   - "email"

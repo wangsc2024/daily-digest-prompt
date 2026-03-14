@@ -34,6 +34,19 @@ triggers:
 > **Windows 注意**：`$TODOIST_API_TOKEN` 不會自動注入 Bash 環境，必須透過 PowerShell 讀取 `.env` 再呼叫 API。
 > **禁止使用** `echo $TOKEN`、`$(cat .env | grep TOKEN)` 等方式——會被 Harness 攔截。
 
+### 正確做法（必守）
+
+| 做法 | 說明 |
+|------|------|
+| **pwsh -Command** | 使用本 SKILL 內所有「pwsh -Command」片段：先 `$env:TODOIST_API_TOKEN` 或 `Get-Content .env` 讀 token，再 `Invoke-RestMethod`。 |
+| **Python** | 使用 `os.environ["TODOIST_API_TOKEN"]` 或 `python-dotenv` 載入後再呼叫 API（見下方 API 使用（Python））。 |
+| **專案腳本** | 可呼叫 `skills/todoist/scripts/todoist.py`（會從環境變數讀 token）。 |
+
+### 禁止做法（會被 Harness 攔截）
+
+- **禁止** 在 Bash 內用 `curl -H "Authorization: Bearer $(cat .env \| grep ...)"` 或 `` `cat .env \| grep ...` `` 等子 shell 讀取 .env 後傳給 curl。
+- **禁止** 任何 `$(...)` / 反引號 讀取 `.env`、`token.json`、`credentials` 等敏感檔並送入 curl/wget。
+
 Token 取得：https://todoist.com/app/settings/integrations/developer
 
 ### Token 載入片段（所有 pwsh 呼叫共用）

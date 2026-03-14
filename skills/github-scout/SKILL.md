@@ -48,7 +48,7 @@ depends-on:
 | Agent 架構 | `AI agent framework GitHub stars 2026` |
 | Hook/Guard | `pre-commit hooks tool guard GitHub popular 2026` |
 | Skill/Plugin | `plugin system skill framework GitHub trending 2026` |
-| 自愈系統 | `self-healing auto-remediation system GitHub 2026` |
+| 自癒系統 | `self-healing auto-remediation system GitHub 2026` |
 | 日誌可觀測 | `observability structured logging GitHub popular 2026` |
 
 **主題選擇規則**：

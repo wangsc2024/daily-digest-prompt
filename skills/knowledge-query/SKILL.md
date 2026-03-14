@@ -59,23 +59,59 @@ curl -s "http://localhost:3000/api/health"
 
 若回傳錯誤或無回應，跳過知識庫區塊並在摘要中標註「知識庫服務未啟動」。
 
-### 步驟 2：取得最近的筆記
+### 步驟 2：選擇查詢方式並取得筆記
 
-```bash
-curl -s "http://localhost:3000/api/notes?limit=20" | python -c "
-import sys, json
-data = json.load(sys.stdin)
-for n in data.get('notes', [])[:5]:
-    print(f\"- {n['title']}\")
-"
-```
+知識庫 API 提供多種查詢方式，依情境選擇：
 
-或使用混合搜索取得每日相關內容：
+| 方式 | API | 適用情境 |
+|------|-----|----------|
+| **混合搜尋** | POST /api/search/hybrid | 一般查詢、高召回（語義＋關鍵字 RRF） |
+| **語義搜尋** | POST /api/search/semantic | 概念性問題、模糊搜尋、相關主題 |
+| **關鍵字搜尋** | POST /api/search/keyword | 精確詞、專有名詞、程式碼/錯誤訊息 |
+| **標籤搜尋** | GET /api/search/tags/:tag | 依標籤瀏覽（如 #typescript） |
+| **檢索上下文** | POST /api/search/retrieve | 取得格式化段落，由 Agent 自行組織回答（不呼叫 LLM） |
+| **最近筆記** | GET /api/notes?limit=N | 僅列標題、不搜尋 |
+
+**混合搜尋（推薦，每日回顧或一般問句）：**
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json" \
-  -d "{\"query\": \"今日學習 筆記 重點\", \"topK\": 3}"
+  -d "{\"query\": \"今日學習 筆記 重點\", \"topK\": 5}"
+```
+
+**語義搜尋（概念性問題）：**
+
+```bash
+curl -s -X POST "http://localhost:3000/api/search/semantic" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\": \"什麼是依賴注入\", \"topK\": 3, \"minScore\": 0.6}"
+```
+
+**關鍵字搜尋（精確詞）：**
+
+```bash
+curl -s -X POST "http://localhost:3000/api/search/keyword" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\": \"useState\", \"topK\": 10}"
+```
+
+**檢索上下文（從知識庫中回答型：只取資料、自己組織答案）：**
+
+Windows 請用 JSON 檔案發送：
+
+```bash
+# 先以 Write 建立 body.json：{"query":"使用者問題","topK":5}
+curl -s -X POST "http://localhost:3000/api/search/retrieve" \
+  -H "Content-Type: application/json; charset=utf-8" -d @body.json
+```
+
+回傳含 `formattedContext`，可直接作為 LLM 的 context，**僅根據此內容回答**。
+
+**取得最近筆記列表：**
+
+```bash
+curl -s "http://localhost:3000/api/notes?limit=20"
 ```
 
 ### 步驟 3：產出摘要
@@ -197,10 +233,20 @@ curl -s "http://localhost:3000/api/stats"
 curl -s "http://localhost:3000/api/notes/tags"
 ```
 
+## 從知識庫中回答（RAG 流程）
+
+當任務為「從知識庫中找資料回答」時，建議流程：
+
+1. 呼叫 **POST /api/search/retrieve**，body：`{"query": "使用者問題", "topK": 5}`（Windows 用 JSON 檔發送）。
+2. 取回 `formattedContext`，作為 LLM 的 context。
+3. **僅根據 formattedContext 的內容回答**；若為空或無相關筆記，如實說明「知識庫中暫無相關筆記」。
+
+可選：先 **GET /api/stats** 了解筆記總數與健康狀態；需要單篇全文時用 **GET /api/notes/:id**。
+
 ## 注意事項
 
 - 如果知識庫服務未啟動，不要報錯，只需在摘要中省略此區塊
-- 查詢時不需要取得完整筆記內容，標題列表即可
+- 查詢時依情境選 API：概念性用 semantic、精確詞用 keyword、一般用 hybrid、只要段落用 retrieve
 - 匯入前先確認服務 health check 通過
 - **匯入內容放 `contentText`，不要填 `content`**
 - 不要手動建構 Tiptap JSON

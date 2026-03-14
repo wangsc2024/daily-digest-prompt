@@ -6,6 +6,8 @@ description: |
   Use when: 建立知識庫、搭建知識領域、Obsidian vault、知識體系、knowledge domain、build vault、知識架構、一鍵建庫。
 allowed-tools: Bash, Read, Write, WebSearch, WebFetch
 cache-ttl: N/A
+depends-on:
+  - ntfy-notify
 triggers:
   - "建立知識庫"
   - "搭建知識領域"

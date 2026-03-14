@@ -25,7 +25,7 @@ triggers:
 追蹤每次排程執行的狀態，提供健康度報告。由 PowerShell 腳本（run-agent.ps1 / run-agent-team.ps1）負責寫入，Agent 僅讀取。
 
 ## 狀態檔案位置
-- `state/scheduler-state.json` — 所有 Agent 的執行記錄
+- `state/scheduler-state.json` — 所有 Agent 的執行記錄（3000+ 行；讀取前先 `Bash: wc -l state/scheduler-state.json` 取行數，再用 `Read offset=<行數-100> limit=100` 僅取末尾最新記錄，避免整體讀取 36k tokens）
 - `state/todoist-history.json` — Todoist 自動任務歷史（楞嚴經/Log審查/Git push）
 
 ## 狀態檔案格式
@@ -80,6 +80,7 @@ PowerShell 腳本的寫入邏輯：
 4. 寫回檔案
 
 > **注意**：Agent 對此檔案為**唯讀**。若需要健康度資訊，用 Read 讀取後分析即可。
+> **大檔讀取規範**：`wc -l state/scheduler-state.json` → `Read offset=<N-100> limit=100` 近 7 天統計僅需末尾 ~150 行（每筆 ~10 行）。
 
 ## Todoist 歷史追蹤（todoist-history.json）
 
