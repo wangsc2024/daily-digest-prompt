@@ -20,6 +20,10 @@
 
 ### 1.3 從結構化日誌提取 Chatroom 指標
 
+> **說明**：bot.js 的 HTTP 呼叫（localhost:3001）由 Node.js 獨立執行，不經 Claude Code 工具，JSONL 中不會出現 `chatroom` tag。
+> 因此採**雙軌分析**：先查 JSONL（捕捉 Claude Agent 自身的 chatroom Skill 呼叫），再用 localhost:3001 pattern 補充。
+> 若兩軌合計仍為 0，代表近 2 日無 Claude Agent 主動呼叫 bot.js，屬正常（bot.js 被動服務，Claude Agent 只在有任務時才呼叫）。
+
 取今日與昨日的 JSONL 日誌，用 Python 分析：
 ```bash
 TODAY=$(date +%Y-%m-%d)
@@ -29,9 +33,11 @@ python -c "
 import json, sys, datetime
 records = [json.loads(l) for l in sys.stdin if l.strip()]
 
-# 篩選 chatroom 相關工具呼叫
-chatroom_records = [r for r in records if 'chatroom' in r.get('tags', [])]
-claim_records = [r for r in records if any('claim' in str(r.get('summary','')) for _ in [1])]
+# 雙軌篩選：chatroom tag（明確標記）或 localhost:3001 pattern（Bash 呼叫）
+chatroom_records = [r for r in records if
+    'chatroom' in r.get('tags', []) or
+    ('localhost:3001' in str(r.get('summary', '')) and r.get('tool') == 'Bash')]
+claim_records = [r for r in records if 'claim' in str(r.get('summary', ''))]
 
 # 計算指標
 total = len(chatroom_records)
@@ -90,7 +96,9 @@ rm -f cache/chatroom.json
 > 但本次調整後需在報告中記錄，供人工審核。
 
 ### 3.3 無需調整時
-記錄「指標正常，無需調整」。
+若 `total_calls = 0`（雙軌分析均無記錄），記錄：
+「近 2 日無 Claude Agent 主動呼叫 bot.js（正常：bot.js 被動服務，Agent 只在有任務時才呼叫）；斷路器狀態 {gun_bot_state}，指標正常，無需調整」
+其餘情況記錄「指標正常，無需調整」。
 
 ---
 

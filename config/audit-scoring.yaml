@@ -266,10 +266,10 @@ dimensions:
         zero_criteria: "arch-decision.json 不存在或所有 immediate_fix 均 pending/failed_max_retry"
         scoring_guide: "5=>=80% / 3=>=50% / 1=>=20% / 0=<20%（或 arch-decision 不存在）"
       - id: "4.8"
-        name: "自愈修復成功率（SH03）"
+        name: "自癒修復成功率（SH03）"
         full_score_criteria: "最近 7 天 self-heal 的修復成功率（repairs_succeeded/repairs_attempted）平均 ≥ 80%"
         evidence: "讀取 state/todoist-history.json 中 history_type=self_heal 的最近 7 條記錄，提取修復統計"
-        zero_criteria: "無 self_heal 執行記錄（系統從未執行自愈）"
+        zero_criteria: "無 self_heal 執行記錄（系統從未執行自癒）"
         scoring_guide: "5=>=80% / 3=>=50% / 1=>=20% / 0=無資料"
 
   # --- 維度 5：系統使用的技術（5 子項）---

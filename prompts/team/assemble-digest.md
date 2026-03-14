@@ -24,6 +24,9 @@
 
 ### 0.3 載入狀態（唯讀）
 讀取 `state/scheduler-state.json` 計算健康度（此檔案由 PowerShell 腳本維護，Agent 只讀不寫）。
+> **讀取最佳化**：檔案超過 3000 行，請使用 Read 工具的 `limit=100` 參數讀取末尾最新記錄：
+> `Read(file_path="state/scheduler-state.json", offset=<總行數-100>, limit=100)`
+> 若不確定行數，先以 `Bash: wc -l state/scheduler-state.json` 取得行數後再計算 offset。
 
 ---
 

@@ -221,34 +221,67 @@ curl -X POST http://localhost:3000/api/notes \
 
 ### Step 7.5: 發送審查完成通知
 
-審查完成後，透過 ntfy 推播通知，包含審查摘要與後續行動提醒。
+審查完成後，透過 ntfy 推播**兩則**通知：一則審查摘要，一則 ADR decision 填寫提醒（僅在有 Proposed ADR 時發送）。
 
-**建立通知 JSON**（用 Write 工具建立 `audit-notify.json`）：
+**7.5a. 讀取 ADR 狀態清單**
+
+先讀取 `context/adr-registry.json`，分別篩出：
+- `immediate_fix_accepted`：`status === "Accepted"` 且 `implementation_status === "immediate_fix"` 的條目（自動接受，self-heal 將執行）
+- `schedule_adr_pending`：`status === "Proposed"` 且 `decision === ""` 的條目（需人工填寫 decision）
+
+取得各自的 `count` 與 `list`（每條含 `id` 與 `title`，最多列出 5 條）。
+
+**7.5b. 發送審查完成通知**（用 Write 工具建立 `audit-notify.json`）：
 
 ```json
 {
   "topic": "wangsc2025",
   "title": "系統審查完成 {GRADE}（{SCORE}/100）",
-  "message": "修正 {FIXES} 項 | 報告：docs/系統審查報告_{DATE}.md\n\n📋 請手動觸發 arch-evolution：\n  在 Claude Code 輸入 arch-evolution\n  將 improvement-backlog.json 轉化為 ADR\n\n✏️ 請人工填寫 ADR decision 欄位：\n  context/adr-registry.json\n  找 status=Proposed 的條目填寫 decision",
+  "message": "自動修正 {FIXES} 項 | immediate_fix ADR {AUTO_COUNT} 筆（已自動接受，self-heal 將 git 備份後執行）| 報告：docs/系統審查報告_{DATE}.md",
   "priority": 3,
   "tags": ["white_check_mark", "clipboard"]
 }
 ```
 
+發送後刪除 `audit-notify.json`。
+
+**7.5c. 若有 schedule_adr（Proposed + decision 為空），單獨發送人工決策提醒**
+
+讀取步驟 7.5a 的 `schedule_adr_pending`，若 `count > 0`，建立 `adr-decision-notify.json`：
+
+```json
+{
+  "topic": "wangsc2025",
+  "title": "✏️ 需人工決策的 ADR（{SCHEDULE_COUNT} 筆 schedule_adr）",
+  "message": "以下 ADR 因需人工前提條件（CI 環境確認、外部服務整合等），decision 欄位留空待填：\n{schedule_list}\n\n請在 context/adr-registry.json 找到對應條目填寫 decision（接受/拒絕理由）。\n注意：immediate_fix 的 {AUTO_COUNT} 筆已自動接受，self-heal 將自動執行，無需人工介入。",
+  "priority": 4,
+  "tags": ["pencil", "memo"]
+}
+```
+
+- `{schedule_list}` 格式：每行一條 `• {id}：{title}`
+- `{AUTO_COUNT}`：immediate_fix Accepted 的數量（已自動接受）
+- 發送後刪除 `adr-decision-notify.json`
+
 **替換佔位符**：
 - `{GRADE}`：本次等級（如 `S`、`A`）
 - `{SCORE}`：加權總分（如 `90.47`）
-- `{FIXES}`：自動修正數量（如 `2`）
+- `{FIXES}`：Step 4 自動修正數量（如 `2`）
 - `{DATE}`：日期時間（如 `20260224_0040`）
+- `{AUTO_COUNT}`：immediate_fix Accepted ADR 數量
+- `{SCHEDULE_COUNT}`：schedule_adr Proposed ADR 數量
+- `{schedule_list}`：schedule_adr 清單
 
-**發送通知**：
+**發送指令**：
 ```bash
 curl -s -H "Content-Type: application/json; charset=utf-8" -d @audit-notify.json https://ntfy.sh
+# （若有 schedule_adr Proposed ADR）
+curl -s -H "Content-Type: application/json; charset=utf-8" -d @adr-decision-notify.json https://ntfy.sh
 ```
 
 **錯誤處理**：
 - 發送失敗不阻塞流程，僅記錄警告
-- `audit-notify.json` 在 Step 8 清理
+- 兩個暫存 JSON 均在 Step 8 清理
 
 ### Step 8: 清理
 
@@ -258,7 +291,8 @@ curl -s -H "Content-Type: application/json; charset=utf-8" -d @audit-notify.json
 - `results/audit-dim3-7.json`
 - `results/audit-dim4.json`
 - `note.json`（RAG 上傳用）
-- `audit-notify.json`（ntfy 通知用）
+- `audit-notify.json`（ntfy 審查摘要通知用）
+- `adr-decision-notify.json`（ntfy ADR decision 提醒用，若存在）
 
 保留：
 - `docs/系統審查報告_*.md`（永久存檔）

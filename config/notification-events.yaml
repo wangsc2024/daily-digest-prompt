@@ -1,5 +1,5 @@
 # config/notification-events.yaml
-# 自愈機制 ntfy 通知事件集中配置
+# 自癒機制 ntfy 通知事件集中配置
 # 引用者：prompts/team/todoist-auto-arch-evolution.md、templates/auto-tasks/self-heal.md
 #          run-agent-team.ps1、hooks/on_stop_alert.py
 #
@@ -55,18 +55,18 @@ events:
 # self-heal (Act 步驟) 事件
 # ──────────────────────────────────────────
 
-  # 自愈完成 — 全部成功
+  # 自癒完成 — 全部成功
   self_heal_success:
-    title: "✅ 自愈完成"
+    title: "✅ 自癒完成"
     message_template: "修復 {success}/{total} 項 | arch-decision {arch_success} 項 | {timestamp}"
     priority: 2         # low — 常規成功，低打擾
     tags: ["white_check_mark"]
     condition: "all_success"
     deduplicate: false
 
-  # 自愈完成 — 部分失敗
+  # 自癒完成 — 部分失敗
   self_heal_partial:
-    title: "⚠️ 自愈部分失敗"
+    title: "⚠️ 自癒部分失敗"
     message_template: "成功 {success}/{total} 項 | 失敗：{failed_items}"
     priority: 3         # default — 需關注
     tags: ["warning"]
@@ -75,9 +75,9 @@ events:
     deduplicate_key: "self_heal_partial"
     deduplicate_hours: 24  # 同日僅通知 1 次
 
-  # 自愈完成 — 全部失敗
+  # 自癒完成 — 全部失敗
   self_heal_failed:
-    title: "❌ 自愈失敗 — 需人工介入"
+    title: "❌ 自癒失敗 — 需人工介入"
     message_template: "全部 {total} 項修復失敗 | 錯誤：{error_summary}"
     priority: 5         # urgent — 需立即關注
     tags: ["fire", "x"]
@@ -86,7 +86,7 @@ events:
 
   # 無修復項目（系統健康）
   self_heal_nothing:
-    title: "🔧 自愈：無修復項目"
+    title: "🔧 自癒：無修復項目"
     message_template: "系統健康，無需修復 | {timestamp}"
     priority: 2
     tags: ["white_check_mark"]

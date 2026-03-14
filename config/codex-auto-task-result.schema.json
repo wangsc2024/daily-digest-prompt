@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "agent": { "type": "string" },
+    "type": { "type": "string" },
+    "status": { "type": "string", "enum": ["success", "partial_success", "partial", "failed"] },
+    "topic": { "type": ["string", "null"] },
+    "kb_imported": { "type": ["boolean", "null"] },
+    "kb_note_title": { "type": ["string", "null"] },
+    "tags": {
+      "type": ["array", "null"],
+      "items": { "type": "string" }
+    },
+    "summary": { "type": "string" },
+    "error": { "type": ["string", "null"] },
+    "done_cert": {
+      "type": ["object", "null"],
+      "properties": {
+        "status": { "type": ["string", "null"] },
+        "quality_score": { "type": ["number", "integer", "null"] },
+        "remaining_issues": {
+          "type": ["array", "null"],
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["status", "quality_score", "remaining_issues"],
+      "additionalProperties": true
+    },
+    "registry_entry": {
+      "type": ["object", "null"],
+      "properties": {
+        "date": { "type": "string" },
+        "task_type": { "type": "string" },
+        "topic": { "type": "string" },
+        "kb_note_title": { "type": ["string", "null"] },
+        "kb_imported": { "type": ["boolean", "null"] },
+        "tags": {
+          "type": ["array", "null"],
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["date", "task_type", "topic", "kb_note_title", "kb_imported", "tags"],
+      "additionalProperties": true
+    }
+  },
+  "required": ["agent", "type", "status", "summary", "error"],
+  "additionalProperties": true
+}

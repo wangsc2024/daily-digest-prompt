@@ -64,7 +64,7 @@ steps:
         timeout_seconds: 900
 
   act:
-    name: "Act — 自愈迴圈"
+    name: "Act — 自癒迴圈"
     auto_task_key: "self_heal"
     prompt_file: "prompts/team/todoist-auto-self-heal.md"
     timeout_seconds: 600

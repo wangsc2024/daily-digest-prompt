@@ -28,7 +28,7 @@
 | `podcast.yaml` | Podcast 生成配置 | article-to-podcast.ps1 | 調整語音合成、音訊格式參數 |
 | `media-pipeline.yaml` | 媒體管線配置（影片/音訊） | compose_video.py、concat_audio.py | 調整影片合成與音訊串接參數 |
 | `tts-abbreviation-rules.yaml` | TTS 縮寫展開規則 | article-to-podcast.ps1 | 調整語音合成的縮寫念法 |
-| `notification-events.yaml` | 自愈機制 ntfy 通知事件集中配置（OODA 閉環事件） | arch-evolution、self-heal、on_stop_alert.py | 調整通知事件標題、等級、去重策略 |
+| `notification-events.yaml` | 自癒機制 ntfy 通知事件集中配置（OODA 閉環事件） | arch-evolution、self-heal、on_stop_alert.py | 調整通知事件標題、等級、去重策略 |
 | `budget.yaml` | LLM 用量預算配置（每日/月度 token 上限） | budget_guard.py、llm_router.py | 調整 Claude/Groq 用量上限與告警閾值 |
 | `agent-pool.yaml` | Agent Pool 並行度與 done_cert 策略配置 | coordinator.py、done_cert.py | 調整 Agent 並行數量、timeout 繼承來源 |
 | `kb-content-scoring.yaml` | KB 知識庫內容評分系統配置 | kb-curator SKILL、groq-relay.js | 調整知識庫內容品質評分規則 |
@@ -89,7 +89,7 @@ config/
 ├── 特殊領域：creative-game-mode.yaml, retro-games.yaml, podcast.yaml
 ├── 媒體管線：media-pipeline.yaml, tts-abbreviation-rules.yaml
 ├── OODA 工作流：ooda-workflow.yaml
-├── 通知事件：notification-events.yaml（自愈機制事件定義）
+├── 通知事件：notification-events.yaml（自癒機制事件定義）
 ├── 預算治理：budget.yaml（Token 上限 + 告警閾值）
 ├── Agent Pool：agent-pool.yaml（並行度 + done_cert）
 ├── 知識庫評分：kb-content-scoring.yaml（KB 內容品質評分）

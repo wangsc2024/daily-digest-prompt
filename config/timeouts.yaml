@@ -47,15 +47,15 @@ todoist_team:
     ai_workflow_github: 720     # GitHub workflow research + KB
     ai_smart_city: 600          # domain research（ai-domain-research.md 通用模板）
     ai_sysdev: 600              # domain research（ai-domain-research.md 通用模板）
-    shurangama: 900             # WebFetch 楞嚴經多章 + 段落分析 + KB 匯入（PS1 已同步至 900s）
-    jiaoguangzong: 900          # WebFetch 教觀綱宗多章 + KB 匯入（PS1 已同步至 900s）
+    shurangama: 1200            # 楞嚴經深題（如五十陰魔）偶發超過 900s，保留更充裕收尾時間
+    jiaoguangzong: 1200         # 教觀綱宗會通型主題偶發超過 900s，避免卡在最終寫回
     fahua: 900                  # WebFetch 法華 + KB 匯入
     jingtu: 900                 # WebFetch 淨土 + KB 匯入
     # === 系統類（claude_sonnet45 後端，重 context 任務，已導入 sub-agent）===
     skill_audit: 720            # sub-agent 掃描 26 SKILL.md + KB 搜尋 + 修改建議
     system_insight: 720         # sub-agent 分析 logs/state + 更新 system-insight.json
     arch_evolution: 900         # 讀 improvement-backlog + context/*.json + 架構決策
-    self_heal: 720              # 多步驟修復（registry/快取/排程驗證）+ ntfy
+    self_heal: 1200             # 多步驟修復（registry/快取/排程驗證）+ ntfy（延長：720s 曾超時，步驟 a-i + arch-decision 需充裕時間）
     chatroom_optimize: 480      # sub-agent log 分析 + routing.yaml 調整 + ntfy
     git_push: 600               # git log/diff + 隱私檢查 + commit + push + KB 同步
     log_audit: 720              # sub-agent 讀 10+ log + 分析修正 + KB 匯入
@@ -64,6 +64,8 @@ todoist_team:
     qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
     podcast_create: 2400        # 腳本生成 + TTS(40段×~10s) + concat + R2 上傳
     podcast_jiaoguangzong: 2400 # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
+    # === Skill 鑄造（claude_sonnet 預設）===
+    skill_forge: 900            # 上下文讀取(30s) + 子Agent去重(60s) + KB研究(300s) + Skill生成(120s) + 驗證整合(120s) + 自評分(60s) + 緩衝
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:
