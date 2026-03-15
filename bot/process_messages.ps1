@@ -4,8 +4,9 @@
 # 遵循 learn-claude-code s11: "Poll, claim, work, repeat"
 # Worker 主動認領任務，支援多 Worker 安全並行。
 #
-# 一般任務：使用 Cursor CLI (agent -p) + cursor-composer-1-5 執行；用法依 skills/cursor-cli/SKILL.md。
+# 一般任務：使用 Cursor CLI (agent -p) + composer-1.5 執行；用法依 skills/cursor-cli/SKILL.md。
 # 研究型任務：使用 Codex (codex exec --full-auto -m gpt-5.4) 以研究工作流執行；前置 kb-research-strategist 與主任務皆由 Codex 執行；完成後 research-series 更新仍用 claude -p。
+# 備援鏈：非 Cursor CLI 方案（如 Codex）→ 以 Cursor CLI (agent -p) 為備援；Cursor CLI 方案 → 以 Claude (claude -p) 為備援。
 # 前置需求：agent（Cursor CLI）、codex（研究型）、claude CLI（研究後置）已安裝並完成認證。
 #
 # 流程：poll → claim → work → complete
@@ -60,6 +61,32 @@ function Write-Log {
 
 $CompletionLogFile = Join-Path $LogDir "completion_log.jsonl"
 $ProjectRoot = "D:\Source\daily-digest-prompt"
+# 遊戲型任務：產出目錄固定，Vite 建置、部署 Cloudflare Pages、完成後 push GitHub
+$GameWorkDir = "D:\source\game_web"
+
+# ── 解析 agent / codex 可執行檔（排程環境常無 PATH，需絕對路徑）──
+$Script:AgentCmd = (Get-Command agent -ErrorAction SilentlyContinue)?.Source
+if (-not $Script:AgentCmd) {
+    $candidates = @(
+        "$env:USERPROFILE\.local\bin\agent.exe",
+        "$env:LOCALAPPDATA\Programs\cursor\resources\app\bin\agent.cmd",
+        "$env:APPDATA\npm\agent.cmd",
+        "$env:APPDATA\npm\agent.ps1"
+    )
+    foreach ($c in $candidates) {
+        if ($c -and [System.IO.File]::Exists($c)) { $Script:AgentCmd = $c; break }
+    }
+}
+if (-not $Script:AgentCmd) { $Script:AgentCmd = "agent" }
+
+$Script:CodexCmd = (Get-Command codex -ErrorAction SilentlyContinue)?.Source
+if (-not $Script:CodexCmd) {
+    $cx = "$env:APPDATA\npm\codex.cmd"
+    if ([System.IO.File]::Exists($cx)) { $Script:CodexCmd = $cx }
+}
+if (-not $Script:CodexCmd) { $Script:CodexCmd = "codex" }
+# 排程環境常無 codex 在 PATH；有解析到絕對路徑即視為可用
+$Script:CodexAvailable = ($Script:CodexCmd -ne "codex") -or (Get-Command codex -ErrorAction SilentlyContinue)
 
 # ── Skill-First + Cursor CLI 前言（一般任務由 agent -p 執行，依 skills/cursor-cli/SKILL.md）──
 $SkillFirstPreamble = @"
@@ -91,13 +118,15 @@ function Get-BotMemoryContext {
 
 # ── 品質要求後綴（依任務類型，強制結構化輸出）──
 function Get-QualityRequirements {
-    param([string]$TaskContent, [bool]$IsCoding, [bool]$IsResearch)
+    param([string]$TaskContent, [bool]$IsCoding, [bool]$IsResearch, [bool]$IsGame = $false)
     $lower = $TaskContent.ToLower()
     $isPlan     = $lower -match '規劃|計畫|方案|策略|架構|設計'
     $isOptimize = $lower -match '優化|改善|提升|重構|改進'
     $common = "`n`n---`n## 輸出品質要求（必須遵守）`n執行完畢後，**必須**以下列格式提供結構化摘要：`n`n✅ **執行摘要**：（2-3 句話說明完成了什麼）"
     if ($IsResearch) {
         return $common + "`n📚 **主要發現**：（列出 3-5 個關鍵洞察）`n💾 **知識庫**：（是否已存入知識庫，使用何關鍵字）`n🔗 **延伸方向**：（建議後續研究方向）"
+    } elseif ($IsGame) {
+        return $common + "`n📁 **已修改/建立的檔案**：（列出所有異動檔案，須位於 " + $GameWorkDir + "）`n🧪 **測試結果**：（npm run build 通過、本地預覽情況）`n🚀 **部署**：（是否已 git push 至 GitHub、Cloudflare Pages 部署狀態或預覽 URL）`n⚠️ **注意事項**：（使用限制或後續動作）"
     } elseif ($IsCoding) {
         return $common + "`n📁 **已修改/建立的檔案**：（列出所有異動檔案）`n🧪 **測試結果**：（測試通過情況）`n⚠️ **注意事項**：（使用限制或後續動作）"
     } elseif ($isPlan) {
@@ -216,7 +245,7 @@ foreach ($record in @($record)) {
     $uid = $record.uid
     $filename = $record.filename
     $isResearch = $record.is_research
-    $taskType = $record.task_type   # general | code | podcast | detail；舊記錄可能為空
+    $taskType = $record.task_type   # general | code | podcast | detail | kb_answer | game；舊記錄可能為空
 
     if ([string]::IsNullOrWhiteSpace($filename)) { continue }
 
@@ -247,7 +276,8 @@ foreach ($record in @($record)) {
         $stateBody = @{ state = "processing"; worker_id = $WorkerId } | ConvertTo-Json
         Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/state" -Method Patch -Body $stateBody -Headers $JsonHeaders | Out-Null
     } catch {
-        Write-Log "狀態轉換為 processing 失敗: $_"
+        Write-Log "狀態轉換為 processing 失敗: $_（跳過本任務，否則 /processed 會回 invalid_state 且不會回傳至 Gun）"
+        continue
     }
 
     $localFilePath = Join-Path $TempDir $filename
@@ -286,14 +316,14 @@ foreach ($record in @($record)) {
         }
 
         # ── 研究型一律採研究工作流：KB 深化預處理 + 系列上下文；完成後結果存知識庫（由 bot routes 完成時觸發）──
-        $CodexAvailable = Get-Command codex -ErrorAction SilentlyContinue
+        $CodexAvailable = $Script:CodexAvailable
         $kbBriefPath = Join-Path $ProjectRoot "context\kb-research-brief.json"
         if ($isResearch -and $researchKeywords.Count -gt 0) {
             $keywords = ($researchKeywords -join ", ")
             Write-Log "研究型任務：KB 深化需求（關鍵詞：$keywords），以 Codex 執行 kb-research-strategist..."
             $krsPrompt = "請以正體中文輸出。讀取 skills/kb-research-strategist/SKILL.md，以「$keywords」為研究主題執行完整步驟（步驟 0-5），結果輸出至 context/kb-research-brief.json。"
             if ($CodexAvailable) {
-                $krsPrompt | & codex exec --full-auto -m gpt-5.4 2>&1 | Out-Null
+                $krsPrompt | & $Script:CodexCmd exec --full-auto -m gpt-5.4 2>&1 | Out-Null
                 Write-Log "kb-research-strategist（Codex）執行完畢"
             } else {
                 $savedClaudeCodeKRS = $env:CLAUDECODE
@@ -323,6 +353,16 @@ foreach ($record in @($record)) {
             Write-Log "從任務內容偵測到目標路徑: $workDir"
         }
 
+        # 遊戲型：強制工作目錄為 D:\source\game_web，並確保目錄存在
+        if ($taskType -eq 'game') {
+            $workDir = $GameWorkDir
+            if (-not (Test-Path $workDir)) {
+                New-Item -ItemType Directory -Path $workDir -Force | Out-Null
+                Write-Log "遊戲型任務：已建立產出目錄 $workDir"
+            } else {
+                Write-Log "遊戲型任務：產出目錄 $workDir"
+            }
+        }
         # 若有目標目錄，確保其存在
         if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
             if (-not (Test-Path $workDir)) {
@@ -335,7 +375,8 @@ foreach ($record in @($record)) {
         $memoryContext = Get-BotMemoryContext
 
         # ── 品質要求（依任務類型）──
-        $qualityReqs = Get-QualityRequirements -TaskContent $taskContent -IsCoding $isCoding -IsResearch ([bool]$isResearch)
+        $isGame = ($taskType -eq 'game')
+        $qualityReqs = Get-QualityRequirements -TaskContent $taskContent -IsCoding $isCoding -IsResearch ([bool]$isResearch) -IsGame $isGame
 
         # ── 注入 KB 系列研究上下文（若有 kb-research-brief.json）──
         $kbSeriesContext = ""
@@ -380,13 +421,27 @@ foreach ($record in @($record)) {
         $memorySection = if ($memoryContext) { $memoryContext + "`n" } else { "" }
         $researchWorkflowPreamble = ""
         if ($isResearch) {
-            $researchWorkflowPreamble = "`n`n## 研究工作流（本任務依研究工作流執行）`n請善用 WebSearch/WebFetch、知識庫查詢與匯入（skills/knowledge-query、skills/web-research），產出結構化報告或寫入 context/；必要時將研究成果匯入知識庫。`n"
+            $researchWorkflowPreamble = "`n`n## 研究工作流（本任務依研究工作流執行）`n請優先使用 WebSearch/WebFetch（若執行環境允許，見專案 .cursor/cli.json）與知識庫查詢/匯入（skills/knowledge-query、skills/web-research），產出結構化報告或寫入 context/；必要時將研究成果匯入知識庫。若 WebSearch/WebFetch 被拒絕，則依專案內資源與既有知識產出，並於報告中註明「未取得外部網路來源」。`n"
         }
         $codeTaskPreamble = ""
         if ($isCoding) {
             $codeTaskPreamble = "`n`n## 編碼型任務（依 cursor-cli skill 執行）`n本任務為 CODE 型任務，請依 **skills/cursor-cli/SKILL.md** 執行：先讀 skills/SKILL_INDEX.md、積極採用與程式/重構/除錯相關的 Skill，所有修改與產出須在指定工作目錄內完成。`n"
         }
-        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $researchWorkflowPreamble + $codeTaskPreamble + $kbSeriesContext + $qualityReqs
+        $gameTaskPreamble = ""
+        if ($isGame) {
+            $gameTaskPreamble = @"
+
+## 遊戲型任務（依 cursor-cli skill，Vite + Cloudflare Pages）
+
+本任務為**遊戲型**，執行方式比照編碼型，並須遵守：
+1. **建置方式**：必須使用 **Vite** 建置前端專案（npm create vite@latest 或既有 Vite 專案）。
+2. **產出目錄**：所有程式碼與建置產出**必須**位於 **$GameWorkDir**。若目錄不存在請先建立。
+3. **部署**：專案須可部署至 **Cloudflare Pages**（`npm run build` 產出靜態檔，符合 Cloudflare Pages 建置規範）。完成後**必須**在產出目錄內執行 `git add`、`git commit`、`git push` 推送至 GitHub，以觸發或完成 Cloudflare Pages 部署。
+4. 請依 **skills/cursor-cli/SKILL.md** 執行，先讀 skills/SKILL_INDEX.md；所有修改與產出須在 $GameWorkDir 內完成。
+
+"@
+        }
+        $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $researchWorkflowPreamble + $codeTaskPreamble + $gameTaskPreamble + $kbSeriesContext + $qualityReqs
 
         # ── Podcast 型一律採 podcast 工作流（article-to-podcast.ps1 → TTS→MP3→上傳 R2）──
         $podcastHandled = $false
@@ -437,64 +492,157 @@ foreach ($record in @($record)) {
 
         Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
         $AgentStartTime = Get-Date
-        $toolUsed = "Cursor CLI (cursor-composer-1-5)"
+        $toolUsed = "Cursor CLI (composer-1.5)"
         if ($isResearch -and $CodexAvailable) {
             # 研究型任務：以 Codex 研究工作流執行（codex exec --full-auto -m gpt-5.4，依 config/frequency-limits codex_exec）
             Write-Log "--> Worker 使用 Codex 研究工作流 (codex exec --full-auto -m gpt-5.4) 處理研究型任務 (關鍵詞: $($researchKeywords -join ', '), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            $codexPrompt = "請以正體中文輸出。`n`n" + $effectiveContent
+            $codexPromptFile = Join-Path $LogDir "codex-prompt-$uid-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
+            Set-Content -Path $codexPromptFile -Value $codexPrompt -Encoding UTF8 -NoNewline
+            $runCodex = {
+                param($promptPath, $workDirPath, $projRoot)
+                $codexExe = $Script:CodexCmd
+                if ($workDirPath -and -not [string]::IsNullOrWhiteSpace($workDirPath)) {
+                    Push-Location $workDirPath
+                    try {
+                        Get-Content -Path $promptPath -Raw -Encoding UTF8 | & $codexExe exec --full-auto -m gpt-5.4 2>&1
+                    } finally {
+                        Pop-Location
+                    }
+                } else {
+                    Get-Content -Path $promptPath -Raw -Encoding UTF8 | & $codexExe exec --full-auto -m gpt-5.4 2>&1
+                }
+            }
+            $isCodexOutputFailure = {
+                param($out, $exitCode)
+                if ($null -ne $exitCode -and $exitCode -ne 0) { return $true }
+                $str = if ($out -is [array]) { $out -join "`n" } else { [string]$out }
+                $str -match 'failed to refresh available models' -or $str -match 'timeout waiting for child process to exit' -or $str -match 'ERROR\s+codex_core'
+            }
             try {
-                $codexPrompt = "請以正體中文輸出。`n`n" + $effectiveContent
-                $codexPromptFile = Join-Path $LogDir "codex-prompt-$uid-$(Get-Date -Format 'yyyyMMddHHmmss').txt"
-                Set-Content -Path $codexPromptFile -Value $codexPrompt -Encoding UTF8 -NoNewline
+                $output = $null
+                $codexExit = $null
+                if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                    $output = & $runCodex $codexPromptFile $workDir $ProjectRoot
+                } else {
+                    $output = & $runCodex $codexPromptFile $null $ProjectRoot
+                }
+                $codexExit = $LASTEXITCODE
+                if (& $isCodexOutputFailure $output $codexExit) {
+                    $reason = if ($codexExit -ne 0) { "exit code $codexExit" } else { "輸出含錯誤" }
+                    $outStr = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
+                    $flat = ($outStr -replace "`r`n|`n", " ").Trim()
+                    $snippet = if ($flat.Length -gt 0) { $flat.Substring(0, [Math]::Min(600, $flat.Length)) } else { "" }
+                    if ($snippet.Length -gt 0) { Write-Log "[Codex 失敗輸出摘要] $snippet" }
+                    Write-Log "[WARN] Codex 失敗（$reason），重試一次..."
+                    if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                        $output = & $runCodex $codexPromptFile $workDir $ProjectRoot
+                    } else {
+                        $output = & $runCodex $codexPromptFile $null $ProjectRoot
+                    }
+                    $codexExit = $LASTEXITCODE
+                }
+                if (& $isCodexOutputFailure $output $codexExit) {
+                    $outStr2 = if ($output -is [array]) { $output -join "`n" } else { [string]$output }
+                    $flat2 = ($outStr2 -replace "`r`n|`n", " ").Trim()
+                    $snippet2 = if ($flat2.Length -gt 0) { $flat2.Substring(0, [Math]::Min(600, $flat2.Length)) } else { "" }
+                    if ($snippet2.Length -gt 0) { Write-Log "[Codex 重試仍失敗輸出摘要] $snippet2" }
+                    Write-Log "[WARN] Codex 重試仍失敗（exit $codexExit），fallback 至 Cursor CLI ($Script:AgentCmd)"
+                    $toolUsed = "Cursor CLI (composer-1.5, Codex fallback)"
+                    try {
+                        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                            Push-Location $workDir
+                            try {
+                                $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
+                            } finally {
+                                Pop-Location
+                            }
+                        } else {
+                            $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
+                        }
+                    } catch {
+                        Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
+                        $toolUsed = "Claude (Cursor CLI fallback)"
+                        $savedClaudeCode = $env:CLAUDECODE
+                        Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+                        try {
+                            $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" --max-turns 30 2>&1
+                        } finally {
+                            if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode } else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
+                        }
+                    }
+                } else {
+                    $toolUsed = "Codex (gpt-5.4, 研究工作流)"
+                }
+            } catch {
+                Write-Log "[WARN] Codex 執行失敗，fallback 至 Cursor CLI ($Script:AgentCmd): $_"
+                $toolUsed = "Cursor CLI (composer-1.5, Codex fallback)"
                 try {
                     if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
                         Push-Location $workDir
                         try {
-                            $output = Get-Content -Path $codexPromptFile -Raw -Encoding UTF8 | & codex exec --full-auto -m gpt-5.4 2>&1
+                            $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
                         } finally {
                             Pop-Location
                         }
                     } else {
-                        $output = Get-Content -Path $codexPromptFile -Raw -Encoding UTF8 | & codex exec --full-auto -m gpt-5.4 2>&1
+                        $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
                     }
-                } finally {
-                    Remove-Item $codexPromptFile -Force -ErrorAction SilentlyContinue
-                }
-                $toolUsed = "Codex (gpt-5.4, 研究工作流)"
-            } catch {
-                Write-Log "[WARN] Codex 執行失敗，fallback 至 Cursor CLI: $_"
-                $toolUsed = "Cursor CLI (cursor-composer-1-5, Codex fallback)"
-                if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-                    Push-Location $workDir
+                } catch {
+                    Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
+                    $toolUsed = "Claude (Cursor CLI fallback)"
+                    $savedClaudeCode = $env:CLAUDECODE
+                    Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
                     try {
-                        $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                        $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" --max-turns 30 2>&1
                     } finally {
-                        Pop-Location
+                        if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode } else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
                     }
-                } else {
-                    $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
                 }
+            } finally {
+                Remove-Item $codexPromptFile -Force -ErrorAction SilentlyContinue
             }
         } else {
-            # CODE 型任務或一般任務：皆依 skills/cursor-cli/SKILL.md，排程內 agent -p 須 --workspace 與 --trust
-            if ($isCoding) {
-                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, agent -p, cursor-composer-1-5) 處理 CODE 型任務 (工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            # CODE 型 / 遊戲型 / 一般任務：皆依 skills/cursor-cli/SKILL.md，排程內 agent -p 須 --workspace 與 --trust
+            if ($isGame) {
+                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, 遊戲型) 處理遊戲型任務 (產出目錄: $GameWorkDir，Vite + Cloudflare Pages，記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            } elseif ($isCoding) {
+                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, agent -p, composer-1.5) 處理 CODE 型任務 (工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
             } else {
-                Write-Log "--> Worker 使用 Cursor CLI (agent -p, cursor-composer-1-5) 處理一般任務 (從知識庫回答: $(if($taskType -eq 'kb_answer'){'是'}else{'否'}), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+                Write-Log "--> Worker 使用 Cursor CLI (agent -p, composer-1.5) 處理一般任務 (從知識庫回答: $(if($taskType -eq 'kb_answer'){'是'}else{'否'}), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
             }
             try {
                 if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
                     Push-Location $workDir
                     try {
-                        $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                        $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust 2>&1
                     } finally {
                         Pop-Location
                     }
                 } else {
-                    $output = & agent -p $effectiveContent --workspace $ProjectRoot --model cursor-composer-1-5 --trust 2>&1
+                    $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust 2>&1
                 }
-                if ($isCoding) { $toolUsed = "Cursor CLI (cursor-cli skill, cursor-composer-1-5)" }
+                if ($isGame) { $toolUsed = "Cursor CLI (cursor-cli skill, 遊戲型)" }
+                elseif ($isCoding) { $toolUsed = "Cursor CLI (cursor-cli skill, composer-1.5)" }
             } catch {
-                throw
+                Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
+                $toolUsed = "Claude (Cursor CLI fallback)"
+                $savedClaudeCode = $env:CLAUDECODE
+                Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+                try {
+                    if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
+                        Push-Location $workDir
+                        try {
+                            $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" --max-turns 30 2>&1
+                        } finally {
+                            Pop-Location
+                        }
+                    } else {
+                        $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" --max-turns 30 2>&1
+                    }
+                } finally {
+                    if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode } else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
+                }
             }
         }
 
@@ -509,8 +657,20 @@ foreach ($record in @($record)) {
         # 注意：結果回傳至聊天室由 bot server 的 /processed 端點透過穩定 Gun 連線負責，
         # 避免 Worker 自行呼叫 /api/send 時因 Gun relay 閒置斷線導致訊息遺失。
         $completeBody = @{ claim_generation = $claimGeneration; result = $outputStr } | ConvertTo-Json -Depth 3
-        Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/processed" -Method Patch -Body $completeBody -ContentType "application/json; charset=utf-8" -Headers $JsonHeaders | Out-Null
-        Write-Log "狀態已更新為 completed (generation: $claimGeneration)。已請 bot server 透過 Gun 回傳結果至聊天室。"
+        try {
+            $processedResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/processed" -Method Patch -Body $completeBody -ContentType "application/json; charset=utf-8" -Headers $JsonHeaders
+            Write-Log "狀態已更新為 completed (generation: $claimGeneration)。已請 bot server 透過 Gun 回傳結果至聊天室。"
+        } catch {
+            $statusCode = $null
+            try { $statusCode = $_.Exception.Response.StatusCode.value__ } catch {}
+            if ($statusCode -eq 400) {
+                Write-Log "[WARN] /processed 回傳 400（可能任務狀態非 processing 或 API 解析失敗），結果未回傳至 Gun relay。"
+            } elseif ($statusCode -eq 409) {
+                Write-Log "[WARN] /processed 回傳 409（認領已過期），結果未回傳至 Gun relay。"
+            } else {
+                Write-Log "呼叫 /processed 失敗 (HTTP $statusCode): $_"
+            }
+        }
 
         # ── 更新 research-series.json（研究任務完成後）──
         if ($isResearch -and (Test-Path $kbBriefPath)) {

@@ -196,7 +196,8 @@ routes.mount(app, {
     generateId,
     startMessageLoop,
     classifier,
-    sendReply: sendSystemReply
+    sendReply: sendSystemReply,
+    clearTaskOnRelay
 });
 
 // 訊息去重：使用 Map 記錄時間戳以支援定時清理
@@ -210,9 +211,14 @@ function generateId(prefix) {
     return `${prefix}_${crypto.randomUUID().slice(0, 12)}`;
 }
 
-// S5: sendSystemReply — 廣播給所有已連線用戶（各自加密）
+// S5: sendSystemReply — 廣播給所有已連線節點（各自加密）
+// 註：my-gun-relay 會把自己註冊為「客戶端」（wsc-bot/handshake/clients/<relay.pub>），
+// 故只要 relay 已啟動且與 bot 完成 ECDH 握手，sharedSecrets 即含 relay，無需瀏覽器開聊天室。
 async function sendSystemReply(text) {
-    if (app.locals.sharedSecrets.size === 0) return;
+    if (app.locals.sharedSecrets.size === 0) {
+        console.warn('[sendSystemReply] 無已連線節點（sharedSecrets 為空），跳過回傳至 Gun relay。請確認 my-gun-relay 已啟動且與 bot 完成握手（或至少有一聊天室客戶端曾連線）。');
+        return;
+    }
     try {
         const ts = Date.now();
         const replyId = generateId('reply');
@@ -226,6 +232,17 @@ async function sendSystemReply(text) {
         }
     } catch (err) {
         console.error('[sendSystemReply] 失敗:', err.message);
+    }
+}
+
+/** 任務完成後清除 relay 上對應的訊息節點（tombstone），避免 relay 累積已結案任務內容 */
+function clearTaskOnRelay(uid) {
+    if (!uid || typeof uid !== 'string') return;
+    try {
+        gun.get(chatRoomName).get(uid).put(null);
+        console.log(`[clearTaskOnRelay] 已清除 relay 節點: ${uid}`);
+    } catch (err) {
+        console.error('[clearTaskOnRelay] 失敗:', err.message);
     }
 }
 
@@ -357,7 +374,7 @@ const classifyQueue = createQueue({
                 created_at: new Date().toISOString()
             });
 
-            const cronTypeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
+            const cronTypeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'game' ? '遊戲型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
             await sendSystemReply(
                 `[系統回覆] 已設定週期任務：「${decision.task_content}」(${cronTypeLabel})，排程：${decision.cron_expression}`
             );
@@ -421,6 +438,15 @@ const classifyQueue = createQueue({
         if (decision.is_periodic) {
             console.error(`[classify] 無效的 cron 表達式: ${decision.cron_expression}`);
         }
+        // 防護：若訊息明顯為遊戲意圖但被分類為 general，強制改為 game，避免被簡答
+        const gameIntentPattern = /寫遊戲|做遊戲|寫一個.*遊戲|做一個.*遊戲|射擊遊戲|打磚塊|小遊戲|網頁遊戲|具創意的.*遊戲|遊戲$/m;
+        const rawText = (item.text || '').trim();
+        const taskText = (decision.task_content || '').trim();
+        if ((decision.task_type === 'general' || !decision.task_type) && !decision.is_research &&
+            (gameIntentPattern.test(rawText) || gameIntentPattern.test(taskText))) {
+            decision.task_type = 'game';
+            console.log('[classify] 偵測到遊戲意圖，改為遊戲型任務（避免簡答）');
+        }
         // 一般型：僅簡答回覆，不納入任務
         const isGeneralOnly = (decision.task_type === 'general' && !decision.is_research);
         if (isGeneralOnly) {
@@ -431,15 +457,18 @@ const classifyQueue = createQueue({
                 } else {
                     await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
                 }
+                // 持久化「已處理」記錄，重啟後 Gun 重播不會重複簡答（僅寫 records.json，不建 .md）
+                store.addProcessedOnlyRecord(item.id);
             } catch (err) {
                 console.error('[classify] 簡答發送失敗:', err.message);
                 await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
+                store.addProcessedOnlyRecord(item.id);
             }
             return;
         }
         // 其餘型態（研究／程式碼／Podcast／詳細回答／從知識庫回答等）：納入任務，不進行簡答
         store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type);
-        const typeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
+        const typeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'game' ? '遊戲型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
         await sendSystemReply(
             `[系統回覆] 已將任務存為檔案 ${item.id}.md (${typeLabel})，等待 Worker 認領處理中...`
         );

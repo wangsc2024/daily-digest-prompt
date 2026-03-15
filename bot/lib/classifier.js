@@ -42,7 +42,7 @@ function isValidScheduledAt(scheduledAt) {
     return dt <= maxEnd;
 }
 
-const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer']);
+const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer', 'game']);
 
 function validateDecision(parsed) {
     if (typeof parsed !== 'object' || parsed === null) return false;

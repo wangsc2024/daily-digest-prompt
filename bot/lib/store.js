@@ -150,9 +150,16 @@ records.forEach(r => {
 
 // ---- Records CRUD ----
 
-const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer']);
+const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer', 'game']);
 
-function addRecord(uid, taskContent, isResearch, taskType) {
+/**
+ * @param {string} uid
+ * @param {string} taskContent
+ * @param {boolean} isResearch
+ * @param {string} [taskType]
+ * @param {string} [lineUserId] - LINE 來源時填入，供完成時回報至 LINE
+ */
+function addRecord(uid, taskContent, isResearch, taskType, lineUserId) {
     if (records.some(r => r.uid === uid)) {
         console.log(`[addRecord] UID 已存在，跳過: ${uid}`);
         return;
@@ -168,7 +175,7 @@ function addRecord(uid, taskContent, isResearch, taskType) {
 
     const normalizedType = (taskType && VALID_TASK_TYPES.has(taskType)) ? taskType : null;
 
-    records.push({
+    const record = {
         uid,
         filename,
         time: new Date().toISOString(),
@@ -181,7 +188,11 @@ function addRecord(uid, taskContent, isResearch, taskType) {
         claim_generation: 0,
         result: null,
         retry_count: 0
-    });
+    };
+    if (lineUserId && typeof lineUserId === 'string') {
+        record.line_user_id = lineUserId;
+    }
+    records.push(record);
     try {
         saveJSON(RECORDS_PATH, records);
     } catch (err) {
@@ -189,8 +200,37 @@ function addRecord(uid, taskContent, isResearch, taskType) {
         if (fs.existsSync(filePath)) try { fs.unlinkSync(filePath); } catch {}
         throw err;
     }
-    const typeLabel = !!isResearch ? '研究型' : (normalizedType === 'code' ? '程式碼型' : normalizedType === 'podcast' ? 'Podcast 型' : normalizedType === 'detail' ? '詳細回答型' : normalizedType === 'kb_answer' ? '從知識庫回答型' : '一般型');
+    const typeLabel = !!isResearch ? '研究型' : (normalizedType === 'code' ? '程式碼型' : normalizedType === 'podcast' ? 'Podcast 型' : normalizedType === 'detail' ? '詳細回答型' : normalizedType === 'kb_answer' ? '從知識庫回答型' : normalizedType === 'game' ? '遊戲型' : '一般型');
     console.log(`[新增任務記錄]: ${filename}, ${typeLabel}`);
+}
+
+/**
+ * 僅標記訊息已處理（用於一般型簡答），不建立 .md、不納入 Worker 認領。
+ * 重啟後 store.getRecord(id) 仍存在，訊息迴圈去重可避免 Gun 重播時重複簡答。
+ * @param {string} uid - 訊息 ID（如 line_xxx）
+ */
+function addProcessedOnlyRecord(uid) {
+    if (records.some(r => r.uid === uid)) {
+        console.log(`[addProcessedOnlyRecord] UID 已存在，跳過: ${uid}`);
+        return;
+    }
+    const filename = `${uid}.md`;
+    records.push({
+        uid,
+        filename,
+        time: new Date().toISOString(),
+        state: STATES.COMPLETED,
+        is_processed: true,
+        is_research: false,
+        task_type: 'general',
+        claimed_by: null,
+        claimed_at: null,
+        claim_generation: 0,
+        result: null,
+        retry_count: 0
+    });
+    saveJSON(RECORDS_PATH, records);
+    console.log(`[已處理記錄]: ${uid} (一般型簡答，僅去重)`);
 }
 
 function markProcessed(uid, claimGeneration) {
@@ -325,6 +365,7 @@ function releaseExpiredClaims() {
             rec.claimed_by = null;
             rec.claimed_at = null;
             rec.claim_generation = (rec.claim_generation || 0) + 1;
+            rec.last_released_at = new Date().toISOString(); // 釋放後排到隊尾，避免同一 UID 一直被重複認領
             released++;
         }
     });
@@ -354,6 +395,7 @@ function recoverStaleProcessing() {
             rec.claimed_by = null;
             rec.claimed_at = null;
             rec.claim_generation = (rec.claim_generation || 0) + 1;
+            rec.last_released_at = new Date().toISOString(); // 回收後排到隊尾，避免同一 UID 一直被重複認領
             recovered++;
         }
     });
@@ -442,6 +484,17 @@ function queryRecords(filters = {}) {
     }
     if (filters.state !== undefined) {
         results = results.filter(m => m.state === filters.state);
+    }
+    // 待處理任務排序：剛被釋放/回收的排到隊尾，其餘依建立時間（先建立先處理），避免同一 UID 一直被重複認領
+    if (filters.state === STATES.PENDING && results.length > 0) {
+        results = [...results].sort((a, b) => {
+            const aReleased = (a.last_released_at && new Date(a.last_released_at).getTime()) || 0;
+            const bReleased = (b.last_released_at && new Date(b.last_released_at).getTime()) || 0;
+            if (aReleased !== bReleased) return aReleased - bReleased;
+            const aTime = (a.time && new Date(a.time).getTime()) || 0;
+            const bTime = (b.time && new Date(b.time).getTime()) || 0;
+            return aTime - bTime;
+        });
     }
     const total = results.length;
     // D3: 分頁支援
@@ -642,6 +695,7 @@ module.exports = {
     queryRecords,
     getRecord,
     getTaskContent,
+    addProcessedOnlyRecord,
     addCronJob,
     removeCronJob,
     addScheduledTask,

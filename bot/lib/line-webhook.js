@@ -74,9 +74,9 @@ async function handleLineEvent(event, { store, generateId, sendReply }) {
     const text = event.message.text.trim();
     if (!text) return;
 
-    // 建立任務（與 Gun.js 訊息流程一致）
+    // 建立任務（與 Gun.js 一致），並儲存 line_user_id 供完成時回報至 LINE
     const taskId = generateId('line');
-    store.addRecord(taskId, text, false);
+    store.addRecord(taskId, text, false, undefined, userId);
 
     console.log(`[LINE] 使用者 ${userId} 任務已建立：${taskId}`);
 
@@ -86,10 +86,29 @@ async function handleLineEvent(event, { store, generateId, sendReply }) {
             replyToken: event.replyToken,
             messages: [{
                 type: 'text',
-                text: `✅ 任務已收到：「${text.slice(0, 50)}${text.length > 50 ? '…' : ''}」\n等待 Worker 處理中，完成後將透過 Gun 聊天室回報。`
+                text: `✅ 任務已收到：「${text.slice(0, 50)}${text.length > 50 ? '…' : ''}」\n等待 Worker 處理中，完成後會回報至 LINE。`
             }]
         });
     }
 }
 
-module.exports = { mount };
+/** LINE 單則訊息長度上限 */
+const LINE_TEXT_MAX = 5000;
+
+/**
+ * 任務完成時推播結果至 LINE 用戶（由 routes /processed 呼叫）
+ * @param {string} userId - LINE userId (event.source.userId)
+ * @param {string} text - 要送出的內容（超過 5000 字會自動截斷）
+ * @returns {Promise<void>}
+ */
+async function pushMessage(userId, text) {
+    if (!lineClient || !userId) return;
+    const str = typeof text === 'string' ? text : String(text);
+    const body = str.length > LINE_TEXT_MAX ? str.slice(0, LINE_TEXT_MAX) + '\n...[內容過長已截斷]' : str;
+    await lineClient.pushMessage({
+        to: userId,
+        messages: [{ type: 'text', text: body }]
+    });
+}
+
+module.exports = { mount, pushMessage };

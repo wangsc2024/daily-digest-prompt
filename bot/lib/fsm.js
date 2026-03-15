@@ -28,27 +28,30 @@ const TRANSITIONS = {
     [STATES.DEAD_LETTER]:  []
 };
 
-// 任務認領預設逾時（毫秒）：10 分鐘
-const CLAIM_TIMEOUT_MS = 10 * 60 * 1000;
+// 原則：每個任務預估執行時間約 5–30 分鐘；認領後應在數分鐘內轉為 processing。
+// 任務認領預設逾時（毫秒）：認領後若未轉為 processing 超過此時長即釋放
+const CLAIM_TIMEOUT_MS = 5 * 60 * 1000;  // 5 分鐘
 
-// G26: 依任務類型動態設定 claim timeout
+// G26: 依任務類型動態設定 claim timeout（認領→processing 的允許時間，通常 < 1 min）
 const CLAIM_TIMEOUTS = {
-    research: 20 * 60 * 1000,  // 20 分鐘（研究任務）
-    code:     30 * 60 * 1000,  // 30 分鐘（程式碼生成）
-    podcast:  25 * 60 * 1000,  // 25 分鐘（Podcast 腳本＋音訊生成）
-    detail:   15 * 60 * 1000,  // 15 分鐘（詳細回答型）
-    kb_answer: 12 * 60 * 1000, // 12 分鐘（從知識庫中回答：RAG＋LLM）
-    general:  10 * 60 * 1000,  // 10 分鐘（一般任務，原預設）
+    research:  5 * 60 * 1000,  // 5 分鐘
+    code:      5 * 60 * 1000,  // 5 分鐘
+    game:      5 * 60 * 1000,  // 5 分鐘（遊戲型比照編碼型）
+    podcast:   5 * 60 * 1000,  // 5 分鐘
+    detail:    5 * 60 * 1000,  // 5 分鐘
+    kb_answer: 5 * 60 * 1000,  // 5 分鐘
+    general:   5 * 60 * 1000,  // 5 分鐘
 };
 
-// Processing 狀態超時（毫秒）：worker 崩潰時自動回收
+// Processing 狀態超時（毫秒）：單任務預估 5–30 min，設 45 min 含緩衝；worker 崩潰時自動回收
 const PROCESSING_TIMEOUTS = {
-    research: 120 * 60 * 1000, // 2 小時（研究任務含 claude -p 執行）
-    code:      90 * 60 * 1000, // 1.5 小時
-    podcast:  90 * 60 * 1000, // 1.5 小時（腳本＋TTS/音訊）
-    detail:    75 * 60 * 1000, // 1.25 小時（詳細論述／步驟說明）
-    kb_answer: 45 * 60 * 1000, // 45 分鐘（RAG 檢索＋LLM 回答）
-    general:   60 * 60 * 1000, // 1 小時
+    research:  45 * 60 * 1000, // 45 分鐘
+    code:      45 * 60 * 1000, // 45 分鐘
+    game:      45 * 60 * 1000, // 45 分鐘（遊戲型比照編碼型）
+    podcast:   45 * 60 * 1000, // 45 分鐘
+    detail:    45 * 60 * 1000, // 45 分鐘
+    kb_answer: 45 * 60 * 1000, // 45 分鐘
+    general:   45 * 60 * 1000, // 45 分鐘
 };
 
 function getProcessingTimeout(taskType) {

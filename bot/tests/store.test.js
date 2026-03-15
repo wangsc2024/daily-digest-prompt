@@ -59,6 +59,17 @@ describe('store — integration tests', () => {
         expect(saved.length).toBe(50000);
     });
 
+    it('addProcessedOnlyRecord creates completed record without .md file', () => {
+        store.addProcessedOnlyRecord('test-processed-only');
+        const rec = store.getRecord('test-processed-only');
+        expect(rec).toBeDefined();
+        expect(rec.state).toBe('completed');
+        expect(rec.is_processed).toBe(true);
+        expect(rec.task_type).toBe('general');
+        const filePath = path.join(store.TASKS_DIR, 'test-processed-only.md');
+        expect(fs.existsSync(filePath)).toBe(false);
+    });
+
     it('claimRecord transitions to claimed state', () => {
         store.addRecord('test-uid-2', 'content', false);
         const result = store.claimRecord('test-uid-2', 'worker-1');

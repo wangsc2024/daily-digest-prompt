@@ -21,6 +21,7 @@ const store = require('./store');
 const skills = require('./skills');
 const { STATES } = require('./fsm');
 const workflow = require('./workflow');
+const lineWebhook = require('./line-webhook');
 
 // 需自動存入知識庫的任務類型關鍵字
 const KB_KEYWORDS = ['研究', '規劃', '計畫', '方案', '架構', '設計', '優化', '改善', '提升', '重構', '改進', '分析', '評估', '策略', '報告'];
@@ -134,7 +135,8 @@ function buildWorkflowFinalReply(wf, storeRef) {
  * L1: 可選注入 Gun 相關依賴，將 /api/connect、/api/send 註冊至 dispatch map
  * @param {object} app - Express app
  * @param {object} [opts] - 若提供 gun/SEA/getMyPair/chatRoomName/generateId/startMessageLoop 則註冊 connect 與 send
- *                          可額外提供 sendReply(text) async fn，供 /processed 在任務完成時透過 bot 穩定連線回傳結果
+ *                          可額外提供 sendReply(text) async fn，供 /processed 在任務完成時透過 bot 穩定連線回傳結果；
+ *                          clearTaskOnRelay(uid) 供任務完成後清除 relay 上對應節點（tombstone）。
  */
 function mount(app, opts = {}) {
     // 健康檢查
@@ -292,7 +294,7 @@ function mount(app, opts = {}) {
             const { claim_generation, result } = req.body || {};
             const uid = req.params.uid;
             const resultStatus = store.markProcessed(uid, claim_generation, result);
-            const { sendReply } = opts;
+            const { sendReply, clearTaskOnRelay } = opts;
             const statusMap = {
                 completed: () => {
                     // 工作流推進：回傳 { workflowId, completed, stepsStarted } 或 null（非工作流任務）
@@ -311,14 +313,16 @@ function mount(app, opts = {}) {
                     if (wfResult !== null) {
                         if (wfResult.completed) {
                             // 整個工作流完成：聚合所有步驟結果，發一次完整成果
+                            const wf = workflow.queryWorkflows({}).workflows.find(w => w.id === wfResult.workflowId);
                             if (typeof sendReply === 'function') {
-                                const wf = workflow.queryWorkflows({}).workflows.find(w => w.id === wfResult.workflowId);
                                 const finalMsg = buildWorkflowFinalReply(wf, store);
                                 sendReply(finalMsg)
                                     .catch(e => console.error('[routes/processed] workflow sendReply 失敗:', e.message));
                             }
+                            if (wf && wf.source_id && typeof clearTaskOnRelay === 'function') {
+                                clearTaskOnRelay(wf.source_id);
+                            }
                             // 知識庫：研究型工作流一律存 KB（以工作流名稱為主題）
-                            const wf = workflow.queryWorkflows({}).workflows.find(w => w.id === wfResult.workflowId);
                             if (wf && shouldSaveToKB(wf.name, true, null)) {
                                 const allResults = (wf.steps || [])
                                     .filter(s => s.status === 'completed' && s.task_uid)
@@ -348,6 +352,19 @@ function mount(app, opts = {}) {
 
                         sendReply(`[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`)
                             .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
+                    } else if (result != null) {
+                        console.warn('[routes/processed] 未回傳至 Gun relay：sendReply 不可用（sharedSecrets 為空）。請確認 my-gun-relay 已啟動且與 bot 完成握手。結果已存於 records。');
+
+                        // LINE 來源任務：完成時一併回報至 LINE
+                        if (rec && rec.line_user_id && typeof lineWebhook.pushMessage === 'function') {
+                            const lineMsg = `[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`;
+                            lineWebhook.pushMessage(rec.line_user_id, lineMsg)
+                                .catch(e => console.error('[routes/processed] LINE push 失敗:', e.message));
+                        }
+
+                        if (typeof clearTaskOnRelay === 'function') {
+                            clearTaskOnRelay(uid);
+                        }
 
                         // 研究型一律存 KB；code 型一律存規劃結果至 KB；其餘依關鍵字
                         if (shouldSaveToKB(taskContent, rec && rec.is_research, rec && rec.task_type)) {
@@ -361,7 +378,10 @@ function mount(app, opts = {}) {
                 },
                 not_found: () => res.status(404).json({ error: '找不到指定的任務' }),
                 stale_claim: () => res.status(409).json({ error: '認領已過期，此任務已被重新認領' }),
-                invalid_state: () => res.status(400).json({ error: '只能標記 processing 狀態的任務為已完成' })
+                invalid_state: () => {
+                    console.warn('[routes/processed] 未回傳至聊天室：任務狀態非 processing（可能 Worker 未成功轉為 processing 即呼叫 /processed）');
+                    res.status(400).json({ error: '只能標記 processing 狀態的任務為已完成' });
+                }
             };
             const handler = statusMap[resultStatus];
             if (handler) {
