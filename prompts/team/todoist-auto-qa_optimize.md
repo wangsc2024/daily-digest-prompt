@@ -17,6 +17,28 @@
 
 ---
 
+## 前處理（Groq 加速）
+
+在執行正式步驟前，嘗試用 Groq Relay 萃取 QA 模式清單：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 讀取 `state/failure-stats.json`（若存在），取最近 5 筆失敗類型
+2. 用 Write 工具建立 `temp/groq-req-qa_optimize.json`（UTF-8）：
+   ```json
+   {"mode": "extract", "content": "<最近5筆失敗類型或'無歷史資料'>"}
+   ```
+3. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-qa_optimize.json > temp/groq-result-qa_optimize.json
+   ```
+4. Read `temp/groq-result-qa_optimize.json`，取得 QA 模式清單供第一步使用
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成。
+
 ## 第一步：回顧前次優化記錄
 
 ### 1.1 查詢知識庫

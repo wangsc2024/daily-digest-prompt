@@ -22,6 +22,19 @@
 - 若存在：解析上次統計，準備「連續報到」區塊
 - 若不存在：首次執行，跳過
 
+### 0.2.5 讀取每日摘要連續記憶（任務延續性）
+用 Read 讀取 `context/continuity/daily-digest.json`（不存在則略過）。
+
+計算昨日日期（YYYY-MM-DD），在 `records["<昨日日期>"]` 中提取：
+- 昨日各次摘要的 `top3_headlines`（新聞標題）→ 今日避免重複相同新聞
+- 昨日的 `habit_tip` → 今日生成不同習慣提示
+- 昨日的 `buddhist_wisdom` → 今日選擇不同的佛法主題
+- 昨日的 `digest_quality`（若有）→ 了解昨日品質，決定今日加強方向
+
+同時讀取今日已有的記錄（`records["<今日日期>"]`，若已有多次）：
+- 若今日已執行過（如 08:00 執行過，現在是 11:15）→ 提取已發送的 top3_headlines 避免重複
+- 記錄今日已執行次數（`today_run_count`）
+
 ### 0.3 載入狀態（唯讀）
 讀取 `state/scheduler-state.json` 計算健康度（此檔案由 PowerShell 腳本維護，Agent 只讀不寫）。
 > **讀取最佳化**：檔案超過 3000 行，請使用 Read 工具的 `limit=100` 參數讀取末尾最新記錄：
@@ -302,6 +315,33 @@ else:
 依 `skills/digest-memory/SKILL.md` 指示，用 Write 更新 `context/digest-memory.json`。
 
 > **注意**：`state/scheduler-state.json` 由 PowerShell 執行腳本（run-agent-team.ps1）負責寫入，Agent 不需操作此檔案。
+
+### 9.1.5 寫入每日摘要連續記憶（任務延續性）
+
+1. Read `context/continuity/daily-digest.json`（不存在則初始化 `{"schema_version":1,"schedule_type":"daily_digest","records":{}}`）
+2. 確定 today（YYYY-MM-DD）與 trigger 時間（08:00 / 11:15 / 21:15，可從當前時間推斷）
+3. 在 `records[today]` 中新增本次執行記錄（若 `records[today]` 不存在則建立）：
+   - 先確認 `records[today].runs[]` 中是否已有相同 `run_id`，若有則**跳過（防重複寫入）**
+```json
+{
+  "runs": [
+    ...(已有的本日記錄),
+    {
+      "run_id": "<當前時間戳或 UUID 前 8 碼>",
+      "trigger": "<執行 `pwsh -Command \"Get-Date -Format 'HH:mm'\"` 取得當前時間，映射到最近的排程槽：若 07:30-09:00 → 08:00；若 11:00-12:00 → 11:15；若 20:30-22:00 → 21:15；其他時間使用實際 HH:mm>",
+      "completed_at": "<ISO 8601>",
+      "top3_headlines": ["<新聞標題1>", "<新聞標題2>", "<新聞標題3>"],
+      "habit_tip": "<本次原子習慣提示（一句話）>",
+      "buddhist_wisdom": "<本次佛法主題（2-4 字）>",
+      "todoist_summary": "<今日 Todoist 簡要：N 項待辦>",
+      "digest_quality": "<good|partial|degraded（依快取降級情況）>",
+      "status": "completed"
+    }
+  ]
+}
+```
+4. 清理 `records` 中超過 7 天的舊記錄（保持檔案大小合理）
+5. 用 Write 工具完整覆寫 `context/continuity/daily-digest.json`
 
 ### 9.2 清理 results/
 用 Bash 清理：

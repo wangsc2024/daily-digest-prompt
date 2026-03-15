@@ -11,6 +11,27 @@
 
 ---
 
+## 前處理（Groq 加速）
+
+在執行正式步驟前，嘗試用 Groq Relay 萃取 Skill 違規清單：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 用 Write 工具建立 `temp/groq-req-skill_audit.json`（UTF-8）：
+   ```json
+   {"mode": "extract", "content": "請分析 skills/ 目錄下的 SKILL.md，列出可能違反 Skill-First 規則的項目（每項 15 字以內）"}
+   ```
+2. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-skill_audit.json > temp/groq-result-skill_audit.json
+   ```
+3. Read `temp/groq-result-skill_audit.json`，取得預提取清單，供第一步的子 Agent 掃描時參考
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成。
+
 ## 第一步：委派 Explore 子 Agent 掃描所有 Skill
 
 **禁止直接讀取所有 SKILL.md**（共 26 個，累積 context 超過 100KB → OOM 風險）。

@@ -27,7 +27,8 @@
 
 **plan_type = "auto"**：
 - 讀取所有 `results/todoist-auto-*.json`（自動任務結果，可能有多種類型）
-- 結果檔案命名格式：`todoist-auto-{task_key}.json`（如 `todoist-auto-shurangama.json`）
+- 結果檔案命名格式：`todoist-auto-{task_key}.{result_suffix}`（result_suffix 由 `config/frequency-limits.yaml` 的 `result_suffix` 欄位決定，預設 `json`）
+- 例：`todoist-auto-shurangama.json`（result_suffix=json）；若未來出現 `result_suffix: "md"` 任務，則查找 `todoist-auto-{task_key}.md`
 
 **plan_type = "idle"**：
 - 無 Phase 2 結果
@@ -264,7 +265,7 @@ $r | ConvertTo-Json -Depth 10'
    耗時：Ns
 
 ❌ [任務類型]（失敗時）
-   原因：[一句話失敗原因]
+   原因：[一句話失敗原因，含 reason 欄位，例如：Codex 配額耗盡，fallback 無產出]
 
 ━━━━━━━━━━━━━━
 📊 今日進度：已用 N / 上限 45（成功 N / 失敗 N）
@@ -292,10 +293,12 @@ $r | ConvertTo-Json -Depth 10'
 ```
 
 **plan_type = "idle"**：
+- 先檢查是否存在 `results/todoist-exhausted-fallback.json`。若存在，讀取其 `notify_message` 作為第二行說明。
+- 若無該檔案，第二行使用：「今日自動任務已達上限（已用 N / 45）」。
 ```
 📋 Todoist 報告 HH:MM
 - 無可處理待辦
-- 今日自動任務已達上限（已用 N / 45）
+- [notify_message 或 今日自動任務已達上限（已用 N / 45）]
 ```
 
 ### Skill 同步警告（附加於通知末尾）
@@ -338,6 +341,7 @@ curl -s --max-time 5 http://localhost:3001/api/health 2>/dev/null
 [系統報告] {今日日期 YYYY-MM-DD} {本地時間 HH:MM}
 {各任務完成狀態，每項一行}
 ✓ {任務名稱} — {一句話結果}   ← 成功
+⚠ {任務名稱} — {部分完成原因}    ← partial_success（Agent 有執行但結果未持久化）
 ⚠ {任務名稱} — {失敗原因}    ← 失敗
 ━━━━━━━━━━━━━━━━
 本輪：{成功數} 完成 / {失敗數} 失敗
@@ -374,7 +378,43 @@ rm -f results/broadcast_payload.json
 
 ---
 
-## 步驟 6：清理 results/
+## 步驟 6：寫入排程連續記憶（任務延續性）
+
+在清理結果檔**之前**，將本次執行摘要寫入 `context/continuity/todoist-hourly.json`：
+
+1. Read `context/continuity/todoist-hourly.json`（不存在則初始化 `{"schema_version":1,"schedule_type":"todoist_hourly","max_runs":3,"runs":[]}`）
+2. 從 Step 1 已讀取的 Phase 2 結果中，組裝本次 run 記錄：
+   - **auto_tasks_executed**：掃描所有步驟 1.2 讀取的 `results/todoist-auto-*.json`，依序嘗試以下方式取得 task_key（以先成功者為準）：
+     1. 讀取 `agent` 欄位（如 `"todoist-auto-podcast_jiaoguangzong"`），去掉 "todoist-auto-" 前綴
+     2. 讀取 `task_key` 欄位（直接使用）
+     3. 從**檔名**提取：`results/todoist-auto-{task_key}.json` → 去掉 `results/todoist-auto-` 與 `.json`
+     取得 task_key 後，收集 `status = "success"` 者
+   - **auto_tasks_failed**：同上，收集 `status = "failed"` 或 `status = "partial"` 或 `status = "partial_success"` 者
+   - **auto_tasks_skipped**：步驟 1 中 todoist-plan.json 的 `selected_tasks` 中有 task_key 但找不到對應結果檔的（即 Agent 未執行）
+   - **human_tasks_completed**：所有 `results/todoist-result-*.json` 中 `status = "success"` 的 `content` 前 40 字
+   - **human_tasks_failed**：所有 `results/todoist-result-*.json` 中 `status = "failed"` 的 `content` 前 40 字
+```json
+{
+  "run_id": "<取自 results/todoist-plan.json 的 fetched_at 或 pwsh -Command 'Get-Date -Format yyyyMMddHHmmss' 取得的時間戳>",
+  "started_at": "<results/todoist-plan.json 的 fetched_at 欄位>",
+  "completed_at": "<pwsh -Command \"Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'\" 的輸出>",
+  "plan_type": "<取自 results/todoist-plan.json 的 plan_type>",
+  "auto_tasks_executed": ["<task_key>"],
+  "auto_tasks_failed": ["<task_key>"],
+  "auto_tasks_skipped": ["<task_key>"],
+  "human_tasks_completed": ["<content 前 40 字>"],
+  "human_tasks_failed": ["<content 前 40 字>"],
+  "all_exhausted": "<取自 plan.json 的 auto_tasks.all_exhausted，預設 false>",
+  "phase3_summary": "<50 字以內：本次執行的核心成果，例如：研究了 vLLM 推理優化，完成楞嚴經第三卷研究>",
+  "notable": "<若有異常、待追蹤事項或下次需要注意的點，否則空字串>"
+}
+```
+3. 在 `runs[]` **開頭**插入本次記錄，若 `runs` 超過 `max_runs`（3）則移除最舊的
+4. 用 Write 工具完整覆寫 `context/continuity/todoist-hourly.json`
+
+---
+
+## 步驟 7：清理 results/
 
 ```bash
 rm -f results/todoist-plan.json results/todoist-task-*.md results/todoist-result-*.json

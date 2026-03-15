@@ -11,12 +11,35 @@
 
 ---
 
+## 前處理（Groq 加速）
+
+在執行正式步驟前，嘗試用 Groq Relay 萃取 Workflow 模式：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 用 Write 工具建立 `temp/groq-req-ai_workflow_github.json`（UTF-8）：
+   ```json
+   {"mode": "extract", "content": "請列出 GitHub 上值得追蹤的 AI Workflow 自動化框架關鍵字（每項 10 字以內，列出 5 項）"}
+   ```
+2. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-ai_workflow_github.json > temp/groq-result-ai_workflow_github.json
+   ```
+3. Read `temp/groq-result-ai_workflow_github.json`，取得 Workflow 模式關鍵字，作為搜尋補充詞
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成。
+
+---
+
 ## 第零步：跨任務去重檢查
 
 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
 用 Read 讀取 `context/research-registry.json`：
-- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
-- 存在 → 列出近 7 天內所有 entries
+- 不存在 → 用 Write 建立空 registry：`{"version":2,"topics_index":{},"entries":[]}`
+- 存在 → 只讀取頂層 `topics_index{}` 欄位（不讀 entries）；比對本次研究主題是否在 7 天冷卻期內（topics_index[topic] 距今差 ≤ 7 天則跳過，選擇其他主題）
 
 **判定規則（必須遵守）：**
 1. 近 3 天內有任何 task_type 的 topic 與候選專案名稱**完全相同** → **必須換專案**
@@ -136,7 +159,7 @@ Stars：XXX | Forks：XXX | 最近更新：YYYY-MM-DD
 ## 第四步之後：更新研究註冊表
 
 用 Read 讀取 `context/research-registry.json`（不存在則建立空 registry）。
-用 Write 更新，加入本次 entry：
+用 Write 更新，加入本次 entry 並同步更新頂層 `topics_index`：`topics_index[本次topic] = 今日日期（YYYY-MM-DD）`。
 ```json
 {
   "date": "今天日期（YYYY-MM-DD）",

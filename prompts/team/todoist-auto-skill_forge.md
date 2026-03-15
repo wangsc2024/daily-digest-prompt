@@ -16,6 +16,29 @@
 
 ---
 
+## 前處理（Groq 加速）
+
+在執行 skill-forge 10 步驟前，嘗試用 Groq Relay 分析 Skill 組成：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 用 Write 工具建立 `temp/groq-req-skill_forge.json`（UTF-8）：
+   ```json
+   {"mode": "extract", "content": "請分析一個高品質 Claude Code Skill 應具備的核心組成要素（每項 15 字以內，列出 5 項）"}
+   ```
+2. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-skill_forge.json > temp/groq-result-skill_forge.json
+   ```
+3. Read `temp/groq-result-skill_forge.json`，取得 Skill 組成分析結果，作為 skill-forge 步驟 2（能力缺口分析）的參考
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成。
+
+---
+
 ## 執行
 
 依 `skills/skill-forge/SKILL.md` 的**完整 10 步驟**執行（步驟 0 → 10）。

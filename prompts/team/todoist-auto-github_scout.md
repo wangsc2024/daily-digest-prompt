@@ -8,6 +8,27 @@
 - 禁止使用 TodoWrite
 - 最小化工具呼叫
 
+## 前處理（Groq 加速）
+
+在執行流程前，嘗試用 Groq Relay 生成 trending 一句摘要：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 用 Write 工具建立 `temp/groq-req-github_scout.json`（UTF-8）：
+   ```json
+   {"mode": "summarize", "content": "請為「GitHub 上與 Agent 系統相關的熱門專案」搜尋任務，提供一句搜尋方向建議（20字以內）"}
+   ```
+2. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-github_scout.json > temp/groq-result-github_scout.json
+   ```
+3. Read `temp/groq-result-github_scout.json`，取得搜尋方向建議，補充到執行流程的搜尋關鍵字
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，依原執行流程進行。
+
 ## 執行流程
 讀取 `templates/auto-tasks/github-scout.md`，依其完整步驟執行（含星期檢查）。
 

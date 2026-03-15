@@ -12,6 +12,29 @@
 
 ---
 
+## 步驟 0：讀取排程連續記憶（任務延續性）
+
+用 Read 讀取 `context/continuity/todoist-hourly.json`（不存在則略過）。
+
+從 `runs[]` 陣列中提取**最近 3 次**執行記錄，建立以下背景知識：
+
+**A. 近期自動任務狀態**
+- `recently_executed`：最近 3 次已執行過的 auto_task_key 清單（結合頻率限制，避免同 key 連續執行超過 daily_limit）
+- `recently_failed`：近期失敗的 auto_task_key → 本次優先避免或特別注意
+- `all_exhausted_count`：近期 all_exhausted=true 的次數 → 若連續 2 次以上，考慮觸發 all_exhausted_fallback
+
+**B. 未完成工作追蹤**
+- 若前次 `plan_type = "tasks"`，查看 `human_tasks_failed[]` → 這些任務可能需要今次再處理
+- 若前次有 `notable` 欄位（異常或待追蹤事項），記錄供本次參考
+
+**C. 執行趨勢（輔助決策）**
+- 若最近 3 次都是 `plan_type = "idle"` 或 `plan_type = "auto"` → 說明今日人工任務量少，可增加自動任務數量
+- 若最近有 Phase 2 agent 連續 timeout → 本次可在計畫中標記此 task_key 為高風險
+
+> **效率限制**：此步驟僅讀 1 個小型 JSON 檔，無需 Bash 或 API 呼叫。讀取失敗或檔案不存在時，以空背景知識繼續執行。
+
+---
+
 ## 步驟 1：查詢 Todoist 今日待辦
 
 1. 檢查快取 `cache/todoist.json`（30 分鐘 TTL）
@@ -245,6 +268,10 @@ curl -s --max-time 8 \
    - ⚠️ **git_push 末位調整不影響此計算**：即使 git_push 被移到批次末位，仍以其原始 order 參與 max() 計算
 6. **注意**：`next_execution_order` 的寫入由 Phase 3（todoist-assemble.md 步驟 3）負責；Phase 1 只計算並輸出 `next_execution_order_after`
 7. 若掃完一圈無任何可執行 → plan_type = "idle"
+8. **連續記憶輔助（步驟 0 資料）**：
+   - 若步驟 0 的 `recently_failed[]` 包含本次 round-robin 選中的 task_key，且 `state/failed-auto-tasks.json` 尚未記錄 → 將其加入 Failed Task Recovery（補充偵測）
+   - 若步驟 0 中 `all_exhausted_count >= 2`（近兩次都已輪空）→ 在 plan.json 中設定 `"all_exhausted_tendency": true`，供 Phase 3 組裝時提早觸發 all_exhausted_fallback 判斷
+   - 若步驟 0 中有 `human_tasks_failed[]`（前次人工任務失敗）→ 本次路由中提高這些任務的優先分（+0.3 加成），幫助未完成任務優先被執行
 
 > ⚠️ **唯一真相來源**：每日上限（`daily_limit`）以 `config/frequency-limits.yaml` 為準，此 prompt 不另行定義。新增/停用/調整任務只需修改 YAML。
 

@@ -34,8 +34,8 @@
 
 用 Read 讀取 `config/dedup-policy.yaml` 取得去重策略。
 用 Read 讀取 `context/research-registry.json`：
-- 不存在 → 用 Write 建立空 registry：`{"version":1,"entries":[]}`
-- 存在 → 列出近 7 天內 task_type = "creative_game" 的 entries
+- 不存在 → 用 Write 建立空 registry：`{"version":2,"topics_index":{},"entries":[]}`
+- 存在 → 只讀取頂層 `topics_index{}` 欄位（不讀 entries）；比對本次研究主題是否在 7 天冷卻期內（topics_index[topic] 距今差 ≤ 7 天則跳過，選擇其他主題）
 - 若近 3 天有相同遊戲+相同優化方向 → 必須換方向或換遊戲
 
 ## 執行流程
@@ -128,7 +128,7 @@
 
 ### Phase F: 更新研究註冊表（含版本追蹤）
 用 Read 讀取 `context/research-registry.json`。
-用 Write 更新，加入本次 entry：
+用 Write 更新，加入本次 entry 並同步更新頂層 `topics_index`：`topics_index[本次topic] = 今日日期（YYYY-MM-DD）`。
 ```json
 {
   "date": "今天日期（YYYY-MM-DD）",

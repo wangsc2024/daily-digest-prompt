@@ -17,6 +17,28 @@
 
 ---
 
+## 前處理（Groq 加速）
+
+在執行正式步驟前，嘗試用 Groq Relay 預分類日誌模式：
+
+```bash
+GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+```
+
+若 `GROQ_OK` 為 `ok`：
+1. 讀取 `state/scheduler-state.json`，取最近 10 筆 runs 的 status 欄位
+2. 用 Write 工具建立 `temp/groq-req-log_audit.json`（UTF-8）：
+   ```json
+   {"mode": "classify", "content": "<最近10筆runs的status清單>"}
+   ```
+3. 執行：
+   ```bash
+   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-log_audit.json > temp/groq-result-log_audit.json
+   ```
+4. Read `temp/groq-result-log_audit.json`，取得分類結果供步驟 1 直接使用
+
+若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成（無降級邏輯改變）。
+
 ## 步驟 1：讀取系統狀態
 1. 讀取 `state/scheduler-state.json` — 分析最近 30 筆執行記錄
 2. 讀取 `context/digest-memory.json` — 分析記憶中的異常模式
