@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 17 個工具 = 36 個 Skills）
+## 速查表（19 個核心 + 20 個工具 = 39 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -49,6 +49,9 @@
 | 34 | cache-optimizer | 快取效率分析與 TTL 調優（JSONL 日誌解析→端點命中率→調優建議，depends-on: api-cache） | 快取優化、快取分析、cache optimization、TTL 調優、命中率分析、快取效率、快取診斷 |
 | 35 | cursor-cli | 以 agent -p 為另一執行任務工具（腳本/排程/單次程式碼/重構/審查，與 Todoist Agent 並行） | cursor cli、agent -p、agent --print、Cursor Agent 終端、CLI 任務、非互動 Agent、腳本化 Cursor、排程呼叫 Agent、cursor-cli |
 | 36 | todo-scanner [草稿] | TODO/FIXME 自動掃描與分類清理（規範性 vs 缺陷型，支援 ADR-017） | TODO 清理、FIXME 掃描、todo-scanner、程式碼衛生、TODO 分類、待辦標記統計、技術債盤點 |
+| 37 | quality-tracker | Agent 輸出品質追蹤與回歸偵測（DONE_CERT 品質分數趨勢化，支援 ADR-004） | 品質追蹤、品質回歸、quality tracking、品質趨勢、品質閘門、DONE_CERT 分析、品質監控 |
+| 38 | task-fairness-analyzer | 自動任務公平性診斷與再平衡建議（Gini 係數/飢餓偵測/根因分析，depends-on: scheduler-state、system-insight） | 任務公平性、排程公平、任務飢餓、task fairness、starvation、任務再平衡、公平性分析 |
+| 39 | prompt-lint | Prompt 模板靜態分析（7 條規則偵測反模式：過長/缺 preamble/hardcoded 端點/冗餘指令，depends-on: system-insight） | prompt-lint、prompt 檢查、模板分析、prompt 品質、模板膨脹、prompt 反模式、prompt 優化 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

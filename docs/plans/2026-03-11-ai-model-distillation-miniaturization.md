@@ -456,7 +456,7 @@ pwsh -Command "Invoke-RestMethod -Uri 'http://localhost:3000/api/notes' -Method 
 #### 10.5 ntfy 通知
 ```bash
 # 使用 ntfy-notify Skill 發送完成通知
-curl -H "Content-Type: application/json; charset=utf-8" -d @temp/ntfy-complete.json https://ntfy.sh/wangsc2025
+curl -H "Content-Type: application/json; charset=utf-8" -d @temp/ntfy-complete.json https://ntfy.sh
 ```
 #### 10.6 驗證
 - [ ] ≥ 3 篇前瞻文獻

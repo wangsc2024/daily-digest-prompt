@@ -47,7 +47,7 @@
 | 用途 | 範例 |
 |------|------|
 | 單次任務、純文字 | `agent -p "找出並修復效能問題"` |
-| 指定模型 | `agent -p "任務描述" --model cursor-composer-1-5` |
+| 指定模型 | `agent -p "任務描述" --model composer-1.5` |
 | 腳本可解析輸出 | `agent -p "列出未完成 TODO" --output-format json` |
 | 串流 JSON（長任務） | `agent -p "重構模組" --output-format stream-json --stream-partial-output` |
 | 唯讀探索（不寫檔） | `agent -p "分析專案結構，不要改任何檔案" --mode=ask` |

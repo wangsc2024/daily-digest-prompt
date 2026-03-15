@@ -78,7 +78,7 @@ agent -p "找出並修復此專案中的效能問題"
 ### 3.2 指定工作區與模型
 
 ```powershell
-agent -p "重構 config 目錄下的 YAML 命名一致" --workspace "D:\Source\daily-digest-prompt" --model cursor-composer-1-5
+agent -p "重構 config 目錄下的 YAML 命名一致" --workspace "D:\Source\daily-digest-prompt" --model composer-1.5
 ```
 
 ### 3.3 腳本可解析（JSON）
@@ -114,7 +114,7 @@ agent -p "執行今日的知識庫摘要任務" --workspace "D:\Source\daily-dig
 | `-p`, `--print` | 非互動，輸出到 stdout，完整工具權限 |
 | `--output-format text\|json\|stream-json` | 僅與 -p 有效；預設 text |
 | `--stream-partial-output` | 僅與 -p + stream-json 有效 |
-| `--model <id>` | 例：cursor-composer-1-5；可用 `agent models` 列出 |
+| `--model <id>` | 例：composer-1.5；可用 `agent models` 列出 |
 | `--mode plan\|ask` | plan=先釐清再執行；ask=唯讀 |
 | `--workspace <path>` | 工作區目錄（建議本專案用絕對路徑） |
 | `--trust` | 無頭時信任工作區不再次詢問 |

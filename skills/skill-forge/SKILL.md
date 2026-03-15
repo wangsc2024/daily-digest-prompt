@@ -304,11 +304,12 @@ print(f'PASS: {passed}')
 }
 ```
 ```bash
-curl -s -X POST https://ntfy.sh/wangsc2025 \
+curl -s -X POST https://ntfy.sh \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @ntfy_scanner_alert.json
 rm ntfy_scanner_alert.json
 ```
+（JSON 發送時必須 POST 到根網址 `https://ntfy.sh`，不可用 `https://ntfy.sh/wangsc2025`，否則整段 JSON 會變成通知內文。）
 
 ---
 
@@ -390,13 +391,31 @@ rm kb_import_note.json
 ```
 
 ```bash
-curl -s -X POST https://ntfy.sh/wangsc2025 \
+curl -s -X POST https://ntfy.sh \
   -H "Content-Type: application/json; charset=utf-8" \
   -d @ntfy_skill_forge.json
 rm ntfy_skill_forge.json
 ```
+（JSON 發送時必須 POST 到根網址 `https://ntfy.sh`，不可用 `https://ntfy.sh/wangsc2025`，否則整段 JSON 會變成通知內文。）
 
 ### 10b. 結果 JSON
+
+**各執行路徑的欄位速查表**（填寫 10b JSON 時依此覆寫預設值）：
+
+| 執行路徑 | `status` | `integration_status` | `skill_index_updated` | `kb_imported` |
+|---------|----------|---------------------|----------------------|--------------|
+| 完整成功 | `success` | `integrated` | `true` | `true` |
+| 成功但 KB 匯入失敗 | `partial` | `integrated` | `true` | `false` |
+| scanner blocked | `partial` | `held_for_review` | `false` | `true`（若 KB 已匯入）|
+| 品質未達標（5.0-6.9 修正後仍 < 7.0，降至 v0.5.0） | `partial` | `integrated` | `true` | `true` |
+| 品質拒絕（< 5.0） | `quality_rejected` | `quality_rejected` | `false` | `false` |
+| 格式驗證失敗 | `format_failed` | `format_failed` | `false` | `false` |
+
+`status` 欄位說明：
+- `success`：完整通過所有步驟並整合
+- `partial`：生成成功但 scanner blocked 或 KB 匯入失敗
+- `quality_rejected`：步驟 6.5 平均分 < 5.0（未修正或修正後仍不達）
+- `format_failed`：步驟 6 格式驗證 2 輪後仍失敗
 
 用 Write 工具建立 `results/todoist-auto-skill_forge.json`：
 ```json

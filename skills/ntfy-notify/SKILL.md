@@ -217,21 +217,104 @@ curl -H "Content-Type: application/json" -d '{"topic":"TOPIC","title":"任務失
 當用戶要求「完成後通知 xxx」時，Claude 應：
 
 1. **執行用戶要求的任務**
-2. **建立 JSON 檔案**（使用 Write 工具）
-3. **發送通知**（使用 Bash + curl）
-4. **刪除暫存檔案**（清理）
+2. **建立通知 JSON 檔案**（使用 Write 工具）
+3. **寫入 ntfy 日誌**（每次通知都記錄，詳見下方「通知日誌記錄」）
+4. **發送通知**（使用 Bash + curl，捕捉 exit code）
+5. **刪除暫存通知檔**（保留日誌檔）
 
 **範例流程：**
 ```python
 # 步驟 1: 建立 JSON 檔案
 # 使用 Write 工具寫入 ntfy_notify.json
 
-# 步驟 2: 發送通知
-# curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_notify.json https://ntfy.sh
+# 步驟 2: 發送通知，捕捉 HTTP 狀態碼
+# HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+#   -H "Content-Type: application/json; charset=utf-8" \
+#   -d @ntfy_notify.json https://ntfy.sh)
 
-# 步驟 3: 清理暫存檔
+# 步驟 3: 寫入 ntfy 日誌（見下方格式）
+
+# 步驟 4: 清理暫存檔
 # rm ntfy_notify.json
 ```
+
+---
+
+## 通知日誌記錄
+
+**每次發送 ntfy 通知，必須同時寫入一筆日誌**到 `logs/ntfy/` 目錄。
+這些日誌供 `ntfy_review` 自動任務（Claude Opus 4.6）每日審查，識別優化機會。
+
+### 日誌流程
+
+```bash
+# 步驟 1：確保目錄存在
+mkdir -p logs/ntfy
+
+# 步驟 2：取得時間戳與環境變數
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+# agent：優先用排程注入的 $AGENT_NAME；互動模式下固定為 "claude-code-interactive"
+AGENT_NAME=${AGENT_NAME:-"claude-code-interactive"}
+# trace_id：優先用排程注入的 $DIGEST_TRACE_ID；互動模式下生成 "interactive-YYYYMMDD_HHmmss"
+TRACE_ID=${DIGEST_TRACE_ID:-"interactive-${TIMESTAMP}"}
+
+# 步驟 3：發送通知並捕捉結果
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @ntfy_notify.json https://ntfy.sh)
+CURL_OK=$([ "$HTTP_CODE" = "200" ] && echo true || echo false)
+```
+
+**步驟 4：用 Write 工具寫入日誌檔**，路徑格式：
+`logs/ntfy/YYYYMMDD_HHmmss_<topic>.json`
+
+### 日誌格式
+
+```json
+{
+  "timestamp": "2026-03-15T10:00:00+08:00",
+  "topic": "wangsc2025",
+  "title": "任務完成",
+  "message": "訊息內容",
+  "tags": ["white_check_mark"],
+  "priority": null,
+  "agent": "auto-podcast_jiaoguangzong",
+  "trace_id": "abc123...",
+  "http_status": 200,
+  "sent": true
+}
+```
+
+| 欄位 | 說明 |
+|------|------|
+| `timestamp` | ISO 8601，Asia/Taipei |
+| `topic` | ntfy topic 名稱 |
+| `title` / `message` / `tags` / `priority` | 同通知 payload |
+| `agent` | 從環境變數 `$AGENT_NAME` 取得 |
+| `trace_id` | 從環境變數 `$DIGEST_TRACE_ID` 取得 |
+| `http_status` | curl 回傳的 HTTP 狀態碼（200 = 成功） |
+| `sent` | `true` = 200 OK，`false` = 其他 |
+
+### 完整範例（含日誌）
+
+```bash
+# 1. 建立通知 payload（Write 工具）
+# → ntfy_payload_tmp.json
+
+# 2. 發送並捕捉狀態碼
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @ntfy_payload_tmp.json https://ntfy.sh)
+
+# 3. 用 Write 工具寫入日誌
+# → logs/ntfy/20260315_100000_wangsc2025.json
+
+# 4. 刪除暫存 payload
+rm ntfy_payload_tmp.json
+# 注意：日誌檔保留，不刪除
+```
+
+> **注意**：日誌檔名中的 topic 若含特殊字元，替換為底線（`/` → `_`）。
 
 ---
 
