@@ -76,9 +76,9 @@ initial_schema: |
 # Token 用量閾值（對應 state/token-usage.json 的 estimated_tokens）
 # ============================================================
 token_thresholds:
-  warn: 1500000      # 1.5M：正常警告線
-  critical: 8000000  # 8M：觸發 phase_overrides 的 critical 邏輯
-  emergency: 12000000 # 12M：觸發 phase_overrides 的 emergency 邏輯
+  warn: 8000000      # 8M：正常警告線（校準自 7 日均值 ~10M，原 1.5M 過低導致告警失效）
+  critical: 15000000 # 15M：觸發 phase_overrides 的 critical 邏輯（上調配合 warn 校準）
+  emergency: 25000000 # 25M：觸發 phase_overrides 的 emergency 邏輯（對應 03-09 異常值 30M）
 
 # ============================================================
 # 後端定義
@@ -140,6 +140,12 @@ backends:
     fallback: claude_sonnet45
     description: "Cursor CLI agent -p（非互動模式，完整工具權限；法華經研究 + Podcast 生成任務）"
 
+  claude_opus46:
+    type: claude_code
+    cli_flag: "--model claude-opus-4-6"
+    fallback: claude_sonnet45
+    description: "Claude Opus 4.6（高品質系統審查與優化任務：ntfy 日誌審查 + 系統優化）"
+
 # ============================================================
 # 任務 -> 後端對應規則
 # ============================================================
@@ -177,6 +183,9 @@ task_rules:
     - creative_game_optimize  # 遊戲創意優化：程式碼生成能力強
     - qa_optimize             # QA 品質優化：程式碼審查推理
     - github_scout            # GitHub 靈感偵察：程式碼理解
+
+  claude_opus46:           # Claude Opus 4.6，高品質系統審查
+    - ntfy_review          # ntfy 日誌審查：審查 24h 通知記錄，識別優化機會，執行優化工作流
 
   # openrouter_standard 已廢除（git_push 移至 claude_sonnet45，free-tier 三連敗）
 
@@ -292,6 +301,8 @@ tasks:
     template_version: 1
     history_type: "shurangama"
     execution_order: 1
+    timeout_seconds: 1200
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   jiaoguangzong:
@@ -308,6 +319,8 @@ tasks:
       study_path: "概論 → 五時判教 → 八教分類 → 化法四教（藏通別圓）→ 化儀四教 → 觀法修持 → 判教實例"
     history_type: "jiaoguangzong"
     execution_order: 2
+    timeout_seconds: 1200
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   fahua:
@@ -324,6 +337,8 @@ tasks:
       study_path: "經典概論 → 方便品（開權顯實）→ 譬喻品（三車火宅）→ 信解品 → 藥草喻品 → 化城喻品 → 壽量品 → 觀世音菩薩普門品 → 一佛乘義理"
     history_type: "fahua"
     execution_order: 3
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   jingtu:
@@ -340,6 +355,8 @@ tasks:
       study_path: "淨土三經概論 → 阿彌陀經要義 → 觀無量壽經十六觀 → 無量壽經四十八願 → 善導大師五正行 → 念佛法門修持 → 淨土十疑論 → 臨終正念"
     history_type: "jingtu"
     execution_order: 4
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
 
   # --- AI / 技術研究群組（共 7 次/日）---
@@ -351,6 +368,8 @@ tasks:
     template_version: 1
     history_type: "tech_research"
     execution_order: 5
+    timeout_seconds: 2600
+    result_suffix: "json"
     skills: [knowledge-query, web-research, todoist]
     description: "分析今日 Todoist 已完成任務所需技術，選擇一項深入研究並寫入 RAG 知識庫"
 
@@ -362,6 +381,8 @@ tasks:
     template_version: 1
     history_type: "ai_deep_research"
     execution_order: 6
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [knowledge-query, hackernews-ai-digest, web-research, kb-research-strategist, groq]
     description: "每日規劃一個 AI 技術深度研究，分 4 階段完成（規劃→蒐集→分析→報告）"
     stages:
@@ -378,6 +399,8 @@ tasks:
     template_version: 1
     history_type: "unsloth_research"
     execution_order: 7
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [knowledge-query, web-research]
     description: "研究 Unsloth LLM fine-tuning 框架的最新技術、最佳實踐、與其他工具比較"
 
@@ -389,6 +412,8 @@ tasks:
     template_version: 1
     history_type: "ai_github_research"
     execution_order: 8
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [knowledge-query, web-research, github-scout, kb-research-strategist]
     description: "研究 AI 相關 GitHub 熱門專案，分析架構與應用，將報告寫入 RAG 知識庫"
 
@@ -400,6 +425,8 @@ tasks:
     template_version: 2
     history_type: "ai_smart_city"
     execution_order: 9
+    timeout_seconds: 600
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
     description: "研究 AI 應用於智慧城市（交通、能源、公共安全、環境監測等），將報告寫入 RAG 知識庫"
     template_params:
@@ -431,6 +458,8 @@ tasks:
     template_version: 2
     history_type: "ai_sysdev"
     execution_order: 10
+    timeout_seconds: 600
+    result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
     description: "研究 AI 應用於系統開發（AI-assisted coding、自動測試、架構優化、DevOps 智能化），將報告寫入 RAG 知識庫"
     template_params:
@@ -464,6 +493,8 @@ tasks:
     template_version: 1
     history_type: "skill_audit"
     execution_order: 11
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [knowledge-query, skill-scanner, system-insight]
     description: "審查專案 Skills 的品質與覆蓋度，提出優化方案並落實執行直至通過驗證"
 
@@ -476,6 +507,8 @@ tasks:
     template_version: 1
     history_type: "log_audit"
     execution_order: 12
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [scheduler-state, knowledge-query, system-insight]
 
   git_push:
@@ -486,6 +519,8 @@ tasks:
     template_version: 1
     history_type: "git_push"
     execution_order: 13
+    timeout_seconds: 600
+    result_suffix: "json"
     skills: [knowledge-query, git-smart-commit]
     description: "同步知識庫 Vite 網站（wangsc2024/knowledge），用 Smart Commit 分群提交後推送 daily-digest-prompt + knowledge 至 GitHub"
 
@@ -498,6 +533,8 @@ tasks:
     template_version: 1
     history_type: "creative_game_optimize"
     execution_order: 14
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [game-design, knowledge-query, web-research]
     description: "階段一：依優先級創建 10 個經典復古小遊戲（Space Invaders、Pac-Man、Tetris 等）；階段二：90% 優化復古遊戲 + 10% 優化佛學遊戲"
 
@@ -510,6 +547,8 @@ tasks:
     template_version: 1
     history_type: "qa_optimize"
     execution_order: 15
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [knowledge-query, web-research, system-insight]
     description: "以最嚴格資訊安全標準漸進式優化 D:\\Source\\qa_system，每次基於前次成果持續改進"
 
@@ -522,6 +561,8 @@ tasks:
     template_version: 1
     history_type: "system_insight"
     execution_order: 16
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [system-insight, scheduler-state, knowledge-query]
     description: "分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出洞察報告"
 
@@ -534,6 +575,8 @@ tasks:
     template_version: 1
     history_type: "arch_evolution"
     execution_order: 17
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [system-insight, ntfy-notify]
     description: "讀取 improvement-backlog.json，對每個問題做出架構決策（immediate_fix/schedule_adr/wontfix/deferred），產出 arch-decision.json 供 self-heal 執行"
     trigger_condition: "OODA orient 完成後，improvement-backlog.json 非空時觸發（ooda-workflow.yaml decide 步驟）；優先由 run-system-audit-team.ps1 Phase 3 直接觸發，無需等待 round-robin"
@@ -547,6 +590,8 @@ tasks:
     template_version: 1
     history_type: "self_heal"
     execution_order: 18
+    timeout_seconds: 1200
+    result_suffix: "json"
     skills: [system-insight, scheduler-state, knowledge-query]
     description: "識別可自動修復的問題（過期快取/過期 registry/跨日未歸零/殘留檔案）並自動修復，同時執行 arch-decision.json 的 immediate_fix 項目"
     trigger_condition: "每日常規輪轉；若 workflow-state.json current_step=act 且 arch-decision.json 存在且 <= 48h，todoist-query.md 的 OODA Act 覆蓋邏輯會優先強制觸發"
@@ -560,6 +605,8 @@ tasks:
     template_version: 1
     history_type: "chatroom_optimize"
     execution_order: 19
+    timeout_seconds: 480
+    result_suffix: "json"
     skills: [chatroom-query, api-cache, knowledge-query]
     description: "評估 bot.js 任務佇列執行品質（成功率/衝突率/耗時），自動清除過期快取或調整 max_tasks_per_run"
 
@@ -572,6 +619,8 @@ tasks:
     template_version: 1
     history_type: "ai_workflow_github"
     execution_order: 20
+    timeout_seconds: 720
+    result_suffix: "json"
     skills: [knowledge-query, kb-research-strategist, web-research, github-scout]
     description: "從 GitHub 選出 AI 工作流自動化熱門專案（n8n/Dify/AutoGen/LangGraph 等），經 kb-research-strategist 優化選題後深度研究並將報告納入知識庫"
 
@@ -584,6 +633,8 @@ tasks:
     template_version: 1
     history_type: "github_scout"
     execution_order: 23  # 修正：原 18 與 self_heal 衝突
+    timeout_seconds: 600  # WebSearch×2 + WebFetch + 分析（無 KB 匯入，輕量）
+    result_suffix: "json"
     skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
     description: "自動蒐集 GitHub 熱門專案靈感，分析與本系統的改進機會（僅週三/週日執行）"
 
@@ -596,6 +647,8 @@ tasks:
     template_version: 1
     history_type: "podcast_create"
     execution_order: 21
+    timeout_seconds: 2400
+    result_suffix: "json"
     skills: [knowledge-query, ntfy-notify]
     description: "評分非佛學類別的 KB 筆記，選出最佳 3 篇，生成雙主持人對話腳本，TTS 合成後上傳 R2 並通知"
 
@@ -607,6 +660,8 @@ tasks:
     template_version: 1
     history_type: "podcast_jiaoguangzong"
     execution_order: 22
+    timeout_seconds: 2400
+    result_suffix: "json"
     skills: [knowledge-query, ntfy-notify]
     description: "從知識庫選取教觀綱宗未用筆記，生成雙主持人對話腳本（30-40 輪），TTS 合成後上傳 R2。每次執行 1 集，每日合計 30 集，與 podcast_create 共享 podcast-history.json 去重機制"
 
@@ -619,8 +674,24 @@ tasks:
     template_version: 1
     history_type: "skill_forge"
     execution_order: 24
+    timeout_seconds: 900
+    result_suffix: "json"
     skills: [kb-research-strategist, skill-scanner, knowledge-query, ntfy-notify]
     description: "分析三大上下文（improvement-backlog + adr-registry + system-insight）識別 Skill 缺口，基於 KB 深研自動生成完整可用的 SKILL.md，LLM 自評分（≥7/10）+ 安全驗證後整合至 SKILL_INDEX.md"
+
+  # --- ntfy 審查與優化群組（每日 1 次，Claude Opus 4.6）---
+  ntfy_review:
+    name: "ntfy 通知審查與系統優化"
+    daily_limit: 1
+    counter_field: "ntfy_review_count"
+    template: "prompts/team/todoist-auto-ntfy_review.md"
+    template_version: 1
+    history_type: "ntfy_review"
+    execution_order: 25
+    timeout_seconds: 1200
+    result_suffix: "json"
+    skills: [ntfy-notify, system-insight, self-heal, knowledge-query]
+    description: "以 Claude Opus 4.6 審查 24h 內 logs/ntfy/ 下的通知日誌，識別失敗、異常模式與優化機會；若有問題則執行系統優化工作流（self_heal/system_insight），最後以格式化 ntfy 通知回報審查結果"
 
 # ============================================================
 # 每日上限摘要
@@ -643,5 +714,11 @@ history:
   max_auto_tasks: 200   # auto_tasks 陣列上限，超過移除最舊的
   max_daily_summary: 30  # daily_summary 陣列上限
 
-# 全部達上限時
-all_exhausted_action: "直接跳到通知步驟（通知：今日自動任務已達上限）"
+# 全部自動任務達上限時：先執行排程再通知
+# 當 all_exhausted_fallback 存在時，Phase 2 不直接跳過，改為執行該 fallback（如製作 1 集淨土教觀學苑 podcast），再進入 Phase 3 通知
+all_exhausted_action: "先執行排程（淨土教觀學苑 podcast 1 集）再通知"
+all_exhausted_fallback: "jiaoguang_podcast_one"   # 依 docs/plans/淨土教觀學苑podcast專輯.md 依序製作 1 集
+all_exhausted_notify_message: "今日自動任務已達上限故製作1集淨土教觀學苑podcast"
+# 排程模型備援：若非 cursor-cli skill 則以 cursor-cli skill 為備援；cursor-cli skill 則以 claude 為備援
+all_exhausted_fallback_primary: "claude"   # 優先使用："claude"（article-to-podcast 流程）| "cursor_cli"（cursor-cli skill 模型）
+# 備援依規則自動：primary 非 cursor_cli → 備援 cursor_cli；primary 為 cursor_cli → 備援 claude

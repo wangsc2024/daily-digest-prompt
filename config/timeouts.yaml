@@ -19,6 +19,7 @@ daily_digest_single:
   retry_interval: 120       # 重試間隔
 
 # Todoist 任務 - 團隊模式 (run-todoist-agent-team.ps1)
+# ADR-018: Phase 2 支援 max 1 retry（僅 timeout）、30s backoff，retry 事件寫入 spans；總 Phase 2 時間最壞約 phase2_timeout + 30 + phase2_timeout
 todoist_team:
   phase1_timeout: 420        # Phase 1: 查詢+路由+規劃+寫入 task prompt 檔案（300s 偶爾不足）
   phase1_max_retries: 1      # Phase 1 重試次數（降為 1，避免過長等待）
@@ -38,6 +39,8 @@ todoist_team:
     gitpush: 360    # Git 推送（6 分鐘）
   # Phase 2 動態 timeout（按 auto-task key，優先級高於 phase2_timeout_by_type）
   # 所有 23 個自動任務均有明確 timeout，不再依賴 phase2_timeout_by_type.auto 預設值
+  # timeout_seconds in config/frequency-limits.yaml is the single source of truth for human-readable timeouts
+  # Values here are kept for backward-compatibility but must stay in sync with frequency-limits.yaml
   phase2_timeout_by_task:
     # === 研究類（Codex 後端，含 WebSearch/WebFetch）===
     tech_research: 2600         # WebSearch×3 + WebFetch×4 + KB 匯入，2026-02-26 超時紀錄
@@ -59,6 +62,7 @@ todoist_team:
     chatroom_optimize: 480      # sub-agent log 分析 + routing.yaml 調整 + ntfy
     git_push: 600               # git log/diff + 隱私檢查 + commit + push + KB 同步
     log_audit: 720              # sub-agent 讀 10+ log + 分析修正 + KB 匯入
+    github_scout: 600           # WebSearch×2 + WebFetch + 分析（無 KB 匯入，輕量）
     # === 創意類 ===
     creative_game_optimize: 900 # sync-games.ps1 npm build 最長 ~15 min
     qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
@@ -66,6 +70,8 @@ todoist_team:
     podcast_jiaoguangzong: 2400 # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
     # === Skill 鑄造（claude_sonnet 預設）===
     skill_forge: 900            # 上下文讀取(30s) + 子Agent去重(60s) + KB研究(300s) + Skill生成(120s) + 驗證整合(120s) + 自評分(60s) + 緩衝
+    # === ntfy 審查（claude_opus46）===
+    ntfy_review: 1200           # 日誌讀取(60s) + 模式分析(120s) + 優化工作流(600s) + 格式化通知(60s) + 緩衝
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:

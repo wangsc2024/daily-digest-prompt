@@ -326,7 +326,7 @@ tasks:
     description: "分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出洞察報告"
 
   self_heal:
-    name: "系統自愈迴圈"
+    name: "系統自癒迴圈"
     daily_limit: 1
     counter_field: "self_heal_count"
     template: "templates/auto-tasks/self-heal.md"
@@ -382,7 +382,7 @@ tasks:
 # 系統維護：Log審查(1) + Git推送(1) = 2
 # 遊戲創意：創意遊戲優化(0) = 0
 # 專案品質：QA優化(0) = 0
-# 系統自省：系統洞察(1) + 自愈迴圈(1) = 2
+# 系統自省：系統洞察(1) + 自癒迴圈(1) = 2
 # Chatroom 整合：品質優化(1) = 1
 # AI 工作流自動化：GitHub 研究(1) = 1
 # GitHub 靈感：靈感蒐集(0) = 0

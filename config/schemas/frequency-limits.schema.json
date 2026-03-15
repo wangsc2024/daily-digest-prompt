@@ -77,7 +77,20 @@
     },
     "all_exhausted_action": {
       "type": "string",
-      "description": "全部達上限時的動作"
+      "description": "全部達上限時的動作（描述用）"
+    },
+    "all_exhausted_fallback": {
+      "type": "string",
+      "description": "達上限時先執行的排程（如 jiaoguang_podcast_one = 依專輯製作 1 集 podcast）"
+    },
+    "all_exhausted_notify_message": {
+      "type": "string",
+      "description": "執行 fallback 後 Phase 3 通知內容（如：今日自動任務已達上限故製作1集淨土教觀學苑podcast）"
+    },
+    "all_exhausted_fallback_primary": {
+      "type": "string",
+      "enum": ["claude", "cursor_cli"],
+      "description": "排程優先模型：claude=腳本流程；cursor_cli=cursor-cli skill。備援規則：非 cursor_cli 則備援 cursor_cli；cursor_cli 則備援 claude"
     },
     "tasks": {
       "type": "object",
