@@ -152,6 +152,17 @@
       "date": "2026-03-14",
       "channel": "ntfy/wangsc2025",
       "time": "2026-03-14 17:05:01"
+    },
+    {
+      "verse_text": "不忘初心，方得始終。",
+      "status": "success",
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-15",
+      "source": "《華嚴經》",
+      "author": "釋迦牟尼佛",
+      "verse_id": 15,
+      "session": "evening",
+      "time": "2026-03-15 17:05:01"
     }
   ]
 }

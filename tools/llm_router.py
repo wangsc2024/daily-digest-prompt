@@ -144,7 +144,7 @@ def update_token_usage(provider: str) -> None:
         usage = json.loads(TOKEN_USAGE_PATH.read_text(encoding="utf-8"))
         today = datetime.date.today().isoformat()
         day_record = usage.setdefault("daily", {}).setdefault(today, {})
-        key = "groq_calls" if provider == "groq" else "claude_calls"
+        key = "groq_calls" if provider == "groq" else ("groq_skipped" if provider == "groq_skipped" else "claude_calls")
         day_record[key] = day_record.get(key, 0) + 1
         TOKEN_USAGE_PATH.write_text(
             json.dumps(usage, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -228,6 +228,7 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
                 "task_type": task_type,
             }
         except urllib.error.URLError as e:
+            update_token_usage("groq_skipped")  # 記錄 Groq 降級次數（relay 離線）
             fallback_action = (
                 config.get("fallback", {})
                 .get("groq_unavailable", {})
@@ -240,6 +241,7 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
                 "task_type": task_type,
             }
         except Exception as e:
+            update_token_usage("groq_skipped")  # 記錄 Groq 降級次數（其他錯誤）
             return {
                 "provider": "fallback_skipped",
                 "error": str(e),

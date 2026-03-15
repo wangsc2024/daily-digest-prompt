@@ -1728,4 +1728,50 @@ if (Test-Path $auditVerify) {
 }
 
 Write-Host ""
+
+# ============================================
+# 外部服務健康預檢（KB API / Gun Relay / Groq Relay）
+# ============================================
+Write-Host "[外部服務]" -ForegroundColor Cyan
+
+# 1. RAG_Skill KB API (D:\Source\RAG_Skill, port 3000)
+try {
+    $kbResp = Invoke-RestMethod "http://localhost:3000/api/health" -TimeoutSec 3 -ErrorAction Stop
+    try {
+        $kbStats = Invoke-RestMethod "http://localhost:3000/api/stats" -TimeoutSec 3 -ErrorAction Stop
+        $kbNotes = $kbStats.total_notes
+        Write-Host "  ✅ KB API (localhost:3000) 正常，筆記總數: $kbNotes" -ForegroundColor Green
+    } catch {
+        Write-Host "  ✅ KB API (localhost:3000) 正常（stats 端點不可用）" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "  ⚠️  KB API 離線 — 知識庫查詢/去重失效（D:\Source\RAG_Skill port 3000）" -ForegroundColor Yellow
+}
+
+# 2. Gun Relay (D:\Source\my-gun-relay, port 8765)
+try {
+    $relayResp = Invoke-RestMethod "http://localhost:8765/api/health" -TimeoutSec 3 -ErrorAction Stop
+    $relayPeers = if ($null -ne $relayResp.peers) { $relayResp.peers } else { "?" }
+    Write-Host "  ✅ Gun Relay (localhost:8765) 正常，peers: $relayPeers" -ForegroundColor Green
+} catch {
+    Write-Host "  ❌ Gun Relay 離線 — 聊天室/LINE 通知失效（D:\Source\my-gun-relay port 8765）" -ForegroundColor Red
+}
+
+# 3. Groq Relay (bot/groq-relay.js, port 3002)
+try {
+    $groqResp = Invoke-RestMethod "http://localhost:3002/groq/health" -TimeoutSec 3 -ErrorAction Stop
+    $groqApiOk = $groqResp.api_reachable -eq $true
+    $groqIcon = if ($groqApiOk) { "✅" } else { "⚠️ " }
+    $groqModel = if ($groqResp.model) { $groqResp.model } else { "?" }
+    $groqLatency = if ($groqResp.api_latency_ms) { "$($groqResp.api_latency_ms)ms" } else { "?" }
+    $groqClr = if ($groqApiOk) { "Green" } else { "Yellow" }
+    Write-Host "  $groqIcon Groq Relay (localhost:3002) — model: $groqModel, latency: $groqLatency" -ForegroundColor $groqClr
+    if (-not $groqApiOk) {
+        Write-Host "    ⚠️  Groq API 不可達 — Groq 路由全部降級為 Claude" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "  ⚠️  Groq Relay 離線 — Groq 路由全部降級為 Claude（bot/groq-relay.js port 3002）" -ForegroundColor Yellow
+}
+
+Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

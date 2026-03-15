@@ -19,6 +19,7 @@ from on_stop_alert import (
     read_session_entries,
     write_session_summary,
     _rotate_logs,
+    _cleanup_stale_state_files,
     _compute_error_budget,
     _check_slow_session,
 )
@@ -841,3 +842,101 @@ class TestComputeErrorBudgetIntegration:
 
         result = _compute_error_budget()
         assert isinstance(result, list)
+
+
+class TestCleanupStaleStateFiles:
+    """state/ 目錄過期檔案清理。"""
+
+    def test_removes_old_loop_state_files(self, tmp_path, monkeypatch):
+        """超過 retention_days 的 loop-state-*.json 應被刪除。"""
+        from datetime import datetime, timedelta
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+
+        old_file = state_dir / "loop-state-abc12345.json"
+        old_file.write_text('{"session_call_count": 5}')
+        old_mtime = (datetime.now() - timedelta(days=10)).timestamp()
+        os.utime(str(old_file), (old_mtime, old_mtime))
+
+        new_file = state_dir / "loop-state-def67890.json"
+        new_file.write_text('{"session_call_count": 3}')
+
+        import on_stop_alert
+        fake_hooks = tmp_path / "hooks"
+        fake_hooks.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks / "on_stop_alert.py"))
+
+        removed = _cleanup_stale_state_files(retention_days=7)
+        assert removed == 1
+        assert not old_file.exists()
+        assert new_file.exists()
+
+    def test_removes_old_stop_alert_files(self, tmp_path, monkeypatch):
+        """超過 retention_days 的 stop-alert-*.json 應被刪除。"""
+        from datetime import datetime, timedelta
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+
+        old_file = state_dir / "stop-alert-aabbccdd.json"
+        old_file.write_text('{"last_sent": "2026-01-01T00:00:00Z"}')
+        old_mtime = (datetime.now() - timedelta(days=10)).timestamp()
+        os.utime(str(old_file), (old_mtime, old_mtime))
+
+        import on_stop_alert
+        fake_hooks = tmp_path / "hooks"
+        fake_hooks.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks / "on_stop_alert.py"))
+
+        removed = _cleanup_stale_state_files(retention_days=7)
+        assert removed == 1
+        assert not old_file.exists()
+
+    def test_keeps_recent_files(self, tmp_path, monkeypatch):
+        """新檔案不應被清理。"""
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+
+        recent_file = state_dir / "loop-state-11223344.json"
+        recent_file.write_text('{}')
+
+        import on_stop_alert
+        fake_hooks = tmp_path / "hooks"
+        fake_hooks.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks / "on_stop_alert.py"))
+
+        removed = _cleanup_stale_state_files(retention_days=7)
+        assert removed == 0
+        assert recent_file.exists()
+
+    def test_ignores_non_matching_files(self, tmp_path, monkeypatch):
+        """不匹配 pattern 的檔案不受影響。"""
+        from datetime import datetime, timedelta
+        state_dir = tmp_path / "state"
+        state_dir.mkdir()
+
+        safe_files = ["run-fsm.json", "scheduler-state.json", "token-usage.json"]
+        for name in safe_files:
+            f = state_dir / name
+            f.write_text('{}')
+            old_mtime = (datetime.now() - timedelta(days=30)).timestamp()
+            os.utime(str(f), (old_mtime, old_mtime))
+
+        import on_stop_alert
+        fake_hooks = tmp_path / "hooks"
+        fake_hooks.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks / "on_stop_alert.py"))
+
+        removed = _cleanup_stale_state_files(retention_days=7)
+        assert removed == 0
+        for name in safe_files:
+            assert (state_dir / name).exists()
+
+    def test_handles_missing_state_dir(self, tmp_path, monkeypatch):
+        """state/ 目錄不存在時不應拋出例外。"""
+        import on_stop_alert
+        fake_hooks = tmp_path / "hooks"
+        fake_hooks.mkdir(exist_ok=True)
+        monkeypatch.setattr(on_stop_alert, "__file__", str(fake_hooks / "on_stop_alert.py"))
+
+        result = _cleanup_stale_state_files(retention_days=7)
+        assert result is None

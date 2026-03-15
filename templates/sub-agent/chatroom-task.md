@@ -60,6 +60,8 @@ rm -f cache/state_body.json
 
 依據 `task.content` 描述執行任務。
 
+> ⛔ **回覆格式禁令**：禁止在結果中加入「執行摘要」、「後續行動」、「重要結論」、「結構化摘要」等額外區塊。只回覆任務實際內容與執行結果，不加任何前後綴說明。
+
 ### 若 `is_research = true`（研究類任務）
 - 讀取 `templates/sub-agent/research-task.md` 作為執行指引
 - 執行知識庫搜尋（避免重複研究）
@@ -79,7 +81,7 @@ rm -f cache/state_body.json
 ```bash
 python -c "
 import json
-result_text = '''執行摘要：\n{在此填入任務執行結果摘要，200 字以內}'''
+result_text = '''{在此填入任務執行結果，直接呈現內容，不加「執行摘要」等標題，200 字以內}'''
 body = {
     'claim_generation': {claim_generation},
     'result': result_text

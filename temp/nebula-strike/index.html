@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>星雲殲擊 Nebula Strike - 創意太空射擊</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: 'Orbitron', 'Courier New', monospace;
+      touch-action: none;
+    }
+    .back-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      color: #6a8;
+      text-decoration: none;
+      font-size: 0.85rem;
+      z-index: 20;
+      transition: color 0.3s;
+    }
+    .back-link:hover { color: #9cf; }
+    #gameContainer { position: relative; width: 100%; max-width: 480px; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: crisp-edges;
+    }
+    #touchControls {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 10;
+    }
+    .touch-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(100,200,255,0.2);
+      border: 2px solid rgba(100,200,255,0.5);
+      color: #9cf;
+      font-size: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .touch-btn:active { background: rgba(100,200,255,0.4); }
+    .touch-group { display: flex; gap: 12px; }
+    #btnPause {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(100,200,255,0.1);
+      border: 1px solid rgba(100,200,255,0.3);
+      color: #9cf;
+      font-size: 18px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 15;
+      cursor: pointer;
+    }
+    #btnPause:active { background: rgba(100,200,255,0.3); }
+    @media (pointer: coarse) {
+      #touchControls { display: flex; }
+      #btnPause { display: flex; }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <a href="../../index.html" class="back-link">&#8592; 返回</a>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="480" height="640"></canvas>
+  </div>
+  <div id="btnPause">&#10074;&#10074;</div>
+  <div id="touchControls">
+    <div class="touch-group">
+      <div class="touch-btn" id="btnLeft">&#9664;</div>
+      <div class="touch-btn" id="btnRight">&#9654;</div>
+    </div>
+    <div class="touch-btn" id="btnFire">&#9679;</div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

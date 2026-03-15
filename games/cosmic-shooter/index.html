@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>星塵風暴 — Cosmic Storm</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a12;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #e8e8f0;
+      overflow: hidden;
+      touch-action: none;
+    }
+    #game-container {
+      position: relative;
+      border: 2px solid #3d5a80;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(61, 90, 128, 0.3), inset 0 0 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    #gameCanvas {
+      display: block;
+      background: #0a0a12;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+    }
+    #ui-overlay.pointer-events { pointer-events: auto; }
+    #hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 14px;
+      text-shadow: 0 0 8px rgba(0,0,0,0.8);
+    }
+    #score-section { display: flex; gap: 16px; align-items: center; }
+    #combo-badge {
+      background: linear-gradient(135deg, #ee6c4d, #c44536);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #combo-badge.active { opacity: 1; }
+    #loading-screen, #menu-screen, #pause-screen, #gameover-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 18, 0.92);
+      gap: 20px;
+      padding: 24px;
+    }
+    #loading-screen { z-index: 10; }
+    #menu-screen, #pause-screen, #gameover-screen { z-index: 5; display: none; }
+    #menu-screen.active, #pause-screen.active, #gameover-screen.active { display: flex; }
+    h1 {
+      font-size: clamp(24px, 5vw, 36px);
+      background: linear-gradient(135deg, #98c1d9, #e0fbfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+    .subtitle { font-size: 14px; opacity: 0.8; }
+    #loading-bar {
+      width: 200px;
+      height: 8px;
+      background: #1a1a2e;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    #loading-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3d5a80, #98c1d9);
+      transition: width 0.2s;
+    }
+    .btn {
+      padding: 12px 28px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s, box-shadow 0.2s;
+      pointer-events: auto;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary {
+      background: linear-gradient(135deg, #3d5a80, #ee6c4d);
+      color: white;
+      box-shadow: 0 4px 20px rgba(238, 108, 77, 0.4);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 28px rgba(238, 108, 77, 0.5); }
+    .btn-secondary {
+      background: rgba(61, 90, 128, 0.5);
+      color: #e0fbfc;
+      border: 1px solid #3d5a80;
+    }
+    #touch-zone {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 120px;
+      pointer-events: auto;
+      touch-action: none;
+    }
+    @media (max-width: 600px) {
+      #hud { font-size: 12px; }
+      #game-container { max-width: 100vw; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+  </div>
+  <script src="js/game.js"></script>
+</body>
+</html>

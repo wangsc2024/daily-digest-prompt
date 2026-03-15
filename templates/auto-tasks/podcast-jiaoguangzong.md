@@ -15,17 +15,28 @@
 
 ---
 
-## 步驟 0：讀取 Podcast 長久記憶
+## 步驟 -1：讀取自動任務連續記憶（preamble 協議）
 
-讀取過去的播客歷史，取得已用筆記與主題：
+遵守 `templates/shared/preamble.md` 的自動任務連續記憶規則。
 
-```bash
-cat context/podcast-history.json
-```
+用 Read 讀取 `context/continuity/auto-task-podcast_jiaoguangzong.json`（不存在則略過）。
 
-記錄：
-- **`summary.recent_note_ids`**：30 天內已用筆記 ID（本次必須排除）
-- **`summary.recent_topics`**：近期主題標籤（本次選擇不在此清單的切入角度）
+> **注意**：podcast 任務的主要連續記憶儲存在 `context/podcast-history.json`（更豐富的 TTL 結構），下一步驟 0 即讀取。`auto-task-podcast_jiaoguangzong.json` 僅記錄任務層級狀態（是否成功/失敗）供 `todoist-hourly.json` 趨勢感知使用。任務完成後（步驟 11 之後）依 preamble 協議寫入本次記錄。
+
+---
+
+## 步驟 0：讀取 Podcast 長久記憶（TTL 感知）
+
+用 **Read 工具**讀取 `context/podcast-history.json`，取得已用筆記與主題：
+
+1. 計算 today = 今日日期（YYYY-MM-DD 格式）
+2. 從 `summary.recent_note_ids`（格式：`[{note_id, last_used, expires_at}]`）中：
+   - **過濾**：移除 `expires_at < today` 的過期項目（形成 `active_note_ids` 清單）
+   - 記錄 `active_note_ids`（即未過期的 note_id 字串清單）——本次選筆記時必須排除
+3. 從 `summary.recent_topics`（格式：`[{topic, last_used, expires_at}]`）中：
+   - **過濾**：移除 `expires_at < today` 的過期項目（形成 `active_topics` 清單）
+   - 記錄 `active_topics`（即未過期的 topic 字串清單）——本次選筆記時優先避開
+4. 記錄 `summary.cooldown_days`（預設 30），用於後續計算 expires_at
 
 ---
 
@@ -40,9 +51,9 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 ```
 
 選取規則（依序）：
-1. **排除** ID 在步驟 0 的 `recent_note_ids` 中的筆記
-2. 優先選取主題**不在** `recent_topics` 中的筆記
-3. 若所有筆記都已用過（冷卻中），選**分數最低**的（允許最舊的筆記循環重用）
+1. **排除** ID 在步驟 0 的 `active_note_ids` 中的筆記（已在冷卻期內）
+2. 優先選取主題**不在** `active_topics` 中的筆記（未覆蓋的知識角度）
+3. 若所有筆記都已用過（全在冷卻中），選**分數最低**的（允許最舊的筆記循環重用）
 
 記錄選定筆記的 `note_id`。
 
@@ -192,13 +203,48 @@ cat context/podcast-history.json
 }
 ```
 
-更新 `summary`：
+更新 `summary`（TTL 感知）：
 - `total_episodes`：+1
-- `recent_note_ids`：前方加入本集 note_id，保留最新 30 筆
-- `recent_topics`：前方加入本集 topics，去重後保留最新 50 個
+- `recent_note_ids`（TTL 格式）：
+  - 先移除 `expires_at < today` 的過期項目
+  - 若本集 note_id 已存在於列表，更新其 `last_used` = today、`expires_at` = today + cooldown_days
+  - 否則在**末尾**新增 `{"note_id": "...", "last_used": "<today>", "expires_at": "<today+cooldown>"}`
+  - 保留最新 30 筆（如超出，移除最早 last_used 的項目）
+- `recent_topics`（TTL 格式）：
+  - 先移除 `expires_at < today` 的過期項目
+  - 對本集 topics 中每個 topic：若已存在，更新 last_used/expires_at；否則末尾新增 `{"topic": "...", "last_used": "<today>", "expires_at": "<today+cooldown>"}`
+  - 去重後保留最新 50 個
 - `updated_at`：更新為當前 ISO 8601
 
 用 **Write 工具**完整覆寫 `context/podcast-history.json`（version:2 格式，保留 entries[] 原樣）。
+
+## 步驟 11：同步 topics 至 research-registry.json（跨任務去重防線）
+
+Read `context/research-registry.json`，在頂層 `topics_index{}` 中：
+- 以本集 `note_title` 為 key、今日日期（YYYY-MM-DD）為 value，**新增或更新**
+- 同時加入本集 `podcast_title` 作為 key（若與 note_title 不同）
+- 用 Write 工具完整覆寫 `context/research-registry.json`（保留 entries[] 原樣）
+
+> **目的**：讓研究任務（tech_research / shurangama / jiaoguangzong 等）的去重步驟能偵測到 Podcast 已處理過的主題，避免同天重複研究相同知識點。
+
+## 步驟 12：寫入自動任務連續記憶（preamble 協議）
+
+依 `templates/shared/preamble.md` 的自動任務連續記憶規則，在結果 JSON 寫入後執行：
+
+1. Read `context/continuity/auto-task-podcast_jiaoguangzong.json`（不存在則初始化 `{"task_key":"podcast_jiaoguangzong","schema_version":1,"max_runs":5,"runs":[]}`）
+2. 在 `runs[]` 開頭插入：
+```json
+{
+  "executed_at": "<ISO 8601>",
+  "topic": "<podcast_title>（<note_title>）",
+  "status": "completed",
+  "key_findings": "<本集核心主題 1-2 句，如：四諦觀修行次第與止觀雙運的實踐方法>",
+  "kb_note_ids": ["<note_id>"],
+  "next_suggested_angle": "<下集可深化的角度，如：繼續深化同課程的下一主題>"
+}
+```
+3. 若 `runs` 超過 5 則移除最舊的
+4. 用 Write 工具完整覆寫 `context/continuity/auto-task-podcast_jiaoguangzong.json`
 
 完成！在最終輸出中列出：
 - podcast_title 與 slug

@@ -1,0 +1,56 @@
+{
+  "notes": [
+    {
+      "note_id": "d90898d3-ecc3-41dc-8f22-0f4e3dc6d52d",
+      "title": "法華經隨喜功德品研究：聞法隨喜的功德校量與展轉教化的五十展轉",
+      "tags": [
+        "法華經",
+        "佛學",
+        "天台宗",
+        "隨喜功德品",
+        "展轉教化",
+        "功德校量",
+        "本門流通",
+        "一佛乘",
+        "開權顯實",
+        "五十展轉"
+      ],
+      "created_at": null,
+      "content_length": 28051,
+      "core_concepts": [
+        "五十展轉教化",
+        "隨喜功德校量",
+        "本門流通分",
+        "一佛乘圓教精神",
+        "展轉傳法機制"
+      ],
+      "summary_200chars": "《法華經》隨喜功德品揭示展轉教化至第五十人，僅聞一偈而隨喜者，其功德超越布施四百萬億世界眾生八十年的福報，彰顯法華圓教「一念契入真實性」的核心價值，強調聞法隨喜與展轉傳法的無量功德。"
+    },
+    {
+      "note_id": "cc231ade-9ad2-44f2-b966-9b09bca21880",
+      "title": "Mastra — TypeScript 原生 AI Agent 框架深度洞察：Observational Memory 觀測式記憶、Agent Network 動態路由、Supervisor 多 Agent 協調與對 Agent 系統設計的六大借鑑啟示（22K Stars, 2026-03）",
+      "tags": [
+        "GitHub",
+        "AI Agent",
+        "TypeScript",
+        "Mastra",
+        "Observational Memory",
+        "Agent Framework",
+        "深度思維",
+        "知識庫",
+        "研究",
+        "架構設計"
+      ],
+      "created_at": null,
+      "content_length": 28459,
+      "core_concepts": [
+        "Observational Memory 觀測式記憶",
+        "Agent Network 動態路由",
+        "Supervisor 多 Agent 協調",
+        "TypeScript 型別安全",
+        "宣告式 Agent 定義"
+      ],
+      "summary_200chars": "Mastra 是 Gatsby.js 團隊打造的 TypeScript 原生 AI Agent 框架（22K Stars），以型別安全為核心，提供觀測式記憶、動態路由與多 Agent 協調機制，定位為從原型到生產的一站式 Agent 開發平台。"
+    }
+  ]
+}

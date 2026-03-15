@@ -1,46 +1,46 @@
 {
-  "updated": "2026-03-14T08:39:39.229465+00:00",
+  "updated": "2026-03-15T12:41:36.137079+00:00",
   "summary": {
     "ai_github_research": {
-      "avg": 58.0,
-      "count": 5,
-      "last": 30,
+      "avg": 57.2,
+      "count": 6,
+      "last": 53,
       "alert": true
     },
     "ai_sysdev": {
-      "avg": 77.9,
-      "count": 7,
-      "last": 30,
+      "avg": 73.1,
+      "count": 8,
+      "last": 40,
       "alert": true
     },
     "shurangama": {
-      "avg": 58.0,
-      "count": 5,
-      "last": 30,
-      "alert": true
-    },
-    "jiaoguangzong": {
-      "avg": 61.1,
-      "count": 9,
-      "last": 30,
-      "alert": true
-    },
-    "fahua": {
-      "avg": 65.0,
+      "avg": 53.3,
       "count": 6,
       "last": 30,
       "alert": true
     },
-    "jingtu": {
-      "avg": 80.9,
+    "jiaoguangzong": {
+      "avg": 55.5,
       "count": 11,
       "last": 30,
       "alert": true
     },
-    "ai_deep_research": {
-      "avg": 61.6,
-      "count": 14,
+    "fahua": {
+      "avg": 54.8,
+      "count": 9,
+      "last": 43,
+      "alert": true
+    },
+    "jingtu": {
+      "avg": 74.8,
+      "count": 13,
       "last": 30,
+      "alert": true
+    },
+    "ai_deep_research": {
+      "avg": 61.1,
+      "count": 15,
+      "last": 53,
       "alert": true
     },
     "tech_research": {
@@ -50,9 +50,9 @@
       "alert": true
     },
     "ai_workflow_github": {
-      "avg": 31.7,
-      "count": 3,
-      "last": 35,
+      "avg": 37.0,
+      "count": 4,
+      "last": 53,
       "alert": true
     }
   },
@@ -1141,6 +1141,198 @@
         "tool_utilization": 0
       },
       "output_length": 355,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_sysdev.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "fahua",
+      "timestamp": "2026-03-14T14:41:59.474600+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 388,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-fahua.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "shurangama",
+      "timestamp": "2026-03-14T19:46:28.451060+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 401,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-shurangama.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "jiaoguangzong",
+      "timestamp": "2026-03-14T19:46:28.654322+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 472,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-jiaoguangzong.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "fahua",
+      "timestamp": "2026-03-14T21:39:58.578334+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 378,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-fahua.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "ai_workflow_github",
+      "timestamp": "2026-03-14T23:44:22.307444+00:00",
+      "score": 53,
+      "dimensions": {
+        "source_count": 8,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 20,
+        "tool_utilization": 0
+      },
+      "output_length": 2388,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_workflow_github.json",
+      "backend": "codex_exec",
+      "alert": true
+    },
+    {
+      "task_key": "jiaoguangzong",
+      "timestamp": "2026-03-15T04:44:29.804847+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 422,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-jiaoguangzong.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "fahua",
+      "timestamp": "2026-03-15T04:44:30.006616+00:00",
+      "score": 43,
+      "dimensions": {
+        "source_count": 8,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 10,
+        "tool_utilization": 0
+      },
+      "output_length": 624,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-fahua.json",
+      "backend": "cursor_cli",
+      "alert": true
+    },
+    {
+      "task_key": "jingtu",
+      "timestamp": "2026-03-15T05:33:19.792486+00:00",
+      "score": 53,
+      "dimensions": {
+        "source_count": 8,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 20,
+        "tool_utilization": 0
+      },
+      "output_length": 2386,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-jingtu.json",
+      "backend": "codex_exec",
+      "alert": true
+    },
+    {
+      "task_key": "ai_github_research",
+      "timestamp": "2026-03-15T06:33:20.948438+00:00",
+      "score": 53,
+      "dimensions": {
+        "source_count": 8,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 20,
+        "tool_utilization": 0
+      },
+      "output_length": 2412,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_github_research.json",
+      "backend": "codex_exec",
+      "alert": true
+    },
+    {
+      "task_key": "ai_deep_research",
+      "timestamp": "2026-03-15T06:33:21.142438+00:00",
+      "score": 53,
+      "dimensions": {
+        "source_count": 8,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 20,
+        "tool_utilization": 0
+      },
+      "output_length": 2398,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_deep_research.json",
+      "backend": "codex_exec",
+      "alert": true
+    },
+    {
+      "task_key": "jingtu",
+      "timestamp": "2026-03-15T11:06:20.498411+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 318,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-jingtu.json",
+      "backend": "claude_sonnet45",
+      "alert": true
+    },
+    {
+      "task_key": "ai_sysdev",
+      "timestamp": "2026-03-15T12:41:36.133080+00:00",
+      "score": 40,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 15,
+        "tool_utilization": 0
+      },
+      "output_length": 807,
       "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_sysdev.json",
       "backend": "unknown",
       "alert": true

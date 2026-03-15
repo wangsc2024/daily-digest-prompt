@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "schedule_type": "todoist_hourly",
+  "description": "每小時 Todoist 排程的最近 3 次執行記錄，供下次排程決策時參考",
+  "max_runs": 3,
+  "runs": [
+    {
+      "run_id": "20260315133034",
+      "started_at": "2026-03-15T13:30:34Z",
+      "completed_at": "2026-03-15T21:39:40",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["skill_audit"],
+      "auto_tasks_failed": ["log_audit"],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "完成 Skill 審查（academic-paper-research + skill-forge 3處修正），Log 審查發現 OpenRouter 額度耗盡待處理",
+      "notable": "log_audit 為 partial：P1 OpenRouter 額度耗盡需手動處理，P2 done_cert JSON 解析已修復"
+    },
+    {
+      "run_id": "20260315123044",
+      "started_at": "2026-03-15T12:30:44Z",
+      "completed_at": "2026-03-15T20:43:00",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["ai_smart_city", "ai_sysdev"],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "完成AI智慧城市研究（智慧醫療全景）與AI系統開發研究（Agent Context Management），均以備援claude_sonnet45執行成功",
+      "notable": "兩個任務均因Codex配額耗盡fallback至claude_sonnet45，品質均5/5"
+    },
+    {
+      "run_id": "20260315113040",
+      "started_at": "2026-03-15T11:30:40Z",
+      "completed_at": "2026-03-15T19:40:27",
+      "plan_type": "tasks",
+      "auto_tasks_executed": [],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": ["研究1項 GitHub 最熱門方案並將研究結果寫入 RAG 知識庫"],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "完成 GitHub 熱門方案研究（Agency-Agents 45K Stars），已匯入知識庫",
+      "notable": ""
+    }
+  ]
+}

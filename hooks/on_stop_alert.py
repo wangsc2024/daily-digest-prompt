@@ -388,6 +388,34 @@ def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
         f.write(json.dumps(summary, ensure_ascii=False) + "\n")
 
 
+def _cleanup_stale_state_files(retention_days=7):
+    """清理過期的 loop-state-*.json 和 stop-alert-*.json 檔案。
+
+    這些檔案由 agent_guardian.py（LoopDetector）和 on_stop_alert.py（session 去重）
+    產生，無自動清理機制會導致 state/ 目錄無限膨脹。
+    """
+    state_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "state")
+    if not os.path.isdir(state_dir):
+        return
+
+    cutoff_ts = (datetime.now() - timedelta(days=retention_days)).timestamp()
+    patterns = (r"^loop-state-[0-9a-f]+\.json$", r"^stop-alert-[0-9a-f]+\.json$")
+    removed = 0
+
+    for fname in os.listdir(state_dir):
+        if not any(re.match(p, fname) for p in patterns):
+            continue
+        fpath = os.path.join(state_dir, fname)
+        try:
+            if os.path.getmtime(fpath) < cutoff_ts:
+                os.remove(fpath)
+                removed += 1
+        except OSError:
+            pass
+
+    return removed
+
+
 def _rotate_logs(retention_days=7):
     """刪除超過保留天數的結構化日誌與過期 session-summary 條目。"""
     log_dir = os.path.join("logs", "structured")
@@ -977,6 +1005,7 @@ def main():
         )
 
     _rotate_logs()
+    _cleanup_stale_state_files()
     _update_metrics_daily()
 
     # Level 4-B: Error Budget 計算（寫入後才讀，確保今日資料最新）

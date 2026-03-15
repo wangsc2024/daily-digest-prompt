@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "schedule_type": "system_audit",
+  "description": "每日 00:40 系統審查的執行記錄，每日獨立一筆",
+  "records": {}
+}

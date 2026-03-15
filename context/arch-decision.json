@@ -1,25 +1,10 @@
 {
   "version": 1,
-  "generated_at": "2026-03-14T09:02:00+08:00",
+  "generated_at": "2026-03-15T09:01:00+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
   "source_audit_score": 86.29,
   "decisions": [
-    {
-      "backlog_id": "ADR-20260311-010",
-      "backlog_pattern": "依賴漏洞自動掃描",
-      "action": "skip",
-      "priority": "high",
-      "fix_instructions": null,
-      "estimated_minutes": 0,
-      "verification": null,
-      "execution_status": "skip",
-      "retry_count": 0,
-      "executed_at": null,
-      "execution_result": null,
-      "execution_note": "已存在對應 ADR（ADR-20260311-010，status: Accepted, implementation_status: done）。已完成修復。",
-      "validation_result": null
-    },
     {
       "backlog_id": "ADR-20260314-016",
       "backlog_pattern": "CI ruff lint 整合",
@@ -34,6 +19,21 @@
       "execution_result": "success",
       "execution_note": "ruff lint 步驟已存在於 ci.yml（第 29-30 行），修復已完成",
       "validation_result": "ci.yml 已包含 ruff check 步驟，位置正確（Install dependencies 之後、pytest 之前）"
+    },
+    {
+      "backlog_id": "ADR-20260311-010",
+      "backlog_pattern": "依賴漏洞自動掃描",
+      "action": "skip",
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "skip",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "已存在對應 ADR（ADR-20260311-010，status: Accepted, implementation_status: done）。已完成修復。",
+      "validation_result": null
     },
     {
       "backlog_id": "ADR-20260311-011",
@@ -53,47 +53,45 @@
     {
       "backlog_id": "ADR-20260314-017",
       "backlog_pattern": "TODO/FIXME 規範性清理",
-      "action": "schedule_adr",
+      "action": "skip",
       "priority": "medium",
       "fix_instructions": null,
-      "estimated_minutes": 60,
+      "estimated_minutes": 0,
       "verification": null,
-      "execution_status": "pending",
+      "execution_status": "skip",
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "265 處 TODO/FIXME 跨 56 檔，需人工分類規範性 vs 缺陷型後分批清理。建議排入週末作業。",
+      "execution_note": "已存在對應 ADR（ADR-20260314-017，status: Accepted, implementation_status: partial）。需人工分類規範性 vs 缺陷型 TODO 後分批清理，等待人工排程。",
       "validation_result": null
     },
     {
       "backlog_id": "ADR-20260314-018",
       "backlog_pattern": "Phase 2 任務 retry 機制",
-      "action": "schedule_adr",
+      "action": "skip",
       "priority": "medium",
       "fix_instructions": null,
-      "estimated_minutes": 45,
+      "estimated_minutes": 0,
       "verification": null,
-      "execution_status": "pending",
+      "execution_status": "skip",
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "涉及核心腳本 run-todoist-agent-team.ps1，安全邊界禁止自動修復。需人工排程並端對端驗證。",
+      "execution_note": "已存在對應 ADR（ADR-20260314-018，status: Accepted, implementation_status: done）。已完成修復。",
       "validation_result": null
     }
   ],
   "immediate_fix_summary": {
-    "count": 1,
-    "items": [
-      "ADR-20260314-016"
-    ],
+    "count": 0,
+    "items": [],
     "safe_to_automate": true
   },
   "meta": {
     "decisions_total": 5,
-    "immediate_fix": 1,
-    "schedule_adr": 2,
+    "immediate_fix": 0,
+    "schedule_adr": 0,
     "deferred": 0,
     "wontfix": 0,
-    "skip": 2
+    "skip": 5
   }
 }

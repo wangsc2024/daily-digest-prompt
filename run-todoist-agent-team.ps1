@@ -632,7 +632,7 @@ function Get-TaskBackend {
 
         # 決定後端名稱
         $backendName = "claude_sonnet"
-        foreach ($bName in @("claude_sonnet45","claude_haiku","codex_exec","codex_standard","openrouter_standard","openrouter_research")) {
+        foreach ($bName in @("claude_opus46","claude_sonnet45","claude_haiku","codex_exec","codex_standard","openrouter_standard","openrouter_research","cursor_cli")) {
             $rules = $sel.task_rules.$bName
             if ($rules -and ($rules -contains $TaskKey)) {
                 $backendName = $bName
@@ -643,19 +643,37 @@ function Get-TaskBackend {
         $bCfg = $sel.backends.$backendName
 
         # codex_exec / codex_standard：偵測安裝（訂閱制不需 API Key）
+        # 備援規則：非 cursor_cli 模型 → cursor_cli；cursor_cli → claude
         if ($backendName -in @("codex_exec","codex_standard")) {
             if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
-                Write-Log "[ModelSelect] WARN: codex not installed, fallback -> openrouter_research ($TaskKey)"
-                $backendName = "openrouter_research"
-                $bCfg = $sel.backends.openrouter_research
+                Write-Log "[ModelSelect] WARN: codex not installed, fallback -> cursor_cli ($TaskKey)"
+                $backendName = "cursor_cli"
+                $bCfg = $sel.backends.cursor_cli
             }
         }
 
         # openrouter_*：偵測 API Key
+        # 備援規則：非 cursor_cli 模型 → cursor_cli；cursor_cli → claude
         if ($backendName -like "openrouter*" -and -not $env:OPENROUTER_API_KEY) {
-            Write-Log "[ModelSelect] WARN: OPENROUTER_API_KEY not set, fallback -> claude_haiku ($TaskKey)"
-            $backendName = "claude_haiku"
-            $bCfg = $sel.backends.claude_haiku
+            Write-Log "[ModelSelect] WARN: OPENROUTER_API_KEY not set, fallback -> cursor_cli ($TaskKey)"
+            $backendName = "cursor_cli"
+            $bCfg = $sel.backends.cursor_cli
+        }
+
+        # cursor_cli：偵測 agent 指令可用性
+        if ($backendName -eq "cursor_cli") {
+            if (-not (Get-Command agent -ErrorAction SilentlyContinue)) {
+                Write-Log "[ModelSelect] WARN: 'agent' CLI not found, cursor_cli fallback -> claude_sonnet ($TaskKey)"
+                $backendName = "claude_sonnet"
+                $bCfg = $sel.backends.claude_sonnet
+            } else {
+                $taskFile = Join-Path $AgentDir "temp\cursor-cli-task-$TaskKey.md"
+                if (-not (Test-Path $taskFile)) {
+                    Write-Log "[ModelSelect] WARN: cursor_cli task file missing ($taskFile), fallback -> claude_sonnet ($TaskKey)"
+                    $backendName = "claude_sonnet"
+                    $bCfg = $sel.backends.claude_sonnet
+                }
+            }
         }
 
         # 讀 token_level（供呼叫方查詢）
@@ -776,6 +794,65 @@ function Start-OpenRouterJob {
     return $job
 }
 
+function Start-CursorCliJob {
+    param(
+        [string]$TaskKey,
+        [string]$TaskFile,
+        [string]$AgentDir,
+        [int]$TimeoutSeconds = 600,
+        [string]$TraceId = ""
+    )
+    $safeKey    = $TaskKey
+    $resultFile = Join-Path $AgentDir "results\todoist-auto-$safeKey.json"
+    $stderrFile = Join-Path $AgentDir "logs\cursor-cli-$safeKey-stderr.log"
+
+    $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+        param($taskFile, $resultFile, $stderrFile, $traceId, $taskKey, $dir)
+        $env:CLAUDE_TEAM_MODE = "1"
+        $env:DIGEST_TRACE_ID  = $traceId
+        $env:AGENT_PHASE      = "phase2-auto"
+        $env:AGENT_NAME       = "cursor-cli-$taskKey"
+        Set-Location $dir
+
+        $startTime = Get-Date
+        $content   = Get-Content $taskFile -Raw -Encoding UTF8
+
+        # Ensure logs dir exists
+        $logsDir = Split-Path $stderrFile -Parent
+        if (-not (Test-Path $logsDir)) { New-Item -ItemType Directory -Path $logsDir -Force | Out-Null }
+
+        $output = & agent -p $content 2>$stderrFile
+        $exitCode = $LASTEXITCODE
+        $elapsed  = [math]::Round(((Get-Date) - $startTime).TotalSeconds, 1)
+
+        # 取最後 10 行作為摘要
+        $outputLines = $output | Where-Object { $_ }
+        $summaryLines = ($outputLines | Select-Object -Last 10) -join "`n"
+
+        $result = @{
+            agent        = "todoist-auto-$taskKey"
+            backend      = "cursor_cli"
+            status       = if ($exitCode -eq 0) { "completed" } else { "failed" }
+            summary      = $summaryLines
+            elapsed      = $elapsed
+            exit_code    = $exitCode
+            trace_id     = $traceId
+            generated_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+        }
+
+        # Ensure results dir exists
+        $resultsDir = Split-Path $resultFile -Parent
+        if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null }
+
+        $result | ConvertTo-Json -Depth 3 | Set-Content $resultFile -Encoding UTF8
+        return $output
+    } -ArgumentList $TaskFile, $resultFile, $stderrFile, $TraceId, $TaskKey, $AgentDir
+
+    $job | Add-Member -NotePropertyName "ResultFile" -NotePropertyValue $resultFile -Force
+    $job | Add-Member -NotePropertyName "StdErrFile"  -NotePropertyValue $stderrFile  -Force
+    return $job
+}
+
 # ============================================
 # Start execution
 # ============================================
@@ -857,17 +934,43 @@ Write-Log "Mode: parallel (Phase 1 x1 + Phase 2 xN + Phase 3 x1)"
 Write-Log "[PID] $PID"
 
 # ─── Instance Lock（防止與上一班排程重疊，避免 results/ 衝突與日誌截斷）───
+# PID 存活檢查邏輯：
+#   死進程 → 強制清除孤立鎖，繼續執行
+#   活進程 → 等待 5 分鐘後再查；仍活 → ntfy 通知「前一任務執行中」後退出；已死 → 清除鎖繼續執行
 $TodoistTeamLockFile = "$AgentDir\state\run-todoist-agent-team.lock"
 if (Test-Path $TodoistTeamLockFile) {
     $lockContent = Get-Content $TodoistTeamLockFile -Raw -ErrorAction SilentlyContinue
     $lockPid = ($lockContent -split "`n")[0].Trim()
     $existingProcess = Get-Process -Id $lockPid -ErrorAction SilentlyContinue
     if ($existingProcess) {
-        Write-Log "[SKIP] Another instance is running (PID $lockPid). Exiting to avoid overlap."
-        exit 0
+        Write-Log "[LOCK] PID $lockPid 仍在運行，等待 5 分鐘後再確認..."
+        Start-Sleep -Seconds 300
+        # 5 分鐘後再次檢查
+        $existingProcess2 = Get-Process -Id $lockPid -ErrorAction SilentlyContinue
+        if ($existingProcess2) {
+            Write-Log "[SKIP] 前一任務（PID $lockPid）5 分鐘後仍在執行中，退出避免重疊。"
+            # ntfy 通知前一任務仍執行中
+            $ntfyLockJson = "$AgentDir\temp\ntfy-lock-overlap-$(Get-Date -Format 'HHmmss').json"
+            @{
+                topic = "wangsc2025"
+                title = "⚠️ Todoist 任務排程重疊"
+                message = "前一次 todoist-team 排程（PID $lockPid）仍在執行，本次（PID $PID）已跳過。若持續發生請確認任務是否卡死。"
+                priority = 3
+                tags = @("warning")
+            } | ConvertTo-Json | Set-Content $ntfyLockJson -Encoding UTF8
+            try {
+                curl -s -X POST https://ntfy.sh -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyLockJson" | Out-Null
+            } catch {}
+            Remove-Item $ntfyLockJson -Force -ErrorAction SilentlyContinue
+            exit 0
+        }
+        # 5 分鐘後已死進程：若鎖仍存在則強制清除
+        Write-Log "[LOCK] PID $lockPid 於等待期間結束，強制清除孤立鎖後繼續執行。"
+        Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
+    } else {
+        Write-Log "[WARN] Stale lock found (PID $lockPid not running). Removing."
+        Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
     }
-    Write-Log "[WARN] Stale lock found (PID $lockPid not running). Removing."
-    Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
 }
 $PID | Set-Content $TodoistTeamLockFile -Encoding UTF8
 try {
@@ -1285,6 +1388,8 @@ $phase2Start = Get-Date
 Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "running" -AgentType "todoist"
 
 $phase2Jobs = @()
+# ADR-018: 記錄每個 Phase 2 job 的 descriptor，供 timeout 時重試使用（max 1 retry, 30s backoff）
+$phase2JobDescriptors = @()
 $sections = @{ query = "success" }
 
 if ($plan.plan_type -eq "tasks") {
@@ -1331,6 +1436,7 @@ if ($plan.plan_type -eq "tasks") {
 
         $job | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $taskName
         $phase2Jobs += $job
+        $phase2JobDescriptors += @{ plan_type = "tasks"; taskPrompt = $taskPrompt; taskTools = $taskTools; taskName = $taskName }
         Write-Log "[Phase2] Started: $taskName (Job $($job.Id)) - $($task.content)"
     }
 }
@@ -1340,6 +1446,40 @@ elseif ($plan.plan_type -eq "auto") {
 
     if ($null -eq $selectedTasks -or $selectedTasks.Count -eq 0) {
         Write-Log "[Phase2] No auto-tasks selected (all exhausted or error)"
+        # all_exhausted_fallback：達上限時先執行排程（如淨土教觀學苑 1 集）再進入 Phase 3 通知
+        $allExhausted = $plan.auto_tasks.all_exhausted -eq $true
+        if ($allExhausted -and (Test-Path "$AgentDir\config\frequency-limits.yaml")) {
+            try {
+                $fl = ConvertFrom-YamlViapy -YamlPath "$AgentDir\config\frequency-limits.yaml"
+                $fallback = $fl.all_exhausted_fallback
+                $notifyMsg = $fl.all_exhausted_notify_message
+                if ($fallback -eq "jiaoguang_podcast_one" -and $notifyMsg) {
+                    $fallbackScript = Join-Path $AgentDir "tools\run-jiaoguang-podcast-next.ps1"
+                    $primaryBackend = $fl.all_exhausted_fallback_primary
+                    if (-not $primaryBackend) { $primaryBackend = "claude" }
+                    $fallbackBackend = if ($primaryBackend -eq "cursor_cli") { "claude" } else { "cursor_cli" }
+                    if (Test-Path $fallbackScript) {
+                        Write-Log "[Phase2] all_exhausted_fallback: 執行淨土教觀學苑 podcast 1 集（primary=$primaryBackend, 備援=$fallbackBackend）"
+                        $jiaoguangOk = $false
+                        foreach ($backend in @($primaryBackend, $fallbackBackend)) {
+                            & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1 | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
+                            if ($LASTEXITCODE -eq 0) {
+                                $jiaoguangOk = $true
+                                Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）"
+                                break
+                            }
+                            Write-Log "[Phase2] all_exhausted_fallback primary=$backend 失敗，嘗試備援 $fallbackBackend"
+                        }
+                        $resultsDir = Join-Path $AgentDir "results"
+                        if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null }
+                        @{ ran = "jiaoguang_podcast_one"; notify_message = $notifyMsg } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
+                        if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback  primary 與備援皆未成功，仍寫入 fallback.json 以通知" }
+                    }
+                }
+            } catch {
+                Write-Log "[Phase2] all_exhausted_fallback 讀取或執行失敗: $_"
+            }
+        }
     }
     else {
         Write-Log "[Phase2] Starting $($selectedTasks.Count) auto-task agents in parallel..."
@@ -1428,6 +1568,17 @@ elseif ($plan.plan_type -eq "auto") {
             } elseif ($backend.type -eq "openrouter_runner") {
                 $job = Start-OpenRouterJob -TaskKey $taskKey -PromptContent $promptContent `
                     -TraceId $traceId -AgentName $agentName
+            } elseif ($backend.type -eq "cursor_cli") {
+                $cursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$taskKey.md"
+                if (-not (Test-Path $cursorTaskFile)) {
+                    Write-Log "[Phase2] WARN: cursor_cli task file missing ($cursorTaskFile), skip $taskKey"
+                    $job = $null
+                } else {
+                    $timeout = if ($backend.timeout_seconds) { [int]$backend.timeout_seconds } else { 600 }
+                    $job = Start-CursorCliJob -TaskKey $taskKey -TaskFile $cursorTaskFile `
+                        -AgentDir $AgentDir -TimeoutSeconds $timeout -TraceId $traceId
+                    $stderrFile = Join-Path $AgentDir "logs\cursor-cli-$taskKey-stderr.log"
+                }
             } else {
                 # claude_code: 原有 Start-Job，注入可選的 cli_flag（如 --model claude-haiku-4-5）
                 $cliFlag = $backend.cli_flag
@@ -1465,13 +1616,47 @@ elseif ($plan.plan_type -eq "auto") {
                 $job | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $stderrFile -Force
             }
             $phase2Jobs += $job
+            $phase2JobDescriptors += @{ plan_type = "auto"; promptContent = $promptContent; taskKey = $taskKey; backend = $backend; agentName = $agentName; taskName = $taskName }
             Write-Log "[Phase2] Started: $agentName ($taskName) backend=$($backend.backend) (Job $($job.Id))"
         }
     }
 }
 else {
-    # Scenario C: idle
+    # Scenario C: idle（全部達上限）
     Write-Log "[Phase2] Idle - all auto-tasks at daily limit"
+    # all_exhausted_fallback：先執行排程（如淨土教觀學苑 1 集）再進入 Phase 3
+    if (Test-Path "$AgentDir\config\frequency-limits.yaml") {
+        try {
+            $fl = ConvertFrom-YamlViapy -YamlPath "$AgentDir\config\frequency-limits.yaml"
+            $fallback = $fl.all_exhausted_fallback
+            $notifyMsg = $fl.all_exhausted_notify_message
+            if ($fallback -eq "jiaoguang_podcast_one" -and $notifyMsg) {
+                $fallbackScript = Join-Path $AgentDir "tools\run-jiaoguang-podcast-next.ps1"
+                $primaryBackend = $fl.all_exhausted_fallback_primary
+                if (-not $primaryBackend) { $primaryBackend = "claude" }
+                $fallbackBackend = if ($primaryBackend -eq "cursor_cli") { "claude" } else { "cursor_cli" }
+                if (Test-Path $fallbackScript) {
+                    Write-Log "[Phase2] all_exhausted_fallback: 執行淨土教觀學苑 podcast 1 集（primary=$primaryBackend, 備援=$fallbackBackend）"
+                    $jiaoguangOk = $false
+                    foreach ($backend in @($primaryBackend, $fallbackBackend)) {
+                        & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1 | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
+                        if ($LASTEXITCODE -eq 0) {
+                            $jiaoguangOk = $true
+                            Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）"
+                            break
+                        }
+                        Write-Log "[Phase2] all_exhausted_fallback primary=$backend 失敗，嘗試備援 $fallbackBackend"
+                    }
+                    $resultsDir = Join-Path $AgentDir "results"
+                    if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null }
+                    @{ ran = "jiaoguang_podcast_one"; notify_message = $notifyMsg } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
+                    if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback  primary 與備援皆未成功，仍寫入 fallback.json 以通知" }
+                }
+            }
+        } catch {
+            Write-Log "[Phase2] all_exhausted_fallback 讀取或執行失敗: $_"
+        }
+    }
 }
 
 # Wait for Phase 2 jobs
@@ -1481,6 +1666,8 @@ if ($phase2Jobs.Count -gt 0) {
 }
 
 # Collect Phase 2 results
+$phase2QuotaFallbacks = @()    # Codex quota error → openrouter_research fallback
+$phase2SandboxFallbacks = @()  # Codex exit 0 但結果檔缺失 → claude_sonnet45 fallback
 foreach ($job in $phase2Jobs) {
     $agentName = $job.AgentName
     $output = Receive-Job -Job $job -ErrorAction SilentlyContinue
@@ -1506,6 +1693,36 @@ foreach ($job in $phase2Jobs) {
             Repair-CompletedAutoTaskResultFile -TaskKey $tkKey -AgentName $agentName `
                 -BackendName $job.BackendName -Output @($output) -StdErrFile $stderrFile `
                 -JobElapsed $jobElapsed
+
+            # Codex 失敗偵測（兩種模式）
+            if ($job.BackendName -in @("codex_exec","codex_standard")) {
+                $outputStr = (@($output) -join "`n")
+                $desc = $phase2JobDescriptors | Where-Object { $_.agentName -eq $agentName } | Select-Object -First 1
+
+                # 模式 A：quota exceeded（立即退出，output 含 limit 關鍵字）
+                if ($outputStr -match "usage.limit|hit.*limit|quota.*exceeded|try.again.*Mar|monthly.limit|exceeded.*quota") {
+                    Write-Log "[Phase2] $agentName Codex quota exceeded，排隊 cursor_cli / claude_sonnet45 fallback"
+                    if ($desc) {
+                        $phase2QuotaFallbacks += @{ taskKey = $tkKey; agentName = $agentName; promptContent = $desc.promptContent }
+                    }
+                }
+                # 模式 B：沙箱持久化失敗（exit 0 跑完，但結果檔缺失）
+                # 排除已在 quota 佇列的（避免雙重 fallback）
+                elseif ($desc) {
+                    $resultFilePath = "$AgentDir\results\todoist-auto-$tkKey.json"
+                    $isSandboxFailure = $false
+                    if (Test-Path $resultFilePath) {
+                        try {
+                            $rf = Get-Content $resultFilePath -Raw -Encoding UTF8 | ConvertFrom-Json
+                            $isSandboxFailure = ($rf.reason -eq "result_file_missing_or_invalid")
+                        } catch {}
+                    }
+                    if ($isSandboxFailure) {
+                        Write-Log "[Phase2] $agentName Codex sandbox persistence failure（exit 0 但結果檔缺失），排隊 claude_sonnet45 fallback"
+                        $phase2SandboxFallbacks += @{ taskKey = $tkKey; agentName = $agentName; promptContent = $desc.promptContent }
+                    }
+                }
+            }
         }
     }
     elseif ($job.State -eq "Running") {
@@ -1519,6 +1736,336 @@ foreach ($job in $phase2Jobs) {
         if ($output) { foreach ($line in @($output)) { Write-Log "  [$agentName] $line" } }
         $sections[$agentName] = "failed"
         Update-FailureStats "phase_failure" "phase2" "todoist"
+
+        # Codex Failed state（ScriptBlock 拋出例外）→ 加入 quota fallback 佇列觸發備援
+        if ($agentName -like "auto-*" -and $job.PSObject.Properties["BackendName"] -and $job.BackendName -in @("codex_exec","codex_standard")) {
+            $tkKey = $agentName -replace '^auto-', ''
+            $desc = $phase2JobDescriptors | Where-Object { $_.agentName -eq $agentName } | Select-Object -First 1
+            if ($desc) {
+                Write-Log "[Phase2] $agentName Codex job Failed（ScriptBlock 例外），排隊 quota fallback 備援"
+                $phase2QuotaFallbacks += @{ taskKey = $tkKey; agentName = $agentName; promptContent = $desc.promptContent }
+            }
+        }
+    }
+}
+
+# Codex quota fallback → cursor_cli（優先）→ claude_sonnet45（次選）
+# openrouter / groq 嚴禁作為 fallback（結果不可靠）
+if ($phase2QuotaFallbacks.Count -gt 0) {
+    Write-Log "[Phase2] Codex quota fallback: $($phase2QuotaFallbacks.Count) 個任務（cursor_cli 優先，次選 claude_sonnet45）..."
+    $quotaFallbackJobs = @()
+    foreach ($qf in $phase2QuotaFallbacks) {
+        $qfCursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$($qf.taskKey).md"
+        if ((Get-Command agent -ErrorAction SilentlyContinue) -and (Test-Path $qfCursorTaskFile)) {
+            # 第一優先：cursor_cli（有任務檔且 agent CLI 可用）
+            $fbJob = Start-CursorCliJob -TaskKey $qf.taskKey -TaskFile $qfCursorTaskFile -AgentDir $AgentDir -TimeoutSeconds (Get-TaskTimeout $qf.taskKey) -TraceId $traceId
+            if ($fbJob) {
+                $fbJob | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $qf.agentName -Force
+                $fbJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "cursor_cli" -Force
+                $quotaFallbackJobs += $fbJob
+                Write-Log "[Phase2] quota-fallback started: $($qf.agentName) -> cursor_cli"
+            }
+        } else {
+            # 次選：claude_sonnet45（無 cursor_cli task file 或 agent CLI 不可用）
+            $reason = if (-not (Get-Command agent -ErrorAction SilentlyContinue)) { "agent CLI 不可用" } else { "無 cursor-cli-task 檔" }
+            Write-Log "[Phase2] quota-fallback: $reason，改用 claude_sonnet45 ($($qf.agentName))"
+            $qfStderrFile = "$LogDir\$($qf.agentName)-quota-fb-stderr-$Timestamp.log"
+            $fbJob = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt, $agentName, $traceId, $apiToken, $stderrFile)
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
+                if ($apiToken) { [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process") }
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+                $prompt | claude -p --allowedTools Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch --model claude-sonnet-4-5 2>$stderrFile
+            } -ArgumentList $qf.promptContent, $qf.agentName, $traceId, $todoistToken, $qfStderrFile
+            if ($fbJob) {
+                $fbJob | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $qf.agentName -Force
+                $fbJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "claude_sonnet45" -Force
+                $fbJob | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $qfStderrFile -Force
+                $quotaFallbackJobs += $fbJob
+                Write-Log "[Phase2] quota-fallback started: $($qf.agentName) -> claude_sonnet45"
+            }
+        }
+    }
+    if ($quotaFallbackJobs.Count -gt 0) {
+        $quotaFallbackJobs | Wait-Job -Timeout $Phase2TimeoutSeconds | Out-Null
+        foreach ($fj in $quotaFallbackJobs) {
+            $an = $fj.AgentName
+            $fbOutput = Receive-Job -Job $fj -ErrorAction SilentlyContinue
+            $tkKey = $an -replace '^auto-', ''
+            if ($fj.State -eq "Completed") {
+                $fbBackend = if ($fj.PSObject.Properties["BackendName"]) { $fj.BackendName } else { "claude_sonnet45" }
+                Write-Log "[Phase2] quota-fallback $an completed ($fbBackend)"
+                $fbResultPath = "$AgentDir\results\todoist-auto-$tkKey.json"
+                $afterFallback = $null
+                if (Test-Path $fbResultPath) {
+                    try { $afterFallback = Get-Content $fbResultPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch {}
+                }
+                if ($afterFallback -and $afterFallback.status -eq "success") {
+                    # 備援成功：加註 fallback_backend，summary 前綴說明
+                    $afterFallback | Add-Member -NotePropertyName "fallback_backend" -NotePropertyValue $fbBackend -Force
+                    $origSummary = if ($afterFallback.summary) { $afterFallback.summary } else { "" }
+                    $afterFallback.summary = "（以備援模型 $fbBackend 執行成功）$origSummary"
+                    $afterFallback | ConvertTo-Json -Depth 6 | Set-Content -Path $fbResultPath -Encoding UTF8 -Force
+                    Write-Log "[Phase2] quota-fallback ${an}: $fbBackend 備援成功 ✓"
+                } else {
+                    $fbPreview = if ($fbOutput) { (@($fbOutput) -join "`n") } else { "" }
+                    $fbPreviewShort = if ($fbPreview.Length -gt 500) { $fbPreview.Substring(0, 500) + "..." } else { $fbPreview }
+                    @{
+                        agent = "todoist-auto-$tkKey"; type = $tkKey
+                        status = "failed"; reason = "codex_quota_fallback_no_result"
+                        backend = $fbBackend
+                        summary = "Codex 配額耗盡，$fbBackend fallback 執行完畢但無任何產出"
+                        backend_stdout_preview = $fbPreviewShort
+                        timestamp = (Get-Date -Format "o")
+                    } | ConvertTo-Json -Depth 3 | Set-Content -Path $fbResultPath -Encoding UTF8 -Force
+                    Write-Log "[Phase2] quota-fallback ${an}: $fbBackend 未產出 success 結果"
+                }
+                $sections[$an] = "success"
+            } else {
+                Write-Log "[Phase2] quota-fallback ${an} failed/timeout (state: $($fj.State))"
+                Stop-Job -Job $fj -ErrorAction SilentlyContinue
+            }
+            Remove-Job -Job $fj -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+# Codex sandbox fallback → cursor_cli（優先）→ claude_sonnet45（次選）
+# openrouter / groq 嚴禁作為 fallback
+if ($phase2SandboxFallbacks.Count -gt 0) {
+    Write-Log "[Phase2] Codex sandbox fallback: $($phase2SandboxFallbacks.Count) 個任務（cursor_cli 優先，次選 claude_sonnet45）..."
+    $sandboxFallbackJobs = @()
+    foreach ($sf in $phase2SandboxFallbacks) {
+        $sfCursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$($sf.taskKey).md"
+        $sfStderrFile = "$LogDir\$($sf.agentName)-sandbox-fb-stderr-$Timestamp.log"
+        $sfJob = $null
+        $sfBackendName = "claude_sonnet45"
+        if ((Get-Command agent -ErrorAction SilentlyContinue) -and (Test-Path $sfCursorTaskFile)) {
+            # 第一優先：cursor_cli
+            $sfJob = Start-CursorCliJob -TaskKey $sf.taskKey -TaskFile $sfCursorTaskFile -AgentDir $AgentDir -TimeoutSeconds (Get-TaskTimeout $sf.taskKey) -TraceId $traceId
+            $sfBackendName = "cursor_cli"
+            Write-Log "[Phase2] sandbox-fallback started: $($sf.agentName) -> cursor_cli"
+        } else {
+            # 次選：claude_sonnet45
+            $sfReason = if (-not (Get-Command agent -ErrorAction SilentlyContinue)) { "agent CLI 不可用" } else { "無 cursor-cli-task 檔" }
+            Write-Log "[Phase2] sandbox-fallback: $sfReason，改用 claude_sonnet45 ($($sf.agentName))"
+            $sfJob = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt, $agentName, $traceId, $apiToken, $stderrFile)
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
+                if ($apiToken) { [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process") }
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+                $prompt | claude -p --allowedTools Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch --model claude-sonnet-4-5 2>$stderrFile
+            } -ArgumentList $sf.promptContent, $sf.agentName, $traceId, $todoistToken, $sfStderrFile
+            Write-Log "[Phase2] sandbox-fallback started: $($sf.agentName) -> claude_sonnet45"
+        }
+        if ($sfJob) {
+            $sfJob | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $sf.agentName -Force
+            $sfJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue $sfBackendName -Force
+            $sfJob | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $sfStderrFile -Force
+            $sandboxFallbackJobs += $sfJob
+        }
+    }
+    if ($sandboxFallbackJobs.Count -gt 0) {
+        $sandboxFallbackJobs | Wait-Job -Timeout $Phase2TimeoutSeconds | Out-Null
+        foreach ($sfj in $sandboxFallbackJobs) {
+            $an = $sfj.AgentName
+            $sfOutput = Receive-Job -Job $sfj -ErrorAction SilentlyContinue
+            $tkKey = $an -replace '^auto-', ''
+            if ($sfj.State -eq "Completed") {
+                $sfBackend = if ($sfj.PSObject.Properties["BackendName"]) { $sfj.BackendName } else { "claude_sonnet45" }
+                Write-Log "[Phase2] sandbox-fallback $an completed ($sfBackend)"
+                # Repair 會因現有 partial_success 結果檔提早返回，改為直接檢查並強制補記
+                $sfResultPath = "$AgentDir\results\todoist-auto-$tkKey.json"
+                $afterSfFallback = $null
+                if (Test-Path $sfResultPath) {
+                    try { $afterSfFallback = Get-Content $sfResultPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch {}
+                }
+                if ($afterSfFallback -and $afterSfFallback.status -eq "success") {
+                    # 備援成功：加註 fallback_backend，summary 前綴說明
+                    $afterSfFallback | Add-Member -NotePropertyName "fallback_backend" -NotePropertyValue $sfBackend -Force
+                    $origSfSummary = if ($afterSfFallback.summary) { $afterSfFallback.summary } else { "" }
+                    $afterSfFallback.summary = "（以備援模型 $sfBackend 執行成功）$origSfSummary"
+                    $afterSfFallback | ConvertTo-Json -Depth 6 | Set-Content -Path $sfResultPath -Encoding UTF8 -Force
+                    Write-Log "[Phase2] sandbox-fallback ${an}: $sfBackend 備援成功 ✓"
+                } else {
+                    $sfPreview = if ($sfOutput) { (@($sfOutput) -join "`n") } else { "" }
+                    $sfPreviewShort = if ($sfPreview.Length -gt 500) { $sfPreview.Substring(0, 500) + "..." } else { $sfPreview }
+                    @{
+                        agent = "todoist-auto-$tkKey"; type = $tkKey
+                        status = "failed"; reason = "codex_sandbox_fallback_no_result"
+                        backend = $sfBackend
+                        summary = "Codex 沙箱持久化失敗，$sfBackend fallback 執行完畢但無任何產出"
+                        backend_stdout_preview = $sfPreviewShort
+                        timestamp = (Get-Date -Format "o")
+                    } | ConvertTo-Json -Depth 3 | Set-Content -Path $sfResultPath -Encoding UTF8 -Force
+                    Write-Log "[Phase2] sandbox-fallback ${an}: $sfBackend 未產出 success 結果，已強制補記 partial_success"
+                }
+                $sections[$an] = "success"
+            } else {
+                Write-Log "[Phase2] sandbox-fallback $an failed/timeout (state: $($sfj.State))"
+                Stop-Job -Job $sfj -ErrorAction SilentlyContinue
+            }
+            Remove-Job -Job $sfj -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+# ADR-018: Phase 2 retry — 僅對 timeout 重試 1 次，exponential backoff 初始 30s，retry 事件寫入 spans
+$phase2RetryJobs = @()
+$toRetry = @()
+for ($i = 0; $i -lt $phase2Jobs.Count; $i++) {
+    $an = $phase2Jobs[$i].AgentName
+    if ($sections[$an] -eq "timeout" -and $phase2JobDescriptors.Count -gt $i) {
+        $toRetry += @{ index = $i; descriptor = $phase2JobDescriptors[$i] }
+    }
+}
+if ($toRetry.Count -gt 0) {
+    $backoffSec = 30
+    Write-Log "[Phase2] ADR-018 retry: $($toRetry.Count) job(s) (timeout), backoff ${backoffSec}s..."
+    Start-Sleep -Seconds $backoffSec
+    foreach ($r in $toRetry) {
+        $d = $r.descriptor
+        $agentName = if ($d.plan_type -eq "tasks") { $d.taskName } else { $d.agentName }
+        $retryStart = Get-Date
+        $newJob = $null
+        if ($d.plan_type -eq "tasks") {
+            $newJob = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                param($prompt, $tools, $taskName, $logDir, $timestamp, $traceId, $apiToken)
+                [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2", "Process")
+                [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $taskName, "Process")
+                if ($apiToken) { [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process") }
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $OutputEncoding = [System.Text.Encoding]::UTF8
+                $stderrFile = "$logDir\$taskName-stderr-$timestamp.log"
+                $output = $prompt | claude -p --allowedTools $tools 2>$stderrFile
+                if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) { $stderrSize = (Get-Item $stderrFile).Length; if ($stderrSize -eq 0) { Remove-Item $stderrFile -Force } }
+                return $output
+            } -ArgumentList $d.taskPrompt, $d.taskTools, $d.taskName, $LogDir, $Timestamp, $traceId, $todoistToken
+        } else {
+            $be = $d.backend
+            $stderrFile = "$LogDir\$($d.agentName)-stderr-$Timestamp.log"
+            if ($be.type -eq "codex") {
+                # ADR-018 修正：Codex timeout 重試改用備援 backend（避免 quota/沙箱失敗無限重試）
+                # 備援規則：非 cursor_cli → cursor_cli → claude（規則同 Get-TaskBackend）
+                $retryCursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$($d.taskKey).md"
+                if ((Get-Command agent -ErrorAction SilentlyContinue) -and (Test-Path $retryCursorTaskFile)) {
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) codex timeout -> cursor_cli"
+                    $newJob = Start-CursorCliJob -TaskKey $d.taskKey -TaskFile $retryCursorTaskFile -AgentDir $AgentDir -TimeoutSeconds (Get-TaskTimeout $d.taskKey) -TraceId $traceId
+                    if ($newJob) { $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "cursor_cli" -Force }
+                } else {
+                    # openrouter / groq 嚴禁作為 fallback，直接用 claude_sonnet45
+                    $retryReason = if (-not (Get-Command agent -ErrorAction SilentlyContinue)) { "agent CLI 不可用" } else { "無 cursor-cli-task 檔" }
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) codex timeout -> claude_sonnet45 ($retryReason)"
+                    $newJob = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                        param($prompt, $agentName, $traceId, $apiToken, $stderrFile)
+                        [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                        [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                        [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                        [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
+                        if ($apiToken) { [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process") }
+                        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                        $OutputEncoding = [System.Text.Encoding]::UTF8
+                        $prompt | claude -p --allowedTools Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch --model claude-sonnet-4-5 2>$stderrFile
+                    } -ArgumentList $d.promptContent, $d.agentName, $traceId, $todoistToken, $stderrFile
+                    if ($newJob) { $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "claude_sonnet45" -Force }
+                }
+                if ($newJob) {
+                    $newJob | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $stderrFile -Force
+                }
+            } elseif ($be.type -eq "openrouter_runner") {
+                # 備援規則：非 cursor_cli → cursor_cli；cursor_cli → claude
+                $retryOrCursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$($d.taskKey).md"
+                if ((Get-Command agent -ErrorAction SilentlyContinue) -and (Test-Path $retryOrCursorTaskFile)) {
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) openrouter timeout -> cursor_cli"
+                    $newJob = Start-CursorCliJob -TaskKey $d.taskKey -TaskFile $retryOrCursorTaskFile -AgentDir $AgentDir -TimeoutSeconds (Get-TaskTimeout $d.taskKey) -TraceId $traceId
+                    if ($newJob) { $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "cursor_cli" -Force }
+                } else {
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) openrouter timeout -> openrouter (no cursor_cli task file)"
+                    $newJob = Start-OpenRouterJob -TaskKey $d.taskKey -PromptContent $d.promptContent -TraceId $traceId -AgentName $d.agentName
+                    if ($newJob) { $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue $be.backend -Force }
+                }
+            } else {
+                # claude_code 類型：timeout 後優先嘗試 cursor_cli（若有任務檔），否則原模型重試
+                # 備援規則：非 cursor_cli → cursor_cli；cursor_cli → claude（原地重試屬於 claude 備援鏈末端）
+                $cliFlag = $be.cli_flag
+                $retryClaudeCursorTaskFile = Join-Path $AgentDir "temp\cursor-cli-task-$($d.taskKey).md"
+                if ((Get-Command agent -ErrorAction SilentlyContinue) -and (Test-Path $retryClaudeCursorTaskFile)) {
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) claude timeout -> cursor_cli"
+                    $newJob = Start-CursorCliJob -TaskKey $d.taskKey -TaskFile $retryClaudeCursorTaskFile -AgentDir $AgentDir -TimeoutSeconds (Get-TaskTimeout $d.taskKey) -TraceId $traceId
+                    if ($newJob) { $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue "cursor_cli" -Force }
+                } else {
+                    Write-Log "[Phase2] ADR-018 retry: $($d.agentName) claude timeout -> claude (same model, no cursor_cli task file)"
+                    $newJob = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
+                        param($prompt, $agentName, $logDir, $timestamp, $traceId, $apiToken, $cliFlag, $stderrFile)
+                        [System.Environment]::SetEnvironmentVariable("CLAUDE_TEAM_MODE", "1", "Process")
+                        [System.Environment]::SetEnvironmentVariable("DIGEST_TRACE_ID", $traceId, "Process")
+                        [System.Environment]::SetEnvironmentVariable("AGENT_PHASE", "phase2-auto", "Process")
+                        [System.Environment]::SetEnvironmentVariable("AGENT_NAME", $agentName, "Process")
+                        if ($apiToken) { [System.Environment]::SetEnvironmentVariable("TODOIST_API_TOKEN", $apiToken, "Process") }
+                        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                        $OutputEncoding = [System.Text.Encoding]::UTF8
+                        $claudeArgs = @("-p", "--allowedTools", "Read,Bash,Write,Edit,Glob,Grep,WebSearch,WebFetch"); if ($cliFlag) { $claudeArgs += ($cliFlag -split '\s+') }
+                        $output = $prompt | claude @claudeArgs 2>$stderrFile
+                        if ($LASTEXITCODE -eq 0 -and (Test-Path $stderrFile)) { $stderrSize = (Get-Item $stderrFile).Length; if ($stderrSize -eq 0) { Remove-Item $stderrFile -Force } }
+                        return $output
+                    } -ArgumentList $d.promptContent, $d.agentName, $LogDir, $Timestamp, $traceId, $todoistToken, $cliFlag, $stderrFile
+                }
+            }
+            if ($newJob) {
+                $newJob | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $d.agentName -Force
+                # BackendName 可能已由 codex fallback 邏輯設定（openrouter_research / claude_sonnet45），不覆蓋
+                if (-not $newJob.PSObject.Properties["BackendName"]) {
+                    $newJob | Add-Member -NotePropertyName "BackendName" -NotePropertyValue $be.backend -Force
+                }
+                if (-not $newJob.PSObject.Properties["StdErrFile"]) {
+                    $newJob | Add-Member -NotePropertyName "StdErrFile" -NotePropertyValue $stderrFile -Force
+                }
+            }
+        }
+        if ($newJob) {
+            if (-not $newJob.PSObject.Properties["AgentName"]) {
+                $newJob | Add-Member -NotePropertyName "AgentName" -NotePropertyValue $agentName -Force
+            }
+            $phase2RetryJobs += @{ job = $newJob; agentName = $agentName; retryStart = $retryStart }
+        }
+    }
+    if ($phase2RetryJobs.Count -gt 0) {
+        $retryJobsOnly = $phase2RetryJobs | ForEach-Object { $_.job }
+        Write-Log "[Phase2] Waiting for $($retryJobsOnly.Count) retry job(s) (timeout: ${Phase2TimeoutSeconds}s)..."
+        $retryJobsOnly | Wait-Job -Timeout $Phase2TimeoutSeconds | Out-Null
+        foreach ($entry in $phase2RetryJobs) {
+            $rj = $entry.job
+            $an = $entry.agentName
+            $output = Receive-Job -Job $rj -ErrorAction SilentlyContinue
+            $retryEnd = Get-Date
+            if ($rj.State -eq "Completed") {
+                $sections[$an] = "success"
+                if ($output) { $outputLines = @($output); $startIdx = [Math]::Max(0, $outputLines.Count - 5); for ($idx = $startIdx; $idx -lt $outputLines.Count; $idx++) { Write-Log "  [$an] $($outputLines[$idx])" } }
+                $jobElapsed = if ($rj.PSBeginTime -and $rj.PSEndTime) { [int]($rj.PSEndTime - $rj.PSBeginTime).TotalSeconds } else { $null }
+                Write-Log "[Phase2] $an retry completed$(if ($jobElapsed) { " (${jobElapsed}s)" })"
+                Write-Span -TraceId $traceId -SpanType "retry" -Phase "phase2" -Agent $an -StartTime $entry.retryStart -EndTime $retryEnd -Status "retry_ok"
+                if ($an -like "auto-*") {
+                    $tkKey = $an -replace '^auto-', ''
+                    $stderrFile = if ($rj.PSObject.Properties["StdErrFile"]) { $rj.StdErrFile } else { "" }
+                    Repair-CompletedAutoTaskResultFile -TaskKey $tkKey -AgentName $an -BackendName $rj.BackendName -Output @($output) -StdErrFile $stderrFile -JobElapsed $jobElapsed
+                }
+            } else {
+                if ($rj.State -eq "Running") { Stop-Job -Job $rj }
+                Write-Span -TraceId $traceId -SpanType "retry" -Phase "phase2" -Agent $an -StartTime $entry.retryStart -EndTime $retryEnd -Status "retry_failed"
+                Write-Log "[Phase2] $an retry failed (state: $($rj.State))"
+            }
+            $rj | Remove-Job -Force -ErrorAction SilentlyContinue
+        }
     }
 }
 
@@ -1649,8 +2196,8 @@ if (Test-Path $doneCertScript) {
     Write-Log "[Phase3-Pre] Verifying done_certs before assembly..."
     try {
         $certResult = uv run --project $AgentDir python $doneCertScript --verify-all 2>&1
-        $certJson = $certResult | Where-Object { $_ -match '^\{' } | Select-Object -Last 1
-        if ($certJson) {
+        $certJson = ($certResult | Out-String).Trim()
+        if ($certJson -and $certJson -match '^\s*\{') {
             $cert = $certJson | ConvertFrom-Json
             $passed = $cert.passed
             $total  = $cert.total

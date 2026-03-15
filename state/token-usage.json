@@ -4,12 +4,6 @@
   "daily_limit_warn": 1500000,
   "days": {},
   "daily": {
-    "2026-03-07": {
-      "estimated_tokens": 16338404.000000004,
-      "tool_calls": 4879,
-      "input_chars": 2773945,
-      "output_chars": 54410469
-    },
     "2026-03-08": {
       "estimated_tokens": 8461176.285714284,
       "tool_calls": 3673,
@@ -49,11 +43,17 @@
       "output_chars": 16887131
     },
     "2026-03-14": {
-      "estimated_tokens": 7288549.714285721,
-      "tool_calls": 2876,
-      "input_chars": 1374646,
-      "output_chars": 24135278
+      "estimated_tokens": 9031558.5714286,
+      "tool_calls": 3590,
+      "input_chars": 1699339,
+      "output_chars": 29911116
+    },
+    "2026-03-15": {
+      "estimated_tokens": 10820070.000000024,
+      "tool_calls": 3412,
+      "input_chars": 1531666,
+      "output_chars": 36338579
     }
   },
-  "updated": "2026-03-14T17:34:34.652999"
+  "updated": "2026-03-15T22:34:48.495198"
 }

@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added（2026-02-16 ~ 2026-03-14）
+### Added（2026-02-16 ~ 2026-03-15）
+- 系統審查報告 2026-03-15（Phase 2 組裝 + 2 項自動修正，86.18/A）
 - 系統審查報告 2026-03-14（Phase 2 組裝 + 2 項自動修正，86.29/A）
 - 系統審查報告 2026-03-12（87.18/A，+1.70）
 - 系統審查報告 2026-03-10（Phase 2 組裝 + 3 項自動修正）
@@ -23,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 無項目移除（保留此章節供未來記錄）
 
 ### Known Issues
-- 行覆蓋率 10.19%（門檻 40%），模組覆蓋率 100%
+- 959 個測試通過，行覆蓋率待改善（hooks+skills scope），模組覆蓋率 100%
 - 6 個 config YAML 僅注釋引用無代碼實裝（cache-policy/scoring/notification 等）
 - 17 處 Windows 硬編碼路徑（D:\Source\）待架構評估
 

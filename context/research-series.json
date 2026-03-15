@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-14T16:55:00+08:00",
+  "updated_at": "2026-03-15T20:40:32.650298+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -55,7 +55,7 @@
       "domain": "Logical Thinking / Critical Thinking / Decision Frameworks",
       "description": "邏輯思維、批判性思考與決策框架研究系列",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-14",
+      "last_active": "2026-03-15",
       "tags": [
         "邏輯思維",
         "批判性思考",
@@ -122,7 +122,8 @@
           "status": "in_progress",
           "started_at": "2026-03-14",
           "kb_notes": [
-            "Scout Mindset 與 Superforecasting — 邏輯思維框架在不確定性決策中的實踐應用指南"
+            "Scout Mindset 與 Superforecasting — 邏輯思維框架在不確定性決策中的實踐應用指南",
+            "貝葉斯推理的日常實踐應用 — 基率忽略、機率校準與自然頻率技術"
           ],
           "covered_concepts": [
             "Scout Mindset 偵察兵心態",
@@ -133,7 +134,14 @@
             "Fermi 估算法",
             "不確定性決策五步整合框架",
             "概率性思維",
-            "輕握身份（Hold Identity Lightly）"
+            "輕握身份（Hold Identity Lightly）",
+            "基率忽略（Base Rate Neglect）",
+            "自然頻率法（Natural Frequencies）",
+            "似然比思維",
+            "頻率樹視覺工具",
+            "三步貝葉斯決策法",
+            "Bayesian Teaching for LLM",
+            "認知偏誤的貝葉斯矯正"
           ]
         },
         "optimization": {
@@ -422,7 +430,7 @@
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-14",
+      "last_active": "2026-03-15",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -554,7 +562,7 @@
           "completed_at": "2026-03-07"
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
             "教觀綱宗 synthesis 研究：注疏傳統文獻蒐集與分析、跨系列教觀會通框架及全書核心要點結構化報告",
             "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
@@ -564,7 +572,8 @@
             "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準",
             "教觀綱宗研究：四教觀法與四種四諦的相攝關係 — 由教相到觀行的內在對應",
             "教觀綱宗研究：化法四教之圓教 — 一心三觀、一念三千、圓融三諦與圓教菩薩位次的完整教觀體系",
-            "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話"
+            "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話",
+            "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -601,17 +610,24 @@
             "六即佛的六個階位詳解（理即→名字即→觀行即→相似即→分證即→究竟即）",
             "六即佛與化法四教的對應關係",
             "六即佛與禪宗修證階位的比較",
-            "六即佛在現代修行中的實踐意義"
+            "六即佛在現代修行中的實踐意義",
+            "歷史傳承脈絡",
+            "明清天台復興",
+            "章安灌頂",
+            "荊溪湛然",
+            "知禮",
+            "註疏傳統",
+            "判教演進史"
           ],
-          "completed_at": "2026-03-13"
+          "completed_at": "2026-03-15"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "synthesis 階段持續深化：完成六即佛後，可續研一念三千義理展開、天台三大部與教觀綱宗關係、或與唯識宗的判教對話"
+      "next_research_hint": "synthesis 完成，教觀綱宗研究系列圓滿。後續可開啟天台宗其他專題（如摩訶止觀實修、六妙門、小止觀）或其他宗派判教研究（華嚴五教、法相三時）"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -885,180 +901,76 @@
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
-      "domain": "淨土宗 / Pure Land Buddhism 念佛法門深度研究",
-      "description": "淨土宗深度研究系列，涵蓋淨土三經、歷代祖師思想、修行法門、判教體系",
-      "initiated_at": "2026-02-15",
-      "last_active": "2026-03-14",
+      "domain": "淨土宗 / 念佛法門",
+      "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
+      "initiated_at": "2026-02-01",
+      "last_active": "2026-03-15",
       "tags": [
         "淨土宗",
         "佛學",
         "念佛",
+        "信願行",
+        "印光大師",
         "善導大師",
-        "信願行"
+        "蕅益大師"
       ],
       "stages": {
         "foundation": {
           "status": "completed",
-          "started_at": "2026-02-15",
-          "completed_at": "2026-02-15",
+          "started_at": "2026-02-01",
+          "completed_at": "2026-02-28",
           "kb_notes": [
             "淨土三經概論",
             "阿彌陀經要義",
             "觀無量壽經十六觀",
             "無量壽經四十八願",
             "善導大師五正行",
-            "念佛法門修持",
-            "淨土十疑論",
-            "臨終正念"
+            "淨土五經一論教典體系"
           ],
           "covered_concepts": [
             "淨土三經",
+            "善導大師五正行",
+            "信願行",
+            "凡夫入報土",
+            "二種深信",
+            "正定業",
             "四十八願",
-            "五正行",
-            "四種念佛",
-            "十念法",
             "十六觀",
-            "臨終助念"
+            "九品往生"
           ]
         },
         "mechanism": {
           "status": "completed",
-          "started_at": "2026-02-18",
-          "completed_at": "2026-02-24",
+          "started_at": "2026-03-15",
+          "completed_at": "2026-03-15",
           "kb_notes": [
-            "曇鸞大師研究",
-            "道綽大師研究",
-            "蓮池大師研究",
-            "蕅益大師研究"
+            "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第"
           ],
           "covered_concepts": [
-            "自力他力",
-            "難易二道",
-            "聖道淨土二門",
-            "一心不亂",
-            "六信",
-            "竹窗隨筆"
+            "十念法",
+            "攝耳諦聽",
+            "金剛持",
+            "念佛三昧",
+            "功夫成片",
+            "事一心",
+            "理一心",
+            "日課功課"
           ]
         },
         "application": {
-          "status": "completed",
-          "started_at": "2026-02-24",
-          "completed_at": "2026-02-25",
-          "kb_notes": [
-            "印光大師淨土思想",
-            "少康大師研究",
-            "十念法與計數念佛"
-          ],
-          "covered_concepts": [
-            "十念記數法",
-            "老實念佛",
-            "敦倫盡分",
-            "口出化佛",
-            "攝心念佛"
-          ]
+          "status": "pending"
         },
         "optimization": {
-          "status": "completed",
-          "started_at": "2026-02-25",
-          "completed_at": "2026-03-04",
-          "kb_notes": [
-            "截流大師淨土思想",
-            "天台教觀與淨土會通"
-          ],
-          "covered_concepts": [
-            "念佛百日期",
-            "禪淨雙修",
-            "台淨雙修",
-            "五方便念佛門"
-          ]
+          "status": "pending"
         },
         "synthesis": {
-          "status": "completed",
-          "started_at": "2026-03-04",
-          "completed_at": "2026-03-14",
-          "kb_notes": [
-            "淨土宗判教體系研究：從龍樹難易二道到善導要弘二門的教理演進",
-            "淨土宗與華嚴宗的會通 — 普賢十大願王導歸極樂與華嚴念佛三昧的圓融教觀",
-            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要",
-            "阿彌陀經研究：執持名號與一心不亂的義理辨析及實修指要",
-            "觀無量壽經研究：十六觀的次第結構與觀佛攝心法",
-            "善導大師五正行研究：正助二業結構與專修稱名實踐",
-            "無量壽經研究：第十八願的本願稱名與平生業成",
-            "念佛法門修持研究：都攝六根、淨念相繼的攝心要訣與日課實踐",
-            "無量壽經研究：攝生三願（十八、十九、二十願）的願門結構與念佛次第",
-            "智者大師《淨土十疑論》研究：天台教觀解疑與念佛攝心法門",
-            "智者大師《淨土十疑論》研究：天台教觀解疑與念佛攝心法門",
-            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要",
-            "「淨土五經一論」教典體系研究 — 從淨土三經到印光大師選定五經一論的經論會通與修行綱要"
-          ],
-          "covered_concepts": [
-            "淨土判教體系系統整理",
-            "聖道門與淨土門的完整辨析",
-            "要門與弘願門的深層區分",
-            "五願開示（善導大師三心釋）",
-            "橫出三界與豎出三界的比較",
-            "淨土宗判教在中日兩國的不同發展",
-            "華嚴淨土會通",
-            "普賢十大願王導歸極樂",
-            "毗盧遮那與阿彌陀佛同體",
-            "彭際清華嚴念佛三昧論五門",
-            "善財五十三參念佛法門",
-            "三經一體（華嚴大本/無量壽中本/阿彌陀小本）",
-            "念佛三昧為三昧之王",
-            "華嚴奧藏",
-            "五經一論教典體系歷史形成（三經→四經→五經）",
-            "魏源增列普賢行願品為淨土第四經",
-            "印光大師1933年增列念佛圓通章為第五經",
-            "五經各自功能定位與教學分工",
-            "信願行三資糧統攝五經的體系結構",
-            "三經二章文獻學結構",
-            "三重同心圓修行模型",
-            "五經一論的日常功課安排",
-            "天親菩薩往生論五念門在體系中的定位",
-            "執持名號的語義層次與修持動作",
-            "一心不亂作為結果、方法或感應條件的辨析",
-            "如何把《阿彌陀經》行法落實為日課與攝心方法",
-            "十六觀三層次第（依報／正報／品位往生）",
-            "定善十三觀與散善三福的會通",
-            "觀佛攝心法的日課操作",
-            "由觀想會歸稱名的善導詮釋",
-            "五正行的具體功課編排",
-            "稱名作為正定業的經論根據整理",
-            "與大勢至念佛圓通章、天台淨土教觀的承接關係",
-            "第十八願與十一願、二十二願的三願結構",
-            "平生業成的日常修持操作化",
-            "第十八願與成就文的因果對讀",
-            "本願稱名",
-            "平生業成",
-            "第十八願與第十一願、第二十二願的三願結構",
-            "都攝六根與口念耳聞的具體操作",
-            "如何把十念記數法與隨念隨聽結合",
-            "念佛攝心法與楞嚴耳根圓通的互證",
-            "攝生三願的願文對讀",
-            "三願攝機的次第判釋",
-            "從雜行回入稱名的實修路徑",
-            "淨土十疑論",
-            "天台止觀與念佛攝心",
-            "圓教念佛三昧",
-            "十疑詳解",
-            "淨土十疑論",
-            "天台止觀與念佛攝心",
-            "圓教念佛三昧",
-            "十疑詳解",
-            "五經一論的整體結構",
-            "印光大師選定五經一論的判攝智慧",
-            "五經之間的經論關係與互補性",
-            "五經一論在修行次第上的配合運用"
-          ]
+          "status": "pending"
         }
       },
-      "current_stage": "completed",
-      "completion_pct": 100,
-      "related_series": [
-        "shurangama-sutra",
-        "jiaoguangzong"
-      ],
-      "next_research_hint": "synthesis 階段完成後，pure-land-buddhism 系列達 100% 完成度。未來可開啟新系列：淨土宗與現代心理學對話、淨土宗在台灣的弘揚史等"
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [],
+      "next_research_hint": "完成後進入 application：念佛道場規矩、打佛七、助念儀軌等實際應用場景"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2845,6 +2757,179 @@
       "completion_pct": 40,
       "related_series": [],
       "next_research_hint": "下一步可進入 application：針對防災道路、橋梁監測、園區開發與交通控制建立 PoC 實作藍圖。"
+    },
+    "tiantai-zhiguan-practice": {
+      "series_id": "tiantai-zhiguan-practice",
+      "domain": "天台止觀實修 / Tiantai Zhiguan Practice",
+      "description": "天台宗止觀實修體系深度研究，從小止觀入門到摩訶止觀圓頓修證",
+      "initiated_at": "2026-03-15",
+      "last_active": "2026-03-15",
+      "tags": [
+        "小止觀",
+        "佛學",
+        "天台宗",
+        "止觀",
+        "智者大師",
+        "實修"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-15",
+          "completed_at": "2026-03-15",
+          "kb_notes": [
+            "天台止觀實修：《小止觀》完整研究 — 智者大師的修習止觀坐禪法要與現代實踐指南"
+          ],
+          "covered_concepts": [
+            "小止觀十章架構",
+            "具足五緣",
+            "訶五欲",
+            "棄五蓋",
+            "調五事",
+            "行五法",
+            "止觀雙運"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "jiaoguangzong"
+      ],
+      "next_research_hint": "完成foundation後進入mechanism：摩訶止觀十乘觀法深度研究"
+    },
+    "ai-smart-city": {
+      "series_id": "ai-smart-city",
+      "domain": "AI Smart City / 智慧城市",
+      "description": "AI 應用於智慧城市的技術與案例研究系列",
+      "initiated_at": "2026-03-15",
+      "last_active": "2026-03-15",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "smart-city",
+        "系統開發"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "completed_at": "2026-03-15",
+          "kb_notes": [],
+          "covered_concepts": [
+            "數位孿生",
+            "AI影像監控",
+            "犯罪預測",
+            "智慧交通號誌",
+            "V2X車聯網",
+            "建築能耗優化",
+            "智慧水務",
+            "參與式預算",
+            "公文自動化"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "in_progress",
+          "started_at": "2026-03-15",
+          "kb_notes": [
+            "AI 驅動的智慧醫療：疫情預測、遠距醫療與公共衛生決策支援技術全景（2026）"
+          ],
+          "covered_concepts": [
+            "AI疫情預測",
+            "遠距醫療",
+            "公共衛生決策",
+            "LSTM時序預測",
+            "混合預測模型",
+            "多源資料融合"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 optimization：效能優化、成本控制、隱私保護技術"
+    },
+    "ai-software-development": {
+      "series_id": "ai-software-development",
+      "domain": "AI Software Development / Agent Architecture / System Engineering",
+      "description": "AI 應用於系統開發的深入研究系列，涵蓋 Context Management、Memory Architecture、Agent 設計模式等核心機制",
+      "initiated_at": "2026-03-15",
+      "last_active": "2026-03-15",
+      "tags": [
+        "AI",
+        "系統開發",
+        "Agent",
+        "software-engineering"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-01",
+          "completed_at": "2026-03-14",
+          "kb_notes": [
+            "Agentic Coding 2026 全景報告",
+            "Claude Code Plugins 插件系統完整指南",
+            "OpenHands — 開源 AI 驅動軟體開發平台",
+            "Spec Kit — 規格驅動開發工具集",
+            "AI Agent 開發設計模式完整指南"
+          ],
+          "covered_concepts": [
+            "Agentic Coding",
+            "SWE-bench",
+            "Claude Code Plugins",
+            "MCP",
+            "Agent SDK",
+            "規格驅動開發"
+          ]
+        },
+        "mechanism": {
+          "status": "in_progress",
+          "started_at": "2026-03-15",
+          "kb_notes": [
+            "AI Agent Context Management 與 Long-Term Memory 架構 — 從短期上下文到持久化記憶的機制設計與實作模式（2026）"
+          ],
+          "covered_concepts": [
+            "Context Window Management",
+            "Long-Term Memory 架構",
+            "Memory Compression",
+            "Tool Use Orchestration 內部實作",
+            "Multi-Agent State Synchronization"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 application：實作 Agent Memory 系統的完整程式碼範例"
     }
   }
 }

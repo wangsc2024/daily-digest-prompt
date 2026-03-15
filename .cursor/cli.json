@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**/*)",
+      "Write(context/**)",
+      "Write(docs/**)",
+      "Write(specs/**)",
+      "Write(bot/tasks_md/**)",
+      "Write(results/**)",
+      "Write(tmp/**)",
+      "Write(temp/**)",
+      "Shell(node)",
+      "Shell(pwsh)",
+      "Shell(powershell)",
+      "Shell(python)",
+      "Shell(npm)",
+      "Shell(uv)",
+      "Shell(git)",
+      "Shell(cursor)",
+      "Shell(agent)",
+      "Shell(codex)",
+      "WebFetch(*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(**/.env*)",
+      "Write(**/.env*)",
+      "Write(**/*.key)"
+    ]
+  }
+}

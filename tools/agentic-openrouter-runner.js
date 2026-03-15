@@ -29,9 +29,9 @@ const {execSync, execFileSync} = require('child_process');
 
 // ─── 設定 ───────────────────────────────────────────────
 const API_KEY   = (process.env.OPENROUTER_API_KEY || '').trim();
-const MODEL     = process.env.OPENROUTER_MODEL || 'openrouter/free';
-const FALLBACK_MODEL = 'openrouter/free'; // free tier 自動路由，重試時同樣走 free
-const MAX_TURNS = 15;
+const MODEL     = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-exp:free'; // 支援 function calling 的免費模型
+const FALLBACK_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'; // 備援：支援 tool_use 的免費 LLaMA
+const MAX_TURNS = 20; // 增加 turns 讓研究任務有足夠步驟完成
 const AGENT_NAME = process.env.AGENT_NAME || 'openrouter-runner';
 const WORKING_DIR = process.cwd();
 
@@ -159,14 +159,63 @@ function toolWebFetch({url, prompt}) {
     }
 }
 
+function toolWebSearch({query}) {
+    const results = [];
+
+    // 1. DuckDuckGo Instant Answer API（英文查詢效果佳）
+    try {
+        const q = encodeURIComponent(query);
+        const raw = execSync(
+            `curl -s --max-time 10 "https://api.duckduckgo.com/?q=${q}&format=json&no_redirect=1&no_html=1&skip_disambig=1"`,
+            {encoding: 'utf8', timeout: 15000, maxBuffer: 1024 * 1024}
+        );
+        const data = JSON.parse(raw);
+        if (data.AbstractText) results.push(`摘要: ${data.AbstractText}`);
+        if (data.RelatedTopics) {
+            const topics = data.RelatedTopics.filter(t => t.Text).slice(0, 5).map(t => `- ${t.Text}`);
+            if (topics.length) results.push('相關主題:\n' + topics.join('\n'));
+        }
+    } catch {}
+
+    // 2. Wikipedia API fallback（中英文友好，免驗證）
+    if (!results.length) {
+        try {
+            const wq = encodeURIComponent(query);
+            const isZh = /[\u4e00-\u9fff]/.test(query);
+            const lang = isZh ? 'zh' : 'en';
+            const wRaw = execSync(
+                `curl -s --max-time 10 "https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${wq}&format=json&srlimit=5&utf8=1"`,
+                {encoding: 'utf8', timeout: 15000, maxBuffer: 512 * 1024}
+            );
+            const wData = JSON.parse(wRaw);
+            const items = wData.query?.search || [];
+            if (items.length) {
+                results.push('Wikipedia 搜尋結果:');
+                items.slice(0, 5).forEach(item => {
+                    const snippet = item.snippet
+                        .replace(/<[^>]+>/g, '')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&amp;/g, '&')
+                        .replace(/&#39;/g, "'");
+                    results.push(`- **${item.title}**: ${snippet}`);
+                });
+            }
+        } catch {}
+    }
+
+    if (!results.length) return `WebSearch: 未找到 "${query}" 的相關結果`;
+    return `[WebSearch: ${query}]\n` + results.join('\n\n');
+}
+
 // ─── Tool 分派 ───────────────────────────────────────────
 
 const TOOLS = {
-    Read:     toolRead,
-    Write:    toolWrite,
-    Bash:     toolBash,
-    Grep:     toolGrep,
-    WebFetch: toolWebFetch,
+    Read:      toolRead,
+    Write:     toolWrite,
+    Bash:      toolBash,
+    Grep:      toolGrep,
+    WebFetch:  toolWebFetch,
+    WebSearch: toolWebSearch,
 };
 
 const TOOL_SCHEMAS = [
@@ -241,6 +290,20 @@ const TOOL_SCHEMAS = [
                     prompt: {type: 'string', description: 'Optional extraction hint'},
                 },
                 required: ['url'],
+            },
+        },
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'WebSearch',
+            description: 'Search the web using DuckDuckGo and return results',
+            parameters: {
+                type: 'object',
+                properties: {
+                    query: {type: 'string', description: 'Search query'},
+                },
+                required: ['query'],
             },
         },
     },

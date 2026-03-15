@@ -1,103 +1,121 @@
 {
   "version": 2,
-  "generated_at": "2026-03-14T12:00:00+08:00",
+  "generated_at": "2026-03-14T23:59:59+08:00",
   "period_days": 7,
-  "total_skills": 34,
+  "total_skills": 26,
+  "actual_skills_found": 37,
   "data_sources": {
-    "jsonl_logs": "ok",
-    "scheduler_state": "ok",
-    "auto_tasks_today": "ok",
-    "research_registry": "ok",
-    "behavior_patterns": "unavailable"
+    "jsonl_logs": "complete",
+    "scheduler_state": "complete",
+    "auto_tasks_today": "complete",
+    "research_registry": "complete",
+    "behavior_patterns": "missing"
   },
   "metrics": {
-    "daily_success_rate": 0.9080,
-    "skill_usage_coverage": 0.9118,
-    "cache_hit_ratio": 0.1812,
+    "daily_success_rate": 1.0,
+    "skill_usage_coverage": 1.42,
+    "cache_hit_ratio": 0.182,
     "error_rate": 0.0,
-    "block_rate": 0.0019,
-    "topic_diversity": 0.9915,
-    "auto_task_fairness": 0.5437,
-    "avg_io_per_call": 39834,
+    "block_rate": 0.00178,
+    "topic_diversity": 0.993,
+    "auto_task_fairness": 0.659,
+    "avg_io_per_call": 12419,
     "behavior_pattern_count": null,
     "high_confidence_patterns": null
   },
   "alerts": [
     {
-      "level": "critical",
-      "metric": "cache_hit_ratio",
-      "value": 0.1812,
-      "threshold": 0.40,
-      "message": "快取命中率 18.12%（api-call 1640 / cache-read 363），遠低於 40% 門檻。ADR-005 已接受此問題，implementation_status=partial，快取跳過邏輯尚未完全落實。"
-    },
-    {
       "level": "warning",
-      "metric": "avg_io_per_call",
-      "value": 39834,
-      "threshold": 5000,
-      "message": "平均每次工具呼叫 I/O 大小 39,834 字元，為門檻 8 倍。主因：team-mode 大量讀取大型 JSON 狀態檔（scheduler-state.json 36k tokens）。建議優先使用 Grep/offset 分段讀取。"
+      "metric": "cache_hit_ratio",
+      "value": 0.182,
+      "threshold": 0.40,
+      "message": "快取命中率 18.2%（cache-read 405 / api-call 1820），遠低於 40% 門檻。ADR-005 的 cache/status.json valid 旗標條件跳過邏輯尚未完整落實。"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.5437,
-      "threshold": 0.5,
-      "message": "自動任務公平性 0.54（stddev 3.91 / mean 7.20），略超 0.5 門檻。ai_deep_research 執行 18 次為最高，是平均的 2.5 倍。建議檢查 frequency-limits.yaml 的 daily_limit 設定。"
+      "value": 0.659,
+      "threshold": 0.50,
+      "message": "自動任務公平性 0.66，超過 0.5 門檻，惡化趨勢（上次 0.54）。佛經類任務執行 2 次，OODA 類（system_insight、arch_evolution、qa_optimize、creative_game_optimize、unsloth_research）未執行。"
+    },
+    {
+      "level": "info",
+      "metric": "avg_io_per_call",
+      "value": 12419,
+      "threshold": 5000,
+      "message": "平均工具呼叫 I/O 大幅改善至 12,419 字元（-69% vs 上次 39,834），仍略超 5KB 門檻但已接近可接受範圍。"
+    },
+    {
+      "level": "info",
+      "metric": "skill_usage_coverage",
+      "value": 1.42,
+      "threshold": 0.70,
+      "message": "發現 37 個 Skills（142% 覆蓋率），超過文檔記錄的 26 個，需同步更新 SKILL_INDEX.md 與 system-insight SKILL.md 的 total_skills 欄位。"
+    },
+    {
+      "level": "info",
+      "metric": "daily_success_rate",
+      "value": 1.0,
+      "threshold": 0.90,
+      "message": "排程器 100% 成功率（131/131），較上次 90.8% 大幅改善，無失敗時段。"
     }
   ],
   "recommendations": [
-    "【高優先】快取命中率偏低（18.12% < 40%）— ADR-005 的 cache/status.json valid 旗標條件跳過邏輯尚未完整落實。建議在 run-agent-team.ps1 補強 valid=true 時跳過對應 fetch agent 的邏輯。",
-    "【高優先】avg_io_per_call 超標 8 倍（39,834 > 5,000）— 根因：scheduler-state.json（3774 行）整體讀取。建議改用分段讀取（offset+limit）或改讀 state/run-fsm.json 摘要欄位。",
-    "【中優先】auto_task_fairness 略超警戒（0.54 > 0.50）— auto-ai_deep_research 執行 18 次佔比過高。建議檢查 frequency-limits.yaml 的 daily_limit（ai_deep_research 目前設定）。",
-    "【注意】loop-suspected 標籤出現 1,184 次（7 天 18,000 次呼叫中佔 6.6%）— 建議用 trace-analyzer 分析具體觸發 session，確認是否有真實迴圈風險。",
-    "【資訊】behavior-patterns.json 尚無自動產出程式，3 個 Token Economy 指標設為 null，不影響整體評估。"
+    "【高優先】快取命中率持續偏低（18.2%），建議檢查 config/cache-policy.yaml 的 TTL 設定與 Phase 0 預計算邏輯（run-agent-team.ps1）",
+    "【高優先】自動任務公平性惡化（0.54 → 0.66），OODA 類 5 個任務（system_insight、arch_evolution、qa_optimize、creative_game_optimize、unsloth_research）完全未執行，建議檢查 frequency-limits.yaml 權重與執行順序",
+    "【中優先】avg_io_per_call 雖改善 69%（39,834 → 12,419）但仍超標 2.5 倍，建議持續加強子 Agent 委派策略（Explore 模式返回摘要而非全文）",
+    "【中優先】Skill 總數已達 37 個（+19% vs 文檔），需更新 SKILL_INDEX.md 速查表並同步 system-insight SKILL.md 的 total_skills 欄位",
+    "【注意】loop-suspected 標籤 1,187 次（6% 工具呼叫），建議用 trace-analyzer 分析具體觸發 session",
+    "【正向】排程器成功率從 90.8% 提升至 100%，表現優異",
+    "【正向】研究去重機制極度有效（多樣性 99.3%），138 entries 僅 1 次重複"
   ],
   "skill_heatmap": {
-    "knowledge-query": 192,
-    "ntfy-notify": 158,
-    "todoist": 140,
+    "knowledge-query": 649,
+    "todoist": 410,
+    "api-cache": 405,
+    "ntfy-notify": 196,
     "kb-research-strategist": 110,
     "web-research": 58,
-    "api-cache": 32,
     "groq": 18,
-    "system-insight": 5,
     "chatroom-query": 15,
     "digest-memory": 12,
-    "hackernews-ai-digest": 11,
-    "pingtung-news": 10,
+    "hackernews-ai-digest": 12,
     "writing-plans": 10,
+    "pingtung-news": 8,
     "skill-forge": 8,
-    "github-scout": 7
+    "github-scout": 7,
+    "system-insight": 6
   },
-  "high_failure_hours": [3, 14],
-  "loop_suspected_count": 1184,
+  "high_failure_hours": [],
+  "loop_suspected_count": 1187,
   "statistics": {
-    "total_runs_7d": 174,
-    "successful_runs": 158,
-    "failed_runs": 16,
-    "total_tool_calls": 18000,
-    "unique_skills_used": 31,
-    "research_entries": 118,
-    "unique_topics": 117,
-    "auto_tasks_count": 20,
-    "recent_7d_research": 118,
-    "auto_task_distribution": {
-      "auto-ai_deep_research": 18,
-      "auto-tech_research": 12,
-      "auto-jingtu": 11,
-      "auto-jiaoguangzong": 10,
-      "auto-fahua": 10,
-      "auto-git_push": 9,
-      "auto-shurangama": 9,
-      "auto-self_heal": 7,
-      "auto-chatroom_optimize": 7,
-      "auto-ai_workflow_github": 7,
-      "auto-ai_github_research": 6,
-      "auto-ai_sysdev": 6,
-      "auto-podcast_create": 6,
-      "auto-podcast_jiaoguangzong": 6,
-      "auto-skill_audit": 5
-    }
+    "total_runs_7d": 131,
+    "successful_runs": 131,
+    "failed_runs": 0,
+    "total_tool_calls": 19677,
+    "session_count": 793,
+    "avg_calls_per_session": 24.8,
+    "unique_skills_used": 37,
+    "research_entries": 138,
+    "unique_topics": 137,
+    "auto_tasks_completed": 19,
+    "auto_tasks_total": 24,
+    "auto_task_completion_rate": 0.792,
+    "top_tools": {
+      "Bash": 7921,
+      "Read": 6649,
+      "Write": 1787,
+      "Edit": 661,
+      "Grep": 581
+    },
+    "team_mode_ratio": 0.507
   },
-  "summary": "系統整體健康良好（成功率 90.8%），但快取策略與 I/O 效率仍需優化（持續問題）。快取命中率 18.12%（+3.6pp vs 上次 14.57%），雖有改善但距目標 40% 仍遠。avg_io_per_call 大幅上升至 39,834（上次 13,639），主因 scheduler-state.json 大型整體讀取。loop-suspected 標籤出現 1,184 次需持續觀察。"
+  "trends": {
+    "daily_success_rate": "+9.2pp (0.908 → 1.0)",
+    "avg_io_per_call": "-69% (39834 → 12419)",
+    "auto_task_fairness": "+21% (0.5437 → 0.659, 惡化)",
+    "skill_usage_coverage": "+19% (31 → 37 skills)",
+    "cache_hit_ratio": "+0.4pp (0.1812 → 0.182, 持平)"
+  },
+  "summary": "系統整體健康度優異（100% 成功率），I/O 效率大幅改善（-69%），但快取策略與任務公平性仍需優化。排程器穩定性顯著提升（90.8% → 100%），無失敗時段。avg_io_per_call 從 39,834 降至 12,419（-69%），顯示子 Agent 委派策略奏效。主要問題：(1) 快取命中率持平於 18.2%，距目標 40% 仍遠；(2) 自動任務公平性惡化（0.54 → 0.66），OODA 類 5 個任務完全未執行。研究去重機制極度有效（99.3% 多樣性），loop-suspected 標籤 1,187 次需持續觀察。"
 }

@@ -29,6 +29,46 @@
 > **禁止**：主 Agent 直接累積大量檔案內容後再分析（OOM 風險）。
 > **正確**：子 Agent 分析後傳回 ≤ 200 行 JSON 摘要，主 Agent 根據摘要決策。
 
+## 自動任務連續記憶規則（所有 todoist-auto-*.md 適用）
+
+若你是一個自動任務（結果寫入 `results/todoist-auto-{task_key}.json`），必須遵守以下連續記憶協議：
+
+### 任務開始前：讀取歷史執行記錄
+在執行主要任務**之前**（第一個實質步驟之前），執行：
+```
+Read context/continuity/auto-task-{task_key}.json
+```
+（不存在則略過）
+
+從 `runs[]` 最近 5 筆中提取：
+- **上次研究的 topic** → 本次選擇不同角度或繼續深化
+- **key_findings** → 避免重複已知結論，從上次的基礎繼續推進
+- **next_suggested_angle** → 若有此欄位，優先考慮此方向
+- **kb_note_ids** → 本次研究應排除（已整合到知識庫的筆記）
+
+### 任務完成後（包含失敗路徑）：寫入本次執行記錄
+在寫入最終結果檔 `results/todoist-auto-{task_key}.json` **之後**（無論 status 為 success、failed 或 partial）、結束之前，執行：
+> **失敗路徑也必須寫入**：若任務因錯誤提早終止，仍需嘗試寫入 continuity（`status: "failed"`），確保下次執行能感知到失敗歷史。
+
+1. Read `context/continuity/auto-task-{task_key}.json`（不存在則初始化 `{"task_key":"<key>","schema_version":1,"max_runs":5,"runs":[]}`）
+2. 在 `runs[]` **開頭**插入本次記錄：
+```json
+{
+  "executed_at": "<ISO 8601>",
+  "topic": "<本次研究/處理的核心主題（10-20 字）>",
+  "status": "<completed|failed|partial>",
+  "key_findings": "<2-3 句：本次最重要的發現或成果>",
+  "kb_note_ids": ["<匯入知識庫的 note_id>"],
+  "next_suggested_angle": "<下次可以繼續探索的方向（10-20 字），若無則留空>"
+}
+```
+3. 若 `runs` 超過 `max_runs`（5）則移除最舊的
+4. 用 Write 工具完整覆寫 `context/continuity/auto-task-{task_key}.json`
+
+> **重要**：`{task_key}` 為此 prompt 對應的任務鍵（與 `results/todoist-auto-{task_key}.json` 相同）。
+
+---
+
 ## 重要禁令：禁止產生 nul 檔案
 - 絕對禁止在 Bash 指令中使用 `> nul`、`2>nul`、`> NUL`，這會在 Windows 上產生名為 nul 的實體檔案
 - 絕對禁止用 Write 工具建立名為 nul 的檔案
