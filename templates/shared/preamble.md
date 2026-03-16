@@ -16,6 +16,36 @@
 - 跳過 api-cache 直接呼叫外部服務
 - 執行結束不更新記憶和狀態
 
+## ⚡ Shell 執行強制規則（所有 todoist-auto-*.md 適用）
+
+> **任何 Shell 命令都必須用 Bash tool 實際執行，不得只輸出命令文字。**
+
+| 命令類型 | 強制事項 |
+|---------|---------|
+| `curl` / `pwsh` / `git` / `uv run` / `python` | 必須用 Bash tool 執行，不得只描述 |
+| `cat task_prompt.md \| claude -p` | 必須用 Bash tool 執行；先用 Write 工具建立 task_prompt.md，再 Bash 執行 claude -p |
+| 每個關鍵 Shell 步驟 | 執行後立即確認輸出（ls / grep / echo 確認） |
+| `status: "success"` | 只能在確認實際輸出存在後才能寫入 |
+
+**違反症狀**：Agent 輸出「建議步驟」文字、「以下命令可執行...」等描述性語言，而未看到 Bash tool 的呼叫紀錄。
+
+## 知識庫寫入確認規則
+
+所有 `POST /api/import` 或 `POST /api/notes` 執行後，**必須**確認寫入成功：
+
+```bash
+# 儲存回應到暫存檔後確認
+curl -s -X POST "http://localhost:3000/api/import" \
+  -H "Content-Type: application/json" \
+  -d @note.json > /tmp/kb-import-result.json
+
+# 確認回應含 id 欄位
+grep -q '"id"' /tmp/kb-import-result.json && echo "✅ KB 寫入成功" || echo "❌ KB 寫入失敗"
+```
+
+- 回應含 `"id"` → 記錄 note_id，繼續
+- 回應不含 `"id"` 或 curl 失敗 → 結果 JSON 的 `status` 改為 `"partial"`，記錄錯誤原因
+
 ## Context 保護：重量操作委派子 Agent
 
 當任務需要**讀取 5 個以上檔案**或**執行耗時搜尋**時，必須用 Agent 工具委派子 Agent，主 Agent 只接收摘要 JSON：

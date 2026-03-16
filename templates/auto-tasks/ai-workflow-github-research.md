@@ -19,6 +19,10 @@
 ```
 
 ## 執行方式
+
+> ⚡ **【立即】用 Bash tool 執行（不得只輸出命令文字）**
+> 執行前確認 task_prompt.md 已建立：
+
 ```bash
 cat task_prompt.md | claude -p --allowedTools "Read,Bash,Write,WebSearch,WebFetch"
 ```

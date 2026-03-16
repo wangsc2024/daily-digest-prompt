@@ -3,6 +3,12 @@
 > 觸發條件：Todoist 無可處理項目且 git_push_count < 4
 > 由主 Agent 直接執行，不需子 Agent
 
+## ⚡ 強制執行規則
+
+> **所有 bash/pwsh/git/python 命令必須用 Bash tool 實際執行，不得只輸出命令文字。**
+> git push 是不可逆操作：push 前必須用 Bash 確認 `git status --porcelain` 輸出，再決定是否 commit。
+> 每個步驟執行後確認 exit code：非 0 則記錄錯誤，依步驟說明決定是否繼續。
+
 ## 步驟
 
 ### 0. 同步遊戲到 game_web（確保 game-web.pages.dev 最新）

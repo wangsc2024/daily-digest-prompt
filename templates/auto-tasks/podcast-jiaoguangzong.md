@@ -110,6 +110,8 @@ curl -s "http://localhost:3000/api/notes/{選定的 note_id}"
 
 ## 步驟 5：TTS 語音合成
 
+> ⚡ **必須用 Bash tool 實際執行，不得只輸出命令文字**
+
 ```bash
 uv run --project . python tools/generate_podcast_audio.py \
   --input "results/article-{slug}/podcast-script.jsonl" \
@@ -118,11 +120,18 @@ uv run --project . python tools/generate_podcast_audio.py \
   --voice-b "zh-TW-YunJheNeural"
 ```
 
-等待完成。若失敗：記錄錯誤，跳至步驟 7 寫入失敗結果。
+**✅ Checkpoint（必須執行）**：
+```bash
+ls results/article-{slug}/podcast-audio/*.mp3 2>/dev/null | wc -l
+```
+- 輸出 > 0：繼續步驟 6
+- 輸出為 0：記錄錯誤，跳至步驟 9 寫入 `status: "failed"`，停止流程
 
 ---
 
 ## 步驟 6：音訊串接（MP3 輸出）
+
+> ⚡ **必須用 Bash tool 實際執行，不得只輸出命令文字**
 
 ```bash
 uv run --project . python tools/concat_audio.py \
@@ -130,6 +139,13 @@ uv run --project . python tools/concat_audio.py \
   --script "results/article-{slug}/podcast-script.jsonl" \
   --output "results/article-{slug}/podcast-final.mp3"
 ```
+
+**✅ Checkpoint（必須執行）**：
+```bash
+ls -la "results/article-{slug}/podcast-final.mp3"
+```
+- 檔案存在：繼續步驟 7
+- 不存在：記錄錯誤，跳至步驟 9 寫入 `status: "failed"`，停止流程
 
 ---
 
@@ -166,6 +182,7 @@ Click: https://podcast.pdoont.us.kg
 用 Write 工具寫入 `results/todoist-auto-podcast_jiaoguangzong.json`：
 ```json
 {
+  "type": "podcast_jiaoguangzong",
   "task_key": "podcast_jiaoguangzong",
   "episode_title": "（播客標題）",
   "note_id": "（note_id）",
@@ -176,6 +193,7 @@ Click: https://podcast.pdoont.us.kg
   "cloud_url": "（R2 URL 或 '未上傳'）",
   "turns": （對話輪數）,
   "status": "success",
+  "summary": "（podcast_title）— （turns）輪對話",
   "completed_at": "（ISO 8601）"
 }
 ```

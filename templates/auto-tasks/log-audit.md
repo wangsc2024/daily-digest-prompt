@@ -1,7 +1,13 @@
 # 系統 Log 深度審查 Prompt 模板
 
 > 觸發條件：Todoist 無可處理項目且 log_audit_count < 1
-> 主 Agent 用此模板建立 task_prompt.md，透過 `claude -p` 執行
+
+先讀取 `templates/shared/preamble.md`，遵守其中所有規則（Skill-First + nul 禁令 + Shell 執行強制規則）。
+
+## ⚡ 強制執行規則
+
+> **ls / grep / curl 等命令必須用 Bash tool 實際執行，不得只輸出命令文字。**
+> 步驟 2 的 ls 列出 log 清單後，必須用 Read 工具逐一讀取檔案，不得跳過實際讀取直接輸出分析。
 
 ## 審查流程
 
