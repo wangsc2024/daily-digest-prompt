@@ -19,15 +19,15 @@ Alert severity:
   - warning: blocked 1-2 OR errors 1-4
   - info (no alert): everything healthy
 """
-import sys
+import hashlib
 import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
-import hashlib
-from datetime import datetime, timedelta, date
 from collections import Counter
+from datetime import date, datetime, timedelta
 
 NTFY_TOPIC = "wangsc2025"
 NTFY_MAX_BYTES = 4096  # ntfy message size limit
@@ -475,7 +475,7 @@ def _update_metrics_daily() -> None:
     由 main() 在 _rotate_logs() 之後呼叫。
     """
     try:
-        from hook_utils import file_lock, atomic_write_json, safe_load_json
+        from hook_utils import atomic_write_json, file_lock, safe_load_json
     except ImportError:
         return  # hook_utils 不可用時靜默跳過
 
@@ -608,9 +608,6 @@ def _compute_error_budget() -> list:
     records = metrics_data.get("records", [])
     if not records:
         return []
-
-    # 取最近 window_days 內的記錄平均值（或最新單日值）
-    today_str = datetime.now().strftime("%Y-%m-%d")
 
     results = []
     for slo in slos:
@@ -934,7 +931,6 @@ def main():
                 last_dt = datetime.fromisoformat(last_sent)
                 if last_dt.tzinfo is None:
                     last_dt = last_dt.replace(tzinfo=timezone.utc)
-                now_dt = datetime.now(tz=timezone.utc)
                 # 每個 session 最多發一次告警（無論間隔多長）
                 print(json.dumps({"dedup": True, "last_sent": last_sent}))
                 sys.exit(0)

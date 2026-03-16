@@ -14,8 +14,16 @@ PreToolUse:Bash Guard — Bash 指令機器強制攔截。
 規則來源：config/hook-rules.yaml（不可用時回退至內建預設值）。
 攔截事件記錄至 logs/structured/YYYY-MM-DD.jsonl。
 """
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex, get_rule_patterns, get_rule_re_flags
-
+from hook_utils import (
+    filter_rules_by_preset,
+    get_compiled_regex,
+    get_rule_patterns,
+    get_rule_re_flags,
+    load_yaml_rules,
+    log_blocked_event,
+    output_decision,
+    read_stdin_json,
+)
 
 # YAML 不可用時的內建預設規則
 FALLBACK_BASH_RULES = [

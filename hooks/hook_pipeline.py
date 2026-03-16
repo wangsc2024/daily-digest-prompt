@@ -31,7 +31,6 @@ from __future__ import annotations
 
 from typing import Callable
 
-
 # 中介軟體型別別名
 Middleware = Callable[[dict], dict]
 

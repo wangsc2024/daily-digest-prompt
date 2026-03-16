@@ -22,10 +22,9 @@ Security:
     protocol; note that Claude Code PostToolUse may not always pass full
     output content, so output_chars in token-usage.json may be zero.
 """
-import sys
 import json
 import os
-import re
+import sys
 from datetime import datetime
 
 # Import agent_guardian for error classification and loop detection
@@ -337,7 +336,7 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
     some tool types, so output_chars may undercount actual output volume.
     """
     try:
-        from hook_utils import file_lock, atomic_write_json, safe_load_json
+        from hook_utils import atomic_write_json, file_lock, safe_load_json
 
         token_file = _find_token_usage_file()
 
@@ -491,10 +490,33 @@ def main():
     # Build log entry
     # span_type hierarchy: session > phase > agent > tool_call
     # Each JSONL entry is always a "tool_call" span; phase/session spans are recorded by PS1 scripts.
+    trace_id = os.environ.get("DIGEST_TRACE_ID", "")
+    if not trace_id and os.environ.get("AGENT_PHASE") == "phase3":
+        # Fallback: Phase 3 (assemble) 可能未繼承 env，從 state/run-fsm.json 取最近 todoist run_id
+        try:
+            fsm_path = os.path.join(os.getcwd(), "state", "run-fsm.json")
+            if os.path.isfile(fsm_path):
+                with open(fsm_path, "r", encoding="utf-8") as f:
+                    fsm = json.load(f)
+                runs = fsm.get("runs", {})
+                todoist_runs = [
+                    (k, v) for k, v in runs.items()
+                    if isinstance(v, dict) and v.get("agent_type") == "todoist"
+                ]
+                if todoist_runs:
+                    # 依 phase3.updated 或 started 取最新一筆
+                    def _sort_key(r):
+                        v = r[1]
+                        p3 = v.get("phases", {}).get("phase3", {})
+                        return p3.get("updated") or v.get("started") or ""
+                    todoist_runs.sort(key=_sort_key, reverse=True)
+                    trace_id = (todoist_runs[0][1].get("run_id") or "")[:12]
+        except (OSError, json.JSONDecodeError, KeyError):
+            pass
     entry = {
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
-        "trace_id": os.environ.get("DIGEST_TRACE_ID", ""),
+        "trace_id": trace_id,
         "phase": os.environ.get("AGENT_PHASE", ""),
         "agent": os.environ.get("AGENT_NAME", ""),
         "span_type": "tool_call",

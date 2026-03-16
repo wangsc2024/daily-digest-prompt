@@ -17,10 +17,8 @@ Usage:
 import argparse
 import json
 import os
-import sys
-from datetime import datetime, timedelta
 from collections import Counter
-
+from datetime import datetime, timedelta
 
 LOG_DIR = os.path.join("logs", "structured")
 

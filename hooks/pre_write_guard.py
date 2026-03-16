@@ -13,8 +13,13 @@ PreToolUse:Write/Edit Guard — 檔案寫入機器強制攔截。
 """
 import os
 
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision
-
+from hook_utils import (
+    filter_rules_by_preset,
+    load_yaml_rules,
+    log_blocked_event,
+    output_decision,
+    read_stdin_json,
+)
 
 # YAML 不可用時的內建預設規則
 FALLBACK_WRITE_RULES = [

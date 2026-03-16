@@ -26,11 +26,11 @@ import json
 import os
 import re
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List
+from typing import Dict, Optional
 
 # Import shared API source patterns, regex cache, and file lock
 try:
-    from hook_utils import API_SOURCE_PATTERNS, get_compiled_regex, file_lock
+    from hook_utils import API_SOURCE_PATTERNS, file_lock, get_compiled_regex
     _FILE_LOCK_AVAILABLE = True
 except ImportError:
     _FILE_LOCK_AVAILABLE = False
@@ -413,8 +413,8 @@ class CircuitBreaker:
 # Loop Detector
 # ============================================
 
-from collections import deque
 import hashlib
+from collections import deque
 
 
 def _load_loop_thresholds() -> dict:

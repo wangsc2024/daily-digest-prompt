@@ -15,13 +15,13 @@ YAML 配置 Schema 驗證與遷移工具。
   python validate_config.py --migrate --apply      # 實際執行遷移
   python validate_config.py --fix <config>         # 修復特定配置檔問題
 """
-import os
-import sys
 import json
+import os
 import re
 import shutil
+import sys
 from datetime import datetime
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Dict, List, Optional
 
 
 def _load_yaml(filepath):
@@ -692,9 +692,6 @@ def check_routing_consistency(skills_dir=None, config_dir=None):
         if isinstance(mapping, dict) and "keywords" in mapping:
             keyword_labels.update(mapping["keywords"])
 
-    # 合併所有可路由標籤
-    all_routing_labels = routing_labels | keyword_labels
-
     # 注意：skill_aliases_no_file 中的名稱（如「程式開發（Plan-Then-Execute）」）
     # 是描述性別名，由模板驅動而非獨立 SKILL.md，交叉驗證時應跳過 SKILL.md 檢查。
     # 這些別名已在 routing.yaml skill_aliases 中標記 no_skill_file: true。
@@ -873,7 +870,7 @@ def migrate_config(config_name, target_version=None, config_dir=None, dry_run=Tr
         except Exception as e:
             return False, [f"❌ 寫入失敗：{str(e)}"]
     else:
-        messages.append(f"\n💡 Dry-run 模式：實際執行請加上 --apply 參數")
+        messages.append("\n💡 Dry-run 模式：實際執行請加上 --apply 參數")
 
     # 10. 遷移後驗證
     if not dry_run:
@@ -1470,9 +1467,6 @@ def main():
     skill_scores = None
     if "--check-skills" in sys.argv or "--all" in sys.argv:
         skill_scores = validate_skill_quality()
-        # 計算統計
-        total_skills = len(skill_scores)
-        avg_score = sum(s["score"] for s in skill_scores.values()) / total_skills if total_skills > 0 else 0
         low_score_skills = [name for name, data in skill_scores.items() if data["score"] < 80]
 
         if low_score_skills:

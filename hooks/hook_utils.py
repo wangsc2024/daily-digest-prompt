@@ -10,7 +10,6 @@ import re
 import sys
 from datetime import datetime
 
-
 # 模組層級正則編譯快取（避免重複編譯 hot path 中的 pattern）
 # 設有上限防止長時間運行進程記憶體膨脹
 _REGEX_CACHE_MAXSIZE = 512
@@ -509,7 +508,6 @@ def cleanup_stale_state_files(max_age_hours: int = 48) -> dict:
     Returns:
         {"removed": [...], "errors": [...]} 清理結果摘要
     """
-    from datetime import timedelta
 
     project_root = get_project_root()
     state_dir = os.path.join(project_root, "state")

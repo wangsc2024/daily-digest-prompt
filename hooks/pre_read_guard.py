@@ -13,8 +13,14 @@ PreToolUse:Read Guard — 敏感路徑讀取攔截。
 import os
 import re
 
-from hook_utils import load_yaml_rules, filter_rules_by_preset, log_blocked_event, read_stdin_json, output_decision, get_compiled_regex
-
+from hook_utils import (
+    filter_rules_by_preset,
+    get_compiled_regex,
+    load_yaml_rules,
+    log_blocked_event,
+    output_decision,
+    read_stdin_json,
+)
 
 # YAML 不可用時的內建預設規則
 FALLBACK_READ_RULES = [

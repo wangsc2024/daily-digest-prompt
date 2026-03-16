@@ -18,11 +18,10 @@ Behavior Pattern Tracker — Instinct Lite 行為模式採集器。
   由 post_tool_logger.py 在寫入 JSONL 後呼叫 track()。
   也可獨立執行 `python behavior_tracker.py report` 查看統計。
 """
+import hashlib
 import json
 import os
-import hashlib
 from datetime import datetime, timedelta
-
 
 # Use script-relative path to avoid CWD dependency in team mode
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -205,7 +204,7 @@ def report():
     total_input = sum(p.get("total_input", 0) for p in sorted_patterns)
     total_output = sum(p.get("total_output", 0) for p in sorted_patterns)
     total_calls = sum(p.get("count", 0) for p in sorted_patterns)
-    print(f"Token 經濟概要：")
+    print("Token 經濟概要：")
     print(f"  總呼叫次數: {total_calls}")
     print(f"  總輸入量: {total_input:,} chars (~{total_input//4:,} tokens)")
     print(f"  總輸出量: {total_output:,} chars (~{total_output//4:,} tokens)")
@@ -217,7 +216,7 @@ def report():
     for p in sorted_patterns:
         t = p.get("tool", "unknown")
         tool_counts[t] = tool_counts.get(t, 0) + p.get("count", 0)
-    print(f"\n工具使用分布：")
+    print("\n工具使用分布：")
     for t, c in sorted(tool_counts.items(), key=lambda x: -x[1]):
         print(f"  {t}: {c} 次")
 

@@ -17,9 +17,9 @@ cjk_guard.py - 日文漢字混入繁體中文的偵測與自動修正工具
 返回碼：0=無問題, 1=發現問題（scan/pre-commit），0=已修正（fix）
 """
 
-import sys
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 # 日文漢字 → 繁體中文正確字元的映射表
@@ -237,7 +237,7 @@ if __name__ == '__main__':
         paths = args[1:] if len(args) > 1 else ['.']
         issues = scan_files(paths)
         if issues == 0:
-            print(f"✓ 掃描完成，無日文漢字混入")
+            print("✓ 掃描完成，無日文漢字混入")
         sys.exit(1 if issues > 0 else 0)
 
     elif args[0] == 'fix':
