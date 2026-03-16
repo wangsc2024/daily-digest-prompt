@@ -98,7 +98,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 用 Write 建立 `results/todoist-auto-ai_sysdev.json`：
 ```json
 {
-  "agent": "todoist-ai-sysdev",
+  "agent": "todoist-auto-ai_sysdev",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "ai_sysdev",

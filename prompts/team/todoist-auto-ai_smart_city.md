@@ -98,7 +98,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 用 Write 建立 `results/todoist-auto-ai_smart_city.json`：
 ```json
 {
-  "agent": "todoist-ai-smart-city",
+  "agent": "todoist-auto-ai_smart_city",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "ai_smart_city",

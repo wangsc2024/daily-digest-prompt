@@ -9,7 +9,7 @@
 
 ## 立即行動：寫入 Fail-Safe 結果（最高優先）
 讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-creative_game_optimize.json`，內容：
-`{"agent":"todoist-creative-game","status":"failed","type":"creative_game","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
+`{"agent":"todoist-auto-creative_game_optimize","status":"failed","type":"creative_game_optimize","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
 
 （此 placeholder 將在 Phase G 成功完成後被覆寫為 status=success）
 
@@ -188,10 +188,10 @@ fi
 用 Write 建立 `results/todoist-auto-creative_game_optimize.json`：
 ```json
 {
-  "agent": "todoist-creative-game",
+  "agent": "todoist-auto-creative_game_optimize",
   "status": "success 或 partial 或 failed",
   "task_id": null,
-  "type": "creative_game",
+  "type": "creative_game_optimize",
   "stage": "creation 或 optimization",
   "game_id": "[遊戲 ID]",
   "game_name": "[遊戲中文名]",

@@ -130,7 +130,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 用 Write 建立 `results/todoist-auto-skill_audit.json`：
 ```json
 {
-  "agent": "todoist-skill-audit",
+  "agent": "todoist-auto-skill_audit",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "skill_audit",

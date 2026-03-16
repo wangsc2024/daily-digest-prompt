@@ -83,7 +83,7 @@ cd D:/Source/daily-digest-prompt && git push origin main
 有變更且推送成功時：
 ```json
 {
-  "agent": "todoist-gitpush",
+  "agent": "todoist-auto-git_push",
   "status": "success",
   "task_id": null,
   "type": "git_push",
@@ -104,7 +104,7 @@ cd D:/Source/daily-digest-prompt && git push origin main
 無變更時：
 ```json
 {
-  "agent": "todoist-gitpush",
+  "agent": "todoist-auto-git_push",
   "status": "success",
   "task_id": null,
   "type": "git_push",
@@ -125,7 +125,7 @@ cd D:/Source/daily-digest-prompt && git push origin main
 推送失敗時：
 ```json
 {
-  "agent": "todoist-gitpush",
+  "agent": "todoist-auto-git_push",
   "status": "failed",
   "task_id": null,
   "type": "git_push",

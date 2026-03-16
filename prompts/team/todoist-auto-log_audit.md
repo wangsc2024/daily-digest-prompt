@@ -7,7 +7,7 @@
 
 ## 立即行動：寫入 Fail-Safe 結果（最高優先）
 讀完 preamble 後立即執行，用 Write 工具建立 `results/todoist-auto-log_audit.json`，內容：
-`{"agent":"todoist-logaudit","status":"failed","type":"log_audit","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
+`{"agent":"todoist-auto-log_audit","status":"failed","type":"log_audit","error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}`
 
 （此 placeholder 將在步驟 8 成功完成後被覆寫為 status=success）
 
@@ -136,7 +136,7 @@ cp "目標檔案" "目標檔案.bak"
 用 Write 建立 `results/todoist-auto-log_audit.json`：
 ```json
 {
-  "agent": "todoist-logaudit",
+  "agent": "todoist-auto-log_audit",
   "status": "success 或 partial 或 failed",
   "task_id": null,
   "type": "log_audit",

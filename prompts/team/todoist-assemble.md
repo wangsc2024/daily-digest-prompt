@@ -174,7 +174,10 @@ $r | ConvertTo-Json -Depth 10'
 讀取 `context/auto-tasks-today.json`，根據 Phase 2 結果更新：
 
 對每個存在的 `results/todoist-auto-*.json` 結果檔案：
-1. 從結果 JSON 中讀取 `type` 欄位（如 `shurangama`、`tech_research`）
+1. 依序嘗試以下方式取得 task_key（以先成功者為準）：
+   - 讀取 `task_key` 欄位（Podcast 任務標準，如 `podcast_jiaoguangzong`）
+   - 讀取 `type` 欄位（研究任務標準，如 `shurangama`、`tech_research`）
+   - 從**檔名**提取：`results/todoist-auto-{task_key}.json` → 去掉 `results/todoist-auto-` 與 `.json`
 2. 查找 `config/frequency-limits.yaml` 中對應的 `counter_field`
 3. 將該欄位 +1
 
@@ -250,7 +253,7 @@ $r | ConvertTo-Json -Depth 10'
 
 **plan_type = "auto"**：
 ```
-📋 Todoist 自動任務報告（團隊模式）HH:MM
+📋 Todoist 報告（團隊模式）HH:MM
 
 🔧 自動任務（M 個並行，總耗時 Ns）
 ━━━━━━━━━━━━━━
@@ -276,7 +279,7 @@ $r | ConvertTo-Json -Depth 10'
 
 **plan_type = "tasks"**（人工待辦）：
 ```
-📋 Todoist 自動執行報告（團隊模式）HH:MM
+📋 Todoist 報告（團隊模式）HH:MM
 
 📊 統計：待辦 N 項 | 執行 N 項（✅ 成功 N / ❌ 失敗 N / ⏭️ 跳過 N）
 
@@ -296,7 +299,7 @@ $r | ConvertTo-Json -Depth 10'
 - 先檢查是否存在 `results/todoist-exhausted-fallback.json`。若存在，讀取其 `notify_message` 作為第二行說明。
 - 若無該檔案，第二行使用：「今日自動任務已達上限（已用 N / 45）」。
 ```
-📋 Todoist 報告 HH:MM
+📋 Todoist 報告（團隊模式）HH:MM
 - 無可處理待辦
 - [notify_message 或 今日自動任務已達上限（已用 N / 45）]
 ```
