@@ -12,11 +12,11 @@ Paperclip 式預算守衛（P4-C）— 原子化扣款 + 閾值熔斷
   # 模擬超限（測試用）
   uv run python tools/budget_guard.py --simulate-exhaustion --provider groq
 """
+import argparse
 import json
 import sys
-import argparse
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 BUDGET_CONFIG = REPO_ROOT / "config" / "budget.yaml"
@@ -88,9 +88,9 @@ def check_budget(task_type: str, provider: str, estimated_tokens: int = 50) -> d
 
 def _send_budget_warning(provider: str, utilization: float) -> None:
     """80% 警告 → ntfy 通知（非同步，不阻塞主流程）"""
+    import os
     import subprocess
     import tempfile
-    import os
 
     payload = {
         "topic": "wangsc2025",

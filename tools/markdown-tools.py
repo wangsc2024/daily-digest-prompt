@@ -16,7 +16,6 @@ import re
 import sys
 from pathlib import Path
 
-
 # ─── TOC 生成 ────────────────────────────────────────────────────────────────
 
 def generate_toc(content: str, max_depth: int = 6) -> str:

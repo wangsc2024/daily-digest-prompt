@@ -9,10 +9,9 @@ import sys
 from pathlib import Path
 
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from markdown_it import MarkdownIt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Inches, Pt, RGBColor
 
 
 def create_document(title: str) -> Document:

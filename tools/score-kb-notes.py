@@ -44,20 +44,28 @@ DEFAULT_LIMIT = 200
 def score_content_length(text: str) -> int:
     """(0-25) 內容長度：字元數越多，品質越高"""
     n = len(text.strip())
-    if n >= 1500: return 25
-    if n >= 800:  return 18
-    if n >= 400:  return 11
-    if n >= 100:  return 5
+    if n >= 1500:
+        return 25
+    if n >= 800:
+        return 18
+    if n >= 400:
+        return 11
+    if n >= 100:
+        return 5
     return 0
 
 
 def score_structure_quality(text: str) -> int:
     """(0-20) 結構品質：有 Markdown 格式元素表示筆記組織完整"""
     pts = 0
-    if re.search(r'^#{1,3}\s', text, re.MULTILINE): pts += 8   # 標題
-    if re.search(r'^\s*[-*]\s', text, re.MULTILINE): pts += 5  # 無序列表
-    if re.search(r'^\s*\d+\.\s', text, re.MULTILINE): pts += 4 # 有序列表
-    if re.search(r'\|\s.+\s\|', text): pts += 3                # 表格
+    if re.search(r'^#{1,3}\s', text, re.MULTILINE):
+        pts += 8   # 標題
+    if re.search(r'^\s*[-*]\s', text, re.MULTILINE):
+        pts += 5  # 無序列表
+    if re.search(r'^\s*\d+\.\s', text, re.MULTILINE):
+        pts += 4  # 有序列表
+    if re.search(r'\|\s.+\s\|', text):
+        pts += 3  # 表格
     return min(pts, 20)
 
 
@@ -65,9 +73,12 @@ def score_source_citation(text: str) -> int:
     """(0-20) 來源引用：引用越多越可信"""
     urls = set(re.findall(r'https?://[^\s\)\"\'<>]+', text))
     n = len(urls)
-    if n >= 4: return 20
-    if n >= 2: return 13
-    if n >= 1: return 7
+    if n >= 4:
+        return 20
+    if n >= 2:
+        return 13
+    if n >= 1:
+        return 7
     return 0
 
 
@@ -79,9 +90,12 @@ def score_podcast_suitability(text: str, title: str = "") -> int:
     cn_sentences = len(re.findall(r'[。！？]', text))
     en_sentences = len(re.findall(r'[.!?]\s', text))
     sentences = cn_sentences + en_sentences
-    if sentences >= 15: pts += 10
-    elif sentences >= 8: pts += 7
-    elif sentences >= 3: pts += 4
+    if sentences >= 15:
+        pts += 10
+    elif sentences >= 8:
+        pts += 7
+    elif sentences >= 3:
+        pts += 4
 
     # 對話友善關鍵詞
     dialogue_kw = ['研究', '發現', '表示', '認為', '建議', '重要', '關鍵',
@@ -91,11 +105,14 @@ def score_podcast_suitability(text: str, title: str = "") -> int:
 
     # 扣分：程式碼區塊過多（純程式碼筆記不適合口播）
     code_blocks = text.count('```')
-    if code_blocks >= 6: pts -= 8
-    elif code_blocks >= 3: pts -= 3
+    if code_blocks >= 6:
+        pts -= 8
+    elif code_blocks >= 3:
+        pts -= 3
 
     # 加分：有標題（適合介紹段）
-    if title and len(title) > 4: pts += 4
+    if title and len(title) > 4:
+        pts += 4
 
     return max(0, min(pts, 20))
 
@@ -107,10 +124,14 @@ def score_recency(created_at: str) -> int:
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         days_old = (datetime.now(timezone.utc) - dt).days
-        if days_old <= 1:   return 15
-        if days_old <= 3:   return 13
-        if days_old <= 7:   return 10
-        if days_old <= 30:  return 6
+        if days_old <= 1:
+            return 15
+        if days_old <= 3:
+            return 13
+        if days_old <= 7:
+            return 10
+        if days_old <= 30:
+            return 6
         return 2
     except Exception:
         return 5

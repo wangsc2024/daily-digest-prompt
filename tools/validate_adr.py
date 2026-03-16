@@ -17,9 +17,9 @@ ADR 自動化驗證工具（P0-A）
 
 整合到 .git/hooks/pre-commit（見下方說明）
 """
+import argparse
 import json
 import sys
-import argparse
 from datetime import date, datetime
 from pathlib import Path
 

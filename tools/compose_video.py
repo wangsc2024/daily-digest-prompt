@@ -9,7 +9,6 @@ tools/compose_video.py
 import argparse
 import hashlib
 import json
-import os
 import shutil
 import subprocess
 import sys
@@ -245,7 +244,7 @@ def compose(storyboard_path: Path, audio_dir: Path, fps: int, output_path: Path)
     copy_audio_to_public(audio_dir, public_dir, slug)
 
     # 下載 AI 場景背景圖到 public/images/<slug>/
-    print(f"[INFO] 開始下載 AI 場景背景圖...")
+    print("[INFO] 開始下載 AI 場景背景圖...")
     image_map = fetch_images_for_scenes(scenes_in, public_dir, slug)
     if image_map:
         print(f"[INFO] 成功下載 {len(image_map)} / {len(scenes_in)} 張場景圖")

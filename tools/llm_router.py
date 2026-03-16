@@ -14,11 +14,11 @@ routing_rules 為 mapping 格式（key=task_type），O(1) dict lookup。
   Groq 離線：{"provider":"fallback_skipped","error":"...","action":"skip_and_log"}
   預算超限：{"provider":"budget_suspended","reason":"daily_budget_exhausted","utilization":1.05}
 """
+import argparse
 import json
 import sys
-import argparse
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent

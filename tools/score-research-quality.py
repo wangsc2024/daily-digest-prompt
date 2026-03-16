@@ -17,7 +17,6 @@ import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlparse
 
 # ─── 設定 ────────────────────────────────────────────────
 SCRIPT_DIR   = Path(__file__).parent
@@ -34,9 +33,12 @@ def score_source_count(text: str) -> int:
     urls = re.findall(r'https?://[^\s\)\]\"\']+', text)
     unique_urls = set(urls)
     count = len(unique_urls)
-    if count >= 5:  return 25
-    if count >= 3:  return 15
-    if count >= 1:  return 8
+    if count >= 5:
+        return 25
+    if count >= 3:
+        return 15
+    if count >= 1:
+        return 8
     return 0
 
 def score_source_diversity(text: str) -> int:
@@ -48,9 +50,12 @@ def score_source_diversity(text: str) -> int:
         if len(parts) >= 2:
             domains.add('.'.join(parts[-2:]))
     count = len(domains)
-    if count >= 3:  return 20
-    if count >= 2:  return 12
-    if count >= 1:  return 5
+    if count >= 3:
+        return 20
+    if count >= 2:
+        return 12
+    if count >= 1:
+        return 5
     return 0
 
 def score_kb_novelty(text: str, task_key: str) -> int:
@@ -80,20 +85,27 @@ def score_kb_novelty(text: str, task_key: str) -> int:
         words = set(re.findall(r'[\w\u4e00-\u9fff]{2,}', text.lower()))
         overlap = sum(1 for t in recent_topics if any(w in words for w in t.split()))
 
-        if overlap == 0:    return 25   # 完全新主題
-        if overlap <= 1:    return 15   # 有一些重疊
-        if overlap <= 3:    return 8    # 中等重疊
-        return 3                        # 高度重疊
+        if overlap == 0:
+            return 25  # 完全新主題
+        if overlap <= 1:
+            return 15  # 有一些重疊
+        if overlap <= 3:
+            return 8   # 中等重疊
+        return 3       # 高度重疊
     except Exception:
         return 10
 
 def score_output_depth(text: str) -> int:
     """output_depth（0-20）：結果字元長度（500 字以上得滿分）"""
     length = len(text)
-    if length >= 1500: return 20
-    if length >= 800:  return 15
-    if length >= 500:  return 10
-    if length >= 200:  return 5
+    if length >= 1500:
+        return 20
+    if length >= 800:
+        return 15
+    if length >= 500:
+        return 10
+    if length >= 200:
+        return 5
     return 0
 
 def score_tool_utilization(data: dict) -> int:
@@ -245,7 +257,7 @@ if __name__ == '__main__':
           f"kb_novelty={dims['kb_novelty']} output_depth={dims['output_depth']} "
           f"tool_utilization={dims['tool_utilization']}")
     print(f"  output_length={record['output_length']} backend={record['backend']}")
-    print(f"  state/research-quality.json updated")
+    print("  state/research-quality.json updated")
 
     # 輸出 JSON 方便管道使用
     json.dump(record, sys.stdout, ensure_ascii=False)
