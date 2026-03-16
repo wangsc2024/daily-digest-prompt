@@ -4,11 +4,23 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-16T13:41:40.047809+08:00",
+      "topic": "智慧能源 — AI 電網調度與再生能源預測（台灣實踐）",
+      "status": "completed",
+      "key_findings": "台電 AFC 系統 0.1-0.2 秒響應、94% 服務性能；屏東太陽能 2100-2400 小時日照但電網線路受限；離岸風電彰化外海 400 座風機（2026）、1.5 GW 併網容量；AI 預測技術多時間尺度（15 分鐘至 7 天）",
+      "kb_note_ids": [
+        "d131bf44-130c-4152-9c32-b7839268aaf3"
+      ],
+      "next_suggested_angle": "optimization 階段 — 電網效能調優、成本效益分析、V2G 雙向供電"
+    },
+    {
       "executed_at": "2026-03-15T12:35:00+08:00",
       "topic": "智慧醫療 — AI 疫情預測、遠距醫療與公共衛生決策支援",
       "status": "completed",
       "key_findings": "新加坡遠距醫療增長 400%、台灣健保資料庫 24 年大數據優勢、AI 疫情預測混合模型（CNN-LSTM-ARIMA）、屏東偏鄉醫療機會（遠距會診+AI 篩檢巡迴車）",
-      "kb_note_ids": ["0cff21ad-ba72-4cf0-967f-a8dda778fcd4"],
+      "kb_note_ids": [
+        "0cff21ad-ba72-4cf0-967f-a8dda778fcd4"
+      ],
       "next_suggested_angle": "智慧能源 — AI 電網調度、再生能源預測與台灣能源轉型"
     }
   ]

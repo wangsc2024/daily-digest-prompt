@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-15T20:40:32.650298+08:00",
+  "updated_at": "2026-03-16T14:48:00.674570+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-14",
+      "last_active": "2026-03-16",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -302,7 +302,8 @@
             "楞嚴經研究：最初方便與二決定義的內在呼應 — 從發心辨因到修證入門",
             "楞嚴經研究：楞嚴心咒（咒心）— 梵音結構、五會定位、持誦儀軌與跨宗派修持詮釋",
             "楞嚴心咒跨學科深化研究 — 音韻學分析、密教三系統比較與數位人文方法應用",
-            "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第"
+            "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第",
+            "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -423,7 +424,7 @@
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "五會深度解構完成後，可續研：（1）藏傳佛教楞嚴經傳承與修法差異；（2）心咒持誦的腦科學/意識研究實證；（3）楞嚴經與現代心智科學的跨學科對話"
+      "next_research_hint": "十番顯見深度剖析完成後，可繼續探索楞嚴經其他未深入主題（如四科七大、三種相續）"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
@@ -904,7 +905,7 @@
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-15",
+      "last_active": "2026-03-16",
       "tags": [
         "淨土宗",
         "佛學",
@@ -958,7 +959,19 @@
           ]
         },
         "application": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "打佛七實務指南 — 淨土宗念佛道場的核心集體共修形式：起源、儀軌、規約與現代實踐"
+          ],
+          "covered_concepts": [
+            "打佛七",
+            "繞佛",
+            "坐念",
+            "灑淨結界",
+            "精進佛七",
+            "一般佛七",
+            "念佛堂規約"
+          ]
         },
         "optimization": {
           "status": "pending"
@@ -970,7 +983,7 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：念佛道場規矩、打佛七、助念儀軌等實際應用場景"
+      "next_research_hint": "完成後繼續 application：助念儀軌、念佛道場規矩；或進入 optimization：共修效率提升、攝心方法精進"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -1225,7 +1238,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-14",
+      "last_active": "2026-03-16",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1298,7 +1311,8 @@
           "kb_notes": [
             "FastMCP 深度研究報告 - AI工作流自動化",
             "n8n — 開源 AI 工作流自動化平台深度洞察（85K+ Stars, 2026-03）",
-            "modelcontextprotocol/servers 深度研究報告 - AI工作流自動化"
+            "modelcontextprotocol/servers 深度研究報告 - AI工作流自動化",
+            "LangGraph 深度研究報告 - AI工作流自動化：圖形化狀態機工作流與角色導向工作流的設計哲學對比"
           ],
           "covered_concepts": [
             "MCP server 框架如何成為 AI 工作流的可重用工具層",
@@ -1314,14 +1328,18 @@
             "daily-digest-prompt 可直接借鑑的工具治理模式",
             "full-stack MCP framework 的 client-agent-server-inspector 一體化設計",
             "mcp-use 與 FastMCP / 官方 servers 的定位差異",
-            "對 Claude Agent / daily-digest-prompt 的具體工具治理借鑑"
+            "對 Claude Agent / daily-digest-prompt 的具體工具治理借鑑",
+            "狀態機工作流模型",
+            "LangGraph 圖形化編排",
+            "與 CrewAI 的架構對比",
+            "LangChain 生態整合"
           ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "後續可做 MCP framework 對照：mcp-use vs FastMCP vs 官方 SDK/servers，在治理、觀測與部署模式上形成選型矩陣。"
+      "next_research_hint": "synthesis 階段持續推進：後續可研究 AutoGen、MetaGPT 等其他 Multi-agent 框架，形成完整的工作流範式矩陣"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -2660,7 +2678,7 @@
       "domain": "GitHub AI 開源專案",
       "description": "GitHub AI 開源專案研究系列，聚焦非重複且可落地的熱門專案。",
       "initiated_at": "2026-03-14",
-      "last_active": "2026-03-14",
+      "last_active": "2026-03-16",
       "tags": [
         "GitHub",
         "AI",
@@ -2683,7 +2701,17 @@
           "completed_at": "2026-03-14"
         },
         "mechanism": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars, 2026）"
+          ],
+          "covered_concepts": [
+            "Crews 角色協作",
+            "Flows 事件驅動",
+            "雙模型架構",
+            "Pydantic 狀態管理",
+            "記憶系統"
+          ]
         },
         "application": {
           "status": "pending"
@@ -2696,9 +2724,9 @@
         }
       },
       "current_stage": "mechanism",
-      "completion_pct": 20,
+      "completion_pct": 30,
       "related_series": [],
-      "next_research_hint": "下一步可研究同系列的機制層，例如 Axolotl、Liger Kernel 或 torchtune 與 Unsloth 的內核差異。"
+      "next_research_hint": "完成後進入 application：實作程式碼範例與整合指南"
     },
     "urban-digital-twin-decision-platforms": {
       "series_id": "urban-digital-twin-decision-platforms",
@@ -2874,7 +2902,7 @@
       "domain": "AI Software Development / Agent Architecture / System Engineering",
       "description": "AI 應用於系統開發的深入研究系列，涵蓋 Context Management、Memory Architecture、Agent 設計模式等核心機制",
       "initiated_at": "2026-03-15",
-      "last_active": "2026-03-15",
+      "last_active": "2026-03-16",
       "tags": [
         "AI",
         "系統開發",
@@ -2906,14 +2934,20 @@
           "status": "in_progress",
           "started_at": "2026-03-15",
           "kb_notes": [
-            "AI Agent Context Management 與 Long-Term Memory 架構 — 從短期上下文到持久化記憶的機制設計與實作模式（2026）"
+            "AI Agent Context Management 與 Long-Term Memory 架構 — 從短期上下文到持久化記憶的機制設計與實作模式（2026）",
+            "AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質保證（2026）"
           ],
           "covered_concepts": [
             "Context Window Management",
             "Long-Term Memory 架構",
             "Memory Compression",
             "Tool Use Orchestration 內部實作",
-            "Multi-Agent State Synchronization"
+            "Multi-Agent State Synchronization",
+            "AI 單元測試生成機制",
+            "Test-Time Scaling 在測試中的應用",
+            "Mutation Testing 自動化",
+            "Property-Based Testing with AI",
+            "Test Oracle Problem 解法"
           ]
         },
         "application": {
@@ -2929,7 +2963,102 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：實作 Agent Memory 系統的完整程式碼範例"
+      "next_research_hint": "完成後進入 application：實作 AI 測試生成工具鏈的完整流程"
+    },
+    "claude-code-cli-automation": {
+      "series_id": "claude-code-cli-automation",
+      "domain": "Claude Code CLI 進階使用與自動化最佳實踐",
+      "description": "",
+      "initiated_at": "2026-03-16",
+      "last_active": "2026-03-16",
+      "tags": [
+        "Claude Code",
+        "CLI",
+        "命令列",
+        "自動化",
+        "best practices",
+        "技術研究"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-16",
+          "kb_notes": [
+            "Claude Code CLI 進階使用與自動化最佳實踐 — Print Mode、Background Tasks 與 CI/CD 整合指南（2026）"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入探討 CLI 的內部機制與進階參數"
+    },
+    "ai-smart-grid-energy": {
+      "series_id": "ai-smart-grid-energy",
+      "domain": "AI 智慧能源 — 電網調度與再生能源預測",
+      "description": "AI 智慧電網與再生能源調度技術研究系列",
+      "initiated_at": "2026-03-16",
+      "last_active": "2026-03-16",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "智慧能源",
+        "smart-grid",
+        "台灣"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "skipped",
+          "note": "KB 已有基礎知識"
+        },
+        "mechanism": {
+          "status": "completed",
+          "completed_at": "2026-02-24",
+          "kb_notes": [
+            "AI 驅動的智慧電網調度與再生能源預測技術"
+          ],
+          "covered_concepts": [
+            "深度強化學習",
+            "GAN 預測模型"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-16",
+          "completed_at": "2026-03-16",
+          "kb_notes": [
+            "台灣智慧電網 AI 應用實踐：台電 AFC、屏東太陽能與離岸風電調度案例（2026）"
+          ],
+          "covered_concepts": [
+            "台電 AFC",
+            "屏東太陽能",
+            "離岸風電"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [],
+      "next_research_hint": "完成後進入 optimization：電網效能調優、成本效益分析"
     }
   }
 }

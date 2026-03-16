@@ -22,6 +22,7 @@ context/auto-tasks-today.json
 context/research-registry.json
 context/metrics-daily.json
 context/behavior-patterns.json
+context/continuity/auto-task-*.json
 
 # ── 影片 / Podcast 媒體輸出（大型二進位，不進版控）──────────
 output/
@@ -38,6 +39,7 @@ tools/video-studio/public/images/
 
 # ── Bot 任務排程暫存（每次 cron 觸發都會產生新檔）──────────
 bot/tasks_md/
+bot/logs/
 
 # ── 暫存檔（子 Agent / 自動任務 / 工具產生）────────────────
 task_prompt.md
@@ -48,9 +50,10 @@ hooks_alert_temp.json
 debug_audio.py
 tmp_*
 temp_*
+temp/
 *.tmp
 *.txt.tmp
-{
+[{]
 
 # ── Gun.js 暫存資料與金鑰 ────────────────────────────────────
 bot/radata-*/

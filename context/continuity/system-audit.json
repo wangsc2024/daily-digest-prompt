@@ -2,5 +2,26 @@
   "schema_version": 1,
   "schedule_type": "system_audit",
   "description": "每日 00:40 系統審查的執行記錄，每日獨立一筆",
-  "records": {}
+  "records": {
+    "2026-03-16": {
+      "run_id": "20260316_004910",
+      "completed_at": "2026-03-16T00:51:00+08:00",
+      "health_score": 85.16,
+      "grade": "A",
+      "top_issues": [
+        "3.1 測試覆蓋率 62 分（行覆蓋率 10.39%）",
+        "5.4 跨平台相容性 55 分（by design）",
+        "7.4 測試覆蓋率 65 分",
+        "5.5 技術債務 68 分（87 處 TODO/FIXME）"
+      ],
+      "fixes_applied": 1,
+      "fixes_list": [
+        "CHANGELOG.md 更新測試數據 959→964 + 新增 2026-03-16 審查記錄"
+      ],
+      "trend_vs_prev": "declined",
+      "consecutive_decline_count": 1,
+      "report_path": "docs/系統審查報告_20260316_0049.md",
+      "status": "completed"
+    }
+  }
 }

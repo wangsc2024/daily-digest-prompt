@@ -1,79 +1,9 @@
 {
   "status": "completed",
+  "updated_at": "2026-03-16T00:54:43+08:00",
+  "current_step": "decide",
+  "run_id": "ae35ddf77f31",
   "history": [
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-13T20:35:19.170338+08:00",
-      "repairs": "0/0 項（含 arch-decision 0 項）"
-    },
-    {
-      "status": "completed",
-      "step": "complete",
-      "ts": "2026-03-13T20:35:19.170338+08:00"
-    },
-    {
-      "status": "running",
-      "step": "orient",
-      "ts": "2026-03-14T00:40:02+08:00"
-    },
-    {
-      "status": "completed",
-      "step": "orient",
-      "ts": "2026-03-14T00:51:28+08:00"
-    },
-    {
-      "status": "skipped",
-      "step": "decide",
-      "ts": "2026-03-14T00:51:28+08:00"
-    },
-    {
-      "status": "running",
-      "step": "decide",
-      "ts": "2026-03-14T09:00:00+08:00",
-      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 86.29/100）"
-    },
-    {
-      "status": "completed",
-      "step": "decide",
-      "ts": "2026-03-14T09:03:00+08:00",
-      "artifacts": [
-        "context/adr-registry.json（15 個 ADR：10 accepted, 2 deferred, 1 wontfix, 2 proposed）",
-        "context/arch-decision.json（5 項決策，immediate_fix 1 項）"
-      ]
-    },
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-14T00:51:28+08:00"
-    },
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-14T07:36:21.762808",
-      "repairs": "2/3 項（含 arch-decision 1 項）"
-    },
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-14T12:00:00+08:00",
-      "repairs": "0/0 項（含 arch-decision 0 項）"
-    },
-    {
-      "status": "running",
-      "step": "decide",
-      "ts": "2026-03-14T15:00:00+08:00",
-      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 86.29/100）"
-    },
-    {
-      "status": "completed",
-      "step": "decide",
-      "ts": "2026-03-14T15:03:00+08:00",
-      "artifacts": [
-        "context/adr-registry.json（15 個 ADR：無變更）",
-        "context/arch-decision.json（5 項決策：0 immediate_fix, 0 schedule_adr, 5 skip）"
-      ]
-    },
     {
       "status": "completed",
       "step": "act",
@@ -131,9 +61,73 @@
       "step": "act",
       "ts": "2026-03-15T05:36:07.328855",
       "repairs": "0/0 項（含 arch-decision 0 項）"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-15T09:30:00+08:00",
+      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 86.29/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-15T09:33:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（15 個 ADR：無變更）",
+        "context/arch-decision.json（5 項決策：0 immediate_fix, 0 schedule_adr, 5 skip）"
+      ]
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-15T23:34:46.656326+08:00",
+      "repairs": "1/1 項（含 arch-decision 0 項）"
+    },
+    {
+      "step": "complete",
+      "status": "completed",
+      "ts": "2026-03-15T23:34:46.656326+08:00"
+    },
+    {
+      "step": "orient",
+      "status": "running",
+      "ts": "2026-03-16T00:40:02+08:00"
+    },
+    {
+      "step": "orient",
+      "status": "completed",
+      "ts": "2026-03-16T00:52:14+08:00"
+    },
+    {
+      "step": "decide",
+      "status": "skipped",
+      "ts": "2026-03-16T00:52:14+08:00"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-16T09:00:00+08:00",
+      "note": "arch-evolution 啟動（改善清單 5 項，來源：system-audit 86.29/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-16T09:01:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（15 個 ADR：無變更）",
+        "context/arch-decision.json（5 項決策：0 immediate_fix, 0 schedule_adr, 5 skip）"
+      ]
+    },
+    {
+      "step": "act",
+      "status": "completed",
+      "ts": "2026-03-16T09:01:00+08:00"
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-16T09:15:00+08:00",
+      "repairs": "1/1 項（含 arch-decision 0 項）"
     }
-  ],
-  "run_id": "8aa0acdd1ab4",
-  "updated_at": "2026-03-15T00:51:37+08:00",
-  "current_step": "complete"
+  ]
 }

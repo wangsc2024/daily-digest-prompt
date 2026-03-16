@@ -47,6 +47,14 @@ schedules:
     retry: 0
     description: "知識庫統一備份（每日 00:15，週日含 JSON 匯出）"
 
+  morning-verse:
+    cron: "30 6 * * *"
+    script: run-morning-verse.ps1
+    args: "-Session morning"
+    timeout: 120
+    retry: 1
+    description: "每日晨間佛偈推播（06:30，鼓勵精進用功・回歸本性）"
+
   evening-verse:
     cron: "5 17 * * *"
     script: run-morning-verse.ps1
@@ -116,6 +124,7 @@ schedules:
 | todoist-team | 每小時半點 01:30-23:30 | run-todoist-agent-team.ps1 | 4000s (~67min) | Todoist 團隊模式（逾 60min 可能與下一班重疊，見 troubleshooting §1.1） |
 | media-podcast-buddhist | 每日 15:20 | run-podcast-latest-buddhist.ps1 | 4000s (~67min) | KB 最新教觀綱宗筆記 → 雙主持人 Podcast MP3 |
 | kb-backup-all | 每日 00:15 | kb-backup-all.ps1 | 300s (5min) | 知識庫統一備份（週日含 JSON 匯出） |
+| morning-verse | 每日 06:30 | run-morning-verse.ps1 -Session morning | 120s (2min) | 晨間佛偈推播（鼓勵精進用功・回歸本性） |
 | evening-verse | 每日 17:05 | run-morning-verse.ps1 -Session evening | 120s (2min) | 黃昏佛偈推播（回歸本性・借假修真） |
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot + Gun Relay + Chatroom Scheduler 重啟 |
 | bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot + Gun Relay + Chatroom Scheduler 開機啟動 |

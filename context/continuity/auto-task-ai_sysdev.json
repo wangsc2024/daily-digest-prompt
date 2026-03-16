@@ -4,11 +4,23 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-16T14:48:29.187761+08:00",
+      "topic": "AI 測試生成與 Test-Time Compute 驗證機制",
+      "status": "completed",
+      "key_findings": "Meta TestGen-LLM 三層過濾機制（73% 接受率）、Test-Time Compute Verifier 提升品質、LLM 驅動的 Mutation Testing（ACH）在工業級部署中展現成效",
+      "kb_note_ids": [
+        "9846abc5-ea48-4608-b13e-fb8d3a99978c"
+      ],
+      "next_suggested_angle": "進入 application 階段：實作 pytest + LLM + mutation testing 的整合工具鏈"
+    },
+    {
       "executed_at": "2026-03-15T20:35:00+08:00",
       "topic": "AI Agent Context Management 與 Long-Term Memory 架構",
       "status": "completed",
       "key_findings": "深入探討 Context Window 管理（Sliding Window、壓縮技術）、Long-Term Memory 架構（六大框架：Letta、Mem0、Zep等）、RAG vs Memory 差異、實作模式（Claude SDK、LangChain、AutoGen）及生產部署最佳實踐",
-      "kb_note_ids": ["8fb70bab-5418-49ad-b267-4741958f82df"],
+      "kb_note_ids": [
+        "8fb70bab-5418-49ad-b267-4741958f82df"
+      ],
       "next_suggested_angle": "進入 application 階段：實作完整 Agent Memory 系統的程式碼範例，整合 PostgreSQL + Vector DB 的混合架構"
     }
   ]

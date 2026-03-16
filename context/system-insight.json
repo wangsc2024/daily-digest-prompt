@@ -1,121 +1,122 @@
 {
   "version": 2,
-  "generated_at": "2026-03-14T23:59:59+08:00",
+  "generated_at": "2026-03-15T00:00:00+08:00",
   "period_days": 7,
   "total_skills": 26,
-  "actual_skills_found": 37,
+  "actual_skills_found": null,
   "data_sources": {
     "jsonl_logs": "complete",
     "scheduler_state": "complete",
     "auto_tasks_today": "complete",
     "research_registry": "complete",
-    "behavior_patterns": "missing"
+    "behavior_patterns": "complete"
   },
   "metrics": {
-    "daily_success_rate": 1.0,
-    "skill_usage_coverage": 1.42,
-    "cache_hit_ratio": 0.182,
+    "daily_success_rate": 0.901,
+    "skill_usage_coverage": null,
+    "cache_hit_ratio": 0.188,
     "error_rate": 0.0,
-    "block_rate": 0.00178,
+    "block_rate": 0.0,
     "topic_diversity": 0.993,
-    "auto_task_fairness": 0.659,
-    "avg_io_per_call": 12419,
-    "behavior_pattern_count": null,
-    "high_confidence_patterns": null
+    "auto_task_fairness": 0.459,
+    "avg_io_per_call": 12066,
+    "behavior_pattern_count": 200,
+    "high_confidence_patterns": 154
   },
   "alerts": [
     {
-      "level": "warning",
+      "level": "critical",
       "metric": "cache_hit_ratio",
-      "value": 0.182,
+      "value": 0.188,
       "threshold": 0.40,
-      "message": "快取命中率 18.2%（cache-read 405 / api-call 1820），遠低於 40% 門檻。ADR-005 的 cache/status.json valid 旗標條件跳過邏輯尚未完整落實。"
+      "message": "快取命中率持續偏低 18.8%（cache-read 486 / api-call 2103），遠低於 40% 門檻。相較昨日 18.2% 僅微幅改善 +0.6pp。"
     },
     {
       "level": "warning",
-      "metric": "auto_task_fairness",
-      "value": 0.659,
-      "threshold": 0.50,
-      "message": "自動任務公平性 0.66，超過 0.5 門檻，惡化趨勢（上次 0.54）。佛經類任務執行 2 次，OODA 類（system_insight、arch_evolution、qa_optimize、creative_game_optimize、unsloth_research）未執行。"
-    },
-    {
-      "level": "info",
-      "metric": "avg_io_per_call",
-      "value": 12419,
-      "threshold": 5000,
-      "message": "平均工具呼叫 I/O 大幅改善至 12,419 字元（-69% vs 上次 39,834），仍略超 5KB 門檻但已接近可接受範圍。"
-    },
-    {
-      "level": "info",
-      "metric": "skill_usage_coverage",
-      "value": 1.42,
-      "threshold": 0.70,
-      "message": "發現 37 個 Skills（142% 覆蓋率），超過文檔記錄的 26 個，需同步更新 SKILL_INDEX.md 與 system-insight SKILL.md 的 total_skills 欄位。"
-    },
-    {
-      "level": "info",
       "metric": "daily_success_rate",
-      "value": 1.0,
+      "value": 0.901,
       "threshold": 0.90,
-      "message": "排程器 100% 成功率（131/131），較上次 90.8% 大幅改善，無失敗時段。"
+      "message": "7 天成功率從昨日 100% 降至 90.1%（155/172 成功，17 次失敗），主要失敗時段：0-5 時、8-9 時、14-23 時。"
+    },
+    {
+      "level": "warning",
+      "metric": "avg_io_per_call",
+      "value": 12066,
+      "threshold": 5000,
+      "message": "平均工具呼叫 I/O 為 12,066 字元，超出 5,000 門檻 2.4 倍（相較昨日 12,419 微幅改善 -2.8%）。"
+    },
+    {
+      "level": "info",
+      "metric": "auto_task_fairness",
+      "value": 0.459,
+      "threshold": 0.50,
+      "message": "自動任務公平性大幅改善至 0.459（昨日 0.659），重回健康範圍，round-robin 輪轉機制修正有效。"
+    },
+    {
+      "level": "info",
+      "metric": "topic_diversity",
+      "value": 0.993,
+      "threshold": 0.50,
+      "message": "研究主題多樣性 99.3%（139/140），持續優異，研究去重機制極度有效。"
+    },
+    {
+      "level": "info",
+      "metric": "behavior_patterns",
+      "value": 154,
+      "threshold": 5,
+      "message": "首次記錄行為模式資料：200 個模式，154 個高信心模式（77%），可進一步演化為 Skills。"
+    },
+    {
+      "level": "warning",
+      "metric": "skill_usage_coverage",
+      "value": null,
+      "threshold": 0.70,
+      "message": "資料缺失：JSONL 日誌 skill-read 標籤（1317 次）未記錄具體 Skill 名稱，無法計算覆蓋率。"
     }
   ],
   "recommendations": [
-    "【高優先】快取命中率持續偏低（18.2%），建議檢查 config/cache-policy.yaml 的 TTL 設定與 Phase 0 預計算邏輯（run-agent-team.ps1）",
-    "【高優先】自動任務公平性惡化（0.54 → 0.66），OODA 類 5 個任務（system_insight、arch_evolution、qa_optimize、creative_game_optimize、unsloth_research）完全未執行，建議檢查 frequency-limits.yaml 權重與執行順序",
-    "【中優先】avg_io_per_call 雖改善 69%（39,834 → 12,419）但仍超標 2.5 倍，建議持續加強子 Agent 委派策略（Explore 模式返回摘要而非全文）",
-    "【中優先】Skill 總數已達 37 個（+19% vs 文檔），需更新 SKILL_INDEX.md 速查表並同步 system-insight SKILL.md 的 total_skills 欄位",
-    "【注意】loop-suspected 標籤 1,187 次（6% 工具呼叫），建議用 trace-analyzer 分析具體觸發 session",
-    "【正向】排程器成功率從 90.8% 提升至 100%，表現優異",
-    "【正向】研究去重機制極度有效（多樣性 99.3%），138 entries 僅 1 次重複"
+    "【高優先】快取命中率持續偏低（18.2% → 18.8%），6 天來僅改善 +3.3%，建議：(1) 檢查 config/cache-policy.yaml TTL 設定 (2) 確認 Phase 0 預計算 cache/status.json 的 valid 旗標邏輯 (3) 分析 2103 次 api-call 中哪些未走快取",
+    "【高優先】daily_success_rate 從 100% 降至 90.1%（17 次失敗），建議：(1) 分析高失敗時段（0-5, 8-9, 14-23）的共同特徵 (2) 15:00 失敗率 28.6% 需優先調查 (3) 檢查排程衝突或資源競爭",
+    "【中優先】avg_io_per_call 持續超標 2.4 倍（5KB → 12KB），建議：(1) 強化子 Agent 委派策略（返回摘要而非全文）(2) 使用 Grep/Glob 取代 Read 完整檔案 (3) 啟用 limit/offset 參數",
+    "【中優先】JSONL 日誌品質問題：skill-read 標籤未記錄 Skill 名稱，導致無法統計 Skill 覆蓋率，建議改進 hooks/post_tool_logger.py 的 skill-read 標籤邏輯",
+    "【低優先】loop-suspected 標籤 1,790 次（7.6% 工具呼叫），建議用 trace-analyzer 分析具體觸發 session",
+    "【正向】自動任務公平性大幅改善 -30.3%（0.659 → 0.459），證明 round-robin 調整有效",
+    "【正向】研究去重機制極度有效（99.3% 多樣性），140 entries 僅 1 次重複",
+    "【正向】首次記錄行為模式資料，154 個高信心模式（77%）為 Skill 演化提供基礎"
   ],
   "skill_heatmap": {
-    "knowledge-query": 649,
-    "todoist": 410,
-    "api-cache": 405,
-    "ntfy-notify": 196,
-    "kb-research-strategist": 110,
-    "web-research": 58,
-    "groq": 18,
-    "chatroom-query": 15,
-    "digest-memory": 12,
-    "hackernews-ai-digest": 12,
-    "writing-plans": 10,
-    "pingtung-news": 8,
-    "skill-forge": 8,
-    "github-scout": 7,
-    "system-insight": 6
+    "注意": "skill-read 有 1,317 次操作，但 JSONL 日誌未記錄具體 Skill 名稱，無法產生 heatmap。建議改進日誌記錄機制。"
   },
-  "high_failure_hours": [],
-  "loop_suspected_count": 1187,
+  "high_failure_hours": [0, 1, 2, 3, 4, 5, 8, 9, 14, 15, 18, 19, 20, 21, 22, 23],
   "statistics": {
-    "total_runs_7d": 131,
-    "successful_runs": 131,
-    "failed_runs": 0,
-    "total_tool_calls": 19677,
-    "session_count": 793,
-    "avg_calls_per_session": 24.8,
-    "unique_skills_used": 37,
-    "research_entries": 138,
-    "unique_topics": 137,
-    "auto_tasks_completed": 19,
-    "auto_tasks_total": 24,
-    "auto_task_completion_rate": 0.792,
+    "total_runs_7d": 172,
+    "successful_runs": 155,
+    "failed_runs": 17,
+    "total_tool_calls": 23567,
+    "session_count": null,
+    "avg_calls_per_session": null,
+    "unique_skills_used": null,
+    "research_entries": 140,
+    "unique_topics": 139,
+    "auto_tasks_completed": 18,
+    "auto_tasks_total": 25,
+    "auto_task_completion_rate": 0.72,
     "top_tools": {
-      "Bash": 7921,
-      "Read": 6649,
-      "Write": 1787,
-      "Edit": 661,
-      "Grep": 581
+      "Bash": 9213,
+      "Read": 8233,
+      "Write": 2146,
+      "Edit": 878,
+      "Grep": 722
     },
-    "team_mode_ratio": 0.507
+    "team_mode_ratio": 0.511,
+    "loop_suspected_count": 1790
   },
   "trends": {
-    "daily_success_rate": "+9.2pp (0.908 → 1.0)",
-    "avg_io_per_call": "-69% (39834 → 12419)",
-    "auto_task_fairness": "+21% (0.5437 → 0.659, 惡化)",
-    "skill_usage_coverage": "+19% (31 → 37 skills)",
-    "cache_hit_ratio": "+0.4pp (0.1812 → 0.182, 持平)"
+    "daily_success_rate": "-9.9pp (1.0 → 0.901, 惡化)",
+    "cache_hit_ratio": "+0.6pp (0.182 → 0.188, 微幅改善)",
+    "auto_task_fairness": "-30.3% (0.659 → 0.459, 大幅改善)",
+    "avg_io_per_call": "-2.8% (12419 → 12066, 微幅改善)",
+    "behavior_patterns": "新資料（null → 200 patterns, 154 high-confidence）"
   },
-  "summary": "系統整體健康度優異（100% 成功率），I/O 效率大幅改善（-69%），但快取策略與任務公平性仍需優化。排程器穩定性顯著提升（90.8% → 100%），無失敗時段。avg_io_per_call 從 39,834 降至 12,419（-69%），顯示子 Agent 委派策略奏效。主要問題：(1) 快取命中率持平於 18.2%，距目標 40% 仍遠；(2) 自動任務公平性惡化（0.54 → 0.66），OODA 類 5 個任務完全未執行。研究去重機制極度有效（99.3% 多樣性），loop-suspected 標籤 1,187 次需持續觀察。"
+  "summary": "系統整體穩定但有隱憂。自動任務公平性大幅改善（-30.3%），研究多樣性優異（99.3%），首次記錄行為模式資料（154 個高信心模式）。主要問題：(1) 成功率從 100% 降至 90.1%（17 次失敗），15:00 時段失敗率高達 28.6%；(2) 快取命中率持續偏低 18.8%（距目標 40% 仍遠）；(3) 平均 I/O 持續超標 2.4 倍；(4) JSONL 日誌品質不足，skill-read 標籤未記錄 Skill 名稱。建議優先調查失敗時段與快取策略，並改進日誌記錄機制。"
 }

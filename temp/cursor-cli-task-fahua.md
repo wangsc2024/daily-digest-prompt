@@ -20,21 +20,25 @@
    - 修行實踐要點
    - 延伸閱讀建議
 
-5. **寫入結果檔**：用 Write 工具將以下 JSON 寫入 `results/todoist-auto-fahua.json`：
+5. **匯入知識庫**（必須先於寫入結果檔）：將研究報告以 POST http://localhost:3000/api/notes 匯入（source: "import"，tags: ["法華經", "佛學", "天台宗"]）。若知識庫未啟動（連線失敗），記錄 `kb_imported: false`、`note_id: null`，仍須完成步驟 6～7。匯入成功時記下 API 回傳的 `id` 作為 `note_id`。
+
+6. **更新研究登錄表**：在 `context/research-registry.json` 的 `entries` 陣列追加新條目，同時更新 `topics_index` 欄位。
+
+7. **寫入結果檔**：用 Write 工具將以下 JSON 寫入 `results/todoist-auto-fahua.json`（**必須包含步驟 5 的 note_id 與 kb_imported**）：
    ```json
    {
      "agent": "todoist-auto-fahua",
      "backend": "cursor_cli",
-     "status": "completed",
-     "summary": "<研究摘要（100字以內）>",
+     "type": "fahua",
+     "status": "success 或 partial 或 failed",
      "topic": "<本次研究主題>",
+     "summary": "<研究摘要（100字以內）>",
+     "note_id": "<步驟5 API 回傳的 id，未匯入則 null>",
+     "kb_imported": true 或 false,
      "generated_at": "<ISO8601時間戳>"
    }
    ```
-
-6. **更新研究登錄表**：在 `context/research-registry.json` 的 `entries` 陣列追加新條目，同時更新 `topics_index` 欄位。
-
-7. **匯入知識庫**：將研究報告以 POST http://localhost:3000/api/notes 格式匯入（source: "import"，tags: ["法華經", "佛學", "天台宗"]）。
+   > 若步驟 5 跳過匯入，`note_id` 填 null、`kb_imported` 填 false；有匯入則必填實際 note_id。
 
 ## 注意事項
 - 全程使用正體中文輸出

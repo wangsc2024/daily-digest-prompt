@@ -829,6 +829,32 @@ function Start-CursorCliJob {
         $outputLines = $output | Where-Object { $_ }
         $summaryLines = ($outputLines | Select-Object -Last 10) -join "`n"
 
+        # Ensure results dir exists
+        $resultsDir = Split-Path $resultFile -Parent
+        if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null }
+
+        # 若 Agent 已寫入有效結果檔（含 type/agent/status），僅合併後設資料，不覆蓋 note_id/kb_imported/topic
+        $existing = $null
+        if (Test-Path $resultFile) {
+            try {
+                $raw = Get-Content $resultFile -Raw -Encoding UTF8
+                if ($raw -and $raw.Length -ge 100) {
+                    $existing = $raw | ConvertFrom-Json
+                    if ($existing.agent -and $existing.status -and ($existing.PSObject.Properties.Name -contains "type")) {
+                        $existing.backend      = "cursor_cli"
+                        $existing.elapsed      = $elapsed
+                        $existing.exit_code    = $exitCode
+                        $existing.trace_id     = $traceId
+                        $existing.generated_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+                        if (-not $existing.summary -and $summaryLines) { $existing.summary = $summaryLines }
+                        if ($exitCode -ne 0 -and $existing.status -eq "completed") { $existing.status = "failed" }
+                        $existing | ConvertTo-Json -Depth 5 | Set-Content $resultFile -Encoding UTF8
+                        return $output
+                    }
+                }
+            } catch { }
+        }
+
         $result = @{
             agent        = "todoist-auto-$taskKey"
             backend      = "cursor_cli"
@@ -839,11 +865,6 @@ function Start-CursorCliJob {
             trace_id     = $traceId
             generated_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
         }
-
-        # Ensure results dir exists
-        $resultsDir = Split-Path $resultFile -Parent
-        if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Path $resultsDir -Force | Out-Null }
-
         $result | ConvertTo-Json -Depth 3 | Set-Content $resultFile -Encoding UTF8
         return $output
     } -ArgumentList $TaskFile, $resultFile, $stderrFile, $TraceId, $TaskKey, $AgentDir
@@ -2228,6 +2249,7 @@ while ($attempt -le $MaxPhase3Retries) {
 
     Write-Log "[Phase3] Running assembly agent (attempt $($attempt + 1))..."
     $phase3Start = Get-Date
+    $phase3StderrTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 
     try {
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -2238,7 +2260,7 @@ while ($attempt -le $MaxPhase3Retries) {
         $env:AGENT_PHASE = "phase3"
         $env:AGENT_NAME = "todoist-assemble"
 
-        $stderrFile = "$LogDir\assemble-stderr-$Timestamp.log"
+        $stderrFile = "$LogDir\assemble-stderr-$phase3StderrTimestamp.log"
         # Step 6: Phase 3 token budget（使用與 Phase 1 相同的 token_level）
         $phase3Args = @("-p", "--allowedTools", "Read,Bash,Write")
         if ($phase1ModelFlag) { $phase3Args += ($phase1ModelFlag -split '\s+') }
