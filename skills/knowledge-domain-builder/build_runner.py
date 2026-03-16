@@ -16,6 +16,7 @@ import re
 import sys
 from datetime import datetime
 
+
 def main():
     if len(sys.argv) < 5:
         print("用法: python build_runner.py <outline.md> <domain_profile.json> <content_materials.json> <output_dir>")
@@ -401,7 +402,6 @@ tags:
     # Generate Canvas
     canvas_nodes = []
     canvas_edges = []
-    x_base = 0
     overview_id = "overview"
     canvas_nodes.append({
         "id": overview_id,

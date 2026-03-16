@@ -1,13 +1,12 @@
 ---
 name: prompt-lint
-version: "0.5.0"
+version: "1.0.0"
 description: |
   Prompt 模板靜態分析工具。掃描 prompts/ 與 templates/ 目錄下的 .md 檔案，
   偵測 7 類反模式（過長模板、缺少 preamble 引用、hardcoded 端點、冗餘指令、
   未匹配變數、缺少降級段落、重複 Skill 引用），產出結構化報告並追蹤趨勢。
   協助降低 avg_io_per_call、減少 loop-suspected 事件、提升 prompt 品質。
   Use when: prompt 品質檢查、模板膨脹偵測、反模式掃描、prompt 優化建議、模板衛生檢查。
-  ⚠️ 知識基礎薄弱，建議透過 skill-audit 補強
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep]
 cache-ttl: "N/A"
 triggers:
@@ -220,6 +219,105 @@ summary = {
 | Grep 工具異常 | 改用 Python re 模組逐檔掃描 |
 | SKILL_INDEX.md 不存在 | 跳過 R5 規則，標記 `r5_skipped: true` |
 | 上次報告不存在 | `trend.previous_total_warnings: null`，不計算趨勢 |
+
+---
+
+## 輸出範例
+
+### prompt-lint-report.json 範例
+
+```json
+{
+  "generated_at": "2026-03-16T14:30:00+08:00",
+  "version": "1.0.0",
+  "total_files": 68,
+  "summary": {
+    "total_files": 68,
+    "files_with_warnings": 8,
+    "files_with_info": 15,
+    "clean_files": 45,
+    "rule_violation_counts": {
+      "R1_overlong": 3,
+      "R2_no_preamble": 5,
+      "R3_hardcoded_endpoint": 2,
+      "R4_redundant_directive": 7,
+      "R5_invalid_skill_ref": 0,
+      "R6_no_fallback": 12,
+      "R7_unmatched_var": 1
+    },
+    "top_offenders": [
+      {"file": "prompts/team/todoist-assemble.md", "warnings": 2, "infos": 3},
+      {"file": "templates/auto-tasks/ai-deep-research.md", "warnings": 1, "infos": 2}
+    ]
+  },
+  "violations": [
+    {
+      "file": "prompts/team/todoist-assemble.md",
+      "rule": "R1",
+      "severity": "warn",
+      "detail": "lines=350 chars=18500，建議拆分配置到 YAML",
+      "suggestion": "將步驟 3 的路由表移至 config/routing.yaml"
+    },
+    {
+      "file": "templates/auto-tasks/podcast-create.md",
+      "rule": "R3",
+      "severity": "warn",
+      "detail": "直接 hardcoded http://localhost:3000/api/import",
+      "suggestion": "改用 knowledge-query Skill，透過 SKILL.md 取得端點"
+    }
+  ],
+  "trend": {
+    "previous_total_warnings": 12,
+    "current_total_warnings": 8,
+    "delta": -4
+  }
+}
+```
+
+### Top 3 可行動建議範例
+
+```
+【優先級 P0】修正 R3 違規（2 個檔案）
+- prompts/team/todoist-auto-podcast_create.md:45
+  建議：改用 knowledge-query Skill 匯入筆記
+- templates/auto-tasks/git-push.md:23
+  建議：改用 ntfy-notify Skill 發送通知
+
+【優先級 P1】優化 R1 過長模板（3 個檔案）
+- prompts/team/todoist-assemble.md (350 行)
+  建議：路由表移至 config/routing.yaml
+- templates/auto-tasks/ai-deep-research.md (280 行)
+  建議：研究框架移至 templates/shared/research-framework.md
+
+【優先級 P2】補充 R6 降級處理（12 個檔案）
+- 建議在步驟末尾增加「降級處理」段落
+```
+
+---
+
+## 常見問題
+
+### Q1：R4 冗餘指令誤報怎麼處理？
+**A**：R4 規則會檢查 prompt 中是否重複宣告 preamble.md 已有的規則。若確實需要強調某規則，可在該規則前加註解：
+```markdown
+<!-- 此處重複強調 nul 禁令，因本任務高風險 -->
+禁止使用 > nul
+```
+
+### Q2：如何解讀 trend delta？
+**A**：
+- delta < 0：違規數量減少（改善中）
+- delta > 0：違規數量增加（需關注）
+- delta = 0 或 null：無變化或無歷史數據
+
+### Q3：什麼情況下會觸發 R1 WARN？
+**A**：模板超過 300 行或 15,000 字元。建議將大型配置表、重複的步驟模板外部化到 config/ 或 templates/shared/。
+
+### Q4：手動執行 prompt-lint
+**A**：
+```bash
+echo "執行 prompt-lint 掃描所有模板" | claude -p skills/prompt-lint/SKILL.md
+```
 
 ---
 

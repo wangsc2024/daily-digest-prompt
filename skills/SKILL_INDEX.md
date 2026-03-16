@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 20 個工具 = 39 個 Skills）
+## 速查表（19 個核心 + 21 個工具 = 40 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -52,6 +52,7 @@
 | 37 | quality-tracker | Agent 輸出品質追蹤與回歸偵測（DONE_CERT 品質分數趨勢化，支援 ADR-004） | 品質追蹤、品質回歸、quality tracking、品質趨勢、品質閘門、DONE_CERT 分析、品質監控 |
 | 38 | task-fairness-analyzer | 自動任務公平性診斷與再平衡建議（Gini 係數/飢餓偵測/根因分析，depends-on: scheduler-state、system-insight） | 任務公平性、排程公平、任務飢餓、task fairness、starvation、任務再平衡、公平性分析 |
 | 39 | prompt-lint | Prompt 模板靜態分析（7 條規則偵測反模式：過長/缺 preamble/hardcoded 端點/冗餘指令，depends-on: system-insight） | prompt-lint、prompt 檢查、模板分析、prompt 品質、模板膨脹、prompt 反模式、prompt 優化 |
+| 40 | behavior-pattern-analyzer | Agent 行為模式分析與 Skill 演化候選識別（信心度/頻率/I/O 聚類，depends-on: system-insight） | 行為模式分析、behavior pattern、模式挖掘、Skill 演化、行為聚類、agent 行為、behavior-pattern-analyzer |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
