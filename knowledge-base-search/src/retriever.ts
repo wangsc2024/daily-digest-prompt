@@ -9,7 +9,7 @@ export async function searchRelevantDocs(
   vectorStore: InMemoryVectorStore,
   mistralClient: Mistral,
   topK = 5
-): Promise<Document[]> {
+): Promise<Array<Document & { score: number }>> {
   const embedRes = await mistralClient.embeddings.create({
     model: EMBED_MODEL,
     inputs: [query],
