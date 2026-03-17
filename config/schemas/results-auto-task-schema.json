@@ -17,7 +17,8 @@
       "examples": [
         "todoist-auto-workflow_forge",
         "todoist-auto-self_heal",
-        "todoist-auto-ai_deep_research"
+        "todoist-auto-ai_deep_research",
+        "todoist-auto-insight_briefing"
       ]
     },
     "task_type": {
@@ -33,7 +34,8 @@
         "workflow_forge",
         "self_heal",
         "ai_deep_research",
-        "system_insight"
+        "system_insight",
+        "insight_briefing"
       ]
     },
     "status": {

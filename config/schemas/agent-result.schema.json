@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/wangsc2024/daily-digest-prompt/schemas/agent-result.json",
+  "title": "Agent Result Schema",
+  "description": "通用 Agent 執行結果 Schema，適用於所有 results/*.json 輸出檔案（ADR-003）",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["success", "partial", "failed", "format_failed"],
+      "description": "執行狀態"
+    },
+    "task_type": {
+      "type": "string",
+      "description": "任務類型（auto / todoist / daily-digest / manual）"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Agent 識別碼"
+    },
+    "task_key": {
+      "type": "string",
+      "description": "任務鍵（底線命名，對應 frequency-limits.yaml）"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "執行完成時間（ISO 8601）"
+    },
+    "artifacts_produced": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "產出檔案路徑列表"
+    },
+    "quality_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "品質評分（0-10，來自 quality-gate.md DONE_CERT）"
+    },
+    "summary": {
+      "type": "string",
+      "description": "執行摘要"
+    },
+    "kb_imported": {
+      "type": "boolean",
+      "description": "是否已匯入知識庫"
+    },
+    "kb_note_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "匯入知識庫的 note ID 列表"
+    },
+    "execution_time_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "執行耗時（秒）"
+    },
+    "error": {
+      "type": "object",
+      "description": "錯誤詳情（僅 status=failed 時提供）",
+      "required": ["type", "message"],
+      "properties": {
+        "type": { "type": "string" },
+        "message": { "type": "string" },
+        "details": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "_metadata": {
+    "version": "1.0.0",
+    "created_at": "2026-03-17",
+    "adr": "ADR-20260224-003",
+    "purpose": "定義 results/*.json 標準欄位（status/task_type/artifacts_produced/quality_score），供 check-health.ps1 Schema 驗證使用"
+  }
+}

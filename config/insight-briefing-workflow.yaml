@@ -1,0 +1,83 @@
+# config/insight-briefing-workflow.yaml
+# 深度研究洞察簡報工作流定義：步驟順序、對應 Skill、輸出路徑
+# 引用者：skills/insight-briefing/SKILL.md、prompts/team/todoist-auto-insight_briefing.md
+
+version: 1
+name: insight-briefing
+description: "運用多種 Skill 建立深度研究洞察簡報：研究→洞察萃取→簡報產出→KB匯入→通知"
+
+# 步驟順序（每步先讀對應 skills/<skill>/SKILL.md 再執行，Skill-First）
+steps:
+  - id: dedup_check
+    skill: null
+    required: true
+    inputs: "config/dedup-policy.yaml, context/research-registry.json"
+    outputs: "選定主題、通過去重"
+    description: "讀取研究註冊表與去重策略，選定本次簡報主題並通過冷卻/飽和檢查"
+
+  - id: research_strategy
+    skill: kb-research-strategist
+    required: true
+    inputs: "選定主題、context/research-series.json"
+    outputs: "context/kb-research-brief.json（知識差距、下一階段建議）"
+    description: "KB 知識感測與研究策略，產出深化計畫"
+
+  - id: gather
+    skill: web-research
+    required: true
+    inputs: "主題、關鍵詞、research_strategy 產出"
+    outputs: "蒐集來源清單、摘要、品質評分"
+    description: "依主題選擇 web-research 或 academic-paper-research 蒐集資料"
+    skill_alt: academic-paper-research
+
+  - id: synthesize
+    skill: null
+    required: true
+    inputs: "gather 產出、research_strategy 產出"
+    outputs: "核心洞見清單、共識/分歧、證據要點"
+    description: "交叉比對、萃取洞察，無專屬 Skill，依 markdown-editor 與撰寫指引結構化"
+
+  - id: briefing_output
+    skill: markdown-editor
+    required: true
+    inputs: "synthesize 產出"
+    outputs: "context/insight-briefings/YYYY-MM-DD-{topic_slug}.md"
+    description: "產出結構化 Markdown 簡報（標題、摘要、關鍵洞見、證據、建議行動、參考來源）"
+
+  - id: optional_pptx
+    skill: null
+    required: false
+    inputs: "briefing_output 的 Markdown"
+    outputs: "context/insight-briefings/YYYY-MM-DD-{topic_slug}.pptx"
+    description: "可選：依 Cursor 全域 pptx Skill 產出投影片"
+
+  - id: kb_import
+    skill: knowledge-query
+    required: true
+    inputs: "briefing_output 的 Markdown 內容"
+    outputs: "KB note ID、tags"
+    description: "將簡報匯入知識庫，title 含 insight-briefing、tags 含 深度研究洞察簡報"
+
+  - id: registry_update
+    skill: null
+    required: true
+    inputs: "topic、date、kb_note_title、kb_imported"
+    outputs: "context/research-registry.json 已更新（entries + topics_index + summary）"
+    description: "將本次簡報登記至研究註冊表，task_type: insight_briefing，供去重與冷卻檢查"
+
+  - id: notify
+    skill: ntfy-notify
+    required: true
+    inputs: "status、簡報標題、artifact path"
+    outputs: "ntfy 通知已發送"
+    description: "完成後推播通知（topic 依 config/notification.yaml）"
+
+# 產出路徑約定
+output:
+  briefing_dir: "context/insight-briefings"
+  briefing_path_template: "context/insight-briefings/YYYY-MM-DD-{topic_slug}.md"
+  pptx_path_template: "context/insight-briefings/YYYY-MM-DD-{topic_slug}.pptx"
+  result_json: "results/todoist-auto-insight_briefing.json"
+
+# 可選功能
+optional_pptx: false

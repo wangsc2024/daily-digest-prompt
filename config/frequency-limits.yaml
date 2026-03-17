@@ -70,6 +70,7 @@ initial_schema: |
     "future_plan_optimize_count": 0,
     "kb_insight_evaluation_count": 0,
     "workflow_forge_count": 0,
+    "insight_briefing_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -79,9 +80,9 @@ initial_schema: |
 # Token 用量閾值（對應 state/token-usage.json 的 estimated_tokens）
 # ============================================================
 token_thresholds:
-  warn: 8000000      # 8M：正常警告線（校準自 7 日均值 ~10M，原 1.5M 過低導致告警失效）
-  critical: 15000000 # 15M：觸發 phase_overrides 的 critical 邏輯（上調配合 warn 校準）
-  emergency: 25000000 # 25M：觸發 phase_overrides 的 emergency 邏輯（對應 03-09 異常值 30M）
+  warn: 10000000      # 8M：正常警告線（校準自 7 日均值 ~10M，原 1.5M 過低導致告警失效）
+  critical: 18000000 # 15M：觸發 phase_overrides 的 critical 邏輯（上調配合 warn 校準）
+  emergency: 28000000 # 25M：觸發 phase_overrides 的 emergency 邏輯（對應 03-09 異常值 30M）
 
 # ============================================================
 # 後端定義
@@ -152,7 +153,7 @@ backends:
 # ============================================================
 # 任務 -> 後端對應規則
 # ============================================================
-# 注意：未列入任何規則的任務，預設使用 claude_sonnet
+# 注意：未列入任何規則的任務，預設使用 cursor_cli（run-todoist-agent-team.ps1 Get-TaskBackend 初始值）
 task_rules:
   claude_sonnet45:
     - self_heal        # 系統自癒：需完整 Claude 工具鏈存取本地狀態
@@ -161,6 +162,7 @@ task_rules:
     - chatroom_optimize  # Chatroom 優化：需評估 bot.js 品質指標
     - skill_audit      # Skill 審查：需讀取並分析所有 SKILL.md
     - workflow_forge   # Workflow 鑄造廠：流程標準化、輸出 Schema、一致性，需讀 config + prompts
+    - insight_briefing # 深度研究洞察簡報：多 Skill 串接、KB/ntfy、需完整工具鏈
     - shurangama             # Codex on Windows 無法穩定持久化 results/ 檔案，改走 Claude 本機工具鏈
     - jiaoguangzong          # 避免研究完成但 host 看不到結果檔
     - podcast_jiaoguangzong  # 教觀綱宗 Podcast：與 podcast_create 相同流程
@@ -740,6 +742,20 @@ tasks:
     skills: [knowledge-query, system-insight, ntfy-notify]
     description: "運用流程標準化提升系統品質與輸出穩定度：分析 config/prompts 與失敗案例，產出工作流定義、輸出 Schema 或驗證清單，避免格式錯誤、優化系統一致性"
 
+  insight_briefing:
+    name: "深度研究洞察簡報"
+    daily_limit: 1
+    counter_field: "insight_briefing_count"
+    template: "prompts/team/todoist-auto-insight_briefing.md"
+    prompt_file: "prompts/team/todoist-auto-insight_briefing.md"
+    template_version: 1
+    history_type: "insight_briefing"
+    execution_order: 29
+    timeout_seconds: 900
+    result_suffix: "json"
+    skills: [knowledge-query, web-research, kb-research-strategist, markdown-editor, ntfy-notify]
+    description: "運用多種 Skill 建立深度研究洞察簡報：研究策略→蒐集→洞察萃取→Markdown 簡報→KB 匯入→research-registry 更新→通知"
+
 # ============================================================
 # 每日上限摘要
 # ============================================================
@@ -766,3 +782,4 @@ all_exhausted_notify_message: "今日自動任務已達上限故製作1集淨土
 # 排程模型備援：若非 cursor-cli skill 則以 cursor-cli skill 為備援；cursor-cli skill 則以 claude 為備援
 all_exhausted_fallback_primary: "claude"   # 優先使用："claude"（article-to-podcast 流程）| "cursor_cli"（cursor-cli skill 模型）
 # 備援依規則自動：primary 非 cursor_cli → 備援 cursor_cli；primary 為 cursor_cli → 備援 claude
+all_exhausted_fallback_daily_limit: 3     # fallback 每日最多執行 3 集（必須上傳 R2）

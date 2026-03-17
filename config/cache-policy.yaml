@@ -21,17 +21,17 @@ sources:
 
   pingtung-news:
     file: "cache/pingtung-news.json"
-    ttl_minutes: 360  # 維持 6 小時（避免重大新聞延遲）
+    ttl_minutes: 720  # ADR-023: 360→720（12h，屏東新聞 volatility=low，延長 TTL 提升命中率）
     degraded_ttl_minutes: 2880  # 降級使用時限（48 小時）
 
   hackernews:
     file: "cache/hackernews.json"
-    ttl_minutes: 180  # 120 → 180（3 小時，HN 更新較頻繁但可接受）
+    ttl_minutes: 360  # ADR-023: 180→360（6h，HN 更新頻率中等，命中率 < 20% 觸發 ×2 調整）
     degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
   knowledge:
     file: "cache/knowledge.json"
-    ttl_minutes: 60  # 維持 1 小時
+    ttl_minutes: 120  # ADR-023: 60→120（2h，KB 資料穩定性高，命中率預期顯著提升）
     degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
   gmail:
@@ -53,6 +53,35 @@ schema: |
     "source": "來源名稱",
     "data": { ... 原始 API 回應 ... }
   }
+
+# 自適應 TTL 規則（ADR-023：d-TTL 演算法）
+# cache-optimizer Skill 每週執行分析後，依此規則調整各端點 TTL
+adaptive_ttl:
+  enabled: true  # 啟用自適應調整，由 cache-optimizer Skill 執行
+  evaluation_window_days: 7  # 評估週期（7 天滑動視窗）
+  rules:
+    # 命中率低 + 資料穩定 → 延長 TTL
+    - condition: "hit_ratio < 0.20 AND volatility == 'low'"
+      action: "ttl_minutes *= 2"
+      max_ttl_minutes: 1440  # 最長 24h，避免資料過時
+      note: "命中率 < 20% 且 volatility=low，倍增 TTL 提升命中率"
+    # 命中率高 + 資料易變 → 縮短 TTL
+    - condition: "hit_ratio > 0.80 AND volatility == 'high'"
+      action: "ttl_minutes /= 2"
+      min_ttl_minutes: 15  # 最短 15 分鐘，確保資料新鮮度
+      note: "命中率 > 80% 且 volatility=high，半減 TTL 提升資料時效性"
+    # 命中率低 + 資料易變 → 不調整（API 限制或查詢不穩定，需人工分析）
+    - condition: "hit_ratio < 0.20 AND volatility == 'high'"
+      action: "no_change"
+      note: "命中率低且 volatility=high，不自動調整，由 cache-optimizer Skill 人工分析"
+  volatility:
+    # 各端點的資料易變性評估（low=穩定，high=頻繁更新）
+    todoist: "high"       # 任務隨時更新
+    pingtung-news: "low"  # 每日更新 1-3 次
+    hackernews: "medium"  # 每 1-3 小時更新
+    knowledge: "low"      # KB 手動更新，極少變化
+    gmail: "medium"       # 取決於郵件頻率
+    chatroom: "high"      # 任務佇列隨時變化
 
 # 快取命中追蹤（Agent 執行期間維護計數器）
 tracking:

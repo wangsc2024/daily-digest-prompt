@@ -1,0 +1,169 @@
+# 依賴注入配置 — 全專案 Skill 端點集中管理（ADR-20260224-001 Phase 3）
+#
+# 背景：ADR-001 Phase 3 全面 DI 遷移
+# 目標：成為所有 Skill 端點設定的唯一真相來源
+# 使用方式（SKILL.md 的 DI 讀取片段）：
+#   $base = uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['todoist']['api']['base_url'])"
+# 遷移狀態：
+#   Phase 1（完成）：建立此檔，收錄 todoist/knowledge_query/ntfy_notify
+#   Phase 2（完成）：機會遷移，新增 chatroom_relay/groq_relay/hackernews/pingtung_news/gmail
+#   Phase 3（本次）：全面 DI，所有 SKILL.md 加入 depends-on 並以此檔為端點來源
+
+version: "2.0.0"
+created_at: "2026-03-17"
+updated_at: "2026-03-17"
+adr_ref: "ADR-20260224-001"
+
+# ===========================================================
+# Skill 依賴清單
+# ===========================================================
+
+skills:
+
+  # ---------------------------------------------------------
+  # Todoist（最高頻 — 每小時觸發，REST API + Cache 雙依賴）
+  # ---------------------------------------------------------
+  todoist:
+    description: "Todoist 任務管理 API v1"
+    api:
+      base_url: "https://api.todoist.com/api/v1"
+      auth_type: "bearer"
+      auth_env: "TODOIST_API_TOKEN"           # 從 .env 讀取
+      auth_source: ".env"
+    endpoints:
+      tasks_filter:    "/tasks/filter"        # GET ?query=today|overdue
+      tasks_list:      "/tasks"               # GET 全量列表
+      task_create:     "/tasks"               # POST 建立任務
+      task_update:     "/tasks/{id}"          # POST 更新任務
+      task_close:      "/tasks/{id}/close"    # POST 完成任務
+      task_reopen:     "/tasks/{id}/reopen"   # POST 重開任務
+      task_delete:     "/tasks/{id}"          # DELETE 刪除任務
+      comments_create: "/comments"            # POST 新增留言
+      projects_list:   "/projects"            # GET 專案列表
+      labels_list:     "/labels"              # GET 標籤列表
+    timeout_seconds: 30
+    rate_limit:
+      requests_per_minute: 60
+
+  # ---------------------------------------------------------
+  # knowledge-query（高頻 — 每次研究任務觸發）
+  # ---------------------------------------------------------
+  knowledge_query:
+    description: "個人知識庫 API（本機 localhost）"
+    api:
+      base_url: "http://localhost:3000"
+      auth_type: "none"
+    endpoints:
+      health:          "/api/health"          # GET 健康檢查
+      search_hybrid:   "/api/search/hybrid"   # POST 混合搜尋（語義+BM25）
+      search_semantic: "/api/search/semantic" # POST 純語義搜尋
+      search_keyword:  "/api/search/keyword"  # POST BM25 關鍵字
+      search_title:    "/api/search/retrieve" # POST 標題搜尋
+      notes_list:      "/api/notes"           # GET 列出筆記
+      notes_import:    "/api/import"          # POST 匯入筆記
+      stats:           "/api/stats"           # GET 統計資訊
+      tags_list:       "/api/notes/tags"      # GET 標籤列表
+    timeout_seconds: 15
+    notes:
+      - "服務需在本機執行：cd D:/Source/knowledge-base && npm start"
+      - "cache/knowledge.json 為快取備援（valid 欄位 = false 時使用）"
+
+  # ---------------------------------------------------------
+  # ntfy-notify（高頻 — 每次任務完成/失敗時觸發）
+  # ---------------------------------------------------------
+  ntfy_notify:
+    description: "ntfy.sh 推播通知服務"
+    api:
+      base_url: "https://ntfy.sh"             # 自架可改此處
+      auth_type: "none"
+    topic: "wangsc2025"                       # 與 config/notification.yaml 同步
+    endpoint: "/{topic}"                      # POST 發送通知
+    timeout_seconds: 10
+    notes:
+      - "發送必須用 JSON 檔案方式（curl -d @file.json），不可用 inline JSON（Windows 亂碼）"
+      - "Header 必須加 charset=utf-8：Content-Type: application/json; charset=utf-8"
+      - "詳細配置見 config/notification.yaml"
+
+  # ---------------------------------------------------------
+  # chatroom-relay（中頻 — 聊天室任務交付）
+  # ---------------------------------------------------------
+  chatroom_relay:
+    description: "聊天室 API 服務（本機 localhost）"
+    api:
+      base_url: "http://localhost:3001"
+      auth_type: "none"
+    endpoints:
+      health:           "/api/health"              # GET 健康檢查
+      records_pending:   "/api/records?state=pending"   # GET 待處理記錄
+      records_completed: "/api/records?state=completed"  # GET 已完成記錄
+      record_claim:     "/api/records/{uid}/claim" # POST 認領任務
+      record_state:     "/api/records/{uid}/state" # POST 更新狀態
+      record_processed: "/api/records/{uid}/processed" # POST 標記完成
+      scheduled_tasks:  "/api/scheduled-tasks"     # GET 排程任務
+      cron_jobs:        "/api/cron-jobs"           # GET Cron 任務
+    timeout_seconds: 10
+    notes:
+      - "服務需在本機執行：cd D:/Source/my-gun-relay && node server.js"
+
+  # ---------------------------------------------------------
+  # groq-relay（中頻 — LLM 推理 + 批次翻譯）
+  # ---------------------------------------------------------
+  groq_relay:
+    description: "Groq API Relay（本機 localhost）"
+    api:
+      base_url: "http://localhost:3002"
+      auth_type: "none"                            # Relay 在本機處理 auth
+    endpoints:
+      health:   "/groq/health"                     # GET 健康檢查
+      chat:     "/groq/chat"                       # POST 對話補全
+    timeout_seconds: 20
+    notes:
+      - "服務需在本機執行：cd D:/Source/my-gun-relay && node bot/groq-relay.js"
+      - "實際 Groq API Key 由 relay 內部管理，不對外暴露"
+
+  # ---------------------------------------------------------
+  # hackernews（低頻 — 每日 AI 新聞摘要）
+  # ---------------------------------------------------------
+  hackernews:
+    description: "Hacker News Firebase API（公開）"
+    api:
+      base_url: "https://hacker-news.firebaseio.com/v0"
+      auth_type: "none"
+    endpoints:
+      top_stories: "/topstories.json"              # GET 熱門文章 ID 列表
+      item:        "/item/{id}.json"               # GET 文章詳情
+    timeout_seconds: 10
+
+  # ---------------------------------------------------------
+  # pingtung-news（低頻 — 屏東縣政府新聞查詢）
+  # ---------------------------------------------------------
+  pingtung_news:
+    description: "屏東縣政府 MCP 新聞服務"
+    api:
+      base_url: "https://ptnews-mcp.pages.dev"
+      auth_type: "none"
+    endpoints:
+      mcp: "/mcp"                                  # POST JSON-RPC
+    timeout_seconds: 15
+    notes:
+      - "使用 JSON-RPC 2.0 協定：method=tools/call"
+      - "可用工具：pingtung_news_latest / pingtung_news_search / pingtung_news_by_date"
+
+  # ---------------------------------------------------------
+  # gmail（低頻 — 每日郵件摘要）
+  # ---------------------------------------------------------
+  gmail:
+    description: "Google Gmail API v1（OAuth2）"
+    api:
+      base_url: "https://gmail.googleapis.com/gmail/v1"
+      auth_type: "oauth2"
+      credentials_file: "skills/gmail/scripts/credentials.json"
+      token_file:        "skills/gmail/scripts/token.json"
+    endpoints:
+      messages_list: "/users/me/messages"          # GET 郵件列表
+      message_get:   "/users/me/messages/{id}"     # GET 郵件詳情
+      labels_list:   "/users/me/labels"            # GET 標籤列表
+    timeout_seconds: 30
+    notes:
+      - "OAuth2 Token 需先執行 skills/gmail/scripts/auth.py 授權"
+      - "依賴：google-auth-oauthlib google-auth-httplib2 google-api-python-client"

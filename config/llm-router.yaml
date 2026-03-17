@@ -16,7 +16,7 @@ providers:
     model: llama-3.1-8b-instant
     timeout_s: 20
     max_tokens: 2048
-    rate_limit_per_min: 3           # 保守策略（免費方案 5 req/min），避免多任務並行觸發 429
+    rate_limit_per_min: 2           # 更保守策略（免費方案 5 req/min），降至 2 避免並行觸發配額超限
     cache_ttl_min: 5                # Relay 端快取 TTL（分鐘）
     fallback_on_error: true         # 失敗時降級，不中斷主流程
 
@@ -125,13 +125,13 @@ batch:
     rule: en_to_zh
     max_items: 5                    # 一次最多翻譯 5 篇
     strategy: sequential            # 逐篇翻譯（避免 429）
-    delay_between_ms: 500           # 篇間延遲（ms）
+    delay_between_ms: 1000          # 篇間延遲增加至 1 秒，配合 rate_limit_per_min: 2
 
   news_items:
     rule: news_summary
     max_items: 5
     strategy: sequential
-    delay_between_ms: 300
+    delay_between_ms: 600           # 篇間延遲增加至 600ms，配合 rate_limit_per_min: 2
 
   kb_scoring:
     rule: kb_content_score

@@ -21,3 +21,10 @@ backup:
   path: backups/long_term_memory_expired.jsonl
 retrieval:
   similarity_threshold: 0.78
+sync:
+  timeout_seconds: 10
+  max_retries: 3
+sync_queue:
+  path: state/long_term_memory_sync_queue.json
+  max_items: 2000
+  flush_batch_size: 20

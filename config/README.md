@@ -34,6 +34,7 @@
 | `kb-content-scoring.yaml` | KB 知識庫內容評分系統配置 | kb-curator SKILL、groq-relay.js | 調整知識庫內容品質評分規則 |
 | `schemas/` | YAML 驗證 Schema + 輸出規範目錄 | validate_config.py | 修改配置驗證規則 |
 | `schemas/results-auto-task-schema.json` | 自動任務結果 JSON 統一格式 Schema | 所有 prompts/team/todoist-auto-*.md | 定義 results/*.json 必填/選填欄位、型別規範 |
+| `insight-briefing-workflow.yaml` | 深度研究洞察簡報工作流步驟與輸出路徑 | insight-briefing SKILL、todoist-auto-insight_briefing.md | 調整簡報步驟順序、可選 .pptx、產出目錄 |
 
 ## 版本管理
 
