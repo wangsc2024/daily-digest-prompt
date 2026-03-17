@@ -63,7 +63,7 @@
 
 **先執行 KB 健康檢查**（3 秒 timeout）：
 ```bash
-curl -s --connect-timeout 3 "http://localhost:3000/health"
+curl -s --connect-timeout 3 "http://localhost:3000/api/health"
 ```
 - 若連線成功 → 繼續執行以下去重查詢
 - 若連線失敗（connection refused / timeout）→ 設定 `kb_available=false`，**跳過本步驟與第四步（KB 匯入）**，直接進行第三步研究，最終結果 JSON 設 `kb_imported=false`，不視為失敗

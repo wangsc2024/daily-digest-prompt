@@ -34,6 +34,13 @@
 
 > 此步驟確保 session 內有 `cache-read` + `knowledge` 標籤，避免 Harness 快取繞過警告。
 
+### 前置二：KB 服務確認（必做）
+```bash
+curl -s --connect-timeout 3 "http://localhost:3000/api/health"
+```
+- 回傳 200 → `kb_available=true`，繼續以下搜尋
+- 失敗（逾時或非 2xx）→ `kb_available=false`，**跳過第一步搜尋與第四步匯入**，直接進行第二步選題
+
 ### 階段 1：語義搜尋（優先）
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
@@ -58,7 +65,7 @@ for n in matched:
 rm kb_notes.json
 ```
 
-- 兩階段都失敗（知識庫無法連線）→ 跳過查詢，從楞嚴經概論開始研究
+- 兩階段搜尋都失敗（去重資訊不足，但 KB 服務仍在線，**第四步匯入不受影響**）→ 從楞嚴經概論開始研究
 - 有結果 → 仔細閱讀已有標題，避免重複
 
 ## 知識策略分析（kb-research-strategist Skill，去重通過後執行）

@@ -146,10 +146,15 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 ## 第五步：寫入結果 JSON
 用 Write 建立 `results/todoist-auto-ai_deep_research.json`：
+
+> **status 規則**：每個階段完成時一律寫 `"success"`（階段 1 完成 = 成功，階段 2 完成 = 成功，以此類推）。
+> 只有在本次執行中途遭遇錯誤、無法完成當前階段時才寫 `"failed"`。
+> 禁止寫 `"partial"`（會被下游 Phase 3 誤判為失敗）。
+
 ```json
 {
   "agent": "todoist-auto-ai_deep_research",
-  "status": "success 或 partial 或 failed",
+  "status": "success",
   "task_id": null,
   "type": "ai_deep_research",
   "stage": 1,
@@ -161,7 +166,7 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
     "quality_score": 4,
     "remaining_issues": []
   },
-  "summary": "一句話摘要（含階段編號）",
+  "summary": "一句話摘要（含階段編號，如：Stage 1 完成：選定主題 XXX，研究計畫已建立）",
   "error": null
 }
 ```
