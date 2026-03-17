@@ -32,7 +32,8 @@
 | `budget.yaml` | LLM 用量預算配置（每日/月度 token 上限） | budget_guard.py、llm_router.py | 調整 Claude/Groq 用量上限與告警閾值 |
 | `agent-pool.yaml` | Agent Pool 並行度與 done_cert 策略配置 | coordinator.py、done_cert.py | 調整 Agent 並行數量、timeout 繼承來源 |
 | `kb-content-scoring.yaml` | KB 知識庫內容評分系統配置 | kb-curator SKILL、groq-relay.js | 調整知識庫內容品質評分規則 |
-| `schemas/` | YAML 驗證 Schema 目錄 | validate_config.py | 修改配置驗證規則 |
+| `schemas/` | YAML 驗證 Schema + 輸出規範目錄 | validate_config.py | 修改配置驗證規則 |
+| `schemas/results-auto-task-schema.json` | 自動任務結果 JSON 統一格式 Schema | 所有 prompts/team/todoist-auto-*.md | 定義 results/*.json 必填/選填欄位、型別規範 |
 
 ## 版本管理
 
@@ -93,5 +94,7 @@ config/
 ├── 預算治理：budget.yaml（Token 上限 + 告警閾值）
 ├── Agent Pool：agent-pool.yaml（並行度 + done_cert）
 ├── 知識庫評分：kb-content-scoring.yaml（KB 內容品質評分）
-└── schemas/：YAML 驗證 Schema 定義
+└── schemas/：YAML 驗證 Schema + 輸出格式規範
+    ├── results-auto-task-schema.json：自動任務結果 JSON 統一格式（28 個 todoist-auto-*.json）
+    └── （其他 Schema 檔案）
 ```

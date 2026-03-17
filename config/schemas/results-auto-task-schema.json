@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/wangsc2024/daily-digest-prompt/schemas/results-auto-task.json",
+  "title": "Daily Digest Auto-Task Result Schema",
+  "description": "統一的自動任務結果 JSON Schema，適用於所有 todoist-auto-*.json 輸出檔案",
+  "type": "object",
+  "required": ["task_key", "status"],
+  "anyOf": [
+    {"required": ["agent"]},
+    {"required": ["task_type"]}
+  ],
+  "properties": {
+    "agent": {
+      "type": "string",
+      "pattern": "^todoist-auto-[a-z_]+$",
+      "description": "Agent 識別碼，格式必須為 todoist-auto-{task_key}（與 task_type 二選一，推薦使用）",
+      "examples": [
+        "todoist-auto-workflow_forge",
+        "todoist-auto-self_heal",
+        "todoist-auto-ai_deep_research"
+      ]
+    },
+    "task_type": {
+      "type": "string",
+      "const": "auto",
+      "description": "任務類型，固定為 auto（與 agent 二選一，舊格式相容用）"
+    },
+    "task_key": {
+      "type": "string",
+      "pattern": "^[a-z_]+$",
+      "description": "任務鍵，對應 config/frequency-limits.yaml 中的 tasks 鍵名（必須使用底線，禁用連字號）",
+      "examples": [
+        "workflow_forge",
+        "self_heal",
+        "ai_deep_research",
+        "system_insight"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "partial", "failed", "format_failed"],
+      "description": "執行狀態：success（完全成功）、partial（部分完成，如 KB 未匯入但產物已產出）、failed（執行失敗）、format_failed（格式驗證失敗）"
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "執行完成時間（ISO 8601 格式，建議使用 Asia/Taipei 時區；可選）",
+      "examples": ["2026-03-17T06:35:39+08:00"]
+    },
+    "summary": {
+      "type": "string",
+      "description": "執行摘要（一句話說明執行結果；可選）"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "產出檔案路徑列表（複數版本，與 artifact 二選一；可選）",
+      "examples": [["context/system-insight.json", "context/arch-decision.json"]]
+    },
+    "alerts_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "告警數量（system-insight 專用；可選）"
+    },
+    "repairs_attempted": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "嘗試修復次數（self-heal 專用；可選）"
+    },
+    "repairs_succeeded": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "成功修復次數（self-heal 專用；可選）"
+    },
+    "alerts": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "告警列表（self-heal 專用；可選）"
+    },
+    "execution_time_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "執行耗時（秒，可含小數）",
+      "examples": [120.5, 45.2, 600.0]
+    },
+    "artifact": {
+      "type": "object",
+      "description": "產出物資訊（若任務產出檔案、工作流定義、報告等）",
+      "required": ["path", "type"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "產出檔案路徑（相對專案根目錄）",
+          "examples": [
+            "config/schemas/results-auto-task-schema.json",
+            "docs/workflows/ooda-validation-checklist.md",
+            "context/arch-decision.json"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["workflow_yaml", "output_schema", "validation_checklist", "report", "code", "config", "documentation"],
+          "description": "產出類型：workflow_yaml（工作流定義）、output_schema（輸出格式規範）、validation_checklist（驗證清單）、report（報告）、code（程式碼）、config（配置檔）、documentation（文件）"
+        },
+        "gap_addressed": {
+          "type": "string",
+          "description": "解決的缺口簡述（一句話說明此產出解決什麼問題）",
+          "examples": [
+            "28 個自動任務結果 JSON 格式不一致",
+            "OODA workflow 缺少狀態驗證規則"
+          ]
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "產出檔案大小（位元組）"
+        }
+      },
+      "additionalProperties": true
+    },
+    "integration_status": {
+      "type": "string",
+      "enum": ["integrated", "proposed", "failed"],
+      "description": "整合狀態：integrated（已整合至專案配置）、proposed（建議變更，需人工審核）、failed（整合失敗）"
+    },
+    "kb_imported": {
+      "type": "boolean",
+      "description": "是否已匯入知識庫（若任務無需匯入 KB，此欄位可省略）"
+    },
+    "kb_note_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "匯入知識庫的 note ID 列表（若 kb_imported=true 時提供）",
+      "examples": [["abc123", "def456"]]
+    },
+    "message": {
+      "type": "string",
+      "description": "執行訊息或補充說明（可選）",
+      "examples": [
+        "已產出 Schema 並整合至 config/README.md",
+        "無高優先級缺口，已產出建議清單",
+        "格式驗證通過，成功整合"
+      ]
+    },
+    "error": {
+      "type": "object",
+      "description": "錯誤詳情（僅當 status=failed 或 format_failed 時提供）",
+      "required": ["type", "message"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "錯誤類型",
+          "examples": ["ValidationError", "IntegrationError", "APIError", "TimeoutError"]
+        },
+        "message": {
+          "type": "string",
+          "description": "錯誤訊息"
+        },
+        "details": {
+          "type": "string",
+          "description": "錯誤詳細資訊（如堆疊追蹤或日誌片段）"
+        }
+      },
+      "additionalProperties": true
+    },
+    "metrics": {
+      "type": "object",
+      "description": "執行度量（可選，供進階分析用）",
+      "properties": {
+        "tool_calls": {
+          "type": "integer",
+          "description": "工具呼叫次數"
+        },
+        "files_read": {
+          "type": "integer",
+          "description": "讀取檔案數量"
+        },
+        "files_written": {
+          "type": "integer",
+          "description": "寫入檔案數量"
+        },
+        "api_calls": {
+          "type": "integer",
+          "description": "外部 API 呼叫次數"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "agent": "todoist-auto-workflow_forge",
+      "task_key": "workflow_forge",
+      "status": "success",
+      "executed_at": "2026-03-17T06:35:39+08:00",
+      "execution_time_seconds": 120.5,
+      "artifact": {
+        "path": "config/schemas/results-auto-task-schema.json",
+        "type": "output_schema",
+        "gap_addressed": "28 個自動任務結果 JSON 格式不一致",
+        "size_bytes": 4096
+      },
+      "integration_status": "integrated",
+      "kb_imported": true,
+      "kb_note_ids": ["abc123"],
+      "message": "已產出 Schema 並整合至 docs/ARCHITECTURE.md"
+    },
+    {
+      "task_type": "auto",
+      "task_key": "self_heal",
+      "status": "partial",
+      "repairs_attempted": 3,
+      "repairs_succeeded": 3,
+      "alerts": [],
+      "summary": "修復 3 個問題，但 arch-decision.json 不存在，跳過 immediate_fix 執行"
+    },
+    {
+      "task_type": "auto",
+      "task_key": "system_insight",
+      "status": "success",
+      "artifacts": ["context/system-insight.json"],
+      "alerts_count": 2,
+      "summary": "分析完成，2 個 critical alerts"
+    },
+    {
+      "agent": "todoist-auto-ai_deep_research",
+      "task_key": "ai_deep_research",
+      "status": "failed",
+      "executed_at": "2026-03-17T08:00:00+08:00",
+      "execution_time_seconds": 45.0,
+      "error": {
+        "type": "APIError",
+        "message": "WebSearch API 呼叫逾時",
+        "details": "連續 3 次請求超過 30 秒未回應"
+      },
+      "integration_status": "failed"
+    }
+  ],
+  "_metadata": {
+    "version": "1.0.0",
+    "created_at": "2026-03-17",
+    "created_by": "todoist-auto-workflow_forge",
+    "purpose": "統一自動任務結果格式，避免格式漂移，供 Phase 3 組裝與驗證使用",
+    "usage_note": "所有 prompts/team/todoist-auto-*.md 的結果 JSON 應符合此 Schema"
+  }
+}

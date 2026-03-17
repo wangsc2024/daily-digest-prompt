@@ -67,6 +67,9 @@ initial_schema: |
     "podcast_create_count": 0,
     "podcast_jiaoguangzong_count": 0,
     "skill_forge_count": 0,
+    "future_plan_optimize_count": 0,
+    "kb_insight_evaluation_count": 0,
+    "workflow_forge_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -157,6 +160,7 @@ task_rules:
     - log_audit        # Log 審查：需讀大量結構化日誌
     - chatroom_optimize  # Chatroom 優化：需評估 bot.js 品質指標
     - skill_audit      # Skill 審查：需讀取並分析所有 SKILL.md
+    - workflow_forge   # Workflow 鑄造廠：流程標準化、輸出 Schema、一致性，需讀 config + prompts
     - shurangama             # Codex on Windows 無法穩定持久化 results/ 檔案，改走 Claude 本機工具鏈
     - jiaoguangzong          # 避免研究完成但 host 看不到結果檔
     - podcast_jiaoguangzong  # 教觀綱宗 Podcast：與 podcast_create 相同流程
@@ -167,6 +171,7 @@ task_rules:
   cursor_cli:           # Cursor CLI agent -p，非互動模式，完整工具權限（Write/Bash/Read）
     - fahua            # 法華經研究：確保長時研究成果持久化至 results/，任務檔 temp/cursor-cli-task-fahua.md
     - podcast_create   # Podcast 生成：創意對話撰寫 + TTS/concat + R2 上傳，任務檔 temp/cursor-cli-task-podcast_create.md
+    - future_plan_optimize  # 未來計畫待辦優化：以 KB 完善 未來計畫/待辦事項.md，MD 格式輸出
 
   codex_exec:           # gpt-5.4，內建 WebSearch
     - ai_sysdev
@@ -178,6 +183,7 @@ task_rules:
     - unsloth_research
     - ai_smart_city
     - jingtu           # 淨土宗研究：改走 Codex 研究工作流（WebSearch + live 即時資料）
+    - kb_insight_evaluation  # 知識庫近 3 天洞察報告審核：擇 3 項高價值建議研究並擬定執行方案，納入系統優化評估
 
   codex_standard:       # gpt-5.3-codex 預設，適合創意/分析型任務
     - creative_game_optimize  # 遊戲創意優化：程式碼生成能力強
@@ -276,20 +282,21 @@ phase_overrides:
 #   template_version: 模板版本號（配合模板內部版本控制）
 #   template_params:  傳入模板的參數（僅參數化模板使用）
 #   history_type:     歷史記錄分類 key
-#   execution_order:  round-robin 輪轉順序（1-20）
+#   execution_order:  round-robin 輪轉順序（1-27，非連續）
 #   skills:           此任務依賴的 Skills 清單
 #
-# 群組摘要（11 群組，23 任務，合計 25 次/日，含 5 個暫停任務）：
-#   佛學研究:        #1-#4   (4 次/日) — 楞嚴經(1)、教觀綱宗(1)、法華經(1)、淨土宗(1)
-#   AI/技術研究:     #5-#11  (10 次/日) — 技術研究(2)、AI深度(5)、Unsloth(0)、GitHub AI(1)、智慧城市(0)、系統開發(1)、AI工作流(1)
-#   系統優化:        #11     (1 次/日) — Skill審查(1)
-#   系統維護:        #12-#13 (2 次/日) — Log審查(1)、Git推送(1)
-#   遊戲創意:        #14     (0 次/日) — 創意遊戲優化(0，暫停)
-#   專案品質:        #15     (0 次/日) — QA優化(0，暫停)
-#   系統自省:        #16-#17 (2 次/日) — 系統洞察(1)、自癒迴圈(1)
-#   GitHub靈感:      #18     (0 次/日) — GitHub Scout(0，暫停)
-#   聊天室/媒體:     #19-#22 (7 次/日) — Chatroom優化(1)、AI工作流GitHub(1)、Podcast通用(1)、教觀綱宗Podcast(3)
-#   Skill 鑄造:      #24     (1 次/日) — skill-forge(1)
+# 群組摘要（11 群組，27 任務，合計依 daily_limit 加總）：
+#   佛學研究:        #1-#4   — 楞嚴經(1)、教觀綱宗(2)、法華經(3)、淨土宗(2) = 8
+#   AI/技術研究:     #5-#10  — 技術研究(2)、AI深度(3)、Unsloth(0)、GitHub AI(1)、智慧城市(1)、系統開發(1) = 8
+#   系統優化:        #11     — Skill審查(1) = 1
+#   系統維護:        #12-#13 — Log審查(2)、Git推送(1) = 3
+#   遊戲創意:        #14     — 創意遊戲優化(0，暫停) = 0
+#   專案品質:        #15     — QA優化(0，暫停) = 0
+#   系統自省:        #16-#18 — 系統洞察(2)、架構演進(2)、自癒迴圈(2) = 6
+#   Chatroom/工作流: #19-#20 — Chatroom優化(0，暫停)、AI工作流GitHub(1) = 1
+#   Podcast/靈感:    #21-#23 — Podcast通用(2)、教觀綱宗Podcast(3)、GitHub Scout(1) = 6
+#   Skill 鑄造:      #24     — skill-forge(2) = 2
+#   ntfy/未來/洞察:  #25-#27 — ntfy審查(1)、未來計畫(1)、KB洞察(1) = 3
 tasks:
 
   # --- 佛學研究群組（共 4 次/日）---
@@ -693,21 +700,58 @@ tasks:
     skills: [ntfy-notify, system-insight, self-heal, knowledge-query]
     description: "以 Claude Opus 4.6 審查 24h 內 logs/ntfy/ 下的通知日誌，識別失敗、異常模式與優化機會；若有問題則執行系統優化工作流（self_heal/system_insight），最後以格式化 ntfy 通知回報審查結果"
 
+  # --- 未來計畫與洞察評估群組 ---
+  future_plan_optimize:
+    name: "未來計畫待辦優化"
+    daily_limit: 1
+    counter_field: "future_plan_optimize_count"
+    template: "prompts/team/todoist-auto-future_plan_optimize.md"
+    template_version: 1
+    history_type: "future_plan_optimize"
+    execution_order: 26
+    timeout_seconds: 900
+    result_suffix: "json"
+    skills: [knowledge-query, writing-plans, markdown-editor]
+    description: "每日以 Cursor CLI 優化 未來計畫/待辦事項.md：以知識庫為基礎完善規劃、增加每項待辦細節、調整架構，做為專案改版先驅研究，MD 格式輸出"
+
+  kb_insight_evaluation:
+    name: "知識庫洞察評估與執行方案"
+    daily_limit: 1
+    counter_field: "kb_insight_evaluation_count"
+    template: "prompts/team/todoist-auto-kb_insight_evaluation.md"
+    template_version: 1
+    history_type: "kb_insight_evaluation"
+    execution_order: 27
+    timeout_seconds: 1200
+    result_suffix: "json"
+    skills: [knowledge-query, system-insight, arch-evolution]
+    description: "每日以 Codex gpt-5.4 審核知識庫近 3 天洞察報告中可借鏡建議，擇 3 項高價值項目研究後擬定執行方案，反覆審查優化直至完善，納入系統優化評估項目"
+
+  workflow_forge:
+    name: "Workflow 鑄造廠"
+    daily_limit: 1
+    counter_field: "workflow_forge_count"
+    template: "prompts/team/todoist-auto-workflow_forge.md"
+    template_version: 1
+    history_type: "workflow_forge"
+    execution_order: 28
+    timeout_seconds: 900
+    result_suffix: "json"
+    skills: [knowledge-query, system-insight, ntfy-notify]
+    description: "運用流程標準化提升系統品質與輸出穩定度：分析 config/prompts 與失敗案例，產出工作流定義、輸出 Schema 或驗證清單，避免格式錯誤、優化系統一致性"
+
 # ============================================================
 # 每日上限摘要
 # ============================================================
-# 佛學研究（claude_sonnet45）：楞嚴經(1) + 教觀綱宗(1) + 法華經(1) + 淨土宗(1) = 4
-# AI/技術（codex_exec）：任務技術(2) + AI深度(3) + Unsloth(0) + AI GitHub(1) + AI智慧城市(0) + AI系統開發(1) + AI工作流(1) = 8
-# 系統優化（claude_sonnet45）：Skill審查(0，停用) = 0
-# 系統維護（claude_sonnet45）：Log審查(0，停用) + Git推送(0，停用) = 0
-# 遊戲創意（codex_standard）：創意遊戲優化(0，暫停) = 0
-# 專案品質（codex_standard）：QA優化(0，暫停) = 0
-# 系統自省（claude_sonnet45）：系統洞察(0，停用) + 自癒迴圈(0，停用) = 0
-# Chatroom 整合（claude_sonnet45）：品質優化(0，停用) = 0
-# GitHub 靈感（codex_standard）：靈感蒐集(0，暫停) = 0
-# Podcast 生成（claude_sonnet45）：AI 雙主持人(0，停用) + 教觀綱宗 3 集(0，停用) = 0
-# Skill 鑄造（claude_sonnet 預設）：skill-forge(1) = 1
-# 合計：13 次/日（codex_exec/codex_standard + skill_forge；claude_sonnet45 任務全數停用）
+# 各後端每日上限摘要（以 daily_limit 為準）：
+# 佛學（shurangama:claude_sonnet45, jiaoguangzong:claude_sonnet45, fahua:cursor_cli, jingtu:codex_exec）= 8
+# AI/技術（codex_exec）：tech(2)+ai_deep(3)+unsloth(0)+ai_github(1)+ai_smart_city(1)+ai_sysdev(1)+ai_workflow(1) = 9
+# 系統（claude_sonnet45）：skill_audit(1)+log_audit(2)+git_push(1)+system_insight(2)+arch_evolution(2)+self_heal(2) = 10
+# 創意/品質（codex_standard）：creative_game(0)+qa(0)+github_scout(1) = 1
+# Podcast（cursor_cli/claude_sonnet45）：podcast_create(2)+podcast_jiaoguangzong(3) = 5
+# Chatroom（claude_sonnet45）：chatroom_optimize(0) = 0
+# 其他：skill_forge(2)+ntfy_review(1)+future_plan(1)+kb_insight(1) = 5
+# 合計：38 次/日（含 daily_limit=0 的暫停任務 3 個：unsloth/creative_game/qa/chatroom）
 
 # 歷史追蹤寫入規則
 history:

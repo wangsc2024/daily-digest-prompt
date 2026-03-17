@@ -72,6 +72,10 @@ todoist_team:
     skill_forge: 900            # 上下文讀取(30s) + 子Agent去重(60s) + KB研究(300s) + Skill生成(120s) + 驗證整合(120s) + 自評分(60s) + 緩衝
     # === ntfy 審查（claude_opus46）===
     ntfy_review: 1200           # 日誌讀取(60s) + 模式分析(120s) + 優化工作流(600s) + 格式化通知(60s) + 緩衝
+    # === 未來計畫與洞察評估 ===
+    future_plan_optimize: 900   # 讀待辦 + KB 查詢 + 完善細節 + 寫回 MD + 結果 JSON
+    kb_insight_evaluation: 1200 # 讀 system-insight + 擇 3 項 + 研究 + 執行方案 + 寫回 improvement-backlog
+    workflow_forge: 900         # 掃描 config/prompts + 缺口篩選 + 產物生成 + 驗證 + 整合
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:

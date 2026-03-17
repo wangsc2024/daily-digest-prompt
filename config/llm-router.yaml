@@ -16,7 +16,7 @@ providers:
     model: llama-3.1-8b-instant
     timeout_s: 20
     max_tokens: 2048
-    rate_limit_per_min: 5           # 免費方案上限；付費可設到 30
+    rate_limit_per_min: 3           # 保守策略（免費方案 5 req/min），避免多任務並行觸發 429
     cache_ttl_min: 5                # Relay 端快取 TTL（分鐘）
     fallback_on_error: true         # 失敗時降級，不中斷主流程
 
@@ -118,6 +118,8 @@ routing_rules:
     used_by: [prompts/team/fetch-gmail.md]
 
 # 批次處理設定
+# 注意：delay_between_ms 僅限單一任務內部，跨任務仍可能並行觸發 429
+# 若多個自動任務同時段執行，需在排程層級錯開時間（每小時半點執行的 todoist-team）
 batch:
   hackernews_articles:
     rule: en_to_zh
@@ -135,7 +137,7 @@ batch:
     rule: kb_content_score
     max_items: 20                   # 單次最多評分 20 筆（低分篩選後）
     strategy: sequential
-    delay_between_ms: 13000         # 13 秒/筆 → ~4.6 req/min
+    delay_between_ms: 15000         # 15 秒/筆 → ~4 req/min（確保不超限）
 
 # 降級策略
 fallback:
