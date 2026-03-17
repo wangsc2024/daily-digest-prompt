@@ -16,9 +16,21 @@ triggers:
   - "屏東縣長"
   - "新聞稿"
   - "地方新聞"
+depends-on:
+  - config/dependencies.yaml
 ---
 
 # 屏東新聞通
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.pingtung_news`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['pingtung_news']['api']['base_url'])" 2>/dev/null || echo "https://ptnews-mcp.pages.dev")
+> ```
 
 查詢屏東縣政府新聞稿資料，支援 Claude Chat 與 Claude Code 環境。
 

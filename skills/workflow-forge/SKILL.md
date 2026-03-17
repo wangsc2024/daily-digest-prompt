@@ -23,9 +23,12 @@ depends-on:
   - knowledge-query
   - system-insight
   - ntfy-notify
+  - config/dependencies.yaml
 ---
 
 # Workflow Forge — 流程標準化與輸出穩定度鑄造廠
+
+> **端點來源**：`config/dependencies.yaml`（ADR-001 Phase 3）— 請讀取 YAML 取得對應 base_url（deps key: ntfy_notify）。
 
 ## 設計目標
 

@@ -154,6 +154,17 @@ daily-digest-prompt/
     scheduler-state.json          # 執行記錄（最近 200 筆，PowerShell 獨佔寫入）
     todoist-history.json          # Todoist 自動任務歷史
     config-metrics.json           # 配置膨脹度量歷史（analyze-config.ps1 產生，30 筆滾動）
+    long_term_memory_sync_queue.json # 長期記憶同步失敗待重送佇列
+
+  # 長期記憶模組
+  memory/
+    long_term_memory.py           # 多層摘要記憶、倒排索引、metadata-aware retrieval
+  tools/
+    digest_sync.py                # 摘要同步到知識庫、佇列重送、檢索入口
+    long_term_memory.py           # research-registry / continuity 壓縮維護
+    long_term_memory_rollback.py  # 長期記憶快照與回退
+  scripts/
+    long_term_memory_perf.py      # 100 筆 smoke + 1M 合成索引檢索 benchmark
 
   # Skills（行為指引，自包含）
   skills/

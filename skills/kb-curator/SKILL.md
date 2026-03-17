@@ -25,9 +25,21 @@ triggers:
 depends-on:
   - "knowledge-query"
   - "groq"
+  - "config/dependencies.yaml"
 ---
 
 # KB Curator Skill（知識庫治理工具）
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.knowledge_query` / `skills.groq_relay`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> KB=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['knowledge_query']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3000")
+> GROQ=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['groq_relay']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3002")
+> ```
 
 提供知識庫的品質管理功能，確保 KB 內容不重複、不過時、品質一致。
 

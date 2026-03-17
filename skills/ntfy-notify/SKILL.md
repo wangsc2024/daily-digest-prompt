@@ -8,7 +8,8 @@ description: |
   Use when: 任務完成推播、即時提醒、通知發送、排程結果通知、告警推播。
 allowed-tools: Bash, Read, Write
 cache-ttl: 0min
-depends-on: []
+depends-on:
+  - config/dependencies.yaml
 triggers:
   - "通知"
   - "提醒"
@@ -24,6 +25,19 @@ triggers:
 ---
 
 # ntfy 通知 (ntfy Notification Skill)
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.ntfy_notify`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url` 與 `topic`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['ntfy_notify']['api']['base_url'])" 2>/dev/null || echo "https://ntfy.sh")
+> TOPIC=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['ntfy_notify']['topic'])" 2>/dev/null || echo "wangsc2025")
+> ```
+>
+> `base_url` fallback：`https://ntfy.sh`；`topic` fallback：`wangsc2025`。
 
 任務完成後透過 ntfy.sh 發送推播通知，讓你在手機或桌面即時收到任務狀態。
 

@@ -1,12 +1,12 @@
 ---
 name: cache-optimizer
-version: "0.5.0"
+version: "1.0.0"
 description: |
   快取效率分析與 TTL 調優工具。解析 JSONL 結構化日誌中的快取事件，
   計算各 API 來源的命中率，對比 cache-policy.yaml 的 TTL 設定，
   產出端點級診斷報告與具體 TTL 調整建議。
-  Use when: 快取命中率偏低、TTL 調整決策、快取效率診斷、快取趨勢分析。
-  ⚠️ 知識基礎薄弱，建議透過 skill-audit 補強
+  ADR-023：支援 adaptive_ttl 規則評估（d-TTL 演算法），依命中率與 volatility 自動建議 TTL 調整。
+  Use when: 快取命中率偏低、TTL 調整決策、快取效率診斷、快取趨勢分析、adaptive_ttl 評估。
 allowed-tools: [Bash, Read, Write, Grep, Glob]
 cache-ttl: "N/A"
 triggers:

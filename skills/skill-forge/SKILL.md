@@ -21,9 +21,12 @@ depends-on:
   - skill-scanner
   - ntfy-notify
   - knowledge-query
+  - "config/dependencies.yaml"
 ---
 
 # Skill Forge — 知識庫驅動的 Skill 自動生成器
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query, ntfy_notify`）— ADR-001 Phase 3
 
 ## 設計哲學
 

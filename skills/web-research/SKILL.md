@@ -10,6 +10,7 @@ cache-ttl: N/A
 depends-on:
   - knowledge-query
   - ntfy-notify
+  - "config/dependencies.yaml"
 triggers:
   - "研究"
   - "WebSearch"
@@ -26,6 +27,8 @@ triggers:
 ---
 
 # Web Research Skill（網路研究標準化框架）
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 所有使用 WebSearch/WebFetch 的研究任務應遵循此框架。
 此 Skill 為底層框架，被 research-task.md 模板、各研究類自動任務（ai-deep-research、ai-github-research 等）隱式依賴。

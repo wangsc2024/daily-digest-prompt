@@ -275,6 +275,8 @@ curl -s --max-time 8 \
 
 > ⚠️ **唯一真相來源**：每日上限（`daily_limit`）以 `config/frequency-limits.yaml` 為準，此 prompt 不另行定義。新增/停用/調整任務只需修改 YAML。
 
+**summary.total_limit 單一真相**：寫入 plan 前，用 Read 讀取 `results/todoist-daily-cap.json`（由 run-todoist-agent-team.ps1 在 Phase 1 前預先寫入）。若存在則將其中的 `total_daily_cap` 作為 `auto_tasks.summary.total_limit`；若檔案不存在則自行加總 `config/frequency-limits.yaml` 所有 `tasks` 的 `daily_limit` 作為 total_limit。**禁止使用固定數字（如 45、40）**，一律以檔案或 YAML 加總為準。
+
 ---
 
 ## 步驟 3：排名 + 執行方案規劃
@@ -459,9 +461,9 @@ Phase 1 的職責是**傳遞「已決定的研究主題」**給 Phase 2，避免
     "next_execution_order_after": 3,
     "all_exhausted": false,
     "summary": {
-      "total_limit": 45,
+      "total_limit": 40,
       "total_used": 5,
-      "remaining": 40,
+      "remaining": 35,
       "selected_count": 2,
       "max_per_run": 4
     }
@@ -495,7 +497,7 @@ Phase 1 的職責是**傳遞「已決定的研究主題」**給 Phase 2，避免
     "selected_tasks": [],
     "next_execution_order_after": null,
     "all_exhausted": true,
-    "summary": { "total_limit": 45, "total_used": 45, "remaining": 0, "selected_count": 0, "max_per_run": 4 }
+    "summary": { "total_limit": 40, "total_used": 40, "remaining": 0, "selected_count": 0, "max_per_run": 4 }
   },
   "filter_summary": { "api_total": 0, "after_date_filter": 0, "after_closed_filter": 0, "processable": 0, "skipped": 0 },
   "sync_warnings": {

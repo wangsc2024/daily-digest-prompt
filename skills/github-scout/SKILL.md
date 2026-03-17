@@ -23,9 +23,12 @@ depends-on:
   - "web-research"
   - "knowledge-query"
   - "ntfy-notify"
+  - "config/dependencies.yaml"
 ---
 
 # GitHub Scout Skill（GitHub 靈感蒐集工具）
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 自動搜尋 GitHub 上與 Agent 系統相關的熱門專案，分析改進機會。
 

@@ -6,6 +6,8 @@ description: |
   Use when: 知識庫、筆記、搜尋筆記、匯入、研究成果、知識查詢。
 allowed-tools: Bash, Read, Write
 cache-ttl: 60min
+depends-on:
+  - config/dependencies.yaml
 triggers:
   - "知識庫"
   - "筆記"
@@ -21,6 +23,16 @@ triggers:
 ---
 
 # 知識庫查詢與匯入
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.knowledge_query`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在每個需要呼叫 API 的步驟開頭執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['knowledge_query']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3000")
+> ```
 
 查詢個人知識庫取得筆記內容，或將研究成果匯入知識庫。
 

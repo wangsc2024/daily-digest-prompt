@@ -68,7 +68,14 @@ triggers:
     "imports_today": 0,
     "top_tags": ["楞嚴經", "AI動態", "系統審查"]
   },
-  "digest_summary": "昨日 5 項待辦完成 3 項，屏東新聞 2 則，AI 動態 3 則"
+  "digest_summary": "昨日 5 項待辦完成 3 項，屏東新聞 2 則，AI 動態 3 則",
+  "long_term_memory": {
+    "last_sync_at": "2026-02-11T08:05:00+08:00",
+    "last_note_id": "uuid",
+    "sync_status": "success",
+    "memory_layer": "knowledge-base",
+    "retention_days": 30
+  }
 }
 ```
 
@@ -114,6 +121,12 @@ triggers:
     - `top_tags`：從 `/api/notes/tags` 取得的前 5 大標籤（查詢失敗則保留前次值）
 13. `trends`（可選，v2 新增）：最近 7 天趨勢資料，每天一筆
 14. `insights`（可選，v2 新增）：Agent 自動提煉的跨天觀察
+15. `long_term_memory`（可選，v2 擴充）：
+    - `last_sync_at`：最後一次同步到知識庫 / 長期記憶層的時間
+    - `last_note_id`：最近一次同步的長期記憶 note id
+    - `sync_status`：`success` / `skipped` / `failed`
+    - `memory_layer`：例如 `knowledge-base`
+    - `retention_days`：此批摘要記憶預設保存天數
 
 ### trends 區塊格式（可選）
 ```json
@@ -167,6 +180,7 @@ triggers:
 - `schema_version`：固定為 2
 - `last_modified_by`：固定為 "agent"
 - `last_run`：使用 ISO 8601 含時區格式（如 `2026-02-13T16:57:00+08:00`）
+- 若本次有同步到長期記憶層，`long_term_memory.last_sync_at` 應與同步時間一致
 
 ## 注意事項
 - 用 Write 工具建立 JSON 檔案，確保 UTF-8 編碼

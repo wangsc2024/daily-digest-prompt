@@ -6,6 +6,8 @@ description: |
   Use when: 管理待辦事項、查詢今日任務、新增刪除任務、過濾優先級。
 allowed-tools: Bash, Read, Write
 cache-ttl: 30min
+depends-on:
+  - config/dependencies.yaml
 triggers:
   - "todoist"
   - "待辦事項"
@@ -23,6 +25,16 @@ triggers:
 ---
 
 # Todoist 待辦事項整合
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.todoist`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在每個需要呼叫 API 的步驟開頭執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['todoist']['api']['base_url'])" 2>/dev/null || echo "https://api.todoist.com/api/v1")
+> ```
 
 透過 Todoist API v1（`/api/v1/`）管理任務。
 

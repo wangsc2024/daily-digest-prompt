@@ -271,9 +271,10 @@ $r | ConvertTo-Json -Depth 10'
    原因：[一句話失敗原因，含 reason 欄位，例如：Codex 配額耗盡，fallback 無產出]
 
 ━━━━━━━━━━━━━━
-📊 今日進度：已用 N / 上限 45（成功 N / 失敗 N）
+📊 今日進度：已用 N / 上限 M（成功 N / 失敗 N）
 🔄 下次輪轉指針：[next_execution_order]
 ```
+**N、M 來源**：從 `results/todoist-plan.json` 的 `auto_tasks.summary` 取得（total_used → N，total_limit → M），勿使用固定數字。
 
 > **注意**：每個任務必須單獨列出實際主題和產出，不得合併或省略。若無 KB 筆記則填「無」，有 commit 才填 commit hash。
 
@@ -297,11 +298,11 @@ $r | ConvertTo-Json -Depth 10'
 
 **plan_type = "idle"**：
 - 先檢查是否存在 `results/todoist-exhausted-fallback.json`。若存在，讀取其 `notify_message` 作為第二行說明。
-- 若無該檔案，第二行使用：「今日自動任務已達上限（已用 N / 45）」。
+- 若無該檔案，第二行使用：「今日自動任務已達上限（已用 N / M）」；N、M 從 plan 的 `auto_tasks.summary.total_used`、`total_limit` 取得。
 ```
 📋 Todoist 報告（團隊模式）HH:MM
 - 無可處理待辦
-- [notify_message 或 今日自動任務已達上限（已用 N / 45）]
+- [notify_message 或 今日自動任務已達上限（已用 N / M）]
 ```
 
 ### Skill 同步警告（附加於通知末尾）

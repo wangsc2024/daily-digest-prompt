@@ -18,9 +18,12 @@ triggers:
   - "behavior-pattern-analyzer"
 depends-on:
   - system-insight
+  - "config/dependencies.yaml"
 ---
 
 # behavior-pattern-analyzer — Agent 行為模式分析器
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 ## 設計目的
 

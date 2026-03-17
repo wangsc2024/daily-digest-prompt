@@ -8,7 +8,7 @@ description: |
   生成結構化報告並追蹤清理進度。直接支援 ADR-017 的清理計畫。
   Use when: TODO 清理、FIXME 掃描、程式碼衛生檢查、技術債盤點、TODO 分類、待辦標記統計。
 allowed-tools: [Bash, Read, Write, Edit, Grep, Glob]
-cache-ttl: "N/A"
+cache-ttl: "30min"
 triggers:
   - "TODO 清理"
   - "FIXME 掃描"
@@ -17,7 +17,8 @@ triggers:
   - "TODO 分類"
   - "待辦標記統計"
   - "技術債盤點"
-depends-on: []
+depends-on:
+  - system-insight
 ---
 
 # todo-scanner：TODO/FIXME 自動掃描與分類清理
@@ -137,8 +138,10 @@ for item in data['items']:
     by_dir.setdefault(dir_name, 0)
     by_dir[dir_name] += 1
 
+from datetime import datetime, timezone
+
 report = {
-    'scan_date': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+    'scan_date': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
     'total': data['total'],
     'normative_count': len(classified['normative']),
     'defect_count': len(classified['defect']),

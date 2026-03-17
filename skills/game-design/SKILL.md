@@ -21,9 +21,13 @@ triggers:
   - "遊戲部署"
   - "遊戲效能"
   - "HTML5"
+depends-on:
+  - "config/dependencies.yaml"
 ---
 
 # 遊戲設計與優化
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 HTML5/JavaScript 遊戲品質提升、UX 最佳化與 Cloudflare Pages 部署指引。
 

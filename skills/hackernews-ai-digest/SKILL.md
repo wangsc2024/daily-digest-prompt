@@ -9,6 +9,7 @@ cache-ttl: 120min
 depends-on:
   - api-cache
   - groq
+  - config/dependencies.yaml
 triggers:
   - "AI 新聞"
   - "LLM"
@@ -26,6 +27,17 @@ triggers:
 ---
 
 # Hacker News AI 新聞摘要
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.hackernews` / `skills.groq_relay`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['hackernews']['api']['base_url'])" 2>/dev/null || echo "https://hacker-news.firebaseio.com/v0")
+> GROQ=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['groq_relay']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3002")
+> ```
 
 透過 curl 呼叫 Hacker News 官方 API，篩選 AI 相關熱門文章，產出中文摘要。
 

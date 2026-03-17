@@ -316,6 +316,32 @@ else:
 
 > **注意**：`state/scheduler-state.json` 由 PowerShell 執行腳本（run-agent-team.ps1）負責寫入，Agent 不需操作此檔案。
 
+### 9.1.2 同步到長期記憶知識庫
+在 `context/digest-memory.json` 寫入完成後，將本次 Daily Digest 的可重用摘要同步到長期記憶：
+
+1. 重新讀取最新 `context/digest-memory.json`
+2. 擷取：
+   - `digest_summary`
+   - `last_run`
+   - `knowledge.top_tags`
+   - `insights`
+   - 今日新聞 / HN / Todoist 的高價值摘要
+3. 用 Write 建立 `temp/digest-memory-import.json`，格式需符合 `skills/knowledge-query/SKILL.md` 的 `/api/import` 規格：
+   - `title`: `Daily Digest Memory - YYYY-MM-DD`
+   - `contentText`: Markdown，至少含「摘要」、「洞察」、「標籤」、「來源時間」
+   - `tags`: 至少包含 `Daily-Digest-Prompt`、`long-term-memory`、`daily-digest`
+   - `source`: `import`
+   - `summary`: 一句話摘要
+   - `kind`: `digest`
+   - `digestDate`: `YYYY-MM-DD`
+   - `importance`: 0.7（若含重大政策 / 高熱度 AI 新聞可提高到 0.85）
+   - `expiresAt`: 一般為 30 天後；若內容為長期有效洞察可留空
+4. 先做去重查詢：
+   `curl -s -X POST "http://localhost:3000/api/search/hybrid" -H "Content-Type: application/json; charset=utf-8" -d '{"query":"Daily Digest Memory YYYY-MM-DD","topK":3}'`
+5. 若已有同日記錄且相似度高 → 改成更新同 note；若無 → POST `/api/import`
+6. 成功後刪除 `temp/digest-memory-import.json`
+7. 若知識庫服務不可用，記錄「長期記憶同步略過：知識庫服務不可用」，但不影響整體摘要完成
+
 ### 9.1.5 寫入每日摘要連續記憶（任務延續性）
 
 1. Read `context/continuity/daily-digest.json`（不存在則初始化 `{"schema_version":1,"schedule_type":"daily_digest","records":{}}`）

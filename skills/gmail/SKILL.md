@@ -9,6 +9,7 @@ allowed-tools: Bash, Read, Write
 cache-ttl: 30min
 depends-on:
   - api-cache
+  - config/dependencies.yaml
 triggers:
   - "gmail"
   - "email"
@@ -24,6 +25,18 @@ triggers:
 ---
 
 # Gmail 郵件讀取整合
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.gmail`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得配置；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> GMAIL_BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['gmail']['api']['base_url'])" 2>/dev/null || echo "https://gmail.googleapis.com/gmail/v1")
+> GMAIL_CREDS=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['gmail']['api']['credentials_file'])" 2>/dev/null || echo "skills/gmail/scripts/credentials.json")
+> GMAIL_TOKEN=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['gmail']['api']['token_file'])" 2>/dev/null || echo "skills/gmail/scripts/token.json")
+> ```
 
 透過 Gmail API 讀取郵件摘要，支援多種過濾條件。
 

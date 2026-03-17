@@ -10,6 +10,7 @@ allowed-tools: Bash, Read, Write
 cache-ttl: N/A
 depends-on:
   - todoist
+  - "config/dependencies.yaml"
 triggers:
   - "新增 Todoist 任務"
   - "建立排程任務"
@@ -23,6 +24,8 @@ triggers:
 ---
 
 # Todoist Task Creator — 互動式任務新增
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `todoist`）— ADR-001 Phase 3
 
 ## 使用場景
 

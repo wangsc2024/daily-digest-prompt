@@ -21,9 +21,12 @@ triggers:
   - "kb-research-strategist"
 depends-on:
   - knowledge-query
+  - "config/dependencies.yaml"
 ---
 
 # kb-research-strategist：知識庫研究策略師
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 ## 五階段知識累積模型
 

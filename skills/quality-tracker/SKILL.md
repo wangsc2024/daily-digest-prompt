@@ -22,9 +22,12 @@ triggers:
   - "品質監控"
 depends-on:
   - ntfy-notify
+  - config/dependencies.yaml
 ---
 
 # quality-tracker：Agent 輸出品質追蹤與回歸偵測
+
+> **端點來源**：`config/dependencies.yaml`（ADR-001 Phase 3）— 請讀取 YAML 取得對應 base_url（deps key: ntfy_notify）。
 
 ## 設計目的
 

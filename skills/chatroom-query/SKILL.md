@@ -9,6 +9,7 @@ allowed-tools: Bash, Read, Write
 cache-ttl: 15min
 depends-on:
   - api-cache
+  - config/dependencies.yaml
 triggers:
   - "chatroom"
   - "聊天室"
@@ -22,6 +23,18 @@ triggers:
 ---
 
 # chatroom-query Skill v1.1.0
+
+## 依賴注入（DI）
+
+> 端點來源：`config/dependencies.yaml` → `skills.chatroom_relay`（ADR-001 Phase 3）
+> 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
+>
+> **讀取片段**（在需要呼叫 API 的步驟前執行）：
+> ```bash
+> BASE=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['chatroom_relay']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3001")
+> ```
+>
+> `base_url` fallback：`http://localhost:3001`（bot.js 預設埠）。
 
 ## API 連線資訊
 

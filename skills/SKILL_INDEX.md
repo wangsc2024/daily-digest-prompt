@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 24 個工具 = 43 個 Skills）
+## 速查表（19 個核心 + 25 個工具 = 44 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -45,17 +45,19 @@
 | 30 | markdown-editor | Markdown 指令／編輯／總結（依知識庫完整指南，33 種語法+TOC+摘要） | Markdown、md、格式化、摘要、TOC、目錄生成、表格、連結替換、內容總結、大綱、錨點、腳註、Mermaid、告警區塊、GFM、CommonMark |
 | 31 | skill-forge | 知識庫驅動的 Skill 自動生成（分析三大上下文→優先級矩陣→KB深研→生成SKILL.md→LLM自評分→整合） | skill-forge、生成 Skill、新增 Skill、Skill 缺口、能力缺口、Skill 鑄造、自動生成技能 |
 | 32 | workflow-forge | 流程標準化鑄造廠（config/prompts 掃描→格式與一致性缺口→工作流定義/輸出 Schema/驗證清單→整合） | workflow-forge、workflow 鑄造、流程標準化、輸出格式規範、工作流定義、系統一致性 |
-| 33 | academic-paper-research | 指定議題學術研究與報告生成（同行評審/學術專書/會議論文優先） | 學術研究、文獻回顧、研究報告、指定議題研究、論文等級、同行評審、literature review、academic research |
-| 34 | chatroom-task-delivery | chatroom 任務投遞診斷與修復（relay ACK / bot receipt / records / worker 四段鏈路） | chatroom delivery、task delivery、mk_、/api/task、未入列、未執行、假成功、receipt timeout、bot receipt、Gun relay 任務 |
-| 35 | cache-optimizer | 快取效率分析與 TTL 調優（JSONL 日誌解析→端點命中率→調優建議，depends-on: api-cache） | 快取優化、快取分析、cache optimization、TTL 調優、命中率分析、快取效率、快取診斷 |
-| 36 | cursor-cli | 以 agent -p 為另一執行任務工具（腳本/排程/單次程式碼/重構/審查，與 Todoist Agent 並行） | cursor cli、agent -p、agent --print、Cursor Agent 終端、CLI 任務、非互動 Agent、腳本化 Cursor、排程呼叫 Agent、cursor-cli |
-| 37 | todo-scanner [草稿] | TODO/FIXME 自動掃描與分類清理（規範性 vs 缺陷型，支援 ADR-017） | TODO 清理、FIXME 掃描、todo-scanner、程式碼衛生、TODO 分類、待辦標記統計、技術債盤點 |
-| 38 | quality-tracker | Agent 輸出品質追蹤與回歸偵測（DONE_CERT 品質分數趨勢化，支援 ADR-004） | 品質追蹤、品質回歸、quality tracking、品質趨勢、品質閘門、DONE_CERT 分析、品質監控 |
-| 39 | task-fairness-analyzer | 自動任務公平性診斷與再平衡建議（Gini 係數/飢餓偵測/根因分析，depends-on: scheduler-state、system-insight） | 任務公平性、排程公平、任務飢餓、task fairness、starvation、任務再平衡、公平性分析 |
-| 40 | prompt-lint | Prompt 模板靜態分析（7 條規則偵測反模式：過長/缺 preamble/hardcoded 端點/冗餘指令，depends-on: system-insight） | prompt-lint、prompt 檢查、模板分析、prompt 品質、模板膨脹、prompt 反模式、prompt 優化 |
-| 41 | behavior-pattern-analyzer | Agent 行為模式分析與 Skill 演化候選識別（信心度/頻率/I/O 聚類，depends-on: system-insight） | 行為模式分析、behavior pattern、模式挖掘、Skill 演化、行為聚類、agent 行為、behavior-pattern-analyzer |
-| 42 | agent-result-validator | Agent 結果檔案 Schema 驗證與格式漂移偵測（ADR-003 落地，depends-on: system-insight） | 結果驗證、result validation、schema 驗證、格式漂移、format drift、agent-result-validator、結果檔案檢查、handoff 驗證 |
-| 43 | context-budget-monitor | Agent I/O 預算監控與 Context 保護強制執行（per-session I/O 分析，depends-on: system-insight） | context-budget-monitor、I/O 預算、Context 保護、Context 膨脹、session I/O、avg_io_per_call、預算監控 |
+| 33 | insight-briefing | 深度研究洞察簡報（多 Skill 串接：研究策略→蒐集→洞察→簡報→KB 匯入→通知，depends-on: knowledge-query、web-research、kb-research-strategist、ntfy-notify） | 深度研究洞察簡報、insight briefing、研究簡報、多 Skill 研究簡報 |
+| 34 | academic-paper-research | 指定議題學術研究與報告生成（同行評審/學術專書/會議論文優先） | 學術研究、文獻回顧、研究報告、指定議題研究、論文等級、同行評審、literature review、academic research |
+| 35 | chatroom-task-delivery | chatroom 任務投遞診斷與修復（relay ACK / bot receipt / records / worker 四段鏈路） | chatroom delivery、task delivery、mk_、/api/task、未入列、未執行、假成功、receipt timeout、bot receipt、Gun relay 任務 |
+| 36 | cache-optimizer | 快取效率分析與 TTL 調優（JSONL 日誌解析→端點命中率→調優建議，depends-on: api-cache） | 快取優化、快取分析、cache optimization、TTL 調優、命中率分析、快取效率、快取診斷 |
+| 37 | cursor-cli | 以 agent -p 為另一執行任務工具（腳本/排程/單次程式碼/重構/審查，與 Todoist Agent 並行） | cursor cli、agent -p、agent --print、Cursor Agent 終端、CLI 任務、非互動 Agent、腳本化 Cursor、排程呼叫 Agent、cursor-cli |
+| 38 | todo-scanner [草稿] | TODO/FIXME 自動掃描與分類清理（規範性 vs 缺陷型，支援 ADR-017） | TODO 清理、FIXME 掃描、todo-scanner、程式碼衛生、TODO 分類、待辦標記統計、技術債盤點 |
+| 39 | quality-tracker | Agent 輸出品質追蹤與回歸偵測（DONE_CERT 品質分數趨勢化，支援 ADR-004） | 品質追蹤、品質回歸、quality tracking、品質趨勢、品質閘門、DONE_CERT 分析、品質監控 |
+| 40 | task-fairness-analyzer | 自動任務公平性診斷與再平衡建議（Gini 係數/飢餓偵測/根因分析，depends-on: scheduler-state、system-insight） | 任務公平性、排程公平、任務飢餓、task fairness、starvation、任務再平衡、公平性分析 |
+| 41 | prompt-lint | Prompt 模板靜態分析（7 條規則偵測反模式：過長/缺 preamble/hardcoded 端點/冗餘指令，depends-on: system-insight） | prompt-lint、prompt 檢查、模板分析、prompt 品質、模板膨脹、prompt 反模式、prompt 優化 |
+| 42 | behavior-pattern-analyzer | Agent 行為模式分析與 Skill 演化候選識別（信心度/頻率/I/O 聚類，depends-on: system-insight） | 行為模式分析、behavior pattern、模式挖掘、Skill 演化、行為聚類、agent 行為、behavior-pattern-analyzer |
+| 43 | agent-result-validator | Agent 結果檔案 Schema 驗證與格式漂移偵測（ADR-003 落地，depends-on: system-insight） | 結果驗證、result validation、schema 驗證、格式漂移、format drift、agent-result-validator、結果檔案檢查、handoff 驗證 |
+| 44 | context-budget-monitor | Agent I/O 預算監控與 Context 保護強制執行（per-session I/O 分析，depends-on: system-insight） | context-budget-monitor、I/O 預算、Context 保護、Context 膨脹、session I/O、avg_io_per_call、預算監控 |
+| 45 | pre-flight-check [草稿] | 執行前飛行檢查：外部依賴健康探測 + 時段風險評估 + go/no-go 決策（depends-on: scheduler-state、api-cache） | pre-flight-check、執行前檢查、飛行檢查、依賴健康、時段風險、go/no-go、預防性檢查 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

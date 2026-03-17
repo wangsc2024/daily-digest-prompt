@@ -43,6 +43,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
    - 統計各工具呼叫次數
    - 統計 tags 分佈（api-call, cache-read, skill-read, error, blocked 等）
    - 計算 session 平均耗時
+   - **block_rate / blocked_count**：必須使用 `tools/collect_system_data.py` 產出的 `jsonl_stats.blocked_count`、`jsonl_stats.block_rate`、`jsonl_stats.total_calls`，禁止從原始 JSONL 內文推斷（日誌中可能出現「1085 chars」、時間戳小數等數字，誤用會導致 block_rate 誤報）
 
 2. **scheduler-state.json**（`state/scheduler-state.json`）
    - 近 7 天成功/失敗比率
@@ -70,7 +71,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | skill_usage_coverage | 被使用的 Skill 數 / 26（從 JSONL `skill-read` 標籤統計 unique Skill 名稱；總數：19 核心 + 7 工具） | >= 70% |
 | cache_hit_ratio | cache-read / (cache-read + api-call) | >= 40% |
 | error_rate | error 標籤 / 總呼叫數 | <= 5% |
-| block_rate | blocked 標籤 / 總呼叫數 | <= 2% |
+| block_rate | blocked_count / total_calls（由 collect_system_data 產出，禁止手動從 JSONL 推斷） | <= 2% |
 | topic_diversity | unique topics / total research entries | >= 0.5 |
 | auto_task_fairness | stddev(task_counts) / mean(task_counts) | <= 0.5 |
 | avg_io_per_call | 所有工具呼叫 output_len 平均值 | <= 5000 chars |

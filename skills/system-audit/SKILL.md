@@ -9,7 +9,7 @@ description: |
   Note: 互動式工具 Skill，由使用者手動觸發，不透過 Todoist 自動路由。
 allowed-tools: Bash, Read, Write, Glob, Grep, WebSearch, WebFetch
 cache-ttl: N/A
-depends-on: [skill-scanner]
+depends-on: [skill-scanner, config/dependencies.yaml]
 triggers:
   - "系統審查"
   - "系統評分"
@@ -24,6 +24,8 @@ triggers:
 ---
 
 # System Audit — 通用系統審查評分
+
+> **端點來源**：`config/dependencies.yaml`（ADR-001 Phase 3）— 請讀取 YAML 取得對應 base_url（deps key: knowledge_query）。
 
 以 7 個維度、38 個子項對目標系統進行全面量化評估，產出結構化報告。
 

@@ -19,9 +19,12 @@ triggers:
   - "prompt 優化"
 depends-on:
   - system-insight
+  - "config/dependencies.yaml"
 ---
 
 # prompt-lint：Prompt 模板靜態分析工具
+
+> **端點來源**：`config/dependencies.yaml`（deps key: `knowledge_query`）— ADR-001 Phase 3
 
 ## 設計目標
 
