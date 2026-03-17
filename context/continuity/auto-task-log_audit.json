@@ -4,6 +4,22 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-16T22:37:00+08:00",
+      "topic": "Groq 配額超限與 Stale lock 清理修復",
+      "status": "completed",
+      "key_findings": "發現並修復 2 個問題：P1-Groq API 配額超限（降低速率 5→3），P2-Stale lock 清理頻繁（強化末尾清理邏輯）。所有修改已通過驗證並歸檔至知識庫。",
+      "kb_note_ids": ["c6bfc6f2-4359-4571-939d-5d0d87ee9f8c"],
+      "next_suggested_angle": "監控 Groq 429 錯誤消失情況，追蹤 Stale lock 頻率變化"
+    },
+    {
+      "executed_at": "2026-03-16T15:34:00+08:00",
+      "topic": "系統穩定性驗證與 Token 用量校準建議",
+      "status": "completed",
+      "key_findings": "Log 審查顯示系統健康（9 個錯誤信號全數為零），Codex 降級機制 100% 成功。建議校準 token 用量警戒閾值（當前 1.5M 過低，實際 3-11M/day）。",
+      "kb_note_ids": ["38a9f82b-3414-46a7-a250-00868d6f9a79"],
+      "next_suggested_angle": "分析 Phase 2/3 耗時分布，識別優化機會"
+    },
+    {
       "executed_at": "2026-03-15T21:36:00+08:00",
       "topic": "Phase 3 done_cert JSON 解析失敗修復",
       "status": "partial",

@@ -163,6 +163,28 @@
       "verse_id": 15,
       "session": "evening",
       "time": "2026-03-15 17:05:01"
+    },
+    {
+      "session": "evening",
+      "verse_id": 16,
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-16",
+      "author": "神秀大師",
+      "status": "success",
+      "time": "2026-03-16 17:05:01",
+      "verse_text": "身是菩提樹，心如明鏡臺，時時勤拂拭，勿使惹塵埃。",
+      "source": "《六祖大師法寶壇經》"
+    },
+    {
+      "time": "2026-03-17 06:30:01",
+      "verse_text": "朝看花開滿樹紅，暮看花落樹還空；若將花比人間事，花與人間事一同。",
+      "verse_id": 17,
+      "author": "龍舒居士王日休",
+      "source": "《龍舒淨土文》",
+      "date": "2026-03-17",
+      "status": "success",
+      "session": "morning",
+      "channel": "ntfy/wangsc2025"
     }
   ]
 }

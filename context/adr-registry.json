@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "updated_at": "2026-03-14",
+  "updated_at": "2026-03-17",
   "summary": {
-    "total": 15,
-    "proposed": 0,
-    "accepted": 13,
+    "total": 18,
+    "proposed": 1,
+    "accepted": 15,
     "deferred": 1,
     "wontfix": 1,
     "rejected": 0,
@@ -43,7 +43,7 @@
       ],
       "notes": "來源：pydantic/pydantic-ai（14,942 stars）。Phase 1 POC 建議選 todoist Skill，因其同時有 REST API + Cache 兩種依賴，最具代表性。",
       "fitness_functions": [],
-      "tech_debt_score": 0.0,
+      "tech_debt_score": 2.0,
       "auto_generated": false,
       "review_due": "2026-05-25"
     },
@@ -76,7 +76,6 @@
         "templates/shared/quality-gate.md",
         "templates/shared/done-cert.md"
       ],
-      "notes": "來源：openai/openai-agents-python（18,986 stars）。建議分兩步：(1) 在 quality-gate.md 新增 JSON schema 驗證段落；(2) 在 on_stop_alert.py 增加格式一致性統計。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -93,8 +92,8 @@
       "source_pattern": "Agent Handoff 控制轉移機制",
       "priority": "P1",
       "effort": "medium",
-      "context": "OpenAI SDK 的 Handoff 讓 Agent 可以宣告式地將控制權轉移給其他 Agent（附帶上下文傳遞）。現有子 Agent 委派透過 PowerShell Start-Job 實現，上下文傳遞依賴臨時 JSON 檔（results/*.json），缺乏語義層的 handoff 定義——何時轉交、轉交什麼上下文、如何回傳結果沒有標準化。",
-      "decision": "接受（縮減範圍）。不重寫 PS1 team 腳本架構。具體行動：(1) 建立 config/schemas/agent-result.schema.json 定義 results/*.json 標準欄位（status/task_type/artifacts_produced/quality_score）；(2) 在 check-health.ps1 新增 schema 驗證區塊，偵測格式不符的結果檔；(3) 全語義 Handoff SDK 遷移延後至正式採用 Claude Agent SDK 時再評估。目前 todoist-auto-{key}.json 命名規範已是事實上的 handoff 標準，此決策將其形式化。",
+      "context": "OpenAI SDK 的 Handoff 讓 Agent 可以宣告式地將控制權轉移給其他 Agent（附帶上下文傳遞）。現有子 Agent 委派透過 PowerShell Start-Job 實現，上下文傳遞依賴臨時 JSON 檔（results/*.json），缺乏語義層的 handoff 定義。",
+      "decision": "接受（縮減範圍）。不重寫 PS1 team 腳本架構。具體行動：(1) 建立 config/schemas/agent-result.schema.json 定義 results/*.json 標準欄位（status/task_type/artifacts_produced/quality_score）；(2) 在 check-health.ps1 新增 schema 驗證區塊，偵測格式不符的結果檔；(3) 全語義 Handoff SDK 遷移延後至正式採用 Claude Agent SDK 時再評估。",
       "consequences": {
         "positive": [
           "routing.yaml 可定義標準 handoff 規則，提升可讀性",
@@ -112,7 +111,6 @@
         "templates/sub-agent/skill-task.md",
         "run-todoist-agent-team.ps1"
       ],
-      "notes": "來源：openai/openai-agents-python。2026-02-18 的 Phase 2/3 檔案命名修正（todoist-auto-*.json）是此問題的局部解法，此 ADR 將其推廣為全面 schema 標準。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -129,8 +127,8 @@
       "source_pattern": "Evals 評估系統",
       "priority": "P1",
       "effort": "medium",
-      "context": "Pydantic AI 內建 Evals 評估系統，可系統性測試 Agent 的效能與準確度。現有 system-audit（38 子項評分）和 benchmark.yaml 是靜態門檻，但缺乏自動化的 Agent 輸出品質評估——摘要完整度、研究深度、通知可讀性均無量化追蹤。",
-      "decision": "接受（輕量版）。不引入完整 Evals SDK。具體行動：(1) 在 quality-gate.md 確認已有的 3 個量化指標（研究 ≥300 字、摘要 ≥3 任務、通知 ≤50 字）；(2) on_stop_alert.py 新增 quality_scores 追蹤欄位（從 DONE_CERT 的 quality_score 欄位彙總）；(3) context/metrics-daily.json 加入每日品質分數趨勢（由 ADR-20260304-009 的 OTel 框架提供支撐）；(4) 完整 Evals 框架延後，待品質分數趨勢資料累積 30 天後再評估是否需要更精密的評估工具。",
+      "context": "Pydantic AI 內建 Evals 評估系統，可系統性測試 Agent 的效能與準確度。現有 system-audit（38 子項評分）和 benchmark.yaml 是靜態門檻，但缺乏自動化的 Agent 輸出品質評估。",
+      "decision": "接受（輕量版）。不引入完整 Evals SDK。具體行動：(1) 在 quality-gate.md 確認已有的 3 個量化指標；(2) on_stop_alert.py 新增 quality_scores 追蹤欄位；(3) context/metrics-daily.json 加入每日品質分數趨勢；(4) 完整 Evals 框架延後。",
       "consequences": {
         "positive": [
           "Agent 輸出品質可隨時間趨勢化",
@@ -149,7 +147,6 @@
         "hooks/on_stop_alert.py",
         "context/metrics-daily.json"
       ],
-      "notes": "來源：pydantic/pydantic-ai。quality_score 已存在於 DONE_CERT 格式，只需在 on_stop_alert.py 匯總即可，實作成本極低。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -167,8 +164,8 @@
       "source_pattern": "可組合工作流模式（Composable Workflow Patterns）",
       "priority": "P1",
       "effort": "medium",
-      "context": "mcp-agent 實作了 Anthropic 'Building Effective Agents' 論文中的 map-reduce、orchestrator、evaluator-optimizer、router 模式。現有管線是固定三階段（fetch→assemble→notify），缺乏動態組合能力——無法根據快取狀態跳過 API 呼叫、無法讓品質閘門觸發自動重試。",
-      "decision": "接受（保守範圍）。不重寫 PowerShell Start-Job 架構。具體行動：(1) Phase 1 的 cache/status.json valid 旗標已實作（P0-B），延伸為「valid=true 時跳過對應 agent」的條件跳過邏輯（修改 run-agent-team.ps1）；(2) 品質閘門重試已有 phase2_max_retries=1，維持現狀；(3) map-reduce/orchestrator 完整模式延後，待評估 Claude Agent SDK 整合可行性後再決定。快取命中率改善預計對系統效能有直接正面影響。",
+      "context": "mcp-agent 實作了 Anthropic 'Building Effective Agents' 論文中的 map-reduce、orchestrator、evaluator-optimizer、router 模式。現有管線是固定三階段（fetch→assemble→notify），缺乏動態組合能力。",
+      "decision": "接受（保守範圍）。不重寫 PowerShell Start-Job 架構。具體行動：Phase 1 的 cache/status.json valid 旗標已實作，延伸為條件跳過邏輯。",
       "consequences": {
         "positive": [
           "快取命中時可跳過 API fetch 階段，節省 token",
@@ -186,7 +183,6 @@
         "cache/status.json",
         "templates/sub-agent/refinement.md"
       ],
-      "notes": "來源：lastmile-ai/mcp-agent（8,035 stars）。cache/status.json valid 旗標已由 P0-B 實作，是此模式的基礎建設，應優先延伸利用。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -202,34 +198,26 @@
       "source_pattern": "Daily-Digest-Prompt 可觀測性成熟度演進路線圖（KB: a085364f）",
       "priority": "P0",
       "effort": "medium",
-      "context": "系統快取命中率 12.1%（目標 ≥40%）、output_len 始終為 0、無跨 Phase 因果關聯、無 SLO 量化基準。現有 JSONL 日誌結構良好但缺乏時序聚合與 Span 追蹤能力。評估過 OpenTelemetry SDK 但引入外部依賴不符合「不使用 Docker、最小化依賴」的架構原則。",
-      "decision": "自建輕量級四層可觀測性框架：(1) Level 2 指標聚合—context/metrics-daily.json 14 天滾動窗口，by on_stop_alert.py；(2) Level 3 Span 記錄—results/spans-{trace_id}.json，by PS1 team 腳本；(3) SLO 配置—config/slo.yaml 6 個 SLO 定義；(4) Error Budget 計算—整合至健康報告。採用 OpenTelemetry 語義欄位命名（trace_id/span_type/parent_trace_id）確保未來可遷移至標準 OTel。",
+      "context": "系統快取命中率 12.1%（目標 ≥40%）、output_len 始終為 0、無跨 Phase 因果關聯、無 SLO 量化基準。",
+      "decision": "自建輕量級四層可觀測性框架。採用 OpenTelemetry 語義欄位命名確保未來可遷移至標準 OTel。",
       "consequences": {
         "positive": [
           "零外部依賴：純 Python + PowerShell，保持最小化架構",
           "14 天趨勢基礎：metrics-daily.json 支援 regression 模式與趨勢箭頭",
-          "SLO 量化決策：Error Budget 取代主觀判斷",
-          "Waterfall 視覺化：spans-*.json 支援 query-logs.ps1 -Mode waterfall",
-          "OTel 語義相容：未來可接 Jaeger/Tempo 而不需重構"
+          "SLO 量化決策：Error Budget 取代主觀判斷"
         ],
         "negative": [
-          "per-agent span 時間精度有限（共用 Phase 起始時間，非真實個別完成時間）",
+          "per-agent span 時間精度有限",
           "指標計算依賴 Session 結束（on_stop_alert.py），中途崩潰不寫入"
         ]
       },
       "related_files": [
         "context/metrics-daily.json",
-        "results/spans-{trace_id}.json",
         "config/slo.yaml",
         "hooks/on_stop_alert.py",
         "hooks/post_tool_logger.py",
-        "check-health.ps1",
-        "query-logs.ps1",
-        "run-agent-team.ps1",
-        "run-todoist-agent-team.ps1",
-        "run-system-audit-team.ps1"
+        "check-health.ps1"
       ],
-      "notes": "來源 KB 報告 ID: a085364f。Level 3-B parent_trace_id 改由 PARENT_TRACE_ID 環境變數注入（非錯誤地複製 trace_id）。cognitive tags 為 Level 3-C 補充（routing/skill-select/retry 決策可追蹤）。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -245,29 +233,14 @@
       "source": "improvement-backlog",
       "source_pattern": "依賴漏洞自動掃描",
       "priority": "P1",
-      "dimension": "資訊安全",
       "effort": "medium",
-      "current_score": 75,
-      "target_score": 85,
-      "context": "系統審查（2026-03-11）1.4 依賴安全 75 分。無 pip-audit 或 Dependabot 整合，pyproject.toml 使用 >= 而非 == 精確版本鎖定。若依賴被注入惡意版本，現有 Hook 層無法偵測。",
-      "decision": "接受。具體行動：(1) pyproject.toml 的 [dev] 新增 pip-audit 依賴；(2) check-health.ps1 新增 [依賴安全掃描] 區塊，執行 uv run pip-audit 並顯示結果；(3) 重大漏洞（CVSS ≥ 7.0）觸發 ntfy critical 告警；(4) pyproject.toml 的核心依賴改用 == 精確版本（pyyaml、requests 等），測試/開發依賴維持 >= 彈性。不整合 Dependabot（需 GitHub App 授權，超出當前架構範圍）。",
+      "context": "系統審查（2026-03-11）1.4 依賴安全 75 分。無 pip-audit 或 Dependabot 整合。",
+      "decision": "接受。pyproject.toml 新增 pip-audit，check-health.ps1 新增掃描區塊。",
       "consequences": {
-        "positive": [
-          "依賴漏洞可量化，安全評分預計 75→85",
-          "無需外部服務，純本地工具",
-          "整合至現有 check-health.ps1 工作流，無新學習成本"
-        ],
-        "negative": [
-          "pip-audit 需要連線 PyPI，離線環境會失敗",
-          "精確版本鎖定需要定期手動升級"
-        ]
+        "positive": ["依賴漏洞可量化", "純本地工具", "整合至現有工作流"],
+        "negative": ["需連線 PyPI", "精確版本鎖定需定期手動升級"]
       },
-      "related_files": [
-        "pyproject.toml",
-        "uv.lock",
-        "check-health.ps1"
-      ],
-      "notes": "立即可行的安全提升。pip-audit 由 PyPA 官方維護，可信度高。建議第一次執行後記錄基準漏洞數量，後續追蹤趨勢。",
+      "related_files": ["pyproject.toml", "uv.lock", "check-health.ps1"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -283,31 +256,14 @@
       "source": "improvement-backlog",
       "source_pattern": "行覆蓋率提升計畫",
       "priority": "P2",
-      "dimension": "系統品質",
       "effort": "medium",
-      "current_score": 82,
-      "target_score": 90,
-      "context": "系統審查（2026-03-11）3.1 測試覆蓋率：682 個測試模組覆蓋率 100%，但行覆蓋率 10.19% 遠低於 45% 目標。高優先測試模組（pre_bash_guard、agent_guardian、hook_utils）的分支邏輯未完全覆蓋。",
-      "decision": "接受（分階段）。具體行動：(1) pyproject.toml 新增 pytest-cov 配置，預設執行 coverage report；(2) 建立 .coveragerc，focus 在 hooks/*.py（最高風險模組）；(3) Phase 1 目標：hook_utils.py 行覆蓋率從估計 40% 提升至 80%（新增 20 個測試）；(4) Phase 2 目標：agent_guardian.py ErrorClassifier 分支覆蓋至 75%（新增 15 個測試）；(5) 整體行覆蓋率短期目標 30%，長期目標 45%。不設硬性 gate（不因覆蓋率不足而 fail CI），僅在 check-health.ps1 顯示趨勢。",
+      "context": "行覆蓋率 10.19% 遠低於 45% 目標。",
+      "decision": "接受（分階段）。Hook 模組優先提升行覆蓋率。",
       "consequences": {
-        "positive": [
-          "Hook 分支邏輯可信度提升",
-          "回歸偵測能力增強（現有 682 個測試主要測試 happy path）",
-          "為未來 CI 整合做好基礎"
-        ],
-        "negative": [
-          "新增測試需要理解現有實作細節，初期工作量不低",
-          "100% 模組覆蓋率的假象可能導致安全感過高"
-        ]
+        "positive": ["Hook 分支邏輯可信度提升", "回歸偵測能力增強"],
+        "negative": ["初期工作量不低", "假象安全感"]
       },
-      "related_files": [
-        "tests/hooks/test_hook_utils.py",
-        "tests/hooks/test_pre_bash_guard.py",
-        "hooks/hook_utils.py",
-        "hooks/agent_guardian.py",
-        "pyproject.toml"
-      ],
-      "notes": "pytest --cov=hooks --cov-report=term-missing 可立即使用。優先補強 ErrorClassifier 的 rate_limit 分類分支，因為它影響所有 API 呼叫的韌性。",
+      "related_files": ["tests/hooks/", "hooks/hook_utils.py", "hooks/agent_guardian.py", "pyproject.toml"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -323,28 +279,14 @@
       "source": "improvement-backlog",
       "source_pattern": "YAML 注釋密度全面提升",
       "priority": "P2",
-      "dimension": "系統文件",
       "effort": "low",
-      "current_score": 76,
-      "target_score": 84,
-      "context": "系統審查（2026-03-11）6.4 配置說明 76 分。22 個 YAML 檔案平均注釋密度 13%，低於 20% 目標。本次審查已修正 2 個，但仍有 config/cache-policy.yaml、config/scoring.yaml、config/notification.yaml 等關鍵配置注釋不足。",
-      "decision": "接受（立即修復）。low effort、明確目標，列為 immediate_fix 供 self-heal 直接執行。具體操作：對 cache-policy.yaml、scoring.yaml、notification.yaml 三個檔案，在每個頂層欄位上方新增說明注釋，達到 20% 注釋密度（約每 5 行有 1 行注釋）。不改變任何配置值，純粹增加可讀性。",
+      "context": "22 個 YAML 檔案平均注釋密度 13%，低於 20% 目標。",
+      "decision": "接受（立即修復）。對關鍵配置檔案新增說明注釋，達到 20% 注釋密度。",
       "consequences": {
-        "positive": [
-          "配置意圖自文件化，新維護者無需查詢 CLAUDE.md",
-          "audit-scoring 文件評分預計 76→84",
-          "low effort 高回報，立即可見效果"
-        ],
-        "negative": [
-          "注釋需與配置保持同步，後續修改需同時更新注釋"
-        ]
+        "positive": ["配置意圖自文件化", "audit-scoring 評分提升"],
+        "negative": ["注釋需與配置保持同步"]
       },
-      "related_files": [
-        "config/cache-policy.yaml",
-        "config/scoring.yaml",
-        "config/notification.yaml"
-      ],
-      "notes": "immediate_fix 項目，由 self-heal 在下次執行時優先處理。注釋格式參考 config/health-scoring.yaml（已有良好示範）。",
+      "related_files": ["config/cache-policy.yaml", "config/scoring.yaml", "config/notification.yaml"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -360,29 +302,14 @@
       "source": "improvement-backlog",
       "source_pattern": "GitHub Actions CI 基礎建設",
       "priority": "P2",
-      "dimension": "技術棧",
       "effort": "medium",
-      "current_score": 78,
-      "target_score": 85,
-      "context": "系統審查（2026-03-11）5.3 工具鏈完整性 78 分。缺 CI/CD pipeline，682 個測試僅手動觸發。若主分支推送帶有 regression，無自動偵測機制。",
-      "decision": "提議（Proposed）。需要確認 GitHub Actions 觸發條件與 secrets 管理方式後再決定。傾向建立最小 CI：push to main 觸發 (1) uv run pytest tests/hooks/ 和 (2) uv run pip-audit。不設 deployment 步驟。待確認：目前 GitHub repo 是否已設定？是否有 API keys 需要注入為 secrets？若無 GitHub repo，此 ADR 暫時不可行。",
+      "context": "缺 CI/CD pipeline，測試僅手動觸發。",
+      "decision": "建立最小 CI：push to main 觸發 pytest + pip-audit。",
       "consequences": {
-        "positive": [
-          "Hook 回歸自動偵測，減少手動測試負擔",
-          "pip-audit 在 push 時自動掃描，與 ADR-010 協同",
-          "工具鏈評分預計 78→85"
-        ],
-        "negative": [
-          "需要 GitHub Actions 配置時間",
-          "API keys 需要 secrets 管理（敏感資訊不可寫入 yaml）",
-          "CI 執行時間增加每次 push 的等待"
-        ]
+        "positive": ["Hook 回歸自動偵測", "與 ADR-010 協同"],
+        "negative": ["需 GitHub Actions 配置", "API keys 需 secrets 管理"]
       },
-      "related_files": [
-        ".github/workflows/ci.yml",
-        "pyproject.toml"
-      ],
-      "notes": "狀態設為 Proposed 等待人工確認 GitHub 環境是否就緒。若已有 repo，建立 ci.yml 約需 30 分鐘。最小 workflow 模板已有充足參考（uv + pytest 組合）。ci.yml 已建立並同步至 repo。",
+      "related_files": [".github/workflows/ci.yml", "pyproject.toml"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -398,26 +325,14 @@
       "source": "improvement-backlog",
       "source_pattern": "跨平台排程抽象層",
       "priority": "P2",
-      "dimension": "技術棧",
       "effort": "high",
-      "current_score": 60,
-      "target_score": 75,
-      "context": "系統審查（2026-03-11）5.4 跨平台相容性 60 分。系統僅支援 Windows Task Scheduler，無 cron/systemd 替代方案。",
-      "decision": "不修復（Wontfix）。理由：(1) 系統明確設計為 Windows-only 個人助理，ADR-003 確立 PowerShell 7 作為執行環境；(2) effort=high，影響 setup-scheduler.ps1、HEARTBEAT.md、run-with-env.ps1 等核心腳本；(3) 唯一用戶（本人）使用 Windows 11，無跨平台需求；(4) 若未來需要跨平台，正確方式是整體重架（改為 Docker + cron），而非在現有架構上加抽象層。此分數偏低（60）接受，不以此項目為改善優先級。建立 docs/design/cross-platform-scheduler-design.md 作為設計備忘（非執行計畫）。",
+      "context": "系統僅支援 Windows Task Scheduler，無 cron/systemd 替代。",
+      "decision": "不修復（Wontfix）。系統明確設計為 Windows-only 個人助理，無跨平台需求。",
       "consequences": {
-        "positive": [
-          "節省 high effort 的開發時間用於更高槓桿的改善項目",
-          "保持架構簡單性（ADR-002 文件驅動原則）"
-        ],
-        "negative": [
-          "跨平台相容性分數維持 60，拉低技術棧維度總分",
-          "若未來需要 Linux 部署，需大幅重寫"
-        ]
+        "positive": ["節省開發時間", "保持架構簡單性"],
+        "negative": ["跨平台分數維持 60", "未來需 Linux 部署時大幅重寫"]
       },
-      "related_files": [
-        "docs/design/cross-platform-scheduler-design.md"
-      ],
-      "notes": "建議在 docs/design/cross-platform-scheduler-design.md 記錄若未來需要跨平台的遷移路徑（Windows Task Scheduler → cron 的映射表），方便未來決策。",
+      "related_files": ["docs/design/cross-platform-scheduler-design.md"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -433,29 +348,14 @@
       "source": "improvement-backlog",
       "source_pattern": "PS1 hardcoded timeout 消除",
       "priority": "P1",
-      "dimension": "系統架構",
       "effort": "medium",
-      "current_score": 75,
-      "target_score": 88,
-      "context": "系統審查（2026-03-12）2.2 配置外部化 75 分。run-todoist-agent-team.ps1 第 25-68 行 hardcode 25 個 timeout 值，未讀取 timeouts.yaml。違反「改配置不改程式碼」原則（ADR-002 文件驅動架構）。run-agent-team.ps1 也有類似問題。",
-      "decision": "提議（Proposed）。具體行動：(1) 在 run-todoist-agent-team.ps1 啟動時用 ConvertFrom-YamlViapy 讀取 config/timeouts.yaml，取代 $AutoTaskTimeoutOverride hashtable 的 hardcoded 值；(2) run-agent-team.ps1 同理處理 Phase timeout；(3) 保留 fallback 預設值（YAML 讀取失敗時使用 hardcoded 值，確保韌性）；(4) 修改後需端對端驗證所有排程任務的 timeout 行為不變。因涉及核心腳本，列為 schedule_adr 待人工排程。",
+      "context": "run-todoist-agent-team.ps1 hardcode timeout 值，未讀取 timeouts.yaml。",
+      "decision": "提議。在 PS1 啟動時讀取 config/timeouts.yaml 取代 hardcoded 值。",
       "consequences": {
-        "positive": [
-          "timeout 調整只需改 config/timeouts.yaml，無需修改 PS1 腳本",
-          "配置外部化評分預計 75→88",
-          "與 ADR-002 文件驅動架構原則一致"
-        ],
-        "negative": [
-          "引入 YAML 解析依賴（ConvertFrom-YamlViapy），增加啟動時間約 1-2 秒",
-          "需確保 YAML 解析失敗時的 fallback 機制正確"
-        ]
+        "positive": ["timeout 調整只需改 YAML", "與 ADR-002 一致"],
+        "negative": ["引入 YAML 解析依賴", "需確保 fallback 機制"]
       },
-      "related_files": [
-        "run-todoist-agent-team.ps1",
-        "run-agent-team.ps1",
-        "config/timeouts.yaml"
-      ],
-      "notes": "與 ADR-002（文件驅動架構）直接相關。建議實施時先在 run-agent-team.ps1 試行（較簡單），驗證後再擴展到 run-todoist-agent-team.ps1。",
+      "related_files": ["run-todoist-agent-team.ps1", "run-agent-team.ps1", "config/timeouts.yaml"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -471,27 +371,14 @@
       "source": "improvement-backlog",
       "source_pattern": "CI ruff lint 整合",
       "priority": "P1",
-      "dimension": "技術棧",
       "effort": "low",
-      "current_score": 75,
-      "target_score": 80,
-      "context": "系統審查（2026-03-14）5.3 工具鏈完整性 75 分。CI（ADR-013）已建立 pytest + pip-audit，但缺 ruff lint 和 PowerShell 語法驗證。ruff lint 可在 CI 中自動偵測程式碼品質回歸。",
-      "decision": "接受（立即修復）。在 .github/workflows/ci.yml 的 Install dependencies 之後、pytest 之前，新增 ruff check 步驟：`uv run ruff check hooks/ tools/ tests/`。effort=low，操作明確，不影響現有 CI 流程。",
+      "context": "CI 缺 ruff lint。",
+      "decision": "接受（立即修復）。在 ci.yml 新增 ruff check 步驟。",
       "consequences": {
-        "positive": [
-          "程式碼品質回歸自動偵測",
-          "與現有 CI pipeline 無縫整合",
-          "工具鏈評分預計 75→80"
-        ],
-        "negative": [
-          "現有程式碼若有 lint 問題需先修正才能通過 CI"
-        ]
+        "positive": ["程式碼品質自動偵測"],
+        "negative": ["現有 lint 問題需先修正"]
       },
-      "related_files": [
-        ".github/workflows/ci.yml",
-        "pyproject.toml"
-      ],
-      "notes": "ADR-013 的延伸。ruff 已在 pyproject.toml 的 dev 依賴中，無需新增依賴。",
+      "related_files": [".github/workflows/ci.yml", "pyproject.toml"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -507,28 +394,14 @@
       "source": "improvement-backlog",
       "source_pattern": "TODO/FIXME 規範性清理",
       "priority": "P2",
-      "dimension": "系統完成度",
       "effort": "low",
-      "current_score": 84,
-      "target_score": 88,
-      "context": "系統審查（2026-03-14）7.1 功能完成度 84 分。265 處 TODO/FIXME 分散 56 檔（70% 規範性、30% 缺陷型），導致 D7 退步 6 分。需人工分類哪些是規範性（可直接移除）、哪些是缺陷型（需修復後移除）。",
-      "decision": "接受（分階段、人工排程）。理由：265 處 TODO/FIXME 導致 D7 完成度 84 分，多數為規範性可清理。具體行動：(1) 用 grep 掃描並產出分類報告；(2) 規範性 TODO（如「考慮…」「可能需要…」）直接移除；(3) 缺陷型 TODO 轉 issue 追蹤；(4) 目標 265→80 處以下，優先清理 docs/plans/、再 templates/、再 prompts/。刻意設計的模板佔位符（如 new-auto-task.ps1）改用角括號語法以消除掃描誤報。不自動修復，由人工分批執行。",
+      "context": "265 處 TODO/FIXME 分散 56 檔，需人工分類。",
+      "decision": "接受（分階段、人工排程）。規範性 TODO 直接移除，缺陷型轉 issue。",
       "consequences": {
-        "positive": [
-          "功能完成度評分預計 84→88",
-          "減少程式碼噪音，提升可維護性"
-        ],
-        "negative": [
-          "需人工判斷每個 TODO 的性質，工作量不低",
-          "誤刪缺陷型 TODO 可能遺失問題追蹤"
-        ]
+        "positive": ["功能完成度評分提升", "減少程式碼噪音"],
+        "negative": ["需人工判斷", "誤刪缺陷型 TODO 風險"]
       },
-      "related_files": [
-        "docs/plans/",
-        "templates/",
-        "prompts/"
-      ],
-      "notes": "建議分批處理：先清理 docs/plans/（最多規範性 TODO），再處理 templates/，最後 prompts/。",
+      "related_files": ["docs/plans/", "templates/", "prompts/"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -541,33 +414,128 @@
       "implementation_status": "done",
       "created_at": "2026-03-14",
       "decided_at": "2026-03-14",
+      "implemented_at": "2026-03-16",
       "source": "improvement-backlog",
       "source_pattern": "Phase 2 任務 retry 機制",
       "priority": "P2",
-      "dimension": "系統工作流",
       "effort": "medium",
-      "current_score": 93,
-      "target_score": 95,
-      "context": "系統審查（2026-03-14）4.3 失敗恢復 93 分。Phase 2 任務執行無重試機制為最大缺口。單次失敗即終止，無 backoff 重試。",
-      "decision": "接受（人工排程）。理由：失敗恢復 93 分，Phase 2 單次失敗即終止為主要缺口。具體行動：(1) 在 run-todoist-agent-team.ps1 Phase 2 迴圈加入 max 1 retry、exponential backoff 初始 30s；(2) 僅對 timeout/transient 錯誤重試，permanent 不重試；(3) retry 事件寫入 spans JSON；(4) 同步檢視 config/timeouts.yaml 的 phase2_timeout 是否需放大以容納 retry。因涉及核心腳本，由人工實施與驗證。",
+      "context": "Phase 2 單次失敗即終止，無 backoff 重試。",
+      "decision": "接受（人工排程）。Phase 2 迴圈加入 max 1 retry、exponential backoff。",
       "consequences": {
-        "positive": [
-          "失敗恢復評分預計 93→95",
-          "暫時性錯誤（網路抖動、API 限速）可自動恢復"
-        ],
-        "negative": [
-          "retry 增加執行時間，需確保不超出排程窗口",
-          "需區分 transient vs permanent failure"
-        ]
+        "positive": ["失敗恢復提升", "暫時性錯誤自動恢復"],
+        "negative": ["retry 增加執行時間", "需區分 transient vs permanent"]
       },
-      "related_files": [
-        "run-todoist-agent-team.ps1"
-      ],
-      "notes": "與 ADR-005（可組合工作流）的品質閘門重試邏輯相關。建議實施時同步更新 config/timeouts.yaml 的 phase2_timeout 以容納 retry 時間。",
+      "related_files": ["run-todoist-agent-team.ps1"],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
       "review_due": "2026-06-12"
+    },
+    {
+      "id": "ADR-20260317-019",
+      "title": "CHANGELOG 格式規範化（Conventional Commit）",
+      "status": "Accepted",
+      "implementation_status": "immediate_fix",
+      "created_at": "2026-03-17",
+      "decided_at": "2026-03-17",
+      "source": "improvement-backlog",
+      "source_pattern": "CHANGELOG 格式規範化",
+      "priority": "P2",
+      "dimension": "系統文件",
+      "effort": "low",
+      "current_score": 76,
+      "target_score": 82,
+      "context": "系統審查（2026-03-17）近 20 筆 commit 中 30% 不符 Conventional Commit 格式，CHANGELOG 評分 76。需統一 commit message 格式並規範 CHANGELOG 書寫方式。",
+      "decision": "自動接受：規範 CHANGELOG.md 格式，補充缺失的版本標題與分類標籤（feat/fix/chore/refactor），操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "CHANGELOG 可讀性提升，版本歷史清晰",
+          "系統文件評分預計 76→82",
+          "為未來自動化 CHANGELOG 生成奠定基礎"
+        ],
+        "negative": [
+          "需與團隊統一 commit message 格式（單人專案影響低）"
+        ]
+      },
+      "related_files": [
+        "CHANGELOG.md"
+      ],
+      "notes": "effort=low，僅修改文件格式，不影響系統行為。建議 CHANGELOG 按 Keep a Changelog 格式組織，每個版本區塊包含 Added/Changed/Fixed/Removed 分類。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260317-020",
+      "title": "Skills 測試覆蓋擴充（高頻 Skills 優先）",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-03-17",
+      "decided_at": null,
+      "source": "improvement-backlog",
+      "source_pattern": "Skills 測試覆蓋擴充",
+      "priority": "P2",
+      "dimension": "系統完成度",
+      "effort": "medium",
+      "current_score": 74,
+      "target_score": 80,
+      "context": "系統審查（2026-03-17）僅 3/41 Skills 有測試，測試覆蓋率 74 分。高頻 Skills（todoist、knowledge-query、ntfy-notify）缺乏自動化測試。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "Skill 行為穩定性可量化驗證",
+          "系統完成度評分預計 74→80",
+          "與 ADR-011 行覆蓋率計畫互補"
+        ],
+        "negative": [
+          "Skill 測試需模擬外部 API，初期設計成本不低",
+          "測試維護成本隨 Skill 數量增加"
+        ]
+      },
+      "related_files": [
+        "tests/skills/"
+      ],
+      "notes": "等待人工排程。建議優先為 todoist Skill 補測試（已有 20 個測試），再擴展到 knowledge-query。effort=medium，需確認測試框架選擇與 mock 策略。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260317-021",
+      "title": "統一安裝指南文件（docs/INSTALL.md）",
+      "status": "Accepted",
+      "implementation_status": "immediate_fix",
+      "created_at": "2026-03-17",
+      "decided_at": "2026-03-17",
+      "source": "improvement-backlog",
+      "source_pattern": "統一安裝指南文件",
+      "priority": "P2",
+      "dimension": "系統文件",
+      "effort": "low",
+      "current_score": 82,
+      "target_score": 86,
+      "context": "系統審查（2026-03-17）安裝步驟分散在 CLAUDE.md 和 OPERATIONS.md，缺少統一安裝指南。新手難以獨立操作。操作手冊 82 分。",
+      "decision": "自動接受：建立 docs/INSTALL.md 統一安裝指南，彙整散落的安裝步驟（uv 安裝、依賴安裝、排程設定、ntfy 訂閱），操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "安裝步驟一處集中，新手可獨立完成部署",
+          "操作手冊評分預計 82→86",
+          "減少 CLAUDE.md 中的冗餘安裝說明"
+        ],
+        "negative": [
+          "新增文件需與 OPERATIONS.md 保持同步"
+        ]
+      },
+      "related_files": [
+        "docs/INSTALL.md"
+      ],
+      "notes": "effort=low，建立新文件不影響現有系統行為。內容從 CLAUDE.md 技術棧段落和 OPERATIONS.md 安裝段落整合而來。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-16T14:48:00.674570+08:00",
+  "updated_at": "2026-03-17T10:42:45.148356+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-17",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -303,7 +303,8 @@
             "楞嚴經研究：楞嚴心咒（咒心）— 梵音結構、五會定位、持誦儀軌與跨宗派修持詮釋",
             "楞嚴心咒跨學科深化研究 — 音韻學分析、密教三系統比較與數位人文方法應用",
             "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第",
-            "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較"
+            "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較",
+            "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -424,14 +425,14 @@
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "十番顯見深度剖析完成後，可繼續探索楞嚴經其他未深入主題（如四科七大、三種相續）"
+      "next_research_hint": "完成四科七大後，可繼續探索：二決定義（修行抉擇）、二十五圓通完整比較、五十陰魔的現代心理學詮釋"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-15",
+      "last_active": "2026-03-17",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -460,12 +461,14 @@
         "mechanism": {
           "status": "completed",
           "started_at": "2026-02-15",
-          "completed_at": "2026-02-16",
+          "completed_at": "2026-03-17",
           "kb_notes": [
             "藏教通教",
             "別教圓教",
             "觀法修持",
-            "判教實例"
+            "判教實例",
+            "化法四教之通教 — 無生四諦、體空觀、幻有即空與通前通後的判教樞紐",
+            "化法四教之藏教 — 生滅四諦、析空觀、七賢位與四果修證體系"
           ],
           "covered_concepts": [
             "析空觀",
@@ -476,7 +479,13 @@
             "生滅四諦",
             "無生四諦",
             "無量四諦",
-            "無作四諦"
+            "無作四諦",
+            "無生四諦",
+            "體空觀",
+            "幻有即空",
+            "通前通後",
+            "三乘共十地",
+            "被接入別圓"
           ]
         },
         "application": {
@@ -628,7 +637,7 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "synthesis 完成，教觀綱宗研究系列圓滿。後續可開啟天台宗其他專題（如摩訶止觀實修、六妙門、小止觀）或其他宗派判教研究（華嚴五教、法相三時）"
+      "next_research_hint": "化法四教（藏通別圓）系列已齊全，可深化化儀四教（頓漸秘密不定）個別專論，或進入觀法修持的進階研究（如十乘觀法、三諦圓融）"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -905,7 +914,7 @@
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-17",
       "tags": [
         "淨土宗",
         "佛學",
@@ -941,11 +950,12 @@
           ]
         },
         "mechanism": {
-          "status": "completed",
+          "status": "in_progress",
           "started_at": "2026-03-15",
           "completed_at": "2026-03-15",
           "kb_notes": [
-            "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第"
+            "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第",
+            "蕅益大師《阿彌陀經要解》研究 — 五重玄義、圓教詮釋與「古今註解第一」的義理架構"
           ],
           "covered_concepts": [
             "十念法",
@@ -955,13 +965,19 @@
             "功夫成片",
             "事一心",
             "理一心",
-            "日課功課"
+            "日課功課",
+            "五重玄義（釋名、辨體、明宗、論用、判教相）",
+            "蕅益大師以天台圓教判阿彌陀經為圓頓之教",
+            "對「執持名號」「若一日至七日」的深度解析",
+            "印光大師推崇《要解》為古今註解第一的原因",
+            "與善導《觀經疏》、蓮池《彌陀疏鈔》的差異與互補"
           ]
         },
         "application": {
           "status": "in_progress",
           "kb_notes": [
-            "打佛七實務指南 — 淨土宗念佛道場的核心集體共修形式：起源、儀軌、規約與現代實踐"
+            "打佛七實務指南 — 淨土宗念佛道場的核心集體共修形式：起源、儀軌、規約與現代實踐",
+            "淨土宗助念儀軌與臨終關懷實務指南 — 從印光大師《臨終三大要》到現代助念團操作細節"
           ],
           "covered_concepts": [
             "打佛七",
@@ -970,7 +986,15 @@
             "灑淨結界",
             "精進佛七",
             "一般佛七",
-            "念佛堂規約"
+            "念佛堂規約",
+            "助念儀軌完整流程",
+            "臨終八小時不動身體",
+            "助念人員分工與輪班",
+            "病榻佈置與佛像供奉",
+            "往生被與陀羅尼被的使用",
+            "助念團組織與管理",
+            "臨終開示話術",
+            "念佛機與音響設備"
           ]
         },
         "optimization": {
@@ -981,9 +1005,9 @@
         }
       },
       "current_stage": "application",
-      "completion_pct": 40,
+      "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後繼續 application：助念儀軌、念佛道場規矩；或進入 optimization：共修效率提升、攝心方法精進"
+      "next_research_hint": "完成後可進入 application：淨土念佛道場規矩與執事分工、淨土懺儀實踐等"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2902,7 +2926,7 @@
       "domain": "AI Software Development / Agent Architecture / System Engineering",
       "description": "AI 應用於系統開發的深入研究系列，涵蓋 Context Management、Memory Architecture、Agent 設計模式等核心機制",
       "initiated_at": "2026-03-15",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-17",
       "tags": [
         "AI",
         "系統開發",
@@ -2951,7 +2975,16 @@
           ]
         },
         "application": {
-          "status": "pending"
+          "status": "in_progress",
+          "started_at": "2026-03-17",
+          "kb_notes": [
+            "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）"
+          ],
+          "covered_concepts": [
+            "MCP 整合",
+            "IDE 自動化",
+            "CI/CD Agent"
+          ]
         },
         "optimization": {
           "status": "pending"
@@ -2961,9 +2994,9 @@
         }
       },
       "current_stage": "mechanism",
-      "completion_pct": 20,
+      "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：實作 AI 測試生成工具鏈的完整流程"
+      "next_research_hint": "完成後進入 optimization：效能優化、成本控制、開發者體驗提升"
     },
     "claude-code-cli-automation": {
       "series_id": "claude-code-cli-automation",
@@ -3011,7 +3044,7 @@
       "domain": "AI 智慧能源 — 電網調度與再生能源預測",
       "description": "AI 智慧電網與再生能源調度技術研究系列",
       "initiated_at": "2026-03-16",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-17",
       "tags": [
         "AI",
         "智慧城市",
@@ -3049,16 +3082,157 @@
           ]
         },
         "optimization": {
+          "status": "completed",
+          "completed_at": "2026-03-17",
+          "kb_notes": [
+            "AI 智慧電網優化實踐：V2G 雙向供電、效能 KPI 與成本效益量化（2026）"
+          ],
+          "covered_concepts": [
+            "V2G雙向供電",
+            "電網效能KPI",
+            "成本效益量化",
+            "ROI計算"
+          ]
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "synthesis",
+      "completion_pct": 60,
+      "related_series": [],
+      "next_research_hint": "完成後進入 synthesis：與其他智慧城市子系統（智慧交通、智慧建築）整合，探討電網-交通-建築三網融合的綜效"
+    },
+    "dify-ai-workflow": {
+      "series_id": "dify-ai-workflow",
+      "domain": "Dify — 開源 No-code AI 工作流平台",
+      "description": "AI 工作流自動化領域研究系列（No-code 平台視角）",
+      "initiated_at": "2026-03-17",
+      "last_active": "2026-03-17",
+      "tags": [
+        "AI工作流",
+        "No-code",
+        "LLM應用",
+        "Dify"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-17",
+          "kb_notes": [
+            "Dify 深度研究報告 - AI工作流自動化：No-code 平台的架構與設計哲學"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
           "status": "pending"
         },
         "synthesis": {
           "status": "pending"
         }
       },
-      "current_stage": "optimization",
-      "completion_pct": 60,
+      "current_stage": "foundation",
+      "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 optimization：電網效能調優、成本效益分析"
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入 Dify 的工作流引擎與 RAG 實作細節"
+    },
+    "json-schema-validation-automation": {
+      "series_id": "json-schema-validation-automation",
+      "domain": "JSON Schema 驗證與自動化",
+      "description": "研究 JSON Schema 規範與 Python 驗證庫的完整技術知識系列",
+      "initiated_at": "2026-03-17",
+      "last_active": "2026-03-17",
+      "tags": [
+        "JSON Schema",
+        "驗證",
+        "自動化",
+        "Python",
+        "jsonschema",
+        "Pydantic",
+        "fastjsonschema",
+        "技術研究",
+        "foundation",
+        "2026"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-17",
+          "kb_notes": [
+            "JSON Schema 驗證與自動化完整指南 — 規範演進、Python 驗證庫比較與最佳實踐（2026）"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 schema 編譯、快取機制、格式漂移偵測"
+    },
+    "langgraph": {
+      "series_id": "langgraph",
+      "domain": "LangGraph 圖形化 Agent 工作流框架",
+      "description": "LangChain 生態中的圖形化 Agent 編排框架研究系列",
+      "initiated_at": "2026-03-17",
+      "last_active": "2026-03-17",
+      "tags": [
+        "LangGraph",
+        "Agent框架",
+        "工作流編排",
+        "LangChain",
+        "State Graph"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-17",
+          "kb_notes": [
+            "LangGraph — 圖形化 Agent 工作流框架深度研究：State Graph 架構、條件式路由與 LangChain 生態整合"
+          ],
+          "covered_concepts": [
+            "LangGraph 核心架構",
+            "State Graph",
+            "LangChain 整合",
+            "Agentic 工作流設計"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [
+        "multi-agent-frameworks"
+      ],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入 State Graph 實作原理、MessageGraph 與 StateGraph 的差異、Checkpointing 機制"
     }
   }
 }

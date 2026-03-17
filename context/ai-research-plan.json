@@ -23,5 +23,88 @@
     "climate modeling",
     "loss function design"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "Implementing physics-informed neural networks with deep learning for differential equations (Frontiers 2026)",
+      "url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1717117/full",
+      "key_points": [
+        "2026 最新實作研究，解決 ODE 反問題（參數估計）與正問題（近似解）",
+        "提出系統性方法處理 PINNs 在微分方程求解中的兩大挑戰",
+        "實際程式碼實作範例與深度學習框架整合"
+      ]
+    },
+    {
+      "title": "Embedding Physics into Machine Learning: A Review of Physics Informed Neural Networks as Partial Differential Equation Forward Solvers",
+      "url": "https://www.sciopen.com/article/10.26599/TST.2025.9010157",
+      "key_points": [
+        "完整綜述 PINNs 作為 PDE 正向求解器的發展脈絡",
+        "問題導向的結構化回顧，涵蓋架構類型與優化技術",
+        "詳細分析當前挑戰：泛化能力、訓練效率、優化困難"
+      ]
+    },
+    {
+      "title": "Physics-informed neural network with weighted loss and hard constraints for hyperbolic conservation laws (Nature 2025)",
+      "url": "https://www.nature.com/articles/s41598-025-34263-1",
+      "key_points": [
+        "WHC-PINN：加權損失與硬約束結合的創新架構",
+        "雙曲守恆律求解的突破性方法",
+        "梯度加權策略有效解決邊界條件與初始值問題"
+      ]
+    },
+    {
+      "title": "Physics-informed machine learning: case studies for weather and climate modelling (Royal Society)",
+      "url": "https://royalsocietypublishing.org/rsta/article/379/2194/20200093/41210/Physics-informed-machine-learning-case-studies-for",
+      "key_points": [
+        "10 個天氣與氣候建模實際案例研究",
+        "證實 PIML 在物理一致性、訓練時間、資料效率方面的優勢",
+        "對非平穩系統（如氣候變遷）的泛化能力提升"
+      ]
+    },
+    {
+      "title": "Multi-Objective Loss Balancing for Physics-Informed Deep Learning (ScienceDirect 2025)",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0045782525001860",
+      "key_points": [
+        "多目標優化平衡問題的系統性分析",
+        "初始條件與邊界條件的軟約束 vs 硬約束權衡",
+        "自適應損失平衡技術（如 DC-PINNs）自動調整權重"
+      ]
+    },
+    {
+      "title": "GitHub - maziarraissi/PINNs (Original PINN Implementation)",
+      "url": "https://github.com/maziarraissi/PINNs",
+      "key_points": [
+        "Maziar Raissi 的原始 PINNs 實作（開創性論文作者）",
+        "包含經典 PDE 案例：Burgers 方程、Navier-Stokes 方程等",
+        "完整 TensorFlow 程式碼與複現步驟"
+      ]
+    },
+    {
+      "title": "Physics-Informed Neural Networks: Minimizing Residual Loss with Wide Networks (arXiv 2024)",
+      "url": "https://arxiv.org/html/2405.01680v1",
+      "key_points": [
+        "寬網路與有效激活函數對殘差損失最小化的影響",
+        "網路架構設計對 PINN 性能的關鍵影響",
+        "激活函數選擇的數學原理與實驗驗證"
+      ]
+    },
+    {
+      "title": "物理信息神經網路（PINN）：將物理知識融合到深度學習中 (CSDN 中文教學)",
+      "url": "https://blog.csdn.net/qq_28247201/article/details/136072595",
+      "key_points": [
+        "中文社群的系統性 PINN 教學，涵蓋核心概念與數學推導",
+        "實際應用案例：倒立擺控制、航天器軌道設計",
+        "中文程式碼實作範例與除錯技巧"
+      ]
+    },
+    {
+      "title": "AI4Science: PINN 物理信息神經網路入門及相關論文 (知乎)",
+      "url": "https://zhuanlan.zhihu.com/p/517450449",
+      "key_points": [
+        "中文知識社群的 PINN 入門指南與論文總結",
+        "AI for Science 領域的 PINN 應用概覽",
+        "中文研究者的實踐經驗與學習路徑建議"
+      ]
+    }
+  ],
+  "stage_completed": 2
 }

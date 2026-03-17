@@ -418,3 +418,150 @@ class TestHealthScoringSchema:
         errors, warnings, stats = validate_config(config_dir)
         health_errors = [e for e in errors if "health" in e]
         assert any("ranges" in e for e in health_errors)
+
+
+# ---------------------------------------------------------------------------
+# Execution order + timeout sync checks
+# ---------------------------------------------------------------------------
+from validate_config import check_execution_order_gaps, check_timeout_sync
+
+
+class TestExecutionOrderGaps:
+    """Tests for execution_order duplicate detection."""
+
+    def test_no_duplicates(self, tmp_path):
+        """No issues when all execution_order values are unique."""
+        import yaml
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        data = {
+            "version": 4,
+            "tasks": {
+                "task_a": {"name": "A", "daily_limit": 1, "counter_field": "a_count", "execution_order": 1},
+                "task_b": {"name": "B", "daily_limit": 1, "counter_field": "b_count", "execution_order": 2},
+            },
+        }
+        with open(os.path.join(config_dir, "config", "frequency-limits.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(data, f)
+        issues = check_execution_order_gaps(config_dir=config_dir)
+        assert issues == []
+
+    def test_duplicate_order_detected(self, tmp_path):
+        """Duplicate execution_order should be flagged."""
+        import yaml
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        data = {
+            "version": 4,
+            "tasks": {
+                "task_a": {"name": "A", "daily_limit": 1, "counter_field": "a_count", "execution_order": 1},
+                "task_b": {"name": "B", "daily_limit": 1, "counter_field": "b_count", "execution_order": 1},
+            },
+        }
+        with open(os.path.join(config_dir, "config", "frequency-limits.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(data, f)
+        issues = check_execution_order_gaps(config_dir=config_dir)
+        assert len(issues) == 1
+        assert "重複" in issues[0]
+        assert "task_a" in issues[0]
+        assert "task_b" in issues[0]
+
+    def test_missing_file_returns_empty(self, tmp_path):
+        """Missing frequency-limits.yaml should return empty list."""
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        issues = check_execution_order_gaps(config_dir=config_dir)
+        assert issues == []
+
+    def test_real_config_no_duplicates(self):
+        """Real project config should have no duplicate execution_order."""
+        base_dir = os.path.join(os.path.dirname(__file__), "..", "..")
+        issues = check_execution_order_gaps(config_dir=base_dir)
+        assert issues == [], f"Duplicate execution_order found: {issues}"
+
+
+class TestTimeoutSync:
+    """Tests for timeout synchronization between configs."""
+
+    def test_synced_values(self, tmp_path):
+        """No issues when timeout values match."""
+        import yaml
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        freq_data = {
+            "version": 4,
+            "tasks": {
+                "task_a": {"name": "A", "daily_limit": 1, "counter_field": "a_count",
+                           "execution_order": 1, "timeout_seconds": 600},
+            },
+        }
+        timeout_data = {
+            "version": 1,
+            "todoist_team": {
+                "phase2_timeout_by_task": {"task_a": 600},
+            },
+        }
+        with open(os.path.join(config_dir, "config", "frequency-limits.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(freq_data, f)
+        with open(os.path.join(config_dir, "config", "timeouts.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(timeout_data, f)
+        issues = check_timeout_sync(config_dir=config_dir)
+        assert issues == []
+
+    def test_mismatch_detected(self, tmp_path):
+        """Mismatched timeout values should be flagged."""
+        import yaml
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        freq_data = {
+            "version": 4,
+            "tasks": {
+                "task_a": {"name": "A", "daily_limit": 1, "counter_field": "a_count",
+                           "execution_order": 1, "timeout_seconds": 600},
+            },
+        }
+        timeout_data = {
+            "version": 1,
+            "todoist_team": {
+                "phase2_timeout_by_task": {"task_a": 720},
+            },
+        }
+        with open(os.path.join(config_dir, "config", "frequency-limits.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(freq_data, f)
+        with open(os.path.join(config_dir, "config", "timeouts.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(timeout_data, f)
+        issues = check_timeout_sync(config_dir=config_dir)
+        assert len(issues) == 1
+        assert "不同步" in issues[0]
+
+    def test_missing_in_timeouts_detected(self, tmp_path):
+        """Task missing from timeouts.yaml should be flagged."""
+        import yaml
+        config_dir = str(tmp_path)
+        os.makedirs(os.path.join(config_dir, "config"), exist_ok=True)
+        freq_data = {
+            "version": 4,
+            "tasks": {
+                "task_a": {"name": "A", "daily_limit": 1, "counter_field": "a_count",
+                           "execution_order": 1, "timeout_seconds": 600},
+            },
+        }
+        timeout_data = {
+            "version": 1,
+            "todoist_team": {
+                "phase2_timeout_by_task": {},
+            },
+        }
+        with open(os.path.join(config_dir, "config", "frequency-limits.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(freq_data, f)
+        with open(os.path.join(config_dir, "config", "timeouts.yaml"), "w", encoding="utf-8") as f:
+            yaml.dump(timeout_data, f)
+        issues = check_timeout_sync(config_dir=config_dir)
+        assert len(issues) == 1
+        assert "缺失" in issues[0]
+
+    def test_real_config_synced(self):
+        """Real project configs should have synced timeout values."""
+        base_dir = os.path.join(os.path.dirname(__file__), "..", "..")
+        issues = check_timeout_sync(config_dir=base_dir)
+        assert issues == [], f"Timeout sync issues: {issues}"

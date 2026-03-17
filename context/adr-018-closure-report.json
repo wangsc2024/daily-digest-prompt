@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "adr_id": "ADR-20260314-018",
+  "adr_title": "Phase 2 任務執行 retry 機制",
+  "closure_date": "2026-03-16",
+  "closure_type": "formal",
+  "research_summary": "深度研究驗證 ADR-018 四項決策均已落實，模型備援鏈已依 system-breakpoints-fix-plan 修復，可正式結案。",
+  "implementation_evidence": [
+    {
+      "decision_item": "max 1 retry、exponential backoff 初始 30s",
+      "evidence": "run-todoist-agent-team.ps1 行 1942-1954：$toRetry 篩選 timeout、backoffSec=30、Start-Sleep -Seconds $backoffSec",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "僅對 timeout 重試，permanent 不重試",
+      "evidence": "行 1946：if ($sections[$an] -eq \"timeout\") 條件，僅 timeout 進入 $toRetry",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "retry 事件寫入 spans JSON",
+      "evidence": "行 2076-2085：Write-Span -SpanType \"retry\" -Status \"retry_ok\"|\"retry_failed\"",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "記錄每個 Phase 2 job 的 descriptor 供 timeout 重試",
+      "evidence": "行 1412-1413：$phase2JobDescriptors 陣列儲存 taskPrompt/taskTools/taskName 或 agentName/backend/promptContent/taskKey",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "模型備援：codex timeout → cursor_cli → claude_sonnet45",
+      "evidence": "行 1979-1990：Get-TaskBackend 規則，retry 改用備援 backend 避免 quota/沙箱無限重試",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "模型備援：openrouter timeout → cursor_cli → openrouter 原地",
+      "evidence": "行 2012-2016：cursor_cli 優先，無 task file 則 openrouter 原地重試",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "模型備援：claude timeout → cursor_cli → claude 原地",
+      "evidence": "行 2022-2030：cursor_cli 優先，無 task file 則 claude 同模型重試",
+      "file": "run-todoist-agent-team.ps1",
+      "status": "done"
+    },
+    {
+      "decision_item": "timeouts.yaml 註釋與 retry 時間容納",
+      "evidence": "config/timeouts.yaml 行 22：ADR-018 註釋說明 phase2_timeout + 30 + phase2_timeout 最壞情境",
+      "file": "config/timeouts.yaml",
+      "status": "done"
+    }
+  ],
+  "related_documents": [
+    "docs/plans/system-breakpoints-fix-plan.md",
+    "context/arch-decision.json",
+    "context/adr-registry.json"
+  ],
+  "verification": {
+    "arch_decision_status": "skip (implementation_status: done)",
+    "system_breakpoints_status": "已修復（模型備援三條皆 ✅）",
+    "code_references": 15
+  }
+}

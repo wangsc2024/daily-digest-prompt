@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generated_at": "2026-03-16T09:01:00+08:00",
+  "generated_at": "2026-03-17T01:22:00+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
-  "source_audit_score": 86.29,
+  "source_audit_score": 85.05,
   "decisions": [
     {
       "backlog_id": "ADR-20260314-016",
@@ -21,10 +21,10 @@
       "validation_result": "ci.yml 已包含 ruff check 步驟，位置正確（Install dependencies 之後、pytest 之前）"
     },
     {
-      "backlog_id": "ADR-20260311-010",
-      "backlog_pattern": "依賴漏洞自動掃描",
+      "backlog_id": "ADR-20260314-017",
+      "backlog_pattern": "TODO/FIXME 規範性清理",
       "action": "skip",
-      "priority": "high",
+      "priority": "medium",
       "fix_instructions": null,
       "estimated_minutes": 0,
       "verification": null,
@@ -32,7 +32,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "已存在對應 ADR（ADR-20260311-010，status: Accepted, implementation_status: done）。已完成修復。",
+      "execution_note": "已存在對應 ADR（ADR-20260314-017，status: Accepted, implementation_status: partial）。需人工分類規範性 vs 缺陷型 TODO 後分批清理。",
       "validation_result": null
     },
     {
@@ -51,47 +51,62 @@
       "validation_result": null
     },
     {
-      "backlog_id": "ADR-20260314-017",
-      "backlog_pattern": "TODO/FIXME 規範性清理",
-      "action": "skip",
+      "backlog_id": "ADR-20260317-019",
+      "backlog_pattern": "CHANGELOG 格式規範化",
+      "action": "immediate_fix",
+      "priority": "medium",
+      "fix_instructions": "規範 CHANGELOG.md 格式：(1) 確認頂部有 '# Changelog' 標題；(2) 每個版本區塊使用 '## [版本號] - YYYY-MM-DD' 格式；(3) 變更分類使用 '### Added/Changed/Fixed/Removed' 子標題；(4) 每條變更使用 Conventional Commit 前綴（feat/fix/chore/refactor/docs）；(5) 不修改任何實質內容，僅調整格式與分類標籤。參考 Keep a Changelog 規範。",
+      "estimated_minutes": 10,
+      "verification": "CHANGELOG.md 頂部有 '# Changelog' 標題，至少最近 3 個版本區塊使用標準格式，變更條目有分類標籤。",
+      "execution_status": "success",
+      "retry_count": 0,
+      "executed_at": "2026-03-17T01:30:00+08:00",
+      "execution_result": "success",
+      "execution_note": "CHANGELOG.md 格式規範化完成：4 個版本區塊（Unreleased/0.2.0/0.1.1/0.1.0）使用標準格式，所有條目加入 Conventional Commit 前綴",
+      "validation_result": "頂部有 # Changelog，4 個版本區塊使用 ## [版本] - 日期 格式，### Added/Changed/Fixed/Removed/Security 子標題正確"
+    },
+    {
+      "backlog_id": "ADR-20260317-020",
+      "backlog_pattern": "Skills 測試覆蓋擴充",
+      "action": "schedule_adr",
       "priority": "medium",
       "fix_instructions": null,
       "estimated_minutes": 0,
       "verification": null,
-      "execution_status": "skip",
+      "execution_status": "pending",
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "已存在對應 ADR（ADR-20260314-017，status: Accepted, implementation_status: partial）。需人工分類規範性 vs 缺陷型 TODO 後分批清理，等待人工排程。",
+      "execution_note": "effort=medium，需人工確認測試策略（mock vs integration）後排程實施。ADR-20260317-020 已建立，status: Proposed。",
       "validation_result": null
     },
     {
-      "backlog_id": "ADR-20260314-018",
-      "backlog_pattern": "Phase 2 任務 retry 機制",
-      "action": "skip",
+      "backlog_id": "ADR-20260317-021",
+      "backlog_pattern": "統一安裝指南文件",
+      "action": "immediate_fix",
       "priority": "medium",
-      "fix_instructions": null,
-      "estimated_minutes": 0,
-      "verification": null,
-      "execution_status": "skip",
+      "fix_instructions": "建立 docs/INSTALL.md，內容整合自 CLAUDE.md 和 OPERATIONS.md 的安裝相關段落：(1) 前置條件（Windows 11、PowerShell 7、uv、Claude Code CLI）；(2) 安裝步驟（git clone、uv sync、設定環境變數）；(3) 排程設定（Windows Task Scheduler，引用 setup-scheduler.ps1）；(4) ntfy 通知訂閱（topic: wangsc2025）；(5) 驗證步驟（check-health.ps1）。格式參考現有 docs/ 下文件風格。",
+      "estimated_minutes": 15,
+      "verification": "docs/INSTALL.md 存在且包含 5 個主要段落（前置條件、安裝、排程、通知、驗證）。新手依照指南可獨立完成部署。",
+      "execution_status": "success",
       "retry_count": 0,
-      "executed_at": null,
-      "execution_result": null,
-      "execution_note": "已存在對應 ADR（ADR-20260314-018，status: Accepted, implementation_status: done）。已完成修復。",
-      "validation_result": null
+      "executed_at": "2026-03-17T01:30:00+08:00",
+      "execution_result": "success",
+      "execution_note": "docs/INSTALL.md 建立完成，包含 5 個段落：前置條件、安裝步驟、排程設定、ntfy 通知、驗證步驟",
+      "validation_result": "docs/INSTALL.md 存在，包含 5 個 ## 段落（前置條件/安裝步驟/排程設定/ntfy通知訂閱/驗證步驟）"
     }
   ],
   "immediate_fix_summary": {
-    "count": 0,
-    "items": [],
+    "count": 2,
+    "items": ["ADR-20260317-019", "ADR-20260317-021"],
     "safe_to_automate": true
   },
   "meta": {
-    "decisions_total": 5,
-    "immediate_fix": 0,
-    "schedule_adr": 0,
+    "decisions_total": 6,
+    "immediate_fix": 2,
+    "schedule_adr": 1,
     "deferred": 0,
     "wontfix": 0,
-    "skip": 5
+    "skip": 3
   }
 }

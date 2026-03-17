@@ -5,7 +5,19 @@
 ## 第零步：星期檢查
 用 Bash 執行 `date +%u` 取得星期幾（1=週一, 7=週日）。
 - 若為 3（週三）或 7（週日）→ 繼續執行
-- 其他天 → 輸出 DONE_CERT（status=DONE, quality_score=5, self_assessment="非執行日，跳過"）並結束
+- 其他天 → 用 Write 工具建立 `results/todoist-auto-github_scout.json`：
+  ```json
+  {
+    "task_type": "auto",
+    "task_key": "github_scout",
+    "status": "skipped",
+    "day_of_week": <date +%u 的結果>,
+    "projects_found": 0,
+    "proposals_count": 0,
+    "summary": "非執行日（僅週三、週日執行），跳過"
+  }
+  ```
+  然後輸出 DONE_CERT（status=DONE, quality_score=5, self_assessment="非執行日，跳過"）並結束
 
 > 設計考量：作為自動任務可利用現有 round-robin 基礎設施，
 > 非執行日消耗極少資源（僅 1 次 date 命令 + DONE_CERT 輸出，< 5 秒）。

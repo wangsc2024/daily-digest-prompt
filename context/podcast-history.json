@@ -1,29 +1,142 @@
 {
   "version": 2,
-  "updated_at": "2026-03-16T15:25:34",
+  "updated_at": "2026-03-17T05:09:41+08:00",
   "summary": {
-    "total_episodes": 37,
+    "total_episodes": 41,
     "cooldown_days": 30,
     "recent_note_ids": [
-      "ed138bbf-b608-4f05-8311-f6fc2e865392",
       {
         "note_id": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
         "last_used": "2026-03-15",
         "expires_at": "2026-04-14"
+      },
+      {
+        "note_id": "539bf8cc-3400-4309-bed1-efea59c37c9a",
+        "last_used": "2026-03-16",
+        "expires_at": "2026-04-15"
+      },
+      {
+        "note_id": "893e05b0-2573-489f-b9d4-455364a6a9f8",
+        "last_used": "2026-03-17",
+        "expires_at": "2026-04-16"
       }
     ],
     "recent_topics": [
-      "教觀綱宗",
-      "佛學",
-      "天台宗",
       {
         "topic": "Vite",
         "last_used": "2026-03-15",
         "expires_at": "2026-04-14"
+      },
+      {
+        "topic": "別教",
+        "last_used": "2026-03-16",
+        "expires_at": "2026-04-15"
+      },
+      {
+        "topic": "次第三觀",
+        "last_used": "2026-03-16",
+        "expires_at": "2026-04-15"
+      },
+      {
+        "topic": "無量四諦",
+        "last_used": "2026-03-16",
+        "expires_at": "2026-04-15"
+      },
+      {
+        "topic": "歷史傳承",
+        "last_used": "2026-03-17",
+        "expires_at": "2026-04-16"
+      },
+      {
+        "topic": "章安灌頂",
+        "last_used": "2026-03-17",
+        "expires_at": "2026-04-16"
+      },
+      {
+        "topic": "荊溪湛然",
+        "last_used": "2026-03-17",
+        "expires_at": "2026-04-16"
       }
     ]
   },
   "episodes": [
+    {
+      "episode_title": "千年法脈:天台宗傳承史",
+      "notes_used": [
+        "893e05b0-2573-489f-b9d4-455364a6a9f8"
+      ],
+      "note_titles": [
+        "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+      ],
+      "topics": [
+        "歷史傳承",
+        "章安灌頂",
+        "荊溪湛然"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-17T05:09:41+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260317-0504.mp3",
+      "slug": "教觀綱宗-20260317-0504"
+    },
+    {
+      "episode_title": "知識管理與技術三重奏：Zettelkasten、Shannon 滲透測試與 LMCache",
+      "notes_used": [
+        "9f3bac96-4490-49e9-a894-1d653e93c7c3",
+        "c6f23755-68eb-46cb-948f-c76f24ea708b",
+        "0bcb8d26-145f-4d7e-99c5-0d7c1ec150bc"
+      ],
+      "note_titles": [
+        "Zettelkasten 卡片盒筆記法與個人知識管理系統",
+        "Shannon — 全自主 AI 滲透測試工具深度研究",
+        "LMCache 深度研究：面向 vLLM/SGLang 的 LLM KV Cache 基礎設施"
+      ],
+      "topics": [
+        "Zettelkasten",
+        "Shannon",
+        "LMCache"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-17T12:00:00+08:00",
+      "slug": "tech-trio-zettelkasten-shannon-lmcache-20260317"
+    },
+    {
+      "episode_title": "別教進階：次第與但中",
+      "notes_used": [
+        "539bf8cc-3400-4309-bed1-efea59c37c9a"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之別教 — 次第三觀、無量四諦與菩薩歷別行位的教觀體系"
+      ],
+      "topics": [
+        "別教",
+        "次第三觀",
+        "無量四諦"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-16T19:39:32+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260316-1933.mp3",
+      "slug": "教觀綱宗-20260316-1933"
+    },
+    {
+      "episode_title": "結構化思維三重奏：創意遊戲、Dify 工作流與情報分析方法論",
+      "notes_used": [
+        "da249b33-9644-4e55-8220-d36d53ff9f32",
+        "52f6a3b0-d7e7-45ff-86db-cdfb241304e6",
+        "4acb4713-b6cc-44af-a1cf-b6a31f73a05a"
+      ],
+      "note_titles": [
+        "寫一個具創意的打磚塊遊戲",
+        "Dify 深度研究報告 - AI 工作流自動化：蜂巢架構、Plugin 生態系統與 LLMOps 全景",
+        "結構化分析技術（Structured Analytic Techniques）— 情報分析界的系統性思維方法論與認知偏誤對抗框架"
+      ],
+      "topics": [
+        "創意遊戲",
+        "Dify",
+        "結構化分析"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-16T17:15:00+08:00"
+    },
     {
       "episode_title": "天台止觀修行指南",
       "notes_used": [
@@ -717,6 +830,30 @@
     }
   ],
   "entries": [
+    {
+      "note_id": "da249b33-9644-4e55-8220-d36d53ff9f32",
+      "note_title": "寫一個具創意的打磚塊遊戲",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-20260316",
+      "used_at": "2026-03-16T17:15:00"
+    },
+    {
+      "note_id": "52f6a3b0-d7e7-45ff-86db-cdfb241304e6",
+      "note_title": "Dify 深度研究報告 - AI 工作流自動化",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-20260316",
+      "used_at": "2026-03-16T17:15:00"
+    },
+    {
+      "note_id": "4acb4713-b6cc-44af-a1cf-b6a31f73a05a",
+      "note_title": "結構化分析技術（Structured Analytic Techniques）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-20260316",
+      "used_at": "2026-03-16T17:15:00"
+    },
     {
       "note_id": "19be31e8-9a10-491b-8b00-e0ba95d7308a",
       "note_title": "法華經一心三觀的理論與生活實踐",

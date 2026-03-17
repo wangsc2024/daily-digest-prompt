@@ -1,0 +1,47 @@
+{
+  "research_topic": "LTX-2 生成視頻模型深度介紹",
+  "task_type": "tech_research",
+  "timestamp": "2026-03-16T23:00:00+08:00",
+  "sources": [
+    {"url": "https://ltx.io/model/ltx-2", "grade": "A", "type": "官方"},
+    {"url": "https://website.ltx.video/", "grade": "A", "type": "官方"},
+    {"url": "https://github.com/Lightricks/LTX-2", "grade": "A", "type": "官方 GitHub"},
+    {"url": "https://en.wikipedia.org/wiki/LTX-2", "grade": "A", "type": "Wikipedia"},
+    {"url": "https://huggingface.co/Lightricks/LTX-2", "grade": "A", "type": "HuggingFace"}
+  ],
+  "quality": {
+    "sources_count": 5,
+    "grade_distribution": {"A": 5, "B": 0, "C": 0, "D": 0},
+    "cross_verified_facts": 6,
+    "research_depth": "thorough",
+    "confidence_level": "high"
+  },
+  "summary": "LTX-2 為以色列 Lightricks 於 2025 年 10 月發布的開源 DiT 基音視訊生成模型，原生 4K/50fps、音視同步、最長 20 秒片段，為開源 AI 視頻模型 Top 3。",
+  "findings": [
+    {
+      "title": "模型定位與歷史",
+      "content": "LTX-2 是 Lightricks LTX 家族第二代，前身為 2024 年 LTX Video（2B）、2025 年 LTXV-13b。2025 年 10 月 23 日發布，2026 年 1 月開源權重，2026 年 3 月推出 LTX-2.3 與 LTX Desktop 本地運行版。"
+    },
+    {
+      "title": "架構與技術規格",
+      "content": "基於 Diffusion Transformer (DiT) 架構，非對稱雙流：14B 視訊流 + 5B 音訊流，共 19B 參數。雙向音視交叉注意力、modality-CFG、統一擴散管線同時去噪音視 latent。支援 causal VAE 編碼、多語言文字嵌入。"
+    },
+    {
+      "title": "核心能力",
+      "content": "原生 4K/50fps、音視同步生成（Audio-to-Video）、最長 20 秒片段。三種模式：Fast（速度）、Pro（高品質）、Ultra（雲端超高清）。支援 text-to-video、image-to-video、depth-aware、OpenPose 動作、攝影機控制、LoRA 微調、Retake 編輯、Extend Scene。"
+    },
+    {
+      "title": "效能與排行",
+      "content": "Artificial Analysis 評測：Image-to-Video 排名第 3（僅次 Kling 3.5、Veo 3.1），Text-to-Video 排名第 7。H100 上比 WAN 2.2 14B 約快 18 倍，號稱「最快生產級 AI 視頻模型」。"
+    },
+    {
+      "title": "生態與部署",
+      "content": "開源權重於 GitHub/HuggingFace；API 自服務；LTX Studio 視覺化創作；LTX Desktop 消費級硬體本地運行；ComfyUI/Fal 整合；Google Cloud 訓練基礎設施。"
+    },
+    {
+      "title": "應用場景",
+      "content": "後製自動化（追蹤、rotoscoping、plate 替換）、概念到過場動畫、預製模擬、多關鍵幀導向、老片修復與升頻。獲奧斯卡導演 Taika Waititi 等創作者採用。"
+    }
+  ],
+  "keywords": ["LTX-2", "Lightricks", "AI 視頻生成", "DiT", "Diffusion Transformer", "text-to-video", "image-to-video", "4K", "音視同步", "開源視頻模型"]
+}

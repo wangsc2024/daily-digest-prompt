@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "description": "workflow-forge 產出物註冊表，追蹤所有流程標準化與輸出規範產物",
+  "entries": [
+    {
+      "date": "2026-03-17",
+      "artifact_path": "config/schemas/results-auto-task-schema.json",
+      "gap_type": "output_schema",
+      "gap_description": "28 個自動任務結果 JSON 缺少統一 Schema，導致格式不一致風險",
+      "priority": "P0",
+      "total_score": 95,
+      "impact_range": "28 個 todoist-auto-*.md",
+      "integration_status": "integrated",
+      "documented_in": "config/README.md"
+    }
+  ]
+}

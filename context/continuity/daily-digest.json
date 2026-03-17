@@ -17,6 +17,21 @@
           "status": "completed"
         }
       ]
+    },
+    "2026-03-16": {
+      "runs": [
+        {
+          "run_id": "71-2118",
+          "trigger": "21:15",
+          "completed_at": "2026-03-16T21:18:00+08:00",
+          "top3_headlines": ["藝起派對寫生盛會報名開跑", "竹田頓物驛3/21開幕", "LLM Architecture Gallery 459🔥"],
+          "habit_tip": "複利效應：每天進步1%，一年後進步37倍",
+          "buddhist_wisdom": "龍舒淨土文",
+          "todoist_summary": "0 項待辦",
+          "digest_quality": "good",
+          "status": "completed"
+        }
+      ]
     }
   }
 }

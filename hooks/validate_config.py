@@ -1244,6 +1244,92 @@ def generate_skill_dag(config_dir: str = ".", output_file: Optional[str] = None)
     return dot_content
 
 
+def check_execution_order_gaps(config_dir: str = ".") -> List[str]:
+    """檢查 frequency-limits.yaml 中 execution_order 是否有重複值。
+
+    Returns:
+        issues 字串清單（重複的 execution_order 列舉）
+    """
+    issues = []
+
+    freq_path = os.path.join(config_dir, "config", "frequency-limits.yaml")
+    if not os.path.exists(freq_path):
+        return issues
+
+    try:
+        import yaml
+        with open(freq_path, "r", encoding="utf-8") as f:
+            freq_data = yaml.safe_load(f)
+    except Exception:
+        return issues
+
+    tasks = freq_data.get("tasks", {})
+    order_map: Dict[int, List[str]] = {}  # {order: [task_keys]}
+
+    for task_key, task_cfg in tasks.items():
+        if not isinstance(task_cfg, dict):
+            continue
+        order = task_cfg.get("execution_order")
+        if order is not None:
+            order_map.setdefault(order, []).append(task_key)
+
+    # 檢查重複
+    for order, keys in sorted(order_map.items()):
+        if len(keys) > 1:
+            issues.append(
+                f"⚠️ execution_order {order} 重複：{', '.join(keys)}"
+            )
+
+    return issues
+
+
+def check_timeout_sync(config_dir: str = ".") -> List[str]:
+    """驗證 frequency-limits.yaml timeout_seconds 與 timeouts.yaml phase2_timeout_by_task 同步。
+
+    Returns:
+        issues 字串清單（不一致的 timeout 值）
+    """
+    issues = []
+
+    freq_path = os.path.join(config_dir, "config", "frequency-limits.yaml")
+    timeout_path = os.path.join(config_dir, "config", "timeouts.yaml")
+
+    if not os.path.exists(freq_path) or not os.path.exists(timeout_path):
+        return issues
+
+    try:
+        import yaml
+        with open(freq_path, "r", encoding="utf-8") as f:
+            freq_data = yaml.safe_load(f)
+        with open(timeout_path, "r", encoding="utf-8") as f:
+            timeout_data = yaml.safe_load(f)
+    except Exception:
+        return issues
+
+    tasks = freq_data.get("tasks", {})
+    phase2_by_task = (
+        timeout_data.get("todoist_team", {}).get("phase2_timeout_by_task", {})
+    )
+
+    for task_key, task_cfg in tasks.items():
+        if not isinstance(task_cfg, dict):
+            continue
+        freq_timeout = task_cfg.get("timeout_seconds")
+        phase2_timeout = phase2_by_task.get(task_key)
+
+        if freq_timeout is not None and phase2_timeout is not None:
+            if freq_timeout != phase2_timeout:
+                issues.append(
+                    f"⚠️ {task_key} timeout 不同步：frequency-limits={freq_timeout}s, timeouts={phase2_timeout}s"
+                )
+        elif freq_timeout is not None and phase2_timeout is None:
+            issues.append(
+                f"⚠️ {task_key} 在 timeouts.yaml phase2_timeout_by_task 中缺失（frequency-limits={freq_timeout}s）"
+            )
+
+    return issues
+
+
 def check_auto_tasks_consistency(config_dir: str = ".") -> tuple:
     """驗證自動任務的三檔一致性：frequency-limits key ↔ template ↔ team prompt。
 
@@ -1485,6 +1571,15 @@ def main():
             if issue.startswith("ERROR:"):
                 errors.append(issue)
 
+    # 新增：execution_order 重複檢查 + timeout 同步檢查
+    order_issues = []
+    timeout_issues = []
+    if "--cross-validate" in sys.argv or "--all" in sys.argv:
+        order_issues = check_execution_order_gaps(config_dir=base_dir)
+        timeout_issues = check_timeout_sync(config_dir=base_dir)
+        warnings.extend(order_issues)
+        warnings.extend(timeout_issues)
+
     if "--json" in sys.argv:
         output = {
             "errors": errors,
@@ -1528,6 +1623,18 @@ def main():
                     sys.exit(1)
             else:
                 print("  ✓ 所有引用均有效（技能、模板路徑）")
+
+        # execution_order + timeout 同步輸出
+        if "--cross-validate" in sys.argv or "--all" in sys.argv:
+            if order_issues or timeout_issues:
+                print("\n[配置同步檢查]")
+                for issue in order_issues:
+                    print(f"  {issue}")
+                for issue in timeout_issues:
+                    print(f"  {issue}")
+            else:
+                print("\n[配置同步檢查]")
+                print("  ✓ execution_order 無重複，timeout 值同步")
 
         # 顯示驗證統計
         if stats["json_schema_used"] > 0 or stats["simple_validation_used"] > 0:

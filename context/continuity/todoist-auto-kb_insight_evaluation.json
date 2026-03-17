@@ -1,0 +1,15 @@
+{
+  "task_key": "kb_insight_evaluation",
+  "schema_version": 1,
+  "max_runs": 5,
+  "runs": [
+    {
+      "executed_at": "2026-03-17T00:00:00+08:00",
+      "topic": "系統洞察報告三大緊急優化項目評估（Context 保護、快取策略、失敗時段）",
+      "status": "completed",
+      "key_findings": "識別三大緊急改進項目：(1) Context 保護規則強制執行可降低 avg_io_per_call 從 24.7KB 至 5KB；(2) 快取策略深度優化可提升命中率從 19.9% 至 40%+；(3) 失敗時段根因分析可降低 15:00/9:00/14:00 失敗率 50%+。已完成網路研究（6 個最佳實踐來源）並擬定可執行方案，納入 improvement-backlog.json（rank 6-8）。",
+      "kb_note_ids": [],
+      "next_suggested_angle": "優先執行 P0 項目（Context 保護規則），監控 7 天後 avg_io_per_call 指標變化"
+    }
+  ]
+}

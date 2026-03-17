@@ -1,10 +1,9 @@
 skill 直接優化但需要更嚴格的指令
 排程可以由系統安排
 持久記憶功能
-agent 長記憶方案
+agent及排程 長記憶方案
 Hono — 超輕量 Edge-First Web 框架
 https://langfuse.com/blog/2025-03-19-ai-agent-comparison
 加入 llamaindex+mistral 3.2 small
-讓make可以透過LINE回傳BOT執行的結果與取代ntfy
 
 

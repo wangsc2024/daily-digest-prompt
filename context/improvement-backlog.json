@@ -1,93 +1,120 @@
 {
   "version": 1,
-  "generated_at": "2026-03-14T00:55:00+08:00",
+  "generated_at": "2026-03-17T01:15:00+08:00",
+  "last_kb_insight_evaluation": "2026-03-17T00:00:00+08:00",
   "source": "system-audit",
-  "audit_date": "2026-03-14",
-  "total_score": 86.29,
+  "audit_date": "2026-03-17",
+  "total_score": 85.05,
   "grade": "A",
   "items": [
     {
       "rank": 1,
       "priority": "P1",
-      "pattern": "依賴漏洞自動掃描",
-      "description": "1.4 依賴安全 78 分。pip-audit 僅 CI 觸發，缺少定期自動掃描排程。建議整合至 check-health.ps1 或 weekly GitHub Actions。ADR-010 已接受。",
-      "dimension": "資訊安全",
-      "current_score": 78,
-      "target_score": 83,
+      "pattern": "TODO/FIXME 分批清理",
+      "description": "87 處 TODO/FIXME 分散於 65 個檔案，技術債務累積拉低 5.5 至 58 分。ADR-017 已 partial，需持續分批清理規範性 TODO。",
+      "dimension": "技術棧",
+      "current_score": 58,
+      "target_score": 70,
       "effort": "medium",
-      "target_files": [
-        "pyproject.toml",
-        ".github/workflows/ci.yml",
-        "check-health.ps1"
-      ],
-      "goal_id": "G02",
-      "adr_ref": "ADR-20260311-010"
+      "target_files": ["docs/plans/", "templates/", "prompts/"]
     },
     {
       "rank": 2,
       "priority": "P1",
-      "pattern": "CI ruff lint 整合",
-      "description": "5.3 工具鏈完整性 75 分。CI 缺 ruff lint 和 PowerShell 語法驗證。已擴展 pytest 至 skills/tools，下一步加 lint。",
-      "dimension": "技術棧",
-      "current_score": 75,
+      "pattern": "行覆蓋率提升計畫",
+      "description": "964 個測試通過但行覆蓋率僅 10.39%，遠低於 45% 目標。ADR-011 已完成但分數仍偏低，需持續補強核心模組分支覆蓋。",
+      "dimension": "系統品質",
+      "current_score": 72,
       "target_score": 80,
-      "effort": "low",
-      "target_files": [
-        ".github/workflows/ci.yml",
-        "pyproject.toml"
-      ],
-      "goal_id": "G04",
-      "adr_ref": "ADR-20260311-013"
+      "effort": "medium",
+      "target_files": ["tests/hooks/", "hooks/hook_utils.py", "hooks/agent_guardian.py"]
     },
     {
       "rank": 3,
       "priority": "P2",
-      "pattern": "行覆蓋率提升計畫",
-      "description": "3.1 測試覆蓋率 78 分。行覆蓋率 45.81%，個別模組偏低（validate_config 5%、on_stop_alert 5%）。ADR-011 Phase 1 目標 hook_utils 80%。",
-      "dimension": "系統品質",
-      "current_score": 78,
-      "target_score": 83,
-      "effort": "medium",
-      "target_files": [
-        "tests/hooks/test_hook_utils.py",
-        "hooks/hook_utils.py",
-        "hooks/on_stop_alert.py"
-      ],
-      "goal_id": "G02",
-      "adr_ref": "ADR-20260311-011"
+      "pattern": "CHANGELOG 格式規範化",
+      "description": "近 20 筆 commit 中 30% 不符 Conventional Commit 格式，CHANGELOG 6.5 評分 76。建議統一 commit message 格式。",
+      "dimension": "系統文件",
+      "current_score": 76,
+      "target_score": 82,
+      "effort": "low",
+      "target_files": ["CHANGELOG.md"]
     },
     {
       "rank": 4,
       "priority": "P2",
-      "pattern": "TODO/FIXME 規範性清理",
-      "description": "7.1 功能完成度 84 分。265 處 TODO/FIXME 分散 56 檔（70% 規範性、30% 缺陷型），導致 D7 退步 6 分。清理規範性 TODO 可回升。",
+      "pattern": "Skills 測試覆蓋擴充",
+      "description": "僅 3/41 Skills 有測試，7.4 測試覆蓋率 74 分。優先為 todoist、knowledge-query 等高頻 Skills 補測試。",
       "dimension": "系統完成度",
-      "current_score": 84,
-      "target_score": 88,
-      "effort": "low",
-      "target_files": [
-        "docs/plans/",
-        "templates/",
-        "prompts/"
-      ],
-      "goal_id": "G04",
-      "adr_ref": ""
+      "current_score": 74,
+      "target_score": 80,
+      "effort": "medium",
+      "target_files": ["tests/skills/"]
     },
     {
       "rank": 5,
       "priority": "P2",
-      "pattern": "Phase 2 任務 retry 機制",
-      "description": "4.3 失敗恢復 93 分。Phase 2 任務執行無重試機制為最大缺口。建議加 max 1 retry with backoff。",
-      "dimension": "系統工作流",
-      "current_score": 93,
-      "target_score": 95,
+      "pattern": "統一安裝指南文件",
+      "description": "安裝步驟分散在 CLAUDE.md 和 OPERATIONS.md，缺少統一安裝指南。新手難以獨立操作。6.2 操作手冊 82 分。",
+      "dimension": "系統文件",
+      "current_score": 82,
+      "target_score": 86,
+      "effort": "low",
+      "target_files": ["docs/INSTALL.md"]
+    },
+    {
+      "rank": 6,
+      "priority": "P0",
+      "pattern": "Context 保護規則強制執行",
+      "description": "avg_io_per_call 超標 5 倍（24.7KB vs 5KB 門檻），Context 保護規則未執行。需啟用 session I/O 預算監控、識別違規 Agent、強制執行子 Agent 委派規則。",
+      "dimension": "系統品質",
+      "current_score": 20,
+      "target_score": 90,
       "effort": "medium",
-      "target_files": [
-        "run-todoist-agent-team.ps1"
-      ],
-      "goal_id": "G02",
-      "adr_ref": ""
+      "target_files": ["skills/context-budget-monitor/", "templates/shared/preamble.md", "hooks/"],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-17T00:00:00+08:00",
+      "execution_plan": "1. 啟用 context-budget-monitor Skill；2. 識別違規 Agent（avg > 15KB）；3. 強制執行 preamble 子 Agent 委派規則；4. 建立 pre-session hook 預算檢查；5. 7 天後驗證 avg_io_per_call < 5KB",
+      "research_sources": [
+        "https://www.getmaxim.ai/articles/context-window-management-strategies-for-long-context-ai-agents-and-chatbots/",
+        "https://eval.16x.engineer/blog/llm-context-management-guide"
+      ]
+    },
+    {
+      "rank": 7,
+      "priority": "P1",
+      "pattern": "快取策略深度優化",
+      "description": "cache_hit_ratio 持續低迷 19.9%（門檻 40%），遠低於目標。需分析各端點命中率、評估資料 volatility、調整 TTL 配置、建立自適應 TTL 機制。",
+      "dimension": "系統效能",
+      "current_score": 50,
+      "target_score": 85,
+      "effort": "medium",
+      "target_files": ["config/cache-policy.yaml", "skills/cache-optimizer/", "skills/api-cache/"],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-17T00:00:00+08:00",
+      "execution_plan": "1. 用 cache-optimizer Skill 分析各端點命中率；2. 識別低命中率端點（< 20%）；3. 評估資料 volatility；4. 調整 cache-policy.yaml TTL（新聞 12h→24h、HN 6h→12h）；5. 監控 7 天後命中率變化；6. 建立自適應 TTL 機制（d-TTL 演算法）",
+      "research_sources": [
+        "https://www.fastly.com/documentation/guides/full-site-delivery/caching/caching-best-practices/",
+        "https://arxiv.org/pdf/1704.04448"
+      ]
+    },
+    {
+      "rank": 8,
+      "priority": "P1",
+      "pattern": "失敗時段根因分析與預防機制",
+      "description": "15:00、9:00、14:00 為高失敗時段，需識別共同特徵（timeout、API 限制、資源競爭）、建立時段特定 timeout 配置、實施預防性檢查。",
+      "dimension": "系統穩定性",
+      "current_score": 65,
+      "target_score": 85,
+      "effort": "medium",
+      "target_files": ["config/timeouts.yaml", "tools/trace_analyzer.py", "state/scheduler-state.json"],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-17T00:00:00+08:00",
+      "execution_plan": "1. 用 trace-analyzer 分析 3 個時段失敗 session；2. 識別共同特徵；3. 檢查外部依賴（KB、Todoist API、ntfy）在這些時段狀態；4. 建立時段特定 timeout 配置；5. 實施預防性檢查（pre-execution health check）；6. 監控 14 天後失敗率變化",
+      "research_sources": [
+        "https://coastapp.com/blog/failure-analysis/",
+        "https://blog.infraspeak.com/root-cause-analysis/"
+      ]
     }
-  ],
-  "schema_version": 2
+  ]
 }

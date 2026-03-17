@@ -90,6 +90,9 @@ $AutoTaskTimeoutOverride = @{
     "git_push"               = 600
     "skill_forge"            = 900
     "github_scout"           = 600
+    "future_plan_optimize"   = 900   # 未來計畫待辦優化：KB + MD 寫回
+    "kb_insight_evaluation"  = 1200  # 洞察報告擇 3 項研究 + 執行方案 + improvement-backlog
+    "workflow_forge"         = 900   # Workflow 鑄造廠：流程標準化 + 輸出 Schema + 一致性
 }
 
 # 合併：config/timeouts.yaml 優先，hardcoded 為 fallback
@@ -1825,13 +1828,14 @@ if ($phase2QuotaFallbacks.Count -gt 0) {
                 if (Test-Path $fbResultPath) {
                     try { $afterFallback = Get-Content $fbResultPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch {}
                 }
-                if ($afterFallback -and $afterFallback.status -eq "success") {
-                    # 備援成功：加註 fallback_backend，summary 前綴說明
+                if ($afterFallback -and $afterFallback.status -in @("success", "skipped", "partial")) {
+                    # 備援成功（含非執行日 skipped、多階段任務 partial）：加註 fallback_backend，summary 前綴說明
                     $afterFallback | Add-Member -NotePropertyName "fallback_backend" -NotePropertyValue $fbBackend -Force
                     $origSummary = if ($afterFallback.summary) { $afterFallback.summary } else { "" }
-                    $afterFallback.summary = "（以備援模型 $fbBackend 執行成功）$origSummary"
+                    $statusLabel = if ($afterFallback.status -eq "skipped") { "非執行日跳過" } elseif ($afterFallback.status -eq "partial") { "階段性完成" } else { "執行成功" }
+                    $afterFallback.summary = "（以備援模型 $fbBackend $statusLabel）$origSummary"
                     $afterFallback | ConvertTo-Json -Depth 6 | Set-Content -Path $fbResultPath -Encoding UTF8 -Force
-                    Write-Log "[Phase2] quota-fallback ${an}: $fbBackend 備援成功 ✓"
+                    Write-Log "[Phase2] quota-fallback ${an}: $fbBackend 備援完成（status=$($afterFallback.status)）✓"
                 } else {
                     $fbPreview = if ($fbOutput) { (@($fbOutput) -join "`n") } else { "" }
                     $fbPreviewShort = if ($fbPreview.Length -gt 500) { $fbPreview.Substring(0, 500) + "..." } else { $fbPreview }
@@ -1909,13 +1913,14 @@ if ($phase2SandboxFallbacks.Count -gt 0) {
                 if (Test-Path $sfResultPath) {
                     try { $afterSfFallback = Get-Content $sfResultPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch {}
                 }
-                if ($afterSfFallback -and $afterSfFallback.status -eq "success") {
-                    # 備援成功：加註 fallback_backend，summary 前綴說明
+                if ($afterSfFallback -and $afterSfFallback.status -in @("success", "skipped", "partial")) {
+                    # 備援成功（含非執行日 skipped、多階段任務 partial）：加註 fallback_backend，summary 前綴說明
                     $afterSfFallback | Add-Member -NotePropertyName "fallback_backend" -NotePropertyValue $sfBackend -Force
                     $origSfSummary = if ($afterSfFallback.summary) { $afterSfFallback.summary } else { "" }
-                    $afterSfFallback.summary = "（以備援模型 $sfBackend 執行成功）$origSfSummary"
+                    $sfStatusLabel = if ($afterSfFallback.status -eq "skipped") { "非執行日跳過" } elseif ($afterSfFallback.status -eq "partial") { "階段性完成" } else { "執行成功" }
+                    $afterSfFallback.summary = "（以備援模型 $sfBackend $sfStatusLabel）$origSfSummary"
                     $afterSfFallback | ConvertTo-Json -Depth 6 | Set-Content -Path $sfResultPath -Encoding UTF8 -Force
-                    Write-Log "[Phase2] sandbox-fallback ${an}: $sfBackend 備援成功 ✓"
+                    Write-Log "[Phase2] sandbox-fallback ${an}: $sfBackend 備援完成（status=$($afterSfFallback.status)）✓"
                 } else {
                     $sfPreview = if ($sfOutput) { (@($sfOutput) -join "`n") } else { "" }
                     $sfPreviewShort = if ($sfPreview.Length -gt 500) { $sfPreview.Substring(0, 500) + "..." } else { $sfPreview }
@@ -2367,4 +2372,10 @@ $staleResults = Get-ChildItem "$ResultsDir\*" -File -ErrorAction SilentlyContinu
 if ($staleResults) {
     $staleResults | Remove-Item -Force
     Write-Log "[Cleanup] Removed $($staleResults.Count) stale result files (>7d)"
+}
+
+# Clean up lock file (強制清理，確保正常結束時一定釋放鎖定)
+if (Test-Path $TodoistTeamLockFile) {
+    Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
+    Write-Log "[Cleanup] Lock file removed"
 }

@@ -197,7 +197,7 @@
 | daily-digest-mid | 每日 11:15 | run-agent-team.ps1 | 團隊並行 |
 | daily-digest-pm | 每日 21:15 | run-agent-team.ps1 | 團隊並行 |
 | todoist-single | 每小時整點 02-23 | run-todoist-agent.ps1 | 單一 |
-| todoist-team | 每小時半點 02-23 | run-todoist-agent-team.ps1 | 3 階段並行 |
+| todoist-team | 每 30 分鐘 整點及半點 01-23 | run-todoist-agent-team.ps1 | 3 階段並行 |
 
 詳細排程 cron 定義在 `HEARTBEAT.md`；timeout 設定在 `config/timeouts.yaml`。
 
