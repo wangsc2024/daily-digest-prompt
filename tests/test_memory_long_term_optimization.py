@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from memory.long_term_memory import DigestLevel, LongTermMemoryConfig, LongTermMemoryManager
+from memory.long_term_memory import DigestLevel, LongTermMemoryConfig, LongTermMemoryManager, SearchFilters
 
 
 def _local_tmp(name: str) -> Path:
@@ -67,6 +67,46 @@ def test_similarity_search_meets_threshold():
     assert results
     assert results[0].score > 0.78
     assert results[0].retrieval_path == ["summary-index", "daily", "raw-messages"]
+
+
+def test_multi_stage_search_supports_metadata_filters():
+    tmp_path = _local_tmp("memory-search-filters")
+    manager = LongTermMemoryManager(
+        LongTermMemoryConfig(storage_path=tmp_path / "memory.json", backup_path=tmp_path / "expired.jsonl"),
+        now_provider=lambda: datetime(2026, 3, 18, tzinfo=timezone.utc),
+    )
+    manager.add_digest(
+        level=DigestLevel.DAILY,
+        topic="AI Agent",
+        messages=["決定採用 recent memory layer。"],
+        session_id="session-keep",
+        tags=["daily-digest", "AI"],
+        metadata={"taskType": "ai_sysdev", "digestDate": "2026-03-18T08:00:00+00:00"},
+    )
+    manager.add_digest(
+        level=DigestLevel.DAILY,
+        topic="AI Agent",
+        messages=["這是一筆舊資料。"],
+        session_id="session-skip",
+        tags=["daily-digest", "AI"],
+        metadata={"taskType": "research", "digestDate": "2026-02-01T08:00:00+00:00"},
+    )
+
+    results = manager.multi_stage_search(
+        "AI Agent recent memory layer",
+        top_k=5,
+        filters=SearchFilters(
+            topic="AI Agent",
+            task_type="ai_sysdev",
+            tags=["AI"],
+            start_date="2026-03-01",
+            end_date="2026-03-31",
+        ),
+    )
+
+    assert len(results) == 1
+    assert results[0].record.metadata["taskType"] == "ai_sysdev"
+    assert results[0].retrieval_path == ["summary-index", "metadata-filter", "daily", "raw-messages"]
 
 
 def test_expire_records_removes_outdated_daily_and_keeps_monthly():
