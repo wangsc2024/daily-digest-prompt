@@ -1,5 +1,5 @@
 {
-  "date": "2026-03-16",
+  "date": "2026-03-17",
   "topic": "Physics-Informed Machine Learning（PIML/PINN）— 物理定律約束的機器學習",
   "series_context": {
     "series_id": "physics-informed-ml",
@@ -10,101 +10,148 @@
   "research_questions": [
     "什麼是 Physics-Informed Machine Learning (PIML) 和 Physics-Informed Neural Networks (PINN)？",
     "PIML 如何將物理定律（偏微分方程）嵌入神經網路損失函數？",
-    "2026 年 PIML 在流體力學、氣候建模等領域有哪些突破性應用？"
+    "2026 年 PIML 在流體力學、氣候建模與科學計算上有哪些突破性進展？"
   ],
-  "methodology": "學術論文 + 技術部落格 + 官方文件交叉比對，建立完整概論。重點關注 2026 年最新演算法突破（如夏威夷大學研究）與應用案例。",
+  "methodology": "以學術論文、官方研究機構文章、開源實作與中文技術教學交叉蒐集。先用中英文 5 組以上關鍵詞搜尋，再比對知識庫既有內容，最後保留能補足「原理、方法、應用、實作」四個面向的來源。",
   "keywords": [
     "Physics-Informed Neural Networks",
     "PINN",
     "PIML",
     "physics constraints",
     "PDE solver",
-    "fluid dynamics",
+    "scientific machine learning",
     "climate modeling",
-    "loss function design"
+    "loss balancing"
   ],
+  "searched_queries": [
+    "2026 Physics-Informed Neural Networks latest breakthroughs official blog paper",
+    "2026 PIML PINN review PDE solver paper",
+    "2026 物理信息神經網路 PINN 最新 研究",
+    "2026 physics-informed machine learning climate modeling official",
+    "site:zhihu.com PINN 物理信息神經網路 2025 2026",
+    "site:csdn.net PINN 物理信息神經網路 2025 2026"
+  ],
+  "kb_check": {
+    "query": "AI 深度研究 Physics-Informed Neural Networks PIML PINN",
+    "topK": 20,
+    "result": "知識庫未出現 PIML/PINN 專題筆記，只有一般 AI 研究與其他主題的關聯片段，適合繼續蒐集並深化。"
+  },
   "sources": [
     {
-      "title": "Implementing physics-informed neural networks with deep learning for differential equations (Frontiers 2026)",
+      "title": "Implementing physics-informed neural networks with deep learning for differential equations",
       "url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1717117/full",
+      "language": "en",
+      "type": "paper",
       "key_points": [
-        "2026 最新實作研究，解決 ODE 反問題（參數估計）與正問題（近似解）",
-        "提出系統性方法處理 PINNs 在微分方程求解中的兩大挑戰",
-        "實際程式碼實作範例與深度學習框架整合"
+        "以 ODE 正問題與反問題展示 PINN 的實作流程，兼顧參數估計與近似解建模。",
+        "指出 PINN 的關鍵不只在網路架構，還包括 collocation points、邊界條件編碼與 loss 權重設計。",
+        "提供可落地的深度學習實作脈絡，適合作為研究與工程入門基準。"
       ]
     },
     {
       "title": "Embedding Physics into Machine Learning: A Review of Physics Informed Neural Networks as Partial Differential Equation Forward Solvers",
       "url": "https://www.sciopen.com/article/10.26599/TST.2025.9010157",
+      "language": "en",
+      "type": "paper",
       "key_points": [
-        "完整綜述 PINNs 作為 PDE 正向求解器的發展脈絡",
-        "問題導向的結構化回顧，涵蓋架構類型與優化技術",
-        "詳細分析當前挑戰：泛化能力、訓練效率、優化困難"
+        "系統梳理 PINN 作為 PDE 正向求解器的架構類型、訓練流程與典型應用。",
+        "把訓練穩定性、泛化能力與計算成本列為主流瓶頸。",
+        "適合作為後續比較新方法是否真的改善舊問題的基準綜述。"
       ]
     },
     {
-      "title": "Physics-informed neural network with weighted loss and hard constraints for hyperbolic conservation laws (Nature 2025)",
+      "title": "Physics-informed neural network with weighted loss and hard constraints for hyperbolic conservation laws",
       "url": "https://www.nature.com/articles/s41598-025-34263-1",
+      "language": "en",
+      "type": "paper",
       "key_points": [
-        "WHC-PINN：加權損失與硬約束結合的創新架構",
-        "雙曲守恆律求解的突破性方法",
-        "梯度加權策略有效解決邊界條件與初始值問題"
+        "WHC-PINN 結合加權損失與硬約束，處理雙曲守恆律時比傳統 soft constraints 更穩定。",
+        "顯示損失設計是 PINN 是否可用於高難 PDE 的核心因素之一。",
+        "支持「約束編碼方式」是 2025-2026 年方法創新的主戰場。"
       ]
     },
     {
-      "title": "Physics-informed machine learning: case studies for weather and climate modelling (Royal Society)",
+      "title": "Physics-informed machine learning: case studies for weather and climate modelling",
       "url": "https://royalsocietypublishing.org/rsta/article/379/2194/20200093/41210/Physics-informed-machine-learning-case-studies-for",
+      "language": "en",
+      "type": "paper",
       "key_points": [
-        "10 個天氣與氣候建模實際案例研究",
-        "證實 PIML 在物理一致性、訓練時間、資料效率方面的優勢",
-        "對非平穩系統（如氣候變遷）的泛化能力提升"
+        "以天氣與氣候建模案例說明 PIML 在資料稀缺、物理一致性要求高的場景特別有價值。",
+        "指出 PIML 並非取代物理模型，而是作為 surrogate model、bias correction 與 data assimilation 的增強器。",
+        "為 daily-digest-prompt 未來延伸到科學 AI 主題提供可操作的應用視角。"
       ]
     },
     {
-      "title": "Multi-Objective Loss Balancing for Physics-Informed Deep Learning (ScienceDirect 2025)",
-      "url": "https://www.sciencedirect.com/science/article/pii/S0045782525001860",
+      "title": "PIML: The New Frontier in Energy Systems Research",
+      "url": "https://www.pnnl.gov/publications/piml-new-frontier-energy-systems-research",
+      "language": "en",
+      "type": "official",
       "key_points": [
-        "多目標優化平衡問題的系統性分析",
-        "初始條件與邊界條件的軟約束 vs 硬約束權衡",
-        "自適應損失平衡技術（如 DC-PINNs）自動調整權重"
+        "PNNL 將 PIML 定義為把機器學習與領域物理知識配對，以提升可解釋性、可靠度與資料效率。",
+        "文中強調 challenge pairs 與 transformative pairing，說明 PIML 本質上是一種問題建模策略，而非單一演算法。",
+        "官方研究機構觀點有助於避免把 PIML 縮減成只有 PINN。"
       ]
     },
     {
-      "title": "GitHub - maziarraissi/PINNs (Original PINN Implementation)",
+      "title": "GitHub - maziarraissi/PINNs",
       "url": "https://github.com/maziarraissi/PINNs",
+      "language": "en",
+      "type": "code",
       "key_points": [
-        "Maziar Raissi 的原始 PINNs 實作（開創性論文作者）",
-        "包含經典 PDE 案例：Burgers 方程、Navier-Stokes 方程等",
-        "完整 TensorFlow 程式碼與複現步驟"
+        "原始 PINNs 開源實作，涵蓋 Burgers 與 Navier-Stokes 等經典 PDE 範例。",
+        "可觀察 PINN 早期實作如何把 PDE residual、初始條件與邊界條件寫進 loss function。",
+        "作為後續比較現代框架改良點的重要實作基線。"
       ]
     },
     {
-      "title": "Physics-Informed Neural Networks: Minimizing Residual Loss with Wide Networks (arXiv 2024)",
-      "url": "https://arxiv.org/html/2405.01680v1",
-      "key_points": [
-        "寬網路與有效激活函數對殘差損失最小化的影響",
-        "網路架構設計對 PINN 性能的關鍵影響",
-        "激活函數選擇的數學原理與實驗驗證"
-      ]
-    },
-    {
-      "title": "物理信息神經網路（PINN）：將物理知識融合到深度學習中 (CSDN 中文教學)",
+      "title": "物理信息神經網路（PINN）：將物理知識融合到深度學習中",
       "url": "https://blog.csdn.net/qq_28247201/article/details/136072595",
+      "language": "zh",
+      "type": "blog",
       "key_points": [
-        "中文社群的系統性 PINN 教學，涵蓋核心概念與數學推導",
-        "實際應用案例：倒立擺控制、航天器軌道設計",
-        "中文程式碼實作範例與除錯技巧"
+        "中文教學以直觀方式解釋 PINN 如何把物理方程寫入損失函數。",
+        "對初學者而言，中文材料補足英文論文的進入門檻。",
+        "提供工程實作者常見的建模步驟與除錯觀念。"
       ]
     },
     {
-      "title": "AI4Science: PINN 物理信息神經網路入門及相關論文 (知乎)",
+      "title": "AI4Science: PINN 物理信息神經網路入門及相關論文",
       "url": "https://zhuanlan.zhihu.com/p/517450449",
+      "language": "zh",
+      "type": "blog",
       "key_points": [
-        "中文知識社群的 PINN 入門指南與論文總結",
-        "AI for Science 領域的 PINN 應用概覽",
-        "中文研究者的實踐經驗與學習路徑建議"
+        "整理 PINN 基礎概念、典型論文與 AI for Science 應用脈絡。",
+        "中文社群材料有助於建立術語映射，降低英文關鍵詞查找成本。",
+        "可作為後續報告撰寫時的中文對照參考。"
       ]
     }
   ],
-  "stage_completed": 2
+  "collection_summary": [
+    "PINN 的研究焦點已從概念驗證轉向損失平衡、硬約束與訓練穩定性。",
+    "PIML 的外延大於 PINN，官方研究機構更強調問題建模與科學領域配對策略。",
+    "天氣、氣候與能源系統是 PIML 最具代表性的高價值應用場景。"
+  ],
+  "analysis": {
+    "consensus": [
+      "多數來源一致認為，PIML 不應被狹義等同於 PINN；PINN 是將 PDE 或物理殘差直接嵌入訓練目標的代表方法，但整體 PIML 更像是把機器學習與領域物理知識配對的建模框架。",
+      "論文、官方研究機構與開源實作都指出，PINN 成敗關鍵不在單純增加網路深度，而在 loss 權重、collocation points、初始與邊界條件編碼方式。",
+      "多數來源都把訓練穩定性、計算成本與高難度 PDE 的收斂品質列為 PINN/PIML 的核心瓶頸，顯示此領域仍屬方法工程密集型，而非成熟即插即用技術。",
+      "氣候、天氣與能源系統被反覆提及為高價值場景，因為這些場域同時具有資料稀缺、物理一致性要求高、傳統模擬昂貴等特徵。",
+      "中英文來源均支持「物理約束可提升資料效率與可解釋性」這個主張，這也是 PIML 與純黑盒模型最明顯的區隔。"
+    ],
+    "divergence": [
+      "對於約束實作方式，近期研究更偏向 hard constraints 或混合式約束，以減少僅靠 soft penalty 帶來的失真；但教學型與早期實作仍以 soft constraints 為主，因為較容易上手。",
+      "部分綜述把 PINN 視為 PDE forward solver 的核心方案，官方機構與應用型文章則更強調 surrogate modeling、bias correction、data assimilation 等廣義 PIML 用法，兩者對研究邊界的界定不同。",
+      "在可擴展性評估上，學術綜述普遍審慎，認為高維與複雜系統仍有明顯限制；中文入門文章則較聚焦概念優勢，對訓練失敗模式與成本描述較少。"
+    ],
+    "insights": [
+      "第一個核心洞見是：2025-2026 年 PIML/PINN 的主要創新已從『是否可把物理方程放進 loss』，轉向『如何分配與強化這些約束』，例如加權損失、自適應平衡與硬約束設計。",
+      "第二個核心洞見是：把 PIML 當成建模策略比當成單一模型更準確，因為其價值常出現在 ML 與既有物理模擬流程的混合，而不是完全取代數值求解器。",
+      "第三個核心洞見是：PINN 的工程難點高度集中在資料與方程尺度不一致、殘差項競爭與邊界條件表示，這些問題決定了其是否能從研究 demo 走向可重複部署。",
+      "第四個核心洞見是：官方研究機構對 PIML 的描述更強調可靠度、可解釋性與資料效率，說明產業或科學應用更在意可信近似，而不是單純追求 benchmark 精度。",
+      "第五個核心洞見是：氣候與能源系統場景凸顯 PIML 的真正優勢並非取代大型物理模型，而是加速 surrogate、補償偏差與強化 assimilation，這比『端到端解 PDE』更接近近期實務採用路徑。",
+      "第六個核心洞見是：中文內容對術語普及與導入門檻降低很有幫助，但在方法限制與最新架構差異上仍需以英文論文與官方來源做交叉驗證，否則容易高估 PINN 的通用性。"
+    ]
+  },
+  "stage_completed": 3
 }

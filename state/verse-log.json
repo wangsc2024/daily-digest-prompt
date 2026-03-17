@@ -185,6 +185,17 @@
       "status": "success",
       "session": "morning",
       "channel": "ntfy/wangsc2025"
+    },
+    {
+      "date": "2026-03-17",
+      "source": "《楞嚴經》卷五",
+      "channel": "ntfy/wangsc2025",
+      "author": "觀世音菩薩（佛陀轉述）",
+      "verse_text": "從聞思修入三摩地。",
+      "verse_id": 18,
+      "time": "2026-03-17 17:05:01",
+      "session": "evening",
+      "status": "success"
     }
   ]
 }

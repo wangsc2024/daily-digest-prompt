@@ -1,10 +1,8 @@
 {
-  "schema_version": 1,
-  "next_episode": 1,
-  "last_produced": 0,
-  "last_topic": "",
-  "total_episodes": 750,
-  "updated_at": "2026-03-15T00:00:00+08:00",
-  "source_plan": "docs/plans/淨土教觀學苑podcast專輯.md",
-  "note": "run-jiaoguang-podcast-next.ps1 依此檔取得下集集數；第N集在 source_plan Line (27+N)"
+  "updated_at": "2026-03-17 21:36:04",
+  "next_episode": 12,
+  "last_produced": 11,
+  "today_date": "2026-03-17",
+  "last_topic": "五戒修學述要 第003講",
+  "today_count": 3
 }

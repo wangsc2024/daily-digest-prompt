@@ -1,65 +1,266 @@
 {
   "version": 2,
-  "updated_at": "2026-03-17T05:09:41+08:00",
+  "updated_at": "2026-03-17T21:36:03",
   "summary": {
-    "total_episodes": 41,
+    "total_episodes": 56,
     "cooldown_days": 30,
     "recent_note_ids": [
+      "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67",
+      "d2613091-e99f-4ae1-aa3d-5609d8d823d4",
+      "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+      "6e1b3c73-adff-43f3-91b1-ee24d6f36d08",
+      "4fd7de74-55be-4ffb-9e7b-187cfcacd747",
+      "e5c3a26b-c18a-4594-91e6-3c4a95ee4009",
+      "f735b445-c2e4-417f-aa5a-76692d05b4b0",
       {
-        "note_id": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
-        "last_used": "2026-03-15",
-        "expires_at": "2026-04-14"
-      },
-      {
-        "note_id": "539bf8cc-3400-4309-bed1-efea59c37c9a",
-        "last_used": "2026-03-16",
-        "expires_at": "2026-04-15"
-      },
-      {
-        "note_id": "893e05b0-2573-489f-b9d4-455364a6a9f8",
+        "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
         "last_used": "2026-03-17",
         "expires_at": "2026-04-16"
       }
     ],
     "recent_topics": [
-      {
-        "topic": "Vite",
-        "last_used": "2026-03-15",
-        "expires_at": "2026-04-14"
-      },
-      {
-        "topic": "別教",
-        "last_used": "2026-03-16",
-        "expires_at": "2026-04-15"
-      },
-      {
-        "topic": "次第三觀",
-        "last_used": "2026-03-16",
-        "expires_at": "2026-04-15"
-      },
-      {
-        "topic": "無量四諦",
-        "last_used": "2026-03-16",
-        "expires_at": "2026-04-15"
-      },
+      "教觀綱宗",
+      "佛學",
+      "天台宗",
+      "金剛經",
+      "般若",
+      "大悲懺法及其如何",
+      "楞嚴經",
+      "別業妄見",
+      "大悲懺法",
+      "法華經",
       {
         "topic": "歷史傳承",
-        "last_used": "2026-03-17",
-        "expires_at": "2026-04-16"
-      },
-      {
-        "topic": "章安灌頂",
-        "last_used": "2026-03-17",
-        "expires_at": "2026-04-16"
-      },
-      {
-        "topic": "荊溪湛然",
         "last_used": "2026-03-17",
         "expires_at": "2026-04-16"
       }
     ]
   },
   "episodes": [
+    {
+      "episode_title": "止觀前行二十五法",
+      "notes_used": [
+        "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：二十五方便 — 天台宗止觀修行的前行方便體系"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T21:36:03"
+    },
+    {
+      "episode_title": "析空體空修行法",
+      "notes_used": [
+        "d2613091-e99f-4ae1-aa3d-5609d8d823d4"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之藏教與通教 — 析空觀與體空觀的義理對比"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T21:06:17"
+    },
+    {
+      "episode_title": "析空體空修行法",
+      "notes_used": [
+        "d2613091-e99f-4ae1-aa3d-5609d8d823d4"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之藏教與通教 — 析空觀與體空觀的義理對比"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T20:07:07"
+    },
+    {
+      "episode_title": "金剛般若論會釋",
+      "notes_used": [
+        "5c3f760c-42d2-4d85-a7a1-77d38b49285f"
+      ],
+      "note_titles": [
+        "金剛般若論會釋 卷第1"
+      ],
+      "topics": [
+        "佛學",
+        "金剛經",
+        "般若"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T19:36:06"
+    },
+    {
+      "episode_title": "金剛經善攝法義",
+      "notes_used": [
+        "5c3f760c-42d2-4d85-a7a1-77d38b49285f"
+      ],
+      "note_titles": [
+        "金剛般若論會釋 卷第1"
+      ],
+      "topics": [
+        "佛學",
+        "金剛經",
+        "般若"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T19:06:42"
+    },
+    {
+      "episode_title": "大悲懺法修持指南",
+      "notes_used": [
+        "6e1b3c73-adff-43f3-91b1-ee24d6f36d08"
+      ],
+      "note_titles": [
+        "大悲懺法及其如何於生活中落實"
+      ],
+      "topics": [
+        "大悲懺法及其如何"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T18:37:53"
+    },
+    {
+      "episode_title": "大悲懺法解析",
+      "notes_used": [
+        "6e1b3c73-adff-43f3-91b1-ee24d6f36d08"
+      ],
+      "note_titles": [
+        "大悲懺法及其如何於生活中落實"
+      ],
+      "topics": [
+        "大悲懺法及其如何"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T18:06:11"
+    },
+    {
+      "episode_title": "從翳眼到共業的覺醒",
+      "notes_used": [
+        "4fd7de74-55be-4ffb-9e7b-187cfcacd747"
+      ],
+      "note_titles": [
+        "楞嚴經研究:別業妄見與同分妄見 — 卷二見惑分析與眾生共業的如來藏義理"
+      ],
+      "topics": [
+        "楞嚴經",
+        "佛學",
+        "別業妄見"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T17:36:44"
+    },
+    {
+      "episode_title": "見惑：從翳眼到共業",
+      "notes_used": [
+        "4fd7de74-55be-4ffb-9e7b-187cfcacd747"
+      ],
+      "note_titles": [
+        "楞嚴經研究：別業妄見與同分妄見 — 卷二見惑分析與眾生共業的如來藏義理"
+      ],
+      "topics": [
+        "楞嚴經",
+        "佛學",
+        "別業妄見"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T17:05:55"
+    },
+    {
+      "episode_title": "大悲懺十科修行地圖",
+      "notes_used": [
+        "e5c3a26b-c18a-4594-91e6-3c4a95ee4009"
+      ],
+      "note_titles": [
+        "Task 3: 大悲懺儀軌完整結構分析"
+      ],
+      "topics": [
+        "大悲懺法",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T16:36:22"
+    },
+    {
+      "episode_title": "大悲懺十科修行地圖",
+      "notes_used": [
+        "e5c3a26b-c18a-4594-91e6-3c4a95ee4009"
+      ],
+      "note_titles": [
+        "Task 3: 大悲懺儀軌完整結構分析"
+      ],
+      "topics": [
+        "大悲懺法",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T16:04:58"
+    },
+    {
+      "episode_title": "法華壽量品開近顯遠",
+      "notes_used": [
+        "f735b445-c2e4-417f-aa5a-76692d05b4b0"
+      ],
+      "note_titles": [
+        "法華經壽量品研究：如來壽量無量與本門開近顯遠的核心思想"
+      ],
+      "topics": [
+        "法華經",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-17T15:23:39"
+    },
+    {
+      "episode_title": "八不道人蕅益智旭",
+      "notes_used": [
+        "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：蕅益智旭的註解與貢獻 — 從天台正統到融通諸宗的判教革新"
+      ],
+      "topics": [
+        "蕅益智旭",
+        "融通諸宗",
+        "判教革新"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-17T15:11:36+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260317-1504.mp3",
+      "slug": "教觀綱宗-20260317-1504"
+    },
+    {
+      "episode_title": "三止三觀的修證地圖",
+      "notes_used": [
+        "ed138bbf-b608-4f05-8311-f6fc2e865392"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系"
+      ],
+      "topics": [
+        "止觀",
+        "三止三觀",
+        "觀法修持"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-17T12:41:38.271766+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260317-1233.mp3",
+      "slug": "教觀綱宗-20260317-1233"
+    },
     {
       "episode_title": "千年法脈:天台宗傳承史",
       "notes_used": [
@@ -831,6 +1032,30 @@
   ],
   "entries": [
     {
+      "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
+      "note_title": "MCP（Model Context Protocol）生態系統完整指南",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-mcp-ragflow-argument-20260317",
+      "used_at": "2026-03-17T14:05:30+08:00"
+    },
+    {
+      "note_id": "c13f05ab-8a03-4f61-bc5b-0edb479a626a",
+      "note_title": "RAGFlow — 開源 RAG 引擎深度洞察",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-mcp-ragflow-argument-20260317",
+      "used_at": "2026-03-17T14:05:30+08:00"
+    },
+    {
+      "note_id": "5724812a-fb18-4f1f-b8b6-5b64155d8883",
+      "note_title": "論證謬誤的認知心理機制",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "tech-trio-mcp-ragflow-argument-20260317",
+      "used_at": "2026-03-17T14:05:30+08:00"
+    },
+    {
       "note_id": "da249b33-9644-4e55-8220-d36d53ff9f32",
       "note_title": "寫一個具創意的打磚塊遊戲",
       "query": "技術 AI 研究 學習 工具",
@@ -1093,6 +1318,102 @@
       "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
       "slug": "note-ed138bbf-20260316",
       "used_at": "2026-03-16T15:25:34"
+    },
+    {
+      "note_id": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+      "note_title": "法華經壽量品研究：如來壽量無量與本門開近顯遠的核心思想",
+      "query": "",
+      "note_id_input": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+      "slug": "note-f735b445-20260317",
+      "used_at": "2026-03-17T15:23:39"
+    },
+    {
+      "note_id": "e5c3a26b-c18a-4594-91e6-3c4a95ee4009",
+      "note_title": "Task 3: 大悲懺儀軌完整結構分析",
+      "query": "聞法儀軌 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep1-20260317",
+      "used_at": "2026-03-17T16:04:58"
+    },
+    {
+      "note_id": "e5c3a26b-c18a-4594-91e6-3c4a95ee4009",
+      "note_title": "Task 3: 大悲懺儀軌完整結構分析",
+      "query": "聞法儀軌 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep2-20260317",
+      "used_at": "2026-03-17T16:36:22"
+    },
+    {
+      "note_id": "4fd7de74-55be-4ffb-9e7b-187cfcacd747",
+      "note_title": "楞嚴經研究：別業妄見與同分妄見 — 卷二見惑分析與眾生共業的如來藏義理",
+      "query": "皈依的意義與方法 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep3-20260317",
+      "used_at": "2026-03-17T17:05:55"
+    },
+    {
+      "note_id": "4fd7de74-55be-4ffb-9e7b-187cfcacd747",
+      "note_title": "楞嚴經研究:別業妄見與同分妄見 — 卷二見惑分析與眾生共業的如來藏義理",
+      "query": "皈依的意義與方法 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep4-20260317",
+      "used_at": "2026-03-17T17:36:44"
+    },
+    {
+      "note_id": "6e1b3c73-adff-43f3-91b1-ee24d6f36d08",
+      "note_title": "大悲懺法及其如何於生活中落實",
+      "query": "懺悔法門 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep5-20260317",
+      "used_at": "2026-03-17T18:06:11"
+    },
+    {
+      "note_id": "6e1b3c73-adff-43f3-91b1-ee24d6f36d08",
+      "note_title": "大悲懺法及其如何於生活中落實",
+      "query": "懺悔法門 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep6-20260317",
+      "used_at": "2026-03-17T18:37:53"
+    },
+    {
+      "note_id": "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+      "note_title": "金剛般若論會釋 卷第1",
+      "query": "受戒須知 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep7-20260317",
+      "used_at": "2026-03-17T19:06:42"
+    },
+    {
+      "note_id": "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+      "note_title": "金剛般若論會釋 卷第1",
+      "query": "受戒須知 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep8-20260317",
+      "used_at": "2026-03-17T19:36:06"
+    },
+    {
+      "note_id": "d2613091-e99f-4ae1-aa3d-5609d8d823d4",
+      "note_title": "教觀綱宗研究：化法四教之藏教與通教 — 析空觀與體空觀的義理對比",
+      "query": "五戒修學述要 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep9-20260317",
+      "used_at": "2026-03-17T20:07:07"
+    },
+    {
+      "note_id": "d2613091-e99f-4ae1-aa3d-5609d8d823d4",
+      "note_title": "教觀綱宗研究：化法四教之藏教與通教 — 析空觀與體空觀的義理對比",
+      "query": "五戒修學述要 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep10-20260317",
+      "used_at": "2026-03-17T21:06:17"
+    },
+    {
+      "note_id": "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67",
+      "note_title": "教觀綱宗研究：二十五方便 — 天台宗止觀修行的前行方便體系",
+      "query": "五戒修學述要 第003講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep11-20260317",
+      "used_at": "2026-03-17T21:36:03"
     }
   ]
 }

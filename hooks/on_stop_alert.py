@@ -538,6 +538,23 @@ def _update_metrics_daily() -> None:
             )
             session_success_rate = round(healthy / len(today_sessions) * 100, 1)
 
+    # 品質評分（ADR-004）：0-100 分，反映當日系統健康狀態
+    # 基底：session_success_rate（可用時）或預設 80
+    schema_violation_count = tag_counts.get("schema-fail", 0)
+    base = session_success_rate if session_success_rate is not None else 80.0
+    penalty = min(30.0, blocked_count * 5.0 + error_count * 2.0 + schema_violation_count * 3.0 + loop_suspected * 4.0)
+    quality_score_daily = round(max(0.0, base - penalty), 1)
+    quality_scores = {
+        "daily": quality_score_daily,
+        "components": {
+            "session_success_base": base,
+            "blocked_penalty": min(30.0, blocked_count * 5.0),
+            "error_penalty": min(30.0, error_count * 2.0),
+            "schema_violation_penalty": min(30.0, schema_violation_count * 3.0),
+            "loop_penalty": min(30.0, loop_suspected * 4.0),
+        },
+    }
+
     new_record: dict = {
         "date": today,
         "total_tool_calls": total_calls,
@@ -550,6 +567,8 @@ def _update_metrics_daily() -> None:
         "error_count": error_count,
         "skill_reads": skill_reads,
         "avg_io_per_call": avg_io,
+        "quality_score_daily": quality_score_daily,
+        "quality_scores": quality_scores,
     }
     if session_success_rate is not None:
         new_record["session_success_rate"] = session_success_rate

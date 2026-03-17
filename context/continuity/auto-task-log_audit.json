@@ -4,6 +4,22 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-18T02:30:00+08:00",
+      "topic": "系統健康優異：0 錯誤、2 優化建議（知識庫限流/超時）",
+      "status": "completed",
+      "key_findings": "掃描 10 個最近日誌（3894 行 scheduler-state.json），核心指標全綠燈（ERROR/WARN/RETRY/cache_degraded=0）。發現 2 個非緊急優化建議：知識庫 429 限流（ai_sysdev 重複查詢）、TIMEOUT 1 次（結果集過大）。上次追蹤的 API 配額耗盡與 done_cert 損壞已完全解決。",
+      "kb_note_ids": ["6dbcc61f-eda7-4b58-a4cf-a0112a1d0a74"],
+      "next_suggested_angle": "追蹤優化建議實施效果（ai_sysdev 去重、知識庫 topK 調整）"
+    },
+    {
+      "executed_at": "2026-03-17T12:30:00+08:00",
+      "topic": "7 天 Log 掃描：API 配額耗盡與 done_cert 損壞追蹤",
+      "status": "completed",
+      "key_findings": "掃描 200 個 log 檔案，發現 3 個觀察性問題：API 配額耗盡（42 次，等待 03-17 13:32 恢復）、done_cert JSON 損壞（80 次，03-16 後已消失）、OOM 錯誤（1 次單一事件）。系統整體健康度良好，最近 10 筆排程全部成功。無需修復，建議加強監控機制。",
+      "kb_note_ids": ["5ba7e697-b524-4d55-98b7-925c6c9e69f2"],
+      "next_suggested_angle": "追蹤 API 配額恢復後自動任務執行情況，監控 done_cert 問題是否復發"
+    },
+    {
       "executed_at": "2026-03-16T22:37:00+08:00",
       "topic": "Groq 配額超限與 Stale lock 清理修復",
       "status": "completed",

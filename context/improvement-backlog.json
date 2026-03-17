@@ -1,120 +1,65 @@
 {
   "version": 1,
-  "generated_at": "2026-03-17T01:15:00+08:00",
-  "last_kb_insight_evaluation": "2026-03-17T00:00:00+08:00",
+  "generated_at": "2026-03-18T00:42:00+08:00",
   "source": "system-audit",
-  "audit_date": "2026-03-17",
-  "total_score": 85.05,
+  "audit_date": "2026-03-18",
+  "total_score": 87.88,
   "grade": "A",
   "items": [
     {
       "rank": 1,
       "priority": "P1",
-      "pattern": "TODO/FIXME 分批清理",
-      "description": "87 處 TODO/FIXME 分散於 65 個檔案，技術債務累積拉低 5.5 至 58 分。ADR-017 已 partial，需持續分批清理規範性 TODO。",
+      "pattern": "跨平台路徑硬編碼清理",
+      "description": "14 個檔案含 D:\\Source 或 C:\\Users 硬編碼路徑，限制可攜性。建議改用環境變數或 $PSScriptRoot 相對路徑。",
       "dimension": "技術棧",
-      "current_score": 58,
-      "target_score": 70,
+      "current_score": 75,
+      "target_score": 78,
       "effort": "medium",
-      "target_files": ["docs/plans/", "templates/", "prompts/"]
+      "target_files": ["bot/process_messages.ps1", "cleanup-tasks.ps1", "check-health.ps1"]
     },
     {
       "rank": 2,
       "priority": "P1",
-      "pattern": "行覆蓋率提升計畫",
-      "description": "964 個測試通過但行覆蓋率僅 10.39%，遠低於 45% 目標。ADR-011 已完成但分數仍偏低，需持續補強核心模組分支覆蓋。",
-      "dimension": "系統品質",
-      "current_score": 72,
-      "target_score": 80,
+      "pattern": "輸入驗證強化",
+      "description": "Hook 攔截為防禦性機制，缺少系統化 API 端點 schema 驗證。建議為 results/*.json 等結構化輸出加入 pydantic/jsonschema 驗證。",
+      "dimension": "資訊安全",
+      "current_score": 78,
+      "target_score": 83,
       "effort": "medium",
-      "target_files": ["tests/hooks/", "hooks/hook_utils.py", "hooks/agent_guardian.py"]
+      "target_files": ["hooks/pre_bash_guard.py", "config/hook-rules.yaml", "config/schemas/"]
     },
     {
       "rank": 3,
-      "priority": "P2",
-      "pattern": "CHANGELOG 格式規範化",
-      "description": "近 20 筆 commit 中 30% 不符 Conventional Commit 格式，CHANGELOG 6.5 評分 76。建議統一 commit message 格式。",
-      "dimension": "系統文件",
-      "current_score": 76,
-      "target_score": 82,
+      "priority": "P1",
+      "pattern": "TODO/FIXME 持續清理",
+      "description": "369 處 TODO/FIXME 分佈 76 檔案（Markdown 佔 30 檔）。建議定期清理規劃性 TODO 或轉入 tech-debt-backlog。",
+      "dimension": "系統完成度",
+      "current_score": 78,
+      "target_score": 86,
       "effort": "low",
-      "target_files": ["CHANGELOG.md"]
+      "target_files": ["docs/plans/", "templates/", "prompts/"]
     },
     {
       "rank": 4,
       "priority": "P2",
-      "pattern": "Skills 測試覆蓋擴充",
-      "description": "僅 3/41 Skills 有測試，7.4 測試覆蓋率 74 分。優先為 todoist、knowledge-query 等高頻 Skills 補測試。",
-      "dimension": "系統完成度",
-      "current_score": 74,
-      "target_score": 80,
-      "effort": "medium",
-      "target_files": ["tests/skills/"]
+      "pattern": "測試覆蓋率門檻提升",
+      "description": "覆蓋率門檻 44% 偏低（1086 測試），建議逐步提升至 60%。hook_utils 復用率 63.6% 可提升至 80%+。",
+      "dimension": "系統品質",
+      "current_score": 82,
+      "target_score": 88,
+      "effort": "high",
+      "target_files": ["tests/", "pyproject.toml", ".github/workflows/ci.yml"]
     },
     {
       "rank": 5,
       "priority": "P2",
-      "pattern": "統一安裝指南文件",
-      "description": "安裝步驟分散在 CLAUDE.md 和 OPERATIONS.md，缺少統一安裝指南。新手難以獨立操作。6.2 操作手冊 82 分。",
+      "pattern": "YAML 注釋密度持續提升",
+      "description": "YAML 注釋密度 10.6%-13.2%，低於 20% 目標。關鍵配置檔案需補充說明注釋。",
       "dimension": "系統文件",
-      "current_score": 82,
-      "target_score": 86,
+      "current_score": 90,
+      "target_score": 93,
       "effort": "low",
-      "target_files": ["docs/INSTALL.md"]
-    },
-    {
-      "rank": 6,
-      "priority": "P0",
-      "pattern": "Context 保護規則強制執行",
-      "description": "avg_io_per_call 超標 5 倍（24.7KB vs 5KB 門檻），Context 保護規則未執行。需啟用 session I/O 預算監控、識別違規 Agent、強制執行子 Agent 委派規則。",
-      "dimension": "系統品質",
-      "current_score": 20,
-      "target_score": 90,
-      "effort": "medium",
-      "target_files": ["skills/context-budget-monitor/", "templates/shared/preamble.md", "hooks/"],
-      "source": "kb_insight_evaluation",
-      "evaluated_at": "2026-03-17T00:00:00+08:00",
-      "execution_plan": "1. 啟用 context-budget-monitor Skill；2. 識別違規 Agent（avg > 15KB）；3. 強制執行 preamble 子 Agent 委派規則；4. 建立 pre-session hook 預算檢查；5. 7 天後驗證 avg_io_per_call < 5KB",
-      "research_sources": [
-        "https://www.getmaxim.ai/articles/context-window-management-strategies-for-long-context-ai-agents-and-chatbots/",
-        "https://eval.16x.engineer/blog/llm-context-management-guide"
-      ]
-    },
-    {
-      "rank": 7,
-      "priority": "P1",
-      "pattern": "快取策略深度優化",
-      "description": "cache_hit_ratio 持續低迷 19.9%（門檻 40%），遠低於目標。需分析各端點命中率、評估資料 volatility、調整 TTL 配置、建立自適應 TTL 機制。",
-      "dimension": "系統效能",
-      "current_score": 50,
-      "target_score": 85,
-      "effort": "medium",
-      "target_files": ["config/cache-policy.yaml", "skills/cache-optimizer/", "skills/api-cache/"],
-      "source": "kb_insight_evaluation",
-      "evaluated_at": "2026-03-17T00:00:00+08:00",
-      "execution_plan": "1. 用 cache-optimizer Skill 分析各端點命中率；2. 識別低命中率端點（< 20%）；3. 評估資料 volatility；4. 調整 cache-policy.yaml TTL（新聞 12h→24h、HN 6h→12h）；5. 監控 7 天後命中率變化；6. 建立自適應 TTL 機制（d-TTL 演算法）",
-      "research_sources": [
-        "https://www.fastly.com/documentation/guides/full-site-delivery/caching/caching-best-practices/",
-        "https://arxiv.org/pdf/1704.04448"
-      ]
-    },
-    {
-      "rank": 8,
-      "priority": "P1",
-      "pattern": "失敗時段根因分析與預防機制",
-      "description": "15:00、9:00、14:00 為高失敗時段，需識別共同特徵（timeout、API 限制、資源競爭）、建立時段特定 timeout 配置、實施預防性檢查。",
-      "dimension": "系統穩定性",
-      "current_score": 65,
-      "target_score": 85,
-      "effort": "medium",
-      "target_files": ["config/timeouts.yaml", "tools/trace_analyzer.py", "state/scheduler-state.json"],
-      "source": "kb_insight_evaluation",
-      "evaluated_at": "2026-03-17T00:00:00+08:00",
-      "execution_plan": "1. 用 trace-analyzer 分析 3 個時段失敗 session；2. 識別共同特徵；3. 檢查外部依賴（KB、Todoist API、ntfy）在這些時段狀態；4. 建立時段特定 timeout 配置；5. 實施預防性檢查（pre-execution health check）；6. 監控 14 天後失敗率變化",
-      "research_sources": [
-        "https://coastapp.com/blog/failure-analysis/",
-        "https://blog.infraspeak.com/root-cause-analysis/"
-      ]
+      "target_files": ["config/cache-policy.yaml", "config/scoring.yaml", "config/notification.yaml"]
     }
   ]
 }

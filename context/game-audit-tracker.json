@@ -1,7 +1,35 @@
 {
   "version": 2,
-  "games": {},
+  "games": {
+    "blockPuzzle_cursor": { "last_audit": null, "score": null, "grade": null, "type": "PWA" },
+    "breakout": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "digdug": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "frogger": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "ink-chess": { "last_audit": null, "score": null, "grade": null, "type": "modular" },
+    "mala-meditation": { "last_audit": "2026-03-17", "score": 69, "grade": "C", "type": "creative", "fixes_applied": 3, "issues_found": 28 },
+    "mindful-memory": { "last_audit": "2026-03-17", "score": 67, "grade": "C", "type": "creative", "fixes_applied": 2, "issues_found": 31 },
+    "pacman": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "pong": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "samsara-tower": { "last_audit": null, "score": null, "grade": null, "type": "creative" },
+    "six-roots-zen": { "last_audit": null, "score": null, "grade": null, "type": "creative" },
+    "snake": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "space_invaders": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "tetris": { "last_audit": null, "score": null, "grade": null, "type": "classic" },
+    "zen-breakout": { "last_audit": null, "score": null, "grade": null, "type": "creative" },
+    "zen-cards": { "last_audit": null, "score": null, "grade": null, "type": "modular" },
+    "zen-ink-flow": { "last_audit": null, "score": null, "grade": null, "type": "creative" },
+    "zen-rhythm": { "last_audit": null, "score": null, "grade": null, "type": "creative" }
+  },
   "priority_algorithm": "oldest_first_or_lowest_score",
   "games_per_audit": 2,
-  "last_scan_date": null
+  "last_scan_date": "2026-03-17",
+  "total_games": 18,
+  "audit_history": [
+    {
+      "date": "2026-03-17",
+      "games_audited": ["mala-meditation", "mindful-memory"],
+      "fixes_applied": 5,
+      "avg_score": 68
+    }
+  ]
 }

@@ -3,21 +3,6 @@
   "schedule_type": "daily_digest",
   "description": "每日摘要各次排程的獨立執行記錄，每日最多 3 次（08:00/11:15/21:15）",
   "records": {
-    "2026-03-15": {
-      "runs": [
-        {
-          "run_id": "70-2119",
-          "trigger": "21:15",
-          "completed_at": "2026-03-15T21:19:00+08:00",
-          "top3_headlines": ["萬丹森林公園啟用超過3000人", "潮好玩市集迷你六堆運會", "屏東Young有氧Jump潘若迪"],
-          "habit_tip": "系統優於目標：專注設計系統而非執著結果",
-          "buddhist_wisdom": "金剛經",
-          "todoist_summary": "0 項待辦",
-          "digest_quality": "good",
-          "status": "completed"
-        }
-      ]
-    },
     "2026-03-16": {
       "runs": [
         {
@@ -27,6 +12,21 @@
           "top3_headlines": ["藝起派對寫生盛會報名開跑", "竹田頓物驛3/21開幕", "LLM Architecture Gallery 459🔥"],
           "habit_tip": "複利效應：每天進步1%，一年後進步37倍",
           "buddhist_wisdom": "龍舒淨土文",
+          "todoist_summary": "0 項待辦",
+          "digest_quality": "good",
+          "status": "completed"
+        }
+      ]
+    },
+    "2026-03-17": {
+      "runs": [
+        {
+          "run_id": "72-2119",
+          "trigger": "21:15",
+          "completed_at": "2026-03-17T21:19:00+08:00",
+          "top3_headlines": ["高齡友善資訊網上線", "植樹活動韌性森活3/21登場", "Claude 3D工作技巧132🔥"],
+          "habit_tip": "兩分鐘法則：先建立「開始」的習慣",
+          "buddhist_wisdom": "華嚴經",
           "todoist_summary": "0 項待辦",
           "digest_quality": "good",
           "status": "completed"

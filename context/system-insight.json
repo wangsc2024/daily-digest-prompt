@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "generated_at": "2026-03-16T23:35:55+08:00",
+  "generated_at": "2026-03-17T14:18:00+08:00",
   "period_days": 7,
-  "total_skills": 41,
-  "actual_skills_found": 41,
+  "total_skills": 45,
+  "actual_skills_found": 45,
   "data_sources": {
     "jsonl_logs": "complete",
     "scheduler_state": "complete",
@@ -12,82 +12,113 @@
     "behavior_patterns": "complete"
   },
   "metrics": {
-    "daily_success_rate": 0.9125,
-    "skill_usage_coverage": 1.577,
-    "cache_hit_ratio": 0.199,
+    "daily_success_rate": 0.917,
+    "skill_usage_coverage": 1.0,
+    "cache_hit_ratio": 0.211,
     "error_rate": 0.0,
-    "block_rate": 0.001,
-    "topic_diversity": 0.944,
-    "auto_task_fairness": 0.628,
-    "avg_io_per_call": 24771,
+    "block_rate": 0.0635,
+    "topic_diversity": 0.993,
+    "auto_task_fairness": 0.555,
+    "avg_io_per_call": 10673,
     "behavior_pattern_count": 200,
     "high_confidence_patterns": 155
   },
   "alerts": [
     {
-      "level": "critical",
-      "metric": "avg_io_per_call",
-      "value": 24771,
-      "threshold": 5000,
-      "message": "Context 保護規則未執行，avg_io_per_call 持續高達 24.7KB（門檻 5KB），違規 session 未被遏制"
-    },
-    {
       "level": "warning",
       "metric": "cache_hit_ratio",
-      "value": 0.199,
+      "value": 0.211,
       "threshold": 0.4,
-      "message": "快取命中率持續低迷 19.9%（門檻 40%），與上次相同，未見改善"
+      "message": "快取命中率 21.1%，持續低於 40% 門檻（+0.8pp 微幅改善）"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.628,
+      "value": 0.555,
       "threshold": 0.5,
-      "message": "自動任務公平性略超標 0.628（門檻 0.5），分佈不均但仍可接受"
+      "message": "自動任務執行不均（0.555 > 0.5），較上次 0.532 惡化 4.3%"
+    },
+    {
+      "level": "critical",
+      "metric": "block_rate",
+      "value": 0.0635,
+      "threshold": 0.02,
+      "message": "Hook 攔截率 6.35%，超過 2% 閾值 3 倍（從 0.06% 暴增 100 倍）"
+    },
+    {
+      "level": "warning",
+      "metric": "avg_io_per_call",
+      "value": 10673,
+      "threshold": 5000,
+      "message": "平均 I/O 10673 字元超標 113%，較上次 8998 字元惡化 18.6%"
     }
   ],
   "recommendations": [
-    "【P0 緊急】立即審查近 2 日 avg_io_per_call > 15KB 的 session，識別未遵守 Context 保護規則的 Agent（委派子 Agent），強制執行 preamble 規則",
-    "【P1】檢查快取策略：cache_hit_ratio 持續 19.9%，遠低於 40% 門檻，可能 TTL 配置過短或快取策略失效",
-    "【P2】分析失敗時段（15:00、9:00、14:00）共同特徵，識別系統性瓶頸",
-    "【Info】Skill 總數需更新：實際使用 41 個 Skill，但 SKILL.md 定義 26 個，需同步更新文件",
-    "【正向】成功率從 86% 回升至 91.25%（+5.25pp），已達 90% 門檻，趨勢改善",
-    "【正向】auto_task_fairness 從 0.688 改善至 0.628（-8.7%），輪轉機制恢復效能"
+    "【P0 Critical】block_rate 從 0.06% 暴增至 6.35%（+100 倍），疑似 Hook 規則誤攔截或系統行為異常，需立即調查",
+    "【P1】avg_io_per_call 從 8998 反彈至 10673（+18.6%），Context 保護規則效果減弱，需強化子 Agent 委派策略",
+    "【P1】auto_task_fairness 從 0.532 惡化至 0.555（+4.3%），4 個任務持續未執行（unsloth_research, creative_game_optimize, qa_optimize, chatroom_optimize）",
+    "【P2】快取命中率 21.1% 持續低迷，建議檢查 config/cache-policy.yaml 的 TTL 設定",
+    "【正向】成功率維持 91.7%（+0.1pp），連續達標",
+    "【正向】error_rate = 0%，無錯誤發生",
+    "【正向】主題多樣性 99.3%，研究去重機制運作優異",
+    "【正向】Skill 總數從 43 增長至 45，生態系統持續擴展"
   ],
   "skill_heatmap": {
-    "todoist": 120,
-    "api-cache": 95,
-    "knowledge-query": 58,
-    "groq": 45,
-    "ntfy-notify": 38,
-    "system-insight": 28,
-    "arch-evolution": 25,
-    "github-scout": 22,
-    "kb-research-strategist": 20,
-    "game-design": 18
+    "ntfy-notify": 215,
+    "knowledge-query": 205,
+    "todoist": 162,
+    "kb-research-strategist": 101,
+    "skill-forge": 35,
+    "api-cache": 23,
+    "skill-scanner": 22,
+    "system-insight": 21,
+    "chatroom-query": 21,
+    "hackernews-ai-digest": 20,
+    "groq": 16,
+    "system-audit": 15,
+    "pingtung-news": 15,
+    "digest-memory": 15,
+    "github-scout": 15,
+    "scheduler-state": 15,
+    "web-research": 14,
+    "arch-evolution": 14,
+    "atomic-habits": 14,
+    "learning-mastery": 14
   },
-  "high_failure_hours": [15, 9, 14],
+  "high_failure_hours": [17, 22, 23],
   "statistics": {
-    "total_runs_7d": 160,
-    "successful_runs": 146,
+    "total_runs_7d": 168,
+    "successful_runs": 154,
     "failed_runs": 14,
-    "total_tool_calls": 20761,
-    "unique_skills_used": 41,
-    "research_entries": 144,
+    "total_tool_calls": 17096,
+    "unique_skills_used": 45,
+    "skill_read_count": 1047,
+    "research_entries": 137,
     "unique_topics": 136,
-    "auto_tasks_completed": 25,
+    "auto_tasks_total": 28,
+    "auto_tasks_executed_today": 20,
+    "auto_tasks_pending_today": 8,
     "cache_stats": {
-      "cache_read": 431,
-      "api_call": 1739
-    }
+      "cache_read": 271,
+      "api_call": 1016,
+      "cache_hit_ratio_percent": "21.1%"
+    },
+    "error_count": 0,
+    "blocked_count": 1085,
+    "total_output_chars": 182436051,
+    "avg_output_per_call": 10673
   },
   "trends": {
-    "daily_success_rate": "+5.25pp (0.86 → 0.9125, 顯著改善)",
-    "cache_hit_ratio": "+0.4pp (0.195 → 0.199, 微幅改善)",
-    "auto_task_fairness": "-8.7% (0.688 → 0.628, 改善)",
-    "avg_io_per_call": "-0.9% (24985 → 24771, 微幅改善但仍嚴重超標)",
-    "topic_diversity": "-5.6pp (1.0 → 0.944, 仍優秀)",
-    "skill_usage_coverage": "+57.7% (1.0 → 1.577, Skill 總數需更新)"
+    "daily_success_rate": "+0.1pp (0.916 → 0.917, 微幅改善)",
+    "cache_hit_ratio": "+0.8pp (0.203 → 0.211, 微幅改善但仍低迷)",
+    "auto_task_fairness": "+4.3% (0.532 → 0.555, 惡化)",
+    "avg_io_per_call": "+18.6% (8998 → 10673, 惡化)",
+    "block_rate": "+10583% (0.0006 → 0.0635, 暴增 - Critical)",
+    "topic_diversity": "+0.1pp (0.992 → 0.993, 微幅改善)",
+    "skill_usage_coverage": "維持 100%（total_skills 更新為 45）",
+    "behavior_pattern_count": "持平 200",
+    "high_confidence_patterns": "持平 155",
+    "total_skills": "+2 (43 → 45, 生態系統擴展)"
   },
-  "summary": "系統品質呈現緩步改善趨勢，但核心問題仍未解決。最緊急問題：avg_io_per_call 持續高達 24.7KB（超標 5 倍），雖較上次 24.9KB 微降 0.9%，但仍顯示 Context 保護規則未被執行。成功率顯著回升至 91.25%（+5.25pp），已達 90% 門檻，為唯一重大正向趨勢。快取命中率持續低迷 19.9%（僅微升 +0.4pp）。自動任務公平性改善至 0.628（-8.7%），輪轉機制恢復效能。建議：(1) P0 緊急審查違規 session，強制執行委派規則 (2) P1 深入調查快取策略失效原因 (3) 持續監控成功率反彈趨勢。"
+  "summary": "系統出現重大警訊：block_rate 從 0.06% 暴增至 6.35%（+100 倍），疑似 Hook 規則誤攔截或系統行為異常，需立即調查。同時，avg_io_per_call 從 8998 反彈至 10673（+18.6%），Context 保護規則效果減弱。自動任務公平性從 0.532 惡化至 0.555（+4.3%），4 個任務持續未執行。正向指標：成功率維持 91.7%，error_rate = 0%，主題多樣性 99.3%，Skill 生態系統從 43 擴展至 45。整體評估：系統從「穩定改善中」退回至「警戒」狀態，需優先處理 Hook 攔截率暴增問題。"
 }

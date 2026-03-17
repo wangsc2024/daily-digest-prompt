@@ -1774,4 +1774,154 @@ try {
 }
 
 Write-Host ""
+
+# ─────────────────────────────────────────────────────────────────
+# [Context 預算] ADR-022：avg_io_per_call 趨勢監控
+# ─────────────────────────────────────────────────────────────────
+Write-Host "─────────────────────────────────" -ForegroundColor Cyan
+Write-Host "[Context 預算] avg_io_per_call 趨勢" -ForegroundColor Cyan
+
+$ioHistoryFile = "context/io-budget-history.json"
+if (Test-Path $ioHistoryFile) {
+    try {
+        $ioHistory = Get-Content $ioHistoryFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $entries = $ioHistory.entries
+        if ($entries -and $entries.Count -gt 0) {
+            $latest = $entries[-1]
+            $latestDate = $latest.date
+            $exceededPct = $latest.exceeded_pct
+            $topViolator = $latest.top_violator
+
+            $ioThresholdPct = 50   # exceeded_pct 超過此值視為警告
+            $ioColor = if ($exceededPct -gt $ioThresholdPct) { "Red" } elseif ($exceededPct -gt 20) { "Yellow" } else { "Green" }
+            $ioIcon  = if ($exceededPct -gt $ioThresholdPct) { "❌" } elseif ($exceededPct -gt 20) { "⚠️ " } else { "✅" }
+
+            Write-Host "  $ioIcon 最新（$latestDate）：超標 sessions = $exceededPct%，最大違規 Agent = $topViolator" -ForegroundColor $ioColor
+            Write-Host "       門檻：exceeded_pct ≤ 20% = 健康，≤ 50% = 警告，> 50% = 違規" -ForegroundColor DarkGray
+
+            if ($entries.Count -ge 2) {
+                $prev = $entries[-2].exceeded_pct
+                $curr = $exceededPct
+                $delta = $curr - $prev
+                $trendStr = if ($delta -lt -5) { "📉 改善 ($([math]::Abs($delta))pp)" }
+                            elseif ($delta -gt 5) { "📈 惡化 (+${delta}pp)" }
+                            else { "➡️  穩定（±${delta}pp）" }
+                Write-Host "       趨勢：$trendStr（對比前次 $($entries[-2].date)）" -ForegroundColor DarkGray
+            }
+        } else {
+            Write-Host "  ℹ️  io-budget-history.json 存在但無記錄（尚未執行 context-budget-monitor Skill）" -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host "  ⚠️  io-budget-history.json 解析失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ℹ️  context/io-budget-history.json 不存在（尚未執行 context-budget-monitor Skill）" -ForegroundColor DarkGray
+    Write-Host "       建議：執行 system-audit 即可自動建立" -ForegroundColor DarkGray
+}
+
+Write-Host ""
+
+# ─────────────────────────────────────────────────────────────────
+# [失敗時段分析] ADR-024：高失敗時段失敗率統計（9:00/14:00/15:00）
+# ─────────────────────────────────────────────────────────────────
+Write-Host "─────────────────────────────────" -ForegroundColor Cyan
+Write-Host "[結果 Schema 驗證] ADR-003：results/*.json 格式合規" -ForegroundColor Cyan
+
+$schemaFile = "config/schemas/agent-result.schema.json"
+$resultsDir = "results"
+if (Test-Path $resultsDir) {
+    $resultFiles = Get-ChildItem $resultsDir -Filter "*.json" -ErrorAction SilentlyContinue
+    if ($resultFiles.Count -eq 0) {
+        Write-Host "  ℹ️  results/ 目錄無 JSON 結果檔案" -ForegroundColor DarkGray
+    } else {
+        $schemaExists = Test-Path $schemaFile
+        $validCount = 0; $invalidCount = 0; $invalidFiles = @()
+        foreach ($f in $resultFiles) {
+            try {
+                $obj = Get-Content $f.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+                # 基礎驗證：status 欄位必須存在且為有效值
+                $hasStatus = $null -ne $obj.status -and $obj.status -in @("success","partial","failed","format_failed")
+                if ($hasStatus) { $validCount++ } else { $invalidCount++; $invalidFiles += $f.Name }
+            } catch {
+                $invalidCount++; $invalidFiles += $f.Name
+            }
+        }
+        $total = $resultFiles.Count
+        $color = if ($invalidCount -eq 0) { "Green" } elseif ($invalidCount -le 2) { "Yellow" } else { "Red" }
+        $icon  = if ($invalidCount -eq 0) { "✅" } elseif ($invalidCount -le 2) { "⚠️ " } else { "❌" }
+        Write-Host "  $icon 結果檔：$validCount/$total 通過 Schema 驗證（status 欄位合規）" -ForegroundColor $color
+        if (-not $schemaExists) {
+            Write-Host "  ⚠️  agent-result.schema.json 不存在" -ForegroundColor Yellow
+        }
+        foreach ($fn in $invalidFiles) {
+            Write-Host "    ❌ $fn — status 欄位缺失或無效" -ForegroundColor Red
+        }
+    }
+} else {
+    Write-Host "  ℹ️  results/ 目錄不存在" -ForegroundColor DarkGray
+}
+
+Write-Host ""
+Write-Host "[失敗時段分析] ADR-024：各時段失敗率" -ForegroundColor Cyan
+
+$stateFile = "state/scheduler-state.json"
+if (Test-Path $stateFile) {
+    try {
+        $state = Get-Content $stateFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $runs = $state.runs
+        if (-not $runs) { $runs = @() }
+
+        $highFailureHours = @(9, 14, 15)
+
+        $hourStats = @{}
+        foreach ($run in $runs) {
+            try {
+                $runTime = [datetime]::Parse($run.started_at)
+                $h = $runTime.Hour
+                if (-not $hourStats.ContainsKey($h)) {
+                    $hourStats[$h] = @{ total = 0; failed = 0 }
+                }
+                $hourStats[$h].total++
+                if ($run.status -in @("failed", "timeout")) {
+                    $hourStats[$h].failed++
+                }
+            } catch { }
+        }
+
+        if ($hourStats.Count -eq 0) {
+            Write-Host "  ℹ️  scheduler-state.json 無執行記錄" -ForegroundColor DarkGray
+        } else {
+            foreach ($h in ($highFailureHours | Sort-Object)) {
+                if ($hourStats.ContainsKey($h)) {
+                    $st = $hourStats[$h]
+                    $failRate = if ($st.total -gt 0) { [math]::Round($st.failed / $st.total * 100, 1) } else { 0 }
+                    $hColor = if ($failRate -gt 30) { "Red" } elseif ($failRate -gt 15) { "Yellow" } else { "Green" }
+                    $hIcon  = if ($failRate -gt 30) { "❌" } elseif ($failRate -gt 15) { "⚠️ " } else { "✅" }
+                    Write-Host "  $hIcon ${h}:00 時段：失敗率 = $failRate%（$($st.failed)/$($st.total) runs）" -ForegroundColor $hColor
+                } else {
+                    Write-Host "  ℹ️  ${h}:00 時段：無記錄" -ForegroundColor DarkGray
+                }
+            }
+
+            $worstHour = $hourStats.GetEnumerator() | Sort-Object {
+                if ($_.Value.total -gt 0) { $_.Value.failed / $_.Value.total } else { 0 }
+            } -Descending | Select-Object -First 1
+
+            if ($worstHour) {
+                $wh = $worstHour.Key
+                $ws = $worstHour.Value
+                $wRate = if ($ws.total -gt 0) { [math]::Round($ws.failed / $ws.total * 100, 1) } else { 0 }
+                if ($wh -notin $highFailureHours) {
+                    Write-Host "  📊 全日最高失敗率時段：${wh}:00 ($wRate%，$($ws.failed)/$($ws.total) runs)" -ForegroundColor DarkGray
+                }
+            }
+        }
+    } catch {
+        Write-Host "  ⚠️  scheduler-state.json 解析失敗：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  ℹ️  state/scheduler-state.json 不存在" -ForegroundColor DarkGray
+}
+
+Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

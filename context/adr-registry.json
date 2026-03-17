@@ -1,21 +1,27 @@
 {
   "version": 2,
-  "updated_at": "2026-03-17",
+  "updated_at": "2026-03-18T01:22:00+08:00",
   "summary": {
-    "total": 18,
-    "proposed": 1,
-    "accepted": 15,
+    "total": 23,
+    "proposed": 2,
+    "accepted": 19,
     "deferred": 1,
     "wontfix": 1,
     "rejected": 0,
-    "superseded": 0
+    "superseded": 0,
+    "implementation_breakdown": {
+      "done": 20,
+      "partial": 0,
+      "pending": 2,
+      "immediate_fix": 0
+    }
   },
   "records": [
     {
       "id": "ADR-20260224-001",
       "title": "依賴注入（Dependency Injection）模式",
       "status": "Deferred",
-      "implementation_status": "pending",
+      "implementation_status": "done",
       "created_at": "2026-02-24",
       "decided_at": "2026-03-11",
       "source": "improvement-backlog",
@@ -41,11 +47,11 @@
         "templates/shared/preamble.md",
         "skills/SKILL_INDEX.md"
       ],
-      "notes": "來源：pydantic/pydantic-ai（14,942 stars）。Phase 1 POC 建議選 todoist Skill，因其同時有 REST API + Cache 兩種依賴，最具代表性。",
+      "notes": "Phase 3 全面 DI 完成（2026-03-17）。config/dependencies.yaml v2.0.0 收錄 8 個服務（todoist/knowledge_query/ntfy_notify/chatroom_relay/groq_relay/hackernews/pingtung_news/gmail）。8 個高頻 SKILL.md 已加入 depends-on + DI 讀取區塊；低頻 SKILL.md 加入輕量 depends-on 宣告。全面 DI 遷移完成，Deferred 維持（設計上允許）。",
       "fitness_functions": [],
       "tech_debt_score": 2.0,
       "auto_generated": false,
-      "review_due": "2026-05-25"
+      "review_due": "2026-09-17"
     },
     {
       "id": "ADR-20260224-002",
@@ -85,7 +91,7 @@
       "id": "ADR-20260224-003",
       "title": "Agent Handoff 控制轉移機制",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-02-24",
       "decided_at": "2026-03-11",
       "source": "improvement-backlog",
@@ -120,7 +126,7 @@
       "id": "ADR-20260224-004",
       "title": "Evals 評估系統",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-02-24",
       "decided_at": "2026-03-11",
       "source": "improvement-backlog",
@@ -237,10 +243,21 @@
       "context": "系統審查（2026-03-11）1.4 依賴安全 75 分。無 pip-audit 或 Dependabot 整合。",
       "decision": "接受。pyproject.toml 新增 pip-audit，check-health.ps1 新增掃描區塊。",
       "consequences": {
-        "positive": ["依賴漏洞可量化", "純本地工具", "整合至現有工作流"],
-        "negative": ["需連線 PyPI", "精確版本鎖定需定期手動升級"]
+        "positive": [
+          "依賴漏洞可量化",
+          "純本地工具",
+          "整合至現有工作流"
+        ],
+        "negative": [
+          "需連線 PyPI",
+          "精確版本鎖定需定期手動升級"
+        ]
       },
-      "related_files": ["pyproject.toml", "uv.lock", "check-health.ps1"],
+      "related_files": [
+        "pyproject.toml",
+        "uv.lock",
+        "check-health.ps1"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -260,10 +277,21 @@
       "context": "行覆蓋率 10.19% 遠低於 45% 目標。",
       "decision": "接受（分階段）。Hook 模組優先提升行覆蓋率。",
       "consequences": {
-        "positive": ["Hook 分支邏輯可信度提升", "回歸偵測能力增強"],
-        "negative": ["初期工作量不低", "假象安全感"]
+        "positive": [
+          "Hook 分支邏輯可信度提升",
+          "回歸偵測能力增強"
+        ],
+        "negative": [
+          "初期工作量不低",
+          "假象安全感"
+        ]
       },
-      "related_files": ["tests/hooks/", "hooks/hook_utils.py", "hooks/agent_guardian.py", "pyproject.toml"],
+      "related_files": [
+        "tests/hooks/",
+        "hooks/hook_utils.py",
+        "hooks/agent_guardian.py",
+        "pyproject.toml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -283,10 +311,19 @@
       "context": "22 個 YAML 檔案平均注釋密度 13%，低於 20% 目標。",
       "decision": "接受（立即修復）。對關鍵配置檔案新增說明注釋，達到 20% 注釋密度。",
       "consequences": {
-        "positive": ["配置意圖自文件化", "audit-scoring 評分提升"],
-        "negative": ["注釋需與配置保持同步"]
+        "positive": [
+          "配置意圖自文件化",
+          "audit-scoring 評分提升"
+        ],
+        "negative": [
+          "注釋需與配置保持同步"
+        ]
       },
-      "related_files": ["config/cache-policy.yaml", "config/scoring.yaml", "config/notification.yaml"],
+      "related_files": [
+        "config/cache-policy.yaml",
+        "config/scoring.yaml",
+        "config/notification.yaml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -306,10 +343,19 @@
       "context": "缺 CI/CD pipeline，測試僅手動觸發。",
       "decision": "建立最小 CI：push to main 觸發 pytest + pip-audit。",
       "consequences": {
-        "positive": ["Hook 回歸自動偵測", "與 ADR-010 協同"],
-        "negative": ["需 GitHub Actions 配置", "API keys 需 secrets 管理"]
+        "positive": [
+          "Hook 回歸自動偵測",
+          "與 ADR-010 協同"
+        ],
+        "negative": [
+          "需 GitHub Actions 配置",
+          "API keys 需 secrets 管理"
+        ]
       },
-      "related_files": [".github/workflows/ci.yml", "pyproject.toml"],
+      "related_files": [
+        ".github/workflows/ci.yml",
+        "pyproject.toml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -329,10 +375,18 @@
       "context": "系統僅支援 Windows Task Scheduler，無 cron/systemd 替代。",
       "decision": "不修復（Wontfix）。系統明確設計為 Windows-only 個人助理，無跨平台需求。",
       "consequences": {
-        "positive": ["節省開發時間", "保持架構簡單性"],
-        "negative": ["跨平台分數維持 60", "未來需 Linux 部署時大幅重寫"]
+        "positive": [
+          "節省開發時間",
+          "保持架構簡單性"
+        ],
+        "negative": [
+          "跨平台分數維持 60",
+          "未來需 Linux 部署時大幅重寫"
+        ]
       },
-      "related_files": ["docs/design/cross-platform-scheduler-design.md"],
+      "related_files": [
+        "docs/design/cross-platform-scheduler-design.md"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": false,
@@ -352,10 +406,20 @@
       "context": "run-todoist-agent-team.ps1 hardcode timeout 值，未讀取 timeouts.yaml。",
       "decision": "提議。在 PS1 啟動時讀取 config/timeouts.yaml 取代 hardcoded 值。",
       "consequences": {
-        "positive": ["timeout 調整只需改 YAML", "與 ADR-002 一致"],
-        "negative": ["引入 YAML 解析依賴", "需確保 fallback 機制"]
+        "positive": [
+          "timeout 調整只需改 YAML",
+          "與 ADR-002 一致"
+        ],
+        "negative": [
+          "引入 YAML 解析依賴",
+          "需確保 fallback 機制"
+        ]
       },
-      "related_files": ["run-todoist-agent-team.ps1", "run-agent-team.ps1", "config/timeouts.yaml"],
+      "related_files": [
+        "run-todoist-agent-team.ps1",
+        "run-agent-team.ps1",
+        "config/timeouts.yaml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -375,10 +439,17 @@
       "context": "CI 缺 ruff lint。",
       "decision": "接受（立即修復）。在 ci.yml 新增 ruff check 步驟。",
       "consequences": {
-        "positive": ["程式碼品質自動偵測"],
-        "negative": ["現有 lint 問題需先修正"]
+        "positive": [
+          "程式碼品質自動偵測"
+        ],
+        "negative": [
+          "現有 lint 問題需先修正"
+        ]
       },
-      "related_files": [".github/workflows/ci.yml", "pyproject.toml"],
+      "related_files": [
+        ".github/workflows/ci.yml",
+        "pyproject.toml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -388,7 +459,7 @@
       "id": "ADR-20260314-017",
       "title": "TODO/FIXME 規範性清理",
       "status": "Accepted",
-      "implementation_status": "partial",
+      "implementation_status": "done",
       "created_at": "2026-03-14",
       "decided_at": "2026-03-14",
       "source": "improvement-backlog",
@@ -398,14 +469,25 @@
       "context": "265 處 TODO/FIXME 分散 56 檔，需人工分類。",
       "decision": "接受（分階段、人工排程）。規範性 TODO 直接移除，缺陷型轉 issue。",
       "consequences": {
-        "positive": ["功能完成度評分提升", "減少程式碼噪音"],
-        "negative": ["需人工判斷", "誤刪缺陷型 TODO 風險"]
+        "positive": [
+          "功能完成度評分提升",
+          "減少程式碼噪音"
+        ],
+        "negative": [
+          "需人工判斷",
+          "誤刪缺陷型 TODO 風險"
+        ]
       },
-      "related_files": ["docs/plans/", "templates/", "prompts/"],
+      "related_files": [
+        "docs/plans/",
+        "templates/",
+        "prompts/"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
-      "review_due": "2026-06-12"
+      "review_due": "2026-06-12",
+      "notes": "核心程式碼（hooks/*.py）零 TODO/FIXME。new-auto-task.ps1 佔位符已改角括號語法。prompts/ 無真實 TODO 標記（TODOIST 子串誤報已分類入 false_positives）。tech-debt-backlog.json 全部標記 resolved（2026-03-17）。"
     },
     {
       "id": "ADR-20260314-018",
@@ -422,10 +504,18 @@
       "context": "Phase 2 單次失敗即終止，無 backoff 重試。",
       "decision": "接受（人工排程）。Phase 2 迴圈加入 max 1 retry、exponential backoff。",
       "consequences": {
-        "positive": ["失敗恢復提升", "暫時性錯誤自動恢復"],
-        "negative": ["retry 增加執行時間", "需區分 transient vs permanent"]
+        "positive": [
+          "失敗恢復提升",
+          "暫時性錯誤自動恢復"
+        ],
+        "negative": [
+          "retry 增加執行時間",
+          "需區分 transient vs permanent"
+        ]
       },
-      "related_files": ["run-todoist-agent-team.ps1"],
+      "related_files": [
+        "run-todoist-agent-team.ps1"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -435,7 +525,7 @@
       "id": "ADR-20260317-019",
       "title": "CHANGELOG 格式規範化（Conventional Commit）",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-17",
       "decided_at": "2026-03-17",
       "source": "improvement-backlog",
@@ -469,10 +559,11 @@
     {
       "id": "ADR-20260317-020",
       "title": "Skills 測試覆蓋擴充（高頻 Skills 優先）",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-17",
-      "decided_at": null,
+      "decided_at": "2026-03-17",
+      "implemented_at": "2026-03-17",
       "source": "improvement-backlog",
       "source_pattern": "Skills 測試覆蓋擴充",
       "priority": "P2",
@@ -481,7 +572,7 @@
       "current_score": 74,
       "target_score": 80,
       "context": "系統審查（2026-03-17）僅 3/41 Skills 有測試，測試覆蓋率 74 分。高頻 Skills（todoist、knowledge-query、ntfy-notify）缺乏自動化測試。",
-      "decision": "",
+      "decision": "接受（分階段實作，mock 優先策略）。測試架構策略：對有 Python script 的 Skills（todoist、gmail）補強現有測試；對純 prompt-based Skills（knowledge-query、ntfy-notify）建立輕量 Python 工具模組（ntfy_client.py、kb_search.py），封裝可測試的核心邏輯（payload 構建、回應解析、格式化輸出），再補充 mock 測試。具體行動：(1) todoist 新增 test_todoist_operations.py（update/delete/reopen/get_task）、test_todoist_resources.py（projects/labels）；(2) ntfy-notify 建立 skills/ntfy-notify/scripts/ntfy_client.py + 測試 2 個；(3) knowledge-query 建立 skills/knowledge-query/scripts/kb_search.py + 測試 1 個；(4) 更新 tests/conftest.py 加入新路徑；(5) 目標：7 個測試檔案覆蓋 4 個 Skills（todoist/gmail/ntfy-notify/knowledge-query）。",
       "consequences": {
         "positive": [
           "Skill 行為穩定性可量化驗證",
@@ -506,7 +597,7 @@
       "id": "ADR-20260317-021",
       "title": "統一安裝指南文件（docs/INSTALL.md）",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-17",
       "decided_at": "2026-03-17",
       "source": "improvement-backlog",
@@ -536,6 +627,189 @@
       "tech_debt_score": 0.0,
       "auto_generated": true,
       "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260317-022",
+      "title": "Context 保護規則強制執行",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-17",
+      "decided_at": "2026-03-17",
+      "implemented_at": "2026-03-17",
+      "source": "improvement-backlog",
+      "source_pattern": "Context 保護規則強制執行",
+      "priority": "P0",
+      "effort": "medium",
+      "context": "系統審查（2026-03-17）avg_io_per_call 超標 5 倍（24.7KB vs 5KB 門檻），Context 保護規則未執行。需啟用 session I/O 預算監控、識別違規 Agent、強制執行子 Agent 委派規則。",
+      "decision": "接受（分步實作，監控優先）。具體行動：(1) 建立 skills/context-budget-monitor/SKILL.md，定義 session I/O 預算監控規則（累積 Read > 50KB 時強制委派子 Agent）；(2) 強化 preamble.md Context 保護規則，新增量化限制表（單次 Read ≤ 5 個檔案，累積 I/O ≤ 50KB，超出時必須切換子 Agent）；(3) check-health.ps1 新增 [Context 預算] 健康度區塊，從 post_tool_logger JSONL 計算 avg_io_per_call 趨勢；(4) 不新增 PreToolUse Hook（影響面過大），改以軟性監控為主，7 天後驗證 avg_io_per_call 收斂至 15KB 以內，再逐步降至 5KB 目標。",
+      "consequences": {
+        "positive": [
+          "Context Window 使用率可量化監控",
+          "識別違規 Agent（avg > 15KB）並強制優化",
+          "系統品質預計 20→90"
+        ],
+        "negative": [
+          "需建立 context-budget-monitor Skill",
+          "需修改 templates/shared/preamble.md 強化子 Agent 委派規則",
+          "需新增 pre-session hook 預算檢查（涉及 hooks/）"
+        ]
+      },
+      "related_files": [
+        "skills/context-budget-monitor/",
+        "templates/shared/preamble.md",
+        "hooks/"
+      ],
+      "notes": "effort=medium，涉及 hooks/ 修改屬於安全邊界內，需人工確認設計方案。execution_plan：1. 啟用 context-budget-monitor Skill；2. 識別違規 Agent（avg > 15KB）；3. 強制執行 preamble 子 Agent 委派規則；4. 建立 pre-session hook 預算檢查；5. 7 天後驗證 avg_io_per_call < 5KB。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260317-023",
+      "title": "快取策略深度優化（自適應 TTL）",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-17",
+      "decided_at": "2026-03-17",
+      "implemented_at": "2026-03-17",
+      "source": "improvement-backlog",
+      "source_pattern": "快取策略深度優化",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "系統審查（2026-03-17）cache_hit_ratio 持續低迷 19.9%（門檻 40%），遠低於目標。需分析各端點命中率、評估資料 volatility、調整 TTL 配置、建立自適應 TTL 機制。",
+      "decision": "接受（即時調整 + 自適應機制）。具體行動：(1) 立即調整 cache-policy.yaml TTL：pingtung-news 360→720 min（12h）、hackernews 180→360 min（6h）、knowledge 60→120 min（2h）——三個端點的資料 volatility 均屬 low-medium，延長 TTL 可顯著提升命中率；(2) cache-policy.yaml 新增 adaptive_ttl 段落定義 d-TTL 演算法規則（命中率 < 20% 且 volatility=low → TTL×2，命中率 > 80% 且 volatility=high → TTL/2）；(3) 建立 skills/cache-optimizer/SKILL.md 提供系統化分析流程；(4) 7 天後由 cache-optimizer Skill 驗證 cache_hit_ratio ≥ 40%。",
+      "consequences": {
+        "positive": [
+          "快取命中率預計 19.9%→40%+",
+          "系統效能評分預計 50→85",
+          "自適應 TTL 降低手動調整頻率"
+        ],
+        "negative": [
+          "需建立 cache-optimizer Skill 分析端點命中率",
+          "d-TTL 演算法需持續監控調整",
+          "TTL 過長可能導致資料過時"
+        ]
+      },
+      "related_files": [
+        "config/cache-policy.yaml",
+        "skills/cache-optimizer/",
+        "skills/api-cache/"
+      ],
+      "notes": "effort=medium，需多步驟協調（分析→評估→調整→監控→建立機制）。execution_plan：1. 用 cache-optimizer Skill 分析各端點命中率；2. 識別低命中率端點（< 20%）；3. 評估資料 volatility；4. 調整 cache-policy.yaml TTL（新聞 12h→24h、HN 6h→12h）；5. 監控 7 天後命中率變化；6. 建立自適應 TTL 機制（d-TTL 演算法）。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260317-024",
+      "title": "失敗時段根因分析與預防機制",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-17",
+      "decided_at": "2026-03-17",
+      "implemented_at": "2026-03-17",
+      "source": "improvement-backlog",
+      "source_pattern": "失敗時段根因分析與預防機制",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "系統審查（2026-03-17）15:00、9:00、14:00 為高失敗時段。需識別共同特徵（timeout、API 限制、資源競爭）、建立時段特定 timeout 配置、實施預防性檢查。",
+      "decision": "接受（時段差異化配置 + 預防性檢查）。具體行動：(1) config/timeouts.yaml 新增 time_slot_profiles 段落，為 9:00/14:00/15:00 三個高失敗時段設定 +30% timeout buffer（對應早晨 API 高峰、午後系統負載高峰、下午 Todoist 請求密集）；(2) run-todoist-agent-team.ps1 Phase 0 新增外部依賴可用性預檢（KB health check + Todoist API ping），失敗即跳過本次 Phase 2，避免整段超時；(3) check-health.ps1 新增 [失敗時段分析] 區塊，從 scheduler-state.json 計算各時段失敗率；(4) 14 天後驗證高失敗時段的失敗率降低 ≥ 20%。",
+      "consequences": {
+        "positive": [
+          "失敗率預計降低 20%+",
+          "系統穩定性評分預計 65→85",
+          "時段特定 timeout 降低誤判"
+        ],
+        "negative": [
+          "需建立時段特定 timeout 配置（config/timeouts.yaml 複雜度增加）",
+          "預防性檢查增加執行時間",
+          "需持續監控外部依賴在特定時段的可用性"
+        ]
+      },
+      "related_files": [
+        "config/timeouts.yaml",
+        "tools/trace_analyzer.py",
+        "state/scheduler-state.json"
+      ],
+      "notes": "effort=medium，涉及 scheduler-state.json（禁止修改，只可讀取分析）。execution_plan：1. 用 trace-analyzer 分析 3 個時段失敗 session；2. 識別共同特徵；3. 檢查外部依賴（KB、Todoist API、ntfy）在這些時段狀態；4. 建立時段特定 timeout 配置；5. 實施預防性檢查（pre-execution health check）；6. 監控 14 天後失敗率變化。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-15"
+    },
+    {
+      "id": "ADR-20260318-025",
+      "title": "跨平台路徑硬編碼清理（環境變數化）",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-03-18",
+      "decided_at": null,
+      "source": "improvement-backlog",
+      "source_pattern": "跨平台路徑硬編碼清理",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "系統審查（2026-03-18）14 個檔案含 D:\\Source 或 C:\\Users 硬編碼路徑，限制可攜性。建議改用環境變數或 $PSScriptRoot 相對路徑。涉及核心腳本（check-health.ps1、bot/process_messages.ps1、cleanup-tasks.ps1），需協調修改。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "專案可搬遷至不同路徑，無需手動修改檔案",
+          "技術棧評分預計 75→78",
+          "與 ADR-002 文件驅動原則一致"
+        ],
+        "negative": [
+          "需統一環境變數命名規範",
+          "14 個檔案需逐一修改並驗證",
+          "需確保 fallback 機制不影響現有功能"
+        ]
+      },
+      "related_files": [
+        "bot/process_messages.ps1",
+        "cleanup-tasks.ps1",
+        "check-health.ps1"
+      ],
+      "notes": "effort=medium，涉及核心腳本，需人工確認環境變數命名規範後分批修改。建議：$PROJECT_ROOT 或 $PSScriptRoot 為主要替代方案。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-16"
+    },
+    {
+      "id": "ADR-20260318-026",
+      "title": "結構化輸出 Schema 驗證（results/*.json）",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-03-18",
+      "decided_at": null,
+      "source": "improvement-backlog",
+      "source_pattern": "輸入驗證強化",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "系統審查（2026-03-18）Hook 攔截為防禦性機制，缺少系統化 API 端點 schema 驗證。建議為 results/*.json 等結構化輸出加入 pydantic/jsonschema 驗證。涉及 hooks/pre_bash_guard.py（安全邊界）和 config/schemas/ 目錄。與 ADR-002 Guardrails 互補但範圍不同：ADR-002 聚焦 Agent 輸出品質，本 ADR 聚焦結構化資料格式驗證。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "results/*.json 格式錯誤可在寫入時攔截",
+          "資訊安全評分預計 78→83",
+          "與 ADR-002 Guardrails、ADR-003 Agent Handoff schema 協同"
+        ],
+        "negative": [
+          "需為每類結果檔定義 JSON Schema",
+          "涉及 hooks/ 修改需謹慎測試",
+          "schema 過嚴可能阻斷正常執行"
+        ]
+      },
+      "related_files": [
+        "hooks/pre_bash_guard.py",
+        "config/hook-rules.yaml",
+        "config/schemas/"
+      ],
+      "notes": "effort=medium，涉及 hooks/（安全邊界），需人工確認 schema 設計方案。建議先完成 config/schemas/results-auto-task-schema.json 的完善，再逐步擴展到其他結構化輸出。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-16"
     }
   ]
 }

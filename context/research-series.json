@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-17T10:42:45.148356+08:00",
+  "updated_at": "2026-03-18T03:35:42.842561+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -955,7 +955,8 @@
           "completed_at": "2026-03-15",
           "kb_notes": [
             "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第",
-            "蕅益大師《阿彌陀經要解》研究 — 五重玄義、圓教詮釋與「古今註解第一」的義理架構"
+            "蕅益大師《阿彌陀經要解》研究 — 五重玄義、圓教詮釋與「古今註解第一」的義理架構",
+            "觀無量壽經十六觀研究 — 淨土宗觀想法門的完整修持次第與善導大師判釋"
           ],
           "covered_concepts": [
             "十念法",
@@ -970,7 +971,14 @@
             "蕅益大師以天台圓教判阿彌陀經為圓頓之教",
             "對「執持名號」「若一日至七日」的深度解析",
             "印光大師推崇《要解》為古今註解第一的原因",
-            "與善導《觀經疏》、蓮池《彌陀疏鈔》的差異與互補"
+            "與善導《觀經疏》、蓮池《彌陀疏鈔》的差異與互補",
+            "十六觀",
+            "定善",
+            "散善",
+            "九品往生",
+            "是心作佛",
+            "觀想念佛",
+            "持名念佛"
           ]
         },
         "application": {
@@ -1007,7 +1015,7 @@
       "current_stage": "application",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後可進入 application：淨土念佛道場規矩與執事分工、淨土懺儀實踐等"
+      "next_research_hint": "完成 mechanism 後進入 application：十六觀的實際修持指引與現代淨土行者的觀想實踐"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2978,12 +2986,18 @@
           "status": "in_progress",
           "started_at": "2026-03-17",
           "kb_notes": [
-            "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）"
+            "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）",
+            "Daily-Digest-Prompt 長期記憶與 Context Management 實作指南"
           ],
           "covered_concepts": [
             "MCP 整合",
             "IDE 自動化",
-            "CI/CD Agent"
+            "CI/CD Agent",
+            "Daily-Digest-Prompt 長短期記憶協同資料模型",
+            "Context retrieval / compression / injection 的量化評估指標",
+            "記憶命中率與 token 成本的 benchmark 設計",
+            "錯誤恢復、記憶污染與 stale context 防護機制",
+            "面向 hooks、skills、research brief 的端到端實作藍圖"
           ]
         },
         "optimization": {
@@ -2994,9 +3008,9 @@
         }
       },
       "current_stage": "mechanism",
-      "completion_pct": 40,
+      "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 optimization：效能優化、成本控制、開發者體驗提升"
+      "next_research_hint": "完成後進入 optimization：量化 token 成本、記憶命中率、context 壓縮效果與開發者體驗提升"
     },
     "claude-code-cli-automation": {
       "series_id": "claude-code-cli-automation",
@@ -3233,6 +3247,317 @@
         "multi-agent-frameworks"
       ],
       "next_research_hint": "完成 foundation 後進入 mechanism：深入 State Graph 實作原理、MessageGraph 與 StateGraph 的差異、Checkpointing 機制"
+    },
+    "qdrant-vector-database": {
+      "series_id": "qdrant-vector-database",
+      "domain": "Qdrant 向量數據庫",
+      "description": "從基礎架構到生產部署的完整知識體系",
+      "initiated_at": "2026-03-17",
+      "last_active": "2026-03-17",
+      "tags": [
+        "Qdrant",
+        "向量數據庫",
+        "vector database",
+        "RAG",
+        "知識庫",
+        "性能調優",
+        "生產部署",
+        "技術研究"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-17",
+          "completed_at": "2026-03-17",
+          "kb_notes": [
+            "Qdrant 向量數據庫完整指南 — 核心架構、HNSW 索引、性能調優與生產部署最佳實踐（2026）"
+          ],
+          "covered_concepts": [
+            "HNSW 索引",
+            "Gridstore 存儲引擎",
+            "int8 量化",
+            "分片與副本",
+            "Payload 索引過濾"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "深入 HNSW 算法實現細節、量化壓縮數學原理、過濾機制的內部實作"
+    },
+    "pureland-jiaoguan-podcast-planning": {
+      "series_id": "pureland-jiaoguan-podcast-planning",
+      "domain": "淨土教觀學苑, podcast, 研究規劃, 核心議題, 資料來源策略",
+      "description": "",
+      "initiated_at": "2026-03-17",
+      "last_active": "2026-03-18",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-17",
+          "kb_notes": [
+            "淨土教觀學苑 Podcast 研究規劃機制 — 核心議題補全與資料來源策略",
+            "淨土教觀學苑 Podcast 研究機制深化 — 計畫結構、資料來源採信矩陣與單集 brief schema"
+          ],
+          "covered_concepts": [
+            "來源權重矩陣與採信順序",
+            "課程頁、detail 頁、講義、講記、音檔、學術文獻的交叉驗證流程",
+            "單集 research brief JSON schema",
+            "Definition of Done 與抽查規則",
+            "來源不足或版本衝突時的停損條件"
+          ],
+          "completed_at": "2026-03-18"
+        },
+        "mechanism": {
+          "status": "in_progress",
+          "kb_notes": [
+            "淨土教觀學苑 Podcast 研究機制深化 — 資料來源採信矩陣、驗收條件與單集 research brief schema"
+          ],
+          "covered_concepts": [
+            "課程頁、detail 頁、講義、講記、音檔、學術文獻的明確權重矩陣",
+            "單集 research brief 的固定 JSON schema 與欄位驗證規則",
+            "驗收條件的量化指標，例如最少來源數、必備欄位、引文覆核比例",
+            "來源缺漏或版本衝突時的停損條件與補救流程",
+            "跨集去重、術語一致性與批次 QA 的作業規則"
+          ]
+        },
+        "application": {
+          "status": "in_progress",
+          "kb_notes": [
+            "淨土教觀學苑 Podcast 單集研究包實作指南 — 欄位模板、來源採信與驗收清單",
+            "淨土教觀學苑 Podcast 研究規劃深化 — 資料來源策略、單集研究包模板與章節大綱",
+            "淨土教觀學苑 Podcast 單集研究包標準規格 — JSON Schema、來源採信與驗收流程",
+            "淨土教觀學苑 Podcast 研究規劃深化 — 計畫結構、單集研究包 schema 與資料來源採信矩陣",
+            "淨土教觀學苑 Podcast 單集研究包實作範例 — 核心議題到章節大綱的完整流程",
+            "淨土教觀學苑 Podcast 單集研究包實作指南（核心議題到資料來源映射）",
+            "淨土教觀學苑 Podcast 單集 research brief 正式規格 — schema、驗收流程與批次 QA"
+          ],
+          "covered_concepts": [
+            "單集研究 brief JSON schema 或固定欄位模板",
+            "講義、講記、音檔、學術資料的交叉驗證流程",
+            "節目腳本前研究包的完成定義（Definition of Done）",
+            "驗收條件量化規則",
+            "例外情境處理，例如課程資料不全或多版本講記衝突",
+            "單集研究 brief 的固定 JSON 或欄位 schema",
+            "課程主頁、detail 頁、講義、講記、音檔的權重與衝突處理規則",
+            "章節大綱如何對應雙主持人 podcast 腳本段落",
+            "來源缺漏時的補救流程與停損條件",
+            "跨集一致性的用語、引文與術語標準",
+            "批次製作的 KPI 與研究效率指標",
+            "來源缺口預警機制",
+            "多集去重的半自動檢查流程",
+            "正式 JSON schema 與驗證規則",
+            "研究品質抽查與回溯機制",
+            "單集 research brief 的固定 JSON schema 或欄位結構",
+            "來源衝突時的採信順序與停損條件",
+            "課程頁、講義、講記、音檔、學術文獻之間的交叉驗證流程圖",
+            "雙主持人 Podcast 的段落配置規則",
+            "研究完成定義（Definition of Done）與抽查機制",
+            "批次製作時的去重、術語一致性與品質 KPI",
+            "實際單集 research brief 範例",
+            "核心議題如何映射到節目章節的示範流程",
+            "研究 brief 到腳本成品的端到端驗收案例",
+            "不同課程類型的應用模板差異",
+            "實際單集研究包範例與填寫示範",
+            "資料來源到核心議題的逐項對照矩陣",
+            "不同課程類型對應的研究計畫模板",
+            "來源衝突時的具體裁決案例",
+            "研究 brief 交接到 Podcast 腳本的端到端流程",
+            "可直接機器驗證的正式 JSON Schema 與必填欄位約束",
+            "批次製作情境下的抽樣 QA 比例與失敗處置流程",
+            "單集研究包完成後的 stage-complete 判定規格",
+            "研究 brief 對平台 metadata 與成效追蹤欄位的閉環驗證"
+          ]
+        },
+        "optimization": {
+          "status": "in_progress",
+          "kb_notes": [
+            "淨土教觀學苑 Podcast 研究規劃優化 — 來源缺口預警、批次 QA 與 KPI 設計"
+          ],
+          "covered_concepts": [
+            "來源缺口預警機制",
+            "批次製作的 KPI 與 SLA",
+            "多集去重與術語一致性半自動檢查",
+            "研究品質抽查與回溯修正流程",
+            "不同課程類型對應的來源優先矩陣"
+          ]
+        },
+        "synthesis": {
+          "status": "in_progress",
+          "kb_notes": [
+            "淨土教觀學苑 Podcast 長期內容地圖 — 跨課程資料來源策略與章節大綱母版"
+          ],
+          "covered_concepts": [
+            "跨課程群的內容地圖與系列分層架構",
+            "淨土、天台、唯識、楞嚴等主題之間的橋接選題策略",
+            "長期 podcast 季度規劃與選題組合原則",
+            "跨集引用、術語與章節模板的統一治理模型",
+            "從研究 brief 到節目企劃池的整合流程"
+          ]
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "application 完成後進入 optimization：來源缺口預警、自動欄位驗證、抽樣 QA 與跨集一致性指標化。"
+    },
+    "motivation-science": {
+      "series_id": "motivation-science",
+      "domain": "動機科學與生產力心理學",
+      "description": "探索人類動機、意志力、行為改變的心理學理論與實踐應用",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "動機科學",
+        "SDT",
+        "認知科學",
+        "生產力",
+        "行為改變"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18",
+          "kb_notes": [
+            "自我決定理論（Self-Determination Theory）— Deci & Ryan 的內在動機科學：三大心理需求、動機連續體與待辦事項執行力的動機品質優化方法論（2026）"
+          ],
+          "covered_concepts": [
+            "自主性",
+            "勝任感",
+            "歸屬感",
+            "動機連續體",
+            "六大子理論",
+            "過度辯證效應",
+            "動機品質診斷"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism: 深入內化過程的神經科學基礎、OIT 各調節類型的轉化機制"
+    },
+    "vllm-llm-serving": {
+      "series_id": "vllm-llm-serving",
+      "domain": "vLLM",
+      "description": "vLLM 開源 LLM 推理與 serving 引擎研究系列",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "vLLM"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "kb_notes": [
+            "vLLM — 開源 LLM 推理與 Serving 引擎深度研究：PagedAttention、V1 執行迴圈重構、OpenAI 相容介面與生產部署權衡（73.4K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "PagedAttention 與 KV cache 管理機制",
+            "V1 架構升級重點",
+            "分散式推理與平行化策略",
+            "生產部署安全限制",
+            "daily-digest-prompt 與遊戲專案的實際應用方式"
+          ],
+          "completed_at": "2026-03-18"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "qdrant-vector-database",
+        "ai-software-development"
+      ],
+      "next_research_hint": "mechanism：深入 PagedAttention、KV cache 轉移、平行化與排程細節"
+    },
+    "ai-smart-governance": {
+      "series_id": "ai-smart-governance",
+      "domain": "智慧治理 — AI 市民服務聊天機器人與公文自動分類",
+      "description": "AI 智慧治理研究系列，聚焦市民服務聊天機器人、公文自動分類與地方政府治理流程。",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "智慧治理",
+        "smart-city"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18",
+          "kb_notes": [
+            "智慧治理 — AI 市民服務聊天機器人與公文自動分類：從新加坡 OneService、紐約 MyCity 到台灣地方治理機會（2026）"
+          ],
+          "covered_concepts": [
+            "市民服務聊天機器人",
+            "RAG 政府知識檢索",
+            "公文自動分類",
+            "案件智能分流",
+            "地方政府智慧治理"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism：深化 RAG、案件路由與公文分類模型的技術設計"
     }
   }
 }

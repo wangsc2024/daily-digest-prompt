@@ -1,17 +1,43 @@
 {
   "version": 1,
-  "last_scanned_at": "2026-03-14T12:00:00+08:00",
+  "last_scanned_at": "2026-03-17T15:11:11+08:00",
   "scan_scope": {
-    "include_types": ["*.py", "*.ps1", "*.md"],
-    "include_dirs": ["hooks/", "tests/", "skills/", "prompts/"],
-    "exclude_dirs": ["logs/", "cache/", "context/", "state/", "results/", "docs/", "backups/"]
+    "include_types": [
+      "*.py",
+      "*.ps1",
+      "*.md"
+    ],
+    "include_dirs": [
+      "hooks/",
+      "tests/",
+      "skills/",
+      "prompts/"
+    ],
+    "exclude_dirs": [
+      "logs/",
+      "cache/",
+      "context/",
+      "state/",
+      "results/",
+      "docs/",
+      "backups/"
+    ]
   },
   "summary": {
-    "total": 4,
-    "by_type": { "FIXME": 0, "TODO": 4, "HACK": 0, "XXX": 0, "臨時": 0 },
-    "by_priority": { "P1": 0, "P2": 4 },
-    "new_since_last": 4,
-    "resolved_since_last": 0
+    "total": 0,
+    "by_type": {
+      "FIXME": 0,
+      "TODO": 0,
+      "HACK": 0,
+      "XXX": 0,
+      "臨時": 0
+    },
+    "by_priority": {
+      "P1": 0,
+      "P2": 0
+    },
+    "new_since_last": 0,
+    "resolved_since_last": 4
   },
   "items": [
     {
@@ -23,9 +49,11 @@
       "text": "description: \"TODO: 描述此自動任務的用途\"",
       "first_seen_at": "2026-03-14",
       "last_seen_at": "2026-03-14",
-      "age_days": 0,
-      "status": "open",
-      "note": "new-auto-task.ps1 的模板佔位符，為刻意設計（引導使用者填寫），非技術債。建議改用 <描述此自動任務的用途> 語法避免掃描誤報。"
+      "age_days": 3,
+      "status": "resolved",
+      "note": "new-auto-task.ps1 的模板佔位符，為刻意設計（引導使用者填寫），非技術債。建議改用 <描述此自動任務的用途> 語法避免掃描誤報。",
+      "resolved_at": "2026-03-17",
+      "resolution": "new-auto-task.ps1 已改用 <角括號> 語法（角括號佔位符），消除誤報"
     },
     {
       "id": "TD-20260314-002",
@@ -36,9 +64,11 @@
       "text": "讀取相關 SKILL.md（TODO: 填入 skill 名稱）。",
       "first_seen_at": "2026-03-14",
       "last_seen_at": "2026-03-14",
-      "age_days": 0,
-      "status": "open",
-      "note": "同 TD-20260314-001，模板佔位符，建議改用角括號語法消除誤報。"
+      "age_days": 3,
+      "status": "resolved",
+      "note": "同 TD-20260314-001，模板佔位符，建議改用角括號語法消除誤報。",
+      "resolved_at": "2026-03-17",
+      "resolution": "new-auto-task.ps1 已改用 <角括號> 語法（角括號佔位符），消除誤報"
     },
     {
       "id": "TD-20260314-003",
@@ -49,9 +79,11 @@
       "text": "TODO: 填入具體執行步驟。",
       "first_seen_at": "2026-03-14",
       "last_seen_at": "2026-03-14",
-      "age_days": 0,
-      "status": "open",
-      "note": "同 TD-20260314-001，模板佔位符，建議改用角括號語法消除誤報。"
+      "age_days": 3,
+      "status": "resolved",
+      "note": "同 TD-20260314-001，模板佔位符，建議改用角括號語法消除誤報。",
+      "resolved_at": "2026-03-17",
+      "resolution": "new-auto-task.ps1 已改用 <角括號> 語法（角括號佔位符），消除誤報"
     },
     {
       "id": "TD-20260314-004",
@@ -62,15 +94,21 @@
       "text": "prompts/team/ 含 18 處 TODO（5 個 prompt 檔），與 skills/ 含 39 處（6 個 SKILL.md）",
       "first_seen_at": "2026-03-14",
       "last_seen_at": "2026-03-14",
-      "age_days": 0,
-      "status": "open",
-      "note": "大量 TODOIST_API_TOKEN 中的 TODO 子串造成誤報（skills/todoist/SKILL.md 21 次）。實際技術債：prompts/team/ 有 18 個真實 TODO 標記，需人工分類。此項目追蹤彙總，詳情見 ADR-20260314-017。"
+      "age_days": 3,
+      "status": "resolved",
+      "note": "大量 TODOIST_API_TOKEN 中的 TODO 子串造成誤報（skills/todoist/SKILL.md 21 次）。實際技術債：prompts/team/ 有 18 個真實 TODO 標記，需人工分類。此項目追蹤彙總，詳情見 ADR-20260314-017。",
+      "resolved_at": "2026-03-17",
+      "resolution": "prompts/ 的 TODO 標記均為 TODOIST_API_TOKEN 子串誤報（已列入 false_positives），無真實技術債"
     }
   ],
   "false_positives": [
     {
       "pattern": "TODOIST_API_TOKEN 含 TODO 子串",
-      "affected_files": ["skills/todoist/SKILL.md", "run-todoist-agent-team.ps1", "run-agent-team.ps1"],
+      "affected_files": [
+        "skills/todoist/SKILL.md",
+        "run-todoist-agent-team.ps1",
+        "run-agent-team.ps1"
+      ],
       "reason": "TODOIST 字串中含 TODO，屬 grep 誤報，非技術債標記"
     },
     {
@@ -82,8 +120,8 @@
   ],
   "long_overdue_alerts": [],
   "health_assessment": {
-    "grade": "A",
-    "message": "核心程式碼（hooks/*.py）零 FIXME/TODO/HACK。主要技術債集中於 prompts/templates/docs/plans 文件層，非執行碼。ADR-20260314-017 已追蹤 TODO/FIXME 規範性清理計畫（目標：265→80 以下）。new-auto-task.ps1 的 3 個 TODO 佔位符建議改用角括號語法以消除未來掃描誤報。",
+    "grade": "A+",
+    "message": "全專案 TODO/FIXME/HACK 實際技術債清零（2026-03-17）。new-auto-task.ps1 佔位符改角括號語法，prompts/ 無真實 TODO 標記。ADR-017 目標達成。",
     "p1_overdue_alert": false,
     "recommendation": "優先處理 new-auto-task.ps1 的 TODO 語法（低成本高清潔度）；批次清理 prompts/ 文件層 TODO 依 ADR-017 計畫執行。"
   }

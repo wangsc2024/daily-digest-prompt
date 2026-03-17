@@ -93,6 +93,7 @@ $AutoTaskTimeoutOverride = @{
     "future_plan_optimize"   = 900   # 未來計畫待辦優化：KB + MD 寫回
     "kb_insight_evaluation"  = 1200  # 洞察報告擇 3 項研究 + 執行方案 + improvement-backlog
     "workflow_forge"         = 900   # Workflow 鑄造廠：流程標準化 + 輸出 Schema + 一致性
+    "insight_briefing"       = 900   # 深度研究洞察簡報：多 Skill 串接 + 簡報產出 + KB + ntfy
 }
 
 # 合併：config/timeouts.yaml 優先，hardcoded 為 fallback
@@ -633,8 +634,8 @@ function Get-TaskBackend {
         $sel = ConvertFrom-YamlViapy -YamlPath $selPath
         if (-not $sel) { return $default }
 
-        # 決定後端名稱
-        $backendName = "claude_sonnet"
+        # 決定後端名稱（預設 cursor_cli；未列入 task_rules 的任務以此執行）
+        $backendName = "cursor_cli"
         foreach ($bName in @("claude_opus46","claude_sonnet45","claude_haiku","codex_exec","codex_standard","openrouter_standard","openrouter_research","cursor_cli")) {
             $rules = $sel.task_rules.$bName
             if ($rules -and ($rules -contains $TaskKey)) {
@@ -1048,6 +1049,83 @@ else {
 }
 
 # ============================================
+# Phase 0b: ADR-024 高失敗時段前置健康檢查（time_slot_profiles）
+# ============================================
+$script:ADR024_SkipPhase2 = $false
+$script:ADR024_SkipKBTasks = $false
+if (Test-Path $timeoutsPath) {
+    try {
+        $ty = ConvertFrom-YamlViapy -YamlPath $timeoutsPath
+        $tsp = $ty.time_slot_profiles
+        if ($tsp -and $tsp.high_failure_slots) {
+            $currentHour = (Get-Date).Hour
+            $slot = $tsp.high_failure_slots | Where-Object { [int]$_.hour -eq $currentHour } | Select-Object -First 1
+            if ($slot -and $slot.pre_execution_health_check -eq $true) {
+                Write-Log "[Phase0b] ADR-024: 高失敗時段 ${currentHour}:00，執行前置健康檢查（KB + Todoist）"
+                $hc = $tsp.health_check
+                $kbOk = $false
+                $todoistOk = $false
+                if ($hc.kb_endpoint) {
+                    try {
+                        $kbSec = [int]($hc.kb_timeout_sec ?? 5)
+                        Invoke-RestMethod -Uri $hc.kb_endpoint -Method Get -TimeoutSec $kbSec -ErrorAction Stop | Out-Null
+                        $kbOk = $true
+                        Write-Log "[Phase0b] KB ping OK"
+                    } catch {
+                        Write-Log "[Phase0b] KB ping 失敗: $($_.Exception.Message)"
+                    }
+                } else {
+                    $kbOk = $true
+                }
+                if ($hc.todoist_endpoint -and $todoistToken) {
+                    try {
+                        $todoistSec = [int]($hc.todoist_timeout_sec ?? 8)
+                        $headers = @{ Authorization = "Bearer $todoistToken" }
+                        Invoke-RestMethod -Uri $hc.todoist_endpoint -Method Get -Headers $headers -TimeoutSec $todoistSec -ErrorAction Stop | Out-Null
+                        $todoistOk = $true
+                        Write-Log "[Phase0b] Todoist API ping OK"
+                    } catch {
+                        Write-Log "[Phase0b] Todoist API ping 失敗: $($_.Exception.Message)"
+                    }
+                } else {
+                    if (-not $todoistToken) { Write-Log "[Phase0b] 略過 Todoist ping（無 token）" }
+                    $todoistOk = $true
+                }
+                $onKb = $hc.on_kb_failure ?? "skip_kb_tasks"
+                $onTodoist = $hc.on_todoist_failure ?? "skip_phase2"
+                $onBoth = $hc.on_both_failure ?? "abort_and_notify"
+                if (-not $kbOk -and -not $todoistOk) {
+                    if ($onBoth -eq "abort_and_notify") {
+                        Write-Log "[Phase0b] ADR-024: KB 與 Todoist 均不可用，中止並發送告警"
+                        Update-FailureStats "adr024_health_check" "phase0" "todoist"
+                        $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+                        Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "ADR-024 pre-execution health check: KB and Todoist unavailable" -Sections @{ health_check = "both_failed" }
+                        $ntfyTopic = "wangsc2025"
+                        $bodyFile = Join-Path $AgentDir "ntfy_adr024_alert.json"
+                        @{ topic = $ntfyTopic; title = "Todoist Agent 健康檢查失敗"; message = "ADR-024: 高失敗時段前置檢查 KB 與 Todoist 均不可用，本次執行已中止"; tags = @("warning") } | ConvertTo-Json | Set-Content $bodyFile -Encoding UTF8
+                        try {
+                            curl -s -X POST "https://ntfy.sh" -H "Content-Type: application/json; charset=utf-8" -d "@$bodyFile" | Out-Null
+                        } catch { Write-Log "[Phase0b] ntfy 告警發送失敗: $_" }
+                        if (Test-Path $bodyFile) { Remove-Item $bodyFile -Force }
+                        exit 1
+                    }
+                }
+                if (-not $todoistOk -and $onTodoist -eq "skip_phase2") {
+                    $script:ADR024_SkipPhase2 = $true
+                    Write-Log "[Phase0b] ADR-024: Todoist 不可用，本次跳過 Phase 2，直接 Phase 3 組裝"
+                }
+                if (-not $kbOk -and $onKb -eq "skip_kb_tasks") {
+                    $script:ADR024_SkipKBTasks = $true
+                    Write-Log "[Phase0b] ADR-024: KB 不可用，本次跳過需 KB 的自動任務"
+                }
+            }
+        }
+    } catch {
+        Write-Log "[Phase0b] ADR-024 time_slot_profiles 讀取或執行失敗（略過）: $_"
+    }
+}
+
+# ============================================
 # Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
 # 用 Groq Llama 8B 快速判斷今日任務複雜度
 # 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
@@ -1078,6 +1156,30 @@ if (-not (Test-Path $queryPrompt)) {
     Write-Log "[ERROR] Query prompt not found: $queryPrompt"
     Update-State -Status "failed" -Duration 0 -ErrorMsg "query prompt not found" -Sections @{}
     exit 1
+}
+
+# 預先計算「每日自動任務總上限」並寫入 results/todoist-daily-cap.json，供 Phase 1/3 單一真相來源（避免今日進度顯示 40/45 不一致）
+$dailyCapFile = "$ResultsDir\todoist-daily-cap.json"
+try {
+    $freqPath = Join-Path $AgentDir "config\frequency-limits.yaml"
+    $capPath = Join-Path $AgentDir "results\todoist-daily-cap.json"
+    $capJson = uv run --project $AgentDir python -c "
+import json, yaml, sys
+freq_path = r'$($freqPath -replace '\\','\\')'
+cap_path = r'$($capPath -replace '\\','\\')'
+with open(freq_path, 'r', encoding='utf-8') as f:
+    cfg = yaml.safe_load(f)
+tasks = cfg.get('tasks') or {}
+total = sum(int(t.get('daily_limit', 0)) for t in tasks.values())
+with open(cap_path, 'w', encoding='utf-8') as out:
+    json.dump({'total_daily_cap': total}, out, ensure_ascii=False)
+print(total)
+"
+    if ($capJson -match '^\d+$') {
+        Write-Log "[Phase1] total_daily_cap pre-computed: $capJson (written to results/todoist-daily-cap.json)"
+    }
+} catch {
+    Write-Log "[Phase1] WARN: todoist-daily-cap.json 未寫入，Phase 1 將自行從 YAML 加總: $_"
 }
 
 $queryContent = Get-Content -Path $queryPrompt -Raw -Encoding UTF8
@@ -1416,7 +1518,10 @@ $phase2Jobs = @()
 $phase2JobDescriptors = @()
 $sections = @{ query = "success" }
 
-if ($plan.plan_type -eq "tasks") {
+if ($script:ADR024_SkipPhase2) {
+    Write-Log "[Phase2] ADR-024: 前置健康檢查 Todoist 不可用，跳過 Phase 2 執行，直接進入 Phase 3 組裝"
+}
+elseif ($plan.plan_type -eq "tasks") {
     # Scenario A: Execute Todoist tasks in parallel
     foreach ($task in $plan.tasks) {
         $promptFile = $task.prompt_file
@@ -1508,6 +1613,14 @@ elseif ($plan.plan_type -eq "auto") {
     else {
         Write-Log "[Phase2] Starting $($selectedTasks.Count) auto-task agents in parallel..."
 
+        # ADR-024：需 KB 的任務 key（前置健康檢查 KB 不可用時跳過）
+        $ADR024_KB_TASK_KEYS = @(
+            "shurangama", "jiaoguangzong", "fahua", "jingtu",
+            "tech_research", "ai_deep_research", "unsloth_research", "ai_github_research", "ai_workflow_github", "ai_smart_city", "ai_sysdev",
+            "skill_audit", "log_audit", "system_insight", "arch_evolution", "kb_insight_evaluation", "insight_briefing", "future_plan_optimize", "workflow_forge",
+            "podcast_create", "podcast_jiaoguangzong"
+        )
+
         # Dedicated team prompts：動態掃描實際檔案，防止重命名後路徑失效
         # 命名規則：prompts/team/todoist-auto-{plan_key}.md（底線，與 frequency-limits.yaml key 一致）
         $dedicatedPrompts = @{}
@@ -1547,6 +1660,7 @@ elseif ($plan.plan_type -eq "auto") {
                 "creative_game"      = "creative_game_optimize"
                 "podcastcreate"      = "podcast_create"
                 "podcast"            = "podcast_create"
+                "insightbriefing"    = "insight_briefing"
             }
             if ($keyAliases.ContainsKey($normalizedKey)) {
                 $normalizedKey = $keyAliases[$normalizedKey]
@@ -1556,6 +1670,11 @@ elseif ($plan.plan_type -eq "auto") {
             }
             if ($normalizedKey -ne $taskKey) {
                 Write-Log "[Phase2] Key normalized: $taskKey -> $normalizedKey"
+            }
+            # ADR-024: KB 不可用時跳過需 KB 的自動任務
+            if ($script:ADR024_SkipKBTasks -and ($ADR024_KB_TASK_KEYS -contains $normalizedKey)) {
+                Write-Log "[Phase2] ADR-024: 跳過需 KB 的任務 $normalizedKey（前置健康檢查 KB 不可用）"
+                continue
             }
 
             if ($dedicatedPrompts.ContainsKey($normalizedKey) -and (Test-Path $dedicatedPrompts[$normalizedKey])) {
