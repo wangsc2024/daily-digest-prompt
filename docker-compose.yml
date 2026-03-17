@@ -1,0 +1,17 @@
+services:
+  knowledge-base-search:
+    image: node:20-bookworm
+    working_dir: /app/knowledge-base-search
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-dummy-key}
+      KB_STORE_PATH: /app/data/long_term_memory.json
+    volumes:
+      - ./:/app
+      - kb_data:/app/data
+
+volumes:
+  kb_data:

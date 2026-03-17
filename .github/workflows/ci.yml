@@ -29,14 +29,21 @@ jobs:
       - name: Run ruff lint
         run: uv run ruff check hooks/ tools/ tests/
 
+      # hooks 套件：量 hooks/ 覆蓋率，門檻 45%
       - name: Run pytest (hooks)
-        run: uv run pytest tests/hooks/ -v --tb=short
+        run: uv run pytest tests/hooks/ --cov=hooks --cov-report=term-missing --cov-fail-under=45 --tb=short -q
 
+      # skills 套件：只量 skills/ 覆蓋率，門檻 60%
+      # （ntfy_client 99%、kb_search 97%、todoist API 57%、gmail_client 55%，整體 ~68%）
       - name: Run pytest (skills)
-        run: uv run pytest tests/skills/ -v --tb=short
+        run: uv run pytest tests/skills/ --cov=skills --cov-report=term-missing --cov-fail-under=60 --tb=short -q
 
+      # tools 套件：整合測試，不設覆蓋率門檻（測試真實外部呼叫）
       - name: Run pytest (tools)
-        run: uv run pytest tests/tools/ -v --tb=short
+        run: uv run pytest tests/tools/ --tb=short -q
+
+      - name: Run pytest (long-term-memory)
+        run: uv run pytest tests/test_memory_long_term_optimization.py tests/test_digest_scheduler.py --cov=memory --cov=digest_scheduler --cov-report=term-missing --cov-fail-under=85 --tb=short -q
 
       - name: Run pip-audit
         run: uv run pip-audit

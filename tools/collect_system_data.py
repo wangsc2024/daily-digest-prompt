@@ -18,9 +18,11 @@ END_DATE = datetime(2026, 3, 16)
 START_DATE = END_DATE - timedelta(days=6)
 
 def collect_jsonl_stats():
-    """收集 JSONL 日誌統計"""
+    """收集 JSONL 日誌統計（含 block_rate，供系統洞察使用，避免 LLM 誤用日誌內數字）"""
     stats = {
         "total_calls": 0,
+        "blocked_count": 0,
+        "block_rate": 0.0,
         "tool_distribution": Counter(),
         "tag_distribution": Counter(),
         "unique_skills": set(),
@@ -46,6 +48,10 @@ def collect_jsonl_stats():
                     try:
                         entry = json.loads(line.strip())
                         stats["total_calls"] += 1
+
+                        # 攔截事件：僅計 event==blocked 或 tags 含 "blocked"（與 query_logs 一致）
+                        if entry.get("event") == "blocked" or "blocked" in entry.get("tags", []):
+                            stats["blocked_count"] += 1
 
                         # 工具分佈
                         tool_name = entry.get("tool")
@@ -77,6 +83,7 @@ def collect_jsonl_stats():
 
         if stats["total_calls"] > 0:
             stats["data_available"] = True
+            stats["block_rate"] = round(stats["blocked_count"] / stats["total_calls"], 4)
             stats["unique_skills"] = sorted(list(stats["unique_skills"]))
             stats["skill_count"] = len(stats["unique_skills"])
             stats["avg_output_len"] = int(total_output_len / call_count) if call_count > 0 else 0
@@ -284,7 +291,7 @@ def main():
 
     # 收集各項統計
     jsonl_stats = collect_jsonl_stats()
-    print(f"✓ JSONL 統計完成: {jsonl_stats['total_calls']} 次呼叫")
+    print(f"✓ JSONL 統計完成: {jsonl_stats['total_calls']} 次呼叫, blocked={jsonl_stats.get('blocked_count', 0)}, block_rate={jsonl_stats.get('block_rate', 0)}")
 
     scheduler_stats = collect_scheduler_stats()
     print(f"✓ Scheduler 統計完成: {scheduler_stats['total_runs']} 次執行")

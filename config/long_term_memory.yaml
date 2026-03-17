@@ -1,0 +1,23 @@
+embedding:
+  provider: local
+  model: local-token-v1
+  monthly_cost_limit_usd: 15.0
+  estimated_cost_per_1k_tokens_usd: 0.0
+retention_days:
+  daily: 30
+  weekly: 90
+  monthly: null
+trigger_rules:
+  daily:
+    hours: 24
+    max_messages: 1000
+  weekly:
+    hours: 168
+    max_messages: 7000
+  monthly:
+    hours: 720
+    max_messages: 30000
+backup:
+  path: backups/long_term_memory_expired.jsonl
+retrieval:
+  similarity_threshold: 0.78

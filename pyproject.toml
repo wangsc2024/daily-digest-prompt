@@ -29,7 +29,25 @@ gmail = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --tb=short --cov=hooks --cov=skills --cov-report=term-missing --cov-fail-under=44"
+# --cov-fail-under 從 addopts 移除：CI 分批執行三個子套件（hooks/skills/tools），
+# 各批次只跑自己的測試，全域 fail-under 會因其他模組 0% 而誤判失敗。
+# 各子套件的覆蓋率閾值在 ci.yml 各步驟中個別指定。
+# 本地全跑時：uv run pytest --cov=hooks --cov=skills --cov-fail-under=44
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+# coverage.py 量測範圍（全套件執行時使用）
+source = ["hooks", "skills"]
+omit = ["tests/*", "*/__pycache__/*", "*/scripts/__pycache__/*"]
+
+[tool.coverage.report]
+# 全套件執行時的最低門檻（uv run coverage report 或全跑 pytest 時生效）
+fail_under = 44
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "def main\\(",
+]
 
 [tool.ruff]
 line-length = 100

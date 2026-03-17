@@ -24,8 +24,9 @@ $AlbumPath = Join-Path $AgentDir "docs\plans\淨土教觀學苑podcast專輯.md"
 $StatePath = Join-Path $AgentDir "context\jiaoguang-podcast-next.json"
 $MaxEpisode = 750
 
-# --- 讀取下一集編號 ---
+# --- 讀取下一集編號 + 每日上限檢查 ---
 $next = 1
+$state = $null
 if (Test-Path $StatePath) {
     try {
         $state = Get-Content $StatePath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -35,6 +36,32 @@ if (Test-Path $StatePath) {
         $next = 1
     }
 }
+
+# 每日上限：讀取 frequency-limits.yaml 的 all_exhausted_fallback_daily_limit（預設 3）
+$DailyLimit = 3
+$FreqLimitsPath = Join-Path $AgentDir "config\frequency-limits.yaml"
+if (Test-Path $FreqLimitsPath) {
+    try {
+        $flContent = Get-Content $FreqLimitsPath -Raw -Encoding UTF8
+        if ($flContent -match 'all_exhausted_fallback_daily_limit:\s*(\d+)') {
+            $DailyLimit = [int]$Matches[1]
+        }
+    } catch {}
+}
+
+# 計算今日已產出集數
+$today = (Get-Date -Format "yyyy-MM-dd")
+$todayCount = 0
+if ($state -and $state.today_date -eq $today) {
+    $todayCount = [int]($state.today_count)
+}
+
+if ($todayCount -ge $DailyLimit) {
+    Write-Host "[jiaoguang-podcast-next] 今日已達上限 $DailyLimit 集（today_count=$todayCount），跳過。"
+    exit 0
+}
+
+Write-Host "[jiaoguang-podcast-next] 今日第 $($todayCount + 1)/$DailyLimit 集"
 
 # --- 從專輯 md 取得第 N 列（表格：表頭 27-28 行，第 1 集資料 = 第 29 行 = index 28）---
 if (-not (Test-Path $AlbumPath)) {
@@ -89,16 +116,18 @@ if ($Backend -eq "cursor_cli") {
     }
 }
 
-# --- 寫回下一集編號（僅 claude 模式；cursor_cli 由 agent 依 prompt 更新）---
+# --- 寫回下一集編號 + 今日計數（僅 claude 模式；cursor_cli 由 agent 依 prompt 更新）---
 if ($Backend -eq "claude") {
     $nextNext = if ($next -ge $MaxEpisode) { 1 } else { $next + 1 }
     $stateDir = Split-Path -Parent $StatePath
     if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Force -Path $stateDir | Out-Null }
     @{
-        next_episode = $nextNext
+        next_episode  = $nextNext
         last_produced = $next
-        last_topic = $topicName
-        updated_at = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        last_topic    = $topicName
+        today_date    = $today
+        today_count   = $todayCount + 1
+        updated_at    = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
     } | ConvertTo-Json -Depth 3 | Set-Content -Path $StatePath -Encoding UTF8
 }
 
