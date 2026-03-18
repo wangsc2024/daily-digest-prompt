@@ -2,7 +2,7 @@
 # Claude_todoist-agent: 改為執行 Todoist 團隊並行模式腳本
 
 $task = Get-ScheduledTask -TaskName "Claude_todoist-agent"
-$task.Actions[0].Arguments = '-ExecutionPolicy Bypass -WindowStyle Hidden -File "D:\Source\daily-digest-prompt\run-todoist-agent-team.ps1"'
+$task.Actions[0].Arguments = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$PSScriptRoot\run-todoist-agent-team.ps1`""
 $task | Set-ScheduledTask | Out-Null
 
 # 驗證

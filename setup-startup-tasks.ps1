@@ -32,6 +32,8 @@ $settings = New-ScheduledTaskSettingsSet `
     -RestartInterval (New-TimeSpan -Minutes 5) `
     -MultipleInstances IgnoreNew
 
+$ProjectDir = $PSScriptRoot
+
 # ──────────────────────────────────────────────────────────────
 # 1. 修正 Claude_bot-startup
 # ──────────────────────────────────────────────────────────────
@@ -39,8 +41,8 @@ Write-Step "修正 Claude_bot-startup（加入 groq-relay 啟動）..."
 
 $botAction = New-ScheduledTaskAction `
     -Execute "pwsh.exe" `
-    -Argument '-NoProfile -WindowStyle Hidden -File "D:\Source\daily-digest-prompt\bot\startup.ps1"' `
-    -WorkingDirectory "D:\Source\daily-digest-prompt\bot"
+    -Argument "-NoProfile -WindowStyle Hidden -File `"$ProjectDir\bot\startup.ps1`"" `
+    -WorkingDirectory "$ProjectDir\bot"
 
 try {
     $existing = Get-ScheduledTask -TaskName "Claude_bot-startup" -ErrorAction SilentlyContinue

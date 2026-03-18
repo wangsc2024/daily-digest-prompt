@@ -701,11 +701,24 @@ function Get-TaskBackend {
             $liveWs = ($lwTasks -and ($lwTasks -contains $TaskKey))
         }
 
+        # 安全性：cli_flag 白名單驗證（防止 config 注入任意 CLI 旗標）
+        $rawCliFlag = $bCfg.cli_flag ?? ""
+        $allowedCliFlags = @(
+            "",
+            "--model claude-haiku-4-5",
+            "--model claude-sonnet-4-5",
+            "--model claude-opus-4-6"
+        )
+        if ($rawCliFlag -and ($rawCliFlag -notin $allowedCliFlags)) {
+            Write-Log "[ModelSelect] WARNING: cli_flag '$rawCliFlag' not in whitelist, rejected -> empty"
+            $rawCliFlag = ""
+        }
+
         Write-Log "[ModelSelect] $TaskKey -> $backendName (token_level=$tokenLevel)"
         return @{
             type         = $bCfg.type ?? "claude_code"
             backend      = $backendName
-            cli_flag     = $bCfg.cli_flag ?? ""
+            cli_flag     = $rawCliFlag
             model        = $bCfg.model ?? ""
             model_flag   = $bCfg.model_flag ?? ""   # Codex -m <model> 旗標
             live_ws      = $liveWs
@@ -1071,8 +1084,22 @@ if (Test-Path $timeoutsPath) {
                         Invoke-RestMethod -Uri $hc.kb_endpoint -Method Get -TimeoutSec $kbSec -ErrorAction Stop | Out-Null
                         $kbOk = $true
                         Write-Log "[Phase0b] KB ping OK"
+                        # 持久化 KB 存活狀態，供 Phase 2 agent 直接讀取（免重複 curl）
+                        @{
+                            checked_at   = (Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz")
+                            kb_alive     = $true
+                            endpoint     = $hc.kb_endpoint
+                            ttl_minutes  = 30
+                        } | ConvertTo-Json | Set-Content (Join-Path $AgentDir "cache\kb_live_status.json") -Encoding UTF8
                     } catch {
                         Write-Log "[Phase0b] KB ping 失敗: $($_.Exception.Message)"
+                        @{
+                            checked_at  = (Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz")
+                            kb_alive    = $false
+                            endpoint    = $hc.kb_endpoint
+                            ttl_minutes = 30
+                            error       = $_.Exception.Message
+                        } | ConvertTo-Json | Set-Content (Join-Path $AgentDir "cache\kb_live_status.json") -Encoding UTF8
                     }
                 } else {
                     $kbOk = $true
@@ -1530,7 +1557,51 @@ elseif ($plan.plan_type -eq "tasks") {
             continue
         }
         $taskPrompt = Get-Content -Path "$AgentDir\$promptFile" -Raw -Encoding UTF8
+        # 確保 Write 在 allowedTools（子 Agent 需要 Write 才能產出結果 JSON）
         $taskTools = $task.allowed_tools
+        if ($taskTools -notmatch '\bWrite\b') {
+            $taskTools = "$taskTools,Write"
+            Write-Log "[Phase2] allowedTools 缺少 Write，已自動補入（task rank=$($task.rank)）"
+        }
+        $taskRank = $task.rank
+        $taskContent = $task.content
+        $taskId = $task.task_id
+
+        # Fix: 強制注入結果 JSON 寫入指示（不依賴 Phase 1 LLM 是否有附加）
+        # 使用單引號 here-string 避免 backtick 被 PS 解析為轉義字元，再用 -replace 替換變數
+        $safeContent = $taskContent -replace '"', '\"'
+        $resultJsonTemplate = @'
+
+---
+
+## ⚠️ 重要：執行完成後必須寫入結果檔案（強制）
+
+**無論任務成功、部分完成或失敗，最後一步都必須用 Write 工具建立 `results/todoist-result-RANK.json`**：
+
+```json
+{
+  "agent": "todoist-task-RANK",
+  "status": "success",
+  "task_id": "TASKID",
+  "type": "todoist_task",
+  "content": "TASKCONTENT",
+  "duration_seconds": 0,
+  "done_cert": { "status": "DONE", "quality_score": 4, "remaining_issues": [] },
+  "summary": "一句話摘要",
+  "error": null
+}
+```
+
+- `status` 填 `"success"`、`"partial"` 或 `"failed"`
+- `summary` 填實際完成內容的一句話描述
+- `quality_score` 填 1-5
+- **此步驟不可省略，否則 Phase 3 組裝無法取得本任務結果**
+'@
+        $resultJsonInstruction = $resultJsonTemplate `
+            -replace 'RANK', $taskRank `
+            -replace 'TASKID', $taskId `
+            -replace 'TASKCONTENT', $safeContent
+        $taskPrompt = $taskPrompt.TrimEnd() + $resultJsonInstruction
 
         $taskName = "task-$($task.rank)"
 
@@ -1587,22 +1658,46 @@ elseif ($plan.plan_type -eq "auto") {
                     $primaryBackend = $fl.all_exhausted_fallback_primary
                     if (-not $primaryBackend) { $primaryBackend = "claude" }
                     $fallbackBackend = if ($primaryBackend -eq "cursor_cli") { "claude" } else { "cursor_cli" }
-                    if (Test-Path $fallbackScript) {
-                        Write-Log "[Phase2] all_exhausted_fallback: 執行淨土教觀學苑 podcast 1 集（primary=$primaryBackend, 備援=$fallbackBackend）"
+                    # 每日上限預檢：今日已達上限則靜默跳過，不寫 fallback.json、不通知
+                    $podcastStatePath = Join-Path $AgentDir "context\jiaoguang-podcast-next.json"
+                    $podcastDailyLimit = if ($fl.all_exhausted_fallback_daily_limit) { [int]$fl.all_exhausted_fallback_daily_limit } else { 3 }
+                    $todayStr = Get-Date -Format "yyyy-MM-dd"
+                    $podcastTodayCount = 0
+                    if (Test-Path $podcastStatePath) {
+                        try { $ps = Get-Content $podcastStatePath -Raw -Encoding UTF8 | ConvertFrom-Json; if ($ps.today_date -eq $todayStr) { $podcastTodayCount = [int]$ps.today_count } } catch {}
+                    }
+                    if ($podcastTodayCount -ge $podcastDailyLimit) {
+                        Write-Log "[Phase2] all_exhausted_fallback: 今日已達上限 $podcastDailyLimit 集（today_count=$podcastTodayCount），靜默跳過"
+                    } elseif (Test-Path $fallbackScript) {
+                        Write-Log "[Phase2] all_exhausted_fallback: 製作第 $($podcastTodayCount + 1)/$podcastDailyLimit 集（primary=$primaryBackend, 備援=$fallbackBackend）"
                         $jiaoguangOk = $false
+                        $fallbackUrl = ""
                         foreach ($backend in @($primaryBackend, $fallbackBackend)) {
-                            & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1 | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
+                            $fbOutput = & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1
+                            $fbOutput | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
                             if ($LASTEXITCODE -eq 0) {
                                 $jiaoguangOk = $true
-                                Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）"
+                                $urlLine = $fbOutput | Where-Object { $_ -match '^PODCAST_URL: ' } | Select-Object -Last 1
+                                if ($urlLine) { $fallbackUrl = $urlLine -replace '^PODCAST_URL: ', '' }
+                                Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）$(if ($fallbackUrl) { " URL=$fallbackUrl" })"
                                 break
                             }
                             Write-Log "[Phase2] all_exhausted_fallback primary=$backend 失敗，嘗試備援 $fallbackBackend"
                         }
                         $resultsDir = Join-Path $AgentDir "results"
                         if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null }
-                        @{ ran = "jiaoguang_podcast_one"; notify_message = $notifyMsg } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
-                        if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback  primary 與備援皆未成功，仍寫入 fallback.json 以通知" }
+                        # 讀取最新集數標題以納入通知
+                        $latestEpTitle = ""
+                        try {
+                            $phist = Get-Content (Join-Path $AgentDir "context\podcast-history.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+                            $latestEp = $phist.episodes | Select-Object -First 1
+                            if ($latestEp.episode_title) { $latestEpTitle = $latestEp.episode_title }
+                        } catch {}
+                        $finalNotifyMsg = if (-not $jiaoguangOk) {
+                            "⚠️ 淨土教觀學苑 podcast 製作失敗（primary 與備援皆未成功）"
+                        } elseif ($latestEpTitle) { "$notifyMsg：$latestEpTitle" } else { $notifyMsg }
+                        @{ ran = "jiaoguang_podcast_one"; notify_message = $finalNotifyMsg; episode_title = $latestEpTitle; episode_url = $fallbackUrl; failed = (-not $jiaoguangOk) } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
+                        if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback primary 與備援皆未成功" }
                     }
                 }
             } catch {
@@ -1778,22 +1873,46 @@ else {
                 $primaryBackend = $fl.all_exhausted_fallback_primary
                 if (-not $primaryBackend) { $primaryBackend = "claude" }
                 $fallbackBackend = if ($primaryBackend -eq "cursor_cli") { "claude" } else { "cursor_cli" }
-                if (Test-Path $fallbackScript) {
-                    Write-Log "[Phase2] all_exhausted_fallback: 執行淨土教觀學苑 podcast 1 集（primary=$primaryBackend, 備援=$fallbackBackend）"
+                # 每日上限預檢：今日已達上限則靜默跳過，不寫 fallback.json、不通知
+                $podcastStatePath = Join-Path $AgentDir "context\jiaoguang-podcast-next.json"
+                $podcastDailyLimit = if ($fl.all_exhausted_fallback_daily_limit) { [int]$fl.all_exhausted_fallback_daily_limit } else { 3 }
+                $todayStr = Get-Date -Format "yyyy-MM-dd"
+                $podcastTodayCount = 0
+                if (Test-Path $podcastStatePath) {
+                    try { $ps = Get-Content $podcastStatePath -Raw -Encoding UTF8 | ConvertFrom-Json; if ($ps.today_date -eq $todayStr) { $podcastTodayCount = [int]$ps.today_count } } catch {}
+                }
+                if ($podcastTodayCount -ge $podcastDailyLimit) {
+                    Write-Log "[Phase2] all_exhausted_fallback: 今日已達上限 $podcastDailyLimit 集（today_count=$podcastTodayCount），靜默跳過"
+                } elseif (Test-Path $fallbackScript) {
+                    Write-Log "[Phase2] all_exhausted_fallback: 製作第 $($podcastTodayCount + 1)/$podcastDailyLimit 集（primary=$primaryBackend, 備援=$fallbackBackend）"
                     $jiaoguangOk = $false
+                    $fallbackUrl = ""
                     foreach ($backend in @($primaryBackend, $fallbackBackend)) {
-                        & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1 | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
+                        $fbOutput = & pwsh -ExecutionPolicy Bypass -File $fallbackScript -Backend $backend 2>&1
+                        $fbOutput | ForEach-Object { Write-Log "  [jiaoguang-$backend] $_" }
                         if ($LASTEXITCODE -eq 0) {
                             $jiaoguangOk = $true
-                            Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）"
+                            $urlLine = $fbOutput | Where-Object { $_ -match '^PODCAST_URL: ' } | Select-Object -Last 1
+                            if ($urlLine) { $fallbackUrl = $urlLine -replace '^PODCAST_URL: ', '' }
+                            Write-Log "[Phase2] all_exhausted_fallback 完成（backend=$backend）$(if ($fallbackUrl) { " URL=$fallbackUrl" })"
                             break
                         }
                         Write-Log "[Phase2] all_exhausted_fallback primary=$backend 失敗，嘗試備援 $fallbackBackend"
                     }
                     $resultsDir = Join-Path $AgentDir "results"
                     if (-not (Test-Path $resultsDir)) { New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null }
-                    @{ ran = "jiaoguang_podcast_one"; notify_message = $notifyMsg } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
-                    if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback  primary 與備援皆未成功，仍寫入 fallback.json 以通知" }
+                    # 讀取最新集數標題以納入通知
+                    $latestEpTitle = ""
+                    try {
+                        $phist = Get-Content (Join-Path $AgentDir "context\podcast-history.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+                        $latestEp = $phist.episodes | Select-Object -First 1
+                        if ($latestEp.episode_title) { $latestEpTitle = $latestEp.episode_title }
+                    } catch {}
+                    $finalNotifyMsg = if (-not $jiaoguangOk) {
+                        "⚠️ 淨土教觀學苑 podcast 製作失敗（primary 與備援皆未成功）"
+                    } elseif ($latestEpTitle) { "$notifyMsg：$latestEpTitle" } else { $notifyMsg }
+                    @{ ran = "jiaoguang_podcast_one"; notify_message = $finalNotifyMsg; episode_title = $latestEpTitle; episode_url = $fallbackUrl; failed = (-not $jiaoguangOk) } | ConvertTo-Json -Depth 2 | Set-Content -Path (Join-Path $resultsDir "todoist-exhausted-fallback.json") -Encoding UTF8
+                    if (-not $jiaoguangOk) { Write-Log "[Phase2] all_exhausted_fallback primary 與備援皆未成功" }
                 }
             }
         } catch {
@@ -2247,16 +2366,35 @@ if ($plan.plan_type -eq "tasks" -and $null -ne $plan.tasks -and $plan.tasks.Coun
     for ($rank = 1; $rank -le $plan.tasks.Count; $rank++) {
         $resultPath = "$ResultsDir\todoist-result-$rank.json"
         if (-not (Test-Path $resultPath)) {
-            $taskContent = $plan.tasks[$rank - 1].content
+            $taskObj = $plan.tasks[$rank - 1]
+            $taskContent = $taskObj.content
+            $taskId = $taskObj.task_id
             $shortContent = if ($taskContent.Length -gt 40) { $taskContent.Substring(0, 40) + "…" } else { $taskContent }
             $missingResults += "task-$rank (todoist-result-$rank.json)"
             $sectionKey = "task-$rank"
             $jobState = $sections[$sectionKey]
             Write-Log "[Phase2] Missing result file: todoist-result-$rank.json — job state=$jobState — content: $shortContent" "WARN"
+
+            # 補寫 fallback 結果檔（對齊 Repair-CompletedAutoTaskResultFile 行為）
+            $fallbackStatus = if ($jobState -eq "timeout") { "failed" } elseif ($jobState -eq "success") { "partial" } else { "failed" }
+            $fallbackReason = if ($jobState -eq "timeout") { "phase2_timeout" } else { "result_file_missing" }
+            $fallback = @{
+                agent            = "todoist-task-$rank"
+                status           = $fallbackStatus
+                task_id          = $taskId
+                type             = "todoist_task"
+                content          = $taskContent
+                duration_seconds = 0
+                done_cert        = @{ status = "FAILED"; quality_score = 0; remaining_issues = @("result_file_missing") }
+                summary          = "Phase 2 Agent 未產出結果檔，已由排程自動補記（job_state=$jobState）"
+                error            = $fallbackReason
+            }
+            $fallback | ConvertTo-Json -Depth 4 | Set-Content -Path $resultPath -Encoding UTF8 -Force
+            Write-Log "[Phase2] task-$rank result file 補寫 (status=$fallbackStatus, job_state=$jobState)"
         }
     }
     if ($missingResults.Count -gt 0) {
-        Write-Log "[Phase2] Missing result files: $($missingResults -join ', ') — Phase 3 will mark these tasks as failed (結果缺失)" "WARN"
+        Write-Log "[Phase2] Backfilled $($missingResults.Count) missing result files: $($missingResults -join ', ')" "WARN"
     }
 }
 

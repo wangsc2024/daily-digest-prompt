@@ -92,7 +92,8 @@ $verse = $unusedVerses | Select-Object -First 1
 Write-Host "[INFO] Selected verse #$($verse.id): $($verse.source)"
 
 # ─── Step 4: Send via ntfy ───
-$message = "$($verse.verse)`n`n— $($verse.source)　$($verse.author)"
+$sourceLine = if ($verse.author) { "來源：$($verse.source)（$($verse.author)）" } else { "來源：$($verse.source)" }
+$message = "$($verse.verse)`n`n$sourceLine"
 $payloadFile = "$AgentDir\ntfy_verse.json"
 
 $payload = @{

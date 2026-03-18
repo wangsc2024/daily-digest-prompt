@@ -189,6 +189,48 @@
         }
       },
       "additionalProperties": true
+    },
+    "done_cert": {
+      "type": "object",
+      "description": "完成證明（Agent Pool 使用，ADR-004 P5-A）",
+      "required": ["status", "quality_score"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["DONE", "PENDING", "BLOCKED"],
+          "description": "完成狀態"
+        },
+        "quality_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "品質分數（0-5 分）"
+        },
+        "remaining_issues": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "待解決問題列表"
+        }
+      }
+    },
+    "stage": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "階段編號（多階段任務使用，如 ai_deep_research 的 1-4 階段）"
+    },
+    "topic": {
+      "type": "string",
+      "description": "研究主題名稱（研究任務使用，如 ai_deep_research、shurangama）"
+    },
+    "task_id": {
+      "type": ["string", "null"],
+      "description": "Todoist 任務 ID（若來自 Todoist 任務）"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "執行耗時（秒，與 execution_time_seconds 相同，保留向後相容）"
     }
   },
   "additionalProperties": true,
@@ -242,10 +284,24 @@
     }
   ],
   "_metadata": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "created_at": "2026-03-17",
+    "updated_at": "2026-03-18",
+    "updated_by": "todoist-auto-workflow_forge",
     "created_by": "todoist-auto-workflow_forge",
     "purpose": "統一自動任務結果格式，避免格式漂移，供 Phase 3 組裝與驗證使用",
-    "usage_note": "所有 prompts/team/todoist-auto-*.md 的結果 JSON 應符合此 Schema"
+    "usage_note": "所有 prompts/team/todoist-auto-*.md 的結果 JSON 應符合此 Schema",
+    "changelog": [
+      {
+        "version": "1.1.0",
+        "date": "2026-03-18",
+        "changes": "新增 done_cert、stage、topic、task_id、duration_seconds 欄位，支援 Agent Pool 與多階段任務"
+      },
+      {
+        "version": "1.0.0",
+        "date": "2026-03-17",
+        "changes": "初版，統一 29 個自動任務輸出格式"
+      }
+    ]
   }
 }

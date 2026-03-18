@@ -183,7 +183,6 @@ task_rules:
     - ai_smart_city
     - tech_research
     - unsloth_research
-    - ai_smart_city
     - jingtu           # 淨土宗研究：改走 Codex 研究工作流（WebSearch + live 即時資料）
     - kb_insight_evaluation  # 知識庫近 3 天洞察報告審核：擇 3 項高價值建議研究並擬定執行方案，納入系統優化評估
 
@@ -747,7 +746,6 @@ tasks:
     daily_limit: 1
     counter_field: "insight_briefing_count"
     template: "prompts/team/todoist-auto-insight_briefing.md"
-    prompt_file: "prompts/team/todoist-auto-insight_briefing.md"
     template_version: 1
     history_type: "insight_briefing"
     execution_order: 29

@@ -2,6 +2,8 @@
 # 排程任務整理（需以系統管理員身分執行）
 # 1) 刪除舊排程  2) 修改引擎  3) 重建觸發時間
 
+$ProjectDir = $PSScriptRoot
+
 Write-Host "=== Step 1: 刪除舊排程 ===" -ForegroundColor Yellow
 $toDelete = @("MyDigest01", "MyDigest", "ClaudeDailyDigest", "MyDigest02", "MyDigest03", "MyDigest04")
 foreach ($name in $toDelete) {
@@ -32,7 +34,7 @@ try {
     $action = New-ScheduledTaskAction `
         -Execute "pwsh.exe" `
         -Argument '-ExecutionPolicy Bypass -WindowStyle Hidden -File "D:\Source\daily-digest-prompt\run-agent-team.ps1"' `
-        -WorkingDirectory "D:\Source\daily-digest-prompt"
+        -WorkingDirectory $ProjectDir
 
     $triggers = @(
         New-ScheduledTaskTrigger -Daily -At "02:15"
@@ -65,7 +67,7 @@ try {
     $action = New-ScheduledTaskAction `
         -Execute "pwsh.exe" `
         -Argument '-ExecutionPolicy Bypass -WindowStyle Hidden -File "D:\Source\daily-digest-prompt\run-todoist-agent.ps1"' `
-        -WorkingDirectory "D:\Source\daily-digest-prompt"
+        -WorkingDirectory $ProjectDir
 
     # Daily trigger at 02:00 with 30-min repetition for 21 hours (02:00 - 23:00)
     $trigger = New-ScheduledTaskTrigger -Daily -At "02:00"
