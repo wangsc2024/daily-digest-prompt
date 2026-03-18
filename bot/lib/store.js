@@ -150,7 +150,7 @@ records.forEach(r => {
 
 // ---- Records CRUD ----
 
-const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer', 'game']);
+const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer', 'game', 'system_cmd']);
 
 /**
  * @param {string} uid

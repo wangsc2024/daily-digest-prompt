@@ -60,9 +60,9 @@ function Write-Log {
 }
 
 $CompletionLogFile = Join-Path $LogDir "completion_log.jsonl"
-$ProjectRoot = "D:\Source\daily-digest-prompt"
+$ProjectRoot = $PSScriptRoot ? (Split-Path $PSScriptRoot -Parent) : "D:\Source\daily-digest-prompt"
 # 遊戲型任務：產出目錄固定，Vite 建置、部署 Cloudflare Pages、完成後 push GitHub
-$GameWorkDir = "D:\source\game_web"
+$GameWorkDir = $env:GAME_WEB_DIR ?? "D:\source\game_web"
 
 # ── 解析 agent / codex 可執行檔（排程環境常無 PATH，需絕對路徑）──
 $Script:AgentCmd = (Get-Command agent -ErrorAction SilentlyContinue)?.Source
@@ -443,6 +443,44 @@ foreach ($record in @($record)) {
         }
         $effectiveContent = $SkillFirstPreamble + "`n`n" + $memorySection + $workDirPrefix + $optimizedContent + $researchWorkflowPreamble + $codeTaskPreamble + $gameTaskPreamble + $kbSeriesContext + $qualityReqs
 
+        # ── 系統診斷指令（system_cmd）：由 LINE 括號語法 [...] 觸發，claude -p 調查根因 ──
+        if ($taskType -eq 'system_cmd') {
+            Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
+            $AgentStartTime = Get-Date
+            Write-Log "🔍 系統診斷指令：「$($taskContent.Trim().Substring(0, [Math]::Min($taskContent.Trim().Length, 80)))」"
+            $diagPrompt = @"
+## 系統診斷指令（LINE 指派）
+
+使用者透過 LINE 發出以下診斷請求：
+「$($taskContent.Trim())」
+
+請依以下步驟進行系統調查，工作目錄為 $ProjectRoot：
+1. 閱讀 state/ 目錄下的相關狀態檔（run-fsm.json、scheduler-heartbeat.json、token-budget-state.json、run-todoist-agent-team.lock 等）
+2. 閱讀 context/ 目錄下的相關上下文（workflow-state.json、podcast-history.json、workflow-forge-registry.json 等）
+3. 查閱 config/frequency-limits.yaml 的自動任務設定（哪些任務每日上限、輪轉規則）
+4. 若問題與日誌相關，查看 logs/ 下最近的 .log 或 logs/structured/ 下的 .jsonl
+5. 整理根本原因，給出清楚的調查報告
+6. 提出具體可操作的修正建議（若問題確實存在）
+
+**輸出格式（正體中文，控制在 1500 字以內）**：
+🔍 **調查摘要**：（1-2 句總結）
+📋 **發現的問題**：（列點說明，若無問題也請說明）
+💡 **根本原因**：（技術分析）
+🛠️ **修正建議**：（具體步驟或配置調整方式）
+"@
+            $toolUsed = "Claude (系統診斷)"
+            $savedClaudeCode = $env:CLAUDECODE
+            Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+            try {
+                $output = & claude -p $diagPrompt --allowedTools "Read,Bash,Write" --max-turns 20 2>&1
+                Write-Log "系統診斷指令執行完畢"
+            } catch {
+                Write-Log "系統診斷指令執行失敗: $_"
+                $output = "⚠️ 系統診斷執行失敗：$_"
+            } finally {
+                if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode } else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
+            }
+        } else {
         # ── Podcast 型一律採 podcast 工作流（article-to-podcast.ps1 → TTS→MP3→上傳 R2）──
         $podcastHandled = $false
         $podcastQuery = ""
@@ -480,8 +518,18 @@ foreach ($record in @($record)) {
                 for ($epIdx = 1; $epIdx -le $podcastCount; $epIdx++) {
                     Write-Log "--- 第 ${epIdx}/${podcastCount} 集：Query=$podcastQuery ---"
                     $epOutput = pwsh -ExecutionPolicy Bypass -File $podcastScript -Query $podcastQuery 2>&1
-                    $podcastOutputParts += "=== 第 ${epIdx}/${podcastCount} 集（$podcastQuery）==="
-                    $podcastOutputParts += ($epOutput -join "`n")
+                    # 提取結構化摘要（PODCAST_URL 標記行）供 LINE 回覆使用
+                    $epUrlLine = @($epOutput | Where-Object { $_ -match '^PODCAST_URL: ' }) | Select-Object -Last 1
+                    $epUrl = if ($epUrlLine) { $epUrlLine -replace '^PODCAST_URL: ', '' } else { '' }
+                    if ($epUrl) {
+                        $epSummary = "🎙️ 第 ${epIdx}/${podcastCount} 集（$podcastQuery）製作完成`n🔗 收聽：$epUrl"
+                        $podcastOutputParts += $epSummary
+                    } else {
+                        # 未找到 URL：保留最後 15 行 log（可能含錯誤訊息）
+                        $lastLines = @($epOutput) | Select-Object -Last 15
+                        $podcastOutputParts += "=== 第 ${epIdx}/${podcastCount} 集（$podcastQuery）==="
+                        $podcastOutputParts += ($lastLines -join "`n")
+                    }
                 }
             } finally {
                 if ($null -ne $savedClaudeCode) { $env:CLAUDECODE = $savedClaudeCode }
