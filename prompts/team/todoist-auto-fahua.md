@@ -33,11 +33,16 @@
 - 不存在或已過期 → 略過，繼續下方搜尋
 
 ### 前置二：KB 服務確認（必做）
+
+**優先讀快取**：用 Read 讀取 `cache/kb_live_status.json`
+- 存在且 `kb_alive=true` 且 `checked_at` 在 30 分鐘內 → `kb_available=true`，跳過下方 curl
+- 否則執行備援 curl：
+
 ```bash
-curl -s --connect-timeout 3 "http://localhost:3000/api/health"
+curl -s --connect-timeout 5 -w "\nHTTP_CODE:%{http_code}" "http://localhost:3000/api/health"
 ```
-- 回傳 200 → `kb_available=true`，繼續以下搜尋
-- 失敗（逾時或非 2xx）→ `kb_available=false`，**跳過第一步搜尋與第四步匯入**，直接進行第二步選題
+- 輸出最後一行含 `HTTP_CODE:200` → `kb_available=true`，繼續以下搜尋
+- 其他（無輸出、逾時、非 200）→ `kb_available=false`，**跳過第一步搜尋與第四步匯入**，直接進行第二步選題
 
 ### 階段 1：語義搜尋（優先）
 ```bash
@@ -92,6 +97,7 @@ rm kb_notes.json
   "task_id": null,
   "type": "fahua",
   "topic": "（填入本次研究主題）",
+  "note_id": null,
   "kb_imported": false,
   "duration_seconds": 0,
   "summary": "研究進行中",
@@ -112,12 +118,13 @@ rm kb_notes.json
    - 參考來源
 
 ## 第四步：寫入知識庫
-依 SKILL.md 指示匯入：
+依 `skills/knowledge-query/SKILL.md` 指示匯入（使用 **POST /api/import**，非 /api/notes）：
 - tags 必須包含 ["法華經", "佛學", "天台宗", "本次主題名稱"]
 - contentText 放完整 Markdown，不填 content 欄位
-- 必須用 Write 建立 JSON，不可用 inline JSON
+- 必須用 Write 建立 JSON 檔，再以 `curl -d @檔名` 發送；禁止 inline JSON（Windows 會失敗）
 - source 填 "import"
-- 知識庫未啟動則跳過匯入，改為將研究結果直接輸出
+- 知識庫未啟動（health 非 200）則跳過匯入，改為將研究結果直接輸出，並在最後步驟填 `note_id: null`、`kb_imported: false`
+- **匯入成功時**：API 回應為 `{"result":{"noteIds":["uuid"],...}}`，從 `result.noteIds[0]` 取得 note_id（可只存前 8 碼），在最後步驟的結果 JSON 中必填此欄位
 
 ## 第四步之後：更新研究註冊表
 
@@ -144,7 +151,7 @@ rm kb_notes.json
 若未通過：補充搜尋 → 修正 → 重新匯入（最多自修正 2 次）。
 
 ## 最後步驟：更新結果 JSON（最終狀態）
-用 Write 覆寫 `results/todoist-auto-fahua.json`，將 status 改為最終值：
+用 Write 覆寫 `results/todoist-auto-fahua.json`，將 status 改為最終值。**必須包含 note_id**（第四步匯入成功時填 `result.noteIds[0]` 或前 8 碼，未匯入填 null）：
 ```json
 {
   "agent": "todoist-auto-fahua",
@@ -152,7 +159,8 @@ rm kb_notes.json
   "task_id": null,
   "type": "fahua",
   "topic": "研究主題名稱",
-  "kb_imported": true,
+  "note_id": "第四步 API 回傳的 result.noteIds[0] 或前 8 碼，未匯入則 null",
+  "kb_imported": true 或 false,
   "duration_seconds": 0,
   "done_cert": {
     "status": "DONE",
@@ -164,4 +172,4 @@ rm kb_notes.json
 }
 ```
 
-> 注意：`duration_seconds` 可填 0，由 PowerShell 外部計算。
+> 注意：`duration_seconds` 可填 0，由 PowerShell 外部計算。有匯入時 `note_id` 必填，供報告顯示 KB 筆記。

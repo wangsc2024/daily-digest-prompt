@@ -466,23 +466,6 @@ rm ntfy_skill_forge.json
 }
 ```
 
-**各執行路徑的欄位速查表**（填寫 10b JSON 時依此覆寫預設值）：
-
-| 執行路徑 | `status` | `integration_status` | `skill_index_updated` | `kb_imported` |
-|---------|----------|---------------------|----------------------|--------------|
-| 完整成功 | `success` | `integrated` | `true` | `true` |
-| 成功但 KB 匯入失敗 | `partial` | `integrated` | `true` | `false` |
-| scanner blocked | `partial` | `held_for_review` | `false` | `true`（若 KB 已匯入）|
-| 品質未達標（5.0-6.9 修正後仍 < 7.0，降至 v0.5.0） | `partial` | `integrated` | `true` | `true` |
-| 品質拒絕（< 5.0） | `quality_rejected` | `quality_rejected` | `false` | `false` |
-| 格式驗證失敗 | `format_failed` | `format_failed` | `false` | `false` |
-
-`status` 欄位說明：
-- `success`：完整通過所有步驟並整合
-- `partial`：生成成功但 scanner blocked 或 KB 匯入失敗
-- `quality_rejected`：步驟 6.5 平均分 < 5.0（未修正或修正後仍不達）
-- `format_failed`：步驟 6 格式驗證 2 輪後仍失敗
-
 ---
 
 ## 降級處理總覽
@@ -494,3 +477,9 @@ rm ntfy_skill_forge.json
 | skill-scanner 不存在 | 標記 `scanner_skipped: true`，繼續整合 |
 | 所有候選均不通過開創性門檻 | 選開創性評分最高的候選，降低門檻至「提供主要功能改善」即可 |
 | 品質平均分 5.0-6.9（修正後仍 < 7.0） | 版本降至 v0.5.0，description 末尾加「⚠️ 品質分 X/10，建議後續 skill-audit 改善」，`status: "partial"`，繼續整合 |
+
+---
+
+**版本歷史**：
+- v1.0.0（2026-03）：初始正式版
+- v1.0.1（2026-03-19）：移除步驟 10b 重複內容（skill-audit 發現）

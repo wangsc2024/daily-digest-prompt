@@ -41,7 +41,7 @@ Act      → self-heal（immediate_fix 自動備份後立即執行）/ 人工決
 
 | 原則 | 說明 |
 |------|------|
-| **積極主動完成優化建議** | effort=low 且安全的項目，自動擬訂 decision、自動接受 ADR，由 self-heal 立即執行，不等待人工確認 |
+| **全面自動落實** | 安全邊界外的所有項目（含 effort=high）均自動接受 ADR 並分類為 immediate_fix，由 self-heal 執行。effort 只影響步驟拆分粒度，不決定是否執行 |
 | **動手前進行 git 備份** | 執行任何 immediate_fix 前，self-heal 必須對 `related_files` 執行 `git add + git commit` 備份，確保可回滾 |
 | **優化後以 ntfy 詳細通知** | 修復完成後，ntfy 推播詳細說明：列出每個修改的檔案、改善摘要、驗證結果 |
 | **自動擬訂並接受 ADR** | `immediate_fix` 的 `decision` 欄位由 arch-evolution 自動填寫接受理由；`schedule_adr` 才通知人工填寫 |
@@ -364,7 +364,7 @@ kb-curator → 建議新增 depends-on: [knowledge-query]
 ## 注意事項
 
 - **互動式工具**：由使用者手動觸發，不透過 Todoist 路由
-- **ADR decision 自動填寫（immediate_fix）**：`decision` 欄位由 arch-evolution 自動填寫「自動接受：操作安全且步驟明確，由 self-heal 執行」；wontfix/deferred 填寫對應理由
+- **ADR decision 自動填寫（immediate_fix）**：`decision` 欄位由 arch-evolution 自動填寫「自動接受：{操作摘要}，由 self-heal 執行」；wontfix 填寫拒絕理由；**`deferred` 分類已移除**（原 effort=high 改為 immediate_fix 多步驟拆分）
 - **ADR decision 人工填寫（schedule_adr）**：需人工前提條件的 ADR，`decision` 欄位留空，assemble-audit 推播提醒填寫
 - **+1 原則**：OODA 模組 D 每次只選 1 個行動，避免多頭並進導致改進效果分散
 - **scheduler-state.json 唯讀**：此 Skill 不寫入 scheduler-state.json（PowerShell 腳本獨佔寫入）

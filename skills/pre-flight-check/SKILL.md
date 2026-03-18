@@ -1,12 +1,12 @@
 ---
 name: pre-flight-check
-version: "0.1.0"
+version: "0.5.0"
 description: |
-  ⚠️ 草稿版（KB 不可用時生成）
   執行前飛行檢查。在 Agent 排程任務實際執行前，探測所有外部依賴健康狀態
   （KB API、Todoist API、ntfy、Groq relay），讀取 scheduler-state.json 歷史失敗資料
   計算當前時段風險分數，並輸出 go/no-go 決策與建議 timeout 調整。
   Use when: 排程任務執行前健康檢查、外部依賴可用性偵測、時段風險評估、timeout 動態調整、預防性失敗迴避。
+  ⚠️ 知識基礎薄弱，建議透過 skill-audit 補強。
 allowed-tools: [Bash, Read, Write, Grep]
 cache-ttl: "5min"
 triggers:
@@ -84,16 +84,55 @@ CURRENT_HOUR=$(date +"%H")
 echo "CURRENT_HOUR=$CURRENT_HOUR"
 ```
 
-用 Read 讀取 `state/scheduler-state.json`，從 `runs` 陣列中統計：
-- 過去 7 天在**當前小時**的執行次數（`total_at_hour`）
-- 過去 7 天在**當前小時**的失敗次數（`failed_at_hour`）
-- 計算時段失敗率：`hour_failure_rate = failed_at_hour / total_at_hour`
+用以下 Python 腳本讀取 `state/scheduler-state.json` 並計算時段風險：
 
-同時讀取 `context/system-insight.json` 的 `high_failure_hours` 陣列，確認當前小時是否在高風險清單中。
+```bash
+TIME_RISK_JSON=$(uv run python -X utf8 -c "
+import json, os
+from datetime import datetime, timedelta, timezone
 
-**風險評分公式**：
+# 讀取當前小時
+current_hour = datetime.now(timezone(timedelta(hours=8))).hour
 
-```
+# 讀取 scheduler-state.json
+sched_file = 'state/scheduler-state.json'
+if not os.path.exists(sched_file):
+    print(json.dumps({'time_risk_score': 0, 'hour_failure_rate': 0, 'in_high_risk_list': False, 'consecutive_failures': 0, 'error': 'scheduler-state not found'}))
+    exit(0)
+
+sched = json.load(open(sched_file, encoding='utf-8'))
+runs = sched.get('runs', [])
+
+# 統計過去 7 天當前小時的執行記錄
+seven_days_ago = datetime.now(timezone(timedelta(hours=8))) - timedelta(days=7)
+total_at_hour = 0
+failed_at_hour = 0
+last_3_at_hour = []
+
+for run in runs:
+    run_time = datetime.fromisoformat(run['timestamp'])
+    if run_time < seven_days_ago:
+        continue
+    if run_time.hour == current_hour:
+        total_at_hour += 1
+        if run['status'] in ['failed', 'timeout']:
+            failed_at_hour += 1
+            last_3_at_hour.append(False)
+        else:
+            last_3_at_hour.append(True)
+
+hour_failure_rate = failed_at_hour / total_at_hour if total_at_hour > 0 else 0
+
+# 讀取 system-insight.json
+insight_file = 'context/system-insight.json'
+high_failure_hours = []
+if os.path.exists(insight_file):
+    insight = json.load(open(insight_file, encoding='utf-8'))
+    high_failure_hours = insight.get('high_failure_hours', [])
+
+in_high_risk_list = current_hour in high_failure_hours
+
+# 計算時段風險分數
 time_risk_score = 0
 
 # 基於歷史失敗率（0-50 分）
@@ -105,14 +144,29 @@ elif hour_failure_rate > 0.15:
     time_risk_score += 20
 
 # 是否在高風險清單（0-30 分）
-if current_hour in high_failure_hours:
+if in_high_risk_list:
     time_risk_score += 30
 
 # 連續失敗加權（0-20 分）
-if last_3_runs_at_hour all failed:
+last_3 = last_3_at_hour[:3] if len(last_3_at_hour) >= 3 else []
+last_2 = last_3_at_hour[:2] if len(last_3_at_hour) >= 2 else []
+
+if len(last_3) == 3 and not any(last_3):
     time_risk_score += 20
-elif last_2_runs_at_hour all failed:
+elif len(last_2) == 2 and not any(last_2):
     time_risk_score += 10
+
+print(json.dumps({
+    'time_risk_score': time_risk_score,
+    'hour_failure_rate': round(hour_failure_rate, 3),
+    'in_high_risk_list': in_high_risk_list,
+    'consecutive_failures': 3 if (len(last_3) == 3 and not any(last_3)) else (2 if (len(last_2) == 2 and not any(last_2)) else 0),
+    'total_at_hour': total_at_hour,
+    'failed_at_hour': failed_at_hour
+}))
+" 2>/dev/null || echo "{\"time_risk_score\": 0, \"error\": \"script failed\"}")
+
+echo "$TIME_RISK_JSON"
 ```
 
 **輸出**：`time_risk_score`（0-100）、`hour_failure_rate`、`in_high_risk_list`。
@@ -121,9 +175,51 @@ elif last_2_runs_at_hour all failed:
 
 ## 步驟 3：綜合風險評分與 Go/No-Go 決策
 
-```
+用以下 Python 腳本計算綜合風險並輸出決策：
+
+```bash
+DECISION_JSON=$(uv run python -X utf8 -c "
+import json, sys
+
+# 假設從步驟 1 和 2 取得的數值
+# 實際使用時，這些值應從 Bash 變數傳入或從暫存檔讀取
+dependency_score = ${DEPENDENCY_SCORE:-80}
+time_risk_score_data = json.loads('${TIME_RISK_JSON}')
+time_risk_score = time_risk_score_data.get('time_risk_score', 0)
+
+# 計算綜合風險
 overall_risk = (100 - dependency_score) * 0.6 + time_risk_score * 0.4
+
+# 決策邏輯
+if overall_risk <= 30:
+    decision = 'GO'
+    action = '正常執行，使用預設 timeout'
+    timeout_multiplier = 1.0
+elif overall_risk <= 60:
+    decision = 'GO_CAUTIOUS'
+    action = '執行但 timeout × 1.5，啟用降級模式'
+    timeout_multiplier = 1.5
+elif overall_risk <= 80:
+    decision = 'CONDITIONAL'
+    action = '僅執行不依賴失敗端點的任務，timeout × 2'
+    timeout_multiplier = 2.0
+else:
+    decision = 'NO_GO'
+    action = '建議延後執行，記錄原因，排程下次重試'
+    timeout_multiplier = None
+
+print(json.dumps({
+    'overall_risk': round(overall_risk, 2),
+    'decision': decision,
+    'action': action,
+    'timeout_multiplier': timeout_multiplier
+}))
+" 2>/dev/null || echo "{\"overall_risk\": 0, \"decision\": \"UNKNOWN\", \"error\": \"script failed\"}")
+
+echo "$DECISION_JSON"
 ```
+
+**決策表**：
 
 | 綜合風險 | 決策 | 建議行動 |
 |---------|------|---------|

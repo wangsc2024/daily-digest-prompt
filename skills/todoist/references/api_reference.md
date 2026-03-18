@@ -1,6 +1,6 @@
 # Todoist API v1 完整參考
 
-> **遷移注意**：REST API v2（`/api/v1/`）已棄用（410 Gone），已改用 API v1（`/api/v1/`）。
+> **遷移注意**：REST API v2（`/rest/v2/`）已棄用（410 Gone），已改用 API v1（`/api/v1/`）。
 > 關鍵變更：篩選查詢改為獨立端點 `/tasks/filter?query=`，不再使用 `/tasks?filter=`。
 
 ## 認證

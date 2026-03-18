@@ -1,8 +1,7 @@
 ---
 name: todo-scanner
-version: "0.1.0"
+version: "0.5.0"
 description: |
-  ⚠️ 草稿版（KB 不可用時生成）
   TODO/FIXME 自動掃描與分類清理工具。掃描專案全部檔案的 TODO/FIXME 標記，
   自動分類為「規範性」（可直接移除）或「缺陷型」（需追蹤修復），
   生成結構化報告並追蹤清理進度。直接支援 ADR-017 的清理計畫。

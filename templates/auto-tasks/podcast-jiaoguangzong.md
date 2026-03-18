@@ -74,7 +74,17 @@ curl -s "http://localhost:3000/api/notes/{選定的 note_id}"
 根據筆記標題與內容：
 - 構思一個 **4-12 字**的播客標題（`podcast_title`），需與歷史中所有 episode_title 不同
 - 從 tags 提取 2-3 個主題詞（排除「Podcast製作」、「對話腳本」等通用標籤）作為 `topics`
-- 建立 `slug`：`教觀綱宗-{YYYYMMDD}-{HHmm}`（用 `pwsh -Command "Get-Date -Format 'yyyyMMdd-HHmm'"` 取得）
+**讀取集數序號**（Bash 執行）：
+```bash
+cat context/jiaoguang-podcast-next.json
+```
+取得 `next_episode`（若檔案不存在或解析失敗，預設為 1）。
+
+**建立有意義的 slug**（`淨土學苑_ep{N}_{topic}_{title_short}` 格式）：
+- `{N}` = `next_episode` 補零至 2 位（如 01、15）
+- `{topic}` = 從 note_title 提取主要主題詞（取第一個空格 / — / ： / 第 前的文字），最多 8 字，移除特殊符號
+- `{title_short}` = `podcast_title`，移除空格與特殊符號，最多 12 字
+- 範例：`淨土學苑_ep15_法華經_法華壽量品開近顯遠`
 
 ---
 
@@ -172,7 +182,7 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 標題：🎙️ 教觀綱宗 Podcast：{podcast_title}
 內容：{對話輪數} 輪對話 | {topics 前 3 個主題}
 Tags: headphones, white_check_mark
-Click: https://podcast.pdoont.us.kg
+Click: {cloud_url}（若 cloud_url 有效），否則 https://podcast.pdoont.us.kg
 ```
 
 ---
@@ -235,6 +245,22 @@ cat context/podcast-history.json
 - `updated_at`：更新為當前 ISO 8601
 
 用 **Write 工具**完整覆寫 `context/podcast-history.json`（version:2 格式，保留 entries[] 原樣）。
+
+## 步驟 10.5：更新集數序號
+
+依步驟 3 使用的 `next_episode`，用 **Write 工具**完整覆寫 `context/jiaoguang-podcast-next.json`：
+```json
+{
+  "last_topic": "（podcast_title）",
+  "today_date": "（YYYY-MM-DD）",
+  "next_episode": （next_episode + 1）,
+  "last_produced": （next_episode）,
+  "updated_at": "（ISO 8601）",
+  "today_count": （當日已生成集數，從原 today_date 判斷是否重置）
+}
+```
+
+---
 
 ## 步驟 11：同步 topics 至 research-registry.json（跨任務去重防線）
 

@@ -61,12 +61,17 @@
 
 ## 第二步：查詢知識庫去重
 
-**先執行 KB 健康檢查**（3 秒 timeout）：
+**先執行 KB 健康檢查**：
+
+**優先讀快取**：用 Read 讀取 `cache/kb_live_status.json`
+- 存在且 `kb_alive=true` 且 `checked_at` 在 30 分鐘內 → `kb_available=true`，跳過下方 curl
+- 否則執行備援 curl：
+
 ```bash
-curl -s --connect-timeout 3 "http://localhost:3000/api/health"
+curl -s --connect-timeout 5 -w "\nHTTP_CODE:%{http_code}" "http://localhost:3000/api/health"
 ```
-- 若連線成功 → 繼續執行以下去重查詢
-- 若連線失敗（connection refused / timeout）→ 設定 `kb_available=false`，**跳過本步驟與第四步（KB 匯入）**，直接進行第三步研究，最終結果 JSON 設 `kb_imported=false`，不視為失敗
+- 輸出最後一行含 `HTTP_CODE:200` → `kb_available=true`，繼續以下去重查詢
+- 其他（無輸出、逾時、非 200）→ `kb_available=false`，**跳過本步驟與第四步（KB 匯入）**，直接進行第三步研究，最終結果 JSON 設 `kb_imported=false`，不視為失敗
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \

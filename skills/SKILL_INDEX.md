@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 25 個工具 = 44 個 Skills）
+## 速查表（19 個核心 + 27 個工具 = 46 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -50,14 +50,16 @@
 | 35 | chatroom-task-delivery | chatroom 任務投遞診斷與修復（relay ACK / bot receipt / records / worker 四段鏈路） | chatroom delivery、task delivery、mk_、/api/task、未入列、未執行、假成功、receipt timeout、bot receipt、Gun relay 任務 |
 | 36 | cache-optimizer | 快取效率分析與 TTL 調優（JSONL 日誌解析→端點命中率→調優建議，depends-on: api-cache） | 快取優化、快取分析、cache optimization、TTL 調優、命中率分析、快取效率、快取診斷 |
 | 37 | cursor-cli | 以 agent -p 為另一執行任務工具（腳本/排程/單次程式碼/重構/審查，與 Todoist Agent 並行） | cursor cli、agent -p、agent --print、Cursor Agent 終端、CLI 任務、非互動 Agent、腳本化 Cursor、排程呼叫 Agent、cursor-cli |
-| 38 | todo-scanner [草稿] | TODO/FIXME 自動掃描與分類清理（規範性 vs 缺陷型，支援 ADR-017） | TODO 清理、FIXME 掃描、todo-scanner、程式碼衛生、TODO 分類、待辦標記統計、技術債盤點 |
+| 38 | todo-scanner | TODO/FIXME 自動掃描與分類清理（規範性 vs 缺陷型，支援 ADR-017） | TODO 清理、FIXME 掃描、todo-scanner、程式碼衛生、TODO 分類、待辦標記統計、技術債盤點 |
 | 39 | quality-tracker | Agent 輸出品質追蹤與回歸偵測（DONE_CERT 品質分數趨勢化，支援 ADR-004） | 品質追蹤、品質回歸、quality tracking、品質趨勢、品質閘門、DONE_CERT 分析、品質監控 |
 | 40 | task-fairness-analyzer | 自動任務公平性診斷與再平衡建議（Gini 係數/飢餓偵測/根因分析，depends-on: scheduler-state、system-insight） | 任務公平性、排程公平、任務飢餓、task fairness、starvation、任務再平衡、公平性分析 |
 | 41 | prompt-lint | Prompt 模板靜態分析（7 條規則偵測反模式：過長/缺 preamble/hardcoded 端點/冗餘指令，depends-on: system-insight） | prompt-lint、prompt 檢查、模板分析、prompt 品質、模板膨脹、prompt 反模式、prompt 優化 |
 | 42 | behavior-pattern-analyzer | Agent 行為模式分析與 Skill 演化候選識別（信心度/頻率/I/O 聚類，depends-on: system-insight） | 行為模式分析、behavior pattern、模式挖掘、Skill 演化、行為聚類、agent 行為、behavior-pattern-analyzer |
 | 43 | agent-result-validator | Agent 結果檔案 Schema 驗證與格式漂移偵測（ADR-003 落地，depends-on: system-insight） | 結果驗證、result validation、schema 驗證、格式漂移、format drift、agent-result-validator、結果檔案檢查、handoff 驗證 |
 | 44 | context-budget-monitor | Agent I/O 預算監控與 Context 保護強制執行（per-session I/O 分析，depends-on: system-insight） | context-budget-monitor、I/O 預算、Context 保護、Context 膨脹、session I/O、avg_io_per_call、預算監控 |
-| 45 | pre-flight-check [草稿] | 執行前飛行檢查：外部依賴健康探測 + 時段風險評估 + go/no-go 決策（depends-on: scheduler-state、api-cache） | pre-flight-check、執行前檢查、飛行檢查、依賴健康、時段風險、go/no-go、預防性檢查 |
+| 45 | pre-flight-check | 執行前飛行檢查：外部依賴健康探測 + 時段風險評估 + go/no-go 決策（depends-on: scheduler-state、api-cache） | pre-flight-check、執行前檢查、飛行檢查、依賴健康、時段風險、go/no-go、預防性檢查 |
+| 46 | skill-test-scaffolder | SKILL.md 結構分析→pytest 測試骨架自動生成（frontmatter 驗證/觸發詞/依賴 mock/步驟行為，depends-on: knowledge-query） | skill-test-scaffolder、生成 Skill 測試、Skill 測試骨架、自動生成測試、測試覆蓋擴充、補測試、scaffold test |
+| 47 | skill-registry-sync | Machine-readable Skill Registry 同步（frontmatter 掃描→JSON registry→觸發詞衝突偵測→依賴圖驗證，depends-on: knowledge-query） | skill-registry-sync、Skill 索引同步、Skill registry、觸發詞衝突、依賴圖驗證、Skill manifest、Skill 一致性 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

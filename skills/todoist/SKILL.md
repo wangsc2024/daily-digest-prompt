@@ -1,9 +1,9 @@
 ---
 name: todoist
-version: "2.0.0"
+version: "2.1.0"
 description: |
   Todoist 待辦事項整合 - 查詢、新增、完成、刪除任務。支援專案、標籤、優先級、截止日期等完整功能。
-  Use when: 管理待辦事項、查詢今日任務、新增刪除任務、過濾優先級。
+  Use when: 管理待辦事項、查詢今日任務、新增刪除任務、過濾優先級、Claude Chat 快速指派任務。
 allowed-tools: Bash, Read, Write
 cache-ttl: 30min
 depends-on:
@@ -17,6 +17,10 @@ triggers:
   - "過期任務"
   - "新增任務"
   - "完成任務"
+  - "指派任務"
+  - "幫我新增"
+  - "加一個任務"
+  - "排進待辦"
   - "task"
   - "to-do list"
   - "待辦清單"
@@ -25,6 +29,113 @@ triggers:
 ---
 
 # Todoist 待辦事項整合
+
+---
+
+## Claude Chat 快速指派（互動模式）
+
+> 在 Claude Chat 中說「新增任務」、「指派任務」或「幫我加一個待辦」時，
+> 依照以下步驟從自然語言解析並直接寫入 Todoist。
+
+### 步驟 1：解析意圖
+
+從使用者的自然語言提取以下欄位：
+
+| 欄位 | 自然語言線索 | 預設值 |
+|------|------------|--------|
+| `content` | 任務名稱（必填） | — |
+| `due_string` | 時間詞（今天/明天/下週一/每天早上10點/本週五） | 不填（無截止日） |
+| `priority` | 優先級詞（緊急/重要/p1/p2/一般） | `1`（p4） |
+| `labels` | 標籤（工作/研究/知識庫/個人） | `[]` |
+| `description` | 任務說明、備註 | 不填 |
+
+**優先級關鍵字對照**：
+- `緊急`、`p1`、`最高` → `4`
+- `重要`、`高優先`、`p2` → `3`
+- `一般`、`p3` → `2`
+- 無特別說明 → `1`
+
+**時間詞對照**（中文 → due_string）：
+- 今天 → `today`
+- 明天 → `tomorrow`
+- 後天 → `in 2 days`
+- 下週一 → `next monday`
+- 每天 → `every day`
+- 每週一 → `every monday`
+- 本週五 / 這週五 → `this friday`
+- 月底 → `last day of the month`
+
+### 步驟 2：確認（若資訊不足）
+
+若使用者說「新增一個任務」但**沒提供任務名稱**，直接詢問：
+> 「請告訴我任務名稱（以及截止日期、優先級，可省略）」
+
+若資訊齊全，**不需確認，直接建立**。
+
+### 步驟 3：建立任務
+
+1. 用 Write 工具建立 `tmp/task_add.json`，內容為任務 JSON
+2. 執行 pwsh 呼叫 API
+3. 刪除 `tmp/task_add.json`
+4. 輸出確認訊息
+
+**task_add.json 範例**：
+```json
+{
+  "content": "完成季報初稿",
+  "due_string": "tomorrow",
+  "priority": 3,
+  "labels": ["工作"]
+}
+```
+
+**pwsh 呼叫**：
+```bash
+pwsh -Command '
+$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN } else {
+  (Get-Content "D:/Source/daily-digest-prompt/.env" -EA SilentlyContinue |
+   Where-Object { $_ -match "^TODOIST_API_TOKEN=" } | Select-Object -First 1) -replace "^TODOIST_API_TOKEN=",""
+}
+Invoke-RestMethod "https://api.todoist.com/api/v1/tasks" -Method Post `
+  -Headers @{Authorization="Bearer $t"; "Content-Type"="application/json; charset=utf-8"} `
+  -Body (Get-Content "tmp/task_add.json" -Raw) | ConvertTo-Json -Depth 5'
+```
+
+### 步驟 4：輸出確認訊息
+
+```
+✅ 已指派任務到 Todoist
+
+📌 任務：{content}
+📅 截止：{due_string 或 "無截止日"}
+🔴/🟡/🔵/⚪ 優先級：{p1/p2/p3/p4}
+🏷️ 標籤：{labels 或 "無"}
+🆔 ID：{task.id}
+```
+
+---
+
+### 常見指派範例
+
+| 使用者說 | 解析結果 |
+|---------|---------|
+| `新增任務：明天早上寫週報` | content="明天早上寫週報", due_string="tomorrow" |
+| `幫我加一個今天要完成的緊急任務：修復登入 Bug` | content="修復登入 Bug", due="today", priority=4 |
+| `排進待辦：每週一開週會，標籤工作` | content="開週會", due="every monday", labels=["工作"] |
+| `新增任務：研究 LLM Router，加到知識庫研究標籤` | content="研究 LLM Router", labels=["研究","知識庫"] |
+| `加一個本週五截止的 p2 任務：提交費用報銷` | content="提交費用報銷", due="this friday", priority=3 |
+
+---
+
+### 禁止行為
+
+- **禁止**在沒有任務名稱時自行假設內容
+- **禁止**用 `echo $TOKEN` 或子 shell 讀取 token（Harness 攔截）
+- **禁止**省略 `rm tmp/task_add.json` 清理步驟
+- **禁止**在週期性任務上設定 `due_string`（會清除週期設定）
+- **禁止**在 Bash inline 用 `-d '{...}'` 傳 POST body（Windows 下會失敗）
+
+---
 
 ## 依賴注入（DI）
 

@@ -35,11 +35,16 @@
 > 此步驟確保 session 內有 `cache-read` + `knowledge` 標籤，避免 Harness 快取繞過警告。
 
 ### 前置二：KB 服務確認（必做）
+
+**優先讀快取**：用 Read 讀取 `cache/kb_live_status.json`
+- 存在且 `kb_alive=true` 且 `checked_at` 在 30 分鐘內 → `kb_available=true`，跳過下方 curl
+- 否則執行備援 curl：
+
 ```bash
-curl -s --connect-timeout 3 "http://localhost:3000/api/health"
+curl -s --connect-timeout 5 -w "\nHTTP_CODE:%{http_code}" "http://localhost:3000/api/health"
 ```
-- 回傳 200 → `kb_available=true`，繼續以下搜尋
-- 失敗（逾時或非 2xx）→ `kb_available=false`，**跳過第一步搜尋與第四步匯入**，直接進行第二步選題
+- 輸出最後一行含 `HTTP_CODE:200` → `kb_available=true`，繼續以下搜尋
+- 其他（無輸出、逾時、非 200）→ `kb_available=false`，**跳過第一步搜尋與第四步匯入**，直接進行第二步選題
 
 ### 階段 1：語義搜尋（優先）
 ```bash

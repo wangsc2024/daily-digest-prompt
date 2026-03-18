@@ -87,9 +87,14 @@ class TodoistAPI:
             section_id: 區段 ID
             label: 標籤名稱
         """
-        params = {}
+        # API v1：filter_query 必須走 /tasks/filter?query= 端點
         if filter_query:
-            params["filter"] = filter_query
+            result = self._request("GET", "tasks/filter", params={"query": filter_query})
+            if isinstance(result, dict):
+                return result.get("results", [])
+            return result or []
+
+        params = {}
         if project_id:
             params["project_id"] = project_id
         if section_id:

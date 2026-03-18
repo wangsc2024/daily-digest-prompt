@@ -296,6 +296,47 @@ curl -s -H "Content-Type: application/json; charset=utf-8" -d @adr-decision-noti
 - 發送失敗不阻塞流程，僅記錄警告
 - 兩個暫存 JSON 均在 Step 8 清理
 
+### Step 7.6: ADR 落實追蹤（發現未落實則重新排入執行佇列）
+
+> **目的**：確保所有 ADR 均已實際落實。若發現 `Accepted/immediate_fix` 的 ADR 尚未成功執行，自動重置為 `pending` 讓 self-heal 下次執行時重新處理。
+
+**7.6a. 讀取 ADR 執行狀態**
+
+同時讀取：
+- `context/adr-registry.json` — 找出 `status=Accepted` 且 `implementation_status=immediate_fix` 的 ADR 清單
+- `context/arch-decision.json` — 找出 `action=immediate_fix` 且 `execution_status != "success"` 的決策條目
+
+若兩個檔案任一不存在，跳過此步驟。
+
+**7.6b. 識別未落實的 ADR**
+
+將以下情況都視為「未落實」：
+1. ADR registry 中 `Accepted/immediate_fix`，但 arch-decision.json 中找不到對應 backlog_id 的條目
+2. arch-decision.json 中 `execution_status` 為 `pending`（尚未執行）
+3. arch-decision.json 中 `execution_status` 為 `failed`（執行失敗，需重試）
+
+**7.6c. 重置並重新排入佇列**
+
+若有未落實的 ADR：
+1. 在 `context/arch-decision.json` 中，將這些條目的 `execution_status` 改為 `"pending"`、`retry_count` 遞增 1、`execution_note` 更新為「由 assemble-audit 於 {今日日期} 重新排入佇列（第 {retry_count} 次重試）」
+2. 用 Write 工具覆寫 `context/arch-decision.json`
+
+**7.6d. 發送未落實 ADR 告警通知**（若有未落實項目）
+
+建立 `adr-unimplemented-notify.json`：
+```json
+{
+  "topic": "wangsc2025",
+  "title": "⚠️ ADR 未落實 — 已重新排入執行佇列",
+  "message": "系統審查發現 {N} 個 ADR 尚未落實，已重置為 pending，self-heal 將在下次執行時重新處理：\n{ADR 清單，每行格式：• {id}：{title}（第 {retry_count} 次重試）}",
+  "priority": 4,
+  "tags": ["warning", "repeat"]
+}
+```
+發送後刪除 `adr-unimplemented-notify.json`。
+
+**若所有 ADR 均已落實**：在審查報告的「修正記錄」區段附加一行：`✅ ADR 落實追蹤：所有 Accepted ADR 均已成功執行`。
+
 ### Step 7.8: 寫入系統審查連續記憶（任務延續性）
 
 1. Read `context/continuity/system-audit.json`（不存在則初始化 `{"schema_version":1,"schedule_type":"system_audit","records":{}}`）
@@ -328,6 +369,7 @@ curl -s -H "Content-Type: application/json; charset=utf-8" -d @adr-decision-noti
 - `note.json`（RAG 上傳用）
 - `audit-notify.json`（ntfy 審查摘要通知用）
 - `adr-decision-notify.json`（ntfy ADR decision 提醒用，若存在）
+- `adr-unimplemented-notify.json`（ntfy ADR 未落實告警用，若存在）
 
 保留：
 - `docs/系統審查報告_*.md`（永久存檔）

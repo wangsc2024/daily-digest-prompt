@@ -297,12 +297,16 @@ $r | ConvertTo-Json -Depth 10'
 ```
 
 **plan_type = "idle"**：
-- 先檢查是否存在 `results/todoist-exhausted-fallback.json`。若存在，讀取其 `notify_message` 作為第二行說明。
+- 先檢查是否存在 `results/todoist-exhausted-fallback.json`。若存在，讀取其 `notify_message` 作為第二行說明；若有 `episode_url` 欄位，將其作為 ntfy 通知的 `click` 欄位（點擊即播放）；若 `failed = true`，ntfy tags 改用 `["warning"]`。
 - 若無該檔案，第二行使用：「今日自動任務已達上限（已用 N / M）」；N、M 從 plan 的 `auto_tasks.summary.total_used`、`total_limit` 取得。
 ```
 📋 Todoist 報告（團隊模式）HH:MM
 - 無可處理待辦
 - [notify_message 或 今日自動任務已達上限（已用 N / M）]
+```
+ntfy 範例（有 episode_url 時）：
+```json
+{"topic":"wangsc2025","title":"📋 Todoist 報告...","message":"- 無可處理待辦\n- 今日自動任務已達上限故製作1集淨土教觀學苑podcast：XXX","click":"https://podcasts.pdoont.us.kg/XXX.mp3","tags":["information_source"]}
 ```
 
 ### Skill 同步警告（附加於通知末尾）
