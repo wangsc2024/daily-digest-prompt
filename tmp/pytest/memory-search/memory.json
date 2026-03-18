@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "daily-1773705600-1",
+      "level": "daily",
+      "title": "Daily Digest - 向量檢索",
+      "topic": "向量檢索",
+      "summary": "採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。；qdrant vector retrieval threshold 需支援 multi stage retrieval 與 similarity threshold。",
+      "key_events": [
+        "採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。",
+        "qdrant vector retrieval threshold 需支援 multi stage retrieval 與 similarity threshold。"
+      ],
+      "decisions": [
+        "採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。"
+      ],
+      "open_questions": [],
+      "source_session_ids": [
+        "session-2"
+      ],
+      "raw_messages": [
+        "採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。",
+        "qdrant vector retrieval threshold 需支援 multi stage retrieval 與 similarity threshold。"
+      ],
+      "tags": [
+        "daily",
+        "向量檢索"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "updated_at": "2026-03-17T00:00:00+00:00",
+      "expires_at": "2026-04-16T00:00:00+00:00",
+      "embedding_text": "向量檢索\n採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。；qdrant vector retrieval threshold 需支援 multi stage retrieval 與 similarity threshold。\n採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。 qdrant vector retrieval threshold 需支援 multi stage retrieval 與 similarity threshold。\n採用 qdrant vector retrieval threshold 作為 long term memory 核心查詢。",
+      "embedding": {
+        "向量檢索": 0.018867924528301886,
+        "採用": 0.05660377358490566,
+        "qdrant": 0.09433962264150944,
+        "vector": 0.09433962264150944,
+        "retrieval": 0.1320754716981132,
+        "threshold": 0.1320754716981132,
+        "作為": 0.05660377358490566,
+        "long": 0.05660377358490566,
+        "term": 0.05660377358490566,
+        "memory": 0.05660377358490566,
+        "核心查詢": 0.05660377358490566,
+        "需支援": 0.03773584905660377,
+        "multi": 0.03773584905660377,
+        "stage": 0.03773584905660377,
+        "與": 0.03773584905660377,
+        "similarity": 0.03773584905660377
+      },
+      "metadata": {}
+    }
+  ],
+  "embedding": {
+    "provider": "local",
+    "model": "local-token-v1",
+    "dimension": 0,
+    "api_base": null,
+    "api_key_env": null,
+    "estimated_cost_per_1k_tokens_usd": 0.0,
+    "monthly_cost_limit_usd": 15.0,
+    "current_month_cost_usd": 0.0
+  }
+}

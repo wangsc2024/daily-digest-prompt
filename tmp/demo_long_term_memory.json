@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "daily-1773738000-1",
+      "level": "daily",
+      "title": "Daily Digest - Long-Term Memory",
+      "topic": "Long-Term Memory",
+      "summary": "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "key_events": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "decisions": [
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。"
+      ],
+      "open_questions": [
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "source_session_ids": [
+        "demo-session-001"
+      ],
+      "raw_messages": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "tags": [
+        "demo",
+        "memory",
+        "daily",
+        "Long-Term Memory"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-17T09:00:00+00:00",
+      "updated_at": "2026-03-17T09:00:00+00:00",
+      "expires_at": "2026-04-16T09:00:00+00:00",
+      "embedding_text": "Long-Term Memory\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。 決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。 待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。\n待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "embedding": {
+        "long": 0.038461538461538464,
+        "term": 0.038461538461538464,
+        "memory": 0.038461538461538464,
+        "使用者要求優化": 0.02564102564102564,
+        "並加入": 0.02564102564102564,
+        "daily": 0.02564102564102564,
+        "weekly": 0.02564102564102564,
+        "monthly": 0.02564102564102564,
+        "digest": 0.0641025641025641,
+        "與": 0.0641025641025641,
+        "scheduler": 0.0641025641025641,
+        "backup": 0.02564102564102564,
+        "決定先保留現有": 0.038461538461538464,
+        "knowledge": 0.038461538461538464,
+        "base": 0.038461538461538464,
+        "search": 0.038461538461538464,
+        "相容既有": 0.038461538461538464,
+        "sync": 0.038461538461538464,
+        "multi": 0.038461538461538464,
+        "stage": 0.038461538461538464,
+        "retrieval": 0.038461538461538464,
+        "待辦": 0.038461538461538464,
+        "建立": 0.038461538461538464,
+        "prompt": 0.038461538461538464,
+        "樣板": 0.038461538461538464,
+        "過期清理與備份流程": 0.038461538461538464
+      },
+      "metadata": {}
+    },
+    {
+      "id": "daily-1773738000-2",
+      "level": "daily",
+      "title": "Daily Digest - Long-Term Memory",
+      "topic": "Long-Term Memory",
+      "summary": "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "key_events": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "decisions": [
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。"
+      ],
+      "open_questions": [
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "source_session_ids": [
+        "demo-session-001"
+      ],
+      "raw_messages": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "tags": [
+        "demo",
+        "memory",
+        "daily",
+        "Long-Term Memory"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-17T09:00:00+00:00",
+      "updated_at": "2026-03-17T09:00:00+00:00",
+      "expires_at": "2026-04-16T09:00:00+00:00",
+      "embedding_text": "Long-Term Memory\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。 決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。 待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。\n待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "embedding": {
+        "long": 0.038461538461538464,
+        "term": 0.038461538461538464,
+        "memory": 0.038461538461538464,
+        "使用者要求優化": 0.02564102564102564,
+        "並加入": 0.02564102564102564,
+        "daily": 0.02564102564102564,
+        "weekly": 0.02564102564102564,
+        "monthly": 0.02564102564102564,
+        "digest": 0.0641025641025641,
+        "與": 0.0641025641025641,
+        "scheduler": 0.0641025641025641,
+        "backup": 0.02564102564102564,
+        "決定先保留現有": 0.038461538461538464,
+        "knowledge": 0.038461538461538464,
+        "base": 0.038461538461538464,
+        "search": 0.038461538461538464,
+        "相容既有": 0.038461538461538464,
+        "sync": 0.038461538461538464,
+        "multi": 0.038461538461538464,
+        "stage": 0.038461538461538464,
+        "retrieval": 0.038461538461538464,
+        "待辦": 0.038461538461538464,
+        "建立": 0.038461538461538464,
+        "prompt": 0.038461538461538464,
+        "樣板": 0.038461538461538464,
+        "過期清理與備份流程": 0.038461538461538464
+      },
+      "metadata": {}
+    },
+    {
+      "id": "daily-1773738000-3",
+      "level": "daily",
+      "title": "Daily Digest - Long-Term Memory",
+      "topic": "Long-Term Memory",
+      "summary": "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "key_events": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "decisions": [
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。"
+      ],
+      "open_questions": [
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "source_session_ids": [
+        "demo-session-001"
+      ],
+      "raw_messages": [
+        "使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。",
+        "決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。",
+        "待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。"
+      ],
+      "tags": [
+        "demo",
+        "memory",
+        "daily",
+        "Long-Term Memory"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-17T09:00:00+00:00",
+      "updated_at": "2026-03-17T09:00:00+00:00",
+      "expires_at": "2026-04-16T09:00:00+00:00",
+      "embedding_text": "Long-Term Memory\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。；決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。；待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n使用者要求優化 long term memory，並加入 daily weekly monthly digest 與 scheduler backup。 決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。 待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。\n決定先保留現有 knowledge-base-search，相容既有 digest sync 與 multi stage retrieval。\n待辦：建立 scheduler、Prompt 樣板、過期清理與備份流程。",
+      "embedding": {
+        "long": 0.038461538461538464,
+        "term": 0.038461538461538464,
+        "memory": 0.038461538461538464,
+        "使用者要求優化": 0.02564102564102564,
+        "並加入": 0.02564102564102564,
+        "daily": 0.02564102564102564,
+        "weekly": 0.02564102564102564,
+        "monthly": 0.02564102564102564,
+        "digest": 0.0641025641025641,
+        "與": 0.0641025641025641,
+        "scheduler": 0.0641025641025641,
+        "backup": 0.02564102564102564,
+        "決定先保留現有": 0.038461538461538464,
+        "knowledge": 0.038461538461538464,
+        "base": 0.038461538461538464,
+        "search": 0.038461538461538464,
+        "相容既有": 0.038461538461538464,
+        "sync": 0.038461538461538464,
+        "multi": 0.038461538461538464,
+        "stage": 0.038461538461538464,
+        "retrieval": 0.038461538461538464,
+        "待辦": 0.038461538461538464,
+        "建立": 0.038461538461538464,
+        "prompt": 0.038461538461538464,
+        "樣板": 0.038461538461538464,
+        "過期清理與備份流程": 0.038461538461538464
+      },
+      "metadata": {}
+    }
+  ],
+  "embedding": {
+    "provider": "local",
+    "model": "local-token-v1",
+    "dimension": 0,
+    "api_base": null,
+    "api_key_env": null,
+    "estimated_cost_per_1k_tokens_usd": 0.0,
+    "monthly_cost_limit_usd": 15.0,
+    "current_month_cost_usd": 0.0
+  }
+}

@@ -7,8 +7,8 @@ from pathlib import Path
 from collections import defaultdict, Counter
 import statistics
 
-# 資料路徑
-BASE_DIR = Path("D:/Source/daily-digest-prompt")
+# 資料路徑（以腳本位置動態計算，tools/ 的上一層即專案根目錄）
+BASE_DIR = Path(__file__).resolve().parent.parent
 LOGS_DIR = BASE_DIR / "logs/structured"
 STATE_DIR = BASE_DIR / "state"
 CONTEXT_DIR = BASE_DIR / "context"
@@ -145,7 +145,7 @@ def collect_scheduler_stats():
                     else:
                         stats["failed_count"] += 1
                         hour_failures[run_date.hour] += 1
-            except:
+            except (ValueError, KeyError, TypeError):
                 continue
 
         if stats["total_runs"] > 0:
@@ -238,7 +238,7 @@ def collect_research_stats():
                     entry_date = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
                     if START_DATE <= entry_date <= END_DATE:
                         recent_count += 1
-                except:
+                except (ValueError, TypeError):
                     pass
 
         stats["data_available"] = True
@@ -321,7 +321,7 @@ def main():
     }
 
     # 寫入結果檔案
-    output_path = Path("D:/Source/daily-digest-prompt/tmp/system-insight-data.json")
+    output_path = BASE_DIR / "tmp/system-insight-data.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:

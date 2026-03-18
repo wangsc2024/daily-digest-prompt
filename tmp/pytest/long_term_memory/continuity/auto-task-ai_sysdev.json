@@ -1,0 +1,32 @@
+{
+  "task_key": "ai_sysdev",
+  "max_runs": 2,
+  "runs": [
+    {
+      "topic": "b",
+      "status": "completed",
+      "key_findings": "beta gamma delta"
+    },
+    {
+      "topic": "c",
+      "status": "failed",
+      "key_findings": "delta epsilon zeta"
+    }
+  ],
+  "compressed_history": [
+    {
+      "runs_1_to_1": {
+        "topics_covered": [
+          "a"
+        ],
+        "success_rate": 1.0,
+        "common_angles": [
+          "alpha",
+          "beta",
+          "gamma"
+        ],
+        "next_suggested_angles": []
+      }
+    }
+  ]
+}

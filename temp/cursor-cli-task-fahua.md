@@ -20,7 +20,10 @@
    - 修行實踐要點
    - 延伸閱讀建議
 
-5. **匯入知識庫**（必須先於寫入結果檔）：將研究報告以 POST http://localhost:3000/api/notes 匯入（source: "import"，tags: ["法華經", "佛學", "天台宗"]）。若知識庫未啟動（連線失敗），記錄 `kb_imported: false`、`note_id: null`，仍須完成步驟 6～7。匯入成功時記下 API 回傳的 `id` 作為 `note_id`。
+5. **匯入知識庫**（必須先於寫入結果檔）：
+   - 先做健康檢查：`curl -s --connect-timeout 3 "http://localhost:3000/api/health"`。非 200 則跳過匯入，設 `kb_imported: false`、`note_id: null`，仍完成步驟 6～7。
+   - 匯入時依 `skills/knowledge-query/SKILL.md`：用 **Write** 建立 JSON 檔（如 `tmp_import_fahua.json`），內容為 `{"notes":[{"title":"<研究標題>","contentText":"<完整 Markdown>","tags":["法華經","佛學","天台宗","<本次主題>"],"source":"import"}],"autoSync":true}`；再執行 `curl -s -X POST "http://localhost:3000/api/import" -H "Content-Type: application/json; charset=utf-8" -d @tmp_import_fahua.json`。**禁止** inline JSON（Windows 會失敗）。
+   - 回應格式：`{"result":{"noteIds":["uuid"]}}`。匯入成功時從 `result.noteIds[0]` 取得 `note_id`（可只存前 8 碼供報告顯示）。完成後刪除暫存檔（如 `rm tmp_import_fahua.json` 或 PowerShell 對應指令）。
 
 6. **更新研究登錄表**：在 `context/research-registry.json` 的 `entries` 陣列追加新條目，同時更新 `topics_index` 欄位。
 

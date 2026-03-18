@@ -3,21 +3,6 @@
   "schedule_type": "daily_digest",
   "description": "每日摘要各次排程的獨立執行記錄，每日最多 3 次（08:00/11:15/21:15）",
   "records": {
-    "2026-03-16": {
-      "runs": [
-        {
-          "run_id": "71-2118",
-          "trigger": "21:15",
-          "completed_at": "2026-03-16T21:18:00+08:00",
-          "top3_headlines": ["藝起派對寫生盛會報名開跑", "竹田頓物驛3/21開幕", "LLM Architecture Gallery 459🔥"],
-          "habit_tip": "複利效應：每天進步1%，一年後進步37倍",
-          "buddhist_wisdom": "龍舒淨土文",
-          "todoist_summary": "0 項待辦",
-          "digest_quality": "good",
-          "status": "completed"
-        }
-      ]
-    },
     "2026-03-17": {
       "runs": [
         {
@@ -28,6 +13,21 @@
           "habit_tip": "兩分鐘法則：先建立「開始」的習慣",
           "buddhist_wisdom": "華嚴經",
           "todoist_summary": "0 項待辦",
+          "digest_quality": "good",
+          "status": "completed"
+        }
+      ]
+    },
+    "2026-03-18": {
+      "runs": [
+        {
+          "run_id": "73-2119",
+          "trigger": "21:15",
+          "completed_at": "2026-03-18T21:19:00+08:00",
+          "top3_headlines": ["國際自由車環台公路大賽屏東六堆站", "PARATECH UNIVERSITY亞洲首站屏東", "Mistral AI Forge 565🔥"],
+          "habit_tip": "習慣堆疊：把新習慣接在現有習慣後面",
+          "buddhist_wisdom": "金剛經",
+          "todoist_summary": "1 項待辦（RAG優化）",
           "digest_quality": "good",
           "status": "completed"
         }

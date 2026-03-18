@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "date": "2026-03-17",
+      "task_type": "ai_sysdev",
+      "topic": "new"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "last_updated": "2026-03-17",
+    "recent_3d_topics": [
+      "new"
+    ]
+  },
+  "archived_summaries": [
+    {
+      "period": "2026-03-01 to 2026-03-01",
+      "compressed_at": "2026-03-17",
+      "total_topics": 1,
+      "domains": {
+        "ai_sysdev": 1
+      },
+      "key_findings": [
+        "ai_sysdev: old"
+      ],
+      "source_entry_count": 1
+    }
+  ]
+}

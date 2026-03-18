@@ -196,6 +196,28 @@
       "time": "2026-03-17 17:05:01",
       "session": "evening",
       "status": "success"
+    },
+    {
+      "verse_id": 19,
+      "source": "《西齋淨土詩》",
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-18",
+      "author": "省庵大師",
+      "verse_text": "人身難得今已得，佛法難聞今已聞；此身不向今生度，更待何生度此身。",
+      "session": "morning",
+      "status": "success",
+      "time": "2026-03-18 06:30:02"
+    },
+    {
+      "verse_id": 20,
+      "date": "2026-03-18",
+      "verse_text": "莫謂老來方學道，孤墳多是少年人。",
+      "session": "evening",
+      "author": "蕅益智旭大師",
+      "channel": "ntfy/wangsc2025",
+      "source": "《寒笳集》",
+      "time": "2026-03-18 17:05:01",
+      "status": "success"
     }
   ]
 }

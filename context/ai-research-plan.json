@@ -1,156 +1,106 @@
 {
-  "date": "2026-03-17",
-  "topic": "Physics-Informed Machine Learning（PIML/PINN）— 物理定律約束的機器學習",
-  "series_context": {
-    "series_id": "physics-informed-ml",
-    "stage": "foundation",
-    "is_new": true,
-    "note": "本文為 physics-informed-ml 系列 foundation 階段，建立 PIML/PINN 基礎知識框架"
-  },
+  "date": "2026-03-18",
+  "topic": "多模態 RAG（Multimodal RAG）— 文件、圖像與表格的跨模態檢索生成架構",
   "research_questions": [
-    "什麼是 Physics-Informed Machine Learning (PIML) 和 Physics-Informed Neural Networks (PINN)？",
-    "PIML 如何將物理定律（偏微分方程）嵌入神經網路損失函數？",
-    "2026 年 PIML 在流體力學、氣候建模與科學計算上有哪些突破性進展？"
+    "多模態 RAG 與傳統文字 RAG、原生多模態 Agent 的邊界差異是什麼？",
+    "多模態文件解析、跨模態檢索、reranking 與生成融合的標準架構應如何拆解？",
+    "若要應用到 daily-digest-prompt 或個人知識庫，最有價值的落地方向是什麼？"
   ],
-  "methodology": "以學術論文、官方研究機構文章、開源實作與中文技術教學交叉蒐集。先用中英文 5 組以上關鍵詞搜尋，再比對知識庫既有內容，最後保留能補足「原理、方法、應用、實作」四個面向的來源。",
+  "methodology": "先用最新趨勢與知識庫去重選題，再依 kb-research-strategist 的 foundation 計畫蒐集官方文件、學術論文與代表性框架案例，透過交叉比對建立概念邊界、系統分層與後續實作方向。",
   "keywords": [
-    "Physics-Informed Neural Networks",
-    "PINN",
-    "PIML",
-    "physics constraints",
-    "PDE solver",
-    "scientific machine learning",
-    "climate modeling",
-    "loss balancing"
+    "multimodal RAG",
+    "cross-modal retrieval",
+    "document understanding RAG",
+    "table chart formula retrieval",
+    "multimodal reranking"
   ],
-  "searched_queries": [
-    "2026 Physics-Informed Neural Networks latest breakthroughs official blog paper",
-    "2026 PIML PINN review PDE solver paper",
-    "2026 物理信息神經網路 PINN 最新 研究",
-    "2026 physics-informed machine learning climate modeling official",
-    "site:zhihu.com PINN 物理信息神經網路 2025 2026",
-    "site:csdn.net PINN 物理信息神經網路 2025 2026"
-  ],
-  "kb_check": {
-    "query": "AI 深度研究 Physics-Informed Neural Networks PIML PINN",
-    "topK": 20,
-    "result": "知識庫未出現 PIML/PINN 專題筆記，只有一般 AI 研究與其他主題的關聯片段，適合繼續蒐集並深化。"
-  },
   "sources": [
     {
-      "title": "Implementing physics-informed neural networks with deep learning for differential equations",
-      "url": "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1717117/full",
-      "language": "en",
-      "type": "paper",
+      "title": "CollEX – A Multimodal Agentic RAG System Enabling Interactive Exploration of Scientific Collections",
+      "url": "https://aclanthology.org/2025.magmar-1.2/",
       "key_points": [
-        "以 ODE 正問題與反問題展示 PINN 的實作流程，兼顧參數估計與近似解建模。",
-        "指出 PINN 的關鍵不只在網路架構，還包括 collocation points、邊界條件編碼與 loss 權重設計。",
-        "提供可落地的深度學習實作脈絡，適合作為研究與工程入門基準。"
+        "提出以 LVLM 為核心的 agentic multimodal RAG，透過聊天介面探索大型科學館藏。",
+        "系統同時整合文字與視覺模態，展示多模態 RAG 不只是文件問答，也可支援互動式知識探索。",
+        "PoC 規模達 64,000 筆、32 個 collection，說明多模態 RAG 已具備中大型知識庫落地可能。"
       ]
     },
     {
-      "title": "Embedding Physics into Machine Learning: A Review of Physics Informed Neural Networks as Partial Differential Equation Forward Solvers",
-      "url": "https://www.sciopen.com/article/10.26599/TST.2025.9010157",
-      "language": "en",
-      "type": "paper",
+      "title": "MultiDocFusion: Hierarchical and Multimodal Chunking Pipeline for Enhanced RAG on Long Industrial Documents",
+      "url": "https://aclanthology.org/2025.emnlp-main.1062/",
       "key_points": [
-        "系統梳理 PINN 作為 PDE 正向求解器的架構類型、訓練流程與典型應用。",
-        "把訓練穩定性、泛化能力與計算成本列為主流瓶頸。",
-        "適合作為後續比較新方法是否真的改善舊問題的基準綜述。"
+        "將 vision-based parsing、OCR、章節階層重建與 DFS chunking 串成結構感知的 multimodal chunking pipeline。",
+        "在工業文件 benchmark 上檢索 precision 提升 8–15%，ANLS QA 提升 2–3%。",
+        "說明多模態 RAG 的品質高度依賴 ingestion 與 chunking，而不只是生成模型本身。"
       ]
     },
     {
-      "title": "Physics-informed neural network with weighted loss and hard constraints for hyperbolic conservation laws",
-      "url": "https://www.nature.com/articles/s41598-025-34263-1",
-      "language": "en",
-      "type": "paper",
+      "title": "NVIDIA NeMo Retriever Delivers Accurate Multimodal PDF Data Extraction 15x Faster",
+      "url": "https://developer.nvidia.com/blog/nvidia-nemo-retriever-delivers-accurate-multimodal-pdf-data-extraction-15x-faster/",
       "key_points": [
-        "WHC-PINN 結合加權損失與硬約束，處理雙曲守恆律時比傳統 soft constraints 更穩定。",
-        "顯示損失設計是 PINN 是否可用於高難 PDE 的核心因素之一。",
-        "支持「約束編碼方式」是 2025-2026 年方法創新的主戰場。"
+        "企業文件中的圖表、表格、資訊圖若未納入檢索，會形成 text-only RAG 的盲區。",
+        "NVIDIA 指出其多模態抽取微服務可達 15x 抽取吞吐、3x embedding throughput、1.6x reranking throughput。",
+        "文中亦宣稱錯答可減少 50%、儲存需求可降至 1/35，顯示工程瓶頸集中在抽取與索引效率。"
       ]
     },
     {
-      "title": "Physics-informed machine learning: case studies for weather and climate modelling",
-      "url": "https://royalsocietypublishing.org/rsta/article/379/2194/20200093/41210/Physics-informed-machine-learning-case-studies-for",
-      "language": "en",
-      "type": "paper",
+      "title": "Multimodal RAG - Weaviate Knowledge Cards",
+      "url": "https://weaviate.io/learn/knowledgecards/multimodal-rag",
       "key_points": [
-        "以天氣與氣候建模案例說明 PIML 在資料稀缺、物理一致性要求高的場景特別有價值。",
-        "指出 PIML 並非取代物理模型，而是作為 surrogate model、bias correction 與 data assimilation 的增強器。",
-        "為 daily-digest-prompt 未來延伸到科學 AI 主題提供可操作的應用視角。"
+        "以簡潔定義指出 multimodal RAG 是從多模態知識庫檢索，再交由大型多模態模型依據檢索內容生成。",
+        "強調檢索上下文可包含 images、text、audio 等多種模態，而非僅文字片段。",
+        "適合作為研究中的概念邊界基準，協助區分 multimodal KB、retrieval 與 generation 三層。"
       ]
     },
     {
-      "title": "PIML: The New Frontier in Energy Systems Research",
-      "url": "https://www.pnnl.gov/publications/piml-new-frontier-energy-systems-research",
-      "language": "en",
-      "type": "official",
+      "title": "Multimodal Retrieval-Augmented Generation (RAG) | 多模態檢索增強生成 (RAG) | DeeptoAI",
+      "url": "https://rag.deeptoai.com/docs/advanced-rag-deep-dive/multimodal-rag",
       "key_points": [
-        "PNNL 將 PIML 定義為把機器學習與領域物理知識配對，以提升可解釋性、可靠度與資料效率。",
-        "文中強調 challenge pairs 與 transformative pairing，說明 PIML 本質上是一種問題建模策略，而非單一演算法。",
-        "官方研究機構觀點有助於避免把 PIML 縮減成只有 PINN。"
+        "用雙語教學方式說明對比學習如何建立 unified embedding space，支撐 any-to-any search。",
+        "指出 text-only RAG 的限制在於只能依賴文字來源，當模型可同時理解文字與影像後，便能以兩步流程形成 multimodal RAG。",
+        "整理出多模態 RAG 在影像與 caption generation 上的效益，適合作為架構入門與術語對照資料。"
       ]
     },
     {
-      "title": "GitHub - maziarraissi/PINNs",
-      "url": "https://github.com/maziarraissi/PINNs",
-      "language": "en",
-      "type": "code",
+      "title": "使用知識圖的多模態檢索增強生成（MegaRAG）",
+      "url": "https://tdr.lib.ntu.edu.tw/jspui/handle/123456789/97821",
       "key_points": [
-        "原始 PINNs 開源實作，涵蓋 Burgers 與 Navier-Stokes 等經典 PDE 範例。",
-        "可觀察 PINN 早期實作如何把 PDE residual、初始條件與邊界條件寫進 loss function。",
-        "作為後續比較現代框架改良點的重要實作基線。"
+        "指出現有 KG-based RAG 多半僅處理文本，忽略圖像與空間布局等視覺線索。",
+        "提出 MegaRAG，以跨模態知識圖譜把文本、視覺與空間資訊納入知識建構與推理。",
+        "實驗摘要顯示在純文本與多模態 corpora 上都優於既有方法，提供另一條『結構化推理』路線。"
       ]
     },
     {
-      "title": "物理信息神經網路（PINN）：將物理知識融合到深度學習中",
-      "url": "https://blog.csdn.net/qq_28247201/article/details/136072595",
-      "language": "zh",
-      "type": "blog",
+      "title": "優化挑戰性影像環境下的多模態檢索增強生成策略",
+      "url": "https://tdr.lib.ntu.edu.tw/jspui/handle/123456789/98529",
       "key_points": [
-        "中文教學以直觀方式解釋 PINN 如何把物理方程寫入損失函數。",
-        "對初學者而言，中文材料補足英文論文的進入門檻。",
-        "提供工程實作者常見的建模步驟與除錯觀念。"
-      ]
-    },
-    {
-      "title": "AI4Science: PINN 物理信息神經網路入門及相關論文",
-      "url": "https://zhuanlan.zhihu.com/p/517450449",
-      "language": "zh",
-      "type": "blog",
-      "key_points": [
-        "整理 PINN 基礎概念、典型論文與 AI for Science 應用脈絡。",
-        "中文社群材料有助於建立術語映射，降低英文關鍵詞查找成本。",
-        "可作為後續報告撰寫時的中文對照參考。"
+        "聚焦 degraded document retrieval，指出即便直接提供含答案的降質文件影像，7B VLM 生成表現仍可能下滑約一成。",
+        "提出 DFM 模組把影像表示拆成內容嵌入與降質嵌入，再融合成對降質穩健的文件表徵。",
+        "提醒多模態 RAG 的實際部署必須處理真實世界掃描、拍照噪聲與 OCR/視覺品質問題。"
       ]
     }
   ],
-  "collection_summary": [
-    "PINN 的研究焦點已從概念驗證轉向損失平衡、硬約束與訓練穩定性。",
-    "PIML 的外延大於 PINN，官方研究機構更強調問題建模與科學領域配對策略。",
-    "天氣、氣候與能源系統是 PIML 最具代表性的高價值應用場景。"
-  ],
   "analysis": {
     "consensus": [
-      "多數來源一致認為，PIML 不應被狹義等同於 PINN；PINN 是將 PDE 或物理殘差直接嵌入訓練目標的代表方法，但整體 PIML 更像是把機器學習與領域物理知識配對的建模框架。",
-      "論文、官方研究機構與開源實作都指出，PINN 成敗關鍵不在單純增加網路深度，而在 loss 權重、collocation points、初始與邊界條件編碼方式。",
-      "多數來源都把訓練穩定性、計算成本與高難度 PDE 的收斂品質列為 PINN/PIML 的核心瓶頸，顯示此領域仍屬方法工程密集型，而非成熟即插即用技術。",
-      "氣候、天氣與能源系統被反覆提及為高價值場景，因為這些場域同時具有資料稀缺、物理一致性要求高、傳統模擬昂貴等特徵。",
-      "中英文來源均支持「物理約束可提升資料效率與可解釋性」這個主張，這也是 PIML 與純黑盒模型最明顯的區隔。"
+      "多數來源一致指出，多模態 RAG 的核心價值在於補足 text-only RAG 對圖像、表格、版面與資訊圖的盲區；真正的提升通常來自『把非文字訊號納入檢索』，而不只是把生成模型換成多模態模型。",
+      "來源普遍同意 ingestion 是成敗關鍵。從 MultiDocFusion 的階層式 chunking，到 NVIDIA NeMo Retriever 的 PDF 萃取流程，都說明解析、OCR、版面重建與結構切分會直接影響後續檢索 precision 與回答品質。",
+      "多數資料將系統拆成三層：多模態知識建構、跨模態檢索或 reranking、再由多模態生成模型整合回答。Weaviate、DeeptoAI 與 CollEX 的描述雖深度不同，但架構分層大致一致。",
+      "跨模態對齊是多模態 RAG 的共同技術前提。不論是 unified embedding space、視覺語言模型，或跨模態知識圖，來源都默認必須先把不同模態投影到可比較或可推理的表示空間。",
+      "多數來源隱含同一個工程結論：多模態 RAG 不只是模型問題，也是吞吐、索引成本與檢索延遲問題，因此抽取速度、embedding throughput 與 reranking 效率會直接限制落地規模。"
     ],
     "divergence": [
-      "對於約束實作方式，近期研究更偏向 hard constraints 或混合式約束，以減少僅靠 soft penalty 帶來的失真；但教學型與早期實作仍以 soft constraints 為主，因為較容易上手。",
-      "部分綜述把 PINN 視為 PDE forward solver 的核心方案，官方機構與應用型文章則更強調 surrogate modeling、bias correction、data assimilation 等廣義 PIML 用法，兩者對研究邊界的界定不同。",
-      "在可擴展性評估上，學術綜述普遍審慎，認為高維與複雜系統仍有明顯限制；中文入門文章則較聚焦概念優勢，對訓練失敗模式與成本描述較少。"
+      "在知識表示路線上，主流工程文章偏向 embedding-based pipeline，以向量檢索與 reranking 為主；MegaRAG 則主張以跨模態知識圖顯式表示文本、視覺與空間關係，重點放在可推理性而非純相似度搜尋。",
+      "在文件切分策略上，MultiDocFusion 強調階層式、結構感知 chunking；教學型資料則多以 unified embedding 與 any-to-any retrieval 為核心。前者較重文件工程，後者較重檢索抽象能力。",
+      "在系統目標上，CollEX 將多模態 RAG 視為互動式探索系統，強調 agentic workflow 與多輪探索；NVIDIA 與工業文件研究則更接近企業文件 QA 與資料抽取，成功指標偏向效率與準確率。",
+      "對穩健性的關注程度存在差異。多數介紹性文章假設文件品質可接受，但 NTU 的 degraded document 研究指出，若掃描或拍照品質不佳，即使答案已在圖像中，生成品質仍會明顯下滑，表示真實部署的風險被低估。"
     ],
     "insights": [
-      "第一個核心洞見是：2025-2026 年 PIML/PINN 的主要創新已從『是否可把物理方程放進 loss』，轉向『如何分配與強化這些約束』，例如加權損失、自適應平衡與硬約束設計。",
-      "第二個核心洞見是：把 PIML 當成建模策略比當成單一模型更準確，因為其價值常出現在 ML 與既有物理模擬流程的混合，而不是完全取代數值求解器。",
-      "第三個核心洞見是：PINN 的工程難點高度集中在資料與方程尺度不一致、殘差項競爭與邊界條件表示，這些問題決定了其是否能從研究 demo 走向可重複部署。",
-      "第四個核心洞見是：官方研究機構對 PIML 的描述更強調可靠度、可解釋性與資料效率，說明產業或科學應用更在意可信近似，而不是單純追求 benchmark 精度。",
-      "第五個核心洞見是：氣候與能源系統場景凸顯 PIML 的真正優勢並非取代大型物理模型，而是加速 surrogate、補償偏差與強化 assimilation，這比『端到端解 PDE』更接近近期實務採用路徑。",
-      "第六個核心洞見是：中文內容對術語普及與導入門檻降低很有幫助，但在方法限制與最新架構差異上仍需以英文論文與官方來源做交叉驗證，否則容易高估 PINN 的通用性。"
+      "多模態 RAG 的第一性原理不是『讓模型看圖』，而是『讓檢索系統保留原本會在前處理中流失的訊號』。這代表文件 ingestion 應被視為核心產品能力，而不是前置資料清洗。",
+      "若要應用在 daily-digest-prompt 或個人知識庫，最先值得投入的不是端到端多模態 Agent，而是把 PDF 中的表格、圖表、版面區塊與圖片 caption 納入索引，先提升 retrieval recall，再決定是否升級生成模型。",
+      "結構化路線與向量路線不是互斥，而是可分層組合：向量檢索可負責高召回，知識圖或版面結構可負責高精度推理。MegaRAG 與 MultiDocFusion 共同暗示未來成熟系統可能走向 hybrid retrieval。",
+      "多模態 RAG 的評估不能只看最終 QA 分數，還必須切開看 parsing 品質、chunk 結構、跨模態對齊誤差與 degraded robustness；否則容易把 ingestion 問題誤判為生成模型能力不足。",
+      "企業或個人場景中，成本與延遲往往比模型上限更早成為瓶頸。NVIDIA 的效能數據雖偏產品宣稱，但與其他來源相互印證出一件事：多模態 RAG 的競爭力很大一部分來自資料管線優化，而不是單一模型選型。",
+      "Agentic multimodal RAG 代表下一階段演化，但前提是知識底座要先結構化。CollEX 顯示多輪探索很有價值，然而若底層文件解析與跨模態索引不穩，Agent 只會放大錯檢與幻覺。",
+      "真實世界文件品質是被低估的研究缺口。NTU 的 degraded document 結果說明，部署場景若包含掃描件、手機拍照或低解析簡報，穩健表徵學習可能比追求更大的 VLM 更有短期價值。"
     ]
   },
   "stage_completed": 3

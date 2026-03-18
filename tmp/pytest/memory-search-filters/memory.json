@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "daily-1773792000-1",
+      "level": "daily",
+      "title": "Daily Digest - AI Agent",
+      "topic": "AI Agent",
+      "summary": "決定採用 recent memory layer。",
+      "key_events": [
+        "決定採用 recent memory layer。"
+      ],
+      "decisions": [
+        "決定採用 recent memory layer。"
+      ],
+      "open_questions": [],
+      "source_session_ids": [
+        "session-keep"
+      ],
+      "raw_messages": [
+        "決定採用 recent memory layer。"
+      ],
+      "tags": [
+        "daily-digest",
+        "AI",
+        "daily",
+        "AI Agent"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "updated_at": "2026-03-18T00:00:00+00:00",
+      "expires_at": "2026-04-17T00:00:00+00:00",
+      "embedding_text": "AI Agent\n決定採用 recent memory layer。\n決定採用 recent memory layer。\n決定採用 recent memory layer。",
+      "embedding": {
+        "ai": 0.07142857142857142,
+        "agent": 0.07142857142857142,
+        "決定採用": 0.21428571428571427,
+        "recent": 0.21428571428571427,
+        "memory": 0.21428571428571427,
+        "layer": 0.21428571428571427
+      },
+      "metadata": {
+        "taskType": "ai_sysdev",
+        "digestDate": "2026-03-18T08:00:00+00:00"
+      }
+    },
+    {
+      "id": "daily-1773792000-2",
+      "level": "daily",
+      "title": "Daily Digest - AI Agent",
+      "topic": "AI Agent",
+      "summary": "這是一筆舊資料。",
+      "key_events": [
+        "這是一筆舊資料。"
+      ],
+      "decisions": [],
+      "open_questions": [],
+      "source_session_ids": [
+        "session-skip"
+      ],
+      "raw_messages": [
+        "這是一筆舊資料。"
+      ],
+      "tags": [
+        "daily-digest",
+        "AI",
+        "daily",
+        "AI Agent"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "updated_at": "2026-03-18T00:00:00+00:00",
+      "expires_at": "2026-04-17T00:00:00+00:00",
+      "embedding_text": "AI Agent\n這是一筆舊資料。\n這是一筆舊資料。",
+      "embedding": {
+        "ai": 0.25,
+        "agent": 0.25,
+        "這是一筆舊資料": 0.5
+      },
+      "metadata": {
+        "taskType": "research",
+        "digestDate": "2026-02-01T08:00:00+00:00"
+      }
+    }
+  ],
+  "embedding": {
+    "provider": "local",
+    "model": "local-token-v1",
+    "dimension": 0,
+    "api_base": null,
+    "api_key_env": null,
+    "estimated_cost_per_1k_tokens_usd": 0.0,
+    "monthly_cost_limit_usd": 15.0,
+    "current_month_cost_usd": 0.0
+  }
+}

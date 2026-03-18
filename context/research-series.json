@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-18T03:35:42.842561+08:00",
+  "updated_at": "2026-03-19T02:08:14.153449+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-17",
+      "last_active": "2026-03-18",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -304,7 +304,8 @@
             "楞嚴心咒跨學科深化研究 — 音韻學分析、密教三系統比較與數位人文方法應用",
             "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第",
             "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較",
-            "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門"
+            "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門",
+            "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -425,14 +426,14 @@
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "完成四科七大後，可繼續探索：二決定義（修行抉擇）、二十五圓通完整比較、五十陰魔的現代心理學詮釋"
+      "next_research_hint": "完成現代心理學詮釋後，可繼續探索：楞嚴經與當代神經科學對話、數位時代的魔境（虛擬實境、AI 幻覺）"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-17",
+      "last_active": "2026-03-18",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -489,7 +490,7 @@
           ]
         },
         "application": {
-          "status": "completed",
+          "status": "in_progress",
           "started_at": "2026-02-17",
           "completed_at": "2026-02-23",
           "kb_notes": [
@@ -502,7 +503,8 @@
             "性惡法門",
             "一念三千",
             "十乘觀法",
-            "三諦圓融"
+            "三諦圓融",
+            "化法四教之別教 — 恆沙佛法、歷別行位與菩薩修證次第深度研究"
           ],
           "covered_concepts": [
             "蕅益智旭融通諸宗",
@@ -514,7 +516,10 @@
             "性惡法門",
             "一念三千",
             "十乘觀法",
-            "三諦圓融"
+            "三諦圓融",
+            "恆沙佛法的具體內容",
+            "十住十行十迴向十地等覺妙覺的修證細節",
+            "別教判經實例（華嚴經、維摩經等）"
           ]
         },
         "optimization": {
@@ -637,7 +642,7 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "化法四教（藏通別圓）系列已齊全，可深化化儀四教（頓漸秘密不定）個別專論，或進入觀法修持的進階研究（如十乘觀法、三諦圓融）"
+      "next_research_hint": "別教 application 階段補充完成後，可探索化儀四教的各別深化（頓教、秘密教、不定教）"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -914,7 +919,7 @@
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-17",
+      "last_active": "2026-03-18",
       "tags": [
         "淨土宗",
         "佛學",
@@ -950,13 +955,14 @@
           ]
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-15",
-          "completed_at": "2026-03-15",
+          "completed_at": "2026-03-18",
           "kb_notes": [
             "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第",
             "蕅益大師《阿彌陀經要解》研究 — 五重玄義、圓教詮釋與「古今註解第一」的義理架構",
-            "觀無量壽經十六觀研究 — 淨土宗觀想法門的完整修持次第與善導大師判釋"
+            "觀無量壽經十六觀研究 — 淨土宗觀想法門的完整修持次第與善導大師判釋",
+            "阿彌陀經要義 — 執持名號、一心不亂與信願行的修證結構"
           ],
           "covered_concepts": [
             "十念法",
@@ -978,14 +984,18 @@
             "九品往生",
             "是心作佛",
             "觀想念佛",
-            "持名念佛"
+            "持名念佛",
+            "執持名號統攝信願行",
+            "一心不亂與繫念不亂的詮釋差異",
+            "《阿彌陀經》往生正因段的實修結構"
           ]
         },
         "application": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
             "打佛七實務指南 — 淨土宗念佛道場的核心集體共修形式：起源、儀軌、規約與現代實踐",
-            "淨土宗助念儀軌與臨終關懷實務指南 — 從印光大師《臨終三大要》到現代助念團操作細節"
+            "淨土宗助念儀軌與臨終關懷實務指南 — 從印光大師《臨終三大要》到現代助念團操作細節",
+            "善導大師五正行的正助二業與現代日課設計"
           ],
           "covered_concepts": [
             "打佛七",
@@ -1002,8 +1012,15 @@
             "往生被與陀羅尼被的使用",
             "助念團組織與管理",
             "臨終開示話術",
-            "念佛機與音響設備"
-          ]
+            "念佛機與音響設備",
+            "五正行的正助二業",
+            "稱名正定業與四種助業的主從秩序",
+            "現代居士晨昏定課模板",
+            "碎片時間散課與攝心操作",
+            "大勢至攝心法與善導稱名主軸的結合"
+          ],
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18"
         },
         "optimization": {
           "status": "pending"
@@ -1012,10 +1029,10 @@
           "status": "pending"
         }
       },
-      "current_stage": "application",
-      "completion_pct": 20,
+      "current_stage": "optimization",
+      "completion_pct": 60,
       "related_series": [],
-      "next_research_hint": "完成 mechanism 後進入 application：十六觀的實際修持指引與現代淨土行者的觀想實踐"
+      "next_research_hint": "可續入 optimization：不同根器行者如何依《阿彌陀經》調整持名與攝心方法。"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -1062,7 +1079,7 @@
       "domain": "AI Code Review / LLM-Driven Code Quality",
       "description": "AI 程式碼審查研究系列，涵蓋 LLM 審查機制、多 Agent 架構、SAST 融合、大規模部署",
       "initiated_at": "2026-03-04",
-      "last_active": "2026-03-11",
+      "last_active": "2026-03-19",
       "tags": [
         "AI",
         "Code Review",
@@ -1116,18 +1133,29 @@
           ]
         },
         "optimization": {
-          "status": "pending"
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "AI 程式碼審查優化：誤報治理、風險分級與修補建議驗證閉環（2026）"
+          ],
+          "covered_concepts": [
+            "SARIF precision/security-severity 作為風險排序訊號",
+            "AI auto-triage 與 triage memories 的誤報治理閉環",
+            "修補建議的驗證閘門：CI、重新掃描、語意回歸",
+            "量化指標：triage 自動化率、使用者同意率、修補成功率"
+          ]
         },
         "synthesis": {
           "status": "pending"
         }
       },
-      "current_stage": "application",
-      "completion_pct": 40,
+      "current_stage": "synthesis",
+      "completion_pct": 60,
       "related_series": [
         "ai-security-testing"
       ],
-      "next_research_hint": "完成後進入 optimization：評估誤報率、審查延遲與政策閾值調優"
+      "next_research_hint": "完成 optimization 後，可進入 synthesis：把 code review 與 CI、需求品質閘門、ADR 治理串成全鏈路工程治理。"
     },
     "test-time-compute-reasoning": {
       "series_id": "test-time-compute-reasoning",
@@ -1270,7 +1298,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-18",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1344,7 +1372,8 @@
             "FastMCP 深度研究報告 - AI工作流自動化",
             "n8n — 開源 AI 工作流自動化平台深度洞察（85K+ Stars, 2026-03）",
             "modelcontextprotocol/servers 深度研究報告 - AI工作流自動化",
-            "LangGraph 深度研究報告 - AI工作流自動化：圖形化狀態機工作流與角色導向工作流的設計哲學對比"
+            "LangGraph 深度研究報告 - AI工作流自動化：圖形化狀態機工作流與角色導向工作流的設計哲學對比",
+            "AutoGen 深度研究報告 - AI工作流自動化"
           ],
           "covered_concepts": [
             "MCP server 框架如何成為 AI 工作流的可重用工具層",
@@ -1364,14 +1393,18 @@
             "狀態機工作流模型",
             "LangGraph 圖形化編排",
             "與 CrewAI 的架構對比",
-            "LangChain 生態整合"
+            "LangChain 生態整合",
+            "事件驅動 agent runtime",
+            "team/group chat 協調",
+            "code executor workbench",
+            "與本系統的角色化借鑑模式"
           ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "synthesis 階段持續推進：後續可研究 AutoGen、MetaGPT 等其他 Multi-agent 框架，形成完整的工作流範式矩陣"
+      "next_research_hint": "可進一步整理多代理框架選型矩陣，或補 MetaGPT / Agentless 完成 synthesis 收斂"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -3344,7 +3377,12 @@
             "淨土教觀學苑 Podcast 研究規劃深化 — 計畫結構、單集研究包 schema 與資料來源採信矩陣",
             "淨土教觀學苑 Podcast 單集研究包實作範例 — 核心議題到章節大綱的完整流程",
             "淨土教觀學苑 Podcast 單集研究包實作指南（核心議題到資料來源映射）",
-            "淨土教觀學苑 Podcast 單集 research brief 正式規格 — schema、驗收流程與批次 QA"
+            "淨土教觀學苑 Podcast 單集 research brief 正式規格 — schema、驗收流程與批次 QA",
+            "淨土教觀學苑 Podcast 單集議題驗收規格 — 欄位級檢查矩陣、來源裁決與 series 回寫流程",
+            "淨土教觀學苑 Podcast 單集章節大綱實作指南 — 資料來源映射與課程型態模板",
+            "淨土教觀學苑 Podcast 單集研究包 Application 規格 — 欄位級驗收、來源裁決與 series 回寫流程",
+            "淨土教觀學苑 Podcast 單集研究包 Application 規格 — 資料來源映射、章節大綱母版與欄位級驗收",
+            "淨土教觀學苑 Podcast 單集研究包計畫結構實作指南"
           ],
           "covered_concepts": [
             "單集研究 brief JSON schema 或固定欄位模板",
@@ -3380,7 +3418,24 @@
             "可直接機器驗證的正式 JSON Schema 與必填欄位約束",
             "批次製作情境下的抽樣 QA 比例與失敗處置流程",
             "單集研究包完成後的 stage-complete 判定規格",
-            "研究 brief 對平台 metadata 與成效追蹤欄位的閉環驗證"
+            "研究 brief 對平台 metadata 與成效追蹤欄位的閉環驗證",
+            "議題驗收 failure taxonomy 與對應補件流程",
+            "抽樣 QA 的明確通過門檻與回退機制",
+            "來源新舊版本衝突時的版本鎖定規則",
+            "單集驗收結果回饋到 research-series 的自動更新對映",
+            "不同課程類型對應的章節大綱母版",
+            "單集章節大綱與資料來源欄位的一對一映射範例",
+            "來源衝突裁決後如何回寫到章節大綱與研究 brief 的實例",
+            "可直接機器驗證的欄位級失敗 taxonomy 與補件決策碼",
+            "單集研究包 application 階段的最小可交付樣本數與通過門檻",
+            "驗收結果回寫 research-series.json 的明確欄位對映與作業順序",
+            "單集研究包欄位與章節段落的一對一映射樣板",
+            "不同課程類型的章節大綱母版與適用條件",
+            "來源不足或版本衝突時的欄位級停損門檻",
+            "批次製作時的 application 完成判準與 QA 回寫流程",
+            "可直接重用的單集完整樣本包",
+            "欄位級失敗 taxonomy 與補件決策碼",
+            "application 階段完成門檻的機器可驗證規則"
           ]
         },
         "optimization": {
@@ -3413,7 +3468,7 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "application 完成後進入 optimization：來源缺口預警、自動欄位驗證、抽樣 QA 與跨集一致性指標化。"
+      "next_research_hint": "完成 application 樣本與模板後，進入 optimization：欄位自動驗證、批次抽樣 QA 與跨集一致性監控。"
     },
     "motivation-science": {
       "series_id": "motivation-science",
@@ -3558,6 +3613,261 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "mechanism：深化 RAG、案件路由與公文分類模型的技術設計"
+    },
+    "hybrid-search-rag": {
+      "series_id": "hybrid-search-rag",
+      "domain": "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略",
+      "description": "聚焦關鍵字檢索、向量檢索、RRF 融合、去重與 rerank 協作的研究系列。",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "Hybrid Search",
+        "RAG",
+        "BM25",
+        "向量搜尋",
+        "技術研究"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18",
+          "kb_notes": [
+            "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略（2026）"
+          ],
+          "covered_concepts": [
+            "BM25 關鍵字檢索",
+            "向量語義檢索",
+            "混合檢索基本概念"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18",
+          "kb_notes": [
+            "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略（2026）"
+          ],
+          "covered_concepts": [
+            "RRF 融合",
+            "Relative Score Fusion",
+            "chunk 去重",
+            "parent-level dedup",
+            "rerank 協作"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [
+        "qdrant-vector-database"
+      ],
+      "next_research_hint": "application：把 hybrid search 參數、去重策略與 KB API 驗證流程落到 daily-digest-prompt"
+    },
+    "tiantai-panjiao-wushi": {
+      "series_id": "tiantai-panjiao-wushi",
+      "domain": "天台五時判教",
+      "description": "天台宗五時判教體系的深入研究，從華嚴時到法華涅槃時",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "教觀綱宗",
+        "五時判教",
+        "天台宗",
+        "佛學"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-15",
+          "completed_at": "2026-03-15",
+          "kb_notes": [
+            "教觀綱宗研究：華嚴時的擬宜說法 — 五時判教中最初三七日的教觀意涵與頓教圓兼別教的判教智慧"
+          ],
+          "covered_concepts": [
+            "華嚴時",
+            "擬宜",
+            "頓教",
+            "圓兼別教"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "kb_notes": [
+            "華嚴時的義理機制深化 — 七處九會、十玄門、六相圓融與天台圓兼別判教的內在邏輯"
+          ],
+          "covered_concepts": [
+            "七處九會",
+            "十玄門",
+            "六相圓融",
+            "海印森羅",
+            "法界緣起",
+            "四法界觀"
+          ],
+          "completed_at": "2026-03-18"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [],
+      "next_research_hint": "可進入 application：華嚴時修法在實修中的應用"
+    },
+    "rag-kb-import-workflow": {
+      "series_id": "rag-kb-import-workflow",
+      "domain": "RAG 知識庫匯入的結構化 Markdown 設計、去重查詢與驗證回寫流程",
+      "description": "聚焦研究筆記到 KB 匯入之間的 schema、去重、驗證與回寫閉環。",
+      "initiated_at": "2026-03-18",
+      "last_active": "2026-03-18",
+      "tags": [
+        "技術研究",
+        "RAG 知識庫匯入",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-18",
+          "completed_at": "2026-03-18",
+          "kb_notes": [
+            "RAG 知識庫匯入工作流實務 — 結構化 Markdown、去重查詢與驗證回寫"
+          ],
+          "covered_concepts": [
+            "Markdown 作為 contentText",
+            "先查重再匯入",
+            "匯入成功驗證",
+            "registry / continuity 回寫"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "hybrid-search-rag"
+      ],
+      "next_research_hint": "mechanism：深入 chunking、metadata schema 與 idempotent import 的內部設計"
+    },
+    "chrome-devtools-mcp": {
+      "series_id": "chrome-devtools-mcp",
+      "domain": "Chrome DevTools MCP",
+      "description": "Chrome DevTools MCP 開源專案研究系列，聚焦 AI agent 與瀏覽器 DevTools 能力的整合。",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "GitHub",
+        "AI",
+        "開源專案",
+        "Chrome DevTools MCP"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "Chrome DevTools MCP — 讓 AI Coding Agent 看見瀏覽器的開源除錯與效能分析伺服器深度研究（30K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "Chrome DevTools MCP 的產品定位",
+            "MCP + Puppeteer + DevTools 的分層架構",
+            "工具分類與 token-optimized 設計原則",
+            "daily-digest-prompt 與遊戲專案的應用方式"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "vllm-llm-serving",
+        "rag-kb-import-workflow"
+      ],
+      "next_research_hint": "mechanism：深入 pageId 平行多頁工作流、daemon client 與 Lighthouse/trace 資料映射"
+    },
+    "ai-smart-environment-air-heat": {
+      "series_id": "ai-smart-environment-air-heat",
+      "domain": "環境監測 — AI 空氣品質預測與城市熱風險聯防",
+      "description": "",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "環境監測",
+        "smart-city"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "環境監測 — AI 空氣品質預測與城市熱風險聯防（2026）"
+          ],
+          "covered_concepts": [
+            "高溫熱風險預警",
+            "空污與熱害共同暴露治理",
+            "跨局處聯防流程"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism：深化多模態預測、告警門檻與決策支援架構"
     }
   }
 }

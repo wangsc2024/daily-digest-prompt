@@ -179,6 +179,33 @@ if (-not $podcastTitle) {
     Write-Log "[WARN] podcast_title 未寫入 meta，使用後備值：$podcastTitle"
 }
 
+# ─── 建立有意義的上傳 slug（淨土學苑 / 教觀綱宗相關查詢）───
+$uploadSlug = $Slug  # 預設使用原始 slug
+if ($podcastTitle -and $Query -and $Query -match '教觀綱宗|淨土學苑|淨土|法華|佛法|天台') {
+    try {
+        $nextEpFile = Join-Path $AgentDir "context\jiaoguang-podcast-next.json"
+        $epNum = 1
+        if (Test-Path $nextEpFile) {
+            $nextEpData = Get-Content $nextEpFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($nextEpData.next_episode) { $epNum = [int]$nextEpData.next_episode }
+        }
+        $epStr = $epNum.ToString("D2")
+        # 從 note_title 取主題詞（第一個分隔符前）
+        $topicBase = if ($selectedNoteTitle) {
+            ($selectedNoteTitle -split '[\s\-—：:（(第]')[0]
+        } else { $Query }
+        $topicClean = $topicBase -replace '[^\p{L}\p{N}]', ''
+        $topicPart  = $topicClean.Substring(0, [Math]::Min(8, $topicClean.Length))
+        # 從 podcastTitle 取標題部分
+        $titleClean = $podcastTitle -replace '[^\p{L}\p{N}]', ''
+        $titlePart  = $titleClean.Substring(0, [Math]::Min(12, $titleClean.Length))
+        $uploadSlug = "淨土學苑_ep${epStr}_${topicPart}_${titlePart}"
+        Write-Log "有意義的上傳 slug：$uploadSlug"
+    } catch {
+        Write-Log "[WARN] 有意義 slug 生成失敗（使用原始 slug）: $_"
+    }
+}
+
 # ============================================================
 # Phase 2：雙聲道 TTS 生成
 # ============================================================
@@ -301,7 +328,7 @@ try {
         $uploadTitle = if ($selectedNoteTitle) { $selectedNoteTitle } elseif ($Query) { $Query } else { $podcastTitle }
         $uploadTopic  = $podcastTitle
         $phase5Start = Get-Date
-        $uploadJson = pwsh -ExecutionPolicy Bypass -File $uploadScript -LocalPath $OutFile -Title $uploadTitle -Topic $uploadTopic -Slug $Slug 2>&1 |
+        $uploadJson = pwsh -ExecutionPolicy Bypass -File $uploadScript -LocalPath $OutFile -Title $uploadTitle -Topic $uploadTopic -Slug $uploadSlug 2>&1 |
             Where-Object { $_ -match '^\{' } | Select-Object -Last 1
         $phase5Seconds = [int]((Get-Date) - $phase5Start).TotalSeconds
 
@@ -375,6 +402,8 @@ if ($selectedNoteId -and (Test-Path $OutFile)) {
             topics        = $noteTopics
             source        = "manual"
             created_at    = $nowStr
+            mp3_url       = $publicUrl
+            slug          = $Slug
         }
 
         # 更新 summary
@@ -444,3 +473,10 @@ Write-Log "=== 完成！==="
 Write-Log "輸出檔案: $OutFile"
 if ($publicUrl) { Write-Log "公開 URL:  $publicUrl" }
 Write-Log "總耗時: ${totalSeconds}s（Phase1: ${phase1Seconds}s, Phase2: ${phase2Seconds}s, Phase3: ${phase3Seconds}s, Phase4-KB: ${phase4Seconds}s, Phase5-Upload: ${phase5Seconds}s）"
+
+# 結構化摘要輸出（供 LINE 機器人回覆擷取）
+if ($publicUrl) {
+    Write-Host "PODCAST_URL: $publicUrl"
+} elseif (Test-Path $OutFile) {
+    Write-Host "PODCAST_DONE: $OutFile"
+}

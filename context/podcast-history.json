@@ -1,42 +1,195 @@
 {
   "version": 2,
-  "updated_at": "2026-03-17T21:36:03",
+  "updated_at": "2026-03-18T15:37:03",
   "summary": {
-    "total_episodes": 56,
+    "total_episodes": 65,
     "cooldown_days": 30,
     "recent_note_ids": [
+      "0fd6fe77-1b57-457f-b443-f295c18fd8e5",
+      "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "16f55b36-8eca-4571-8fcb-40b7525bf53b",
       "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67",
-      "d2613091-e99f-4ae1-aa3d-5609d8d823d4",
-      "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
-      "6e1b3c73-adff-43f3-91b1-ee24d6f36d08",
-      "4fd7de74-55be-4ffb-9e7b-187cfcacd747",
-      "e5c3a26b-c18a-4594-91e6-3c4a95ee4009",
-      "f735b445-c2e4-417f-aa5a-76692d05b4b0",
       {
-        "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
-        "last_used": "2026-03-17",
-        "expires_at": "2026-04-16"
+        "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
+        "last_used": "2026-03-18",
+        "expires_at": "2026-04-17"
       }
     ],
     "recent_topics": [
-      "教觀綱宗",
+      "法華經",
       "佛學",
       "天台宗",
-      "金剛經",
-      "般若",
-      "大悲懺法及其如何",
-      "楞嚴經",
-      "別業妄見",
-      "大悲懺法",
-      "法華經",
+      "教觀綱宗",
       {
-        "topic": "歷史傳承",
-        "last_used": "2026-03-17",
-        "expires_at": "2026-04-16"
+        "topic": "四教觀法",
+        "last_used": "2026-03-18",
+        "expires_at": "2026-04-17"
       }
     ]
   },
   "episodes": [
+    {
+      "episode_title": "法華一佛乘義理",
+      "notes_used": [
+        "0fd6fe77-1b57-457f-b443-f295c18fd8e5"
+      ],
+      "note_titles": [
+        "法華經一佛乘義理總論：開權顯實、會三歸一的圓教根本思想"
+      ],
+      "topics": [
+        "法華經",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T15:37:03",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep14-20260318.mp3",
+      "slug": "jiaoguang-ep14-20260318"
+    },
+    {
+      "episode_title": "天台止觀修行體系",
+      "notes_used": [
+        "ed138bbf-b608-4f05-8311-f6fc2e865392"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T15:25:08",
+      "mp3_url": "https://podcasts.pdoont.us.kg/note-ed138bbf-20260318.mp3",
+      "slug": "note-ed138bbf-20260318"
+    },
+    {
+      "episode_title": "教觀雙運圓頓修證",
+      "notes_used": [
+        "16f55b36-8eca-4571-8fcb-40b7525bf53b"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T15:07:03",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep13-20260318.mp3",
+      "slug": "jiaoguang-ep13-20260318"
+    },
+    {
+      "episode_title": "天台二十五方便解析",
+      "notes_used": [
+        "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：二十五方便 — 天台宗止觀修行的前行方便體系"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T14:38:32",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep12-20260318.mp3",
+      "slug": "jiaoguang-ep12-20260318"
+    },
+    {
+      "episode_title": "四諦觀法：天台修證地圖",
+      "notes_used": [
+        "c4c5f326-f98a-4593-b9fb-993200a425b0"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：四教觀法與四種四諦的相攝關係 — 由教相到觀行的內在對應"
+      ],
+      "topics": [
+        "四教觀法",
+        "四種四諦",
+        "教觀雙運"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-18T11:40:08+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260318-1133.mp3",
+      "slug": "教觀綱宗-20260318-1133"
+    },
+    {
+      "episode_title": "Podcast研究機制規劃",
+      "notes_used": [
+        "1ee27d13-177e-489f-8ec2-ab400a0f573f"
+      ],
+      "note_titles": [
+        "淨土教觀學苑 Podcast 製作研究規劃"
+      ],
+      "topics": [
+        "淨土教觀學苑",
+        "podcast",
+        "研究規劃"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T07:59:50",
+      "mp3_url": "https://podcasts.pdoont.us.kg/研究規劃-n-n產出日期-2026-03-20260318.mp3",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318"
+    },
+    {
+      "episode_title": "Podcast研究機制規劃",
+      "notes_used": [
+        "1ee27d13-177e-489f-8ec2-ab400a0f573f"
+      ],
+      "note_titles": [
+        "淨土教觀學苑 Podcast 製作研究規劃"
+      ],
+      "topics": [
+        "淨土教觀學苑",
+        "podcast",
+        "研究規劃"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T07:49:42",
+      "mp3_url": "https://podcasts.pdoont.us.kg/研究規劃-n-n產出日期-2026-03-20260318.mp3",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318"
+    },
+    {
+      "episode_title": "Podcast研究機制規劃",
+      "notes_used": [
+        "1ee27d13-177e-489f-8ec2-ab400a0f573f"
+      ],
+      "note_titles": [
+        "淨土教觀學苑 Podcast 製作研究規劃"
+      ],
+      "topics": [
+        "淨土教觀學苑",
+        "podcast",
+        "研究規劃"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-18T07:40:34",
+      "mp3_url": "https://podcasts.pdoont.us.kg/研究規劃-n-n產出日期-2026-03-20260318.mp3",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318"
+    },
+    {
+      "episode_title": "四教儀與綱宗傳承",
+      "notes_used": [
+        "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：《天台四教儀》與《教觀綱宗》的判教教材化比較 — 從諦觀到蕅益智旭的傳承與互補"
+      ],
+      "topics": [
+        "天台四教儀",
+        "諦觀",
+        "判教教材"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-18T06:40:24+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/教觀綱宗-20260318-0635.mp3",
+      "slug": "教觀綱宗-20260318-0635"
+    },
     {
       "episode_title": "止觀前行二十五法",
       "notes_used": [
@@ -67,7 +220,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T21:06:17"
+      "created_at": "2026-03-17T21:06:17",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep11-20260317.mp3",
+      "slug": "jiaoguang-ep11-20260317"
     },
     {
       "episode_title": "析空體空修行法",
@@ -83,7 +238,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T20:07:07"
+      "created_at": "2026-03-17T20:07:07",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep10-20260317.mp3",
+      "slug": "jiaoguang-ep10-20260317"
     },
     {
       "episode_title": "金剛般若論會釋",
@@ -99,7 +256,9 @@
         "般若"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T19:36:06"
+      "created_at": "2026-03-17T19:36:06",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep9-20260317.mp3",
+      "slug": "jiaoguang-ep9-20260317"
     },
     {
       "episode_title": "金剛經善攝法義",
@@ -115,7 +274,9 @@
         "般若"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T19:06:42"
+      "created_at": "2026-03-17T19:06:42",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep8-20260317.mp3",
+      "slug": "jiaoguang-ep8-20260317"
     },
     {
       "episode_title": "大悲懺法修持指南",
@@ -129,7 +290,9 @@
         "大悲懺法及其如何"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T18:37:53"
+      "created_at": "2026-03-17T18:37:53",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep7-20260317.mp3",
+      "slug": "jiaoguang-ep7-20260317"
     },
     {
       "episode_title": "大悲懺法解析",
@@ -143,7 +306,9 @@
         "大悲懺法及其如何"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T18:06:11"
+      "created_at": "2026-03-17T18:06:11",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep6-20260317.mp3",
+      "slug": "jiaoguang-ep6-20260317"
     },
     {
       "episode_title": "從翳眼到共業的覺醒",
@@ -159,7 +324,9 @@
         "別業妄見"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T17:36:44"
+      "created_at": "2026-03-17T17:36:44",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep5-20260317.mp3",
+      "slug": "jiaoguang-ep5-20260317"
     },
     {
       "episode_title": "見惑：從翳眼到共業",
@@ -175,7 +342,9 @@
         "別業妄見"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T17:05:55"
+      "created_at": "2026-03-17T17:05:55",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep4-20260317.mp3",
+      "slug": "jiaoguang-ep4-20260317"
     },
     {
       "episode_title": "大悲懺十科修行地圖",
@@ -191,7 +360,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T16:36:22"
+      "created_at": "2026-03-17T16:36:22",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep3-20260317.mp3",
+      "slug": "jiaoguang-ep3-20260317"
     },
     {
       "episode_title": "大悲懺十科修行地圖",
@@ -207,7 +378,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T16:04:58"
+      "created_at": "2026-03-17T16:04:58",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep2-20260317.mp3",
+      "slug": "jiaoguang-ep2-20260317"
     },
     {
       "episode_title": "法華壽量品開近顯遠",
@@ -223,7 +396,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-17T15:23:39"
+      "created_at": "2026-03-17T15:23:39",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep1-20260317.mp3",
+      "slug": "jiaoguang-ep1-20260317"
     },
     {
       "episode_title": "八不道人蕅益智旭",
@@ -474,7 +649,9 @@
         "玄奘"
       ],
       "source": "manual",
-      "created_at": "2026-03-15T07:52:51"
+      "created_at": "2026-03-15T07:52:51",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260315.mp3",
+      "slug": "jiaoguang-general-20260315"
     },
     {
       "episode_title": "從 If-Then 到六根清淨：認知壓縮與修行顯化的跨域對話",
@@ -559,7 +736,9 @@
         "天台宗"
       ],
       "source": "manual",
-      "created_at": "2026-03-14T19:05:39"
+      "created_at": "2026-03-14T19:05:39",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260314b.mp3",
+      "slug": "jiaoguang-general-20260314b"
     },
     {
       "episode_title": "AI文件自動化革新",
@@ -703,7 +882,9 @@
         "唯識學"
       ],
       "source": "manual",
-      "created_at": "2026-03-14T10:42:14"
+      "created_at": "2026-03-14T10:42:14",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260314a.mp3",
+      "slug": "jiaoguang-general-20260314a"
     },
     {
       "episode_title": "從四諦到四觀：天台修證地圖",
@@ -763,7 +944,9 @@
         "完成法華經一心三"
       ],
       "source": "manual",
-      "created_at": "2026-03-13T15:23:46"
+      "created_at": "2026-03-13T15:23:46",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260313.mp3",
+      "slug": "jiaoguang-general-20260313"
     },
     {
       "episode_title": "從龍樹到智顗：一心三觀十議題",
@@ -870,7 +1053,9 @@
         "完成法華經一心三"
       ],
       "source": "manual",
-      "created_at": "2026-03-11T15:24:57"
+      "created_at": "2026-03-11T15:24:57",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260311.mp3",
+      "slug": "jiaoguang-general-20260311"
     },
     {
       "episode_title": "不定教的智慧：同法異益",
@@ -1027,7 +1212,9 @@
         "判教教材"
       ],
       "source": "manual",
-      "created_at": "2026-03-10T10:30:00+08:00"
+      "created_at": "2026-03-10T10:30:00+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-general-20260310.mp3",
+      "slug": "jiaoguang-general-20260310"
     }
   ],
   "entries": [
@@ -1414,6 +1601,62 @@
       "note_id_input": "",
       "slug": "jiaoguang-ep11-20260317",
       "used_at": "2026-03-17T21:36:03"
+    },
+    {
+      "note_id": "1ee27d13-177e-489f-8ec2-ab400a0f573f",
+      "note_title": "淨土教觀學苑 Podcast 製作研究規劃",
+      "query": "研究規劃\\n\\n產出日期：2026-03-17\\n執行者：Codex\\n\\n> 已讀取計畫結構：`C:\\\\Users\\\\user\\\\.cursor\\\\skills\\\\writing-plans\\\\SKILL.md`（本次讀取日期：2026-03-17）\\n\\n## 概要\\n- **目標**：建立一套可將淨土教觀學苑 750 集題目索引穩定轉換為單集",
+      "note_id_input": "",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318",
+      "used_at": "2026-03-18T07:40:34"
+    },
+    {
+      "note_id": "1ee27d13-177e-489f-8ec2-ab400a0f573f",
+      "note_title": "淨土教觀學苑 Podcast 製作研究規劃",
+      "query": "研究規劃\\n\\n產出日期：2026-03-17\\n執行者：Codex\\n\\n> 已讀取計畫結構：`C:\\\\Users\\\\user\\\\.cursor\\\\skills\\\\writing-plans\\\\SKILL.md`（本次讀取日期：2026-03-17）\\n\\n## 概要\\n- **目標**：建立一套可將淨土教觀學苑 750 集題目索引穩定轉換為單集",
+      "note_id_input": "",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318",
+      "used_at": "2026-03-18T07:49:42"
+    },
+    {
+      "note_id": "1ee27d13-177e-489f-8ec2-ab400a0f573f",
+      "note_title": "淨土教觀學苑 Podcast 製作研究規劃",
+      "query": "研究規劃\\n\\n產出日期：2026-03-17\\n執行者：Codex\\n\\n> 已讀取計畫結構：`C:\\\\Users\\\\user\\\\.cursor\\\\skills\\\\writing-plans\\\\SKILL.md`（本次讀取日期：2026-03-17）\\n\\n## 概要\\n- **目標**：建立一套可將淨土教觀學苑 750 集題目索引穩定轉換為單集",
+      "note_id_input": "",
+      "slug": "研究規劃-n-n產出日期-2026-03-20260318",
+      "used_at": "2026-03-18T07:59:50"
+    },
+    {
+      "note_id": "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67",
+      "note_title": "教觀綱宗研究：二十五方便 — 天台宗止觀修行的前行方便體系",
+      "query": "五戒修學述要 第004講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep12-20260318",
+      "used_at": "2026-03-18T14:38:32"
+    },
+    {
+      "note_id": "16f55b36-8eca-4571-8fcb-40b7525bf53b",
+      "note_title": "教觀綱宗研究：與《楞嚴經》的圓頓修證會通 — 從教觀雙運到返聞自性的實修判準",
+      "query": "佛法修學概要 修學綱要",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep13-20260318",
+      "used_at": "2026-03-18T15:07:03"
+    },
+    {
+      "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
+      "query": "",
+      "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "slug": "note-ed138bbf-20260318",
+      "used_at": "2026-03-18T15:25:08"
+    },
+    {
+      "note_id": "0fd6fe77-1b57-457f-b443-f295c18fd8e5",
+      "note_title": "法華經一佛乘義理總論：開權顯實、會三歸一的圓教根本思想",
+      "query": "佛法修學概要 第001講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep14-20260318",
+      "used_at": "2026-03-18T15:37:03"
     }
   ]
 }

@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "daily-1773705600-1",
+      "level": "daily",
+      "title": "Daily Digest - AI Agent",
+      "topic": "AI Agent",
+      "summary": "決定採用 Qdrant 作為向量資料庫。；待辦：補上 weekly 摘要與過期清理。；新增每日摘要排程。",
+      "key_events": [
+        "決定採用 Qdrant 作為向量資料庫。",
+        "待辦：補上 weekly 摘要與過期清理。",
+        "新增每日摘要排程。"
+      ],
+      "decisions": [
+        "決定採用 Qdrant 作為向量資料庫。"
+      ],
+      "open_questions": [
+        "待辦：補上 weekly 摘要與過期清理。"
+      ],
+      "source_session_ids": [
+        "session-1"
+      ],
+      "raw_messages": [
+        "決定採用 Qdrant 作為向量資料庫。",
+        "待辦：補上 weekly 摘要與過期清理。",
+        "新增每日摘要排程。"
+      ],
+      "tags": [
+        "daily",
+        "AI Agent"
+      ],
+      "language": "zh-TW",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "updated_at": "2026-03-17T00:00:00+00:00",
+      "expires_at": "2026-04-16T00:00:00+00:00",
+      "embedding_text": "AI Agent\n決定採用 Qdrant 作為向量資料庫。；待辦：補上 weekly 摘要與過期清理。；新增每日摘要排程。\n決定採用 Qdrant 作為向量資料庫。 待辦：補上 weekly 摘要與過期清理。 新增每日摘要排程。\n決定採用 Qdrant 作為向量資料庫。\n待辦：補上 weekly 摘要與過期清理。",
+      "embedding": {
+        "ai": 0.04,
+        "agent": 0.04,
+        "決定採用": 0.12,
+        "qdrant": 0.12,
+        "作為向量資料庫": 0.12,
+        "待辦": 0.12,
+        "補上": 0.12,
+        "weekly": 0.12,
+        "摘要與過期清理": 0.12,
+        "新增每日摘要排程": 0.08
+      },
+      "metadata": {}
+    }
+  ],
+  "embedding": {
+    "provider": "local",
+    "model": "local-token-v1",
+    "dimension": 0,
+    "api_base": null,
+    "api_key_env": null,
+    "estimated_cost_per_1k_tokens_usd": 0.0,
+    "monthly_cost_limit_usd": 15.0,
+    "current_month_cost_usd": 0.0
+  }
+}

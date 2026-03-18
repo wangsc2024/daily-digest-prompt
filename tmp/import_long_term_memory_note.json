@@ -1,0 +1,11 @@
+{
+  "notes": [
+    {
+      "title": "Daily-Digest-Prompt 長期記憶優化與檢索索引設計（2026-03-18）",
+      "contentText": "# 長期記憶優化\n\n以 https://know-w.pages.dev/article/ai-agent-context-management-%E8%88%87--8fb70bab#%E4%B8%83-daily-digest-prompt-%E5%B0%88%E6%A1%88%E7%9A%84%E6%87%89%E7%94%A8%E5%A0%B4%E6%99%AF 中的 Daily‑Digest‑Prompt 專案建議，優化系統長期記憶功能\n\n## 重點\n\n- 為 `memory.long_term_memory` 新增 token/topic/task/tag/date 倒排索引\n- 檢索支援 `topic`、`taskType`、`tags`、`startDate/endDate` 過濾\n- `tools/digest_sync.py` 保留本地待同步佇列與重送能力\n- `tools.long_term_memory_rollback.py` 提供快照與回退\n- `scripts/long_term_memory_perf.py` 補上 100 筆 smoke 與 1,000,000 筆合成索引 benchmark\n\n## 測試\n\n- `23 passed`\n- 100 筆 smoke：search p95 = 2.909 ms\n- 1,000,000 筆合成檢索：search p95 = 0.179 ms\n\n## 限制\n\n- `know-w.pages.dev` 原始 HTML 仍因網路權限無法下載\n- 1M 驗證為合成索引 benchmark，非完整 knowledge-base-search 端到端壓測\n",
+      "tags": ["Daily-Digest-Prompt", "long-term-memory", "ai_sysdev", "knowledge-query"],
+      "source": "import"
+    }
+  ],
+  "autoSync": true
+}

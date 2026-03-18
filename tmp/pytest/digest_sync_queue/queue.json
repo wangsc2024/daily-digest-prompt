@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "title": "Daily Digest Memory - 2026-03-17",
+      "contentText": "# Daily Digest 2026-03-17\n\n## 摘要\n今日摘要\n\n## 洞察\n- （無）\n\n## 記憶指標\n- 執行時間：2026-03-17T08:00:00+08:00\n- 執行次數：0\n- 知識庫筆記數：0\n- 主題：AI\n- 標籤：AI",
+      "tags": [
+        "Daily-Digest-Prompt",
+        "long-term-memory",
+        "daily-digest",
+        "AI"
+      ],
+      "source": "import",
+      "summary": "今日摘要",
+      "kind": "digest",
+      "topic": "AI",
+      "taskType": null,
+      "retrievalHints": [
+        "AI"
+      ],
+      "digestDate": "2026-03-17",
+      "memoryLayer": "recent",
+      "importance": 0.7,
+      "expiresAt": "2026-04-16T00:00:00+00:00",
+      "updatedAt": "2026-03-17T00:00:00+00:00"
+    }
+  ],
+  "updated_at": "2026-03-17T20:11:35.894575+00:00"
+}

@@ -4,14 +4,23 @@
   "entries": [
     {
       "date": "2026-03-17",
+      "updated_date": "2026-03-18",
       "artifact_path": "config/schemas/results-auto-task-schema.json",
       "gap_type": "output_schema",
-      "gap_description": "28 個自動任務結果 JSON 缺少統一 Schema，導致格式不一致風險",
+      "gap_description": "29 個自動任務結果 JSON 缺少統一 Schema，導致格式不一致風險（欄位名稱、status 語義、必填欄位不一致）",
       "priority": "P0",
-      "total_score": 95,
-      "impact_range": "28 個 todoist-auto-*.md",
+      "total_score": 85,
+      "impact_range": "29 個 todoist-auto-*.md",
       "integration_status": "integrated",
-      "documented_in": "config/README.md"
+      "documented_in": "docs/ARCHITECTURE.md",
+      "schema_version": "1.1.0",
+      "changes": "新增 done_cert、stage、topic、task_id、duration_seconds 欄位，支援 Agent Pool 與多階段任務",
+      "validation_results": {
+        "schema_parsable": true,
+        "sample_files_checked": 1,
+        "sample_files_passed": 0,
+        "issues": ["現有 prompts 格式不一致，29 個 prompt 需逐步更新以符合 Schema"]
+      }
     }
   ]
 }

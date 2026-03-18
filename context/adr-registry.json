@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "updated_at": "2026-03-18T01:22:00+08:00",
+  "updated_at": "2026-03-18T14:32:00+08:00",
   "summary": {
-    "total": 23,
-    "proposed": 2,
+    "total": 25,
+    "proposed": 4,
     "accepted": 19,
     "deferred": 1,
     "wontfix": 1,
@@ -12,7 +12,7 @@
     "implementation_breakdown": {
       "done": 20,
       "partial": 0,
-      "pending": 2,
+      "pending": 4,
       "immediate_fix": 0
     }
   },
@@ -742,16 +742,16 @@
     {
       "id": "ADR-20260318-025",
       "title": "跨平台路徑硬編碼清理（環境變數化）",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-18",
-      "decided_at": null,
+      "decided_at": "2026-03-18",
       "source": "improvement-backlog",
       "source_pattern": "跨平台路徑硬編碼清理",
       "priority": "P1",
       "effort": "medium",
       "context": "系統審查（2026-03-18）14 個檔案含 D:\\Source 或 C:\\Users 硬編碼路徑，限制可攜性。建議改用環境變數或 $PSScriptRoot 相對路徑。涉及核心腳本（check-health.ps1、bot/process_messages.ps1、cleanup-tasks.ps1），需協調修改。",
-      "decision": "",
+      "decision": "接受：用 $PSScriptRoot（PS1）和 Path(__file__).parent.parent（Python）取代硬編碼路徑。外部專案路徑（RAG_Skill、game_web）保留 fallback 字串並支援環境變數覆寫（$env:GAME_WEB_DIR）。.claude/settings.json 因 Claude Code 架構限制無法動態化，文件化為已知限制。",
       "consequences": {
         "positive": [
           "專案可搬遷至不同路徑，無需手動修改檔案",
@@ -769,7 +769,7 @@
         "cleanup-tasks.ps1",
         "check-health.ps1"
       ],
-      "notes": "effort=medium，涉及核心腳本，需人工確認環境變數命名規範後分批修改。建議：$PROJECT_ROOT 或 $PSScriptRoot 為主要替代方案。",
+      "notes": "已修改：bot/process_messages.ps1、cleanup-tasks.ps1、setup-startup-tasks.ps1、fix-todoist-task.ps1（$PSScriptRoot）、tools/collect_system_data.py（Path(__file__).parent.parent）。跳過：.claude/settings.json（Claude Code 架構限制）、外部專案路徑（RAG_Skill/game_web 保留 fallback）。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -778,16 +778,16 @@
     {
       "id": "ADR-20260318-026",
       "title": "結構化輸出 Schema 驗證（results/*.json）",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-18",
-      "decided_at": null,
+      "decided_at": "2026-03-18",
       "source": "improvement-backlog",
       "source_pattern": "輸入驗證強化",
       "priority": "P1",
       "effort": "medium",
       "context": "系統審查（2026-03-18）Hook 攔截為防禦性機制，缺少系統化 API 端點 schema 驗證。建議為 results/*.json 等結構化輸出加入 pydantic/jsonschema 驗證。涉及 hooks/pre_bash_guard.py（安全邊界）和 config/schemas/ 目錄。與 ADR-002 Guardrails 互補但範圍不同：ADR-002 聚焦 Agent 輸出品質，本 ADR 聚焦結構化資料格式驗證。",
-      "decision": "",
+      "decision": "接受（warning-only 模式）：新增 validate_json_schema() 至 hook_utils.py（jsonschema 優先，內建 fallback），tools/validate_results.py 供手動批次驗證，pre_write_guard.py 在寫入 results/todoist-auto-*.json 時觸發 schema 驗證並記錄 warn 日誌（不攔截，避免阻斷 Agent 執行）。",
       "consequences": {
         "positive": [
           "results/*.json 格式錯誤可在寫入時攔截",
@@ -805,7 +805,79 @@
         "config/hook-rules.yaml",
         "config/schemas/"
       ],
-      "notes": "effort=medium，涉及 hooks/（安全邊界），需人工確認 schema 設計方案。建議先完成 config/schemas/results-auto-task-schema.json 的完善，再逐步擴展到其他結構化輸出。",
+      "notes": "已實作：hook_utils.py 新增 validate_json_schema()（jsonschema+fallback）；tools/validate_results.py 手動批次驗證工具；pre_write_guard.py 寫入 results/todoist-auto-*.json 時觸發 schema warn 日誌。config/schemas/results-auto-task-schema.json 作為驗證基準。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-16"
+    },
+    {
+      "id": "ADR-20260318-027",
+      "title": "自動任務公平輪轉修復（加權輪轉 + 飢餓保護）",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-03-18",
+      "decided_at": null,
+      "source": "improvement-backlog",
+      "source_pattern": "自動任務公平輪轉修復",
+      "priority": "P0",
+      "effort": "medium",
+      "context": "system-insight 顯示 auto_task_fairness=1.993，29 個任務僅 6 個有執行紀錄。建議在 run-todoist-agent-team.ps1 導入可觀測的加權輪轉與飢餓保護，避免長期 0 次執行任務繼續被跳過。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "29 個自動任務執行機會公平化，避免長期未執行",
+          "Starvation score 可量化監控",
+          "系統穩定性評分提升"
+        ],
+        "negative": [
+          "需修改 run-todoist-agent-team.ps1 核心腳本",
+          "需建立 auto-tasks-today.json 執行紀錄追蹤機制",
+          "Weighted round-robin 演算法複雜度增加"
+        ]
+      },
+      "related_files": [
+        "run-todoist-agent-team.ps1",
+        "context/auto-tasks-today.json",
+        "state/failed-auto-tasks.json"
+      ],
+      "notes": "安全邊界內項目（核心腳本），等待人工決策。execution_plan 已在 backlog 定義：盤點執行次數 → 加權輪轉規則 → 記錄選任務理由 → 公平性驗證腳本。",
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-16"
+    },
+    {
+      "id": "ADR-20260318-028",
+      "title": "Phase 2 快照恢復與故障續跑機制",
+      "status": "Proposed",
+      "implementation_status": "pending",
+      "created_at": "2026-03-18",
+      "decided_at": null,
+      "source": "improvement-backlog",
+      "source_pattern": "Phase 2 快照恢復與故障續跑",
+      "priority": "P0",
+      "effort": "medium",
+      "context": "針對近 7 天成功率僅 85.1% 的問題，優先補強 Phase 2 中斷後的快照恢復，避免單一 Agent timeout 導致整批重跑並放大失敗成本。",
+      "decision": "",
+      "consequences": {
+        "positive": [
+          "單一 Agent 失敗不需整批重跑，節省 token",
+          "系統成功率預計 85.1%→95%+",
+          "系統穩定性評分提升"
+        ],
+        "negative": [
+          "需修改 run-todoist-agent-team.ps1 核心腳本",
+          "需定義 phase2-snapshot schema",
+          "快照管理增加系統複雜度"
+        ]
+      },
+      "related_files": [
+        "run-todoist-agent-team.ps1",
+        "state/run-fsm.json",
+        "results/"
+      ],
+      "notes": "安全邊界內項目（核心腳本），等待人工決策。execution_plan 已在 backlog 定義：定義 snapshot schema → 即時落盤 → resume 決策 → 驗收測試。",
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,

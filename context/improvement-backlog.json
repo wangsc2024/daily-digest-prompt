@@ -15,7 +15,11 @@
       "current_score": 75,
       "target_score": 78,
       "effort": "medium",
-      "target_files": ["bot/process_messages.ps1", "cleanup-tasks.ps1", "check-health.ps1"]
+      "target_files": [
+        "bot/process_messages.ps1",
+        "cleanup-tasks.ps1",
+        "check-health.ps1"
+      ]
     },
     {
       "rank": 2,
@@ -26,7 +30,11 @@
       "current_score": 78,
       "target_score": 83,
       "effort": "medium",
-      "target_files": ["hooks/pre_bash_guard.py", "config/hook-rules.yaml", "config/schemas/"]
+      "target_files": [
+        "hooks/pre_bash_guard.py",
+        "config/hook-rules.yaml",
+        "config/schemas/"
+      ]
     },
     {
       "rank": 3,
@@ -37,7 +45,11 @@
       "current_score": 78,
       "target_score": 86,
       "effort": "low",
-      "target_files": ["docs/plans/", "templates/", "prompts/"]
+      "target_files": [
+        "docs/plans/",
+        "templates/",
+        "prompts/"
+      ]
     },
     {
       "rank": 4,
@@ -48,7 +60,11 @@
       "current_score": 82,
       "target_score": 88,
       "effort": "high",
-      "target_files": ["tests/", "pyproject.toml", ".github/workflows/ci.yml"]
+      "target_files": [
+        "tests/",
+        "pyproject.toml",
+        ".github/workflows/ci.yml"
+      ]
     },
     {
       "rank": 5,
@@ -59,7 +75,304 @@
       "current_score": 90,
       "target_score": 93,
       "effort": "low",
-      "target_files": ["config/cache-policy.yaml", "config/scoring.yaml", "config/notification.yaml"]
+      "target_files": [
+        "config/cache-policy.yaml",
+        "config/scoring.yaml",
+        "config/notification.yaml"
+      ]
+    },
+    {
+      "rank": 6,
+      "priority": "P0",
+      "pattern": "自動任務公平輪轉修復",
+      "description": "system-insight 顯示 auto_task_fairness=1.993，29 個任務僅 6 個有執行紀錄。建議在 run-todoist-agent-team.ps1 導入可觀測的加權輪轉與飢餓保護，避免長期 0 次執行任務繼續被跳過。",
+      "dimension": "系統穩定性",
+      "effort": "medium",
+      "target_files": [
+        "run-todoist-agent-team.ps1",
+        "context/auto-tasks-today.json",
+        "state/failed-auto-tasks.json"
+      ],
+      "execution_plan": [
+        "盤點近 7 天各 task_key 的執行次數、連續跳過次數與最近執行時間，建立 starvation score。",
+        "在 Phase 1 選任務前加入 weighted round-robin 規則，優先補償長期未執行任務，再套用既有 frequency/timeout 限制。",
+        "把選任務理由寫入結果或 state，至少記錄 selected、skipped、skip_reason 與 starvation score。",
+        "新增 7 天公平性驗證腳本或檢查點，確認 executed task 覆蓋率提升且 idle 任務數下降。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-18T08:04:13.1649003+08:00"
+    },
+    {
+      "rank": 7,
+      "priority": "P0",
+      "pattern": "Phase 2 快照恢復與故障續跑",
+      "description": "針對近 7 天成功率僅 85.1% 的問題，優先補強 Phase 2 中斷後的快照恢復，避免單一 Agent timeout 導致整批重跑並放大失敗成本。",
+      "dimension": "系統穩定性",
+      "effort": "medium",
+      "target_files": [
+        "run-todoist-agent-team.ps1",
+        "state/run-fsm.json",
+        "results/"
+      ],
+      "execution_plan": [
+        "定義 phase2-snapshot schema，包含 trace_id、thread/run id、已完成 agents、失敗 agents、checkpoint 時間與可重用 result paths。",
+        "在 Phase 2 每次 agent 完成或失敗時即時落盤 snapshot，並在重試或下次執行時先讀 snapshot 決定是否跳過已完成工作。",
+        "將 resume 決策綁定既有 run-fsm 狀態，避免殭屍 run 或過期 snapshot 被誤用。",
+        "以 13:00、15:00 高失敗時段的歷史情境做驗收，確認可從快照續跑且不重複執行已成功 agent。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-18T08:04:13.1649003+08:00"
+    },
+    {
+      "rank": 8,
+      "priority": "P0",
+      "pattern": "Context Budget Guard 強制化",
+      "description": "avg_io_per_call 達 24875 chars，遠高於 benchmark 的 5000。建議把 Context 保護從提示規則提升為可量測、可拒絕、可降級的執行守門機制。",
+      "dimension": "開發效率",
+      "effort": "medium",
+      "target_files": [
+        "templates/shared/preamble.md",
+        "hooks/post_tool_logger.py",
+        "config/budget.yaml"
+      ],
+      "execution_plan": [
+        "定義 per-phase I/O 預算與 escalation 門檻，將 prompt chars、tool output chars、sub-agent 委派次數納入同一 budget record。",
+        "在 Hook 或 orchestrator 中新增 budget evaluator，超限時優先改為摘要模式、子 Agent 委派或停止額外檔案讀取。",
+        "對長前綴提示與固定指令採用 prompt prefix 穩定化策略，減少重複傳送內容並提高快取命中機會。",
+        "將 avg_io_per_call、top noisy tools、budget breach 次數寫入 system-insight 後續報告，形成閉環監控。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-18T08:04:13.1649003+08:00"
+    }
+  ],
+  "entries": [
+    {
+      "version": 1,
+      "scouted_at": "2026-03-18T07:06:23.6208774+08:00",
+      "topic": "Skill 市集、Hook 守門、Agent 可觀測性",
+      "projects": [
+        {
+          "name": "langfuse/langfuse",
+          "url": "https://github.com/langfuse/langfuse",
+          "stars": 23300,
+          "description": "開源 LLM 工程平台，涵蓋 trace、eval、prompt management、datasets，並可追蹤 agent actions。",
+          "relevance": "high",
+          "last_updated": "2026-03-17"
+        },
+        {
+          "name": "pre-commit/pre-commit",
+          "url": "https://github.com/pre-commit/pre-commit",
+          "stars": 15100,
+          "description": "以宣告式設定管理多語言 pre-commit hooks 的成熟守門框架。",
+          "relevance": "high",
+          "last_updated": "2025-12-16"
+        },
+        {
+          "name": "numman-ali/n-skills",
+          "url": "https://github.com/numman-ali/n-skills",
+          "stars": 933,
+          "description": "跨代理通用的 Skill 市集與同步機制，主打 SKILL.md、AGENTS.md、openskills。",
+          "relevance": "high",
+          "last_updated": "2026-01-17"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "pre-commit/pre-commit",
+          "pattern": "宣告式 guard registry 與可組態 hook 鏈",
+          "target_files": [
+            "config/hook-rules.yaml",
+            "hooks/pre_bash_guard.py",
+            "hooks/pre_read_guard.py"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "把目前分散的 guard 規則整理成可排序、可停用、可分 stage 的 hook registry，降低規則漂移與例外處理成本。"
+        },
+        {
+          "source_project": "langfuse/langfuse",
+          "pattern": "統一 trace/event schema 與 prompt 或任務版本追蹤",
+          "target_files": [
+            "context/digest-memory.json",
+            "scripts",
+            "results"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "為自動任務加入統一 execution trace schema，至少記錄 task_key、skill chain、cache 狀態、耗時、失敗點與輸出 artifact，讓回歸分析不再只靠結果檔。"
+        },
+        {
+          "source_project": "numman-ali/n-skills",
+          "pattern": "Skill discovery manifest 與跨代理相容層",
+          "target_files": [
+            "skills/SKILL_INDEX.md",
+            "AGENTS.md",
+            "templates/shared/preamble.md"
+          ],
+          "priority": "P1",
+          "effort": "low",
+          "description": "補一個 machine-readable 的 skill manifest 或 registry，讓 Skill 路由不只靠文字索引，並降低不同 Agent/Prompt 之間的格式分歧。"
+        },
+        {
+          "source_project": "numman-ali/n-skills",
+          "pattern": "外部 skill 同步與來源追溯",
+          "target_files": [
+            "skills",
+            "context/research-registry.json"
+          ],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "若未來要引入外部 skills，可為每個 skill 增加來源、中繼版本、同步時間與驗證狀態，避免手動複製造成漂移。"
+        },
+        {
+          "source_project": "langfuse/langfuse",
+          "pattern": "Prompt 與研究模板版本化",
+          "target_files": [
+            "templates",
+            "prompts",
+            "results"
+          ],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "將自動任務模板與輸出結果建立版本欄位對映，讓同一 task_key 的產出可以回溯到當時使用的模板版本。"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 2,
+          "B": 1
+        },
+        "research_depth": "adequate"
+      }
+    },
+    {
+      "version": 1,
+      "scouted_at": "2026-03-18T10:30:00+08:00",
+      "topic": "Agent 架構",
+      "projects": [
+        {
+          "name": "openclaw/openclaw",
+          "url": "https://github.com/openclaw/openclaw",
+          "stars": 302000,
+          "description": "本地優先的 AI 助理，採用 Gateway 控制平面架構，支援 20+ 社交平台整合",
+          "relevance": "high",
+          "last_updated": "2026-03-18",
+          "key_patterns": [
+            "三層 Skill 系統（bundled → managed → workspace）",
+            "WebSocket Gateway 控制平面（ws://127.0.0.1:18789）",
+            "會話間通訊工具（sessions_list/history/send）",
+            "媒體管道 Hook（轉錄、大小限制、臨時檔案生命週期）",
+            "Cron + Wakeup 混合排程"
+          ]
+        },
+        {
+          "name": "crewAIInc/crewAI",
+          "url": "https://github.com/crewAIInc/crewAI",
+          "stars": 45900,
+          "description": "多 Agent 協作框架，支援角色扮演與任務編排",
+          "relevance": "high",
+          "last_updated": "2026-03-18",
+          "key_patterns": [
+            "Crews（自主協作）與 Flows（精準編排）雙模式",
+            "YAML 配置驅動的任務定義",
+            "角色特化（role + goal + backstory）",
+            "hierarchical 執行模式（自動指派經理 Agent）",
+            "Pydantic BaseModel 結構化狀態管理"
+          ]
+        },
+        {
+          "name": "langchain-ai/langgraph",
+          "url": "https://github.com/langchain-ai/langgraph",
+          "stars": 44600,
+          "description": "圖狀態機 Agent 編排框架，強調持久化執行與人機協作",
+          "relevance": "medium",
+          "last_updated": "2026-03-18",
+          "key_patterns": [
+            "圖形為基礎的編排（受 Pregel 與 Apache Beam 啟發）",
+            "持久化執行（故障自動恢復，從中斷處繼續）",
+            "Human-in-the-loop（任意時點檢視與修改狀態）",
+            "雙層記憶架構（短期工作記憶 + 長期跨會話記憶）",
+            "低抽象設計（控制與持久性優先）"
+          ]
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "openclaw/openclaw",
+          "pattern": "三層 Skill 系統",
+          "target_files": [
+            "skills/SKILL_INDEX.md",
+            "docs/ARCHITECTURE.md"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "引入 Skill 分層機制（core → shared → workspace），將現有 26 個專案 Skills 按穩定度分層：core（15 個核心不變）、shared（8 個跨專案共用）、workspace（3 個實驗性）。優點：降低依賴地獄、提升 Skill 生命週期管理。"
+        },
+        {
+          "source_project": "openclaw/openclaw",
+          "pattern": "會話間通訊工具",
+          "target_files": [
+            "prompts/team/todoist-query.md",
+            "skills/task-manager/SKILL.md"
+          ],
+          "priority": "P2",
+          "effort": "low",
+          "description": "參考 sessions_list/history/send 模式，在 Team 模式的 Phase 2 並行 Agent 間建立通訊機制。例如：研究 Agent 完成後通知 todoist Agent「已發現相關筆記」，todoist Agent 可選擇性調整優先級。實作方式：Phase 2 結果 JSON 新增 `inter_agent_messages` 欄位，Phase 3 assemble 時讀取並轉發。"
+        },
+        {
+          "source_project": "crewAIInc/crewAI",
+          "pattern": "hierarchical 執行模式（經理 Agent）",
+          "target_files": [
+            "run-todoist-agent-team.ps1",
+            "prompts/team/todoist-query.md"
+          ],
+          "priority": "P1",
+          "effort": "high",
+          "description": "在 Team 模式引入「經理 Agent」角色：Phase 1 查詢後，經理 Agent 分析任務複雜度與依賴關係，動態調整 Phase 2 的並行策略（如：2 個研究任務有依賴→改為順序執行；4 個獨立任務→全並行）。目前 run-todoist-agent-team.ps1 的並行邏輯是固定的，經理 Agent 可提升編排智慧。"
+        },
+        {
+          "source_project": "crewAIInc/crewAI",
+          "pattern": "角色特化（role + goal + backstory）",
+          "target_files": [
+            "prompts/team/todoist-*.md",
+            "templates/sub-agent/*.md"
+          ],
+          "priority": "P2",
+          "effort": "low",
+          "description": "為各 Agent prompt 新增 frontmatter 的 role/goal/backstory 欄位。例如：`todoist-auto-ai_deep_research.md` 的 role=「AI 技術深度研究員」、goal=「每日規劃一個 AI 技術深度研究」、backstory=「擁有 5 年 AI 論文閱讀經驗」。優點：強化角色認同，提升輸出一致性。"
+        },
+        {
+          "source_project": "langchain-ai/langgraph",
+          "pattern": "持久化執行（故障自動恢復）",
+          "target_files": [
+            "state/run-fsm.json",
+            "run-todoist-agent-team.ps1"
+          ],
+          "priority": "P0",
+          "effort": "medium",
+          "description": "強化 run-fsm.json 的殭屍偵測機制（已有基礎），新增「中斷點快照」功能。當 Phase 2 的某個 Agent 超時或失敗時，將已完成的 Agent 結果快照到 `state/phase2-snapshot-{traceId}.json`，下次執行時可選擇「從快照恢復」（跳過已完成的 Agent，僅重試失敗的）。目前 timeout 後整個 Phase 2 都需重新執行，浪費資源。"
+        },
+        {
+          "source_project": "langchain-ai/langgraph",
+          "pattern": "Human-in-the-loop（任意時點干預）",
+          "target_files": [
+            "prompts/team/todoist-query.md",
+            "config/approval-rules.yaml"
+          ],
+          "priority": "P2",
+          "effort": "high",
+          "description": "引入「干預點」配置：在 config/approval-rules.yaml 定義哪些任務類型需要人工批准。例如：git_push 任務在 Phase 2 完成後，寫入 `state/approval-pending-{task_key}.json`，並發送 ntfy 通知，等待用戶回覆「approve」或「reject」。Phase 3 檢查批准狀態後才執行。適用於高風險操作（git push、KB 大量匯入、系統配置變更）。"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 3
+        },
+        "research_depth": "adequate",
+        "notes": "三個專案均為 2026 年熱門框架，stars 數量與活躍度皆高，資訊來源可靠。OpenClaw 的 Skill 系統與我們 Skill-First 策略高度相關；CrewAI 的多 Agent 編排與我們 Team 模式契合；LangGraph 的持久化執行可補強我們系統的容錯能力。"
+      }
     }
   ]
 }

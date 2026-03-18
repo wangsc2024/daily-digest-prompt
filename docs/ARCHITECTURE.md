@@ -26,6 +26,8 @@ daily-digest-prompt/
     notification.yaml             # ntfy 通知配置（topic、標籤、模板）
     dedup-policy.yaml             # 研究去重策略（冷卻天數、飽和閾值、跨任務去重）
     digest-format.md              # 摘要輸出排版模板
+    schemas/
+      results-auto-task-schema.json  # 自動任務結果統一格式 Schema（v1.1.0，供 29 個 todoist-auto-*.json 使用）
 
   # 模板層（按需載入，不預載進 context window）
   templates/
