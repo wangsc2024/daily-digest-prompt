@@ -22,9 +22,11 @@ Agent Guardian - Error Classification, Circuit Breaker & Loop Detection
   result = detector.check_loop(tool, params, output)
   saved_state = detector.get_state()  # 寫回 state/loop-state-{sid}.json
 """
+import hashlib
 import json
 import os
 import re
+from collections import deque
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
@@ -412,9 +414,6 @@ class CircuitBreaker:
 # ============================================
 # Loop Detector
 # ============================================
-
-import hashlib
-from collections import deque
 
 
 def _load_loop_thresholds() -> dict:

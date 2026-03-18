@@ -257,8 +257,12 @@ def get_rule_re_flags(rule):
     return re.IGNORECASE if rule.get("flags") == "IGNORECASE" else 0
 
 
-def log_blocked_event(session_id, tool, summary, reason, guard_tag):
-    """將攔截事件寫入結構化 JSONL 日誌。"""
+def log_blocked_event(session_id, tool, summary, reason, guard_tag, level: str = "block"):
+    """將攔截事件寫入結構化 JSONL 日誌。
+
+    Args:
+        level: 嚴重程度，"block"（攔截）或 "warn"（警告，不攔截）
+    """
     log_dir = os.path.join("logs", "structured")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d") + ".jsonl")
@@ -267,10 +271,10 @@ def log_blocked_event(session_id, tool, summary, reason, guard_tag):
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
         "tool": tool,
-        "event": "blocked",
+        "event": "blocked" if level == "block" else "warn",
         "reason": reason,
         "summary": sanitize_sensitive_data(summary[:200]),
-        "tags": ["blocked", guard_tag],
+        "tags": [level, guard_tag],
     }
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -549,3 +553,47 @@ def compose_middlewares(middlewares: list) -> "object":
     """
     from hook_pipeline import compose_pipeline  # noqa: F401
     return compose_pipeline(middlewares)
+
+
+# ── ADR-026：JSON Schema 驗證工具函數 ────────────────────────────────────────
+
+def validate_json_schema(data: dict, schema: dict) -> tuple[bool, list[str]]:
+    """
+    以 JSON Schema 驗證資料，優先使用 jsonschema 套件，不可用時退回基本必填欄位檢查。
+
+    Args:
+        data: 待驗證的 dict 資料
+        schema: JSON Schema dict（Draft-7 格式）
+
+    Returns:
+        (is_valid, errors) — errors 為空串列表示驗證通過
+    """
+    try:
+        import jsonschema
+        validator = jsonschema.Draft7Validator(schema)
+        errors = [e.message for e in validator.iter_errors(data)]
+        return (len(errors) == 0, errors)
+    except ImportError:
+        pass
+
+    # Fallback：只檢查頂層 required 欄位
+    errors: list[str] = []
+    required = schema.get("required", [])
+    for field in required:
+        if field not in data:
+            errors.append(f"缺少必填欄位: {field}")
+
+    # anyOf：只要有一組必填欄位存在即可
+    for any_of_item in schema.get("anyOf", []):
+        sub_required = any_of_item.get("required", [])
+        if sub_required and all(f in data for f in sub_required):
+            break
+    else:
+        any_of_list = schema.get("anyOf", [])
+        if any_of_list:
+            options = " 或 ".join(
+                str(item.get("required", [])) for item in any_of_list
+            )
+            errors.append(f"anyOf 不滿足，需提供以下其中一組欄位: {options}")
+
+    return (len(errors) == 0, errors)

@@ -11,7 +11,9 @@ PreToolUse:Write/Edit Guard — 檔案寫入機器強制攔截。
 規則來源：config/hook-rules.yaml（不可用時回退至內建預設值）。
 攔截事件記錄至 logs/structured/YYYY-MM-DD.jsonl。
 """
+import json
 import os
+import re
 
 from hook_utils import (
     filter_rules_by_preset,
@@ -19,6 +21,7 @@ from hook_utils import (
     log_blocked_event,
     output_decision,
     read_stdin_json,
+    validate_json_schema,
 )
 
 # YAML 不可用時的內建預設規則
@@ -177,13 +180,55 @@ def check_write_path(file_path, rules=None, project_root=None):
     return False, None, None
 
 
+# ADR-026：results/todoist-auto-*.json 的 schema 驗證
+_AUTO_TASK_RESULT_PATTERN = re.compile(r"results[/\\]todoist-auto-[a-z_]+\.json$", re.IGNORECASE)
+_SCHEMA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "config", "schemas", "results-auto-task-schema.json"
+)
+_cached_result_schema: dict | None = None
+
+
+def _load_result_schema() -> dict:
+    global _cached_result_schema
+    if _cached_result_schema is None:
+        try:
+            with open(_SCHEMA_PATH, encoding="utf-8") as f:
+                _cached_result_schema = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            _cached_result_schema = {}
+    return _cached_result_schema
+
+
+def _validate_auto_task_result(file_path: str, content: str, session_id: str, tool_name: str):
+    """對 results/todoist-auto-*.json 執行 Schema 驗證；驗證失敗僅記錄 warning，不攔截。"""
+    schema = _load_result_schema()
+    if not schema:
+        return  # schema 不可用，跳過
+
+    try:
+        data = json.loads(content)
+    except (json.JSONDecodeError, TypeError):
+        return  # 內容非 JSON，交由寫入後再處理
+
+    is_valid, errors = validate_json_schema(data, schema)
+    if not is_valid:
+        log_blocked_event(
+            session_id, tool_name, file_path,
+            f"[ADR-026 WARN] results schema 驗證失敗：{'; '.join(errors)}",
+            "schema-warn",
+            level="warn"
+        )
+
+
 def main():
     data = read_stdin_json()
     if data is None:
         return output_decision("allow")
 
     tool_name = data.get("tool_name", "Write")
-    file_path = data.get("tool_input", {}).get("file_path", "")
+    tool_input = data.get("tool_input", {})
+    file_path = tool_input.get("file_path", "")
     session_id = data.get("session_id", "")
 
     blocked, reason, guard_tag = check_write_path(file_path)
@@ -191,6 +236,12 @@ def main():
     if blocked:
         log_blocked_event(session_id, tool_name, file_path, reason, guard_tag)
         return output_decision("block", reason)
+
+    # ADR-026：todoist-auto 結果檔 schema 驗證（warning-only，不攔截）
+    if _AUTO_TASK_RESULT_PATTERN.search(file_path):
+        content = tool_input.get("content", tool_input.get("new_string", ""))
+        if content:
+            _validate_auto_task_result(file_path, content, session_id, tool_name)
 
     return output_decision("allow")
 
