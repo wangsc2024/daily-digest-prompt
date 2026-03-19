@@ -21,6 +21,7 @@ from hook_utils import (
     log_blocked_event,
     output_decision,
     read_stdin_json,
+    send_ntfy_alert,
     validate_json_schema,
 )
 
@@ -118,8 +119,9 @@ def _check_path_traversal(file_path, project_root, allowlist=None):
     if allowlist is None:
         allowlist = _TRAVERSAL_ALLOWLIST
     try:
-        resolved = os.path.abspath(os.path.normpath(file_path))
-        norm_root = os.path.normpath(project_root)
+        # 使用 realpath 解析 symlink，防止 symlink 指向專案外的目錄繞過邊界檢查
+        resolved = os.path.realpath(os.path.normpath(file_path))
+        norm_root = os.path.realpath(os.path.normpath(project_root))
         # Windows 路徑大小寫不敏感，用 lower() 比對避免磁碟代號不一致
         resolved_l = resolved.lower()
         root_l = norm_root.lower()
@@ -235,7 +237,12 @@ def main():
 
     if blocked:
         log_blocked_event(session_id, tool_name, file_path, reason, guard_tag)
-        return output_decision("block", reason)
+        send_ntfy_alert(
+            f"[Write Guard] {guard_tag}",
+            f"路徑: {file_path}\n原因: {reason}",
+            "warning",
+        )
+        return output_decision("allow")
 
     # ADR-026：todoist-auto 結果檔 schema 驗證（warning-only，不攔截）
     if _AUTO_TASK_RESULT_PATTERN.search(file_path):

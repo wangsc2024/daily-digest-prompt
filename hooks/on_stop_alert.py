@@ -31,6 +31,7 @@ from datetime import date, datetime, timedelta
 
 NTFY_TOPIC = "wangsc2025"
 NTFY_MAX_BYTES = 4096  # ntfy message size limit
+_PROJ_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _get_skill_diff(reserved_bytes: int = 0) -> str:
@@ -63,7 +64,7 @@ def _get_skill_diff(reserved_bytes: int = 0) -> str:
 
 def _offset_file() -> str:
     """Return path to the offset tracking file for today."""
-    return os.path.join("logs", "structured", ".last_analyzed_offset")
+    return os.path.join(_PROJ_ROOT, "logs", "structured", ".last_analyzed_offset")
 
 
 def _read_offset() -> tuple:
@@ -109,7 +110,7 @@ def read_session_entries(today: str, sid_prefix: str) -> list:
     Filters by session ID prefix (first 12 chars) to isolate
     this session's entries from concurrent sessions.
     """
-    log_file = os.path.join("logs", "structured", f"{today}.jsonl")
+    log_file = os.path.join(_PROJ_ROOT, "logs", "structured", f"{today}.jsonl")
     all_entries = _parse_all_entries(log_file)
     return [e for e in all_entries if e.get("sid", "").startswith(sid_prefix)]
 
@@ -121,7 +122,7 @@ def read_todays_log() -> tuple:
     contains lines added since the last analysis.
     """
     today = datetime.now().strftime("%Y-%m-%d")
-    log_file = os.path.join("logs", "structured", f"{today}.jsonl")
+    log_file = os.path.join(_PROJ_ROOT, "logs", "structured", f"{today}.jsonl")
 
     if not os.path.exists(log_file):
         return ([], 0)
@@ -364,7 +365,7 @@ def send_ntfy_alert(title: str, message: str, severity: str):
 def write_session_summary(analysis: dict, alert_sent: bool, severity: str,
                           session_id: str = ""):
     """Write session summary to summary log."""
-    summary_file = os.path.join("logs", "structured", "session-summary.jsonl")
+    summary_file = os.path.join(_PROJ_ROOT, "logs", "structured", "session-summary.jsonl")
     os.makedirs(os.path.dirname(summary_file), exist_ok=True)
 
     summary = {
@@ -418,7 +419,7 @@ def _cleanup_stale_state_files(retention_days=7):
 
 def _rotate_logs(retention_days=7):
     """刪除超過保留天數的結構化日誌與過期 session-summary 條目。"""
-    log_dir = os.path.join("logs", "structured")
+    log_dir = os.path.join(_PROJ_ROOT, "logs", "structured")
     if not os.path.isdir(log_dir):
         return
     cutoff = (datetime.now() - timedelta(days=retention_days)).strftime("%Y-%m-%d")

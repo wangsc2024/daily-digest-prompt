@@ -220,6 +220,18 @@ write_rules:
       - "D:/Source/knowledge"  # 知識庫同步腳本與 RAG 協作目錄
       - "D:/Source/game_web"  # 遊戲專案（Cursor CLI 遊戲型任務產出）
 
+  # ADR-026：results/todoist-auto-*.json schema 驗證（warning-only，不攔截）
+  # 對應 pre_write_guard.py 的 _AUTO_TASK_RESULT_PATTERN（line 185）
+  - id: auto-task-result-schema
+    description: "自動任務結果 JSON schema 驗證"
+    check: path_match
+    patterns:
+      - 'results[/\\]todoist-auto-[a-z_]+\.json$'
+    action: warn_only         # 不攔截，僅記錄 schema 違規警告
+    reason: "results/todoist-auto-*.json 須符合 config/schemas/results-auto-task-schema.json（ADR-026）"
+    guard_tag: schema-validate
+    priority: low             # 可觀測性規則，不阻擋寫入
+
   # 註解：SKILL.md 保護規則已移除，因為會阻擋用戶明確要求的合法修改
   # 改依賴 Git 版本控制作為安全網
   # - id: skill-md-protect

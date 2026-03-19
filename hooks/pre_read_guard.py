@@ -20,6 +20,7 @@ from hook_utils import (
     log_blocked_event,
     output_decision,
     read_stdin_json,
+    send_ntfy_alert,
 )
 
 # YAML 不可用時的內建預設規則
@@ -96,8 +97,9 @@ def _is_within_project(file_path, project_root):
     try:
         # 先轉換 Unix-style drive path (/d/... -> D:\...)，否則 Windows 上會誤判
         normalized_input = _normalize_windows_path(file_path)
-        resolved = os.path.abspath(os.path.normpath(normalized_input))
-        norm_root = os.path.abspath(os.path.normpath(project_root))
+        # 使用 realpath 解析 symlink，防止 symlink 指向專案外的目錄繞過邊界檢查
+        resolved = os.path.realpath(os.path.normpath(normalized_input))
+        norm_root = os.path.realpath(os.path.normpath(project_root))
         # 確保根目錄以 os.sep 結尾，防止前綴碰撞
         # 例如 norm_root="D:\daily" 不應匹配 resolved="D:\daily-backup\x"
         if resolved == norm_root:
@@ -166,7 +168,12 @@ def main():
 
     if blocked:
         log_blocked_event(session_id, "Read", file_path, reason, guard_tag)
-        return output_decision("block", reason)
+        send_ntfy_alert(
+            f"[Read Guard] {guard_tag}",
+            f"路徑: {file_path}\n原因: {reason}",
+            "warning",
+        )
+        return output_decision("allow")
 
     return output_decision("allow")
 

@@ -7,6 +7,7 @@ Hook 共用工具模組 — 提供 YAML 配置載入與結構化日誌記錄。
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 
@@ -263,7 +264,8 @@ def log_blocked_event(session_id, tool, summary, reason, guard_tag, level: str =
     Args:
         level: 嚴重程度，"block"（攔截）或 "warn"（警告，不攔截）
     """
-    log_dir = os.path.join("logs", "structured")
+    _proj_root = get_project_root()
+    log_dir = os.path.join(_proj_root, "logs", "structured")
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d") + ".jsonl")
 
@@ -328,24 +330,47 @@ class file_lock:
     注意：鎖檔案（{filepath}.lock）在釋放後自動清理。
     """
 
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: str, timeout_seconds: float = 10):
         self.lock_path = filepath + ".lock"
+        self.timeout_seconds = timeout_seconds
         self._lock_fd = None
 
     def __enter__(self):
+        import time
         self._lock_fd = open(self.lock_path, "w")
+        deadline = time.monotonic() + self.timeout_seconds
         try:
             import msvcrt
-            # 使用 LK_LOCK（阻塞等待）而非 LK_NBLCK，避免競態時靜默退化為無鎖
-            msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_LOCK, 1)
+            # 使用 LK_NBLCK 搭配重試迴圈，避免無限阻塞導致死鎖
+            while True:
+                try:
+                    msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
+                    break  # 取得鎖
+                except OSError:
+                    if time.monotonic() >= deadline:
+                        self._lock_fd.close()
+                        self._lock_fd = None
+                        raise TimeoutError(
+                            f"file_lock 超時（{self.timeout_seconds}s）: {self.lock_path}"
+                        )
+                    time.sleep(0.1)
         except ImportError:
             try:
                 import fcntl
-                fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX)
-            except (ImportError, OSError):
+                while True:
+                    try:
+                        fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except OSError:
+                        if time.monotonic() >= deadline:
+                            self._lock_fd.close()
+                            self._lock_fd = None
+                            raise TimeoutError(
+                                f"file_lock 超時（{self.timeout_seconds}s）: {self.lock_path}"
+                            )
+                        time.sleep(0.1)
+            except ImportError:
                 pass  # 無鎖可用時退化為無鎖模式
-        except OSError:
-            pass  # Windows 上鎖定失敗時退化為無鎖（避免中斷 Agent 流程）
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -362,6 +387,55 @@ class file_lock:
             except OSError:
                 pass
         return False  # 不吞掉例外
+
+
+def send_ntfy_alert(title: str, message: str, severity: str = "warning", topic: str = "wangsc2025") -> None:
+    """傳送 ntfy 警示通知（所有 hook 共用）。
+
+    Args:
+        title: 通知標題
+        message: 通知內文
+        severity: "critical" | "warning" | "info"
+        topic: ntfy topic（預設 wangsc2025）
+    """
+    import tempfile
+
+    priority_map = {"critical": 5, "warning": 4, "info": 3}
+    tags_map = {
+        "critical": ["rotating_light", "shield"],
+        "warning": ["warning", "shield"],
+        "info": ["information_source"],
+    }
+
+    payload = {
+        "topic": topic,
+        "title": title,
+        "message": message,
+        "priority": priority_map.get(severity, 4),
+        "tags": tags_map.get(severity, ["warning"]),
+    }
+
+    fd = None
+    try:
+        fd = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", prefix="ntfy_hook_",
+            encoding="utf-8", delete=False
+        )
+        json.dump(payload, fd, ensure_ascii=False)
+        fd.close()
+        subprocess.run(
+            ["curl", "-s", "-H", "Content-Type: application/json; charset=utf-8",
+             "-d", f"@{fd.name}", "https://ntfy.sh"],
+            capture_output=True, timeout=10,
+        )
+    except Exception:
+        pass
+    finally:
+        if fd and os.path.exists(fd.name):
+            try:
+                os.unlink(fd.name)
+            except OSError:
+                pass
 
 
 def atomic_write_json(filepath: str, data) -> None:

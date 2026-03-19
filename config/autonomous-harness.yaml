@@ -7,8 +7,12 @@ autonomous_harness:
   failure_stats_path: "state/failure-stats.json"
   failed_auto_tasks_path: "state/failed-auto-tasks.json"
   api_health_path: "state/api-health.json"
+  auto_task_fairness_path: "state/auto-task-fairness-hint.json"
+  token_budget_state_path: "state/token-budget-state.json"
+  scheduler_heartbeat_path: "state/scheduler-heartbeat.json"
   output_plan_path: "state/autonomous-harness-plan.json"
   recovery_queue_path: "state/autonomous-recovery-queue.json"
+  runtime_state_path: "state/autonomous-runtime.json"
 
   thresholds:
     stale_run_minutes: 45
@@ -16,6 +20,8 @@ autonomous_harness:
     scheduler_failure_threshold: 2
     failed_auto_task_threshold: 2
     api_open_circuit_threshold: 1
+    starvation_task_threshold: 3
+    heartbeat_stale_minutes: 20
 
   dispatch:
     daily-digest:
@@ -32,3 +38,17 @@ autonomous_harness:
         - "Bypass"
         - "-File"
         - "run-todoist-agent-team.ps1"
+
+  runtime_profiles:
+    normal:
+      max_parallel_auto_tasks: 4
+      allow_heavy_auto_tasks: true
+      allow_research_auto_tasks: true
+    degraded:
+      max_parallel_auto_tasks: 2
+      allow_heavy_auto_tasks: false
+      allow_research_auto_tasks: true
+    recovery:
+      max_parallel_auto_tasks: 1
+      allow_heavy_auto_tasks: false
+      allow_research_auto_tasks: false

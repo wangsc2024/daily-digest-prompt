@@ -80,6 +80,20 @@ system_insight:
   priority: 2
   tags: ["gear", "chart_with_upwards_trend"]
 
+# 晨間佛偈推播（06:30，鼓勵精進用功）
+morning_verse:
+  title: "早安佛偈"
+  topic: "wangsc2025"
+  tags: ["lotus_position", "pray"]
+  priority: 3
+
+# 黃昏佛偈推播（17:05，回歸本性・借假修真）
+evening_verse:
+  title: "回歸本性 借假修真"
+  topic: "wangsc2025"
+  tags: ["lotus_position", "pray"]
+  priority: 3
+
 # Harness 告警配置（on_stop_alert.py 讀取；抑制頻率與冷卻）
 harness_alerts:
   # 團隊模式整合

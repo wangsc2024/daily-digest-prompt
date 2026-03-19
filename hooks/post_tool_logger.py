@@ -490,6 +490,32 @@ def main():
     # Build log entry
     # span_type hierarchy: session > phase > agent > tool_call
     # Each JSONL entry is always a "tool_call" span; phase/session spans are recorded by PS1 scripts.
+    # ADR-030: span_id = {phase}-{tool}-{ts_ms_last6} 提供唯一識別（輕量版 OpenTelemetry span）
+    _now_ms = str(int(datetime.now().timestamp() * 1000))[-6:]
+    _phase_env = os.environ.get("AGENT_PHASE", "unknown")
+    span_id = f"{_phase_env}-{tool_name.lower()}-{_now_ms}"
+
+    # ADR-030: cause_chain — 記錄執行路徑因果關係
+    # cache_status: 從 tags 推斷（cache-hit/cache-miss）
+    _cache_status = "not_applicable"
+    if "cache-hit" in tags:
+        _cache_status = "hit"
+    elif "cache-miss" in tags:
+        _cache_status = "miss"
+    elif "cache-read" in tags or "cache-write" in tags:
+        _cache_status = "stale"
+
+    # task_key: 從 AGENT_NAME 取得（去掉 auto- 前綴）
+    _agent_name = os.environ.get("AGENT_NAME", "")
+    _task_key = _agent_name.replace("auto-", "") if _agent_name.startswith("auto-") else _agent_name
+
+    cause_chain = {
+        "task_key": _task_key,
+        "cache_status": _cache_status,
+        "retry_attempts": 0,  # PostToolUse 無法直接感知重試次數，由 phase-level span 補充
+        "failure_point": f"{_phase_env}-{tool_name.lower()}" if has_error else None,
+    }
+
     trace_id = os.environ.get("DIGEST_TRACE_ID", "")
     if not trace_id and os.environ.get("AGENT_PHASE") == "phase3":
         # Fallback: Phase 3 (assemble) 可能未繼承 env，從 state/run-fsm.json 取最近 todoist run_id
@@ -517,6 +543,7 @@ def main():
         "ts": datetime.now().astimezone().isoformat(),
         "sid": (session_id or "")[:12],
         "trace_id": trace_id,
+        "span_id": span_id,           # ADR-030: 唯一 span 識別（{phase}-{tool}-{ts_ms}）
         "phase": os.environ.get("AGENT_PHASE", ""),
         "agent": os.environ.get("AGENT_NAME", ""),
         "span_type": "tool_call",
@@ -527,6 +554,7 @@ def main():
         "output_len": output_len,
         "has_error": has_error,
         "tags": tags,
+        "cause_chain": cause_chain,   # ADR-030: 因果鏈（task_key/cache_status/failure_point）
     }
 
     # Add loop detection details if detected
@@ -551,7 +579,10 @@ def main():
         entry["parent_trace_id"] = parent_trace_id
 
     # Write to JSONL (with disk protection)
-    log_dir = os.path.join("logs", "structured")
+    # 使用絕對路徑防止 CWD 漂移產生嵌套目錄
+    from hook_utils import get_project_root
+    _log_root = get_project_root()
+    log_dir = os.path.join(_log_root, "logs", "structured")
     log_file = os.path.join(log_dir, datetime.now().strftime("%Y-%m-%d") + ".jsonl")
 
     try:
