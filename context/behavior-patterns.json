@@ -1246,12 +1246,12 @@
         "api-read",
         "knowledge"
       ],
-      "count": 123,
+      "count": 124,
       "confidence": 1.0,
-      "success_count": 123,
+      "success_count": 124,
       "first_seen": "2026-03-04T15:20:54.742839+08:00",
-      "last_seen": "2026-03-19T15:20:32.891750+08:00",
-      "total_input": 11062,
+      "last_seen": "2026-03-20T07:35:14.785292+08:00",
+      "total_input": 11151,
       "total_output": 0
     },
     "2eae5f7bf1d9": {
@@ -2863,20 +2863,21 @@
       "total_input": 237,
       "total_output": 0
     },
-    "210b4d183b5f": {
+    "453596260f51": {
       "tool": "Bash",
-      "summary_sample": "cd D:/Source/daily-digest-prompt && git add tests/hooks/test_hook_utils.py tests/hooks/test_on_stop_alert.py tests/hooks/test_pre_read_guard.py tests/",
+      "summary_sample": "curl -s -X POST \"http://localhost:3000/api/import\" -H \"Content-Type: application/json; charset=utf-8\" -d @import_note.json > /tmp/kb-import-result.jso",
       "tags": [
+        "api-call",
         "team-mode",
-        "git",
-        "git-commit"
+        "knowledge",
+        "api-write"
       ],
       "count": 1,
       "confidence": 0.1,
       "success_count": 1,
-      "first_seen": "2026-03-20T07:34:45.687584+08:00",
-      "last_seen": "2026-03-20T07:34:45.687584+08:00",
-      "total_input": 415,
+      "first_seen": "2026-03-20T07:35:20.682932+08:00",
+      "last_seen": "2026-03-20T07:35:20.682932+08:00",
+      "total_input": 238,
       "total_output": 0
     }
   },
