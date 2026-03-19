@@ -28,6 +28,7 @@ daily-digest-prompt/
     digest-format.md              # 摘要輸出排版模板
     schemas/
       results-auto-task-schema.json  # 自動任務結果統一格式 Schema（v1.1.0，供 29 個 todoist-auto-*.json 使用）
+      execution-trace-schema.json    # Agent 執行追蹤統一 Schema（v1.0.0，供 logs/structured/*.jsonl + system-insight 使用）
 
   # 模板層（按需載入，不預載進 context window）
   templates/

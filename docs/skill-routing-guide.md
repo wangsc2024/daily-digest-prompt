@@ -21,8 +21,8 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^邏輯思維` | web-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
 | `^知識庫` | knowledge-query | Read,Bash,Write | skill-task.md |
 | `^AI` | hackernews-ai-digest | Read,Bash,Write | skill-task.md |
-| `^遊戲優化` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
-| `^遊戲開發` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^遊戲優化` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^遊戲開發` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
 | `^專案優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
 | `^UI` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
@@ -32,8 +32,8 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 | `^品質評估` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | skill-task.md |
 | `^Chat系統` | chatroom-query | Read,Bash,Write,Edit,Glob,Grep | chatroom-task.md |
 | `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | code-task.md |
-| `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
-| `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
+| `^創意` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | game-task.md |
+| `^遊戲研究` | game-workflow-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | research-task.md |
 | `@news` | pingtung-news + pingtung-policy-expert | Read,Bash,Write | skill-task.md |
 | `@write` | 文件撰寫 | Read,Bash,Write | skill-task.md |
 
@@ -48,7 +48,7 @@ Todoist 標籤直接映射到 Skill，不需經過內容關鍵字分析。
 ├── 涉及「待辦/任務/todo」？ -> todoist + (可選) knowledge-query
 ├── 涉及「屏東/新聞/縣政」？ -> pingtung-news + pingtung-policy-expert（必搭）
 ├── 涉及「AI/技術/LLM」？   -> hackernews-ai-digest
-├── 涉及「遊戲/game」？     -> game-design + (可選) knowledge-query
+├── 涉及「遊戲/game」？ -> game-workflow-design + (可選) knowledge-query
 ├── 涉及「習慣/行為」？     -> atomic-habits
 ├── 涉及「學習/技巧」？     -> learning-mastery
 ├── 涉及「知識/筆記/研究」？ -> knowledge-query
@@ -130,7 +130,7 @@ digest-memory（讀取） → api-cache（包裝所有 API） → [主要流程]
 |---------|-----------|------|
 | 程式開發/修改 | - | code-task.md |
 | 知識研究 | web-research + knowledge-query | research-task.md |
-| 遊戲設計/優化 | game-design | game-task.md |
+| 遊戲設計/優化 | game-workflow-design | game-task.md |
 | 有 Skill 匹配 | [對應 Skill] | skill-task.md |
 | 一般任務 | - | general-task.md |
 

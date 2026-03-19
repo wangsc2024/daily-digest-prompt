@@ -82,6 +82,13 @@ flowchart TD
 3. 補測試 `tests/tools/test_autonomous_harness.py`
    - 驗證 stale run、failed auto task、open circuit、restart dispatch
 4. 文件化研究、方案、迭代與驗證報告
+5. 新增 runtime policy 控制面
+   - 輸出 `state/autonomous-runtime.json`
+   - 根據 gate 決定 `normal / degraded / recovery`
+   - 產出 `max_parallel_auto_tasks`、`allow_heavy_auto_tasks`、`allow_research_auto_tasks`
+6. 將 runtime policy 接入 `run-todoist-agent-team.ps1`
+   - 在 Phase 2 前對 auto-task 套用降載與重型任務過濾
+   - 讓「資源自調整」從文件設計變成實際執行路徑
 
 ### 建議工具與版本
 - Python >= 3.9
@@ -95,6 +102,7 @@ flowchart TD
 uv sync
 uv run pytest tests/tools/test_autonomous_harness.py
 uv run python tools/autonomous_harness.py --format json
+python tools/autonomous_harness.py --format json
 ```
 
 ## 風險與回退
@@ -116,10 +124,23 @@ uv run python tools/autonomous_harness.py --format json
 - 調整：加入 action 去重、recovery queue 寫回、只對 restart_agent 執行 subprocess。
 - 結果：可在 dry-run 模式產出完整自治計畫，且保留 execute 分支供後續排程接入。
 
+### Iteration 3
+- 調整：加入 fairness / token-budget / scheduler-heartbeat gate。
+- 實作：supervisor 會寫出 `state/autonomous-runtime.json`，Todoist 排程在 Phase 2 前會讀取並降載。
+- 結果：控制面從「只產生建議」升級為「直接影響 auto-task 調度行為」。
+
+## 本輪驗證
+- `python tools/autonomous_harness.py --format json`：成功；實際輸出 `runtime.mode=degraded`。
+- `state/autonomous-runtime.json`：成功生成；目前策略為 `max_parallel_auto_tasks=2`、`allow_heavy_auto_tasks=false`。
+- `python -m pytest tests/tools/test_autonomous_harness.py`：測試收集成功，但被本機暫存目錄 ACL 阻斷於 pytest tmp/cleanup，屬環境限制。
+
 ## 來源
 - LangGraph v1 release notes: https://docs.langchain.com/oss/python/releases/langgraph-v1
 - LangGraph subgraphs / checkpointer docs: https://docs.langchain.com/oss/javascript/langgraph/use-subgraphs
 - OpenAI Frontier: https://openai.com/index/introducing-openai-frontier/
 - AutoGen AgentOps: https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_agentops/
+- AutoGen observability: https://microsoft.github.io/autogen/0.2/docs/topics/llm-observability/
+- Kubernetes concepts: https://kubernetes.io/docs/concepts/
+- Temporal docs: https://docs.temporal.io/
 - DEVIL'S ADVOCATE: https://arxiv.org/pdf/2405.16334
 - MIRAI: https://arxiv.org/pdf/2407.01231

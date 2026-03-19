@@ -1,8 +1,8 @@
 # Skills 索引與路由引擎
 
-> **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
+> **更新時間:** 2026-03-20 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 29 個工具 = 48 個 Skills）
+## 速查表（19 個核心 + 32 個工具 = 51 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -61,6 +61,9 @@
 | 46 | skill-test-scaffolder | SKILL.md 結構分析→pytest 測試骨架自動生成（frontmatter 驗證/觸發詞/依賴 mock/步驟行為，depends-on: knowledge-query） | skill-test-scaffolder、生成 Skill 測試、Skill 測試骨架、自動生成測試、測試覆蓋擴充、補測試、scaffold test |
 | 47 | skill-registry-sync | Machine-readable Skill Registry 同步（frontmatter 掃描→JSON registry→觸發詞衝突偵測→依賴圖驗證，depends-on: knowledge-query） | skill-registry-sync、Skill 索引同步、Skill registry、觸發詞衝突、依賴圖驗證、Skill manifest、Skill 一致性 |
 | 48 | execution-journal | 統一執行追蹤日誌（per-execution trace entry、Skill chain、cache 命中、跨 Phase 因果關聯，depends-on: scheduler-state、system-insight） | execution-journal、執行追蹤、trace 分析、失敗回溯、Skill chain、執行日誌、跨 Phase 因果 |
+| 49 | hook-registry | 宣告式 Hook 規則盤點與 Registry 治理（hooks/*.py 掃描→hook-rules.yaml 比對→漂移偵測→審計報告，depends-on: system-insight） | hook-registry、hook 規則盤點、guard 鏈審計、hook 規則漂移、hook 一致性、hook registry、hook 治理 |
+| 50 | skill-lifecycle-manager | Skill 生命週期管理（穩定度評分/分層分級/退役候選識別/版本升級建議，depends-on: skill-registry-sync、system-insight、arch-evolution） | skill-lifecycle-manager、Skill 生命週期、Skill 退役、Skill 升級、Skill 分層、lifecycle、deprecation、版本升級評估、穩定度評分 |
+| 51 | game-workflow-design | Flutter + Flame 遊戲開發工作流（Phase 0–5、OpenMoji/ZapSplat 素材管線、Cloudflare Pages 部署，依 KB 4b7bf8f5，depends-on: knowledge-query） | 工作流設計遊戲、Flame Engine、Flutter 遊戲、遊戲開發流程、遊戲工作流、OpenMoji、ZapSplat、素材管線、Bonfire、flame_svg、flame_audio、Cloudflare Pages |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

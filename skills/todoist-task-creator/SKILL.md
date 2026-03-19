@@ -80,11 +80,11 @@ triggers:
 | `UI` | 程式開發 | code-task.md | UI 元件開發 |
 | `UI/UX` | 程式開發 | code-task.md | UI/UX 設計實作 |
 | `Cloudflare` | 程式開發 | code-task.md | Cloudflare Pages/Workers 相關 |
-| `遊戲優化` | game-design | game-task.md | 遊戲品質優化 |
-| `遊戲開發` | game-design | game-task.md | 遊戲新功能開發 |
+| `遊戲優化` | game-workflow-design | game-task.md | 遊戲品質優化 |
+| `遊戲開發` | game-workflow-design | game-task.md | 遊戲新功能開發 |
 | `AI` | hackernews-ai-digest | skill-task.md | AI/LLM 研究 |
-| `創意` | game-design | game-task.md | 創意遊戲開發與優化 |
-| `遊戲研究` | game-design + knowledge-query | research-task.md | 遊戲設計研究、技術調研 |
+| `創意` | game-workflow-design | game-task.md | 創意遊戲開發與優化 |
+| `遊戲研究` | game-workflow-design + knowledge-query | research-task.md | 遊戲設計研究、技術調研 |
 | `系統審查` | system-audit | skill-task.md | 系統審查、評分 |
 | `品質評估` | system-audit | skill-task.md | 品質評估 |
 | `Chat系統` | 程式開發 | code-task.md | 聊天系統開發 |

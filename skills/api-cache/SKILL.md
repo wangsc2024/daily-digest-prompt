@@ -94,6 +94,37 @@ triggers:
 
 **規則**：API 失敗時，若快取存在且未超過「降級時限」-> 使用過期快取並標記；否則回報「服務不可用」。
 
+## 自適應 TTL（Adaptive TTL）
+
+### 概述
+`config/cache-policy.yaml` 的 `adaptive_ttl` 段落定義了動態 TTL 調整規則，由 `cache-optimizer` Skill 每週執行分析後自動調整各端點的 TTL 值。
+
+### 調整規則
+| 條件 | 動作 | 上下限 |
+|------|------|--------|
+| hit_ratio < 20% 且 volatility=low | TTL × 2（倍增） | 最長 24h |
+| hit_ratio > 80% 且 volatility=high | TTL ÷ 2（半減） | 最短 15min |
+| hit_ratio < 20% 且 volatility=high | 不調整（需人工分析） | - |
+
+### 各端點 Volatility 評估
+| 端點 | Volatility | 說明 |
+|------|-----------|------|
+| todoist | high | 任務隨時更新 |
+| pingtung-news | low | 每日更新 1-3 次 |
+| hackernews | medium | 每 1-3 小時更新 |
+| knowledge | low | KB 手動更新，極少變化 |
+| gmail | medium | 取決於郵件頻率 |
+| chatroom | high | 任務佇列隨時變化 |
+
+### 使用方式
+- **自動執行**：`cache-optimizer` Skill 每週執行分析，根據 7 天滑動視窗的 cache_hit_ratio 自動調整 TTL
+- **手動觸發**：執行 `cache-optimizer` Skill 可立即分析並調整
+- **驗證**：執行 `check-health.ps1` 檢查 [快取效率] 區塊的 cache_hit_ratio 是否達到 40% 目標
+
+### 注意事項
+- 調整後的 TTL 值會寫回 `config/cache-policy.yaml`，Agent 下次執行時生效
+- 若某端點 hit_ratio 持續偏低（< 20%），應檢查是否因呼叫頻率過高或 TTL 設定過短
+
 ## 快取檔案清理
 
 快取檔案不需要定期清理（會被覆寫），但超過降級時限的快取視為無效，降級時也不使用。
