@@ -27,6 +27,13 @@ from on_stop_alert import (
 
 # --- Fixtures ---
 
+@pytest.fixture(autouse=True)
+def _patch_proj_root(tmp_path, monkeypatch):
+    """讓 on_stop_alert._PROJ_ROOT 跟隨 tmp_path，避免寫入真實目錄。"""
+    import on_stop_alert
+    monkeypatch.setattr(on_stop_alert, "_PROJ_ROOT", str(tmp_path))
+
+
 @pytest.fixture
 def healthy_entries():
     """健康的日誌記錄（無錯誤、無攔截）。"""

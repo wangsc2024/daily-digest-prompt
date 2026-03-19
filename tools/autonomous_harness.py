@@ -80,6 +80,7 @@ class AutonomousHarness:
         self.settings = self.config["autonomous_harness"]
         self.thresholds = self.settings["thresholds"]
         self.dispatch = self.settings.get("dispatch", {})
+        self.runtime_profiles = self.settings.get("runtime_profiles", {})
 
     def _resolve(self, key: str) -> Path:
         return self.repo_root / self.settings[key]
@@ -179,6 +180,97 @@ class AutonomousHarness:
             )
         return actions
 
+    def _fairness_actions(self, fairness_hint: dict[str, Any]) -> list[Action]:
+        if not fairness_hint.get("starvation_detected"):
+            return []
+        starvation_count = int(fairness_hint.get("starvation_count", 0))
+        if starvation_count < self.thresholds["starvation_task_threshold"]:
+            return []
+        return [
+            Action(
+                action_type="rebalance_tasks",
+                target="todoist",
+                reason=f"偵測到 {starvation_count} 個任務飢餓，需降低並行並優先補跑低頻任務",
+                severity="high",
+            )
+        ]
+
+    def _token_budget_actions(self, token_budget_state: dict[str, Any], now: datetime) -> list[Action]:
+        last_alerted_date = token_budget_state.get("last_alerted_date")
+        if last_alerted_date != now.date().isoformat():
+            return []
+        return [
+            Action(
+                action_type="scale_down_workload",
+                target="global",
+                reason="今日已觸發 token budget 告警，需暫停高成本自動任務",
+                severity="medium",
+            )
+        ]
+
+    def _heartbeat_actions(self, scheduler_heartbeat: dict[str, Any], now: datetime) -> list[Action]:
+        status = scheduler_heartbeat.get("status")
+        ts = _parse_datetime(scheduler_heartbeat.get("timestamp"))
+        stale_after = timedelta(minutes=self.thresholds["heartbeat_stale_minutes"])
+        if status == "running" and ts and now - ts <= stale_after:
+            return []
+        reason = "scheduler heartbeat 遺失或逾時，需進入恢復模式"
+        if ts:
+            reason = f"scheduler heartbeat 最後更新於 {ts.isoformat()}，超過自治閾值"
+        return [
+            Action(
+                action_type="queue_self_heal",
+                target="scheduler-heartbeat",
+                reason=reason,
+                severity="critical",
+            )
+        ]
+
+    def _derive_runtime_state(
+        self,
+        plan: dict[str, Any],
+        fairness_hint: dict[str, Any],
+        token_budget_state: dict[str, Any],
+        scheduler_heartbeat: dict[str, Any],
+    ) -> dict[str, Any]:
+        has_critical = any(action["severity"] == "critical" for action in plan["actions"])
+        has_high = any(action["severity"] == "high" for action in plan["actions"])
+        token_alert = token_budget_state.get("last_alerted_date") == plan["generated_at"][:10]
+        starvation_detected = bool(fairness_hint.get("starvation_detected"))
+        heartbeat_stale = any(action["target"] == "scheduler-heartbeat" for action in plan["actions"])
+
+        if has_critical or heartbeat_stale:
+            mode = "recovery"
+        elif has_high or token_alert or starvation_detected or plan["summary"]["open_circuits"] > 0:
+            mode = "degraded"
+        else:
+            mode = "normal"
+
+        profile = self.runtime_profiles.get(mode, {})
+        reasons = [action["reason"] for action in plan["actions"][:5]]
+        return {
+            "generated_at": plan["generated_at"],
+            "mode": mode,
+            "reasons": reasons,
+            "gates": {
+                "heartbeat_stale": heartbeat_stale,
+                "starvation_detected": starvation_detected,
+                "token_budget_alert": token_alert,
+                "open_circuits": plan["summary"]["open_circuits"],
+            },
+            "policies": {
+                "max_parallel_auto_tasks": profile.get("max_parallel_auto_tasks", 4),
+                "allow_heavy_auto_tasks": profile.get("allow_heavy_auto_tasks", True),
+                "allow_research_auto_tasks": profile.get("allow_research_auto_tasks", True),
+                "priority_recovery_targets": [
+                    action["target"]
+                    for action in plan["actions"]
+                    if action["action_type"] in {"queue_self_heal", "rebalance_tasks"}
+                ],
+            },
+            "scheduler_heartbeat": scheduler_heartbeat,
+        }
+
     def build_plan(self, now: datetime | None = None) -> dict[str, Any]:
         now = now or _now()
         run_fsm = _load_json(self._resolve("run_fsm_path"), {"runs": {}, "updated": None})
@@ -186,12 +278,18 @@ class AutonomousHarness:
         failure_stats = _load_json(self._resolve("failure_stats_path"), {"daily": {}, "total": {}})
         failed_auto_tasks = _load_json(self._resolve("failed_auto_tasks_path"), {"entries": []})
         api_health = _load_json(self._resolve("api_health_path"), {"apis": {}})
+        fairness_hint = _load_json(self._resolve("auto_task_fairness_path"), {})
+        token_budget_state = _load_json(self._resolve("token_budget_state_path"), {})
+        scheduler_heartbeat = _load_json(self._resolve("scheduler_heartbeat_path"), {})
 
         actions = []
         actions.extend(self._stale_run_actions(run_fsm, now))
         actions.extend(self._scheduler_failure_actions(scheduler_state))
         actions.extend(self._failed_auto_task_actions(failed_auto_tasks))
         actions.extend(self._api_health_actions(api_health))
+        actions.extend(self._fairness_actions(fairness_hint))
+        actions.extend(self._token_budget_actions(token_budget_state, now))
+        actions.extend(self._heartbeat_actions(scheduler_heartbeat, now))
 
         deduped: list[Action] = []
         seen = set()
@@ -221,19 +319,36 @@ class AutonomousHarness:
             "signals": {
                 "run_fsm_updated": run_fsm.get("updated"),
                 "failure_stats_updated": failure_stats.get("updated"),
+                "fairness_hint": fairness_hint,
+                "token_budget_state": token_budget_state,
+                "scheduler_heartbeat": scheduler_heartbeat,
                 "scheduler_state_recent_statuses": [
                     run.get("status") for run in self._recent_scheduler_runs(scheduler_state)
                 ],
             },
             "actions": [action.as_dict() for action in deduped],
         }
+        plan["runtime"] = self._derive_runtime_state(plan, fairness_hint, token_budget_state, scheduler_heartbeat)
         return plan
 
     def enqueue_recovery(self, plan: dict[str, Any]) -> dict[str, Any]:
         queue_path = self._resolve("recovery_queue_path")
         queue = _load_json(queue_path, {"version": 1, "items": []})
+        existing_pending = {
+            (item.get("action_type"), item.get("target"), item.get("reason"))
+            for item in queue.get("items", [])
+            if item.get("status") == "pending"
+        }
         for action in plan["actions"]:
-            if action["action_type"] not in {"queue_self_heal", "restart_agent"}:
+            if action["action_type"] not in {
+                "queue_self_heal",
+                "restart_agent",
+                "rebalance_tasks",
+                "scale_down_workload",
+            }:
+                continue
+            dedupe_key = (action["action_type"], action["target"], action["reason"])
+            if dedupe_key in existing_pending:
                 continue
             queue["items"].append(
                 {
@@ -245,6 +360,7 @@ class AutonomousHarness:
                     "status": "pending",
                 }
             )
+            existing_pending.add(dedupe_key)
         queue["updated_at"] = plan["generated_at"]
         _write_json(queue_path, queue)
         return queue
@@ -284,6 +400,7 @@ def main() -> None:
     harness = AutonomousHarness()
     plan = harness.build_plan()
     _write_json(harness._resolve("output_plan_path"), plan)
+    _write_json(harness._resolve("runtime_state_path"), plan["runtime"])
     queue = harness.enqueue_recovery(plan)
     if args.execute:
         plan["executions"] = harness.execute(plan)

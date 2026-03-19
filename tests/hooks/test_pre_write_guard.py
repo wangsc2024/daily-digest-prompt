@@ -260,3 +260,23 @@ class TestPathTraversalAbsolutePath:
         blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
         assert blocked, f"Expected block for prefix trick: {evil_path}"
         assert tag == "traversal-guard"
+
+    def test_symlink_escape_blocked(self, tmp_path):
+        """Symlink 逃逸：專案內的 symlink 指向外部目錄應被攔截。
+
+        修復 2026-03-20：原使用 abspath 不解析 symlink，攻擊者可建立
+        專案內的 symlink 指向外部敏感目錄繞過路徑遍歷檢查。
+        """
+        fake_root = str(tmp_path / "project")
+        outside = str(tmp_path / "outside_secrets")
+        os.makedirs(fake_root, exist_ok=True)
+        os.makedirs(outside, exist_ok=True)
+        link_path = os.path.join(fake_root, "sneaky_link")
+        try:
+            os.symlink(outside, link_path)
+        except (OSError, NotImplementedError):
+            pytest.skip("Symlink creation requires elevated privileges on this system")
+        evil_path = os.path.join(link_path, "evil.txt")
+        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
+        assert blocked, f"Symlink escape should be blocked: {evil_path}"
+        assert tag == "traversal-guard"

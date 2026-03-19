@@ -226,6 +226,26 @@ class TestIsWithinProject:
         os.makedirs(project, exist_ok=True)
         assert _is_within_project(project, project) is True
 
+    def test_symlink_escape_blocked(self, tmp_path):
+        """Symlink 指向專案外的路徑應被偵測為不在專案內。
+
+        修復 2026-03-20：原使用 abspath 不解析 symlink，攻擊者可建立
+        專案內的 symlink 指向外部敏感目錄繞過邊界檢查。
+        """
+        project = str(tmp_path / "project")
+        outside = str(tmp_path / "outside_secrets")
+        os.makedirs(project, exist_ok=True)
+        os.makedirs(outside, exist_ok=True)
+        link_path = os.path.join(project, "sneaky_link")
+        try:
+            os.symlink(outside, link_path)
+        except (OSError, NotImplementedError):
+            pytest.skip("Symlink creation requires elevated privileges on this system")
+        target = os.path.join(link_path, "secret.txt")
+        assert _is_within_project(target, project) is False, (
+            "Symlink pointing outside project should be detected"
+        )
+
 
 # ---------------------------------------------------------------------------
 # Regression: false positives (2026-02-16 harness alert)

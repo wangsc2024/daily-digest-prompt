@@ -146,6 +146,11 @@ class TestLoadYamlSection:
 class TestLogBlockedEvent:
     """攔截事件 JSONL 日誌寫入。"""
 
+    @pytest.fixture(autouse=True)
+    def _patch_project_root(self, tmp_path, monkeypatch):
+        import hook_utils
+        monkeypatch.setattr(hook_utils, "get_project_root", lambda: str(tmp_path))
+
     def test_creates_log_entry(self, tmp_path, monkeypatch):
         """應建立包含正確欄位的 JSONL 日誌記錄。"""
         monkeypatch.chdir(tmp_path)
@@ -781,3 +786,45 @@ class TestLoadYamlConfigExceptionNarrowing:
         docstring = file_lock.__doc__
         assert "with open(" in docstring
         assert "json.load(open(" not in docstring
+
+
+class TestFileLockTimeout:
+    """file_lock 超時機制測試（2026-03-20 安全優化）。"""
+
+    def test_lock_accepts_timeout_parameter(self):
+        """file_lock 應接受 timeout_seconds 參數。"""
+        from hook_utils import file_lock
+        lock = file_lock("/tmp/test.json", timeout_seconds=5)
+        assert lock.timeout_seconds == 5
+
+    def test_lock_default_timeout(self):
+        """file_lock 預設超時應為 10 秒。"""
+        from hook_utils import file_lock
+        lock = file_lock("/tmp/test.json")
+        assert lock.timeout_seconds == 10
+
+    def test_lock_timeout_raises_on_contention(self, tmp_path):
+        """當鎖被佔用且超時時應引發 TimeoutError。"""
+        from hook_utils import file_lock
+        target = str(tmp_path / "contested.json")
+        # 手動佔用鎖檔案
+        lock_path = target + ".lock"
+        with open(lock_path, "w") as held:
+            try:
+                import msvcrt
+                msvcrt.locking(held.fileno(), msvcrt.LK_NBLCK, 1)
+                held_locked = True
+            except (ImportError, OSError):
+                held_locked = False
+
+            if held_locked:
+                with pytest.raises(TimeoutError):
+                    with file_lock(target, timeout_seconds=0.5):
+                        pass
+                # 釋放手動鎖
+                try:
+                    msvcrt.locking(held.fileno(), msvcrt.LK_UNLCK, 1)
+                except (ImportError, OSError):
+                    pass
+            else:
+                pytest.skip("Cannot test lock contention on this platform")
