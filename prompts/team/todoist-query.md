@@ -147,8 +147,8 @@ curl -s --max-time 8 \
 | `^邏輯思維` | deep-research + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
 | `^知識庫` | knowledge-query | Read,Bash,Write | 100% |
 | `^AI` | hackernews-ai-digest | Read,Bash,Write | 100% |
-| `^遊戲優化` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
-| `^遊戲開發` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^遊戲優化` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^遊戲開發` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^專案優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^網站優化` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^UI/UX` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
@@ -158,8 +158,8 @@ curl -s --max-time 8 \
 | `^系統審查` | system-audit | Read,Bash,Write,Glob,Grep,WebSearch,WebFetch | 100% |
 | `^Chat系統` | chatroom-query | Read,Bash,Write,Edit,Glob,Grep | 100% |
 | `^專案規劃` | 程式開發（Plan-Then-Execute） | Read,Bash,Write,Edit,Glob,Grep | 100% |
-| `^創意` | game-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
-| `^遊戲研究` | game-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
+| `^創意` | game-workflow-design | Read,Bash,Write,Edit,Glob,Grep | 100% |
+| `^遊戲研究` | game-workflow-design + knowledge-query | Read,Bash,Write,WebSearch,WebFetch | 100% |
 
 ### Tier 2：內容關鍵字比對（信心度 80%）
 比對 SKILL_INDEX 速查表的觸發關鍵字。

@@ -4,6 +4,16 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-20T07:06:47.576498+08:00",
+      "topic": "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化",
+      "status": "completed",
+      "key_findings": "本次聚焦 incident response 冷門面向，整理出 triage、RCA、runbook automation 的共通架構：先蒐證與假設排序，再用 guardrail 控制自動修復。對 daily-digest-prompt 最直接的價值是把 KB 匯入、registry 更新、排程失敗等問題提升為可重用 incident runbook，而非一次性除錯。",
+      "kb_note_ids": [
+        "81574d50-842c-4f3c-a85b-226473c4bde3"
+      ],
+      "next_suggested_angle": "深入事件關聯、根因排序與自動修復安全閘門"
+    },
+    {
       "executed_at": "2026-03-19T02:08:37.920686+08:00",
       "topic": "AI 程式碼審查優化：誤報治理、風險分級與修補建議驗證閉環",
       "status": "completed",
@@ -42,16 +52,6 @@
         "9846abc5-ea48-4608-b13e-fb8d3a99978c"
       ],
       "next_suggested_angle": "進入 application 階段：實作 pytest + LLM + mutation testing 的整合工具鏈"
-    },
-    {
-      "executed_at": "2026-03-15T20:35:00+08:00",
-      "topic": "AI Agent Context Management 與 Long-Term Memory 架構",
-      "status": "completed",
-      "key_findings": "深入探討 Context Window 管理（Sliding Window、壓縮技術）、Long-Term Memory 架構（六大框架：Letta、Mem0、Zep等）、RAG vs Memory 差異、實作模式（Claude SDK、LangChain、AutoGen）及生產部署最佳實踐",
-      "kb_note_ids": [
-        "8fb70bab-5418-49ad-b267-4741958f82df"
-      ],
-      "next_suggested_angle": "進入 application 階段：實作完整 Agent Memory 系統的程式碼範例，整合 PostgreSQL + Vector DB 的混合架構"
     }
   ]
 }

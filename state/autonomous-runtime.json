@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-03-20T07:20:38.067080+08:00",
+  "mode": "degraded",
+  "reasons": [
+    "偵測到 11 個任務飢餓，需降低並行並優先補跑低頻任務"
+  ],
+  "gates": {
+    "heartbeat_stale": false,
+    "starvation_detected": true,
+    "token_budget_alert": false,
+    "open_circuits": 0
+  },
+  "policies": {
+    "max_parallel_auto_tasks": 2,
+    "allow_heavy_auto_tasks": false,
+    "allow_research_auto_tasks": true,
+    "priority_recovery_targets": [
+      "todoist"
+    ]
+  },
+  "scheduler_heartbeat": {
+    "timestamp": "2026-03-20T07:02:58.732201",
+    "status": "running",
+    "pid": 632736
+  }
+}

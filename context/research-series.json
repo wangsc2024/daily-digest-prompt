@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-19T10:09:09.967422+08:00",
+  "updated_at": "2026-03-20T07:06:47.576498+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-19",
+      "last_active": "2026-03-20",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -306,7 +306,8 @@
             "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較",
             "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門",
             "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話",
-            "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結"
+            "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結",
+            "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -594,7 +595,8 @@
             "教觀綱宗研究：化法四教之圓教 — 一心三觀、一念三千、圓融三諦與圓教菩薩位次的完整教觀體系",
             "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話",
             "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興",
-            "教觀綱宗在現代禪修中的應用指南 — 從判教智慧到日常修持的落實路徑（synthesis 階段完結篇）"
+            "教觀綱宗在現代禪修中的應用指南 — 從判教智慧到日常修持的落實路徑（synthesis 階段完結篇）",
+            "教觀綱宗研究：法華涅槃時 — 開權顯實會三歸一的純圓教觀與醍醐究竟"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -638,17 +640,27 @@
             "荊溪湛然",
             "知禮",
             "註疏傳統",
-            "判教演進史"
+            "判教演進史",
+            "法華涅槃時",
+            "開權顯實",
+            "會三歸一",
+            "純圓",
+            "醍醐味",
+            "一佛乘",
+            "一心三觀",
+            "一念三千",
+            "五味喻",
+            "迹門本門"
           ],
           "completed_at": "2026-03-19"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "synthesis 階段完成後，jiaoguangzong 系列達到 100%。未來可開啟新系列。"
+      "next_research_hint": "jiaoguangzong 系列已達 100% 完成。五時判教（華嚴、阿含、方等、般若、法華涅槃）已全面涵蓋，系列圓滿。"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -925,7 +937,7 @@
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-18",
+      "last_active": "2026-03-19",
       "tags": [
         "淨土宗",
         "佛學",
@@ -1029,16 +1041,26 @@
           "completed_at": "2026-03-18"
         },
         "optimization": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "無量壽經四十八願的願門分類與三輩往生實修次第"
+          ],
+          "covered_concepts": [
+            "四十八願的願門群組與內在次第",
+            "三輩往生的行業差別與共同核心",
+            "由願門理解信願行的調整方法",
+            "末法凡夫如何依根器選擇實修重點"
+          ]
         },
         "synthesis": {
           "status": "pending"
         }
       },
-      "current_stage": "optimization",
-      "completion_pct": 60,
+      "current_stage": "synthesis",
+      "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "可續入 optimization：不同根器行者如何依《阿彌陀經》調整持名與攝心方法。"
+      "next_research_hint": "完成後可進入 synthesis：四十八願、三輩往生與臨終正念、台淨會通之整合研究。"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2753,7 +2775,7 @@
       "domain": "GitHub AI 開源專案",
       "description": "GitHub AI 開源專案研究系列，聚焦非重複且可落地的熱門專案。",
       "initiated_at": "2026-03-14",
-      "last_active": "2026-03-16",
+      "last_active": "2026-03-20",
       "tags": [
         "GitHub",
         "AI",
@@ -2776,17 +2798,30 @@
           "completed_at": "2026-03-14"
         },
         "mechanism": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
-            "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars, 2026）"
+            "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars, 2026）",
+            "智慧交通 — 多代理強化學習號誌控制與緊急車輛優先通行",
+            "ComfyUI — 節點式生成式 AI 工作流引擎深度研究：圖形執行模型、自訂節點生態與多模態內容生產架構（106K Stars, 2026-03）"
           ],
           "covered_concepts": [
             "Crews 角色協作",
             "Flows 事件驅動",
             "雙模型架構",
             "Pydantic 狀態管理",
-            "記憶系統"
-          ]
+            "記憶系統",
+            "多代理強化學習協同控制",
+            "緊急車輛優先通行",
+            "圖注意力路網協調",
+            "EMS 派遣與號誌整合",
+            "節點圖執行模型",
+            "Prompt 佇列與 WebSocket 事件",
+            "Custom Nodes 四類擴充模型",
+            "Registry 版本鎖定與安全掃描",
+            "工作流 JSON 可重現性"
+          ],
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20"
         },
         "application": {
           "status": "pending"
@@ -2798,10 +2833,10 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：實作程式碼範例與整合指南"
+      "next_research_hint": "下一步可進入 application：實作 ComfyUI API 工作流、客製節點與自動化素材管線整合。"
     },
     "urban-digital-twin-decision-platforms": {
       "series_id": "urban-digital-twin-decision-platforms",
@@ -4047,6 +4082,415 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "完成後進入 mechanism：深入 Graph RAG 檢索管線與 Cypher 查詢最佳化"
+    },
+    "github-repo-research-pipeline": {
+      "series_id": "github-repo-research-pipeline",
+      "domain": "GitHub 熱門專案研究工作流：GraphQL Search、排序訊號與去重策略",
+      "description": "GitHub 熱門專案搜尋、排序、去重與研究選題流程。",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "GitHub",
+        "研究工作流",
+        "知識庫",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "kb_notes": [
+            "GitHub 熱門專案研究工作流：GraphQL Search、排序訊號與去重策略"
+          ],
+          "covered_concepts": [
+            "GraphQL search 連線查詢",
+            "搜尋語法與排序限定詞",
+            "GraphQL / REST 速率限制權衡",
+            "候選專案去重與品質評分"
+          ],
+          "completed_at": "2026-03-19"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "mechanism：把 GraphQL 查詢模板、去重規則與品質分數做成可執行腳本"
+    },
+    "flutter-flame-gamedev": {
+      "series_id": "flutter-flame-gamedev",
+      "domain": "Flutter + Flame Engine 遊戲開發",
+      "description": "Flutter Flame 引擎遊戲開發系列研究，涵蓋架構、素材整合、Workflow",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [
+        "Flutter",
+        "Flame Engine",
+        "遊戲開發",
+        "OpenMoji",
+        "ZapSplat"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "Flutter + Flame Engine 遊戲開發完整 Workflow — 整合 OpenMoji 開源 SVG 素材與 ZapSplat 音效資源的實作指南"
+          ],
+          "covered_concepts": [
+            "Flame 核心架構",
+            "FCS 元件系統",
+            "Game Loop",
+            "OpenMoji SVG 整合",
+            "ZapSplat 音效整合",
+            "素材管線",
+            "開發 Workflow 五階段",
+            "橋接套件生態系"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "深入 Flame 內部機制：Game Loop 效能調優、Component 生命週期、碰撞偵測演算法"
+    },
+    "logical-thinking": {
+      "series_id": "logical-thinking",
+      "domain": "邏輯思維 批判性思考 決策框架",
+      "description": "邏輯思維方法論系列研究",
+      "initiated_at": "2026-03-13",
+      "last_active": "2026-03-20",
+      "tags": [
+        "邏輯思維",
+        "批判性思考",
+        "決策框架",
+        "方法論"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-13",
+          "completed_at": "2026-03-15",
+          "kb_notes": [
+            "邏輯思維、批判性思考與決策框架完整指南",
+            "邏輯思維與批判性思考：核心框架與決策工具",
+            "論證謬誤系統性分類",
+            "費米估算",
+            "貝葉斯推理",
+            "Scout Mindset 與 Superforecasting"
+          ],
+          "covered_concepts": [
+            "Paul-Elder框架",
+            "心智模型",
+            "論證謬誤",
+            "費米估算",
+            "貝葉斯推理",
+            "偵察兵心態"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-16",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "系統思考（Systems Thinking）",
+            "Decision Intelligence（決策智能）",
+            "論證圖譜（Argument Mapping）",
+            "後設認知（Metacognition）",
+            "第一性原理思維（First Principles Thinking）"
+          ],
+          "covered_concepts": [
+            "系統思考",
+            "決策智能",
+            "論證圖譜",
+            "後設認知",
+            "第一性原理",
+            "蘇格拉底問答法"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [],
+      "next_research_hint": "application 階段：實際案例研究、程式碼範例、決策工具實作"
+    },
+    "yixin-sanguan": {
+      "series_id": "yixin-sanguan",
+      "domain": "一心三觀修持 / One-Heart Three-Contemplations Practice",
+      "description": "天台宗圓教核心觀法一心三觀的完整修持體系研究，從理論到實踐",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [
+        "一心三觀",
+        "天台宗",
+        "教觀綱宗",
+        "摩訶止觀",
+        "圓頓止觀",
+        "佛學修持"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "法華經一心三觀的理論與生活實踐"
+          ],
+          "covered_concepts": [
+            "空假中三觀",
+            "一念三千",
+            "十乘觀法",
+            "圓頓止觀"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "法華經一心三觀的理論與生活實踐"
+          ],
+          "covered_concepts": [
+            "十乘觀法機制",
+            "圓頓止觀特色",
+            "一念三千體系"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "一心三觀具體修持指南 — 從教觀綱宗到摩訶止觀的圓頓觀法實操步驟"
+          ],
+          "covered_concepts": [
+            "具體修持步驟",
+            "調五事",
+            "空假中操作",
+            "日常實踐",
+            "障礙對治"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "jiaoguangzong",
+        "shurangama-sutra"
+      ],
+      "next_research_hint": "進入 optimization 階段：深入常見障礙對治、不同根器調整方法、與念佛禪觀會通"
+    },
+    "jingtu-end-of-life-right-mindfulness": {
+      "series_id": "jingtu-end-of-life-right-mindfulness",
+      "domain": "淨土宗臨終正念的平生預備、助念邊界與家屬配合",
+      "description": "淨土宗臨終正念之平生預備、助念邊界與家屬協作研究系列",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "臨終正念的平生預備、助念邊界與家屬配合"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "臨終正念研究：淨土宗臨終助念與正念往生的修持體系"
+          ],
+          "covered_concepts": [
+            "平生業成",
+            "臨終助念",
+            "第十八願與第十九願",
+            "都攝六根淨念相繼"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "臨終正念的平生預備、助念邊界與家屬配合"
+          ],
+          "covered_concepts": [
+            "平生預囑與醫療決策",
+            "助念邊界與禁忌",
+            "家屬與助念團的角色分工",
+            "臨終前後八至十二小時的具體操作"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [
+        "jingtu-three-sutras-faith-vow-practice"
+      ],
+      "next_research_hint": "下一步可進入 application：整理助念團培訓、臨終 checklist 與居家/醫院兩種情境範本。"
+    },
+    "execution-trace-schema": {
+      "series_id": "execution-trace-schema",
+      "domain": "Execution Trace Schema / Agent Workflow Observability",
+      "description": "Execution Trace Schema、OpenTelemetry、OpenInference 與 Agent 工作流結構化追蹤研究系列",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [
+        "Execution Trace Schema",
+        "OpenTelemetry",
+        "OpenInference",
+        "Agent Observability",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "Execution Trace Schema 實作指南 — Agent 工作流追蹤欄位、OpenTelemetry/OpenInference 映射與 daily-digest-prompt 落地模式"
+          ],
+          "covered_concepts": [
+            "trace_id/span_id/parent_span_id",
+            "GenAI semantic conventions",
+            "OpenInference span kind"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "Execution Trace Schema 實作指南 — Agent 工作流追蹤欄位、OpenTelemetry/OpenInference 映射與 daily-digest-prompt 落地模式"
+          ],
+          "covered_concepts": [
+            "三層追蹤模型",
+            "OTel/GenAI/MCP 欄位映射",
+            "flush 與 parent-child 關係"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "Execution Trace Schema 實作指南 — Agent 工作流追蹤欄位、OpenTelemetry/OpenInference 映射與 daily-digest-prompt 落地模式"
+          ],
+          "covered_concepts": [
+            "Phase span 設計",
+            "PowerShell JSONL 寫法",
+            "KB 與 WebResearch span 對映"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "ai-workflow-automation"
+      ],
+      "next_research_hint": "進入 optimization：研究 sampling、trace 壓縮、跨 agent 關聯與成本控制"
+    },
+    "ai-incident-triage-runbook-automation": {
+      "series_id": "ai-incident-triage-runbook-automation",
+      "domain": "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化",
+      "description": "AI incident triage、根因分析與 runbook automation 研究系列",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [
+        "AI",
+        "系統開發",
+        "Incident Triage",
+        "software-engineering"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化 — 2026 實作指南"
+          ],
+          "covered_concepts": [
+            "incident triage workflow",
+            "log root cause analysis",
+            "runbook approval gate",
+            "incident memory feedback loop"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [
+        "execution-trace-schema",
+        "powershell-automation-patterns"
+      ],
+      "next_research_hint": "mechanism：深入事件關聯、根因排序與自動修復安全閘門"
     }
   }
 }

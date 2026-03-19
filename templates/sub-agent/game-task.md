@@ -9,7 +9,7 @@
 
 ## ⚡ Skill-First 規則
 必須先讀取以下 SKILL.md，嚴格依照指示操作：
-- skills/game-design/SKILL.md
+- skills/game-workflow-design/SKILL.md
 {若任務涉及知識庫：}
 - skills/knowledge-query/SKILL.md
 
@@ -26,16 +26,15 @@
 ## 執行流程
 
 ### Phase A: 現狀分析（不修改任何檔案）
-1. 讀取遊戲專案目錄結構
-2. 分析主要 JS/HTML 檔案，逐項檢查 SKILL.md 品質標準：
-   - 遊戲循環是否使用 requestAnimationFrame？
-   - 碰撞偵測方式及精確度？
-   - 資源載入方式（是否預載？有無載入畫面？）
-   - 記憶體管理（物件回收機制？）
-   - 輸入支援（鍵盤 + 滑鼠 + 觸控？）
-   - 狀態機是否完整？
-3. 列出所有品質問題（含嚴重程度）
-4. 輸出品質分析報告到 stdout
+1. 讀取遊戲專案目錄結構，判斷專案類型（有 `pubspec.yaml` → Flutter；有 `index.html` + `*.js` → HTML5）
+2. **Flutter 專案**：分析 `lib/` 下 Dart 檔案，依 game-workflow-design SKILL.md 檢查：
+   - FlameGame / Component 架構是否正確？
+   - onLoad 是否預載素材？Hitbox 是否設定？
+   - 位移是否乘以 `dt`？輸入 Mixin 是否綁定？
+   - 授權署名（OpenMoji/ZapSplat）是否已標註？
+3. **HTML5 專案**：分析主要 JS/HTML，檢查 requestAnimationFrame、碰撞偵測、資源預載、觸控支援
+4. 列出所有品質問題（含嚴重程度）
+5. 輸出品質分析報告到 stdout
 
 ### Phase B: 知識庫查詢（若適用）
 5. 依 SKILL.md 指示查詢知識庫相關遊戲設計筆記
@@ -59,27 +58,32 @@
 ### Phase E: 整合驗證
 12. 完整遊戲流程測試概覽
 13. 響應式檢查（確認觸控事件已綁定）
-14. 效能相關程式碼檢查
-15. 依 SKILL.md 程式碼審查清單逐項自檢
+14. 效能相關程式碼檢查（Flutter：FPS 維持；HTML5：requestAnimationFrame）
+15. 依 SKILL.md 品質檢查清單逐項自檢（game-workflow-design 或 game-design）
 
 ### Phase F: 部署
-16. 判斷任務是否包含部署/同步需求（描述含「同步」、「部署」、「game_web」、「Pages」、「GitHub」）：
+16. 判斷專案類型與部署需求：
 
-    **A. 需要同步到 game_web（優先判斷）**
+    **A. Flutter 專案（有 pubspec.yaml）— 部署至 Cloudflare Pages**
+    ```bash
+    flutter build web --web-renderer html
+    npx wrangler pages deploy build/web --project-name=<專案名>
+    ```
+    或將 `build/web/` 推至 GitHub，由 Cloudflare Pages 連線 repo 自動部署。
+
+    **B. HTML5 專案（D:\Source\game）— 同步到 game_web**
     若任務描述含「同步遊戲」、「game_web」、「game-web.pages.dev」：
     ```bash
     pwsh -ExecutionPolicy Bypass -File "D:\Source\game_web\sync-games.ps1" -Full
     ```
-    腳本會自動完成：複製遊戲 → 更新提示 → npm build → git push game_web → Cloudflare Pages 自動部署。
     若腳本提示 gameMetadata.js 需補充，用 Edit 工具加入後重新執行。
 
-    **B. 只需 push game/ repo**
-    若任務只在 `D:\Source\game` 修改且無需更新 game_web：
+    **C. 只需 push 原 repo**（無 game_web 或 Pages 需求）：
     ```bash
-    cd D:/Source/game && git add -A && git commit -m "feat: [遊戲名] 優化" && git push
+    cd <專案目錄> && git add -A && git commit -m "feat: [遊戲名] 優化" && git push
     ```
 
-    **C. 無部署需求** → 跳過此步驟
+    **D. 無部署需求** → 跳過此步驟
 
 17. 等待 Cloudflare Pages 自動部署完成（約 1-2 分鐘）
 

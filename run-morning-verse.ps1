@@ -94,11 +94,17 @@ Write-Host "[INFO] Selected verse #$($verse.id): $($verse.source)"
 # ─── Step 4: Send via ntfy ───
 $sourceLine = if ($verse.author) { "來源：$($verse.source)（$($verse.author)）" } else { "來源：$($verse.source)" }
 $message = "$($verse.verse)`n`n$sourceLine"
+# 任務規格：建議 ≤150 字元（含來源），避免推播平台截斷
+if ($message.Length -gt 150) {
+    $message = $message.Substring(0, 147) + "..."
+}
 $payloadFile = "$AgentDir\ntfy_verse.json"
 
+# 晨間用「早安佛偈」、黃昏用「回歸本性 借假修真」（任務規格：主旨可簡述「早安佛偈」）
+$ntfyTitle = if ($Session -eq "morning") { "早安佛偈" } else { "回歸本性 借假修真" }
 $payload = @{
     topic = $NtfyTopic
-    title = "回歸本性 借假修真"
+    title = $ntfyTitle
     message = $message
     tags = @("lotus_position", "pray")
 } | ConvertTo-Json -Depth 3
@@ -156,9 +162,10 @@ if ($sendStatus -eq "failed") {
     Write-Host "[RETRY] Attempting retry in 30 seconds..."
     Start-Sleep -Seconds 30
 
+    $retryTitle = if ($Session -eq "morning") { "早安佛偈（重試）" } else { "回歸本性 借假修真（重試）" }
     $payload2 = @{
         topic = $NtfyTopic
-        title = "回歸本性 借假修真（重試）"
+        title = $retryTitle
         message = $message
         tags = @("lotus_position", "pray")
     } | ConvertTo-Json -Depth 3
@@ -175,9 +182,33 @@ if ($sendStatus -eq "failed") {
             [System.IO.File]::WriteAllText($LogFile, $retryJson, $utf8NoBom)
         } else {
             Write-Host "[ERROR] Retry also failed: HTTP $result2"
+            # 任務規格：重試仍失敗時發送 ntfy 告警
+            $alertPayload = @{
+                topic = $NtfyTopic
+                title = "早安佛偈送訊失敗"
+                message = "晨間偈頌推播失敗（重試後仍 HTTP $result2），請檢查網路或手動執行 run-morning-verse.ps1"
+                tags = @("warning", "x")
+                priority = 4
+            } | ConvertTo-Json -Depth 3
+            $alertFile = "$AgentDir\ntfy_verse_alert.json"
+            [System.IO.File]::WriteAllText($alertFile, $alertPayload, $utf8NoBom)
+            curl -s -o /dev/null -H "Content-Type: application/json; charset=utf-8" -d "@$alertFile" https://ntfy.sh | Out-Null
+            Remove-Item $alertFile -Force -ErrorAction SilentlyContinue
         }
     } catch {
         Write-Host "[ERROR] Retry failed: $($_.Exception.Message)"
+        # 重試拋錯時也發送告警
+        $alertPayload = @{
+            topic = $NtfyTopic
+            title = "早安佛偈送訊失敗"
+            message = "晨間偈頌推播失敗（重試異常：$($_.Exception.Message)），請手動執行 run-morning-verse.ps1"
+            tags = @("warning", "x")
+            priority = 4
+        } | ConvertTo-Json -Depth 3
+        $alertFile = "$AgentDir\ntfy_verse_alert.json"
+        [System.IO.File]::WriteAllText($alertFile, $alertPayload, $utf8NoBom)
+        curl -s -o /dev/null -H "Content-Type: application/json; charset=utf-8" -d "@$alertFile" https://ntfy.sh | Out-Null
+        Remove-Item $alertFile -Force -ErrorAction SilentlyContinue
     }
     Remove-Item $payloadFile -Force -ErrorAction SilentlyContinue
 }

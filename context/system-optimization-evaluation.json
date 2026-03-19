@@ -1,137 +1,223 @@
 {
   "version": 1,
   "source": "kb_insight_evaluation",
-  "generated_at": "2026-03-19T06:34:33.1942957+08:00",
+  "generated_at": "2026-03-20T02:36:35.4832535+08:00",
   "insight_source": "context/system-insight.json",
+  "insight_generated_at": "2026-03-19T09:35:00+08:00",
+  "insight_within_3_days": true,
+  "considered_recommendations": [
+    {
+      "title": "每日成功率 84.6% 低於 90% 門檻，建議檢查近期 12 次失敗 runs 的錯誤模式與根因",
+      "priority": "P1",
+      "source": "context/system-insight.json recommendations",
+      "status": "selected"
+    },
+    {
+      "title": "快取命中率僅 20.7%，建議檢查 TTL 與可快取端點",
+      "priority": "P1",
+      "source": "context/system-insight.json recommendations",
+      "status": "already_in_backlog"
+    },
+    {
+      "title": "平均 I/O 24315 字元，建議強制執行 Context 保護",
+      "priority": "P1",
+      "source": "context/system-insight.json recommendations",
+      "status": "already_in_backlog"
+    },
+    {
+      "title": "自動任務公平性 0.512，建議用 task-fairness-analyzer 檢查",
+      "priority": "P2",
+      "source": "context/system-insight.json recommendations",
+      "status": "already_in_backlog"
+    },
+    {
+      "title": "宣告式 guard registry 與可組態 hook 鏈",
+      "priority": "P1",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "status": "already_in_backlog"
+    },
+    {
+      "title": "統一 trace/event schema 與 prompt 或任務版本追蹤",
+      "priority": "P1",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "status": "partially_selected_via_prompt_versioning"
+    },
+    {
+      "title": "Skill discovery manifest 與跨代理相容層",
+      "priority": "P1",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "status": "selected"
+    },
+    {
+      "title": "Prompt 與研究模板版本化",
+      "priority": "P2",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "status": "selected"
+    },
+    {
+      "title": "三層 Skill 系統",
+      "priority": "P1",
+      "source": "context/improvement-backlog.json entries[1].proposals",
+      "status": "not_selected_lower_immediacy"
+    },
+    {
+      "title": "持久化執行（故障自動恢復）",
+      "priority": "P0",
+      "source": "context/improvement-backlog.json entries[1].proposals",
+      "status": "already_in_backlog"
+    }
+  ],
   "selected_3": [
     {
-      "title": "快取命中率調優與自適應 TTL 治理",
+      "title": "每日成功率根因分類與 SLO/Error Budget 治理",
       "priority": "P1",
-      "dimension": "系統效率",
-      "pattern": "快取命中率調優與自適應 TTL 治理",
-      "description": "system-insight 顯示 cache_hit_ratio 僅 20.7%，遠低於 40% 門檻。建議以 cache-aside 原則重整 TTL、失效與命中觀測，並建立按 volatility/命中率調整的自適應 TTL 治理流程。",
-      "selected_reason": "直接對應 system-insight 的 critical alert，影響 API 成本、延遲與降級能力；現有 improvement-backlog 尚未納入快取策略執行項。",
-      "research_summary": "Azure Cache-Aside 指出 TTL 不宜過短或過長，應與資料存取模式對齊，寫入後優先更新資料源再失效快取；Redis 開發最佳實踐則建議以較小值、客戶端量測與 pipelining 提升吞吐，適合轉化為本專案的 endpoint 級 TTL 與 cache-miss 診斷。",
-      "sources": [
-        {
-          "title": "Cache-Aside pattern",
-          "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
-        },
-        {
-          "title": "Best practices for development - Azure Cache for Redis",
-          "url": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-best-practices-development"
-        }
-      ],
-      "execution_plan": {
-        "goal": "在不修改 frequency/timeouts 限制的前提下，7 天內將 cache_hit_ratio 從 20.7% 提升到至少 35%，並建立端點級 miss 原因追蹤。",
-        "prerequisites": [
-          "可讀取 config/cache-policy.yaml、cache/status.json 與 logs/structured/*.jsonl",
-          "保留既有 api-cache Skill 的快取檔格式與降級流程"
-        ],
-        "steps": [
-          "盤點 todoist、pingtung-news、hackernews、knowledge、gmail 等端點近 7 天 cache-read/api-call/miss 原因，建立基線表。",
-          "依資料 volatility 與讀取頻率調整 config/cache-policy.yaml 中各來源 TTL，優先處理低波動且高重複查詢端點。",
-          "在 api-cache 或相關記錄流程中補上 miss_reason、stale_age、endpoint 三類欄位，區分不存在、過期、格式失敗與主動繞過。",
-          "為寫後失效與降級取用建立統一規則，避免資料源已更新但快取未失效，或 API 故障時無法安全使用過期快取。",
-          "新增每週檢查腳本或 system-insight 彙整欄位，持續輸出端點級 hit ratio、top miss reasons 與 TTL 建議。"
-        ],
-        "acceptance": [
-          "system-insight 的 cache_hit_ratio 7 天內達到 0.35 以上",
-          "至少 80% cache-miss 事件可分類到明確 miss_reason",
-          "config/cache-policy.yaml 的 TTL 調整有對應的端點基線與回顧紀錄"
-        ],
-        "effort": "medium"
-      },
-      "self_review": {
-        "compatible_with_project": true,
-        "notes": "方案集中在 cache-policy、api-cache 與 system-insight 指標閉環，符合文件驅動架構，且未觸碰禁止修改的 frequency/timeouts 檔。"
-      }
+      "dimension": "系統穩定性",
+      "source": "context/system-insight.json recommendations",
+      "execution_plan_summary": "先將近 7 天 failed runs 做 failure mode taxonomy，再定義 SLI/SLO 與 error budget，將 postmortem、降級與修復優先級制度化。"
     },
     {
-      "title": "統一 execution trace schema 與因果追蹤",
+      "title": "Machine-readable Skill Registry 與 Schema 驗證",
+      "priority": "P1",
+      "dimension": "開發效率",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "execution_plan_summary": "把技能資料由文字索引升級為可掃描 registry，搭配 JSON Schema 與語意檢查，統一技能發現、依賴驗證與 trigger 衝突檢測。"
+    },
+    {
+      "title": "Prompt/模板版本追蹤與結果對映",
       "priority": "P1",
       "dimension": "可觀測性",
-      "pattern": "統一 execution trace schema 與因果追蹤",
-      "description": "近 3 天洞察提議把 task_key、skill chain、cache 狀態、耗時、失敗點與輸出 artifact 納入統一 trace/event schema，降低只靠零散結果檔追查回歸的成本。",
-      "selected_reason": "屬於高影響的可觀測性缺口，能同時支撐 system-insight、arch-evolution 與故障回溯；現有 backlog 尚未把 trace schema 納入正式項目。",
-      "research_summary": "OpenTelemetry 將 trace 定義為由 spans 組成的請求路徑，核心欄位包含 trace_id、span_id、timestamps、attributes、events 與 status；Langfuse 以 OpenTelemetry 為基底追蹤完整 LLM/agent traces 與 nested observations，適合映射為本專案的 execution-journal 與 JSONL schema。",
+      "source": "context/improvement-backlog.json entries[0].proposals",
+      "execution_plan_summary": "為 prompts/templates 建立不可變版本標識，並寫入 results/trace，讓回歸分析能精準回溯當次使用的模板版本。"
+    }
+  ],
+  "details": [
+    {
+      "priority": "P1",
+      "pattern": "每日成功率根因分類與 SLO/Error Budget 治理",
+      "description": "system-insight 於 2026-03-19 顯示 daily_success_rate 僅 84.6%，低於 90% 門檻。建議將失敗 run 依 failure mode 分類，建立 SLO、error budget、postmortem 觸發與降級策略，讓成功率改善有一致的優先順序與驗收基準。",
+      "dimension": "系統穩定性",
+      "effort": "medium",
+      "execution_plan": [
+        "盤點近 7 天 12 次失敗 runs，依 phase、task_key、依賴服務、timeout/parse_error/quota 等 failure mode 建立 taxonomy 與 blast radius 對照表。",
+        "為關鍵流程定義最小 SLI/SLO，例如整體 daily_success_rate、Phase 2 success rate、auto-task completion rate，並換算 28 天 error budget。",
+        "建立 budget 消耗規則：單一 incident 或單一 failure class 消耗超過 20% budget 時，強制產出 postmortem 與至少 1 項 P0/P1 修復。",
+        "把 failure mode 對應到既有 retry、fallback、degraded mode 與 ntfy 告警，明確規範何時跳過、何時續跑、何時中止。",
+        "在 system-insight 或配套報表新增 failure-class distribution、budget burn、top recurring causes，形成每週回顧閉環。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "Google SRE 建議以 error budget 作為穩定性與變更速度的控制機制，當單一 incident 或 outage 類型耗掉顯著 budget 時必須進入 postmortem 與高優先修復；Microsoft Reliability/FMA 指南則強調先識別 critical flows、dependencies、failure modes，再設計 detection、mitigation 與 degraded operation。這很適合把目前 84.6% 成功率問題從零散故障，收斂成可治理的失敗分類與預算制度。",
       "sources": [
         {
-          "title": "Traces | OpenTelemetry",
-          "url": "https://opentelemetry.io/docs/concepts/signals/traces/"
+          "title": "Google SRE Workbook: Error Budget Policy",
+          "url": "https://sre.google/workbook/error-budget-policy/"
         },
         {
-          "title": "Langfuse",
-          "url": "https://langfuse.com/"
+          "title": "Microsoft Learn: Architecture strategies for performing failure mode analysis",
+          "url": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/failure-mode-analysis"
+        },
+        {
+          "title": "Microsoft Learn: Reliability checklist",
+          "url": "https://learn.microsoft.com/en-us/power-platform/well-architected/reliability/checklist"
         }
       ],
-      "execution_plan": {
-        "goal": "建立可被 system-insight 與後續分析工具共用的 trace schema，讓每次 auto task 都能回溯 phase、工具鏈、cache 狀態與結果產物。",
-        "prerequisites": [
-          "現有 hooks/post_tool_logger.py 與 logs/structured/*.jsonl 可持續輸出 trace_id",
-          "results/*.json 與 state/ 中已有 task_key、phase、result path 等基礎欄位"
-        ],
-        "steps": [
-          "定義 execution trace schema v1，至少包含 trace_id、span_id、parent_span_id、task_key、phase、tool_or_skill、status、duration_ms、artifacts、attributes。",
-          "盤點現有 post_tool_logger、results JSON 與 state 檔，建立欄位對映表與缺口清單。",
-          "先在不破壞既有日誌的前提下，為新欄位提供向後相容輸出，讓 execution-journal/system-insight 可讀新舊資料。",
-          "補上 cause chain 欄位，明確串接 selected task、cache hit/miss、retry、failure point 與最終 artifact。",
-          "在 system-insight 或配套查詢腳本新增 trace completeness 指標，檢查每次 auto task 是否具備最小追蹤欄位。"
-        ],
-        "acceptance": [
-          "至少 90% 新產生的 auto-task traces 含 trace_id、phase、status、artifacts",
-          "任一失敗 run 可從單一 trace 串回相關 results/state/logs 檔",
-          "system-insight 可統計 trace completeness 或 resumed/failure cause 指標"
-        ],
-        "effort": "medium"
-      },
-      "self_review": {
-        "compatible_with_project": true,
-        "notes": "方案延伸既有 hooks 與 execution-journal 方向，不要求替換目前 JSONL；以增量 schema 與欄位對映落地，與專案架構相容。"
-      }
+      "acceptance": [
+        "7 天內所有 failed runs 至少 90% 可歸類到明確 failure mode。",
+        "system-insight 新增 budget burn 或 failure-class distribution 指標。",
+        "連續 2 週 daily_success_rate 達到或高於 0.90，且有對應 postmortem/修復紀錄。"
+      ],
+      "prerequisites": [
+        "可讀取 logs/structured/*.jsonl、state/failure-stats.json、results/*.json 與 context/system-insight.json。",
+        "沿用現有 ntfy 告警與 fallback/retry 機制，不直接改動 frequency/timeouts 設定檔。"
+      ],
+      "selected_reason": "直接對應本期 system-insight 的主警訊，且目前 backlog 尚未將成功率治理制度化。"
     },
     {
-      "title": "宣告式 hook registry 與 stage 化 guard 鏈",
       "priority": "P1",
-      "dimension": "技術債",
-      "pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
-      "description": "近 3 天洞察指出目前 guard 規則分散在多個 hooks 腳本，建議整理成可排序、可停用、可分 stage 的 hook registry，降低規則漂移與例外處理成本。",
-      "selected_reason": "影響 Hook 可維護性與規則一致性，且能提升安全/品質守門的可配置程度；現有 backlog 尚未正式納入。",
-      "research_summary": "pre-commit 以 declarative config 管理 hooks，支援 default_stages、hook-level stages、fail_fast 與 local/meta repo；Husky 則強調 hook 即檔案、使用共用初始化腳本與可暫時停用機制。這代表本專案可用 registry + stage + shared init 的模式取代分散式硬編碼。",
+      "pattern": "Machine-readable Skill Registry 與 Schema 驗證",
+      "description": "近 3 天洞察指出目前 Skill 發現仍以文字索引為主，建議補上 machine-readable registry 與 schema 驗證，降低 SKILL_INDEX、frontmatter、依賴與觸發詞漂移。",
+      "dimension": "開發效率",
+      "effort": "medium",
+      "execution_plan": [
+        "定義 skill-registry.json schema，至少涵蓋 name、path、description、triggers、depends_on、source、stability、updated_at。",
+        "掃描 skills/**/SKILL.md frontmatter 與 SKILL_INDEX.md，建立欄位對映與衝突偵測規則，特別檢查名稱唯一性、路徑存在性、依賴缺漏與 trigger 重疊。",
+        "以 JSON Schema 驗證 registry 結構，並用補充語意驗證處理 cross-file 規則，例如 depends_on 是否存在、索引與實際技能數是否一致。",
+        "把 registry 產出流程接到既有 skill-registry-sync 或檢查腳本，讓新增 Skill 時同步更新 machine-readable 清單。",
+        "在 system-insight 或 CI 檢查中加入 registry completeness 與 conflict count 指標。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "GitHub Copilot 與 open skills 生態都要求每個 skill 有一致的資料夾與 SKILL.md frontmatter，適合做成可掃描的清單；JSON Schema 則提供 required、annotations 與結構驗證能力，適合用來保證 registry 欄位完整，再搭配語意檢查補足跨檔約束。這代表專案可從文字索引升級到可驗證、可同步、可查衝突的 skill registry。",
       "sources": [
         {
-          "title": "pre-commit",
-          "url": "https://pre-commit.com/"
+          "title": "GitHub Docs: Creating agent skills for GitHub Copilot",
+          "url": "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-skills"
         },
         {
-          "title": "How To | Husky",
-          "url": "https://typicode.github.io/husky/how-to.html"
+          "title": "JSON Schema: Getting started and required properties",
+          "url": "https://json-schema.org/learn/getting-started-step-by-step"
+        },
+        {
+          "title": "JSON Schema: Annotations",
+          "url": "https://json-schema.org/understanding-json-schema/reference/annotations"
+        },
+        {
+          "title": "numman-ali/n-skills",
+          "url": "https://github.com/numman-ali/n-skills"
         }
       ],
-      "execution_plan": {
-        "goal": "把 Hook 規則從分散腳本收斂成可宣告、可排序、可測試的 registry，降低新增守門規則時的改動面。",
-        "prerequisites": [
-          "現有 config/hook-rules.yaml、hooks/pre_bash_guard.py、hooks/pre_read_guard.py、hooks/pre_write_guard.py 可讀",
-          "保留現行安全攔截行為與 nul 禁令，不做破壞式替換"
-        ],
-        "steps": [
-          "盤點所有 pre/post hooks 的規則來源、執行順序、輸入輸出與可否停用，整理成 registry 草案。",
-          "在 config/hook-rules.yaml 或專用 registry 檔加入 stage、enabled、priority、fail_mode、applies_to 等欄位。",
-          "將各 hook 腳本改為讀 registry 執行對應規則，先抽出共用 loader 與 shared init，避免每支腳本重複解析邏輯。",
-          "為高風險規則保留 fail-fast，對可觀測性或格式化類規則支援 warn-only/soft-fail，降低誤攔截成本。",
-          "新增最小驗證腳本或測試，確認 stage 順序、停用開關與規則覆蓋率正常。"
-        ],
-        "acceptance": [
-          "至少 3 個核心 hooks 改為由同一 registry 驅動",
-          "新增或停用規則時不需在多支 hook 腳本重複修改",
-          "Hook 配置變更可經基本驗證，避免無效 stage 或 priority 值進入主幹"
-        ],
-        "effort": "medium"
-      },
-      "self_review": {
-        "compatible_with_project": true,
-        "notes": "方案沿用現有 hook-rules.yaml 與 Hook 機器強制層，屬於結構整理而非策略翻新，對既有安全邊界衝擊可控。"
-      }
+      "acceptance": [
+        "registry 可列出 100% 現有 skills，且 path/name/frontmatter 驗證通過。",
+        "新增或變更 Skill 時，可自動檢出 trigger/depends_on 衝突。",
+        "SKILL_INDEX 與 machine-readable registry 的技能數量與名稱一致。"
+      ],
+      "prerequisites": [
+        "可讀取 skills/**/SKILL.md、skills/SKILL_INDEX.md 與既有 skill-registry-sync 相關腳本。",
+        "保留現有 Markdown 索引作為人讀入口，registry 作為補充層而非取代層。"
+      ],
+      "selected_reason": "這是近 3 天洞察中尚未納入 items 的高槓桿治理項，可直接降低 Skill 漂移與維護成本。"
+    },
+    {
+      "priority": "P1",
+      "pattern": "Prompt/模板版本追蹤與結果對映",
+      "description": "近 3 天洞察建議將 prompts、templates 與 results 建立版本對映，讓同一 task_key 的輸出可回溯到當時使用的模板版本，降低回歸分析與 A/B 比對成本。",
+      "dimension": "可觀測性",
+      "effort": "medium",
+      "execution_plan": [
+        "為 prompts/ 與 templates/ 建立 version 欄位或以 tag/hash 產生不可變版本標識，並定義 major/minor/patch 更新規則。",
+        "在 results/todoist-auto-*.json 與相關 trace/state 檔新增 prompt_version、template_version、prompt_source 等欄位，確保每次執行都能回溯。",
+        "建立版本發布流程：草稿驗證後再提升為穩定版，對重大變更保留 major tag，避免既有任務引用漂移。",
+        "若模板由外部服務或快取提供，補上 fallback/stale 版本記錄，避免問題只看到結果卻無法定位使用的提示版本。",
+        "在 system-insight 或分析報表新增版本分布、版本品質差異與回歸檢查欄位。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "GitHub 的 immutable releases 與 tag 管理強調版本要能穩定指向特定內容，且 major/minor/patch 要有清楚升級語意；Langfuse 的 Prompt API 則直接提供 prompt version、label、cache 與回退機制，說明 prompt 管理若無版本與快取紀錄，故障時很難重建上下文。對本專案而言，最佳做法是把模板版本明確寫入 results/trace，並採用不可變版本標識。",
+      "sources": [
+        {
+          "title": "GitHub Docs: Using immutable releases and tags to manage your action releases",
+          "url": "https://docs.github.com/en/actions/how-tos/create-and-publish-actions/using-immutable-releases-and-tags-to-manage-your-actions-releases"
+        },
+        {
+          "title": "GitHub Docs: Immutable releases",
+          "url": "https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases"
+        },
+        {
+          "title": "Langfuse Python API: get_prompt/update_prompt",
+          "url": "https://python.reference.langfuse.com/langfuse"
+        }
+      ],
+      "acceptance": [
+        "新產生的自動任務結果檔至少 90% 含 prompt_version 或等價不可變版本標識。",
+        "任一回歸案例可回溯到對應 prompt/template 版本與來源檔。",
+        "重大模板調整可區分 major/minor/patch，且不會覆寫歷史版本對應。"
+      ],
+      "prerequisites": [
+        "可讀取 prompts/、templates/、results/ 與現有 trace/state 檔。",
+        "不破壞既有 prompt 薄層與文件驅動架構，只增加版本欄位與回溯紀錄。"
+      ],
+      "selected_reason": "這項可直接改善回歸追查與模板治理，目前 backlog 尚未正式列為 item。"
     }
-  ]
+  ],
+  "summary": "本次以 2026-03-19 的 system-insight 為主來源，並交叉比對 improvement-backlog 近 3 天洞察提案。為避免重複既有 backlog，本次改選成功率治理、skill registry、模板版本追蹤三項高價值且可直接執行的方向。"
 }

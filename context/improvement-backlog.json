@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-03-19T06:34:33.1942957+08:00",
+  "generated_at": "2026-03-20T02:36:35.4832535+08:00",
   "source": "system-audit",
   "audit_date": "2026-03-18",
   "total_score": 87.88,
@@ -254,6 +254,136 @@
         "保留現行安全攔截行為與 nul 禁令，不做破壞式替換"
       ],
       "rank": 11
+    },
+    {
+      "priority": "P1",
+      "pattern": "每日成功率根因分類與 SLO/Error Budget 治理",
+      "description": "system-insight 於 2026-03-19 顯示 daily_success_rate 僅 84.6%，低於 90% 門檻。建議將失敗 run 依 failure mode 分類，建立 SLO、error budget、postmortem 觸發與降級策略，讓成功率改善有一致的優先順序與驗收基準。",
+      "dimension": "系統穩定性",
+      "effort": "medium",
+      "execution_plan": [
+        "盤點近 7 天 12 次失敗 runs，依 phase、task_key、依賴服務、timeout/parse_error/quota 等 failure mode 建立 taxonomy 與 blast radius 對照表。",
+        "為關鍵流程定義最小 SLI/SLO，例如整體 daily_success_rate、Phase 2 success rate、auto-task completion rate，並換算 28 天 error budget。",
+        "建立 budget 消耗規則：單一 incident 或單一 failure class 消耗超過 20% budget 時，強制產出 postmortem 與至少 1 項 P0/P1 修復。",
+        "把 failure mode 對應到既有 retry、fallback、degraded mode 與 ntfy 告警，明確規範何時跳過、何時續跑、何時中止。",
+        "在 system-insight 或配套報表新增 failure-class distribution、budget burn、top recurring causes，形成每週回顧閉環。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "Google SRE 建議以 error budget 作為穩定性與變更速度的控制機制，當單一 incident 或 outage 類型耗掉顯著 budget 時必須進入 postmortem 與高優先修復；Microsoft Reliability/FMA 指南則強調先識別 critical flows、dependencies、failure modes，再設計 detection、mitigation 與 degraded operation。這很適合把目前 84.6% 成功率問題從零散故障，收斂成可治理的失敗分類與預算制度。",
+      "sources": [
+        {
+          "title": "Google SRE Workbook: Error Budget Policy",
+          "url": "https://sre.google/workbook/error-budget-policy/"
+        },
+        {
+          "title": "Microsoft Learn: Architecture strategies for performing failure mode analysis",
+          "url": "https://learn.microsoft.com/en-us/azure/well-architected/reliability/failure-mode-analysis"
+        },
+        {
+          "title": "Microsoft Learn: Reliability checklist",
+          "url": "https://learn.microsoft.com/en-us/power-platform/well-architected/reliability/checklist"
+        }
+      ],
+      "acceptance": [
+        "7 天內所有 failed runs 至少 90% 可歸類到明確 failure mode。",
+        "system-insight 新增 budget burn 或 failure-class distribution 指標。",
+        "連續 2 週 daily_success_rate 達到或高於 0.90，且有對應 postmortem/修復紀錄。"
+      ],
+      "prerequisites": [
+        "可讀取 logs/structured/*.jsonl、state/failure-stats.json、results/*.json 與 context/system-insight.json。",
+        "沿用現有 ntfy 告警與 fallback/retry 機制，不直接改動 frequency/timeouts 設定檔。"
+      ],
+      "selected_reason": "直接對應本期 system-insight 的主警訊，且目前 backlog 尚未將成功率治理制度化。",
+      "rank": 12
+    },
+    {
+      "priority": "P1",
+      "pattern": "Machine-readable Skill Registry 與 Schema 驗證",
+      "description": "近 3 天洞察指出目前 Skill 發現仍以文字索引為主，建議補上 machine-readable registry 與 schema 驗證，降低 SKILL_INDEX、frontmatter、依賴與觸發詞漂移。",
+      "dimension": "開發效率",
+      "effort": "medium",
+      "execution_plan": [
+        "定義 skill-registry.json schema，至少涵蓋 name、path、description、triggers、depends_on、source、stability、updated_at。",
+        "掃描 skills/**/SKILL.md frontmatter 與 SKILL_INDEX.md，建立欄位對映與衝突偵測規則，特別檢查名稱唯一性、路徑存在性、依賴缺漏與 trigger 重疊。",
+        "以 JSON Schema 驗證 registry 結構，並用補充語意驗證處理 cross-file 規則，例如 depends_on 是否存在、索引與實際技能數是否一致。",
+        "把 registry 產出流程接到既有 skill-registry-sync 或檢查腳本，讓新增 Skill 時同步更新 machine-readable 清單。",
+        "在 system-insight 或 CI 檢查中加入 registry completeness 與 conflict count 指標。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "GitHub Copilot 與 open skills 生態都要求每個 skill 有一致的資料夾與 SKILL.md frontmatter，適合做成可掃描的清單；JSON Schema 則提供 required、annotations 與結構驗證能力，適合用來保證 registry 欄位完整，再搭配語意檢查補足跨檔約束。這代表專案可從文字索引升級到可驗證、可同步、可查衝突的 skill registry。",
+      "sources": [
+        {
+          "title": "GitHub Docs: Creating agent skills for GitHub Copilot",
+          "url": "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-skills"
+        },
+        {
+          "title": "JSON Schema: Getting started and required properties",
+          "url": "https://json-schema.org/learn/getting-started-step-by-step"
+        },
+        {
+          "title": "JSON Schema: Annotations",
+          "url": "https://json-schema.org/understanding-json-schema/reference/annotations"
+        },
+        {
+          "title": "numman-ali/n-skills",
+          "url": "https://github.com/numman-ali/n-skills"
+        }
+      ],
+      "acceptance": [
+        "registry 可列出 100% 現有 skills，且 path/name/frontmatter 驗證通過。",
+        "新增或變更 Skill 時，可自動檢出 trigger/depends_on 衝突。",
+        "SKILL_INDEX 與 machine-readable registry 的技能數量與名稱一致。"
+      ],
+      "prerequisites": [
+        "可讀取 skills/**/SKILL.md、skills/SKILL_INDEX.md 與既有 skill-registry-sync 相關腳本。",
+        "保留現有 Markdown 索引作為人讀入口，registry 作為補充層而非取代層。"
+      ],
+      "selected_reason": "這是近 3 天洞察中尚未納入 items 的高槓桿治理項，可直接降低 Skill 漂移與維護成本。",
+      "rank": 13
+    },
+    {
+      "priority": "P1",
+      "pattern": "Prompt/模板版本追蹤與結果對映",
+      "description": "近 3 天洞察建議將 prompts、templates 與 results 建立版本對映，讓同一 task_key 的輸出可回溯到當時使用的模板版本，降低回歸分析與 A/B 比對成本。",
+      "dimension": "可觀測性",
+      "effort": "medium",
+      "execution_plan": [
+        "為 prompts/ 與 templates/ 建立 version 欄位或以 tag/hash 產生不可變版本標識，並定義 major/minor/patch 更新規則。",
+        "在 results/todoist-auto-*.json 與相關 trace/state 檔新增 prompt_version、template_version、prompt_source 等欄位，確保每次執行都能回溯。",
+        "建立版本發布流程：草稿驗證後再提升為穩定版，對重大變更保留 major tag，避免既有任務引用漂移。",
+        "若模板由外部服務或快取提供，補上 fallback/stale 版本記錄，避免問題只看到結果卻無法定位使用的提示版本。",
+        "在 system-insight 或分析報表新增版本分布、版本品質差異與回歸檢查欄位。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-20T02:36:35.4832535+08:00",
+      "research_summary": "GitHub 的 immutable releases 與 tag 管理強調版本要能穩定指向特定內容，且 major/minor/patch 要有清楚升級語意；Langfuse 的 Prompt API 則直接提供 prompt version、label、cache 與回退機制，說明 prompt 管理若無版本與快取紀錄，故障時很難重建上下文。對本專案而言，最佳做法是把模板版本明確寫入 results/trace，並採用不可變版本標識。",
+      "sources": [
+        {
+          "title": "GitHub Docs: Using immutable releases and tags to manage your action releases",
+          "url": "https://docs.github.com/en/actions/how-tos/create-and-publish-actions/using-immutable-releases-and-tags-to-manage-your-actions-releases"
+        },
+        {
+          "title": "GitHub Docs: Immutable releases",
+          "url": "https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases"
+        },
+        {
+          "title": "Langfuse Python API: get_prompt/update_prompt",
+          "url": "https://python.reference.langfuse.com/langfuse"
+        }
+      ],
+      "acceptance": [
+        "新產生的自動任務結果檔至少 90% 含 prompt_version 或等價不可變版本標識。",
+        "任一回歸案例可回溯到對應 prompt/template 版本與來源檔。",
+        "重大模板調整可區分 major/minor/patch，且不會覆寫歷史版本對應。"
+      ],
+      "prerequisites": [
+        "可讀取 prompts/、templates/、results/ 與現有 trace/state 檔。",
+        "不破壞既有 prompt 薄層與文件驅動架構，只增加版本欄位與回溯紀錄。"
+      ],
+      "selected_reason": "這項可直接改善回歸追查與模板治理，目前 backlog 尚未正式列為 item。",
+      "rank": 14
     }
   ],
   "entries": [

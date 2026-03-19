@@ -40,6 +40,30 @@
         "improvement-backlog.json: P1「輸入驗證強化」",
         "validate_results.py 未被任何 .ps1/.yml 引用"
       ]
+    },
+    {
+      "date": "2026-03-20",
+      "artifact_path": "config/schemas/execution-trace-schema.json",
+      "gap_type": "output_schema",
+      "gap_description": "trace_id、span_id、parent_span_id、phase、tool_or_skill、status、duration_ms、artifacts 等欄位分散在多個輸出檔案中，缺乏統一 schema，導致追蹤與回溯成本高",
+      "priority": "P1",
+      "total_score": 95,
+      "impact_range": "所有 Agent 執行追蹤（daily-digest、todoist-agent-team、system-audit-team、gmail-agent）",
+      "integration_status": "integrated",
+      "documented_in": "docs/ARCHITECTURE.md",
+      "schema_version": "1.0.0",
+      "changes": "新建 execution-trace-schema.json，定義 trace_id、span_id、parent_span_id、task_key、phase、status、duration_ms、artifacts、cause_chain 等核心欄位，借鑑 OpenTelemetry Traces 規範",
+      "validation_results": {
+        "schema_parsable": true,
+        "sample_files_checked": 0,
+        "sample_files_passed": 0,
+        "issues": []
+      },
+      "future_integration": {
+        "hooks_post_tool_logger": "可擴充為驗證每筆 JSONL 符合此 schema",
+        "system_insight": "可新增 trace_completeness 指標（檢查必填欄位完整率）",
+        "execution_journal_skill": "未來若實作，可直接使用此 schema 產出結構化日誌"
+      }
     }
   ]
 }

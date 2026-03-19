@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "queued_at": "2026-03-20T07:20:38.067080+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 11 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "pending"
+    }
+  ],
+  "updated_at": "2026-03-20T07:20:38.067080+08:00"
+}

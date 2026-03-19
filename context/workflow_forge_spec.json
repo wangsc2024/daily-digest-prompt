@@ -1,125 +1,197 @@
 {
-  "version": 1,
-  "generated_at": "2026-03-19T05:40:00+08:00",
-  "selected_gap": {
-    "id": "A",
-    "title": "validate_results.py 未自動化執行",
-    "type": "validation_checklist",
-    "priority": "P0",
-    "score": 100,
-    "impact_scope": "30個自動任務結果JSON (results/todoist-auto-*.json)",
-    "root_cause": "雖有 tools/validate_results.py 與 config/schemas/results-auto-task-schema.json，但未整合至任何自動化流程（無 pre-commit hook、無 Phase 3 驗證、無 CI 驗證）",
-    "signal_source": [
-      "system-insight.json: daily_success_rate=0.835 (低於95%目標)",
-      "improvement-backlog.json: P1「輸入驗證強化」",
-      "validate_results.py grep 結果: 未被任何 .ps1/.sh/.yml 引用"
-    ]
-  },
-  "artifact_spec": {
-    "type": "validation_checklist",
-    "path": "docs/workflows/results-validation-checklist.md",
-    "format": "Markdown",
-    "sections": [
+  "version": 2,
+  "generated_at": "2026-03-20T07:15:00+08:00",
+  "gap_type": "output_schema",
+  "gap_title": "Execution Trace Schema 統一",
+  "gap_description": "trace_id、span_id、parent_span_id、phase、tool_or_skill、status、duration_ms、artifacts 等欄位分散在多個輸出檔案中，缺乏統一 schema，導致追蹤與回溯成本高",
+  "gap_source": "improvement-backlog.json Rank 10 (P1)",
+  "priority": "P1",
+  "score": 95,
+  "impact_scope": "所有 Agent 執行追蹤（daily-digest、todoist-agent-team、system-audit-team、gmail-agent）",
+  "artifact_type": "output_schema",
+  "artifact_path": "config/schemas/execution-trace-schema.json",
+  "artifact_description": "為 Agent 執行追蹤定義統一 JSON Schema，包含 trace_id、span_id、phase、status、artifacts、cause_chain 等欄位，供 logs/structured/*.jsonl 與 system-insight 使用",
+  "specification": {
+    "schema_format": "JSON Schema Draft 2020-12",
+    "target_files": [
+      "logs/structured/*.jsonl（每行一個 trace entry）",
+      "results/*.json（trace_id 欄位）",
+      "state/run-fsm.json（phase 追蹤）"
+    ],
+    "core_fields": [
       {
-        "section": "1. 前提條件",
-        "content": "列出驗證前需確認的環境狀態（Python 環境、schema 檔案存在、results/ 目錄權限）"
+        "name": "trace_id",
+        "type": "string",
+        "description": "追蹤 ID，格式為 {YYYYMMDD_HHmmss} 或自訂格式",
+        "required": true,
+        "examples": ["20260320_071500", "interactive-20260320_071500"]
       },
       {
-        "section": "2. 驗證項目",
-        "content": "逐項列出檢查項目（每項含：檢查目標、檢查方式、通過標準、失敗處理）",
-        "items": [
-          {
-            "item": "2.1 Schema 可讀性",
-            "check": "config/schemas/results-auto-task-schema.json 存在且可解析為有效 JSON Schema",
-            "method": "python -c 'import json; json.load(open(\"config/schemas/results-auto-task-schema.json\"))'",
-            "pass_criteria": "exit code = 0",
-            "fail_action": "檢查 schema 格式，修正後重試"
-          },
-          {
-            "item": "2.2 結果檔案格式驗證",
-            "check": "所有 results/todoist-auto-*.json 符合 results-auto-task-schema.json",
-            "method": "uv run python tools/validate_results.py",
-            "pass_criteria": "exit code = 0, 無錯誤訊息",
-            "fail_action": "依錯誤訊息修正對應 prompt 檔案的輸出定義，重新執行任務後再驗證"
-          },
-          {
-            "item": "2.3 必填欄位完整性",
-            "check": "所有結果檔案含 task_key, status, agent（或 task_type）",
-            "method": "uv run python tools/validate_results.py（內建檢查）",
-            "pass_criteria": "無 missing required field 錯誤",
-            "fail_action": "補充缺失欄位至對應 prompt 的輸出 JSON 範例"
-          },
-          {
-            "item": "2.4 agent 欄位命名一致性",
-            "check": "agent 欄位值 = todoist-auto-{task_key}（底線命名）",
-            "method": "Bash: for f in results/todoist-auto-*.json; do jq -r '.agent' \"$f\" | grep -v \"^todoist-auto-$(basename \"$f\" .json | sed 's/todoist-auto-//')$\" && echo \"❌ $f\"; done",
-            "pass_criteria": "無輸出 = 全部一致",
-            "fail_action": "修正 prompt 檔案中的 agent 欄位硬編碼，確保與 task_key 同步"
-          },
-          {
-            "item": "2.5 status 取值規範",
-            "check": "status 僅限 success/partial/failed/format_failed",
-            "method": "uv run python tools/validate_results.py（內建 enum 驗證）",
-            "pass_criteria": "無 invalid enum value 錯誤",
-            "fail_action": "修正 prompt 中錯誤的 status 值（如 completed, error 等非標準值）"
-          }
-        ]
+        "name": "span_id",
+        "type": "string",
+        "description": "Span ID，唯一識別當前操作",
+        "required": true,
+        "examples": ["phase1-001", "phase2-tech_research-001"]
       },
       {
-        "section": "3. 整合點",
-        "content": "定義驗證清單的執行時機與整合方式",
-        "integration_points": [
-          {
-            "point": "Phase 3 assemble 後驗證",
-            "trigger": "run-todoist-agent-team.ps1 Phase 3 完成、寫入最終結果前",
-            "implementation": "在 prompts/team/todoist-assemble.md 步驟 6（寫入結果前）加入驗證步驟：uv run python tools/validate_results.py results/todoist-auto-{task_key}.json",
-            "fallback": "驗證失敗 → status 改為 format_failed，並記錄驗證錯誤至 error 欄位"
-          },
-          {
-            "point": "check-health.ps1 每日檢查",
-            "trigger": "每日健康檢查執行時",
-            "implementation": "在 check-health.ps1 新增 [結果格式驗證] 區塊，呼叫 uv run python tools/validate_results.py，輸出驗證通過率",
-            "fallback": "驗證失敗 → 輸出警告訊息，但不中斷健康檢查"
-          },
-          {
-            "point": "手動驗證指令",
-            "trigger": "開發/除錯時",
-            "implementation": "於 docs/OPERATIONS.md 新增「結果格式驗證」段落，提供快速驗證指令",
-            "command": "uv run python tools/validate_results.py"
-          }
-        ]
+        "name": "parent_span_id",
+        "type": "string",
+        "description": "父 Span ID，用於建立因果關聯",
+        "required": false,
+        "examples": ["phase1-001", null]
       },
       {
-        "section": "4. 失敗處理流程",
-        "content": "定義驗證失敗時的標準處理步驟",
-        "steps": [
-          "1. 記錄錯誤：將 validate_results.py 輸出寫入 logs/validation-errors-{date}.log",
-          "2. 定位來源：找到產生該結果檔案的 prompt 檔案（prompts/team/todoist-auto-{task_key}.md）",
-          "3. 修正 prompt：更新 prompt 中的輸出 JSON 範例，確保符合 schema",
-          "4. 重新執行：手動觸發該任務重新執行，或等待下次排程",
-          "5. 再次驗證：執行 uv run python tools/validate_results.py 確認修正成功"
-        ]
+        "name": "task_key",
+        "type": "string",
+        "description": "任務鍵（自動任務）或 agent 名稱（daily-digest）",
+        "required": true,
+        "pattern": "^[a-z_]+$",
+        "examples": ["tech_research", "daily-digest", "system-audit"]
       },
       {
-        "section": "5. 維護規則",
-        "content": "長期維護驗證清單的規範",
-        "rules": [
-          "新增自動任務時：必須在 prompt 中參照 results-auto-task-schema.json，並在本清單新增對應檢查項",
-          "修改 schema 時：必須更新本清單的驗證項目，並重新驗證所有現有結果檔案",
-          "驗證失敗率 > 10%：觸發 improvement-backlog 新增項目，檢討 schema 與 prompt 不一致原因"
-        ]
+        "name": "phase",
+        "type": "string",
+        "enum": ["init", "phase0", "phase1", "phase2", "phase3", "finalize"],
+        "description": "執行階段",
+        "required": true
+      },
+      {
+        "name": "tool_or_skill",
+        "type": "string",
+        "description": "使用的工具或 Skill 名稱",
+        "required": false,
+        "examples": ["Read", "Bash", "knowledge-query", "todoist"]
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": ["started", "running", "success", "failed", "timeout"],
+        "description": "執行狀態",
+        "required": true
+      },
+      {
+        "name": "duration_ms",
+        "type": "number",
+        "description": "執行耗時（毫秒）",
+        "required": false,
+        "minimum": 0
+      },
+      {
+        "name": "artifacts",
+        "type": "array",
+        "description": "產出的 artifact 列表",
+        "required": false,
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "type": {"type": "string", "enum": ["json", "md", "log", "state"]},
+            "size_bytes": {"type": "number"}
+          },
+          "required": ["path", "type"]
+        }
+      },
+      {
+        "name": "attributes",
+        "type": "object",
+        "description": "額外屬性（key-value pairs）",
+        "required": false,
+        "examples": [{"cache_hit": true, "retry_count": 0}]
+      },
+      {
+        "name": "events",
+        "type": "array",
+        "description": "執行過程中的事件列表",
+        "required": false,
+        "items": {
+          "type": "object",
+          "properties": {
+            "timestamp": {"type": "string", "format": "date-time"},
+            "name": {"type": "string"},
+            "attributes": {"type": "object"}
+          },
+          "required": ["timestamp", "name"]
+        }
+      },
+      {
+        "name": "cause_chain",
+        "type": "object",
+        "description": "因果鏈，串接 selected task、cache hit/miss、retry、failure point 與最終 artifact",
+        "required": false,
+        "properties": {
+          "task_selection": {"type": "string"},
+          "cache_status": {"type": "string", "enum": ["hit", "miss", "stale", "bypass"]},
+          "retry_attempts": {"type": "number"},
+          "failure_point": {"type": "string"},
+          "final_artifact": {"type": "string"}
+        }
+      },
+      {
+        "name": "timestamp",
+        "type": "string",
+        "format": "date-time",
+        "description": "記錄時間戳（ISO 8601，Asia/Taipei）",
+        "required": true
       }
     ],
-    "reference_files": [
-      "config/schemas/results-auto-task-schema.json（驗證標準）",
-      "tools/validate_results.py（驗證工具）",
-      "prompts/team/todoist-auto-*.md（產出來源）"
-    ]
+    "validation_rules": [
+      "trace_id 必須在同一次執行內保持一致",
+      "span_id 在同一 trace 內必須唯一",
+      "parent_span_id 必須指向同一 trace 內的有效 span_id（若非 null）",
+      "phase 欄位必須與執行階段對應",
+      "status=failed 時，events 應包含錯誤事件",
+      "duration_ms 在 status=success 或 failed 時為必填"
+    ],
+    "example_valid_entry": {
+      "trace_id": "20260320_071500",
+      "span_id": "phase2-tech_research-001",
+      "parent_span_id": "phase1-001",
+      "task_key": "tech_research",
+      "phase": "phase2",
+      "tool_or_skill": "knowledge-query",
+      "status": "success",
+      "duration_ms": 1450,
+      "artifacts": [
+        {
+          "path": "results/todoist-auto-tech_research.json",
+          "type": "json",
+          "size_bytes": 2048
+        }
+      ],
+      "attributes": {
+        "cache_hit": false,
+        "kb_imported": true
+      },
+      "cause_chain": {
+        "task_selection": "round-robin",
+        "cache_status": "miss",
+        "retry_attempts": 0,
+        "failure_point": null,
+        "final_artifact": "results/todoist-auto-tech_research.json"
+      },
+      "timestamp": "2026-03-20T07:15:00+08:00"
+    }
   },
-  "validation": {
-    "format": "Markdown",
-    "required_sections": ["前提條件", "驗證項目", "整合點", "失敗處理流程", "維護規則"],
-    "min_check_items": 5,
-    "must_reference_schema": true
-  }
+  "integration_plan": {
+    "step1": "用 Write 工具建立 config/schemas/execution-trace-schema.json",
+    "step2": "在 docs/ARCHITECTURE.md 的「配置文件速查」表格新增一筆：config/schemas/execution-trace-schema.json",
+    "step3": "在 config/schemas/README.md 中新增此 schema 的說明",
+    "step4": "將產物路徑寫入 context/workflow-forge-registry.json"
+  },
+  "validation_method": {
+    "method": "Python jsonschema 驗證",
+    "command": "uv run python -c \"import json, jsonschema; schema=json.load(open('config/schemas/execution-trace-schema.json')); sample={'trace_id':'20260320_071500','span_id':'phase1-001','task_key':'daily-digest','phase':'phase1','status':'success','timestamp':'2026-03-20T07:15:00+08:00'}; jsonschema.validate(sample, schema); print('✅ 驗證通過')\"",
+    "note": "驗證樣本為最小必填欄位組合"
+  },
+  "future_integration": {
+    "hooks_post_tool_logger": "hooks/post_tool_logger.py 可擴充為驗證每筆 JSONL 符合此 schema",
+    "system_insight": "context/system-insight.json 可新增 trace_completeness 指標（檢查必填欄位完整率）",
+    "execution_journal_skill": "未來若實作 execution-journal Skill，可直接使用此 schema 產出結構化日誌"
+  },
+  "notes": [
+    "此 schema 借鑑 OpenTelemetry Traces 規範（trace_id、span_id、parent_span_id、attributes、events）",
+    "允許額外欄位存在（additionalProperties: true），以支援未來擴充",
+    "cause_chain 欄位為本專案特有設計，用於串接任務選擇至最終產出的完整因果鏈",
+    "未來可與 OpenTelemetry SDK 整合，產出標準化 trace 資料"
+  ]
 }

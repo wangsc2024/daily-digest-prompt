@@ -229,6 +229,39 @@
       "verse_text": "修行要在日用中磨煉，舍此無下手處。",
       "time": "2026-03-19 06:30:02",
       "channel": "ntfy/wangsc2025"
+    },
+    {
+      "channel": "ntfy/wangsc2025",
+      "verse_text": "悟後起修，方是真修；不悟而修，總是盲修。",
+      "time": "2026-03-19 17:05:01",
+      "status": "success",
+      "verse_id": 22,
+      "author": "憨山德清大師",
+      "date": "2026-03-19",
+      "source": "《憨山老人夢遊集》",
+      "session": "evening"
+    },
+    {
+      "verse_id": 23,
+      "session": "morning",
+      "status": "success",
+      "source": "《增壹阿含經》（七佛通偈）",
+      "verse_text": "諸惡莫作，眾善奉行，自淨其意，是諸佛教。",
+      "channel": "ntfy/wangsc2025",
+      "date": "2026-03-20",
+      "time": "2026-03-20 06:30:02",
+      "author": "釋迦牟尼佛"
+    },
+    {
+      "author": "覺林菩薩",
+      "verse_id": 24,
+      "status": "success",
+      "session": "evening",
+      "verse_text": "應觀法界性，一切唯心造。",
+      "source": "《華嚴經・覺林菩薩偈》",
+      "date": "2026-03-20",
+      "time": "2026-03-20 07:30:45",
+      "channel": "ntfy/wangsc2025"
     }
   ]
 }

@@ -3,6 +3,26 @@
   "schedule_type": "system_audit",
   "description": "每日 00:40 系統審查的執行記錄，每日獨立一筆",
   "records": {
+    "2026-03-20": {
+      "run_id": "20260320_0046",
+      "completed_at": "2026-03-20T00:49:00+08:00",
+      "health_score": 87.57,
+      "grade": "A",
+      "top_issues": [
+        "5.4 跨平台相容性 58 分（by design）",
+        "5.3 工具鏈完整性 75 分（缺 JS 測試 CI）",
+        "1.2 輸入驗證 78 分（缺 WAF/SAST）",
+        "1.3 存取控制 80 分（缺 RBAC）"
+      ],
+      "fixes_applied": 1,
+      "fixes_list": [
+        "CHANGELOG.md 新增 2026-03-20 審查記錄"
+      ],
+      "trend_vs_prev": "improved",
+      "consecutive_decline_count": 0,
+      "report_path": "docs/系統審查報告_20260320_0046.md",
+      "status": "completed"
+    },
     "2026-03-19": {
       "run_id": "20260319_0045",
       "completed_at": "2026-03-19T00:47:00+08:00",

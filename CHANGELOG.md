@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- 系統審查報告 2026-03-20（Phase 2 組裝 + 1 項自動修正，87.57/A，+2.19）
 - 系統審查報告 2026-03-19（Phase 2 組裝 + 1 項自動修正，85.38/A，-2.50）
 - 系統審查報告 2026-03-18（Phase 2 組裝 + 1 項自動修正，87.88/A，+2.83）
 - 系統審查報告 2026-03-17（Phase 2 組裝 + 1 項自動修正，85.05/A）

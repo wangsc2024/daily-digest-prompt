@@ -1153,6 +1153,96 @@ if (Test-Path $timeoutsPath) {
 }
 
 # ============================================
+# Phase 0c: ADR-027 自動任務公平輪轉 Fairness-Hint 預計算
+# 讀取 context/auto-tasks-today.json 偵測飢餓任務，
+# 寫入 state/auto-task-fairness-hint.json 供 Phase 1 參考。
+# 同時保護 next_execution_order 不越界（超過 max 則重置為 1）。
+# ============================================
+$autoTasksTrackingFile = "$AgentDir\context\auto-tasks-today.json"
+$fairnessHintFile = "$AgentDir\state\auto-task-fairness-hint.json"
+try {
+    $fairnessJson = uv run --project $AgentDir python -X utf8 -c @"
+import json, os, yaml, datetime
+
+tracking_path = r'$($autoTasksTrackingFile -replace '\\','\\')'
+freq_path     = r'$($AgentDir -replace '\\','\\')\\config\\frequency-limits.yaml'
+hint_path     = r'$($fairnessHintFile -replace '\\','\\')'
+
+with open(freq_path, 'r', encoding='utf-8') as f:
+    cfg = yaml.safe_load(f)
+
+tasks = cfg.get('tasks') or {}
+today = datetime.datetime.now().strftime('%Y-%m-%d')
+
+# 讀取或初始化 tracking 檔案
+tracking = {}
+if os.path.exists(tracking_path):
+    try:
+        with open(tracking_path, 'r', encoding='utf-8') as f:
+            tracking = json.load(f)
+    except Exception:
+        tracking = {}
+
+# 若 date 不一致 → 視同全部 0
+if tracking.get('date') != today:
+    tracking = {'date': today}
+
+# 計算每個任務的今日執行次數
+counts = {}
+for key in tasks:
+    counts[key] = tracking.get(f'{key}_count', 0)
+
+# 偵測飢餓任務（今日執行次數 = 0）
+zero_tasks = [k for k, v in counts.items() if v == 0 and tasks[k].get('daily_limit', 0) > 0]
+
+# 偵測 next_execution_order 越界（大於所有 execution_order 的最大值 + 1）
+max_order = max((t.get('execution_order', 0) for t in tasks.values()), default=1)
+current_order = tracking.get('next_execution_order', 1)
+if current_order > max_order:
+    tracking['next_execution_order'] = 1
+    with open(tracking_path, 'w', encoding='utf-8') as f:
+        json.dump(tracking, f, ensure_ascii=False)
+    pointer_reset = True
+else:
+    pointer_reset = False
+
+# 計算 fairness score（標準差 / 平均值；越接近 0 越公平）
+non_zero = [v for v in counts.values() if v > 0]
+if len(non_zero) >= 2:
+    mean_v = sum(non_zero) / len(non_zero)
+    std_v  = (sum((x - mean_v)**2 for x in non_zero) / len(non_zero)) ** 0.5
+    fairness_score = round(std_v / mean_v if mean_v > 0 else 0, 3)
+else:
+    fairness_score = 0.0
+
+hint = {
+    'generated_at': datetime.datetime.now().isoformat(),
+    'date': today,
+    'starvation_count': len(zero_tasks),
+    'starvation_detected': len(zero_tasks) > 0,
+    'zero_count_tasks': zero_tasks[:10],  # 最多列 10 個
+    'fairness_score': fairness_score,
+    'pointer_reset': pointer_reset,
+    'next_execution_order': tracking.get('next_execution_order', 1),
+    'max_execution_order': max_order,
+}
+with open(hint_path, 'w', encoding='utf-8') as f:
+    json.dump(hint, f, ensure_ascii=False, indent=2)
+
+print(json.dumps({'starvation_count': len(zero_tasks), 'fairness_score': fairness_score, 'pointer_reset': pointer_reset}))
+"@
+    if ($fairnessJson) {
+        $fairness = ConvertFrom-Json $fairnessJson
+        Write-Log "[Phase0c] ADR-027 fairness-hint: starvation_count=$($fairness.starvation_count) fairness_score=$($fairness.fairness_score) pointer_reset=$($fairness.pointer_reset)"
+        if ($fairness.pointer_reset) {
+            Write-Log "[Phase0c] ADR-027 next_execution_order 越界，已重置為 1"
+        }
+    }
+} catch {
+    Write-Log "[Phase0c] ADR-027 fairness-hint 計算失敗（略過，不影響主流程）: $_"
+}
+
+# ============================================
 # Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
 # 用 Groq Llama 8B 快速判斷今日任務複雜度
 # 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
@@ -1477,6 +1567,64 @@ print(json.dumps({k: v.get('name', k) for k, v in cfg.get('tasks', {}).items()},
 }
 
 # ============================================
+# Autonomous runtime policy (由 supervisor 輸出)
+# ============================================
+$runtimePolicyFile = Join-Path $AgentDir "state\autonomous-runtime.json"
+if (Test-Path $runtimePolicyFile) {
+    try {
+        $runtimePolicy = Get-Content -Path $runtimePolicyFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $mode = if ($runtimePolicy.mode) { $runtimePolicy.mode } else { "normal" }
+        Write-Log "[Autonomy] runtime mode=$mode"
+
+        if ($plan.plan_type -eq "auto" -and $null -ne $plan.auto_tasks -and $null -ne $plan.auto_tasks.selected_tasks) {
+            $selectedTasks = @($plan.auto_tasks.selected_tasks)
+            $beforeCount = $selectedTasks.Count
+            $allowHeavy = $true
+            $allowResearch = $true
+            $maxParallel = 4
+
+            if ($runtimePolicy.policies) {
+                if ($null -ne $runtimePolicy.policies.allow_heavy_auto_tasks) {
+                    $allowHeavy = [bool]$runtimePolicy.policies.allow_heavy_auto_tasks
+                }
+                if ($null -ne $runtimePolicy.policies.allow_research_auto_tasks) {
+                    $allowResearch = [bool]$runtimePolicy.policies.allow_research_auto_tasks
+                }
+                if ($runtimePolicy.policies.max_parallel_auto_tasks) {
+                    $maxParallel = [int]$runtimePolicy.policies.max_parallel_auto_tasks
+                }
+            }
+
+            $heavyTaskKeys = @(
+                "podcast_create", "podcast_jiaoguangzong", "tech_research", "ai_deep_research",
+                "ai_github_research", "ai_workflow_github", "shurangama", "jiaoguangzong",
+                "fahua", "jingtu", "insight_briefing", "workflow_forge", "future_plan_optimize"
+            )
+            $researchTaskKeys = @(
+                "tech_research", "ai_deep_research", "ai_github_research", "ai_workflow_github",
+                "ai_smart_city", "ai_sysdev", "shurangama", "jiaoguangzong", "fahua", "jingtu"
+            )
+
+            if (-not $allowHeavy) {
+                $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $heavyTaskKeys })
+            }
+            if (-not $allowResearch) {
+                $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $researchTaskKeys })
+            }
+            if ($selectedTasks.Count -gt $maxParallel) {
+                $selectedTasks = @($selectedTasks | Select-Object -First $maxParallel)
+            }
+
+            $plan.auto_tasks.selected_tasks = $selectedTasks
+            $plan | ConvertTo-Json -Depth 10 | Set-Content -Path $planFile -Encoding UTF8 -Force
+            Write-Log "[Autonomy] auto-tasks adjusted: $beforeCount -> $($selectedTasks.Count) (allowHeavy=$allowHeavy, allowResearch=$allowResearch, maxParallel=$maxParallel)"
+        }
+    } catch {
+        Write-Log "[Autonomy] WARN: runtime policy parse failed: $_"
+    }
+}
+
+# ============================================
 # Dynamic Phase 2 Timeout Calculation
 # ============================================
 $Phase2TimeoutSeconds = $TimeoutBudget["buffer"]  # Start with buffer
@@ -1770,6 +1918,18 @@ elseif ($plan.plan_type -eq "auto") {
             if ($script:ADR024_SkipKBTasks -and ($ADR024_KB_TASK_KEYS -contains $normalizedKey)) {
                 Write-Log "[Phase2] ADR-024: 跳過需 KB 的任務 $normalizedKey（前置健康檢查 KB 不可用）"
                 continue
+            }
+
+            # ADR-028: Phase 2 快照恢復 — 若結果檔存在且 < 45 分鐘，視為前次中斷後的已完成任務，跳過重跑
+            $snapshotResultFile = "$AgentDir\results\todoist-auto-$normalizedKey.json"
+            if (Test-Path $snapshotResultFile) {
+                $snapshotAge = [int]((Get-Date) - (Get-Item $snapshotResultFile).LastWriteTime).TotalMinutes
+                if ($snapshotAge -lt 45) {
+                    Write-Log "[Phase2] ADR-028 snapshot-resume: $normalizedKey 結果檔存在（${snapshotAge} min ago），跳過重跑"
+                    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "running" -AgentType "todoist" -Detail "snapshot-resume:$normalizedKey"
+                    $sections["auto-$normalizedKey"] = "snapshot-resume"
+                    continue
+                }
             }
 
             if ($dedicatedPrompts.ContainsKey($normalizedKey) -and (Test-Path $dedicatedPrompts[$normalizedKey])) {

@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-03-20T06:12:05.578479",
+  "code_rules_total": 1,
+  "yaml_rules_total": 22,
+  "drifted_count": 0,
+  "priority_conflicts_count": 0,
+  "coverage_gaps_count": 0,
+  "health_score": 100,
+  "drifted_rules": [],
+  "recommendations": [
+    "所有規則一致，無需修復。"
+  ]
+}

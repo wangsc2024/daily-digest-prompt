@@ -1,18 +1,19 @@
-{
-  "date": "2026-03-19",
-  "topic": "Agentic AI 安全工程：權限隔離、工具沙箱與執行時防護",
+﻿{
+  "date": "2026-03-20",
+  "topic": "Computer-Using Agents（GUI Agent）— 多模態電腦操作代理的架構、評測與實務落地",
   "research_questions": [
-    "2026 年的 Agentic AI 系統主要面臨哪些新型安全風險，與傳統 LLM safety 有何差異？",
-    "權限最小化、工具沙箱、執行時政策與審計觀測應如何組成可落地的分層防線？",
-    "若要應用到 daily-digest-prompt 或個人 Agent 專案，最值得先落地的安全控制點是什麼？"
+    "Computer-Using Agents 與一般工具型 Agent、browser agent 的關鍵差異是什麼？",
+    "此類代理的核心技術棧包含哪些模組：GUI 感知、推理控制、動作執行、驗證與安全？",
+    "哪些 benchmark 與實際案例最能反映 2025-2026 年的能力上限與主要瓶頸？"
   ],
-  "methodology": "先以最新網路趨勢、研究註冊表與知識庫去重選題，再依 kb-research-strategist 的 mechanism 計畫，後續蒐集官方安全文件、研究機構文章與權威工程實務，交叉比對威脅模型、權限控制、沙箱、runtime guardrails 與 observability，建立可落地的 Agent 安全工程框架。",
+  "methodology": "以官方產品/研究文件建立概念框架，再交叉對照學術 benchmark 論文與技術文章，最後回推對 daily-digest-prompt 與個人專案有價值的落地情境與後續研究方向。",
   "keywords": [
-    "agentic AI security",
-    "AI agent permissions sandbox",
-    "runtime policy enforcement",
-    "tool output poisoning mitigation",
-    "agent observability audit logging"
+    "Computer-Using Agent",
+    "GUI Agent",
+    "computer use",
+    "OSWorld",
+    "WebArena",
+    "multimodal agent"
   ],
   "stage_completed": 1
 }

@@ -76,6 +76,13 @@
       "circuit_open": 0,
       "parse_error": 0,
       "phase_failure": 6
+    },
+    "2026-03-19": {
+      "timeout": 0,
+      "api_error": 0,
+      "circuit_open": 0,
+      "parse_error": 0,
+      "phase_failure": 2
     }
   },
   "total": {
@@ -83,7 +90,7 @@
     "circuit_open": 0,
     "parse_error": 0,
     "timeout": 11,
-    "phase_failure": 29
+    "phase_failure": 31
   },
-  "updated": "2026-03-18T20:41:21"
+  "updated": "2026-03-19T21:18:20"
 }

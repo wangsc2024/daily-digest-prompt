@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://daily-digest-prompt.local/schemas/execution-trace-schema.json",
+  "title": "Execution Trace Entry Schema",
+  "description": "統一的 Agent 執行追蹤 schema，用於 logs/structured/*.jsonl、results/*.json 與 system-insight 分析。借鑑 OpenTelemetry Traces 規範，支援 trace_id、span_id、cause_chain 等欄位。",
+  "type": "object",
+  "required": ["trace_id", "span_id", "task_key", "phase", "status", "timestamp"],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "description": "追蹤 ID，用於串接同一次執行的所有 spans。格式：{YYYYMMDD_HHmmss} 或自訂格式",
+      "examples": ["20260320_071500", "interactive-20260320_071500"],
+      "minLength": 1
+    },
+    "span_id": {
+      "type": "string",
+      "description": "Span ID，唯一識別當前操作。建議格式：{phase}-{task_key}-{sequence}",
+      "examples": ["phase1-001", "phase2-tech_research-001", "init-load-skills"],
+      "minLength": 1
+    },
+    "parent_span_id": {
+      "type": ["string", "null"],
+      "description": "父 Span ID，用於建立因果關聯。null 表示根 span",
+      "examples": ["phase1-001", null]
+    },
+    "task_key": {
+      "type": "string",
+      "description": "任務鍵（自動任務）或 agent 名稱（daily-digest、system-audit）",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "examples": ["tech_research", "daily-digest", "system-audit", "ai_deep_research"]
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["init", "phase0", "phase1", "phase2", "phase3", "finalize", "cleanup"],
+      "description": "執行階段。init=初始化、phase0=前處理、phase1=查詢/規劃、phase2=並行執行、phase3=組裝/通知、finalize=收尾、cleanup=清理"
+    },
+    "tool_or_skill": {
+      "type": "string",
+      "description": "使用的工具（Read、Bash、Write）或 Skill 名稱（knowledge-query、todoist）",
+      "examples": ["Read", "Bash", "Write", "knowledge-query", "todoist", "hackernews-ai-digest"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["started", "running", "success", "failed", "timeout", "skipped"],
+      "description": "執行狀態。started=開始、running=進行中、success=成功、failed=失敗、timeout=超時、skipped=跳過"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "執行耗時（毫秒）。在 status=success、failed 或 timeout 時為必填",
+      "minimum": 0,
+      "examples": [1450, 30200, 120000]
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "產出的 artifact 列表（檔案、狀態更新、通知）",
+      "items": {
+        "type": "object",
+        "required": ["path", "type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Artifact 路徑（相對專案根目錄）",
+            "examples": ["results/todoist-auto-tech_research.json", "context/digest-memory.json"]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["json", "md", "log", "state", "notification", "cache"],
+            "description": "Artifact 類型"
+          },
+          "size_bytes": {
+            "type": "number",
+            "description": "檔案大小（bytes）",
+            "minimum": 0
+          },
+          "hash": {
+            "type": "string",
+            "description": "檔案 hash（SHA256），用於驗證完整性"
+          }
+        }
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "description": "額外屬性（key-value pairs），用於記錄執行上下文",
+      "examples": [
+        {"cache_hit": true, "retry_count": 0},
+        {"kb_imported": true, "note_id": "abc123"},
+        {"timeout_seconds": 600, "backend": "claude_sonnet45"}
+      ],
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "description": "執行過程中的事件列表（錯誤、警告、檢查點）",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "name"],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "事件時間戳（ISO 8601）"
+          },
+          "name": {
+            "type": "string",
+            "description": "事件名稱",
+            "examples": ["error", "warning", "checkpoint", "cache_miss"]
+          },
+          "attributes": {
+            "type": "object",
+            "description": "事件屬性",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "cause_chain": {
+      "type": "object",
+      "description": "因果鏈，串接 selected task、cache hit/miss、retry、failure point 與最終 artifact。本專案特有設計，用於追溯執行路徑",
+      "properties": {
+        "task_selection": {
+          "type": "string",
+          "description": "任務選擇方式",
+          "examples": ["round-robin", "tier1-label", "tier2-keyword", "tier3-semantic", "manual"]
+        },
+        "cache_status": {
+          "type": "string",
+          "enum": ["hit", "miss", "stale", "bypass", "not_applicable"],
+          "description": "快取狀態"
+        },
+        "retry_attempts": {
+          "type": "number",
+          "description": "重試次數",
+          "minimum": 0
+        },
+        "failure_point": {
+          "type": ["string", "null"],
+          "description": "失敗點（若 status=failed）。null 表示成功",
+          "examples": ["phase2-timeout", "kb-import-failed", "validation-error", null]
+        },
+        "final_artifact": {
+          "type": ["string", "null"],
+          "description": "最終產出的主要 artifact 路徑",
+          "examples": ["results/todoist-auto-tech_research.json", null]
+        }
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "記錄時間戳（ISO 8601，建議使用 Asia/Taipei 時區）",
+      "examples": ["2026-03-20T07:15:00+08:00"]
+    },
+    "error": {
+      "type": "object",
+      "description": "錯誤資訊（若 status=failed）",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "錯誤訊息"
+        },
+        "type": {
+          "type": "string",
+          "description": "錯誤類型",
+          "examples": ["TimeoutError", "ValidationError", "APIError", "FileNotFoundError"]
+        },
+        "stack_trace": {
+          "type": "string",
+          "description": "錯誤堆疊追蹤（可選）"
+        }
+      },
+      "required": ["message", "type"]
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "trace_id": "20260320_071500",
+      "span_id": "phase2-tech_research-001",
+      "parent_span_id": "phase1-001",
+      "task_key": "tech_research",
+      "phase": "phase2",
+      "tool_or_skill": "knowledge-query",
+      "status": "success",
+      "duration_ms": 1450,
+      "artifacts": [
+        {
+          "path": "results/todoist-auto-tech_research.json",
+          "type": "json",
+          "size_bytes": 2048
+        }
+      ],
+      "attributes": {
+        "cache_hit": false,
+        "kb_imported": true,
+        "backend": "codex_exec"
+      },
+      "cause_chain": {
+        "task_selection": "round-robin",
+        "cache_status": "miss",
+        "retry_attempts": 0,
+        "failure_point": null,
+        "final_artifact": "results/todoist-auto-tech_research.json"
+      },
+      "timestamp": "2026-03-20T07:15:00+08:00"
+    },
+    {
+      "trace_id": "20260320_080000",
+      "span_id": "phase2-skill_forge-001",
+      "parent_span_id": "phase1-002",
+      "task_key": "skill_forge",
+      "phase": "phase2",
+      "tool_or_skill": "skill-forge",
+      "status": "failed",
+      "duration_ms": 30200,
+      "error": {
+        "message": "Timeout after 30 seconds",
+        "type": "TimeoutError"
+      },
+      "events": [
+        {
+          "timestamp": "2026-03-20T08:00:15+08:00",
+          "name": "checkpoint",
+          "attributes": {"step": "KB 深度研究完成"}
+        },
+        {
+          "timestamp": "2026-03-20T08:00:30+08:00",
+          "name": "error",
+          "attributes": {"reason": "Timeout waiting for LLM response"}
+        }
+      ],
+      "cause_chain": {
+        "task_selection": "round-robin",
+        "cache_status": "bypass",
+        "retry_attempts": 1,
+        "failure_point": "phase2-timeout",
+        "final_artifact": null
+      },
+      "timestamp": "2026-03-20T08:00:30+08:00"
+    }
+  ]
+}
