@@ -20,6 +20,7 @@ describe('fsm — canTransition', () => {
         ['claimed', 'completed'],
         ['processing', 'completed'],
         ['processing', 'failed'],
+        ['processing', 'pending'],  // Worker 崩潰後自動回收（recoverStaleProcessing）
         ['failed', 'pending'],
     ];
 
@@ -33,7 +34,6 @@ describe('fsm — canTransition', () => {
         ['pending', 'processing'],
         ['pending', 'failed'],
         ['claimed', 'failed'],
-        ['processing', 'pending'],
         ['processing', 'claimed'],
         ['completed', 'pending'],
         ['completed', 'claimed'],

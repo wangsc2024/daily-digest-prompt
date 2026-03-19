@@ -744,6 +744,8 @@ foreach ($record in @($record)) {
             Write-Log "kb-research-brief.json 已清理"
         }
 
+        } # end system_cmd else
+
     } catch {
         $errMsg = "$_"
         Write-Log "處理發生錯誤: $errMsg"

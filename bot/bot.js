@@ -47,6 +47,7 @@ require('gun/sea');
 const store = require('./lib/store');
 const classifier = require('./lib/classifier');
 const routes = require('./lib/routes');
+const lineWebhook = require('./lib/line-webhook');
 const { createQueue } = require('./lib/queue');
 const workflow = require('./lib/workflow');
 
@@ -447,8 +448,11 @@ const classifyQueue = createQueue({
             decision.task_type = 'game';
             console.log('[classify] 偵測到遊戲意圖，改為遊戲型任務（避免簡答）');
         }
-        // 一般型：僅簡答回覆，不納入任務
-        const isGeneralOnly = (decision.task_type === 'general' && !decision.is_research);
+        // LINE 來源任務（id 前綴 line_）：無論 task_type 為何，一律納入 Worker 執行
+        // 理由：LINE 用於指派任務，而非即時問答，general 簡答會繞過 Worker 導致 LINE 收不到執行結果
+        const isLineTask = (item.id || '').startsWith('line_');
+        // 一般型（非 LINE 來源）：僅簡答回覆，不納入任務
+        const isGeneralOnly = !isLineTask && (decision.task_type === 'general' && !decision.is_research);
         if (isGeneralOnly) {
             try {
                 const quickAnswer = await classifier.answerQuestion(item.text);
@@ -466,8 +470,8 @@ const classifyQueue = createQueue({
             }
             return;
         }
-        // 其餘型態（研究／程式碼／Podcast／詳細回答／從知識庫回答等）：納入任務，不進行簡答
-        store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type);
+        // 所有型態（含 LINE 來源的 general）：納入任務，交由 Worker 執行
+        store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type, item.lineUserId, item.lineReplyTarget, item.lineSourceType);
         const typeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'game' ? '遊戲型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
         await sendSystemReply(
             `[系統回覆] 已將任務存為檔案 ${item.id}.md (${typeLabel})，等待 Worker 認領處理中...`
@@ -475,7 +479,7 @@ const classifyQueue = createQueue({
     },
     onError: (item, err) => {
         console.error('[classify] AI 分類失敗:', err.message);
-        store.addRecord(item.id, item.text, false, undefined);
+        store.addRecord(item.id, item.text, false, undefined, item.lineUserId, item.lineReplyTarget, item.lineSourceType);
     }
 });
 
@@ -522,20 +526,26 @@ function startMessageLoop() {
         }
 
         try {
-            // SEA.decrypt 可能回傳字串（用戶訊息）或已解析物件（bot 回覆 JSON.stringify({text,ts})）
+            // SEA.decrypt 可能回傳字串（用戶訊息）或已解析物件（relay 送來的 {id,text,ts,lineUserId,lineReplyTarget,lineSourceType}）
             let text;
+            let lineUserId;
+            let lineReplyTarget;
+            let lineSourceType;
             if (typeof raw === 'string') {
                 text = raw;
             } else if (raw && typeof raw === 'object' && raw.text) {
-                text = raw.text; // bot 回覆格式：{text, ts}
+                text = raw.text;
+                lineUserId = raw.lineUserId || undefined;
+                lineReplyTarget = raw.lineReplyTarget || raw.lineUserId || undefined;
+                lineSourceType = raw.lineSourceType || undefined;
             } else {
                 text = raw != null ? String(raw) : '';
             }
             if (!text || text.startsWith('[系統回覆]')) return;
 
             processedMessages.set(id, Date.now());
-            if (!classifyQueue.push({ id, text })) {
-                store.addRecord(id, text, false, undefined);
+            if (!classifyQueue.push({ id, text, lineUserId, lineReplyTarget, lineSourceType })) {
+                store.addRecord(id, text, false, undefined, lineUserId, lineReplyTarget, lineSourceType);
                 console.warn(`[message] 佇列已滿，直接存為未分類任務: ${id}`);
             }
         } catch (err) {
@@ -592,6 +602,9 @@ async function init() {
         process.exit(1);
     }
     classifier.init(process.env.GROQ_API_KEY.trim());
+
+    // 初始化 LINE Client（推播模式，允許直接回報至 LINE，不依賴 relay 的揮發 lineUserId 變數）
+    lineWebhook.initClient();
 
     // 從既有 records + scheduledTasks + workflows 填充去重快取，防止重啟後 Gun.js 重播訊息導致重複處理
     for (const rec of store.records) {

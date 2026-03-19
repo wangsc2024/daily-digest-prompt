@@ -67,17 +67,6 @@ function mount(app, { store, generateId, sendReply }) {
     console.log('[LINE] Webhook 已掛載於 POST /api/line-webhook');
 }
 
-/**
- * 解析 LINE 訊息，判斷是否為系統指令（括號語法 [...] 或全形 ［...］）
- * 例：[查明為什麼一直產生podcast] → { isSysCmd: true, cmdText: '查明為什麼一直產生podcast' }
- */
-function parseSysCmd(text) {
-    // 支援半形 [...] 與全形 ［...］，允許首尾空白
-    const m = text.match(/^[\[［]\s*([\s\S]+?)\s*[\]］]$/);
-    if (m) return { isSysCmd: true, cmdText: m[1].trim() };
-    return { isSysCmd: false, cmdText: text };
-}
-
 async function handleLineEvent(event, { store, generateId, sendReply }) {
     if (event.type !== 'message' || event.message.type !== 'text') return;
 
@@ -85,35 +74,19 @@ async function handleLineEvent(event, { store, generateId, sendReply }) {
     const text = event.message.text.trim();
     if (!text) return;
 
-    const { isSysCmd, cmdText } = parseSysCmd(text);
+    // 所有 LINE 訊息一律作為任務處理（由 Groq 分類後交 Worker 執行）
+    // 注意：本 webhook 掛載在 bot 本地端，實際 LINE Webhook 由 my-gun-relay 處理
     const taskId = generateId('line');
-
-    if (isSysCmd) {
-        // 系統指令：task_type = system_cmd，由 Worker 以 claude -p 進行診斷調查
-        store.addRecord(taskId, cmdText, false, 'system_cmd', userId);
-        console.log(`[LINE] 系統指令任務建立：${taskId}，指令：${cmdText.slice(0, 60)}`);
-        if (lineClient && event.replyToken) {
-            await lineClient.replyMessage({
-                replyToken: event.replyToken,
-                messages: [{
-                    type: 'text',
-                    text: `🔍 系統診斷指令已收到：「${cmdText.slice(0, 50)}${cmdText.length > 50 ? '…' : ''}」\n正在調查中，完成後會回報結果至 LINE。`
-                }]
-            });
-        }
-    } else {
-        // 一般任務
-        store.addRecord(taskId, text, false, undefined, userId);
-        console.log(`[LINE] 使用者 ${userId} 任務已建立：${taskId}`);
-        if (lineClient && event.replyToken) {
-            await lineClient.replyMessage({
-                replyToken: event.replyToken,
-                messages: [{
-                    type: 'text',
-                    text: `✅ 任務已收到：「${text.slice(0, 50)}${text.length > 50 ? '…' : ''}」\n等待 Worker 處理中，完成後會回報至 LINE。`
-                }]
-            });
-        }
+    store.addRecord(taskId, text, false, undefined, userId);
+    console.log(`[LINE] 使用者 ${userId} 任務已建立：${taskId}`);
+    if (lineClient && event.replyToken) {
+        await lineClient.replyMessage({
+            replyToken: event.replyToken,
+            messages: [{
+                type: 'text',
+                text: `✅ 任務已收到：「${text.slice(0, 50)}${text.length > 50 ? '…' : ''}」\n等待 Worker 處理中，完成後會回報至 LINE。`
+            }]
+        });
     }
 }
 
@@ -136,4 +109,20 @@ async function pushMessage(userId, text) {
     });
 }
 
-module.exports = { mount, pushMessage };
+/**
+ * 僅初始化 LINE Client（不掛載 Webhook 路由）
+ * 供已有外部 Webhook（如 my-gun-relay）但需直接推播功能的場景使用
+ * @returns {boolean} 是否初始化成功
+ */
+function initClient() {
+    const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+    if (!channelAccessToken) return false;
+    if (!tryLoadLineSdk()) return false;
+    if (!lineClient) {
+        lineClient = new lineSdk.messagingApi.MessagingApiClient({ channelAccessToken });
+        console.log('[LINE] LINE Client 已初始化（推播模式，不掛載 Webhook 路由）');
+    }
+    return true;
+}
+
+module.exports = { mount, pushMessage, initClient };

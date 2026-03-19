@@ -341,25 +341,28 @@ function mount(app, opts = {}) {
                         return;
                     }
 
-                    // ---- 非工作流任務：原有邏輯不變 ----
-                    if (result != null && typeof sendReply === 'function') {
+                    // ---- 非工作流任務 ----
+                    if (result != null) {
                         const MAX_LEN = 6000;
                         const truncated = resultStr.length > MAX_LEN
                             ? resultStr.slice(0, MAX_LEN) + '\n...[內容過長，已截斷]'
                             : resultStr;
-
                         const taskLabel = taskContent.trim().slice(0, 80) + (taskContent.length > 80 ? '…' : '');
+                        const replyMsg = `[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`;
 
-                        sendReply(`[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`)
-                            .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
-                    } else if (result != null) {
-                        console.warn('[routes/processed] 未回傳至 Gun relay：sendReply 不可用（sharedSecrets 為空）。請確認 my-gun-relay 已啟動且與 bot 完成握手。結果已存於 records。');
+                        if (typeof sendReply === 'function') {
+                            sendReply(replyMsg)
+                                .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
+                        } else {
+                            console.warn('[routes/processed] 未回傳至 Gun relay：sendReply 不可用（sharedSecrets 為空）。請確認 my-gun-relay 已啟動且與 bot 完成握手。結果已存於 records。');
+                        }
 
-                        // LINE 來源任務：完成時一併回報至 LINE
-                        if (rec && rec.line_user_id && typeof lineWebhook.pushMessage === 'function') {
-                            const lineMsg = `[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`;
-                            lineWebhook.pushMessage(rec.line_user_id, lineMsg)
-                                .catch(e => console.error('[routes/processed] LINE push 失敗:', e.message));
+                        // LINE 來源任務：一律直接推播至 LINE（不依賴 relay 的揮發 lineUserId 變數）
+                        // line_reply_target：group → groupId（全群組可見），user → userId（私訊）
+                        const lineTarget = rec && (rec.line_reply_target || rec.line_user_id);
+                        if (lineTarget) {
+                            lineWebhook.pushMessage(lineTarget, replyMsg)
+                                .catch(e => console.error(`[routes/processed] LINE push 失敗 (${rec.line_source_type || 'user'} → ${lineTarget.slice(0, 8)}…):`, e.message));
                         }
 
                         if (typeof clearTaskOnRelay === 'function') {
