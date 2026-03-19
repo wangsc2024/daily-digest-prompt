@@ -1,0 +1,34 @@
+version: 1
+generated_at: "2026-03-20"
+
+autonomous_harness:
+  run_fsm_path: "state/run-fsm.json"
+  scheduler_state_path: "state/scheduler-state.json"
+  failure_stats_path: "state/failure-stats.json"
+  failed_auto_tasks_path: "state/failed-auto-tasks.json"
+  api_health_path: "state/api-health.json"
+  output_plan_path: "state/autonomous-harness-plan.json"
+  recovery_queue_path: "state/autonomous-recovery-queue.json"
+
+  thresholds:
+    stale_run_minutes: 45
+    scheduler_failure_window: 10
+    scheduler_failure_threshold: 2
+    failed_auto_task_threshold: 2
+    api_open_circuit_threshold: 1
+
+  dispatch:
+    daily-digest:
+      restart_command:
+        - "pwsh"
+        - "-ExecutionPolicy"
+        - "Bypass"
+        - "-File"
+        - "run-agent-team.ps1"
+    todoist:
+      restart_command:
+        - "pwsh"
+        - "-ExecutionPolicy"
+        - "Bypass"
+        - "-File"
+        - "run-todoist-agent-team.ps1"
