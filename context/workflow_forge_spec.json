@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "generated_at": "2026-03-19T05:40:00+08:00",
+  "selected_gap": {
+    "id": "A",
+    "title": "validate_results.py 未自動化執行",
+    "type": "validation_checklist",
+    "priority": "P0",
+    "score": 100,
+    "impact_scope": "30個自動任務結果JSON (results/todoist-auto-*.json)",
+    "root_cause": "雖有 tools/validate_results.py 與 config/schemas/results-auto-task-schema.json，但未整合至任何自動化流程（無 pre-commit hook、無 Phase 3 驗證、無 CI 驗證）",
+    "signal_source": [
+      "system-insight.json: daily_success_rate=0.835 (低於95%目標)",
+      "improvement-backlog.json: P1「輸入驗證強化」",
+      "validate_results.py grep 結果: 未被任何 .ps1/.sh/.yml 引用"
+    ]
+  },
+  "artifact_spec": {
+    "type": "validation_checklist",
+    "path": "docs/workflows/results-validation-checklist.md",
+    "format": "Markdown",
+    "sections": [
+      {
+        "section": "1. 前提條件",
+        "content": "列出驗證前需確認的環境狀態（Python 環境、schema 檔案存在、results/ 目錄權限）"
+      },
+      {
+        "section": "2. 驗證項目",
+        "content": "逐項列出檢查項目（每項含：檢查目標、檢查方式、通過標準、失敗處理）",
+        "items": [
+          {
+            "item": "2.1 Schema 可讀性",
+            "check": "config/schemas/results-auto-task-schema.json 存在且可解析為有效 JSON Schema",
+            "method": "python -c 'import json; json.load(open(\"config/schemas/results-auto-task-schema.json\"))'",
+            "pass_criteria": "exit code = 0",
+            "fail_action": "檢查 schema 格式，修正後重試"
+          },
+          {
+            "item": "2.2 結果檔案格式驗證",
+            "check": "所有 results/todoist-auto-*.json 符合 results-auto-task-schema.json",
+            "method": "uv run python tools/validate_results.py",
+            "pass_criteria": "exit code = 0, 無錯誤訊息",
+            "fail_action": "依錯誤訊息修正對應 prompt 檔案的輸出定義，重新執行任務後再驗證"
+          },
+          {
+            "item": "2.3 必填欄位完整性",
+            "check": "所有結果檔案含 task_key, status, agent（或 task_type）",
+            "method": "uv run python tools/validate_results.py（內建檢查）",
+            "pass_criteria": "無 missing required field 錯誤",
+            "fail_action": "補充缺失欄位至對應 prompt 的輸出 JSON 範例"
+          },
+          {
+            "item": "2.4 agent 欄位命名一致性",
+            "check": "agent 欄位值 = todoist-auto-{task_key}（底線命名）",
+            "method": "Bash: for f in results/todoist-auto-*.json; do jq -r '.agent' \"$f\" | grep -v \"^todoist-auto-$(basename \"$f\" .json | sed 's/todoist-auto-//')$\" && echo \"❌ $f\"; done",
+            "pass_criteria": "無輸出 = 全部一致",
+            "fail_action": "修正 prompt 檔案中的 agent 欄位硬編碼，確保與 task_key 同步"
+          },
+          {
+            "item": "2.5 status 取值規範",
+            "check": "status 僅限 success/partial/failed/format_failed",
+            "method": "uv run python tools/validate_results.py（內建 enum 驗證）",
+            "pass_criteria": "無 invalid enum value 錯誤",
+            "fail_action": "修正 prompt 中錯誤的 status 值（如 completed, error 等非標準值）"
+          }
+        ]
+      },
+      {
+        "section": "3. 整合點",
+        "content": "定義驗證清單的執行時機與整合方式",
+        "integration_points": [
+          {
+            "point": "Phase 3 assemble 後驗證",
+            "trigger": "run-todoist-agent-team.ps1 Phase 3 完成、寫入最終結果前",
+            "implementation": "在 prompts/team/todoist-assemble.md 步驟 6（寫入結果前）加入驗證步驟：uv run python tools/validate_results.py results/todoist-auto-{task_key}.json",
+            "fallback": "驗證失敗 → status 改為 format_failed，並記錄驗證錯誤至 error 欄位"
+          },
+          {
+            "point": "check-health.ps1 每日檢查",
+            "trigger": "每日健康檢查執行時",
+            "implementation": "在 check-health.ps1 新增 [結果格式驗證] 區塊，呼叫 uv run python tools/validate_results.py，輸出驗證通過率",
+            "fallback": "驗證失敗 → 輸出警告訊息，但不中斷健康檢查"
+          },
+          {
+            "point": "手動驗證指令",
+            "trigger": "開發/除錯時",
+            "implementation": "於 docs/OPERATIONS.md 新增「結果格式驗證」段落，提供快速驗證指令",
+            "command": "uv run python tools/validate_results.py"
+          }
+        ]
+      },
+      {
+        "section": "4. 失敗處理流程",
+        "content": "定義驗證失敗時的標準處理步驟",
+        "steps": [
+          "1. 記錄錯誤：將 validate_results.py 輸出寫入 logs/validation-errors-{date}.log",
+          "2. 定位來源：找到產生該結果檔案的 prompt 檔案（prompts/team/todoist-auto-{task_key}.md）",
+          "3. 修正 prompt：更新 prompt 中的輸出 JSON 範例，確保符合 schema",
+          "4. 重新執行：手動觸發該任務重新執行，或等待下次排程",
+          "5. 再次驗證：執行 uv run python tools/validate_results.py 確認修正成功"
+        ]
+      },
+      {
+        "section": "5. 維護規則",
+        "content": "長期維護驗證清單的規範",
+        "rules": [
+          "新增自動任務時：必須在 prompt 中參照 results-auto-task-schema.json，並在本清單新增對應檢查項",
+          "修改 schema 時：必須更新本清單的驗證項目，並重新驗證所有現有結果檔案",
+          "驗證失敗率 > 10%：觸發 improvement-backlog 新增項目，檢討 schema 與 prompt 不一致原因"
+        ]
+      }
+    ],
+    "reference_files": [
+      "config/schemas/results-auto-task-schema.json（驗證標準）",
+      "tools/validate_results.py（驗證工具）",
+      "prompts/team/todoist-auto-*.md（產出來源）"
+    ]
+  },
+  "validation": {
+    "format": "Markdown",
+    "required_sections": ["前提條件", "驗證項目", "整合點", "失敗處理流程", "維護規則"],
+    "min_check_items": 5,
+    "must_reference_schema": true
+  }
+}

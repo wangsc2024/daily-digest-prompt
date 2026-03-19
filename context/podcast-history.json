@@ -1,33 +1,63 @@
 {
   "version": 2,
-  "updated_at": "2026-03-18T15:37:03",
+  "updated_at": "2026-03-19T04:39:00+08:00",
   "summary": {
-    "total_episodes": 65,
+    "total_episodes": 66,
     "cooldown_days": 30,
     "recent_note_ids": [
-      "0fd6fe77-1b57-457f-b443-f295c18fd8e5",
-      "ed138bbf-b608-4f05-8311-f6fc2e865392",
-      "16f55b36-8eca-4571-8fcb-40b7525bf53b",
-      "2edf5224-1231-4b7c-bfbb-ba06fb1eaa67",
       {
         "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
         "last_used": "2026-03-18",
         "expires_at": "2026-04-17"
+      },
+      {
+        "note_id": "539bf8cc-3400-4309-bed1-efea59c37c9a",
+        "last_used": "2026-03-19",
+        "expires_at": "2026-04-18"
       }
     ],
     "recent_topics": [
-      "法華經",
-      "佛學",
-      "天台宗",
-      "教觀綱宗",
       {
         "topic": "四教觀法",
         "last_used": "2026-03-18",
         "expires_at": "2026-04-17"
+      },
+      {
+        "topic": "別教",
+        "last_used": "2026-03-19",
+        "expires_at": "2026-04-18"
+      },
+      {
+        "topic": "次第三觀",
+        "last_used": "2026-03-19",
+        "expires_at": "2026-04-18"
+      },
+      {
+        "topic": "菩薩行位",
+        "last_used": "2026-03-19",
+        "expires_at": "2026-04-18"
       }
     ]
   },
   "episodes": [
+    {
+      "episode_title": "別教次第三觀修證",
+      "notes_used": [
+        "539bf8cc-3400-4309-bed1-efea59c37c9a"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之別教 — 次第三觀、無量四諦與菩薩歷別行位的教觀體系"
+      ],
+      "topics": [
+        "別教",
+        "次第三觀",
+        "菩薩行位"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-19T04:39:00+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep01_別教_別教次第三觀修證.mp3",
+      "slug": "淨土學苑_ep01_別教_別教次第三觀修證"
+    },
     {
       "episode_title": "法華一佛乘義理",
       "notes_used": [

@@ -1,138 +1,136 @@
 {
   "version": 1,
   "source": "kb_insight_evaluation",
-  "generated_at": "2026-03-18T08:04:13.1649003+08:00",
+  "generated_at": "2026-03-19T06:34:33.1942957+08:00",
   "insight_source": "context/system-insight.json",
   "selected_3": [
     {
-      "title": "自動任務公平輪轉修復",
-      "priority": "P0",
-      "dimension": "系統穩定性",
-      "selected_reason": "直接對應 auto_task_fairness=1.993 與 23 個 idle tasks，影響排程公平性與任務覆蓋率，且與現有 backlog items 不重複。",
-      "research_summary": "Airflow 的 pools 與 priority weights 做法顯示，排程器可把容量限制與優先權分離，並用可插拔權重規則修正飢餓問題；對本專案可推導為 starvation score + weighted round-robin，而非只靠固定輪轉順序。",
+      "title": "快取命中率調優與自適應 TTL 治理",
+      "priority": "P1",
+      "dimension": "系統效率",
+      "pattern": "快取命中率調優與自適應 TTL 治理",
+      "description": "system-insight 顯示 cache_hit_ratio 僅 20.7%，遠低於 40% 門檻。建議以 cache-aside 原則重整 TTL、失效與命中觀測，並建立按 volatility/命中率調整的自適應 TTL 治理流程。",
+      "selected_reason": "直接對應 system-insight 的 critical alert，影響 API 成本、延遲與降級能力；現有 improvement-backlog 尚未納入快取策略執行項。",
+      "research_summary": "Azure Cache-Aside 指出 TTL 不宜過短或過長，應與資料存取模式對齊，寫入後優先更新資料源再失效快取；Redis 開發最佳實踐則建議以較小值、客戶端量測與 pipelining 提升吞吐，適合轉化為本專案的 endpoint 級 TTL 與 cache-miss 診斷。",
       "sources": [
         {
-          "title": "Airflow Pools",
-          "url": "https://airflow.apache.org/docs/apache-airflow/2.11.0/administration-and-deployment/pools.html"
+          "title": "Cache-Aside pattern",
+          "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
         },
         {
-          "title": "Airflow Priority Weights",
-          "url": "https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/priority-weight.html"
+          "title": "Best practices for development - Azure Cache for Redis",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-best-practices-development"
         }
       ],
       "execution_plan": {
-        "goal": "將 7 天內 auto task 覆蓋率由 6/29 拉升至至少 15/29，並把 auto_task_fairness 壓回 0.8 以下。",
+        "goal": "在不修改 frequency/timeouts 限制的前提下，7 天內將 cache_hit_ratio 從 20.7% 提升到至少 35%，並建立端點級 miss 原因追蹤。",
         "prerequisites": [
-          "可讀取 context/auto-tasks-today.json 與 state/failed-auto-tasks.json",
-          "保留現有 frequency-limits 與 timeout override 規則，不修改被禁止的 config 檔"
+          "可讀取 config/cache-policy.yaml、cache/status.json 與 logs/structured/*.jsonl",
+          "保留既有 api-cache Skill 的快取檔格式與降級流程"
         ],
         "steps": [
-          "建立任務公平性資料模型，至少含 last_executed_at、executed_count_7d、consecutive_skips、failure_penalty。",
-          "在 run-todoist-agent-team.ps1 Phase 1 選任務前計算 starvation score，採 weighted round-robin 先選高分任務，再做 frequency 上限檢查。",
-          "對最近連續失敗任務加上 failure_penalty 上限，避免補償機制把系統拖進持續重試。",
-          "把 selected/skipped 與原因寫入 state 或 results，讓後續 system-insight 可回溯。",
-          "新增簡易驗收腳本，重播近 7 天資料驗證 idle tasks 是否下降、覆蓋率是否提高。"
+          "盤點 todoist、pingtung-news、hackernews、knowledge、gmail 等端點近 7 天 cache-read/api-call/miss 原因，建立基線表。",
+          "依資料 volatility 與讀取頻率調整 config/cache-policy.yaml 中各來源 TTL，優先處理低波動且高重複查詢端點。",
+          "在 api-cache 或相關記錄流程中補上 miss_reason、stale_age、endpoint 三類欄位，區分不存在、過期、格式失敗與主動繞過。",
+          "為寫後失效與降級取用建立統一規則，避免資料源已更新但快取未失效，或 API 故障時無法安全使用過期快取。",
+          "新增每週檢查腳本或 system-insight 彙整欄位，持續輸出端點級 hit ratio、top miss reasons 與 TTL 建議。"
         ],
         "acceptance": [
-          "auto_task_fairness 連續 3 天低於 0.8",
-          "近 7 天 executed task 數至少 15 個",
-          "每筆自動任務選擇紀錄都有 skip_reason 或 selection_reason"
+          "system-insight 的 cache_hit_ratio 7 天內達到 0.35 以上",
+          "至少 80% cache-miss 事件可分類到明確 miss_reason",
+          "config/cache-policy.yaml 的 TTL 調整有對應的端點基線與回顧紀錄"
         ],
         "effort": "medium"
       },
       "self_review": {
         "compatible_with_project": true,
-        "notes": "方案只動到 orchestrator 與 state/context 檔，符合 CLAUDE.md 的文件驅動與 PowerShell 主導架構。"
+        "notes": "方案集中在 cache-policy、api-cache 與 system-insight 指標閉環，符合文件驅動架構，且未觸碰禁止修改的 frequency/timeouts 檔。"
       }
     },
     {
-      "title": "Phase 2 快照恢復與故障續跑",
-      "priority": "P0",
-      "dimension": "系統穩定性",
-      "selected_reason": "直接支援 daily_success_rate 85.1% 的改善，且可重用既有 run-fsm 基礎，落地成本低於全面改寫 Team orchestration。",
-      "research_summary": "LangGraph 的 persistence/durable execution 說明指出，checkpoint 應與 thread_id 綁定，並在節點失敗時保留成功節點的 pending writes；time travel/restore 流程則示範如何從特定 checkpoint 恢復並分叉新歷史。這與現有 run-fsm.json 十分相容，可轉化為 Phase 2 snapshot 續跑。",
+      "title": "統一 execution trace schema 與因果追蹤",
+      "priority": "P1",
+      "dimension": "可觀測性",
+      "pattern": "統一 execution trace schema 與因果追蹤",
+      "description": "近 3 天洞察提議把 task_key、skill chain、cache 狀態、耗時、失敗點與輸出 artifact 納入統一 trace/event schema，降低只靠零散結果檔追查回歸的成本。",
+      "selected_reason": "屬於高影響的可觀測性缺口，能同時支撐 system-insight、arch-evolution 與故障回溯；現有 backlog 尚未把 trace schema 納入正式項目。",
+      "research_summary": "OpenTelemetry 將 trace 定義為由 spans 組成的請求路徑，核心欄位包含 trace_id、span_id、timestamps、attributes、events 與 status；Langfuse 以 OpenTelemetry 為基底追蹤完整 LLM/agent traces 與 nested observations，適合映射為本專案的 execution-journal 與 JSONL schema。",
       "sources": [
         {
-          "title": "LangGraph Persistence",
-          "url": "https://docs.langchain.com/oss/python/langgraph/persistence"
+          "title": "Traces | OpenTelemetry",
+          "url": "https://opentelemetry.io/docs/concepts/signals/traces/"
         },
         {
-          "title": "LangGraph Durable Execution",
-          "url": "https://docs.langchain.com/oss/python/langgraph/durable-execution"
-        },
-        {
-          "title": "LangGraph Time Travel",
-          "url": "https://docs.langchain.com/langsmith/human-in-the-loop-time-travel"
+          "title": "Langfuse",
+          "url": "https://langfuse.com/"
         }
       ],
       "execution_plan": {
-        "goal": "讓 Phase 2 在單點 timeout/失敗後可從最後成功 checkpoint 續跑，減少重工並把成功率先拉回 90% 以上。",
+        "goal": "建立可被 system-insight 與後續分析工具共用的 trace schema，讓每次 auto task 都能回溯 phase、工具鏈、cache 狀態與結果產物。",
         "prerequisites": [
-          "state/run-fsm.json 可持續作為 run lifecycle 真相來源",
-          "results/ 內各 agent 結果檔命名已穩定遵循 task_key 規範"
+          "現有 hooks/post_tool_logger.py 與 logs/structured/*.jsonl 可持續輸出 trace_id",
+          "results/*.json 與 state/ 中已有 task_key、phase、result path 等基礎欄位"
         ],
         "steps": [
-          "定義 snapshot 檔 schema，包含 run_id、trace_id、checkpoint_at、completed_agents、failed_agents、result_files、retry_budget。",
-          "在每個 Phase 2 job 完成、timeout、fallback 後即時寫入或更新 snapshot。",
-          "啟動新一輪 run 前先掃描同 trace 或同 task window 的 snapshot，若未過期且結果檔存在，跳過已完成 agents。",
-          "把 snapshot 與 run-fsm phase 狀態交叉驗證，僅允許從 completed/partial 狀態恢復，避免讀到殭屍 run。",
-          "以高失敗時段樣本做演練，確認 resume 不會重複寫入已完成結果。"
+          "定義 execution trace schema v1，至少包含 trace_id、span_id、parent_span_id、task_key、phase、tool_or_skill、status、duration_ms、artifacts、attributes。",
+          "盤點現有 post_tool_logger、results JSON 與 state 檔，建立欄位對映表與缺口清單。",
+          "先在不破壞既有日誌的前提下，為新欄位提供向後相容輸出，讓 execution-journal/system-insight 可讀新舊資料。",
+          "補上 cause chain 欄位，明確串接 selected task、cache hit/miss、retry、failure point 與最終 artifact。",
+          "在 system-insight 或配套查詢腳本新增 trace completeness 指標，檢查每次 auto task 是否具備最小追蹤欄位。"
         ],
         "acceptance": [
-          "模擬單一 agent timeout 時，下次執行可跳過已完成 agents",
-          "snapshot 過期或結果檔缺失時會安全回退為全新執行",
-          "system-insight 可新增 resumed_runs 與 recovered_agents 指標"
+          "至少 90% 新產生的 auto-task traces 含 trace_id、phase、status、artifacts",
+          "任一失敗 run 可從單一 trace 串回相關 results/state/logs 檔",
+          "system-insight 可統計 trace completeness 或 resumed/failure cause 指標"
         ],
         "effort": "medium"
       },
       "self_review": {
         "compatible_with_project": true,
-        "notes": "與現有 run-fsm、result file repair、failed-auto-task tracking 相容，不需改動被禁止檔案。"
+        "notes": "方案延伸既有 hooks 與 execution-journal 方向，不要求替換目前 JSONL；以增量 schema 與欄位對映落地，與專案架構相容。"
       }
     },
     {
-      "title": "Context Budget Guard 強制化",
-      "priority": "P0",
-      "dimension": "開發效率",
-      "selected_reason": "avg_io_per_call 超標近 5 倍，已成為所有大型 Agent 任務的共通風險；若不先控管，後續研究與修復任務會持續被 context 膨脹拖慢。",
-      "research_summary": "OpenAI 的 prompt caching 指南建議把固定前綴置前、變動內容置後並追蹤 cached tokens；LangChain handoffs 則明示多代理間必須精準控制移交的訊息，以避免 context bloat。這兩者可轉化為本專案的硬性 budget guard、摘要模式與 handoff 精簡規範。",
+      "title": "宣告式 hook registry 與 stage 化 guard 鏈",
+      "priority": "P1",
+      "dimension": "技術債",
+      "pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
+      "description": "近 3 天洞察指出目前 guard 規則分散在多個 hooks 腳本，建議整理成可排序、可停用、可分 stage 的 hook registry，降低規則漂移與例外處理成本。",
+      "selected_reason": "影響 Hook 可維護性與規則一致性，且能提升安全/品質守門的可配置程度；現有 backlog 尚未正式納入。",
+      "research_summary": "pre-commit 以 declarative config 管理 hooks，支援 default_stages、hook-level stages、fail_fast 與 local/meta repo；Husky 則強調 hook 即檔案、使用共用初始化腳本與可暫時停用機制。這代表本專案可用 registry + stage + shared init 的模式取代分散式硬編碼。",
       "sources": [
         {
-          "title": "OpenAI Prompt Caching",
-          "url": "https://developers.openai.com/api/docs/guides/prompt-caching"
+          "title": "pre-commit",
+          "url": "https://pre-commit.com/"
         },
         {
-          "title": "LangChain Multi-Agent Handoffs",
-          "url": "https://docs.langchain.com/oss/python/langchain/multi-agent/handoffs"
-        },
-        {
-          "title": "LangGraph Subgraphs",
-          "url": "https://docs.langchain.com/oss/python/langgraph/use-subgraphs"
+          "title": "How To | Husky",
+          "url": "https://typicode.github.io/husky/how-to.html"
         }
       ],
       "execution_plan": {
-        "goal": "將 avg_io_per_call 從 24875 chars 降到 10000 以下作為第一階段目標，並建立可持續追蹤的 budget breach 事件。",
+        "goal": "把 Hook 規則從分散腳本收斂成可宣告、可排序、可測試的 registry，降低新增守門規則時的改動面。",
         "prerequisites": [
-          "hooks/post_tool_logger.py 已能產出結構化日誌",
-          "config/budget.yaml 可擴充 per-phase 或 per-tool 預算欄位"
+          "現有 config/hook-rules.yaml、hooks/pre_bash_guard.py、hooks/pre_read_guard.py、hooks/pre_write_guard.py 可讀",
+          "保留現行安全攔截行為與 nul 禁令，不做破壞式替換"
         ],
         "steps": [
-          "在 config/budget.yaml 增加 phase1/phase2/phase3 的字元預算與 breach policy。",
-          "由 Hook 或 orchestrator 統一計算 prompt prefix chars、tool output chars、result summary chars，超限即打標。",
-          "對超限流程啟用降級策略，依序為摘要化輸出、子 Agent 委派、停止額外全文讀取。",
-          "穩定化長前綴內容，將 shared preamble 與固定 instruction 模組化，降低每次重送差異。",
-          "把 cached_tokens 或等價 prefix reuse 指標、budget breaches、top noisy tools 回寫 system-insight。"
+          "盤點所有 pre/post hooks 的規則來源、執行順序、輸入輸出與可否停用，整理成 registry 草案。",
+          "在 config/hook-rules.yaml 或專用 registry 檔加入 stage、enabled、priority、fail_mode、applies_to 等欄位。",
+          "將各 hook 腳本改為讀 registry 執行對應規則，先抽出共用 loader 與 shared init，避免每支腳本重複解析邏輯。",
+          "為高風險規則保留 fail-fast，對可觀測性或格式化類規則支援 warn-only/soft-fail，降低誤攔截成本。",
+          "新增最小驗證腳本或測試，確認 stage 順序、停用開關與規則覆蓋率正常。"
         ],
         "acceptance": [
-          "avg_io_per_call 在 7 天內降到 10000 以下",
-          "所有 breach 事件都能追溯到 phase 與工具",
-          "至少一個大型 auto task 改用摘要/委派後，輸出品質未明顯退化"
+          "至少 3 個核心 hooks 改為由同一 registry 驅動",
+          "新增或停用規則時不需在多支 hook 腳本重複修改",
+          "Hook 配置變更可經基本驗證，避免無效 stage 或 priority 值進入主幹"
         ],
         "effort": "medium"
       },
       "self_review": {
         "compatible_with_project": true,
-        "notes": "方案以 hook、budget config、shared preamble 為主，符合文件驅動架構且不需直接改動排程器核心策略。"
+        "notes": "方案沿用現有 hook-rules.yaml 與 Hook 機器強制層，屬於結構整理而非策略翻新，對既有安全邊界衝擊可控。"
       }
     }
   ]

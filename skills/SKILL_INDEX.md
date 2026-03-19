@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-13 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 27 個工具 = 46 個 Skills）
+## 速查表（19 個核心 + 29 個工具 = 48 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -60,6 +60,7 @@
 | 45 | pre-flight-check | 執行前飛行檢查：外部依賴健康探測 + 時段風險評估 + go/no-go 決策（depends-on: scheduler-state、api-cache） | pre-flight-check、執行前檢查、飛行檢查、依賴健康、時段風險、go/no-go、預防性檢查 |
 | 46 | skill-test-scaffolder | SKILL.md 結構分析→pytest 測試骨架自動生成（frontmatter 驗證/觸發詞/依賴 mock/步驟行為，depends-on: knowledge-query） | skill-test-scaffolder、生成 Skill 測試、Skill 測試骨架、自動生成測試、測試覆蓋擴充、補測試、scaffold test |
 | 47 | skill-registry-sync | Machine-readable Skill Registry 同步（frontmatter 掃描→JSON registry→觸發詞衝突偵測→依賴圖驗證，depends-on: knowledge-query） | skill-registry-sync、Skill 索引同步、Skill registry、觸發詞衝突、依賴圖驗證、Skill manifest、Skill 一致性 |
+| 48 | execution-journal | 統一執行追蹤日誌（per-execution trace entry、Skill chain、cache 命中、跨 Phase 因果關聯，depends-on: scheduler-state、system-insight） | execution-journal、執行追蹤、trace 分析、失敗回溯、Skill chain、執行日誌、跨 Phase 因果 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

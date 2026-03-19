@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-03-18T00:42:00+08:00",
+  "generated_at": "2026-03-19T06:34:33.1942957+08:00",
   "source": "system-audit",
   "audit_date": "2026-03-18",
   "total_score": 87.88,
@@ -143,6 +143,117 @@
       ],
       "source": "kb_insight_evaluation",
       "evaluated_at": "2026-03-18T08:04:13.1649003+08:00"
+    },
+    {
+      "priority": "P1",
+      "pattern": "快取命中率調優與自適應 TTL 治理",
+      "description": "system-insight 顯示 cache_hit_ratio 僅 20.7%，遠低於 40% 門檻。建議以 cache-aside 原則重整 TTL、失效與命中觀測，並建立按 volatility/命中率調整的自適應 TTL 治理流程。",
+      "dimension": "系統效率",
+      "effort": "medium",
+      "execution_plan": [
+        "盤點 todoist、pingtung-news、hackernews、knowledge、gmail 等端點近 7 天 cache-read/api-call/miss 原因，建立基線表。",
+        "依資料 volatility 與讀取頻率調整 config/cache-policy.yaml 中各來源 TTL，優先處理低波動且高重複查詢端點。",
+        "在 api-cache 或相關記錄流程中補上 miss_reason、stale_age、endpoint 三類欄位，區分不存在、過期、格式失敗與主動繞過。",
+        "為寫後失效與降級取用建立統一規則，避免資料源已更新但快取未失效，或 API 故障時無法安全使用過期快取。",
+        "新增每週檢查腳本或 system-insight 彙整欄位，持續輸出端點級 hit ratio、top miss reasons 與 TTL 建議。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-19T06:34:33.1942957+08:00",
+      "research_summary": "Azure Cache-Aside 指出 TTL 不宜過短或過長，應與資料存取模式對齊，寫入後優先更新資料源再失效快取；Redis 開發最佳實踐則建議以較小值、客戶端量測與 pipelining 提升吞吐，適合轉化為本專案的 endpoint 級 TTL 與 cache-miss 診斷。",
+      "sources": [
+        {
+          "title": "Cache-Aside pattern",
+          "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside"
+        },
+        {
+          "title": "Best practices for development - Azure Cache for Redis",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-best-practices-development"
+        }
+      ],
+      "acceptance": [
+        "system-insight 的 cache_hit_ratio 7 天內達到 0.35 以上",
+        "至少 80% cache-miss 事件可分類到明確 miss_reason",
+        "config/cache-policy.yaml 的 TTL 調整有對應的端點基線與回顧紀錄"
+      ],
+      "prerequisites": [
+        "可讀取 config/cache-policy.yaml、cache/status.json 與 logs/structured/*.jsonl",
+        "保留既有 api-cache Skill 的快取檔格式與降級流程"
+      ],
+      "rank": 9
+    },
+    {
+      "priority": "P1",
+      "pattern": "統一 execution trace schema 與因果追蹤",
+      "description": "近 3 天洞察提議把 task_key、skill chain、cache 狀態、耗時、失敗點與輸出 artifact 納入統一 trace/event schema，降低只靠零散結果檔追查回歸的成本。",
+      "dimension": "可觀測性",
+      "effort": "medium",
+      "execution_plan": [
+        "定義 execution trace schema v1，至少包含 trace_id、span_id、parent_span_id、task_key、phase、tool_or_skill、status、duration_ms、artifacts、attributes。",
+        "盤點現有 post_tool_logger、results JSON 與 state 檔，建立欄位對映表與缺口清單。",
+        "先在不破壞既有日誌的前提下，為新欄位提供向後相容輸出，讓 execution-journal/system-insight 可讀新舊資料。",
+        "補上 cause chain 欄位，明確串接 selected task、cache hit/miss、retry、failure point 與最終 artifact。",
+        "在 system-insight 或配套查詢腳本新增 trace completeness 指標，檢查每次 auto task 是否具備最小追蹤欄位。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-19T06:34:33.1942957+08:00",
+      "research_summary": "OpenTelemetry 將 trace 定義為由 spans 組成的請求路徑，核心欄位包含 trace_id、span_id、timestamps、attributes、events 與 status；Langfuse 以 OpenTelemetry 為基底追蹤完整 LLM/agent traces 與 nested observations，適合映射為本專案的 execution-journal 與 JSONL schema。",
+      "sources": [
+        {
+          "title": "Traces | OpenTelemetry",
+          "url": "https://opentelemetry.io/docs/concepts/signals/traces/"
+        },
+        {
+          "title": "Langfuse",
+          "url": "https://langfuse.com/"
+        }
+      ],
+      "acceptance": [
+        "至少 90% 新產生的 auto-task traces 含 trace_id、phase、status、artifacts",
+        "任一失敗 run 可從單一 trace 串回相關 results/state/logs 檔",
+        "system-insight 可統計 trace completeness 或 resumed/failure cause 指標"
+      ],
+      "prerequisites": [
+        "現有 hooks/post_tool_logger.py 與 logs/structured/*.jsonl 可持續輸出 trace_id",
+        "results/*.json 與 state/ 中已有 task_key、phase、result path 等基礎欄位"
+      ],
+      "rank": 10
+    },
+    {
+      "priority": "P1",
+      "pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
+      "description": "近 3 天洞察指出目前 guard 規則分散在多個 hooks 腳本，建議整理成可排序、可停用、可分 stage 的 hook registry，降低規則漂移與例外處理成本。",
+      "dimension": "技術債",
+      "effort": "medium",
+      "execution_plan": [
+        "盤點所有 pre/post hooks 的規則來源、執行順序、輸入輸出與可否停用，整理成 registry 草案。",
+        "在 config/hook-rules.yaml 或專用 registry 檔加入 stage、enabled、priority、fail_mode、applies_to 等欄位。",
+        "將各 hook 腳本改為讀 registry 執行對應規則，先抽出共用 loader 與 shared init，避免每支腳本重複解析邏輯。",
+        "為高風險規則保留 fail-fast，對可觀測性或格式化類規則支援 warn-only/soft-fail，降低誤攔截成本。",
+        "新增最小驗證腳本或測試，確認 stage 順序、停用開關與規則覆蓋率正常。"
+      ],
+      "source": "kb_insight_evaluation",
+      "evaluated_at": "2026-03-19T06:34:33.1942957+08:00",
+      "research_summary": "pre-commit 以 declarative config 管理 hooks，支援 default_stages、hook-level stages、fail_fast 與 local/meta repo；Husky 則強調 hook 即檔案、使用共用初始化腳本與可暫時停用機制。這代表本專案可用 registry + stage + shared init 的模式取代分散式硬編碼。",
+      "sources": [
+        {
+          "title": "pre-commit",
+          "url": "https://pre-commit.com/"
+        },
+        {
+          "title": "How To | Husky",
+          "url": "https://typicode.github.io/husky/how-to.html"
+        }
+      ],
+      "acceptance": [
+        "至少 3 個核心 hooks 改為由同一 registry 驅動",
+        "新增或停用規則時不需在多支 hook 腳本重複修改",
+        "Hook 配置變更可經基本驗證，避免無效 stage 或 priority 值進入主幹"
+      ],
+      "prerequisites": [
+        "現有 config/hook-rules.yaml、hooks/pre_bash_guard.py、hooks/pre_read_guard.py、hooks/pre_write_guard.py 可讀",
+        "保留現行安全攔截行為與 nul 禁令，不做破壞式替換"
+      ],
+      "rank": 11
     }
   ],
   "entries": [

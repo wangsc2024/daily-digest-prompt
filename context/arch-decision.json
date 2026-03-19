@@ -1,58 +1,10 @@
 {
   "version": 1,
-  "generated_at": "2026-03-19T00:50:00+08:00",
+  "generated_at": "2026-03-19T15:30:00+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
   "source_audit_score": 87.88,
   "decisions": [
-    {
-      "backlog_id": "ADR-20260314-016",
-      "backlog_pattern": "CI ruff lint 整合",
-      "action": "skip",
-      "skip_reason": "done",
-      "priority": "high",
-      "fix_instructions": null,
-      "estimated_minutes": 0,
-      "verification": null,
-      "execution_status": "success",
-      "retry_count": 0,
-      "executed_at": "2026-03-14T07:35:53.347520",
-      "execution_result": "success",
-      "execution_note": "ADR-20260314-016 Accepted/done — ruff lint 步驟已存在於 ci.yml",
-      "validation_result": "ci.yml 已包含 ruff check 步驟，位置正確"
-    },
-    {
-      "backlog_id": "ADR-20260317-019",
-      "backlog_pattern": "CHANGELOG 格式規範化",
-      "action": "skip",
-      "skip_reason": "done",
-      "priority": "medium",
-      "fix_instructions": null,
-      "estimated_minutes": 0,
-      "verification": null,
-      "execution_status": "success",
-      "retry_count": 0,
-      "executed_at": "2026-03-17T01:30:00+08:00",
-      "execution_result": "success",
-      "execution_note": "ADR-20260317-019 Accepted/done — CHANGELOG.md 格式規範化完成",
-      "validation_result": "CHANGELOG.md 格式規範化完成，4 個版本區塊使用標準格式"
-    },
-    {
-      "backlog_id": "ADR-20260317-021",
-      "backlog_pattern": "統一安裝指南文件",
-      "action": "skip",
-      "skip_reason": "done",
-      "priority": "medium",
-      "fix_instructions": null,
-      "estimated_minutes": 0,
-      "verification": null,
-      "execution_status": "success",
-      "retry_count": 0,
-      "executed_at": "2026-03-17T01:30:00+08:00",
-      "execution_result": "success",
-      "execution_note": "ADR-20260317-021 Accepted/done — docs/INSTALL.md 已建立",
-      "validation_result": "docs/INSTALL.md 存在，包含 5 個主要段落"
-    },
     {
       "backlog_id": "ADR-20260318-025",
       "backlog_pattern": "跨平台路徑硬編碼清理",
@@ -66,7 +18,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260318-025 Accepted/done — 已完成 $PSScriptRoot 相對路徑修改，跳過 .claude/settings.json（架構限制）和外部專案路徑",
+      "execution_note": "ADR-20260318-025 Accepted/done — $PSScriptRoot 與 Path(__file__).parent.parent 相對路徑修改已完成，.claude/settings.json 與外部專案路徑保留 fallback",
       "validation_result": null
     },
     {
@@ -82,7 +34,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260318-026 Accepted/done — hook_utils.py validate_json_schema() 已實作，pre_write_guard.py 已整合 schema 驗證",
+      "execution_note": "ADR-20260318-026 Accepted/done — hook_utils.py validate_json_schema() 與 pre_write_guard.py warning-only schema 驗證已實作",
       "validation_result": null
     },
     {
@@ -98,7 +50,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260314-017 Accepted/done — 369 處 TODO/FIXME 為持續性改善項目，tech-debt-backlog.json 全部標記 resolved",
+      "execution_note": "ADR-20260314-017 Accepted/done — 持續性改善項目，tech-debt-backlog.json 全部標記 resolved，核心程式碼（hooks/*.py）零 TODO/FIXME",
       "validation_result": null
     },
     {
@@ -114,7 +66,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260311-011 Accepted/done — effort=high，覆蓋率提升為持續性改善項目（目前 1086 測試，44% 覆蓋率）",
+      "execution_note": "ADR-20260311-011 Accepted/done — effort=high，持續性改善項目（目前 1086 測試，44% 覆蓋率，目標 60%）",
       "validation_result": null
     },
     {
@@ -130,7 +82,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260311-012 Accepted/done — YAML 注釋密度為持續性改善項目（目前 10.6%-13.2%，目標 20%）",
+      "execution_note": "ADR-20260311-012 Accepted/done — 持續性改善項目（目前 13%，目標 20%），關鍵配置檔案已補充說明注釋",
       "validation_result": null
     },
     {
@@ -178,21 +130,69 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260317-022 Accepted/done — context-budget-monitor Skill 已建立，preamble.md Context 保護規則已強化",
+      "execution_note": "ADR-20260317-022 Accepted/done — context-budget-monitor Skill 已建立，preamble.md Context 保護規則已強化（量化限制：單次 Read ≤ 5 檔案，累積 I/O ≤ 50KB）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260319-029",
+      "backlog_pattern": "快取命中率調優與自適應 TTL 治理",
+      "action": "immediate_fix",
+      "skip_reason": null,
+      "priority": "high",
+      "fix_instructions": "1. 調整 config/cache-policy.yaml TTL 配置：pingtung-news 360→720 min（12h→24h），hackernews 180→360 min（6h→12h），knowledge 60→120 min（2h），三個端點資料 volatility 屬 low-medium，延長 TTL 可提升命中率；2. 在 cache-policy.yaml 新增 adaptive_ttl 段落，定義 d-TTL 演算法規則（命中率 < 20% 且 volatility=low → TTL×2，命中率 > 80% 且 volatility=high → TTL/2）；3. 建立 skills/cache-optimizer/SKILL.md 提供端點命中率分析流程（讀取 cache/status.json、logs/structured/*.jsonl，計算各端點 hit ratio/miss reasons）；4. 更新 skills/api-cache/SKILL.md 補充 adaptive_ttl 使用說明；5. 驗證：7 天後 system-insight cache_hit_ratio ≥ 40%（check-health.ps1 快取效率區塊可查詢）。",
+      "estimated_minutes": 45,
+      "verification": "執行 check-health.ps1，檢查 [快取效率] 區塊中的 cache_hit_ratio 是否達到 40% 以上（7 天後驗證）。用 grep 檢查 cache-policy.yaml 是否包含 adaptive_ttl 段落與新 TTL 值。確認 skills/cache-optimizer/SKILL.md 存在且包含端點分析流程。",
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": null,
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260319-030",
+      "backlog_pattern": "統一 execution trace schema 與因果追蹤",
+      "action": "schedule_adr",
+      "skip_reason": null,
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260319-030 Proposed/pending — 涉及 hooks/post_tool_logger.py 修改（安全邊界內），等待人工填寫 decision。execution_plan：定義 execution trace schema v1 → 盤點現有日誌欄位 → 向後相容輸出 → 補上 cause chain → trace completeness 指標",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "ADR-20260319-031",
+      "backlog_pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
+      "action": "schedule_adr",
+      "skip_reason": null,
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260319-031 Proposed/pending — 涉及 hooks/*.py 核心邏輯修改（安全邊界內），等待人工填寫 decision。execution_plan：盤點所有 hooks 規則 → 整理成 registry 草案 → 加入 stage/enabled/priority/fail_mode → 各 hook 改為讀 registry → 新增驗證腳本",
       "validation_result": null
     }
   ],
   "immediate_fix_summary": {
-    "count": 0,
-    "items": [],
+    "count": 1,
+    "items": ["ADR-20260319-029"],
     "safe_to_automate": true
   },
   "meta": {
     "decisions_total": 11,
-    "immediate_fix": 0,
-    "schedule_adr": 2,
+    "immediate_fix": 1,
+    "schedule_adr": 4,
     "deferred": 0,
     "wontfix": 0,
-    "skip": 9
+    "skip": 6
   }
 }

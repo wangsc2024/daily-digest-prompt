@@ -58,7 +58,7 @@ class TestGetTasks:
         api.get_tasks(filter_query="today")
 
         call_args = mock_request.call_args
-        assert call_args[1]["params"]["filter"] == "today"
+        assert call_args[1]["params"]["query"] == "today"
 
 
 class TestCreateTask:

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-19T02:08:14.153449+08:00",
+  "updated_at": "2026-03-19T10:09:09.967422+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-18",
+      "last_active": "2026-03-19",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -305,7 +305,8 @@
             "楞嚴咒五會結構與密教義涵深度解構 — 從大佛頂會到藥叉會的逐會密意、五方佛壇城對應與修持次第",
             "楞嚴經研究：十番顯見深度剖析 — 完整十番經文、義理層次與跨宗派見性論比較",
             "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門",
-            "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話"
+            "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話",
+            "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -418,22 +419,26 @@
             "語料庫語言學在心咒梵漢對照中的應用方法",
             "聲紋分析（acoustic phonetics）在持誦研究中的可能性",
             "跨版本數位校勘：不同傳本心咒異文的自動比對",
-            "心咒的韻律結構（prosody）與持誦節奏的修行意義"
+            "心咒的韻律結構（prosody）與持誦節奏的修行意義",
+            "都攝六根淨念相繼的修證次第",
+            "大勢至與觀音圓通的會通",
+            "念佛三昧在楞嚴經的定位",
+            "大勢至圓通與淨土宗的實修連結"
           ],
           "completed_at": "2026-03-14"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 100,
+      "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "完成現代心理學詮釋後，可繼續探索：楞嚴經與當代神經科學對話、數位時代的魔境（虛擬實境、AI 幻覺）"
+      "next_research_hint": "大勢至圓通研究後，可繼續：楞嚴經與當代神經科學對話、數位時代的魔境、念佛圓通與禪觀的融通"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-18",
+      "last_active": "2026-03-19",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -588,7 +593,8 @@
             "教觀綱宗研究：四教觀法與四種四諦的相攝關係 — 由教相到觀行的內在對應",
             "教觀綱宗研究：化法四教之圓教 — 一心三觀、一念三千、圓融三諦與圓教菩薩位次的完整教觀體系",
             "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話",
-            "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+            "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興",
+            "教觀綱宗在現代禪修中的應用指南 — 從判教智慧到日常修持的落實路徑（synthesis 階段完結篇）"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -634,15 +640,15 @@
             "註疏傳統",
             "判教演進史"
           ],
-          "completed_at": "2026-03-15"
+          "completed_at": "2026-03-19"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 100,
+      "completion_pct": 80,
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "別教 application 階段補充完成後，可探索化儀四教的各別深化（頓教、秘密教、不定教）"
+      "next_research_hint": "synthesis 階段完成後，jiaoguangzong 系列達到 100%。未來可開啟新系列。"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -1298,7 +1304,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-18",
+      "last_active": "2026-03-19",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1310,16 +1316,20 @@
           "status": "completed",
           "started_at": "2026-03-07",
           "kb_notes": [
-            "Dify 深度研究報告 - AI 工作流自動化：蜂巢架構、Plugin 生態系統與 LLMOps 全景（132K Stars, 2026-03）"
+            "Dify 深度研究報告 - AI 工作流自動化：蜂巢架構、Plugin 生態系統與 LLMOps 全景（132K Stars, 2026-03）",
+            "OpenLIT 深度研究報告 - AI工作流自動化"
           ],
           "covered_concepts": [
             "Dify 蜂巢架構",
             "視覺化 AI 工作流建構",
             "RAG Pipeline 整合",
             "Plugin 生態系統",
-            "LLMOps 平台設計"
+            "LLMOps 平台設計",
+            "AI Pipeline 觀測",
+            "trace 到 eval 的回饋閉環",
+            "OpenTelemetry 原生整合"
           ],
-          "completed_at": "2026-03-07"
+          "completed_at": "2026-03-19"
         },
         "mechanism": {
           "status": "completed",
@@ -1401,10 +1411,10 @@
           ]
         }
       },
-      "current_stage": "synthesis",
+      "current_stage": "mechanism",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "可進一步整理多代理框架選型矩陣，或補 MetaGPT / Agentless 完成 synthesis 收斂"
+      "next_research_hint": "mechanism：深化 trace schema、eval pipeline 與 OpenTelemetry Collector 整合"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -2789,7 +2799,7 @@
         }
       },
       "current_stage": "mechanism",
-      "completion_pct": 30,
+      "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "完成後進入 application：實作程式碼範例與整合指南"
     },
@@ -3868,6 +3878,175 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "mechanism：深化多模態預測、告警門檻與決策支援架構"
+    },
+    "jingtu-three-sutras-faith-vow-practice": {
+      "series_id": "jingtu-three-sutras-faith-vow-practice",
+      "domain": "淨土三經的互攝關係與信願行架構",
+      "description": "淨土三經互攝與信願行結構研究系列",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "淨土三經的互攝關係與信願行架構"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [],
+          "covered_concepts": [
+            "阿彌陀經持名念佛",
+            "觀無量壽經十六觀",
+            "無量壽經攝生三願",
+            "善導正助二業",
+            "念佛攝心"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "淨土三經的互攝關係與信願行架構"
+          ],
+          "covered_concepts": [
+            "三經互攝的系統模型",
+            "三經到日課配置的轉譯"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [
+        "shurangama-sutra",
+        "jingtu-podcast-research-pack"
+      ],
+      "next_research_hint": "可進一步研究三經如何對應不同根器與不同日課配置。"
+    },
+    "powershell-automation-patterns": {
+      "series_id": "powershell-automation-patterns",
+      "domain": "PowerShell 7 結構化錯誤處理、JSON 契約與並行工作流",
+      "description": "聚焦 PowerShell 7 在錯誤處理、JSON 結果契約與並行工作流上的可靠自動化模式。",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "技術研究",
+        "PowerShell 7",
+        "daily-digest"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "PowerShell 7 並行作業管理與 Windows Task Scheduler 進階自動化完整指南（2026）",
+            "JSON Schema 驗證與自動化完整指南 — 規範演進、Python 驗證庫比較與最佳實踐（2026）"
+          ],
+          "covered_concepts": [
+            "PowerShell 7 並行執行",
+            "Windows Task Scheduler 自動化",
+            "JSON Schema 驗證"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "completed_at": "2026-03-19",
+          "kb_notes": [
+            "PowerShell 7 結構化錯誤處理、JSON 契約與並行工作流 — daily-digest-prompt 自動化實務"
+          ],
+          "covered_concepts": [
+            "PSNativeCommandUseErrorActionPreference",
+            "ConvertTo-Json 版本行為差異",
+            "ForEach-Object -Parallel runspace pool",
+            "ThrottleLimit 與主線程回寫模式"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 40,
+      "related_series": [
+        "rag-kb-import-workflow"
+      ],
+      "next_research_hint": "把此模式落到 results/*.json、KB API 呼叫與排程腳本，建立可重試範本。"
+    },
+    "gitnexus-code-intelligence": {
+      "series_id": "gitnexus-code-intelligence",
+      "domain": "GitNexus 客戶端知識圖譜代碼智能引擎",
+      "description": "GitNexus 零伺服器客戶端知識圖譜代碼智能引擎研究系列",
+      "initiated_at": "2026-03-19",
+      "last_active": "2026-03-19",
+      "tags": [
+        "GitHub",
+        "GitNexus",
+        "知識圖譜",
+        "Graph RAG",
+        "MCP",
+        "Tree-sitter",
+        "代碼智能",
+        "客戶端架構",
+        "開源專案",
+        "深度思維",
+        "研究",
+        "知識庫",
+        "2026"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-19",
+          "kb_notes": [
+            "GitNexus — 零伺服器客戶端知識圖譜代碼智能引擎：六階段索引管線、Graph RAG Agent、7 個 MCP 工具與預計算關係智能架構深度研究（17.5K Stars, 2026-03）"
+          ],
+          "covered_concepts": [
+            "客戶端知識圖譜",
+            "Graph RAG",
+            "Tree-sitter AST",
+            "KuzuDB",
+            "Cypher 查詢",
+            "預計算關係智能"
+          ],
+          "completed_at": "2026-03-19"
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 Graph RAG 檢索管線與 Cypher 查詢最佳化"
     }
   }
 }

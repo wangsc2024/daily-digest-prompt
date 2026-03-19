@@ -1,107 +1,18 @@
 {
-  "date": "2026-03-18",
-  "topic": "多模態 RAG（Multimodal RAG）— 文件、圖像與表格的跨模態檢索生成架構",
+  "date": "2026-03-19",
+  "topic": "Agentic AI 安全工程：權限隔離、工具沙箱與執行時防護",
   "research_questions": [
-    "多模態 RAG 與傳統文字 RAG、原生多模態 Agent 的邊界差異是什麼？",
-    "多模態文件解析、跨模態檢索、reranking 與生成融合的標準架構應如何拆解？",
-    "若要應用到 daily-digest-prompt 或個人知識庫，最有價值的落地方向是什麼？"
+    "2026 年的 Agentic AI 系統主要面臨哪些新型安全風險，與傳統 LLM safety 有何差異？",
+    "權限最小化、工具沙箱、執行時政策與審計觀測應如何組成可落地的分層防線？",
+    "若要應用到 daily-digest-prompt 或個人 Agent 專案，最值得先落地的安全控制點是什麼？"
   ],
-  "methodology": "先用最新趨勢與知識庫去重選題，再依 kb-research-strategist 的 foundation 計畫蒐集官方文件、學術論文與代表性框架案例，透過交叉比對建立概念邊界、系統分層與後續實作方向。",
+  "methodology": "先以最新網路趨勢、研究註冊表與知識庫去重選題，再依 kb-research-strategist 的 mechanism 計畫，後續蒐集官方安全文件、研究機構文章與權威工程實務，交叉比對威脅模型、權限控制、沙箱、runtime guardrails 與 observability，建立可落地的 Agent 安全工程框架。",
   "keywords": [
-    "multimodal RAG",
-    "cross-modal retrieval",
-    "document understanding RAG",
-    "table chart formula retrieval",
-    "multimodal reranking"
+    "agentic AI security",
+    "AI agent permissions sandbox",
+    "runtime policy enforcement",
+    "tool output poisoning mitigation",
+    "agent observability audit logging"
   ],
-  "sources": [
-    {
-      "title": "CollEX – A Multimodal Agentic RAG System Enabling Interactive Exploration of Scientific Collections",
-      "url": "https://aclanthology.org/2025.magmar-1.2/",
-      "key_points": [
-        "提出以 LVLM 為核心的 agentic multimodal RAG，透過聊天介面探索大型科學館藏。",
-        "系統同時整合文字與視覺模態，展示多模態 RAG 不只是文件問答，也可支援互動式知識探索。",
-        "PoC 規模達 64,000 筆、32 個 collection，說明多模態 RAG 已具備中大型知識庫落地可能。"
-      ]
-    },
-    {
-      "title": "MultiDocFusion: Hierarchical and Multimodal Chunking Pipeline for Enhanced RAG on Long Industrial Documents",
-      "url": "https://aclanthology.org/2025.emnlp-main.1062/",
-      "key_points": [
-        "將 vision-based parsing、OCR、章節階層重建與 DFS chunking 串成結構感知的 multimodal chunking pipeline。",
-        "在工業文件 benchmark 上檢索 precision 提升 8–15%，ANLS QA 提升 2–3%。",
-        "說明多模態 RAG 的品質高度依賴 ingestion 與 chunking，而不只是生成模型本身。"
-      ]
-    },
-    {
-      "title": "NVIDIA NeMo Retriever Delivers Accurate Multimodal PDF Data Extraction 15x Faster",
-      "url": "https://developer.nvidia.com/blog/nvidia-nemo-retriever-delivers-accurate-multimodal-pdf-data-extraction-15x-faster/",
-      "key_points": [
-        "企業文件中的圖表、表格、資訊圖若未納入檢索，會形成 text-only RAG 的盲區。",
-        "NVIDIA 指出其多模態抽取微服務可達 15x 抽取吞吐、3x embedding throughput、1.6x reranking throughput。",
-        "文中亦宣稱錯答可減少 50%、儲存需求可降至 1/35，顯示工程瓶頸集中在抽取與索引效率。"
-      ]
-    },
-    {
-      "title": "Multimodal RAG - Weaviate Knowledge Cards",
-      "url": "https://weaviate.io/learn/knowledgecards/multimodal-rag",
-      "key_points": [
-        "以簡潔定義指出 multimodal RAG 是從多模態知識庫檢索，再交由大型多模態模型依據檢索內容生成。",
-        "強調檢索上下文可包含 images、text、audio 等多種模態，而非僅文字片段。",
-        "適合作為研究中的概念邊界基準，協助區分 multimodal KB、retrieval 與 generation 三層。"
-      ]
-    },
-    {
-      "title": "Multimodal Retrieval-Augmented Generation (RAG) | 多模態檢索增強生成 (RAG) | DeeptoAI",
-      "url": "https://rag.deeptoai.com/docs/advanced-rag-deep-dive/multimodal-rag",
-      "key_points": [
-        "用雙語教學方式說明對比學習如何建立 unified embedding space，支撐 any-to-any search。",
-        "指出 text-only RAG 的限制在於只能依賴文字來源，當模型可同時理解文字與影像後，便能以兩步流程形成 multimodal RAG。",
-        "整理出多模態 RAG 在影像與 caption generation 上的效益，適合作為架構入門與術語對照資料。"
-      ]
-    },
-    {
-      "title": "使用知識圖的多模態檢索增強生成（MegaRAG）",
-      "url": "https://tdr.lib.ntu.edu.tw/jspui/handle/123456789/97821",
-      "key_points": [
-        "指出現有 KG-based RAG 多半僅處理文本，忽略圖像與空間布局等視覺線索。",
-        "提出 MegaRAG，以跨模態知識圖譜把文本、視覺與空間資訊納入知識建構與推理。",
-        "實驗摘要顯示在純文本與多模態 corpora 上都優於既有方法，提供另一條『結構化推理』路線。"
-      ]
-    },
-    {
-      "title": "優化挑戰性影像環境下的多模態檢索增強生成策略",
-      "url": "https://tdr.lib.ntu.edu.tw/jspui/handle/123456789/98529",
-      "key_points": [
-        "聚焦 degraded document retrieval，指出即便直接提供含答案的降質文件影像，7B VLM 生成表現仍可能下滑約一成。",
-        "提出 DFM 模組把影像表示拆成內容嵌入與降質嵌入，再融合成對降質穩健的文件表徵。",
-        "提醒多模態 RAG 的實際部署必須處理真實世界掃描、拍照噪聲與 OCR/視覺品質問題。"
-      ]
-    }
-  ],
-  "analysis": {
-    "consensus": [
-      "多數來源一致指出，多模態 RAG 的核心價值在於補足 text-only RAG 對圖像、表格、版面與資訊圖的盲區；真正的提升通常來自『把非文字訊號納入檢索』，而不只是把生成模型換成多模態模型。",
-      "來源普遍同意 ingestion 是成敗關鍵。從 MultiDocFusion 的階層式 chunking，到 NVIDIA NeMo Retriever 的 PDF 萃取流程，都說明解析、OCR、版面重建與結構切分會直接影響後續檢索 precision 與回答品質。",
-      "多數資料將系統拆成三層：多模態知識建構、跨模態檢索或 reranking、再由多模態生成模型整合回答。Weaviate、DeeptoAI 與 CollEX 的描述雖深度不同，但架構分層大致一致。",
-      "跨模態對齊是多模態 RAG 的共同技術前提。不論是 unified embedding space、視覺語言模型，或跨模態知識圖，來源都默認必須先把不同模態投影到可比較或可推理的表示空間。",
-      "多數來源隱含同一個工程結論：多模態 RAG 不只是模型問題，也是吞吐、索引成本與檢索延遲問題，因此抽取速度、embedding throughput 與 reranking 效率會直接限制落地規模。"
-    ],
-    "divergence": [
-      "在知識表示路線上，主流工程文章偏向 embedding-based pipeline，以向量檢索與 reranking 為主；MegaRAG 則主張以跨模態知識圖顯式表示文本、視覺與空間關係，重點放在可推理性而非純相似度搜尋。",
-      "在文件切分策略上，MultiDocFusion 強調階層式、結構感知 chunking；教學型資料則多以 unified embedding 與 any-to-any retrieval 為核心。前者較重文件工程，後者較重檢索抽象能力。",
-      "在系統目標上，CollEX 將多模態 RAG 視為互動式探索系統，強調 agentic workflow 與多輪探索；NVIDIA 與工業文件研究則更接近企業文件 QA 與資料抽取，成功指標偏向效率與準確率。",
-      "對穩健性的關注程度存在差異。多數介紹性文章假設文件品質可接受，但 NTU 的 degraded document 研究指出，若掃描或拍照品質不佳，即使答案已在圖像中，生成品質仍會明顯下滑，表示真實部署的風險被低估。"
-    ],
-    "insights": [
-      "多模態 RAG 的第一性原理不是『讓模型看圖』，而是『讓檢索系統保留原本會在前處理中流失的訊號』。這代表文件 ingestion 應被視為核心產品能力，而不是前置資料清洗。",
-      "若要應用在 daily-digest-prompt 或個人知識庫，最先值得投入的不是端到端多模態 Agent，而是把 PDF 中的表格、圖表、版面區塊與圖片 caption 納入索引，先提升 retrieval recall，再決定是否升級生成模型。",
-      "結構化路線與向量路線不是互斥，而是可分層組合：向量檢索可負責高召回，知識圖或版面結構可負責高精度推理。MegaRAG 與 MultiDocFusion 共同暗示未來成熟系統可能走向 hybrid retrieval。",
-      "多模態 RAG 的評估不能只看最終 QA 分數，還必須切開看 parsing 品質、chunk 結構、跨模態對齊誤差與 degraded robustness；否則容易把 ingestion 問題誤判為生成模型能力不足。",
-      "企業或個人場景中，成本與延遲往往比模型上限更早成為瓶頸。NVIDIA 的效能數據雖偏產品宣稱，但與其他來源相互印證出一件事：多模態 RAG 的競爭力很大一部分來自資料管線優化，而不是單一模型選型。",
-      "Agentic multimodal RAG 代表下一階段演化，但前提是知識底座要先結構化。CollEX 顯示多輪探索很有價值，然而若底層文件解析與跨模態索引不穩，Agent 只會放大錯檢與幻覺。",
-      "真實世界文件品質是被低估的研究缺口。NTU 的 degraded document 結果說明，部署場景若包含掃描件、手機拍照或低解析簡報，穩健表徵學習可能比追求更大的 VLM 更有短期價值。"
-    ]
-  },
-  "stage_completed": 3
+  "stage_completed": 1
 }

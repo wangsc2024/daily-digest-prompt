@@ -21,6 +21,25 @@
         "sample_files_passed": 0,
         "issues": ["現有 prompts 格式不一致，29 個 prompt 需逐步更新以符合 Schema"]
       }
+    },
+    {
+      "date": "2026-03-19",
+      "artifact_path": "docs/workflows/results-validation-checklist.md",
+      "gap_type": "validation_checklist",
+      "gap_description": "雖有 tools/validate_results.py 與 results-auto-task-schema.json，但未整合至任何自動化流程（無 pre-commit hook、無 Phase 3 驗證、無 CI 驗證），30 個自動任務結果 JSON 依賴 Agent 自律而非機器強制",
+      "priority": "P0",
+      "total_score": 100,
+      "impact_range": "30 個 todoist-auto-*.json",
+      "integration_status": "integrated",
+      "documented_in": "config/README.md",
+      "checklist_version": "1.0.0",
+      "validation_items": 5,
+      "integration_points": 3,
+      "signal_source": [
+        "system-insight.json: daily_success_rate=0.835 (低於95%)",
+        "improvement-backlog.json: P1「輸入驗證強化」",
+        "validate_results.py 未被任何 .ps1/.yml 引用"
+      ]
     }
   ]
 }

@@ -161,7 +161,7 @@ class TestLogBlockedEvent:
         assert entry["tool"] == "Bash"
         assert entry["event"] == "blocked"
         assert entry["reason"] == "禁止 nul"
-        assert "blocked" in entry["tags"]
+        assert "block" in entry["tags"]
         assert "nul-guard" in entry["tags"]
         assert entry["sid"] == "session123"[:12]
 

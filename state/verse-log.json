@@ -218,6 +218,17 @@
       "source": "《寒笳集》",
       "time": "2026-03-18 17:05:01",
       "status": "success"
+    },
+    {
+      "source": "《竹窗隨筆》",
+      "date": "2026-03-19",
+      "author": "蓮池袾宏大師",
+      "verse_id": 21,
+      "status": "success",
+      "session": "morning",
+      "verse_text": "修行要在日用中磨煉，舍此無下手處。",
+      "time": "2026-03-19 06:30:02",
+      "channel": "ntfy/wangsc2025"
     }
   ]
 }
