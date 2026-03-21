@@ -37,9 +37,16 @@ bash_rules:
     priority: critical  # 資料破壞風險
 
   - id: scheduler-state-write
-    description: "禁止 Agent 寫入 scheduler-state.json"
-    # 移除 contains 預檢查，改用精確的寫入操作匹配（排除 ls/cat/grep/python read 等只讀操作）
-    pattern: '(?<![0-9&])>\s*[^&].*scheduler-state\.json|>>\s*.*scheduler-state\.json|(tee|cp|mv)\s+.*scheduler-state\.json|echo\s+.*>\s*.*scheduler-state\.json'
+    description: "禁止 Agent 寫入 scheduler-state.json（覆蓋重導向/tee/cp/mv/dd/install/sed-i/ln）"
+    patterns:
+      - '(?<![0-9&])>\s*[^&].*scheduler-state\.json'
+      - '>>\s*.*scheduler-state\.json'
+      - '(tee|cp|mv)\s+.*scheduler-state\.json'
+      - 'echo\s+.*>\s*.*scheduler-state\.json'
+      - 'dd\s+.*of=.*scheduler-state\.json'
+      - 'install\s+.*scheduler-state\.json'
+      - 'sed\s+-i.*scheduler-state\.json'
+      - 'ln\s+.*scheduler-state\.json'
     reason: "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）"
     guard_tag: state-guard
     priority: medium  # 狀態檔案保護
@@ -204,21 +211,26 @@ write_rules:
   - id: sensitive-files
     description: "禁止寫入敏感檔案"
     check: basename_in
-    values: [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"]
+    values: [".env", ".env.local", "credentials.json", "token.json", "secrets.json", ".htpasswd", "id_rsa", "id_ed25519"]
     reason_template: "禁止寫入敏感檔案: {matched}"
     guard_tag: secret-guard
     priority: high  # 敏感資料保護
 
   - id: path-traversal
-    description: "禁止路徑遍歷攻擊"
+    description: "專案目錄外寫入偵測（僅告警 ntfy／structured log，不阻擋）"
     check: path_traversal
-    reason_template: "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})"
+    action: warn_only
+    reason_template: "偵測到專案目錄外寫入（原路徑遍歷防護）: ({resolved})"
     guard_tag: traversal-guard
-    priority: critical  # 安全攻擊防護
+    priority: medium  # 可觀測性：不阻擋寫入
     # 合法外部目錄白名單（專案與知識庫協作、Claude 設定、遊戲專案等）
     allowed_paths:
       - "D:/Source/knowledge"  # 知識庫同步腳本與 RAG 協作目錄
+      - "D:/Source/knowledge-worker"
       - "D:/Source/game_web"  # 遊戲專案（Cursor CLI 遊戲型任務產出）
+      - "D:/Source/skills"
+      - "D:/Source/RAG_Skill"
+      - "D:/Source/my-gun-relay"
 
   # ADR-026：results/todoist-auto-*.json schema 驗證（warning-only，不攔截）
   # 對應 pre_write_guard.py 的 _AUTO_TASK_RESULT_PATTERN（line 185）

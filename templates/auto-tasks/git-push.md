@@ -1,3 +1,9 @@
+---
+name: "git-push"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 專案推送 GitHub + 知識庫同步流程
 
 > 觸發條件：Todoist 無可處理項目且 git_push_count < 4

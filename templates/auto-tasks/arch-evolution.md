@@ -1,3 +1,9 @@
+---
+name: "arch-evolution"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 架構演進決策模板
 
 > **注意**：本任務直接在 team prompt (`prompts/team/todoist-auto-arch_evolution.md`) 中執行，此檔案僅作為 pre-commit hook 檢查的佔位符。

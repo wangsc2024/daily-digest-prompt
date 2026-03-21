@@ -1,3 +1,9 @@
+---
+name: "creative-game-optimize"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 自動任務：創意遊戲優化
 
 > 以創意思維優化 D:\Source\game 目錄下的遊戲

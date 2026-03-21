@@ -1,3 +1,9 @@
+---
+name: "ai-domain-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # AI 領域研究 Prompt 模板（參數化，供多個自動任務共用）
 #
 # 此模板由 config/frequency-limits.yaml 的 template_params 注入參數：

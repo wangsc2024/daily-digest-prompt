@@ -1,3 +1,9 @@
+---
+name: "buddhist-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 佛學經典研究 Prompt 模板（參數化）
 
 > 觸發條件：Todoist 無可處理項目且對應 counter < daily_limit

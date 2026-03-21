@@ -71,6 +71,7 @@ initial_schema: |
     "kb_insight_evaluation_count": 0,
     "workflow_forge_count": 0,
     "insight_briefing_count": 0,
+    "ntfy_review_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -540,7 +541,7 @@ tasks:
     template: "templates/auto-tasks/creative-game-optimize.md"
     template_version: 1
     history_type: "creative_game_optimize"
-    execution_order: 14
+    execution_order: 34  # 原 14，讓位給 kb_insight_evaluation（OODA 上游前置）
     timeout_seconds: 900
     result_suffix: "json"
     skills: [game-design, knowledge-query, web-research]
@@ -554,7 +555,7 @@ tasks:
     template: "templates/auto-tasks/qa-system-optimize.md"
     template_version: 1
     history_type: "qa_optimize"
-    execution_order: 15
+    execution_order: 35  # 原 15，讓位給 github_scout（OODA 上游前置）
     timeout_seconds: 720
     result_suffix: "json"
     skills: [knowledge-query, web-research, system-insight]
@@ -640,7 +641,7 @@ tasks:
     template: "templates/auto-tasks/github-scout.md"
     template_version: 1
     history_type: "github_scout"
-    execution_order: 23  # 修正：原 18 與 self_heal 衝突
+    execution_order: 15  # 原 23，前移至 arch_evolution(17) 之前（原 14/15 由 disabled 任務讓出），當輪即可被決策並落實
     timeout_seconds: 600  # WebSearch×2 + WebFetch + 分析（無 KB 匯入，輕量）
     result_suffix: "json"
     skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
@@ -722,7 +723,7 @@ tasks:
     template: "prompts/team/todoist-auto-kb_insight_evaluation.md"
     template_version: 1
     history_type: "kb_insight_evaluation"
-    execution_order: 27
+    execution_order: 14  # 原 27，前移至 arch_evolution(17) 之前，當輪即可被決策並落實
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [knowledge-query, system-insight, arch-evolution]

@@ -1,3 +1,9 @@
+---
+name: "qa-system-optimize"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # QA System 品質與安全優化 Prompt 模板
 
 > 觸發條件：Todoist 無可處理項目且 qa_optimize_count < 2

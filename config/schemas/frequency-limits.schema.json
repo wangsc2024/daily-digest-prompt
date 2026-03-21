@@ -8,8 +8,8 @@
   "properties": {
     "version": {
       "type": "integer",
-      "const": 3,
-      "description": "配置版本號（目前為 3）"
+      "const": 4,
+      "description": "配置版本號（目前為 4，2026-03-10 合併 model-selection.yaml）"
     },
     "tracking_file": {
       "type": "string",

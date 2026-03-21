@@ -57,6 +57,18 @@
       "minimum": 0,
       "description": "執行耗時（秒）"
     },
+    "prompt_version": {
+      "type": "string",
+      "description": "產生此結果的 prompt 版本（semver，ADR-034）"
+    },
+    "template_version": {
+      "type": "string",
+      "description": "產生此結果的模板版本（semver）"
+    },
+    "prompt_source": {
+      "type": "string",
+      "description": "prompt 檔案相對路徑（e.g. prompts/team/todoist-auto-arch_evolution.md）"
+    },
     "error": {
       "type": "object",
       "description": "錯誤詳情（僅 status=failed 時提供）",

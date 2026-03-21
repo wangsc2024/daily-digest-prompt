@@ -1,3 +1,9 @@
+---
+name: "ai-deep-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # AI 深度研究計畫 Prompt 模板（4 階段）
 
 > 觸發條件：Todoist 無可處理項目且 ai_deep_research_count < 4

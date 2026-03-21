@@ -13,6 +13,10 @@ autonomous_harness:
   output_plan_path: "state/autonomous-harness-plan.json"
   recovery_queue_path: "state/autonomous-recovery-queue.json"
   runtime_state_path: "state/autonomous-runtime.json"
+  runtime_override_path: "state/autonomous-runtime-overrides.json"
+  agent_registry_path: "state/autonomous-agent-registry.json"
+  resource_snapshot_path: "state/autonomous-resource-snapshot.json"
+  self_heal_request_path: "state/autonomous-self-heal-requests.json"
 
   thresholds:
     stale_run_minutes: 45
@@ -22,6 +26,42 @@ autonomous_harness:
     api_open_circuit_threshold: 1
     starvation_task_threshold: 3
     heartbeat_stale_minutes: 20
+
+  discovery:
+    fetch_agents_glob: "prompts/team/fetch-*.md"
+    auto_tasks_glob: "templates/auto-tasks/*.md"
+    core_fetch_agents:
+      - "todoist"
+      - "news"
+      - "hackernews"
+    optional_fetch_agents:
+      - "gmail"
+      - "security"
+      - "chatroom"
+    heavy_task_patterns:
+      - "podcast"
+      - "research"
+      - "insight"
+      - "workflow"
+      - "future_plan"
+      - "shurangama"
+      - "jiaoguangzong"
+      - "fahua"
+      - "jingtu"
+    research_task_patterns:
+      - "research"
+      - "ai_"
+      - "insight"
+      - "shurangama"
+      - "jiaoguangzong"
+      - "fahua"
+      - "jingtu"
+
+  resources:
+    cpu_percent_high: 85
+    memory_percent_high: 80
+    gpu_percent_high: 85
+    gpu_memory_percent_high: 80
 
   dispatch:
     daily-digest:
@@ -39,16 +79,40 @@ autonomous_harness:
         - "-File"
         - "run-todoist-agent-team.ps1"
 
+  recovery_worker:
+    restart_timeout_seconds: 30
+    default_override_ttl_minutes: 30
+    scale_down_ttl_minutes: 45
+    rebalance_ttl_minutes: 30
+    self_heal_ttl_minutes: 60
+
   runtime_profiles:
     normal:
       max_parallel_auto_tasks: 4
+      max_parallel_fetch_agents: 6
       allow_heavy_auto_tasks: true
       allow_research_auto_tasks: true
+      daily_digest_assembly_mode: "full"
+      daily_digest_phase2_retries: 1
+      blocked_fetch_agents: []
     degraded:
       max_parallel_auto_tasks: 2
+      max_parallel_fetch_agents: 4
       allow_heavy_auto_tasks: false
       allow_research_auto_tasks: true
+      daily_digest_assembly_mode: "degraded"
+      daily_digest_phase2_retries: 0
+      blocked_fetch_agents:
+        - "security"
+        - "chatroom"
     recovery:
       max_parallel_auto_tasks: 1
+      max_parallel_fetch_agents: 3
       allow_heavy_auto_tasks: false
       allow_research_auto_tasks: false
+      daily_digest_assembly_mode: "skip"
+      daily_digest_phase2_retries: 0
+      blocked_fetch_agents:
+        - "gmail"
+        - "security"
+        - "chatroom"

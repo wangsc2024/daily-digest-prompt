@@ -126,6 +126,14 @@
         "priority": {
           "type": "string",
           "enum": ["critical", "high", "medium", "low"]
+        },
+        "action": {
+          "type": "string",
+          "enum": ["warn_only"]
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": { "type": "string" }
         }
       },
       "oneOf": [

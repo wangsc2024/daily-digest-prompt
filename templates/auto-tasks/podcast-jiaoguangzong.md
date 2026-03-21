@@ -1,3 +1,9 @@
+---
+name: "podcast-jiaoguangzong"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 自動任務：教觀綱宗 Podcast 生成（每次 1 集，每日合計 3 集）
 
 > 觸發條件：round-robin 自動輪轉（daily_limit: 3）

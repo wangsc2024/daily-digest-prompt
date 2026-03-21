@@ -1,3 +1,9 @@
+---
+name: "shurangama-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 楞嚴經自動研究 Prompt 模板
 
 > 觸發條件：Todoist 無可處理項目且 shurangama_count < 5

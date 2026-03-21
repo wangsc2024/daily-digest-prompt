@@ -1,3 +1,9 @@
+---
+name: "github-scout"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 自動任務：GitHub 靈感蒐集
 
 > 由 round-robin 自動觸發，每日最多 1 次（僅週三和週日執行）

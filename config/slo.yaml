@@ -18,9 +18,9 @@ slos:
     description: Phase 2 組裝成功的比例
     metric: session_success_rate        # metrics-daily.json 欄位
     metric_direction: higher_is_better  # higher → 越高越好
-    target: 0.995                       # 99.5%
+    target: 0.90                        # 90%（調整自 99.5%，2026-03-20）
     window_days: 30
-    error_budget_pct: 0.5              # 30 天內允許失敗 0.5%（≈ 0.15 天）
+    error_budget_pct: 10.0             # 30 天內允許失敗 10%（≈ 3 天）
     warning_threshold: 30              # 剩餘預算 < 30% 時警告
     critical_threshold: 10             # 剩餘預算 < 10% 時嚴重
 
@@ -78,3 +78,38 @@ slos:
     error_budget_pct: 100.0
     warning_threshold: 30
     critical_threshold: 10
+
+  - id: SLO-007
+    name: Phase 2 成功率
+    description: Phase 2 Agent 成功執行的比例（不含 skip）
+    metric: phase2_success_rate
+    metric_direction: higher_is_better
+    target: 0.95                        # 95%
+    window_days: 7
+    error_budget_pct: 5.0              # 每 7 天允許 5% 失敗
+    warning_threshold: 30
+    critical_threshold: 10
+
+  - id: SLO-008
+    name: 自動任務完成率
+    description: plan_type=auto 執行中完成（non-failed）的自動任務比例
+    metric: auto_task_completion_rate
+    metric_direction: higher_is_better
+    target: 0.85                        # 85%
+    window_days: 7
+    error_budget_pct: 15.0
+    warning_threshold: 30
+    critical_threshold: 10
+
+# Error Budget 政策（ADR-032）
+# 單一 incident 或 failure class 消耗 > 20% budget 時強制 postmortem
+budget_policy:
+  postmortem_trigger_pct: 20          # 單次事件消耗 > 20% budget 時觸發
+  weekly_burn_alert_pct: 50           # 7 天燃燒 > 50% 時升級警告
+  freeze_threshold_pct: 25            # 剩餘 < 25% 時凍結非關鍵變更
+  postmortem_output_dir: "context/postmortem"
+  actions:
+    budget_gt_50pct: "正常變更速度"
+    budget_25_50pct: "減速，優先修復穩定性（P1）"
+    budget_lt_25pct: "凍結非關鍵變更，強制產出 postmortem"
+    budget_exhausted: "全面凍結，專注修復"

@@ -1,3 +1,5 @@
+version: 1
+
 embedding:
   provider: local
   model: local-token-v1

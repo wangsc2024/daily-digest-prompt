@@ -18,7 +18,13 @@ events:
   # arch-evolution (Decide 步驟) — 啟動通知
   ooda_decide_start:
     title: "🔍 arch-evolution 啟動"
-    message_template: "OODA Decide 步驟開始，審查分數 {score}，待處理 {backlog_count} 項"
+    message_template: |
+      OODA Decide 已開始。
+
+      • 改善清單：{backlog_count} 項
+      • 審查評分：{score}／100
+
+      正在產出架構決策…
     priority: 2         # low — 進度通知，不打擾手機
     tags: ["computer", "chart"]
     condition: "always"
@@ -27,7 +33,14 @@ events:
   # arch-evolution (Decide 步驟) — 完成通知（有 immediate_fix 項目）
   ooda_decide_done_with_fixes:
     title: "📋 架構決策完成"
-    message_template: "immediate_fix {fix_count} 項 | schedule_adr {adr_count} 項 | wontfix {wontfix_count} 項 | self-heal 將自動修復"
+    message_template: |
+      決策摘要
+
+      • 立即修復（immediate_fix）：{fix_count} 項
+      • 待排程 ADR（schedule_adr）：{adr_count} 項
+      • 不採納（wontfix）：{wontfix_count} 項
+
+      self-heal 將於下次執行時自動套用上述修復。
     priority: 3         # default — 重要決策，適當提醒
     tags: ["white_check_mark", "computer"]
     condition: "has_immediate_fix"
@@ -36,7 +49,12 @@ events:
   # arch-evolution (Decide 步驟) — 完成通知（無 immediate_fix）
   ooda_decide_done_no_fixes:
     title: "📋 架構決策完成"
-    message_template: "本次無 immediate_fix 項目 | schedule_adr {adr_count} 項待人工排程"
+    message_template: |
+      本次無需立即自動修復（immediate_fix：0 項）。
+
+      • 待排程 ADR（schedule_adr）：{adr_count} 項
+
+      請於方便時安排人工處理。
     priority: 2
     tags: ["computer", "memo"]
     condition: "no_immediate_fix"
@@ -45,7 +63,10 @@ events:
   # arch-evolution (Decide 步驟) — backlog 為空
   ooda_decide_backlog_empty:
     title: "✅ arch-evolution 完成"
-    message_template: "improvement-backlog 已清空，系統無待決策項目"
+    message_template: |
+      improvement-backlog 已清空。
+
+      目前無待決策項目。
     priority: 2
     tags: ["white_check_mark"]
     condition: "backlog_empty"

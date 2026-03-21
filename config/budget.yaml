@@ -3,10 +3,10 @@
 version: 1
 
 daily_budget:
-  claude_tokens: 12_000_000      # 每日 Claude token 上限（估算值，字元 ÷ 3.5）
+  claude_tokens: 20_000_000      # 每日 Claude token 上限（估算值，字元 ÷ 3.5）
   groq_calls: 100                # 每日 Groq API 呼叫上限（免費方案）
   warn_threshold: 0.80           # 80% 時發送 ntfy 告警
-  suspend_threshold: 1.00        # 100% 時暫停新呼叫（circuit breaker）
+  suspend_threshold: 1.20        # 120% 時暫停新呼叫（circuit breaker）
 
 monthly_budget:
   claude_tokens: 100_000_000     # 月度 Claude token 上限

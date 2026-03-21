@@ -1,3 +1,9 @@
+---
+name: "ai-github-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # AI GitHub 熱門專案研究 Prompt 模板
 
 > 觸發條件：Todoist 無可處理項目且 ai_github_research_count < 2

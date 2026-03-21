@@ -1,3 +1,9 @@
+---
+name: "unsloth-research"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # Unsloth 研究 Prompt 模板
 
 > 觸發條件：Todoist 無可處理項目且 unsloth_research_count < 2

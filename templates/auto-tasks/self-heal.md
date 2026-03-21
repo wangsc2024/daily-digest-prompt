@@ -1,3 +1,9 @@
+---
+name: "self-heal"
+template_type: "auto_task_template"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 自動任務：自癒迴圈
 
 > 由 round-robin 自動觸發，每日最多 1 次（`config/frequency-limits.yaml` daily_limit: 1）
