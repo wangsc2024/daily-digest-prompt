@@ -1,0 +1,534 @@
+{
+  "generated_at": "2026-03-22T01:00:37.501259+08:00",
+  "total_high_potential": 66,
+  "topics": [
+    {
+      "topic": "自動任務公平性診斷與修復方案 — Round-Robin 失效根因、飢餓偵測與加權輪轉修復",
+      "saturation_score": 0.3135,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "快取命中率調優與自適應 TTL 治理",
+      "saturation_score": 0.3267,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "LTX-2 生成視頻模型 — Lightricks 開源 DiT 音視訊基礎模型深度研究",
+      "saturation_score": 0.3271,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "DeepSeek V4 — 1 兆參數開源多模態 MoE 大型語言模型",
+      "saturation_score": 0.3293,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "楞嚴咒的結構、持誦法與靈驗記載 — 從五會密咒到實修口訣的完整指南",
+      "saturation_score": 0.3541,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-15",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "以 Rust 重寫 RAG 知識庫系統 — 架構設計、Crate 選型與 Function Calling 實作",
+      "saturation_score": 0.3709,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "論證圖譜（Argument Mapping）— 批判性思考教學效果最強的視覺化推理方法論：Tim van Gelder 八步建圖法、CAAM 軟體工具鏈與情報分",
+      "saturation_score": 0.3735,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "執行意圖（Implementation Intentions）— Peter Gollwitzer 的 If-Then 計畫策略：從目標意圖到行動自動化的認知科",
+      "saturation_score": 0.3752,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-15",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Hook 攔截率暴增與 Context 保護規則失效的聯合診斷框架",
+      "saturation_score": 0.3781,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "化仪四教之渐教 — 从鹿苑阿含到般若的渐次教化體系",
+      "saturation_score": 0.38,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "State 膨脹治理與配置碎片化統一 — loop-state 清理自動化、kb-note-scores 增量化與 YAML 單一真相源方案",
+      "saturation_score": 0.39,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "會通四科圓彰七大",
+      "saturation_score": 0.391,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興",
+      "saturation_score": 0.3942,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-15",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "後設認知（Metacognition）— 認知監控與策略調節的科學：從 Flavell 三變數模型到 AI 認知鏡像框架，及其在待辦事項深度執行中的應用",
+      "saturation_score": 0.396,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars,",
+      "saturation_score": 0.3961,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "十番顯見（見性十義）— 楞嚴經卷一至卷二破妄顯真的核心論證",
+      "saturation_score": 0.3974,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "系統思考（Systems Thinking）— Donella Meadows 十二槓桿點與 Peter Senge 第五項修練",
+      "saturation_score": 0.398,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "LLM 訓練與推理效率革命（2026-03）— MIT TLT 自適應推測解碼加速 70-210% 與 QVAC BitNet LoRA 邊緣裝置微調框架",
+      "saturation_score": 0.3995,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Todoist API v1 進階機制深度解析 — Sync API 增量同步、activities 審計日誌與 webhook 簽章驗證最佳實踐",
+      "saturation_score": 0.4001,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "費米估算（Fermi Estimation）— 數量級推理與結構化分解的邏輯思維方法論",
+      "saturation_score": 0.4007,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Python/PowerShell 專案自動化安全掃描工具鏈 — SAST、SCA 依賴漏洞掃描與 Supply Chain Security 實踐指南",
+      "saturation_score": 0.4014,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "觀無量壽經十六觀 — 淨土宗觀想法門的完整修持次第與善導大師判釋",
+      "saturation_score": 0.4033,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "自我決定理論（Self-Determination Theory）— Deci & Ryan 的內在動機科學",
+      "saturation_score": 0.4047,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "化法四教之通教 — 無生四諦、體空觀、幻有即空與通前通後的判教樞紐",
+      "saturation_score": 0.4055,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "道綽大師與《安樂集》聖道淨土二門判教",
+      "saturation_score": 0.4084,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學與認知科學的跨學科對話",
+      "saturation_score": 0.4095,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "LINE Bot Webhook 驅動的 Agentic 任務管線設計 — 從訊息解析到研究優化審查實作通知自動化閉環",
+      "saturation_score": 0.4101,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "化法四教之別教 — 恆沙佛法、歷別行位與菩薩修證次第深度研究",
+      "saturation_score": 0.4105,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Karpathy/autoresearch — 630 行 Python AI 自主 ML 實驗框架",
+      "saturation_score": 0.4123,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Flutter Flame Engine 遊戲開發 Workflow",
+      "saturation_score": 0.4229,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "前瞻記憶（Prospective Memory）— 記得去做的認知科學：事件型/時間型觸發機制、執行意圖強化策略與待辦事項系統設計的實證方法論",
+      "saturation_score": 0.423,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "華嚴時的義理機制深化 — 七處九會、十玄門、六相圓融與天台圓兼別判教的內在邏輯",
+      "saturation_score": 0.4237,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "研究設計機制整合：分議題深度研究筆記",
+      "saturation_score": 0.4267,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "化儀四教的施教機制與判釋體系 — 頓漸秘密不定四教的運作原理、相互關係與化法配置",
+      "saturation_score": 0.4285,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "AI 智慧電網優化 — V2G 雙向供電、效能 KPI 與成本效益量化",
+      "saturation_score": 0.4312,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Decision Intelligence（決策智能）— 結合資料科學、行為科學與管理科學的統一決策框架",
+      "saturation_score": 0.4318,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "楞嚴經二決定義 — 因地發心與真本修因的修行綱領",
+      "saturation_score": 0.432,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "pytest 測試框架與覆蓋率追蹤最佳實踐 — 從單元測試到 CI/CD 整合的完整工作流（2026）",
+      "saturation_score": 0.4352,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Open WebUI",
+      "saturation_score": 0.4354,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "RAGFlow — 開源 RAG + Agent 引擎深度研究：五層微服務架構、DeepDoc 文件解析、12+ 分塊策略與 Agent Canvas 工作流",
+      "saturation_score": 0.4386,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal Newport 的最佳認知狀態研究",
+      "saturation_score": 0.4393,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "CRAAP Test 與 SIFT Method — 來源可信度評估系統化框架",
+      "saturation_score": 0.4408,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "MiroFish — GitHub #1 Trending AI 群體智能預測引擎",
+      "saturation_score": 0.4412,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化",
+      "saturation_score": 0.444,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "認知偏誤圖鑑與實用去偏技術 — 從 Fasolo 整合框架到 11 步檢查清單的決策品質提升方法論",
+      "saturation_score": 0.4459,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "八識規矩頌深度研究報告 — 原文譯文、歷史爭議、學術注釋與 APA 參考文獻（2026-03-21）",
+      "saturation_score": 0.4461,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Hindsight — vectorize-io Agent Memory 系統",
+      "saturation_score": 0.4461,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "MCP vs A2A — 2026 年 AI Agent 互操作協議的演進、三層架構與安全挑戰",
+      "saturation_score": 0.4464,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "偏鄉遠距醫療整合系統設計：從 5G+AIoT 架構到排程管理的完整實作指南（屏東縣應用）",
+      "saturation_score": 0.4466,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Agent Context Window 治理與 I/O 預算監控最佳實踐",
+      "saturation_score": 0.4505,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "事件驅動架構（Event-Driven Architecture）— 從 Cron 排程到事件觸發的個人自動化系統設計模式",
+      "saturation_score": 0.4575,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "知識自組織日 — 研究基礎設施元認知湧現的四維自組織同構分析",
+      "saturation_score": 0.4591,
+      "status": "high-novelty",
+      "count": 1,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "淨土宗助念儀軌與臨終關懷實務指南",
+      "saturation_score": 0.4608,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-16",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南",
+      "saturation_score": 0.4623,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "教觀綱宗與禪宗的關係 — 判教明晰與不立文字的會通智慧",
+      "saturation_score": 0.4635,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略",
+      "saturation_score": 0.4771,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "obra/superpowers — Agentic Skills Framework（96K Stars）",
+      "saturation_score": 0.4851,
+      "status": "high-novelty",
+      "count": 2,
+      "last_date": "2026-03-19",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "第一性原理思維（First Principles Thinking）— 三步框架、蘇格拉底詰問與現代創新應用",
+      "saturation_score": 0.4933,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "AI 軟體開發系統核心架構實作指南 — Agent SDK、工作流引擎與程式碼生成管線",
+      "saturation_score": 0.4959,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "淨土教觀學苑 Podcast 製作研究規劃（機制細化版）",
+      "saturation_score": 0.519,
+      "status": "high-novelty",
+      "count": 4,
+      "last_date": "2026-03-18",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "deep-research Skill 核心機制深度解析 — Anti-Hallucination、GoT、Auto-Continuation",
+      "saturation_score": 0.5217,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應",
+      "saturation_score": 0.5454,
+      "status": "high-novelty",
+      "count": 3,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "環境監測 — AI 空氣品質預測與城市熱風險聯防",
+      "saturation_score": 0.5725,
+      "status": "high-novelty",
+      "count": 4,
+      "last_date": "2026-03-20",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "法華經深度研究 — 一佛乘義理與修行實踐綜論",
+      "saturation_score": 0.5902,
+      "status": "high-novelty",
+      "count": 6,
+      "last_date": "2026-03-17",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "慧遠大師 — 淨土宗初祖與東林蓮社念佛結社運動",
+      "saturation_score": 0.6002,
+      "status": "high-novelty",
+      "count": 6,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    },
+    {
+      "topic": "n8n",
+      "saturation_score": 0.6883,
+      "status": "high-novelty",
+      "count": 6,
+      "last_date": "2026-03-21",
+      "reason": "moderate saturation but high novelty keywords — unique angle"
+    }
+  ]
+}

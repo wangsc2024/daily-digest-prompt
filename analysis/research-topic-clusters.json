@@ -1,0 +1,3008 @@
+{
+  "generated_at": "2026-03-22T01:00:37.498261+08:00",
+  "total_entries": 160,
+  "total_clusters": 92,
+  "summary": {
+    "saturated_count": 2,
+    "needs_deepening_count": 0,
+    "normal_count": 90
+  },
+  "clusters": {
+    "法華經（妙法蓮華經）Cursor CLI fahua — 迹門修法八品次第與本門壽量普門（2026-03-21）": {
+      "keywords": [
+        "03",
+        "20",
+        "2026",
+        "21",
+        "cli",
+        "cursor",
+        "fahua",
+        "一佛乘",
+        "一佛乘義理",
+        "一佛乘義理與修行實踐綜論",
+        "一佛乘義理與修行實踐要點",
+        "佛學",
+        "信解品",
+        "信解藥草化城壽量普門與一佛乘",
+        "化城喻品",
+        "化城喻品與普門品的義理脈絡",
+        "品次義理深度研究",
+        "壽量品",
+        "壽量本門與普門悲智",
+        "天台宗",
+        "妙法蓮華經",
+        "方便品",
+        "普門品",
+        "法華經",
+        "法華經未深入品章綜合研究",
+        "藥草喻品",
+        "譬喻品",
+        "迹門修法八品次第與本門壽量普門",
+        "迹門品次",
+        "迹門本門",
+        "迹門本門貫通",
+        "重點品章與修行實踐綜論",
+        "開權顯實"
+      ],
+      "count": 9,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-21",
+      "word_count": 412,
+      "entry_topics": [
+        "法華經（妙法蓮華經）Cursor CLI fahua — 迹門修法八品次第與本門壽量普門（2026-03-21）",
+        "法華經（妙法蓮華經）品次義理深度研究 — 迹門本門貫通：信解藥草化城壽量普門與一佛乘（2026-03-21 Cursor CLI）",
+        "法華經（妙法蓮華經）Cursor CLI 深度研究 — 迹門品次、壽量本門與普門悲智（2026-03-21）",
+        "法華經（妙法蓮華經）深度研究 — 開權顯實、一佛乘義理與修行實踐綜論",
+        "法華經（妙法蓮華經）深度研究 — 開權顯實、一佛乘義理與修行實踐綜論",
+        "法華經（妙法蓮華經）深度研究 — 開權顯實、一佛乘義理與修行實踐綜論（2026-03-20 Cursor CLI）",
+        "法華經（妙法蓮華經）Cursor CLI 綜論 — 開權顯實、一佛乘義理與修行實踐要點",
+        "法華經（妙法蓮華經）深度研究 — 一佛乘義理、重點品章與修行實踐綜論",
+        "法華經未深入品章綜合研究：信解品、藥草喻品、化城喻品與普門品的義理脈絡"
+      ],
+      "saturation_score": 0.7388,
+      "status": "saturated",
+      "factors": {
+        "count_norm": 1.0,
+        "novelty": 0.5152,
+        "time_interval_norm": 0.9667,
+        "depth": 1.0
+      }
+    },
+    "道綽大師與《安樂集》聖道淨土二門判教": {
+      "keywords": [
+        "三祖",
+        "佛學",
+        "安樂集",
+        "念佛",
+        "末法思想",
+        "淨土宗",
+        "淨土門",
+        "玄中寺",
+        "聖道淨土二門判教",
+        "聖道門",
+        "道綽大師",
+        "道綽大師與"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 18,
+      "entry_topics": [
+        "道綽大師與《安樂集》聖道淨土二門判教"
+      ],
+      "saturation_score": 0.4084,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.75,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0437
+      }
+    },
+    "教觀綱宗與禪宗的關係 — 判教明晰與不立文字的會通智慧": {
+      "keywords": [
+        "synthesis",
+        "佛學",
+        "判教明晰與不立文字的會通智慧",
+        "台禪會通",
+        "天台宗",
+        "宗門教下",
+        "從判教智慧到日常修持的落實路徑",
+        "教觀綱宗",
+        "教觀綱宗在現代禪修中的應用指南",
+        "教觀綱宗與禪宗的關係",
+        "現代應用",
+        "禪修指南",
+        "禪宗",
+        "跨宗派",
+        "階段完結篇"
+      ],
+      "count": 2,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-21",
+      "word_count": 77,
+      "entry_topics": [
+        "教觀綱宗與禪宗的關係 — 判教明晰與不立文字的會通智慧",
+        "教觀綱宗在現代禪修中的應用指南 — 從判教智慧到日常修持的落實路徑（synthesis 階段完結篇）"
+      ],
+      "saturation_score": 0.4635,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1869
+      }
+    },
+    "State 膨脹治理與配置碎片化統一 — loop-state 清理自動化、kb-note-scores 增量化與 YAML 單一真相源方案": {
+      "keywords": [
+        "kb",
+        "loop",
+        "note",
+        "scores",
+        "state",
+        "yaml",
+        "單一真相源方案",
+        "增量化與",
+        "專案優化",
+        "深度思維",
+        "清理自動化",
+        "知識庫",
+        "膨脹治理與配置碎片化統一"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 70,
+      "entry_topics": [
+        "State 膨脹治理與配置碎片化統一 — loop-state 清理自動化、kb-note-scores 增量化與 YAML 單一真相源方案"
+      ],
+      "saturation_score": 0.39,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7692,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1699
+      }
+    },
+    "Agent Context Window 治理與 I/O 預算監控最佳實踐": {
+      "keywords": [
+        "agent",
+        "context",
+        "window",
+        "保護機制失效的根因分析",
+        "治理與",
+        "預算監控最佳實踐",
+        "預算超標與"
+      ],
+      "count": 2,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-21",
+      "word_count": 72,
+      "entry_topics": [
+        "Agent Context Window 治理與 I/O 預算監控最佳實踐",
+        "Agent I/O 預算超標與 Context 保護機制失效的根因分析"
+      ],
+      "saturation_score": 0.4505,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.7143,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1748
+      }
+    },
+    "n8n": {
+      "keywords": [
+        "agent",
+        "ai",
+        "ai工作流",
+        "autogen",
+        "code",
+        "dify",
+        "github",
+        "langchain",
+        "langfuse",
+        "langgraph",
+        "multi",
+        "n8n",
+        "no",
+        "openlit",
+        "pipeline",
+        "多agent協調",
+        "工作流平台",
+        "狀態機",
+        "自動化",
+        "觀測",
+        "開源"
+      ],
+      "count": 6,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-21",
+      "word_count": 60,
+      "entry_topics": [
+        "n8n",
+        "Langfuse",
+        "AutoGen",
+        "Dify — 開源 No-code AI 工作流平台",
+        "LangGraph",
+        "OpenLIT"
+      ],
+      "saturation_score": 0.6883,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.6667,
+        "novelty": 0.5238,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1456
+      }
+    },
+    "AI 軟體開發系統核心架構實作指南 — Agent SDK、工作流引擎與程式碼生成管線": {
+      "keywords": [
+        "agent",
+        "ai",
+        "automation",
+        "engineering",
+        "ide",
+        "sdk",
+        "software",
+        "實作指南",
+        "工作流引擎",
+        "工作流引擎與程式碼生成管線",
+        "工具鏈配置與工作流程自動化",
+        "整合",
+        "架構設計",
+        "程式碼審查",
+        "程式碼審查優化",
+        "程式碼生成",
+        "系統開發",
+        "誤報治理",
+        "軟體開發系統核心架構實作指南",
+        "開發環境",
+        "開發環境整合實踐指南",
+        "風險分級與修補建議驗證閉環"
+      ],
+      "count": 3,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-21",
+      "word_count": 108,
+      "entry_topics": [
+        "AI 軟體開發系統核心架構實作指南 — Agent SDK、工作流引擎與程式碼生成管線",
+        "AI 程式碼審查優化：誤報治理、風險分級與修補建議驗證閉環",
+        "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化"
+      ],
+      "saturation_score": 0.4959,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.6818,
+        "time_interval_norm": 0.9667,
+        "depth": 0.2621
+      }
+    },
+    "Open WebUI": {
+      "keywords": [
+        "2026",
+        "ai平台",
+        "chatgpt界面",
+        "first",
+        "foundation",
+        "github",
+        "local",
+        "ollama",
+        "open",
+        "webui",
+        "开源专案",
+        "自托管"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 10,
+      "entry_topics": [
+        "Open WebUI"
+      ],
+      "saturation_score": 0.4354,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0243
+      }
+    },
+    "偏鄉遠距醫療整合系統設計：從 5G+AIoT 架構到排程管理的完整實作指南（屏東縣應用）": {
+      "keywords": [
+        "5g",
+        "5g+aiot",
+        "ai",
+        "aiot",
+        "city",
+        "fhir",
+        "healthcare",
+        "hl7",
+        "smart",
+        "偏鄉遠距醫療整合系統設計",
+        "偏鄉醫療",
+        "公共衛生",
+        "台灣",
+        "屏東",
+        "屏東縣應用",
+        "智慧城市",
+        "智慧醫療",
+        "架構到排程管理的完整實作指南",
+        "疫情預測",
+        "系統設計",
+        "遠距醫療",
+        "遠距醫療與公共衛生決策支援"
+      ],
+      "count": 2,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-21",
+      "word_count": 72,
+      "entry_topics": [
+        "偏鄉遠距醫療整合系統設計：從 5G+AIoT 架構到排程管理的完整實作指南（屏東縣應用）",
+        "智慧醫療 — AI 疫情預測、遠距醫療與公共衛生決策支援"
+      ],
+      "saturation_score": 0.4466,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.7273,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1748
+      }
+    },
+    "慧遠大師 — 淨土宗初祖與東林蓮社念佛結社運動": {
+      "keywords": [
+        "foundation",
+        "一心不亂與信願行的修證結構",
+        "佛學",
+        "助念邊界與家屬配合",
+        "善導大師五正行",
+        "善導大師五正行的正助二業與現代日課設計",
+        "執持名號",
+        "念佛",
+        "慧遠大師",
+        "東林蓮社",
+        "淨土三經的互攝關係與信願行架構",
+        "淨土宗",
+        "淨土宗初祖",
+        "淨土宗初祖與東林蓮社念佛結社運動",
+        "無量壽經四十八願的願門分類與三輩往生實修次第",
+        "臨終正念的平生預備",
+        "阿彌陀經要義"
+      ],
+      "count": 6,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-21",
+      "word_count": 125,
+      "entry_topics": [
+        "慧遠大師 — 淨土宗初祖與東林蓮社念佛結社運動",
+        "阿彌陀經要義 — 執持名號、一心不亂與信願行的修證結構",
+        "善導大師五正行的正助二業與現代日課設計",
+        "淨土三經的互攝關係與信願行架構",
+        "無量壽經四十八願的願門分類與三輩往生實修次第",
+        "臨終正念的平生預備、助念邊界與家屬配合"
+      ],
+      "saturation_score": 0.6002,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.6667,
+        "novelty": 0.7647,
+        "time_interval_norm": 0.9667,
+        "depth": 0.3034
+      }
+    },
+    "Todoist API v1 進階機制深度解析 — Sync API 增量同步、activities 審計日誌與 webhook 簽章驗證最佳實踐": {
+      "keywords": [
+        "activities",
+        "api",
+        "daily",
+        "digest",
+        "hmac",
+        "sync",
+        "todoist",
+        "v1",
+        "webhook",
+        "增量同步",
+        "安全機制",
+        "審計日誌與",
+        "技術研究",
+        "簽章驗證最佳實踐",
+        "進階機制深度解析"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 73,
+      "entry_topics": [
+        "Todoist API v1 進階機制深度解析 — Sync API 增量同步、activities 審計日誌與 webhook 簽章驗證最佳實踐"
+      ],
+      "saturation_score": 0.4001,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7333,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1772
+      }
+    },
+    "楞嚴經二決定義 — 因地發心與真本修因的修行綱領": {
+      "keywords": [
+        "mechanism",
+        "二決定義",
+        "佛學",
+        "修行綱領",
+        "因地發心",
+        "因地發心與真本修因的修行綱領",
+        "果地覺",
+        "楞嚴經",
+        "楞嚴經二決定義"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 24,
+      "entry_topics": [
+        "楞嚴經二決定義 — 因地發心與真本修因的修行綱領"
+      ],
+      "saturation_score": 0.432,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0583
+      }
+    },
+    "Test-Time Compute Scaling（測試時計算擴展）": {
+      "keywords": [
+        "ai",
+        "automated",
+        "compute",
+        "engineering",
+        "llm",
+        "scaling",
+        "software",
+        "test",
+        "testing",
+        "time",
+        "測試時計算擴展",
+        "測試生成",
+        "測試生成與",
+        "知識庫",
+        "系統開發",
+        "驗證機制"
+      ],
+      "count": 2,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-21",
+      "word_count": 65,
+      "entry_topics": [
+        "Test-Time Compute Scaling（測試時計算擴展）",
+        "AI 測試生成與 Test-Time Compute 驗證機制"
+      ],
+      "saturation_score": 0.5164,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1578
+      }
+    },
+    "第一性原理思維（First Principles Thinking）— 三步框架、蘇格拉底詰問與現代創新應用": {
+      "keywords": [
+        "elon",
+        "first",
+        "musk",
+        "principles",
+        "thinking",
+        "三步框架",
+        "五個為什麼技術與類比推理的根本對比",
+        "基率忽略",
+        "從亞里斯多德到",
+        "批判性思考",
+        "機率校準與自然頻率技術",
+        "決策框架",
+        "的還原式推理方法論",
+        "知識庫",
+        "第一性原理",
+        "第一性原理思維",
+        "蘇格拉底六步問答",
+        "蘇格拉底詰問與現代創新應用",
+        "認知偏誤",
+        "貝葉斯推理",
+        "貝葉斯推理的日常實踐應用",
+        "邏輯思維"
+      ],
+      "count": 3,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-21",
+      "word_count": 175,
+      "entry_topics": [
+        "第一性原理思維（First Principles Thinking）— 三步框架、蘇格拉底詰問與現代創新應用",
+        "貝葉斯推理的日常實踐應用 — 基率忽略、機率校準與自然頻率技術",
+        "第一性原理思維（First Principles Thinking）— 從亞里斯多德到 Elon Musk 的還原式推理方法論：蘇格拉底六步問答、五個為什麼技術與類比推理的根本對比"
+      ],
+      "saturation_score": 0.4933,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.6364,
+        "time_interval_norm": 0.9667,
+        "depth": 0.4248
+      }
+    },
+    "八識規矩頌深度研究報告 — 原文譯文、歷史爭議、學術注釋與 APA 參考文獻（2026-03-21）": {
+      "keywords": [
+        "03",
+        "2026",
+        "21",
+        "apa",
+        "佛學",
+        "八識",
+        "八識規矩頌",
+        "八識規矩頌深度研究報告",
+        "八識規矩頌的深入研究報告",
+        "原文譯文",
+        "參考文獻",
+        "唯識學",
+        "學術注釋與",
+        "成唯識論",
+        "歷史爭議",
+        "淨土教觀學苑",
+        "玄奘",
+        "轉識成智",
+        "阿賴耶識"
+      ],
+      "count": 2,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-21",
+      "word_count": 62,
+      "entry_topics": [
+        "八識規矩頌深度研究報告 — 原文譯文、歷史爭議、學術注釋與 APA 參考文獻（2026-03-21）",
+        "八識規矩頌的深入研究報告"
+      ],
+      "saturation_score": 0.4461,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.7368,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1505
+      }
+    },
+    "認知偏誤圖鑑與實用去偏技術 — 從 Fasolo 整合框架到 11 步檢查清單的決策品質提升方法論": {
+      "keywords": [
+        "11",
+        "fasolo",
+        "去偏技術",
+        "整合框架到",
+        "步檢查清單的決策品質提升方法論",
+        "決策框架",
+        "知識庫",
+        "認知偏誤",
+        "認知偏誤圖鑑與實用去偏技術",
+        "邏輯思維"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 49,
+      "entry_topics": [
+        "認知偏誤圖鑑與實用去偏技術 — 從 Fasolo 整合框架到 11 步檢查清單的決策品質提升方法論"
+      ],
+      "saturation_score": 0.4459,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1189
+      }
+    },
+    "MCP vs A2A — 2026 年 AI Agent 互操作協議的演進、三層架構與安全挑戰": {
+      "keywords": [
+        "2026",
+        "a2a",
+        "agent",
+        "agent協議",
+        "ai",
+        "mcp",
+        "三層架構與安全挑戰",
+        "互操作協議的演進",
+        "互操作性",
+        "安全"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 47,
+      "entry_topics": [
+        "MCP vs A2A — 2026 年 AI Agent 互操作協議的演進、三層架構與安全挑戰"
+      ],
+      "saturation_score": 0.4464,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1141
+      }
+    },
+    "邊界智慧 — 閾值設計與相變機制的跨域統一分析": {
+      "keywords": [
+        "agent",
+        "github",
+        "gitnexus",
+        "專案優化",
+        "深度思維",
+        "知識庫",
+        "自動任務品質閘門與結果驗證管線強化",
+        "邊界智慧",
+        "閾值設計與相變機制的跨域統一分析",
+        "零伺服器客戶端知識圖譜代碼智能引擎"
+      ],
+      "count": 3,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-21",
+      "word_count": 74,
+      "entry_topics": [
+        "邊界智慧 — 閾值設計與相變機制的跨域統一分析",
+        "Agent 自動任務品質閘門與結果驗證管線強化",
+        "GitNexus — 零伺服器客戶端知識圖譜代碼智能引擎"
+      ],
+      "saturation_score": 0.5587,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1796
+      }
+    },
+    "深度思維洞見報告 — 2026-03-20 知識庫分析：知識前沿地圖日": {
+      "keywords": [
+        "03",
+        "16",
+        "18",
+        "19",
+        "20",
+        "2026",
+        "21",
+        "seci知識結晶化",
+        "元認知",
+        "元認知演化分析",
+        "判教路由日",
+        "工業化",
+        "正助分明日",
+        "洞見報告",
+        "深度思維",
+        "深度思維洞見報告",
+        "理論落地日",
+        "知識前沿地圖日",
+        "知識工廠",
+        "知識庫",
+        "知識庫六維同構分析",
+        "知識庫分析",
+        "知識庫每日洞見報告",
+        "知識庫洞見補充報告",
+        "知識生產的工業化革命",
+        "研究品質",
+        "研究品質意識覺醒日",
+        "管線次第日",
+        "自治控制面日",
+        "自適應反饋迴圈日",
+        "跨領域"
+      ],
+      "count": 9,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-21",
+      "word_count": 317,
+      "entry_topics": [
+        "深度思維洞見報告 — 2026-03-20 知識庫分析：知識前沿地圖日",
+        "深度思維洞見報告 — 2026-03-19 知識庫分析：管線次第日",
+        "深度思維洞見報告 — 2026-03-18 知識庫分析：正助分明日",
+        "2026-03-16 知識庫每日洞見報告 — 判教路由日",
+        "深度思維洞見報告 — 2026-03-20 知識庫分析：自治控制面日",
+        "深度思維洞見報告 — 2026-03-21 知識庫分析：自適應反饋迴圈日",
+        "知識庫洞見補充報告 — 2026-03-20 研究品質意識覺醒日（元認知演化分析）",
+        "知識生產的工業化革命 — 2026-03-20 知識庫六維同構分析",
+        "深度思維洞見報告 — 2026-03-21 知識庫分析：理論落地日（SECI知識結晶化）"
+      ],
+      "saturation_score": 0.7035,
+      "status": "saturated",
+      "factors": {
+        "count_norm": 1.0,
+        "novelty": 0.7097,
+        "time_interval_norm": 0.9667,
+        "depth": 0.7694
+      }
+    },
+    "楞嚴經修行體系的當代實踐整合": {
+      "keywords": [
+        "synthesis",
+        "佛學",
+        "修行體系",
+        "實修指南",
+        "楞嚴經",
+        "楞嚴經修行體系的當代實踐整合",
+        "當代實踐",
+        "禪修整合"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 14,
+      "entry_topics": [
+        "楞嚴經修行體系的當代實踐整合"
+      ],
+      "saturation_score": 0.4844,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9667,
+        "depth": 0.034
+      }
+    },
+    "化儀四教實踐應用指南 — 從理論到實修的根機診斷與修行路徑選擇": {
+      "keywords": [
+        "application",
+        "佛學",
+        "修行路徑",
+        "化儀四教",
+        "化儀四教實踐應用指南",
+        "天台宗",
+        "實踐應用",
+        "從理論到實修的根機診斷與修行路徑選擇",
+        "教觀綱宗",
+        "根機診斷"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 31,
+      "entry_topics": [
+        "化儀四教實踐應用指南 — 從理論到實修的根機診斷與修行路徑選擇"
+      ],
+      "saturation_score": 0.4803,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0752
+      }
+    },
+    "deep-research Skill 核心機制深度解析 — Anti-Hallucination、GoT、Auto-Continuation": {
+      "keywords": [
+        "anti",
+        "auto",
+        "claude",
+        "code",
+        "continuation",
+        "deep",
+        "got",
+        "hallucination",
+        "research",
+        "skill",
+        "安裝",
+        "安裝驗證與專案整合評估",
+        "核心機制深度解析",
+        "知識庫"
+      ],
+      "count": 3,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-21",
+      "word_count": 138,
+      "entry_topics": [
+        "deep-research Skill 核心機制深度解析 — Anti-Hallucination、GoT、Auto-Continuation",
+        "claude-deep-research-skill 安裝驗證與專案整合評估",
+        "安裝 claude-deep-research-skill"
+      ],
+      "saturation_score": 0.5217,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.5714,
+        "time_interval_norm": 0.9667,
+        "depth": 0.335
+      }
+    },
+    "claude-deep-research-skill — 8 階段研究管線、來源可信度評分與引用驗證框架": {
+      "keywords": [
+        "claude",
+        "code",
+        "deep",
+        "research",
+        "skill",
+        "來源可信度評分與引用驗證框架",
+        "研究框架",
+        "階段研究管線"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 52,
+      "entry_topics": [
+        "claude-deep-research-skill — 8 階段研究管線、來源可信度評分與引用驗證框架"
+      ],
+      "saturation_score": 0.506,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.375,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1262
+      }
+    },
+    "化儀四教的施教機制與判釋體系 — 頓漸秘密不定四教的運作原理、相互關係與化法配置": {
+      "keywords": [
+        "mechanism",
+        "不定教",
+        "佛學",
+        "判教機制",
+        "化儀四教",
+        "化儀四教的施教機制與判釋體系",
+        "天台宗",
+        "教觀綱宗",
+        "施教方式",
+        "漸教",
+        "相互關係與化法配置",
+        "秘密教",
+        "頓教",
+        "頓漸秘密不定四教的運作原理"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 40,
+      "entry_topics": [
+        "化儀四教的施教機制與判釋體系 — 頓漸秘密不定四教的運作原理、相互關係與化法配置"
+      ],
+      "saturation_score": 0.4285,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6429,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0971
+      }
+    },
+    "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應": {
+      "keywords": [
+        "mechanism",
+        "一心三觀",
+        "七賢位與四果修證體系",
+        "五重玄義",
+        "佛學",
+        "信願行",
+        "化法四教",
+        "化法四教之藏教",
+        "圓教",
+        "圓教苦集滅道即實相的義理體系與一心三觀的內在對應",
+        "天台宗",
+        "實相",
+        "念佛",
+        "教觀綱宗",
+        "析空觀",
+        "淨土宗",
+        "無作四諦",
+        "生滅四諦",
+        "蕅益大師",
+        "藏教",
+        "阿彌陀經要解"
+      ],
+      "count": 3,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-20",
+      "word_count": 72,
+      "entry_topics": [
+        "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應",
+        "蕅益大師《阿彌陀經要解》",
+        "化法四教之藏教 — 生滅四諦、析空觀、七賢位與四果修證體系"
+      ],
+      "saturation_score": 0.5454,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.5238,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1748
+      }
+    },
+    "ComfyUI": {
+      "keywords": [
+        "2026",
+        "agent",
+        "ai",
+        "chrome",
+        "comfyui",
+        "devtools",
+        "github",
+        "mcp",
+        "openclaw",
+        "vllm",
+        "史上增長最快的開源個人",
+        "知識庫",
+        "開源專案"
+      ],
+      "count": 4,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-21",
+      "word_count": 75,
+      "entry_topics": [
+        "ComfyUI",
+        "Chrome DevTools MCP",
+        "vLLM",
+        "OpenClaw — 2026 年 GitHub 史上增長最快的開源個人 AI Agent"
+      ],
+      "saturation_score": 0.6606,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.4444,
+        "novelty": 0.3077,
+        "time_interval_norm": 0.9667,
+        "depth": 0.182
+      }
+    },
+    "一心三觀具體修持指南 — 從教觀綱宗到摩訶止觀的圓頓觀法實操步驟": {
+      "keywords": [
+        "一心三觀",
+        "一心三觀具體修持指南",
+        "佛學",
+        "修持步驟",
+        "圓頓止觀",
+        "天台宗",
+        "實修指南",
+        "小止觀",
+        "從教觀綱宗到摩訶止觀的圓頓觀法實操步驟",
+        "摩訶止觀",
+        "教觀綱宗",
+        "空假中三觀"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 32,
+      "entry_topics": [
+        "一心三觀具體修持指南 — 從教觀綱宗到摩訶止觀的圓頓觀法實操步驟"
+      ],
+      "saturation_score": 0.4733,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0777
+      }
+    },
+    "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南": {
+      "keywords": [
+        "synthesis",
+        "二十五圓通",
+        "佛學",
+        "圓通章",
+        "大勢至菩薩",
+        "大勢至菩薩念佛圓通章",
+        "天台宗",
+        "密宗",
+        "從六塵六根六識七大到禪淨密台的圓通選擇指南",
+        "念佛圓通",
+        "楞嚴經",
+        "楞嚴經二十五圓通與各宗派修行法門的實證比較",
+        "淨土宗",
+        "淨念相繼",
+        "禪宗",
+        "都攝六根",
+        "都攝六根淨念相繼的修證體系與淨土宗實修連結"
+      ],
+      "count": 2,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-20",
+      "word_count": 79,
+      "entry_topics": [
+        "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南",
+        "大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結"
+      ],
+      "saturation_score": 0.4623,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.6471,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1917
+      }
+    },
+    "以 Rust 重寫 RAG 知識庫系統 — 架構設計、Crate 選型與 Function Calling 實作": {
+      "keywords": [
+        "calling",
+        "crate",
+        "function",
+        "llamaindex",
+        "rag",
+        "rust",
+        "架構設計",
+        "知識庫系統",
+        "選型與",
+        "重寫"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 56,
+      "entry_topics": [
+        "以 Rust 重寫 RAG 知識庫系統 — 架構設計、Crate 選型與 Function Calling 實作"
+      ],
+      "saturation_score": 0.3709,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.8,
+        "time_interval_norm": 0.9,
+        "depth": 0.1359
+      }
+    },
+    "LINE Bot Webhook 驅動的 Agentic 任務管線設計 — 從訊息解析到研究優化審查實作通知自動化閉環": {
+      "keywords": [
+        "agentic",
+        "bot",
+        "line",
+        "pipeline",
+        "webhook",
+        "任務管線設計",
+        "任務自動化",
+        "從訊息解析到研究優化審查實作通知自動化閉環",
+        "驅動的"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 59,
+      "entry_topics": [
+        "LINE Bot Webhook 驅動的 Agentic 任務管線設計 — 從訊息解析到研究優化審查實作通知自動化閉環"
+      ],
+      "saturation_score": 0.4101,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9,
+        "depth": 0.1432
+      }
+    },
+    "五時判教中的法華涅槃時 — 開權顯實會三歸一的純圓教觀與醍醐究竟": {
+      "keywords": [
+        "synthesis",
+        "一佛乘",
+        "五時判教",
+        "五時判教中的法華涅槃時",
+        "佛學",
+        "天台宗",
+        "教觀綱宗",
+        "會三歸一",
+        "法華涅槃時",
+        "純圓",
+        "醍醐味",
+        "開權顯實",
+        "開權顯實會三歸一的純圓教觀與醍醐究竟"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 32,
+      "entry_topics": [
+        "五時判教中的法華涅槃時 — 開權顯實會三歸一的純圓教觀與醍醐究竟"
+      ],
+      "saturation_score": 0.4782,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.4615,
+        "time_interval_norm": 0.9,
+        "depth": 0.0777
+      }
+    },
+    "自動任務公平性診斷與修復方案 — Round-Robin 失效根因、飢餓偵測與加權輪轉修復": {
+      "keywords": [
+        "robin",
+        "round",
+        "失效根因",
+        "自動任務公平性診斷與修復方案",
+        "飢餓偵測與加權輪轉修復"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 45,
+      "entry_topics": [
+        "自動任務公平性診斷與修復方案 — Round-Robin 失效根因、飢餓偵測與加權輪轉修復"
+      ],
+      "saturation_score": 0.3135,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 1.0,
+        "time_interval_norm": 0.9,
+        "depth": 0.1092
+      }
+    },
+    "obra/superpowers — Agentic Skills Framework（96K Stars）": {
+      "keywords": [
+        "96k",
+        "agentic",
+        "agent方法論",
+        "claude",
+        "code",
+        "framework",
+        "github",
+        "obra",
+        "skill",
+        "skills",
+        "stars",
+        "superpowers",
+        "tdd",
+        "框架與軟體開發方法論",
+        "知識庫"
+      ],
+      "count": 2,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-19",
+      "word_count": 98,
+      "entry_topics": [
+        "obra/superpowers — Agentic Skills Framework（96K Stars）",
+        "obra/superpowers — Agentic Skills 框架與軟體開發方法論"
+      ],
+      "saturation_score": 0.4851,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.5333,
+        "time_interval_norm": 0.9,
+        "depth": 0.2379
+      }
+    },
+    "論證圖譜（Argument Mapping）— 批判性思考教學效果最強的視覺化推理方法論：Tim van Gelder 八步建圖法、CAAM 軟體工具鏈與情報分": {
+      "keywords": [
+        "argument",
+        "caam",
+        "gelder",
+        "mapping",
+        "tim",
+        "van",
+        "八步建圖法",
+        "批判性思考",
+        "批判性思考教學效果最強的視覺化推理方法論",
+        "知識庫",
+        "論證圖譜",
+        "軟體工具鏈與情報分析應用",
+        "邏輯思維"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 83,
+      "entry_topics": [
+        "論證圖譜（Argument Mapping）— 批判性思考教學效果最強的視覺化推理方法論：Tim van Gelder 八步建圖法、CAAM 軟體工具鏈與情報分析應用"
+      ],
+      "saturation_score": 0.3735,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7692,
+        "time_interval_norm": 0.9,
+        "depth": 0.2015
+      }
+    },
+    "後設認知（Metacognition）— 認知監控與策略調節的科學：從 Flavell 三變數模型到 AI 認知鏡像框架，及其在待辦事項深度執行中的應用": {
+      "keywords": [
+        "ai",
+        "flavell",
+        "metacognition",
+        "三變數模型到",
+        "及其在待辦事項深度執行中的應用",
+        "後設認知",
+        "深度思維",
+        "知識庫",
+        "認知監控與策略調節的科學",
+        "認知鏡像框架"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 76,
+      "entry_topics": [
+        "後設認知（Metacognition）— 認知監控與策略調節的科學：從 Flavell 三變數模型到 AI 認知鏡像框架，及其在待辦事項深度執行中的應用"
+      ],
+      "saturation_score": 0.396,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7,
+        "time_interval_norm": 0.9,
+        "depth": 0.1845
+      }
+    },
+    "環境監測 — AI 空氣品質預測與城市熱風險聯防": {
+      "keywords": [
+        "ai",
+        "city",
+        "grid",
+        "smart",
+        "再生能源",
+        "台灣",
+        "台灣實踐",
+        "台電",
+        "多代理強化學習號誌控制與緊急車輛優先通行",
+        "屏東",
+        "市民服務聊天機器人與公文自動分類",
+        "智慧交通",
+        "智慧城市",
+        "智慧治理",
+        "智慧能源",
+        "環境監測",
+        "空氣品質預測與城市熱風險聯防",
+        "電網調度與再生能源預測"
+      ],
+      "count": 4,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-20",
+      "word_count": 104,
+      "entry_topics": [
+        "環境監測 — AI 空氣品質預測與城市熱風險聯防",
+        "智慧治理 — AI 市民服務聊天機器人與公文自動分類",
+        "智慧能源 — AI 電網調度與再生能源預測（台灣實踐）",
+        "智慧交通 — 多代理強化學習號誌控制與緊急車輛優先通行"
+      ],
+      "saturation_score": 0.5725,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.4444,
+        "novelty": 0.5556,
+        "time_interval_norm": 0.9333,
+        "depth": 0.2524
+      }
+    },
+    "華嚴時的義理機制深化 — 七處九會、十玄門、六相圓融與天台圓兼別判教的內在邏輯": {
+      "keywords": [
+        "mechanism",
+        "七處九會",
+        "五時判教",
+        "佛學",
+        "六相圓融",
+        "六相圓融與天台圓兼別判教的內在邏輯",
+        "十玄門",
+        "圓兼別",
+        "天台宗",
+        "教觀綱宗",
+        "海印森羅",
+        "華嚴時",
+        "華嚴時的義理機制深化"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 39,
+      "entry_topics": [
+        "華嚴時的義理機制深化 — 七處九會、十玄門、六相圓融與天台圓兼別判教的內在邏輯"
+      ],
+      "saturation_score": 0.4237,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6154,
+        "time_interval_norm": 0.8667,
+        "depth": 0.0947
+      }
+    },
+    "化法四教之別教 — 恆沙佛法、歷別行位與菩薩修證次第深度研究": {
+      "keywords": [
+        "application",
+        "佛學",
+        "別教",
+        "化法四教之別教",
+        "十住十行十迴向十地",
+        "天台宗",
+        "恆沙佛法",
+        "教觀綱宗",
+        "次第三觀",
+        "歷別行位與菩薩修證次第深度研究",
+        "等覺妙覺",
+        "菩薩位次"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 30,
+      "entry_topics": [
+        "化法四教之別教 — 恆沙佛法、歷別行位與菩薩修證次第深度研究"
+      ],
+      "saturation_score": 0.4105,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8667,
+        "depth": 0.0728
+      }
+    },
+    "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學與認知科學的跨學科對話": {
+      "keywords": [
+        "五十陰魔",
+        "佛學",
+        "心理學",
+        "楞嚴經",
+        "楞嚴經五十陰魔的現代心理學詮釋",
+        "禪修心理學",
+        "禪修心理學與認知科學的跨學科對話",
+        "認知科學",
+        "跨學科研究"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 34,
+      "entry_topics": [
+        "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學與認知科學的跨學科對話"
+      ],
+      "saturation_score": 0.4095,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8667,
+        "depth": 0.0825
+      }
+    },
+    "自我決定理論（Self-Determination Theory）— Deci & Ryan 的內在動機科學": {
+      "keywords": [
+        "deci",
+        "determination",
+        "ryan",
+        "self",
+        "theory",
+        "深度思維",
+        "的內在動機科學",
+        "知識庫",
+        "自我決定理論"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 54,
+      "entry_topics": [
+        "自我決定理論（Self-Determination Theory）— Deci & Ryan 的內在動機科學"
+      ],
+      "saturation_score": 0.4047,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8667,
+        "depth": 0.1311
+      }
+    },
+    "淨土教觀學苑 Podcast 製作研究規劃（機制細化版）": {
+      "keywords": [
+        "blueprint",
+        "brief",
+        "mechanism",
+        "podcast",
+        "research",
+        "機制細化版",
+        "淨土教觀學苑",
+        "研究規劃",
+        "製作研究藍圖",
+        "製作研究規劃"
+      ],
+      "count": 4,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-18",
+      "word_count": 91,
+      "entry_topics": [
+        "淨土教觀學苑 Podcast 製作研究規劃（機制細化版）",
+        "淨土教觀學苑 Podcast 製作研究藍圖",
+        "淨土教觀學苑 Podcast 製作研究規劃",
+        "淨土教觀學苑 Podcast 製作研究規劃"
+      ],
+      "saturation_score": 0.519,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.4444,
+        "novelty": 0.7,
+        "time_interval_norm": 0.8667,
+        "depth": 0.2209
+      }
+    },
+    "MiroFish — GitHub #1 Trending AI 群體智能預測引擎": {
+      "keywords": [
+        "#1",
+        "agent",
+        "ai",
+        "github",
+        "intelligence",
+        "mirofish",
+        "swarm",
+        "trending",
+        "群體智能預測引擎"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 41,
+      "entry_topics": [
+        "MiroFish — GitHub #1 Trending AI 群體智能預測引擎"
+      ],
+      "saturation_score": 0.4412,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5556,
+        "time_interval_norm": 0.8667,
+        "depth": 0.0995
+      }
+    },
+    "Hindsight — vectorize-io Agent Memory 系統": {
+      "keywords": [
+        "4%",
+        "91",
+        "agent",
+        "github",
+        "hindsight",
+        "io",
+        "longmemeval",
+        "mcp",
+        "memory",
+        "recall",
+        "reflect",
+        "retain",
+        "sota",
+        "vectorize",
+        "四網路記憶",
+        "深度思維",
+        "知識庫",
+        "開源"
+      ],
+      "count": 2,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-18",
+      "word_count": 135,
+      "entry_topics": [
+        "Hindsight — vectorize-io Agent Memory 系統",
+        "Hindsight — vectorize-io 開源 Agent Memory 框架（四網路記憶、Retain-Recall-Reflect、LongMemEval SOTA 91.4%）"
+      ],
+      "saturation_score": 0.4461,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.6111,
+        "time_interval_norm": 0.8667,
+        "depth": 0.3277
+      }
+    },
+    "AI 驅動的持續整合進階實作：Flaky Test 根因分類、隔離治理與預測式選測": {
+      "keywords": [
+        "ai",
+        "engineering",
+        "flaky",
+        "software",
+        "test",
+        "持續整合",
+        "根因分類",
+        "系統開發",
+        "隔離治理與預測式選測",
+        "驅動的持續整合進階實作"
+      ],
+      "count": 1,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-18",
+      "word_count": 41,
+      "entry_topics": [
+        "AI 驅動的持續整合進階實作：Flaky Test 根因分類、隔離治理與預測式選測"
+      ],
+      "saturation_score": 0.4578,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.8667,
+        "depth": 0.0995
+      }
+    },
+    "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略": {
+      "keywords": [
+        "daily",
+        "digest",
+        "github",
+        "graphql",
+        "hybrid",
+        "qdrant",
+        "rag",
+        "search",
+        "召回與排序策略",
+        "向量數據庫",
+        "向量數據庫性能調優與生產部署最佳實踐",
+        "技術研究",
+        "排序訊號與去重策略",
+        "混合檢索在",
+        "熱門專案研究工作流",
+        "的去重",
+        "研究工作流"
+      ],
+      "count": 3,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-19",
+      "word_count": 101,
+      "entry_topics": [
+        "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略",
+        "Qdrant 向量數據庫性能調優與生產部署最佳實踐",
+        "GitHub 熱門專案研究工作流：GraphQL Search、排序訊號與去重策略"
+      ],
+      "saturation_score": 0.4771,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.7059,
+        "time_interval_norm": 0.9,
+        "depth": 0.2451
+      }
+    },
+    "Agent 工作流可靠性強化、RAG 管線韌性設計與安全防護深化": {
+      "keywords": [
+        "2026",
+        "agent",
+        "agentic",
+        "ai",
+        "rag",
+        "專案優化",
+        "工作流可靠性強化",
+        "最新進展",
+        "深度思維",
+        "知識庫",
+        "管線韌性設計與安全防護深化",
+        "驅動的自適應知識檢索與推理架構"
+      ],
+      "count": 2,
+      "first_date": "2026-03-18",
+      "last_date": "2026-03-21",
+      "word_count": 81,
+      "entry_topics": [
+        "Agent 工作流可靠性強化、RAG 管線韌性設計與安全防護深化",
+        "Agentic RAG — AI Agent 驅動的自適應知識檢索與推理架構（2026 最新進展）"
+      ],
+      "saturation_score": 0.5626,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.3333,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1966
+      }
+    },
+    "法華經（妙法蓮華經）深度研究 — 一佛乘義理、重點品章與修行實踐綜論": {
+      "keywords": [
+        "一佛乘義理",
+        "佛學",
+        "天台宗",
+        "妙法蓮華經",
+        "法華經",
+        "重點品章與修行實踐綜論"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 34,
+      "entry_topics": [
+        "法華經（妙法蓮華經）深度研究 — 一佛乘義理、重點品章與修行實踐綜論"
+      ],
+      "saturation_score": 0.6029,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.0,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0825
+      }
+    },
+    "Hook 攔截率暴增與 Context 保護規則失效的聯合診斷框架": {
+      "keywords": [
+        "context",
+        "hook",
+        "保護規則失效的聯合診斷框架",
+        "攔截率暴增與"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 33,
+      "entry_topics": [
+        "Hook 攔截率暴增與 Context 保護規則失效的聯合診斷框架"
+      ],
+      "saturation_score": 0.3781,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.75,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0801
+      }
+    },
+    "觀無量壽經十六觀 — 淨土宗觀想法門的完整修持次第與善導大師判釋": {
+      "keywords": [
+        "mechanism",
+        "九品往生",
+        "佛學",
+        "十六觀",
+        "善導大師",
+        "定善",
+        "念佛",
+        "散善",
+        "淨土宗",
+        "淨土宗觀想法門的完整修持次第與善導大師判釋",
+        "觀無量壽經",
+        "觀無量壽經十六觀"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 32,
+      "entry_topics": [
+        "觀無量壽經十六觀 — 淨土宗觀想法門的完整修持次第與善導大師判釋"
+      ],
+      "saturation_score": 0.4033,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0777
+      }
+    },
+    "化仪四教之渐教 — 从鹿苑阿含到般若的渐次教化體系": {
+      "keywords": [
+        "五时判教",
+        "从鹿苑阿含到般若的渐次教化體系",
+        "佛學",
+        "化仪四教",
+        "化仪四教之渐教",
+        "天台宗",
+        "教观纲宗",
+        "渐教"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 25,
+      "entry_topics": [
+        "化仪四教之渐教 — 从鹿苑阿含到般若的渐次教化體系"
+      ],
+      "saturation_score": 0.38,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.75,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0607
+      }
+    },
+    "LangGraph — 圖形化 Agent 工作流框架深度研究": {
+      "keywords": [
+        "2026",
+        "agent",
+        "agent框架",
+        "ai",
+        "checkpointing",
+        "github",
+        "langchain",
+        "langgraph",
+        "圖形化",
+        "工作流框架深度研究",
+        "工作流編排",
+        "狀態機",
+        "開源專案"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 31,
+      "entry_topics": [
+        "LangGraph — 圖形化 Agent 工作流框架深度研究"
+      ],
+      "saturation_score": 0.4882,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.3846,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0752
+      }
+    },
+    "AI 智慧電網優化 — V2G 雙向供電、效能 KPI 與成本效益量化": {
+      "keywords": [
+        "ai",
+        "grid",
+        "kpi",
+        "smart",
+        "v2g",
+        "台灣",
+        "成本效益",
+        "效能",
+        "效能優化",
+        "智慧城市",
+        "智慧能源",
+        "智慧電網優化",
+        "與成本效益量化",
+        "雙向供電"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 35,
+      "entry_topics": [
+        "AI 智慧電網優化 — V2G 雙向供電、效能 KPI 與成本效益量化"
+      ],
+      "saturation_score": 0.4312,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5714,
+        "time_interval_norm": 0.8333,
+        "depth": 0.085
+      }
+    },
+    "JSON Schema 驗證與自動化": {
+      "keywords": [
+        "2026",
+        "daily",
+        "digest",
+        "fastjsonschema",
+        "foundation",
+        "json",
+        "jsonschema",
+        "pydantic",
+        "python",
+        "schema",
+        "技術研究",
+        "自動化",
+        "驗證",
+        "驗證與自動化"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 18,
+      "entry_topics": [
+        "JSON Schema 驗證與自動化"
+      ],
+      "saturation_score": 0.4996,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.3571,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0437
+      }
+    },
+    "法華經深度研究 — 一佛乘義理與修行實踐綜論": {
+      "keywords": [
+        "lotus",
+        "series",
+        "sutra",
+        "一佛乘",
+        "一佛乘義理與修行實踐綜論",
+        "三車火宅喻",
+        "三車火宅喻與一佛乘的施設",
+        "久遠實成",
+        "佛學",
+        "四導師",
+        "地湧菩薩",
+        "天台宗",
+        "從地湧出品",
+        "從經典概論到一佛乘義理的結構化綜論",
+        "方便品",
+        "本門",
+        "本門開啟與地湧菩薩的甚深因緣",
+        "法華經",
+        "法華經整體深度研究",
+        "法華經深度研究",
+        "第三品",
+        "第二品",
+        "第十五品",
+        "譬喻品",
+        "開權顯實",
+        "開權顯實與三乘方便的真實意涵"
+      ],
+      "count": 6,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-17",
+      "word_count": 146,
+      "entry_topics": [
+        "法華經深度研究 — 一佛乘義理與修行實踐綜論",
+        "法華經深度研究 — 一佛乘義理與修行實踐綜論",
+        "譬喻品（第三品）— 三車火宅喻與一佛乘的施設",
+        "方便品（第二品）— 開權顯實與三乘方便的真實意涵",
+        "法華經整體深度研究 — 從經典概論到一佛乘義理的結構化綜論",
+        "從地湧出品（第十五品）— 本門開啟與地湧菩薩的甚深因緣"
+      ],
+      "saturation_score": 0.5902,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.6667,
+        "novelty": 0.6923,
+        "time_interval_norm": 0.8333,
+        "depth": 0.3544
+      }
+    },
+    "會通四科圓彰七大": {
+      "keywords": [
+        "synthesis",
+        "五陰六入十二處十八界",
+        "佛學",
+        "修行觀照",
+        "四科七大",
+        "地水火風空見識",
+        "如來藏",
+        "會通四科圓彰七大",
+        "楞嚴經",
+        "破相顯性",
+        "藏性周遍"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 8,
+      "entry_topics": [
+        "會通四科圓彰七大"
+      ],
+      "saturation_score": 0.391,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7273,
+        "time_interval_norm": 0.8333,
+        "depth": 0.0194
+      }
+    },
+    "費米估算（Fermi Estimation）— 數量級推理與結構化分解的邏輯思維方法論": {
+      "keywords": [
+        "estimation",
+        "fermi",
+        "數量級推理與結構化分解的邏輯思維方法論",
+        "知識庫",
+        "費米估算",
+        "邏輯思維"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 43,
+      "entry_topics": [
+        "費米估算（Fermi Estimation）— 數量級推理與結構化分解的邏輯思維方法論"
+      ],
+      "saturation_score": 0.4007,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8333,
+        "depth": 0.1044
+      }
+    },
+    "Decision Intelligence（決策智能）— 結合資料科學、行為科學與管理科學的統一決策框架": {
+      "keywords": [
+        "decision",
+        "intelligence",
+        "決策智能",
+        "深度思維",
+        "知識庫",
+        "結合資料科學",
+        "行為科學",
+        "行為科學與管理科學的統一決策框架",
+        "認知偏誤"
+      ],
+      "count": 1,
+      "first_date": "2026-03-17",
+      "last_date": "2026-03-17",
+      "word_count": 52,
+      "entry_topics": [
+        "Decision Intelligence（決策智能）— 結合資料科學、行為科學與管理科學的統一決策框架"
+      ],
+      "saturation_score": 0.4318,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5556,
+        "time_interval_norm": 0.8333,
+        "depth": 0.1262
+      }
+    },
+    "Context Engineering（上下文工程）— 2026 年 AI Agent 開發核心範式": {
+      "keywords": [
+        "2026",
+        "agent",
+        "ai",
+        "architecture",
+        "context",
+        "engineering",
+        "long",
+        "management",
+        "memory",
+        "software",
+        "term",
+        "上下文工程",
+        "從短期上下文到持久化記憶的機制設計與實作模式",
+        "架構",
+        "知識庫",
+        "系統開發",
+        "開發核心範式"
+      ],
+      "count": 2,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-17",
+      "word_count": 130,
+      "entry_topics": [
+        "Context Engineering（上下文工程）— 2026 年 AI Agent 開發核心範式",
+        "AI Agent Context Management 與 Long-Term Memory 架構 — 從短期上下文到持久化記憶的機制設計與實作模式（2026）"
+      ],
+      "saturation_score": 0.5005,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.4118,
+        "time_interval_norm": 0.8333,
+        "depth": 0.3155
+      }
+    },
+    "淨土宗助念儀軌與臨終關懷實務指南": {
+      "keywords": [
+        "application",
+        "mechanism",
+        "佛學",
+        "共修",
+        "助念",
+        "十念法",
+        "印光大師",
+        "實修",
+        "從印光大師十念法到念佛三昧的完整修持次第",
+        "念佛",
+        "念佛三昧",
+        "念佛法門修持實踐指南",
+        "念佛道場",
+        "打佛七",
+        "打佛七實務指南",
+        "攝心",
+        "淨土宗",
+        "淨土宗助念儀軌與臨終關懷實務指南",
+        "淨土宗念佛道場的核心集體共修形式",
+        "臨終三大要",
+        "臨終關懷"
+      ],
+      "count": 3,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-16",
+      "word_count": 75,
+      "entry_topics": [
+        "淨土宗助念儀軌與臨終關懷實務指南",
+        "打佛七實務指南 — 淨土宗念佛道場的核心集體共修形式",
+        "念佛法門修持實踐指南 — 從印光大師十念法到念佛三昧的完整修持次第"
+      ],
+      "saturation_score": 0.4608,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.3333,
+        "novelty": 0.7143,
+        "time_interval_norm": 0.8,
+        "depth": 0.182
+      }
+    },
+    "pytest 測試框架與覆蓋率追蹤最佳實踐 — 從單元測試到 CI/CD 整合的完整工作流（2026）": {
+      "keywords": [
+        "2026",
+        "background",
+        "cd",
+        "ci",
+        "claude",
+        "cli",
+        "code",
+        "daily",
+        "digest",
+        "mode",
+        "print",
+        "pytest",
+        "tasks",
+        "testing",
+        "命令列",
+        "從單元測試到",
+        "技術研究",
+        "整合指南",
+        "整合的完整工作流",
+        "測試框架與覆蓋率追蹤最佳實踐",
+        "自動化",
+        "覆蓋率",
+        "進階使用與自動化最佳實踐"
+      ],
+      "count": 2,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 128,
+      "entry_topics": [
+        "pytest 測試框架與覆蓋率追蹤最佳實踐 — 從單元測試到 CI/CD 整合的完整工作流（2026）",
+        "Claude Code CLI 進階使用與自動化最佳實踐 — Print Mode、Background Tasks 與 CI/CD 整合指南（2026）"
+      ],
+      "saturation_score": 0.4352,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.6087,
+        "time_interval_norm": 0.8,
+        "depth": 0.3107
+      }
+    },
+    "化法四教之通教 — 無生四諦、體空觀、幻有即空與通前通後的判教樞紐": {
+      "keywords": [
+        "三乘共十地",
+        "佛學",
+        "化法四教",
+        "化法四教之通教",
+        "天台宗",
+        "幻有即空",
+        "幻有即空與通前通後的判教樞紐",
+        "教觀綱宗",
+        "無生四諦",
+        "通教",
+        "體空觀"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 33,
+      "entry_topics": [
+        "化法四教之通教 — 無生四諦、體空觀、幻有即空與通前通後的判教樞紐"
+      ],
+      "saturation_score": 0.4055,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6364,
+        "time_interval_norm": 0.8,
+        "depth": 0.0801
+      }
+    },
+    "LTX-2 生成視頻模型 — Lightricks 開源 DiT 音視訊基礎模型深度研究": {
+      "keywords": [
+        "ai視頻",
+        "dit",
+        "generation",
+        "lightricks",
+        "ltx",
+        "video",
+        "生成視頻模型",
+        "開源",
+        "音視訊基礎模型深度研究"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 44,
+      "entry_topics": [
+        "LTX-2 生成視頻模型 — Lightricks 開源 DiT 音視訊基礎模型深度研究"
+      ],
+      "saturation_score": 0.3271,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.8889,
+        "time_interval_norm": 0.8,
+        "depth": 0.1068
+      }
+    },
+    "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars,": {
+      "keywords": [
+        "2026",
+        "2k",
+        "46",
+        "agent",
+        "ai",
+        "crewai",
+        "crews",
+        "flows",
+        "github",
+        "stars",
+        "事件驅動工作流的架構設計",
+        "技術對比與企業級部署",
+        "編排框架",
+        "角色協作",
+        "開源專案",
+        "雙模型多"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 86,
+      "entry_topics": [
+        "CrewAI — 雙模型多 Agent 編排框架：Crews 角色協作 + Flows 事件驅動工作流的架構設計、技術對比與企業級部署（46.2K Stars, 2026）"
+      ],
+      "saturation_score": 0.3961,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.625,
+        "time_interval_norm": 0.8,
+        "depth": 0.2087
+      }
+    },
+    "十番顯見（見性十義）— 楞嚴經卷一至卷二破妄顯真的核心論證": {
+      "keywords": [
+        "synthesis",
+        "佛學",
+        "十番顯見",
+        "楞嚴經",
+        "楞嚴經卷一至卷二破妄顯真的核心論證",
+        "破妄顯真",
+        "見性",
+        "見性十義",
+        "跨宗派比較"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 29,
+      "entry_topics": [
+        "十番顯見（見性十義）— 楞嚴經卷一至卷二破妄顯真的核心論證"
+      ],
+      "saturation_score": 0.3974,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.8,
+        "depth": 0.0704
+      }
+    },
+    "化法四教之藏教 — 析空观、四谛十二因缘与小乘教法的天台判摄": {
+      "keywords": [
+        "佛學",
+        "化法四教",
+        "化法四教之藏教",
+        "十二因缘",
+        "四谛",
+        "四谛十二因缘与小乘教法的天台判摄",
+        "天台宗",
+        "小乘教法",
+        "教觀綱宗",
+        "析空观",
+        "藏教"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 30,
+      "entry_topics": [
+        "化法四教之藏教 — 析空观、四谛十二因缘与小乘教法的天台判摄"
+      ],
+      "saturation_score": 0.4608,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.4545,
+        "time_interval_norm": 0.8,
+        "depth": 0.0728
+      }
+    },
+    "Python/PowerShell 專案自動化安全掃描工具鏈 — SAST、SCA 依賴漏洞掃描與 Supply Chain Security 實踐指南": {
+      "keywords": [
+        "chain",
+        "devsecops",
+        "powershell",
+        "python",
+        "sast",
+        "sca",
+        "security",
+        "supply",
+        "依賴漏洞掃描與",
+        "實踐指南",
+        "專案自動化安全掃描工具鏈",
+        "深度思維",
+        "知識庫"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 76,
+      "entry_topics": [
+        "Python/PowerShell 專案自動化安全掃描工具鏈 — SAST、SCA 依賴漏洞掃描與 Supply Chain Security 實踐指南"
+      ],
+      "saturation_score": 0.4014,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6154,
+        "time_interval_norm": 0.8,
+        "depth": 0.1845
+      }
+    },
+    "DeepSeek V4 — 1 兆參數開源多模態 MoE 大型語言模型": {
+      "keywords": [
+        "ai架構",
+        "deepseek",
+        "llm",
+        "moe",
+        "v4",
+        "兆參數開源多模態",
+        "多模態",
+        "大型語言模型",
+        "開源模型"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 35,
+      "entry_topics": [
+        "DeepSeek V4 — 1 兆參數開源多模態 MoE 大型語言模型"
+      ],
+      "saturation_score": 0.3293,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.8889,
+        "time_interval_norm": 0.8,
+        "depth": 0.085
+      }
+    },
+    "OpenClaw — GitHub 史上增長最快的開源個人 AI 助手閘道框架": {
+      "keywords": [
+        "agent",
+        "ai",
+        "github",
+        "mcp",
+        "openclaw",
+        "skill",
+        "助手",
+        "助手閘道框架",
+        "史上增長最快的開源個人",
+        "四層架構",
+        "安全分析",
+        "技術洞察",
+        "深度思維",
+        "系統與安全危機啟示",
+        "自擴展",
+        "開源專案",
+        "開源框架"
+      ],
+      "count": 2,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-16",
+      "word_count": 99,
+      "entry_topics": [
+        "OpenClaw — GitHub 史上增長最快的開源個人 AI 助手閘道框架",
+        "OpenClaw — GitHub 史上增長最快的開源個人 AI 助手：四層架構、自擴展 Skill 系統與安全危機啟示"
+      ],
+      "saturation_score": 0.5013,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.4118,
+        "time_interval_norm": 0.8,
+        "depth": 0.2403
+      }
+    },
+    "系統思考（Systems Thinking）— Donella Meadows 十二槓桿點與 Peter Senge 第五項修練": {
+      "keywords": [
+        "donella",
+        "meadows",
+        "peter",
+        "senge",
+        "systems",
+        "thinking",
+        "十二槓桿點與",
+        "決策框架",
+        "第五項修練",
+        "系統思考",
+        "邏輯思維"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 64,
+      "entry_topics": [
+        "系統思考（Systems Thinking）— Donella Meadows 十二槓桿點與 Peter Senge 第五項修練"
+      ],
+      "saturation_score": 0.398,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6364,
+        "time_interval_norm": 0.8,
+        "depth": 0.1553
+      }
+    },
+    "Karpathy/autoresearch — 630 行 Python AI 自主 ML 實驗框架": {
+      "keywords": [
+        "630",
+        "ai",
+        "autoresearch",
+        "github",
+        "karpathy",
+        "ml",
+        "python",
+        "實驗框架",
+        "知識庫",
+        "自主"
+      ],
+      "count": 1,
+      "first_date": "2026-03-16",
+      "last_date": "2026-03-16",
+      "word_count": 50,
+      "entry_topics": [
+        "Karpathy/autoresearch — 630 行 Python AI 自主 ML 實驗框架"
+      ],
+      "saturation_score": 0.4123,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6,
+        "time_interval_norm": 0.8,
+        "depth": 0.1214
+      }
+    },
+    "Agency-Agents — IDE 多 Agent AI 工作室框架": {
+      "keywords": [
+        "agency",
+        "agent",
+        "agents",
+        "ai",
+        "github",
+        "ide",
+        "工作室框架",
+        "知識庫"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 36,
+      "entry_topics": [
+        "Agency-Agents — IDE 多 Agent AI 工作室框架"
+      ],
+      "saturation_score": 0.4765,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.375,
+        "time_interval_norm": 0.7667,
+        "depth": 0.0874
+      }
+    },
+    "楞嚴咒的結構、持誦法與靈驗記載 — 從五會密咒到實修口訣的完整指南": {
+      "keywords": [
+        "五會結構",
+        "佛學",
+        "修行",
+        "功德",
+        "宣化上人",
+        "密咒",
+        "實修指南",
+        "從五會密咒到實修口訣的完整指南",
+        "持誦法",
+        "持誦法與靈驗記載",
+        "楞嚴咒",
+        "楞嚴咒的結構",
+        "楞嚴經",
+        "靈驗"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 33,
+      "entry_topics": [
+        "楞嚴咒的結構、持誦法與靈驗記載 — 從五會密咒到實修口訣的完整指南"
+      ],
+      "saturation_score": 0.3541,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.7857,
+        "time_interval_norm": 0.7667,
+        "depth": 0.0801
+      }
+    },
+    "2026-03-14 知識庫跨領域洞見整合 — 壓縮與顯化：從 AI Agent 記憶架構到唯識轉依、KAN 符號化到禪宗公案的四維同構性": {
+      "keywords": [
+        "03",
+        "14",
+        "2026",
+        "agent",
+        "ai",
+        "kan",
+        "mastra",
+        "唯識",
+        "壓縮與顯化",
+        "洞見報告",
+        "深度思維",
+        "知識庫分析",
+        "知識庫跨領域洞見整合",
+        "禪宗",
+        "符號化到禪宗公案的四維同構性",
+        "記憶架構到唯識轉依",
+        "貝葉斯推理",
+        "跨領域洞見"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 69,
+      "entry_topics": [
+        "2026-03-14 知識庫跨領域洞見整合 — 壓縮與顯化：從 AI Agent 記憶架構到唯識轉依、KAN 符號化到禪宗公案的四維同構性"
+      ],
+      "saturation_score": 0.431,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.7667,
+        "depth": 0.1675
+      }
+    },
+    "執行意圖（Implementation Intentions）— Peter Gollwitzer 的 If-Then 計畫策略：從目標意圖到行動自動化的認知科": {
+      "keywords": [
+        "gollwitzer",
+        "if",
+        "implementation",
+        "intentions",
+        "peter",
+        "then",
+        "執行意圖",
+        "從目標意圖到行動自動化的認知科學與待辦事項高效執行方法論",
+        "深度思維",
+        "知識庫",
+        "計畫策略",
+        "認知科學"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 93,
+      "entry_topics": [
+        "執行意圖（Implementation Intentions）— Peter Gollwitzer 的 If-Then 計畫策略：從目標意圖到行動自動化的認知科學與待辦事項高效執行方法論"
+      ],
+      "saturation_score": 0.3752,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.7667,
+        "depth": 0.2257
+      }
+    },
+    "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興": {
+      "keywords": [
+        "synthesis",
+        "佛學",
+        "四教儀",
+        "天台宗",
+        "從智者大師到蕅益大師",
+        "教觀綱宗",
+        "教觀綱宗的歷史傳承與註疏傳統",
+        "歷史傳承",
+        "的判教演進與明清天台復興",
+        "綱宗",
+        "諦觀"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 52,
+      "entry_topics": [
+        "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+      ],
+      "saturation_score": 0.3942,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6364,
+        "time_interval_norm": 0.7667,
+        "depth": 0.1262
+      }
+    },
+    "天台止觀實修：《小止觀》完整研究": {
+      "keywords": [
+        "佛學",
+        "天台宗",
+        "天台止觀實修",
+        "完整研究",
+        "實修",
+        "小止觀",
+        "智者大師",
+        "止觀"
+      ],
+      "count": 1,
+      "first_date": "2026-03-15",
+      "last_date": "2026-03-15",
+      "word_count": 16,
+      "entry_topics": [
+        "天台止觀實修：《小止觀》完整研究"
+      ],
+      "saturation_score": 0.4439,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.7667,
+        "depth": 0.0388
+      }
+    },
+    "LLM 訓練與推理效率革命（2026-03）— MIT TLT 自適應推測解碼加速 70-210% 與 QVAC BitNet LoRA 邊緣裝置微調框架": {
+      "keywords": [
+        "03",
+        "2026",
+        "210%",
+        "70",
+        "ai",
+        "bitnet",
+        "llm",
+        "lora",
+        "mit",
+        "qvac",
+        "tlt",
+        "知識庫",
+        "自適應推測解碼加速",
+        "訓練效率",
+        "訓練與推理效率革命",
+        "邊緣裝置微調框架"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 77,
+      "entry_topics": [
+        "LLM 訓練與推理效率革命（2026-03）— MIT TLT 自適應推測解碼加速 70-210% 與 QVAC BitNet LoRA 邊緣裝置微調框架"
+      ],
+      "saturation_score": 0.3995,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6875,
+        "time_interval_norm": 0.9,
+        "depth": 0.1869
+      }
+    },
+    "PowerShell 7 結構化錯誤處理、JSON 契約與並行工作流": {
+      "keywords": [
+        "daily",
+        "digest",
+        "json",
+        "powershell",
+        "契約與並行工作流",
+        "技術研究",
+        "結構化錯誤處理"
+      ],
+      "count": 1,
+      "first_date": "2026-03-19",
+      "last_date": "2026-03-19",
+      "word_count": 34,
+      "entry_topics": [
+        "PowerShell 7 結構化錯誤處理、JSON 契約與並行工作流"
+      ],
+      "saturation_score": 0.5305,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.2857,
+        "time_interval_norm": 0.9,
+        "depth": 0.0825
+      }
+    },
+    "前瞻記憶（Prospective Memory）— 記得去做的認知科學：事件型/時間型觸發機制、執行意圖強化策略與待辦事項系統設計的實證方法論": {
+      "keywords": [
+        "memory",
+        "prospective",
+        "事件型",
+        "前瞻記憶",
+        "執行意圖強化策略與待辦事項系統設計的實證方法論",
+        "待辦事項",
+        "時間型觸發機制",
+        "深度思維",
+        "知識庫",
+        "記得去做的認知科學",
+        "認知科學"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 71,
+      "entry_topics": [
+        "前瞻記憶（Prospective Memory）— 記得去做的認知科學：事件型/時間型觸發機制、執行意圖強化策略與待辦事項系統設計的實證方法論"
+      ],
+      "saturation_score": 0.423,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6364,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1723
+      }
+    },
+    "Flutter Flame Engine 遊戲開發 Workflow": {
+      "keywords": [
+        "engine",
+        "flame",
+        "flutter",
+        "workflow",
+        "知識庫",
+        "遊戲開發"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 34,
+      "entry_topics": [
+        "Flutter Flame Engine 遊戲開發 Workflow"
+      ],
+      "saturation_score": 0.4229,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0825
+      }
+    },
+    "快取命中率調優與自適應 TTL 治理": {
+      "keywords": [
+        "ttl",
+        "快取命中率調優與自適應",
+        "治理"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 18,
+      "entry_topics": [
+        "快取命中率調優與自適應 TTL 治理"
+      ],
+      "saturation_score": 0.3267,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 1.0,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0437
+      }
+    },
+    "OpenClaw — 2026 年 GitHub 史上成長最快的開源個人 AI 助手：310K Stars、30+ 頻道整合與自託管 Agent Gateway": {
+      "keywords": [
+        "2026",
+        "30+",
+        "310k",
+        "agent",
+        "ai",
+        "ai助手",
+        "gateway",
+        "github",
+        "openclaw",
+        "stars",
+        "助手",
+        "助手框架深度研究",
+        "史上成長最快的開源個人",
+        "最速爆紅",
+        "架構深度研究",
+        "深度思維",
+        "知識庫",
+        "頻道整合與自託管"
+      ],
+      "count": 2,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 128,
+      "entry_topics": [
+        "OpenClaw — 2026 年 GitHub 史上成長最快的開源個人 AI 助手：310K Stars、30+ 頻道整合與自託管 Agent Gateway 架構深度研究",
+        "OpenClaw — 2026 年 GitHub 最速爆紅 AI 助手框架深度研究"
+      ],
+      "saturation_score": 0.4945,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9333,
+        "depth": 0.3107
+      }
+    },
+    "Execution Trace Schema 統一與 Agent 工作流結構化追蹤": {
+      "keywords": [
+        "agent",
+        "daily",
+        "digest",
+        "execution",
+        "schema",
+        "trace",
+        "工作流結構化追蹤",
+        "技術研究",
+        "統一與"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 41,
+      "entry_topics": [
+        "Execution Trace Schema 統一與 Agent 工作流結構化追蹤"
+      ],
+      "saturation_score": 0.4878,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.4444,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0995
+      }
+    },
+    "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化": {
+      "keywords": [
+        "ai",
+        "cause",
+        "engineering",
+        "incident",
+        "log",
+        "root",
+        "runbook",
+        "software",
+        "triage",
+        "系統開發",
+        "自動化",
+        "驅動"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 50,
+      "entry_topics": [
+        "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化"
+      ],
+      "saturation_score": 0.444,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5833,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1214
+      }
+    },
+    "研究設計機制整合：分議題深度研究筆記": {
+      "keywords": [
+        "mechanism",
+        "methodology",
+        "plan",
+        "research",
+        "structure",
+        "writing",
+        "分議題深度研究筆記",
+        "研究設計",
+        "研究設計機制整合"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 18,
+      "entry_topics": [
+        "研究設計機制整合：分議題深度研究筆記"
+      ],
+      "saturation_score": 0.4267,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0437
+      }
+    },
+    "Harness Agent 深度研究報告 — openharness 的架構、工作流與部署分析": {
+      "keywords": [
+        "agent",
+        "ai",
+        "architecture",
+        "deployment",
+        "harness",
+        "openharness",
+        "workflow",
+        "工作流與部署分析",
+        "深度研究報告",
+        "的架構"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 47,
+      "entry_topics": [
+        "Harness Agent 深度研究報告 — openharness 的架構、工作流與部署分析"
+      ],
+      "saturation_score": 0.4697,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5,
+        "time_interval_norm": 0.9333,
+        "depth": 0.1141
+      }
+    },
+    "Agent Harness 分議題深度研究筆記": {
+      "keywords": [
+        "agent",
+        "architecture",
+        "harness",
+        "observability",
+        "performance",
+        "research",
+        "security",
+        "分議題深度研究筆記"
+      ],
+      "count": 1,
+      "first_date": "2026-03-20",
+      "last_date": "2026-03-20",
+      "word_count": 23,
+      "entry_topics": [
+        "Agent Harness 分議題深度研究筆記"
+      ],
+      "saturation_score": 0.5505,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.25,
+        "time_interval_norm": 0.9333,
+        "depth": 0.0558
+      }
+    },
+    "心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal Newport 的最佳認知狀態研究": {
+      "keywords": [
+        "cal",
+        "csikszentmihalyi",
+        "deep",
+        "flow",
+        "newport",
+        "theory",
+        "work",
+        "心流理論",
+        "心流理論與深度工作的科學",
+        "深度工作",
+        "深度思維",
+        "的最佳認知狀態研究",
+        "認知科學"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 57,
+      "entry_topics": [
+        "心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal Newport 的最佳認知狀態研究"
+      ],
+      "saturation_score": 0.4393,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6154,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1383
+      }
+    },
+    "事件驅動架構（Event-Driven Architecture）— 從 Cron 排程到事件觸發的個人自動化系統設計模式": {
+      "keywords": [
+        "architecture",
+        "cron",
+        "driven",
+        "event",
+        "sdt",
+        "sdt×心流×eda×化儀四教的四維同構與知識系統自我決定化演進",
+        "事件驅動架構",
+        "內在驅動力日",
+        "心流理論",
+        "排程到事件觸發的個人自動化系統設計模式",
+        "深度思維",
+        "知識庫"
+      ],
+      "count": 2,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 102,
+      "entry_topics": [
+        "事件驅動架構（Event-Driven Architecture）— 從 Cron 排程到事件觸發的個人自動化系統設計模式",
+        "內在驅動力日 — SDT×心流×EDA×化儀四教的四維同構與知識系統自我決定化演進"
+      ],
+      "saturation_score": 0.4575,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.2222,
+        "novelty": 0.6667,
+        "time_interval_norm": 0.9667,
+        "depth": 0.2476
+      }
+    },
+    "CRAAP Test 與 SIFT Method — 來源可信度評估系統化框架": {
+      "keywords": [
+        "craap",
+        "method",
+        "sift",
+        "test",
+        "來源可信度評估系統化框架",
+        "來源評估",
+        "深度思維",
+        "知識庫"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 39,
+      "entry_topics": [
+        "CRAAP Test 與 SIFT Method — 來源可信度評估系統化框架"
+      ],
+      "saturation_score": 0.4408,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.625,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0947
+      }
+    },
+    "RAGFlow — 開源 RAG + Agent 引擎深度研究：五層微服務架構、DeepDoc 文件解析、12+ 分塊策略與 Agent Canvas 工作流": {
+      "keywords": [
+        "12+",
+        "agent",
+        "canvas",
+        "deepdoc",
+        "github",
+        "rag",
+        "ragflow",
+        "五層微服務架構",
+        "分塊策略與",
+        "工作流",
+        "引擎深度研究",
+        "文件解析",
+        "深度思維",
+        "知識庫",
+        "開源"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 79,
+      "entry_topics": [
+        "RAGFlow — 開源 RAG + Agent 引擎深度研究：五層微服務架構、DeepDoc 文件解析、12+ 分塊策略與 Agent Canvas 工作流"
+      ],
+      "saturation_score": 0.4386,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.6,
+        "time_interval_norm": 0.9667,
+        "depth": 0.1917
+      }
+    },
+    "知識自組織日 — 研究基礎設施元認知湧現的四維自組織同構分析": {
+      "keywords": [
+        "元認知",
+        "深度思維",
+        "湧現",
+        "知識庫",
+        "知識自組織日",
+        "研究基礎設施元認知湧現的四維自組織同構分析",
+        "自組織"
+      ],
+      "count": 1,
+      "first_date": "2026-03-21",
+      "last_date": "2026-03-21",
+      "word_count": 30,
+      "entry_topics": [
+        "知識自組織日 — 研究基礎設施元認知湧現的四維自組織同構分析"
+      ],
+      "saturation_score": 0.4591,
+      "status": "normal",
+      "factors": {
+        "count_norm": 0.1111,
+        "novelty": 0.5714,
+        "time_interval_norm": 0.9667,
+        "depth": 0.0728
+      }
+    }
+  }
+}

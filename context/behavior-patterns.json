@@ -2833,21 +2833,20 @@
       "total_input": 507,
       "total_output": 0
     },
-    "51d249a68efb": {
-      "tool": "Read",
-      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\hook-registry\\SKILL.md",
+    "5f0803c19c94": {
+      "tool": "ExitPlanMode",
+      "summary_sample": "{'allowedPrompts': [{'tool': 'Bash', 'prompt': 'run pytest tests/'}, {'tool': 'Bash', 'prompt': 'run uv run python tools/time_slot_risk_scorer.py'}, {",
       "tags": [
-        "skill-read",
-        "cognitive-skill-select",
-        "team-mode"
+        "exitplanmode"
       ],
       "count": 1,
       "confidence": 0.1,
       "success_count": 1,
-      "first_seen": "2026-03-22T07:05:45.312142+08:00",
-      "last_seen": "2026-03-22T07:05:45.312142+08:00",
-      "total_input": 94,
+      "first_seen": "2026-03-22T07:05:50.308821+08:00",
+      "last_seen": "2026-03-22T07:05:50.308821+08:00",
+      "total_input": 12494,
       "total_output": 0
     }
   },
-  "last_cleanup": "2026-03-22T06:39:
+  "last_cleanup": "2026-03-22T06:39:14.206189+08:00"
+}

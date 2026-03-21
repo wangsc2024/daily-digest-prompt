@@ -1,0 +1,777 @@
+{
+  "scan_period_days": 7,
+  "total_sessions_analyzed": 1052,
+  "inefficient_chains": [
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "d:\\Source\\daily-digest-prompt\\bot\\lib\\routes.js",
+      "read_count": 14,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\bot\\lib\\routes.js' 14 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "d:\\Source\\daily-digest-prompt\\bot\\lib\\classifier.js",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\bot\\lib\\classifier.js' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "49467215-023",
+      "file": "d:\\Source\\daily-digest-prompt\\bot\\bot.js",
+      "read_count": 10,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\bot\\bot.js' 10 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "d:\\Source\\daily-digest-prompt\\bot\\lib\\store.js",
+      "read_count": 7,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\bot\\lib\\store.js' 7 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "d:\\Source\\daily-digest-prompt\\bot\\process_messages.ps1",
+      "read_count": 24,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\bot\\process_messages.ps1' 24 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "d:/Source/daily-digest-prompt/bot/process_messages.ps1",
+      "read_count": 18,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/bot/process_messages.ps1' 18 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bc58b186-e4e",
+      "file": "D:/Source/daily-digest-prompt/bot/lib/routes.js",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:/Source/daily-digest-prompt/bot/lib/routes.js' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "Read ↔ Edit",
+      "oscillation_count": 9,
+      "suggestion": "偵測到 Read ↔ Edit 來回切換 9 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "a362156a-69f",
+      "pattern": "Read ↔ Glob",
+      "oscillation_count": 4,
+      "suggestion": "偵測到 Read ↔ Glob 來回切換 4 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "Read ↔ Bash",
+      "oscillation_count": 10,
+      "suggestion": "偵測到 Read ↔ Bash 來回切換 10 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "Bash ↔ Read",
+      "oscillation_count": 21,
+      "suggestion": "偵測到 Bash ↔ Read 來回切換 21 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "89c94644-00d",
+      "pattern": "Read ↔ Grep",
+      "oscillation_count": 7,
+      "suggestion": "偵測到 Read ↔ Grep 來回切換 7 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "Edit ↔ Read",
+      "oscillation_count": 11,
+      "suggestion": "偵測到 Edit ↔ Read 來回切換 11 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "Bash ↔ TaskOutput",
+      "oscillation_count": 11,
+      "suggestion": "偵測到 Bash ↔ TaskOutput 來回切換 11 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "bc58b186-e4e",
+      "pattern": "TaskOutput ↔ Bash",
+      "oscillation_count": 6,
+      "suggestion": "偵測到 TaskOutput ↔ Bash 來回切換 6 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "62e58afe-423",
+      "pattern": "Grep ↔ Read",
+      "oscillation_count": 6,
+      "suggestion": "偵測到 Grep ↔ Read 來回切換 6 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a7be0d91-6cd",
+      "file": "D:\\Source\\daily-digest-prompt\\hooks\\post_tool_logger.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\hooks\\post_tool_logger.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "be8590d4-f36",
+      "file": "D:\\Source\\daily-digest-prompt\\run-agent-team.ps1",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\run-agent-team.ps1' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "adf2662c-bab",
+      "pattern": "Bash ↔ Grep",
+      "oscillation_count": 6,
+      "suggestion": "偵測到 Bash ↔ Grep 來回切換 6 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "0614bb80-183",
+      "pattern": "Bash ↔ Glob",
+      "oscillation_count": 4,
+      "suggestion": "偵測到 Bash ↔ Glob 來回切換 4 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "b4f7d615-5ae",
+      "pattern": "Write ↔ Bash",
+      "oscillation_count": 4,
+      "suggestion": "偵測到 Write ↔ Bash 來回切換 4 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "ce3f5580-820",
+      "file": "D:\\Source\\daily-digest-prompt\\context\\research-registry.json",
+      "read_count": 15,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\context\\research-registry.json' 15 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "656f70cd-829",
+      "pattern": "Bash ↔ Write",
+      "oscillation_count": 9,
+      "suggestion": "偵測到 Bash ↔ Write 來回切換 9 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "2fa04720-b90",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\hook-rules.yaml",
+      "read_count": 3,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\config\\hook-rules.yaml' 在同一 session 讀取 3 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "8dab9321-bff",
+      "file": "D:/Source/daily-digest-prompt/hooks/pre_bash_guard.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:/Source/daily-digest-prompt/hooks/pre_bash_guard.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "7717ee43-c6d",
+      "file": "D:\\Source\\knowledge\\src\\index.css",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\knowledge\\src\\index.css' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "5a8c39de-754",
+      "file": "/d/Source/daily-digest-prompt/hooks/pre_write_guard.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 '/d/Source/daily-digest-prompt/hooks/pre_write_guard.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "5a8c39de-754",
+      "file": "D:\\Source\\daily-digest-prompt\\tools\\autonomous_harness.py",
+      "read_count": 7,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\tools\\autonomous_harness.py' 7 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "adf2662c-bab",
+      "pattern": "Grep ↔ Bash",
+      "oscillation_count": 5,
+      "suggestion": "偵測到 Grep ↔ Bash 來回切換 5 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "d50350b4-630",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
+      "read_count": 6,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml' 6 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "7b62aa0e-dfb",
+      "file": "D:\\Source\\daily-digest-prompt\\bot\\groq-relay.js",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\bot\\groq-relay.js' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "7b62aa0e-dfb",
+      "pattern": "Read ↔ Agent",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Read ↔ Agent 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "7b62aa0e-dfb",
+      "pattern": "Bash ↔ TodoWrite",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Bash ↔ TodoWrite 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "d50350b4-630",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
+      "read_count": 6,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml' 在同一 session 讀取 6 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "93647ab1-63c",
+      "file": "D:\\Source\\daily-digest-prompt\\state\\failure-stats.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\state\\failure-stats.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "5761296b-fce",
+      "file": "d:\\Source\\daily-digest-prompt\\run-todoist-agent-team.ps1",
+      "read_count": 29,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\run-todoist-agent-team.ps1' 29 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "5761296b-fce",
+      "file": "d:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-log_audit.md",
+      "read_count": 6,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-log_audit.md' 6 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a54ba60d-97b",
+      "file": "d:/Source/daily-digest-prompt/run-todoist-agent-team.ps1",
+      "read_count": 17,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/run-todoist-agent-team.ps1' 17 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "b0395bc9-1ba",
+      "file": "D:\\Source\\game_web\\js\\gameMetadata.js",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\game_web\\js\\gameMetadata.js' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-tech_research.md",
+      "read_count": 12,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-tech_research.md' 12 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-ai_deep_research.md",
+      "read_count": 13,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-ai_deep_research.md' 13 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-ai_github_research.md",
+      "read_count": 16,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-auto-ai_github_research.md' 16 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\skills\\SKILL_INDEX.md",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\skills\\SKILL_INDEX.md' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\skills\\deep-research\\SKILL.md",
+      "read_count": 8,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\skills\\deep-research\\SKILL.md' 8 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\templates\\shared\\preamble.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\templates\\shared\\preamble.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a348b5ac-61d",
+      "file": "d:\\Source\\daily-digest-prompt\\templates\\auto-tasks\\podcast-create.md",
+      "read_count": 6,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\templates\\auto-tasks\\podcast-create.md' 6 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "a348b5ac-61d",
+      "pattern": "TodoWrite ↔ Edit",
+      "oscillation_count": 5,
+      "suggestion": "偵測到 TodoWrite ↔ Edit 來回切換 5 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "a348b5ac-61d",
+      "pattern": "Edit ↔ TodoWrite",
+      "oscillation_count": 11,
+      "suggestion": "偵測到 Edit ↔ TodoWrite 來回切換 11 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "f4374541-b35",
+      "file": "d:/Source/daily-digest-prompt/tools/run-jiaoguang-podcast-next.ps1",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/tools/run-jiaoguang-podcast-next.ps1' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bf370ac8-d4a",
+      "file": "d:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
+      "read_count": 14,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml' 14 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\check-health.ps1",
+      "read_count": 13,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\check-health.ps1' 13 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "bf370ac8-d4a",
+      "file": "d:/Source/daily-digest-prompt/config/frequency-limits.yaml",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/config/frequency-limits.yaml' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "bf370ac8-d4a",
+      "file": "d:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
+      "read_count": 14,
+      "suggestion": "配置檔 'd:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml' 在同一 session 讀取 14 次，建議載入後快取。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "bf370ac8-d4a",
+      "file": "d:/Source/daily-digest-prompt/config/frequency-limits.yaml",
+      "read_count": 5,
+      "suggestion": "配置檔 'd:/Source/daily-digest-prompt/config/frequency-limits.yaml' 在同一 session 讀取 5 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "64ef908e-254",
+      "file": "d:\\Source\\daily-digest-prompt\\run-agent-team.ps1",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\run-agent-team.ps1' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "64ef908e-254",
+      "pattern": "Edit ↔ Bash",
+      "oscillation_count": 3,
+      "suggestion": "偵測到 Edit ↔ Bash 來回切換 3 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "fda9b358-975",
+      "file": "D:\\Source\\daily-digest-prompt\\hooks\\validate_config.py",
+      "read_count": 4,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\hooks\\validate_config.py' 在同一 session 讀取 4 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "3f9fba9d-666",
+      "file": "D:\\Source\\daily-digest-prompt\\tools\\llm_router.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\tools\\llm_router.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "c322e55c-473",
+      "file": "D:\\Source\\daily-digest-prompt\\state\\todoist-history.json",
+      "read_count": 11,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\state\\todoist-history.json' 11 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "26a0447c-089",
+      "file": "d:/Source/daily-digest-prompt/prompts/team/todoist-auto-podcast_create.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/prompts/team/todoist-auto-podcast_create.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "26a0447c-089",
+      "file": "d:/Source/daily-digest-prompt/templates/auto-tasks/podcast-create.md",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/templates/auto-tasks/podcast-create.md' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "656f70cd-829",
+      "pattern": "Bash ↔ Edit",
+      "oscillation_count": 3,
+      "suggestion": "偵測到 Bash ↔ Edit 來回切換 3 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "e7e341a9-764",
+      "file": "D:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-assemble.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\prompts\\team\\todoist-assemble.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "7d28fe51-41c",
+      "file": "d:\\Source\\daily-digest-prompt\\hooks\\on_stop_alert.py",
+      "read_count": 7,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\hooks\\on_stop_alert.py' 7 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a54ba60d-97b",
+      "file": "d:\\Source\\daily-digest-prompt\\hooks\\validate_config.py",
+      "read_count": 12,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\hooks\\validate_config.py' 12 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a54ba60d-97b",
+      "file": "d:/Source/daily-digest-prompt/hooks/validate_config.py",
+      "read_count": 12,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/hooks/validate_config.py' 12 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "a54ba60d-97b",
+      "file": "d:\\Source\\daily-digest-prompt\\hooks\\validate_config.py",
+      "read_count": 12,
+      "suggestion": "配置檔 'd:\\Source\\daily-digest-prompt\\hooks\\validate_config.py' 在同一 session 讀取 12 次，建議載入後快取。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "a54ba60d-97b",
+      "file": "d:/Source/daily-digest-prompt/hooks/validate_config.py",
+      "read_count": 12,
+      "suggestion": "配置檔 'd:/Source/daily-digest-prompt/hooks/validate_config.py' 在同一 session 讀取 12 次，建議載入後快取。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "0c0ed079-5a5",
+      "pattern": "Bash ↔ Agent",
+      "oscillation_count": 3,
+      "suggestion": "偵測到 Bash ↔ Agent 來回切換 3 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "da1730ee-b21",
+      "file": "D:\\Source\\daily-digest-prompt\\hooks\\on_stop_alert.py",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\hooks\\on_stop_alert.py' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "da1730ee-b21",
+      "file": "D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_on_stop_alert.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_on_stop_alert.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "fc9e123f-d64",
+      "file": "d:/source/knowledge/styles.css",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:/source/knowledge/styles.css' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "49467215-023",
+      "file": "d:\\Source\\my-gun-relay\\index.js",
+      "read_count": 10,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\my-gun-relay\\index.js' 10 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "aaf145fc-531",
+      "file": "D:\\Source\\daily-digest-prompt\\skills\\execution-journal\\SKILL.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\skills\\execution-journal\\SKILL.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\context\\arch-decision.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\context\\arch-decision.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\config\\slo.yaml",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\config\\slo.yaml' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\context\\skill-registry-conflicts.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\context\\skill-registry-conflicts.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\hooks\\post_tool_logger.py",
+      "read_count": 7,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\hooks\\post_tool_logger.py' 7 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\tests\\tools\\test_autonomous_harness.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\tests\\tools\\test_autonomous_harness.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\config\\slo.yaml",
+      "read_count": 5,
+      "suggestion": "配置檔 'd:\\Source\\daily-digest-prompt\\config\\slo.yaml' 在同一 session 讀取 5 次，建議載入後快取。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "89c94644-00d",
+      "file": "d:\\Source\\daily-digest-prompt\\config\\schemas\\agent-result.schema.json",
+      "read_count": 3,
+      "suggestion": "配置檔 'd:\\Source\\daily-digest-prompt\\config\\schemas\\agent-result.schema.json' 在同一 session 讀取 3 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "b44b97ff-a6d",
+      "file": "D:\\Source\\daily-digest-prompt\\skills\\skill-forge\\SKILL.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\skills\\skill-forge\\SKILL.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "b44b97ff-a6d",
+      "file": "D:\\Source\\daily-digest-prompt\\skills\\pre-flight-check\\SKILL.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\skills\\pre-flight-check\\SKILL.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "be8590d4-f36",
+      "file": "/d/Source/daily-digest-prompt/hooks/post_tool_logger.py",
+      "read_count": 7,
+      "suggestion": "同一 session 重複讀取 '/d/Source/daily-digest-prompt/hooks/post_tool_logger.py' 7 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "be8590d4-f36",
+      "file": "D:\\Source\\daily-digest-prompt\\run-todoist-agent-team.ps1",
+      "read_count": 6,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\run-todoist-agent-team.ps1' 6 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "be8590d4-f36",
+      "pattern": "Glob ↔ Read",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Glob ↔ Read 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "be8590d4-f36",
+      "pattern": "Glob ↔ Bash",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Glob ↔ Bash 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "be8590d4-f36",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\timeouts.yaml",
+      "read_count": 3,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\config\\timeouts.yaml' 在同一 session 讀取 3 次，建議載入後快取。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "adf2662c-bab",
+      "pattern": "Grep ↔ Glob",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Grep ↔ Glob 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "6a358218-e8a",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\audit-scoring.yaml",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\config\\audit-scoring.yaml' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "6a358218-e8a",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\audit-scoring.yaml",
+      "read_count": 4,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\config\\audit-scoring.yaml' 在同一 session 讀取 4 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "188f108e-8cd",
+      "file": "D:\\Source\\daily-digest-prompt\\context\\auto-tasks-today.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\context\\auto-tasks-today.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "a9eb2915-c30",
+      "file": "D:/Source/daily-digest-prompt/run-todoist-agent-team.ps1",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'D:/Source/daily-digest-prompt/run-todoist-agent-team.ps1' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "9d2f4311-8cf",
+      "file": "d:\\Source\\daily-digest-prompt\\hooks\\hook_utils.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:\\Source\\daily-digest-prompt\\hooks\\hook_utils.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "c6698ca9-c5c",
+      "pattern": "Read ↔ Write",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 Read ↔ Write 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "036543c9-e2d",
+      "file": "D:/Source/daily-digest-prompt/context/research-registry.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:/Source/daily-digest-prompt/context/research-registry.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "7725e0b7-be5",
+      "file": "D:\\Source\\daily-digest-prompt\\tmp_notes_analysis.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\tmp_notes_analysis.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "fda9b358-975",
+      "file": "D:\\Source\\daily-digest-prompt\\hooks\\validate_config.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\hooks\\validate_config.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "fda9b358-975",
+      "file": "D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_validate_config.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_validate_config.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "fda9b358-975",
+      "file": "D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_validate_config.py",
+      "read_count": 4,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\tests\\hooks\\test_validate_config.py' 在同一 session 讀取 4 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "63e46a37-186",
+      "file": "D:\\Source\\daily-digest-prompt\\skills\\context-budget-monitor\\SKILL.md",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\skills\\context-budget-monitor\\SKILL.md' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "8b6cb732-252",
+      "file": "D:\\Source\\daily-digest-prompt\\config\\dedup-policy.yaml",
+      "read_count": 3,
+      "suggestion": "配置檔 'D:\\Source\\daily-digest-prompt\\config\\dedup-policy.yaml' 在同一 session 讀取 3 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "dd506544-b8d",
+      "file": "d:/Source/daily-digest-prompt/hooks/on_stop_alert.py",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'd:/Source/daily-digest-prompt/hooks/on_stop_alert.py' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "uncached_config",
+      "session_id": "dd506544-b8d",
+      "file": "d:/Source/daily-digest-prompt/config/dependencies.yaml",
+      "read_count": 3,
+      "suggestion": "配置檔 'd:/Source/daily-digest-prompt/config/dependencies.yaml' 在同一 session 讀取 3 次，建議載入後快取。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "b2297e05-eed",
+      "file": "D:\\Source\\game\\mala-meditation\\game.js",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\game\\mala-meditation\\game.js' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "fd6f02cd-3dd",
+      "file": "D:\\Source\\my-gun-relay\\index.html",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\my-gun-relay\\index.html' 5 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "circular_call",
+      "session_id": "fd6f02cd-3dd",
+      "pattern": "TodoWrite ↔ Write",
+      "oscillation_count": 2,
+      "suggestion": "偵測到 TodoWrite ↔ Write 來回切換 2 次。建議合併操作或重構工作流程。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "b20e867a-615",
+      "file": "D:\\Source\\daily-digest-prompt\\context\\digest-memory.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\context\\digest-memory.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "169428b5-94c",
+      "file": "D:\\Source\\daily-digest-prompt\\context\\podcast-history.json",
+      "read_count": 4,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\context\\podcast-history.json' 4 次。建議快取首次讀取結果。"
+    },
+    {
+      "type": "repeated_read",
+      "session_id": "2c2349bb-b37",
+      "file": "D:\\Source\\daily-digest-prompt\\skills\\behavior-pattern-analyzer\\SKILL.md",
+      "read_count": 5,
+      "suggestion": "同一 session 重複讀取 'D:\\Source\\daily-digest-prompt\\skills\\behavior-pattern-analyzer\\SKILL.md' 5 次。建議快取首次讀取結果。"
+    }
+  ],
+  "generated_at": "2026-03-22T01:00:14.969651+08:00"
+}

@@ -284,6 +284,17 @@
       "status": "success",
       "author": "釋迦牟尼佛",
       "source": "《金剛般若波羅蜜經》"
+    },
+    {
+      "time": "2026-03-22 06:30:02",
+      "channel": "ntfy/wangsc2025",
+      "verse_id": 27,
+      "verse_text": "有因有緣世間集，有因有緣集世間；有因有緣世間滅，有因有緣滅世間。",
+      "author": "釋迦牟尼佛",
+      "session": "morning",
+      "date": "2026-03-22",
+      "source": "《雜阿含經》卷二",
+      "status": "success"
     }
   ]
 }

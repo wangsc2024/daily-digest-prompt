@@ -1,9 +1,9 @@
 {
-  "run_id": null,
   "selected_tasks": [
     "skill_forge",
-    "ntfy_review"
+    "git_push"
   ],
-  "timestamp": "2026-03-21T20:02:48",
-  "skipped_resume": []
+  "skipped_resume": [],
+  "run_id": null,
+  "timestamp": "2026-03-22T07:03:39"
 }
