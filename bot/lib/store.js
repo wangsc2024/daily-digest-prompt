@@ -392,7 +392,8 @@ function releaseExpiredClaims() {
 
 /**
  * 回收卡在 processing 狀態超過 timeout 的任務（worker 崩潰/超時恢復）。
- * 將 processing → pending，重設 claimed_by，遞增 claim_generation。
+ * 將 processing → pending，重設 claimed_by，遞增 claim_generation 及 retry_count。
+ * 若 retry_count >= MAX_RETRY_COUNT，移入 dead_letter 而非重回 pending（防無限循環）。
  * @returns {number} 回收的任務數
  */
 function recoverStaleProcessing() {
@@ -404,18 +405,26 @@ function recoverStaleProcessing() {
         const ttl = getProcessingTimeout(taskType);
         const claimedTime = rec.claimed_at ? new Date(rec.claimed_at).getTime() : 0;
         if (Number.isNaN(claimedTime) || (now - claimedTime > ttl)) {
-            logTransition(rec.uid, STATES.PROCESSING, STATES.PENDING, 'processing_timeout');
-            rec.state = STATES.PENDING;
+            rec.retry_count = (rec.retry_count || 0) + 1;
+            rec.claim_generation = (rec.claim_generation || 0) + 1;
             rec.claimed_by = null;
             rec.claimed_at = null;
-            rec.claim_generation = (rec.claim_generation || 0) + 1;
-            rec.last_released_at = new Date().toISOString(); // 回收後排到隊尾，避免同一 UID 一直被重複認領
+            rec.last_released_at = new Date().toISOString();
+            if (rec.retry_count >= MAX_RETRY_COUNT) {
+                logTransition(rec.uid, STATES.PROCESSING, STATES.DEAD_LETTER, 'processing_timeout_max_retry');
+                rec.state = STATES.DEAD_LETTER;
+                rec.dead_at = new Date().toISOString();
+                console.log(`[DLQ] 任務 ${rec.uid} stale 回收已達 ${rec.retry_count} 次上限，移入 Dead Letter Queue`);
+            } else {
+                logTransition(rec.uid, STATES.PROCESSING, STATES.PENDING, 'processing_timeout');
+                rec.state = STATES.PENDING;
+                console.log(`[processing 回收] 任務 ${rec.uid} 超時回收（第 ${rec.retry_count}/${MAX_RETRY_COUNT} 次）`);
+            }
             recovered++;
         }
     });
     if (recovered > 0) {
         saveJSON(RECORDS_PATH, records);
-        console.log(`[processing 回收] 已回收 ${recovered} 個超時 processing 任務`);
     }
     return recovered;
 }

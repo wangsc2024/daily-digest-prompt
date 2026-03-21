@@ -137,6 +137,52 @@ function buildWorkflowFinalReply(wf, storeRef) {
 }
 
 /**
+ * 從 LLM 完整輸出中擷取核心答案，移除執行過程、來源腳註、建議等雜訊。
+ * LINE 回覆只需「任務：X\n結果：Y」格式。
+ */
+function trimReplyForLINE(raw) {
+    if (!raw || typeof raw !== 'string') return raw;
+
+    const lines = raw.split('\n');
+    const filtered = [];
+    let skip = false;
+
+    for (const line of lines) {
+        // 遇到「執行摘要」區塊標記，後續全部跳過
+        if (/^[✅📚💾🔗⚡🎯📝🔍]\s*\*\*/.test(line) ||
+            /^✅\s/.test(line) || /^📚\s/.test(line) ||
+            /^💾\s/.test(line) || /^🔗\s/.test(line)) {
+            skip = true;
+        }
+        if (skip) continue;
+
+        // 跳過來源腳註區塊（**來源**、**Source**、**References**）
+        if (/^\*\*(來源|Source|References|腳註|參考|延伸)[（(）)\s\S]*\*\*/.test(line)) {
+            skip = true;
+            continue;
+        }
+
+        // 跳過「已依 skills/...」等執行過程描述行
+        if (/^已依\s*`?skills\//.test(line) || /^本任務由\s*\*\*Cursor/.test(line)) continue;
+
+        // 跳過純粹的 URL 行（http/https 開頭或帶編號 1. https://）
+        if (/^\s*\d+\.\s+https?:\/\//.test(line) || /^\s*https?:\/\/\S+$/.test(line)) continue;
+
+        // 跳過水平分隔線
+        if (/^---+$/.test(line.trim())) continue;
+
+        filtered.push(line);
+    }
+
+    // 移除尾端空行
+    while (filtered.length > 0 && filtered[filtered.length - 1].trim() === '') {
+        filtered.pop();
+    }
+
+    return filtered.join('\n').trim();
+}
+
+/**
  * L1: 可選注入 Gun 相關依賴，將 /api/connect、/api/send 註冊至 dispatch map
  * @param {object} app - Express app
  * @param {object} [opts] - 若提供 gun/SEA/getMyPair/chatRoomName/generateId/startMessageLoop 則註冊 connect 與 send
@@ -376,14 +422,16 @@ function mount(app, opts = {}) {
 
                     // ---- 非工作流任務 ----
                     if (result != null) {
-                        const MAX_LEN = 6000;
-                        const truncated = resultStr.length > MAX_LEN
-                            ? resultStr.slice(0, MAX_LEN) + '\n...[內容過長，已截斷]'
-                            : resultStr;
                         // 優先用原始用戶訊息（original_text）作標籤，避免顯示歷史前置段落
                         const labelSource = (rec && rec.original_text) || taskContent;
                         const taskLabel = labelSource.trim().slice(0, 80) + (labelSource.length > 80 ? '…' : '');
-                        const replyMsg = `[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`;
+                        // 過濾執行過程、來源腳註、建議等雜訊，LINE 只顯示核心答案
+                        const coreResult = trimReplyForLINE(resultStr);
+                        const MAX_LEN = 1000;
+                        const truncated = coreResult.length > MAX_LEN
+                            ? coreResult.slice(0, MAX_LEN) + '\n…[已截斷]'
+                            : coreResult;
+                        const replyMsg = `任務：${taskLabel}\n結果：${truncated}`;
 
                         // LINE 回覆目標：group → groupId（全群組可見），user → userId（私訊）
                         const lineTarget = rec && (rec.line_reply_target || rec.line_user_id);

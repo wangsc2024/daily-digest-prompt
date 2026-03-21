@@ -44,10 +44,11 @@ const CLAIM_TIMEOUTS = {
 };
 
 // Processing 狀態超時（毫秒）：單任務預估 5–30 min，設 45 min 含緩衝；worker 崩潰時自動回收
+// game 任務需呼叫 Cursor CLI 完整建置遊戲（30-90 min），設 90 min 避免過早 stale-recovery
 const PROCESSING_TIMEOUTS = {
     research:  45 * 60 * 1000, // 45 分鐘
     code:      45 * 60 * 1000, // 45 分鐘
-    game:      45 * 60 * 1000, // 45 分鐘（遊戲型比照編碼型）
+    game:      90 * 60 * 1000, // 90 分鐘（Cursor CLI 完整建置遊戲需 30-90 min）
     podcast:   45 * 60 * 1000, // 45 分鐘
     detail:    45 * 60 * 1000, // 45 分鐘
     kb_answer: 45 * 60 * 1000, // 45 分鐘
