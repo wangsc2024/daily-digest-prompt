@@ -78,6 +78,7 @@
 | `config/timeouts.yaml` | 各 Agent 超時配置 | run-todoist-agent-team.ps1 |
 | `config/topic-rotation.yaml` | 主題輪替演算法（LRU + 同日去重） | 研究任務模板 |
 | `templates/shared/preamble.md` | 共用前言（nul 禁令 + Skill-First） | 所有 prompt |
+| `workflows/prompt-output-validation-checklist.md` | Prompt 輸出格式驗證清單（29 個自動任務統一規範）| 所有 todoist-auto-*.md |
 
 ## 架構
 
