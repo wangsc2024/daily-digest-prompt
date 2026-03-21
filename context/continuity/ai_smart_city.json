@@ -1,0 +1,17 @@
+{
+  "task_key": "ai_smart_city",
+  "schema_version": 1,
+  "max_runs": 5,
+  "runs": [
+    {
+      "executed_at": "2026-03-22T01:40:17.298434+08:00",
+      "topic": "智慧水務 — AI 水質預測演算法與供水調度優化（mechanism 階段）",
+      "status": "completed",
+      "key_findings": "LSTM/GRU 準確度達 98-99%；NSGA-II 優化降低成本 2.7%；台灣有 16,653 個水位感測器部署；建立 smart-water-ai 系列",
+      "kb_note_ids": [
+        "12ea9699-54c6-4390-bd19-6a9c8880f54b"
+      ],
+      "next_suggested_angle": "application 階段：Python LSTM 實作範例、EPANET 整合、台灣開放資料集實驗"
+    }
+  ]
+}

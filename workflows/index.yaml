@@ -1,0 +1,32 @@
+version: "1.0.0"
+updated_at: "2026-03-21"
+description: "workflow-forge 產出物索引，Agent 執行前依 task_type 篩選適用 workflow"
+# 維護方式：workflow-forge 步驟 4 自動 append；勿手動刪除 entries
+# 使用方式：讀取此 index.yaml，找出 task_types 包含你的 task_key 或 "all" 的 entries，
+#           在執行主要步驟前讀取對應 workflow 文件並遵守其規範。
+
+entries:
+  - id: "wf-20260321-prompt-output-validation"
+    path: "workflows/prompt-output-validation-checklist.md"
+    type: "validation_checklist"
+    title: "Prompt 輸出規範驗證清單"
+    version: "1.0.0"
+    created_at: "2026-03-21"
+    task_types:
+      - "workflow_forge"
+      - "skill_forge"
+    priority: "P0"
+    summary: "29 個自動任務 prompt 的輸出 JSON 規範統一驗證清單（frontmatter、必填欄位、status 語義）"
+    read_when: "developing_or_reviewing_prompt"
+
+  - id: "wf-20260319-results-validation"
+    path: "workflows/results-validation-checklist.md"
+    type: "validation_checklist"
+    title: "結果檔案格式驗證清單"
+    version: "1.0.0"
+    created_at: "2026-03-19"
+    task_types:
+      - "all"
+    priority: "P0"
+    summary: "確保 results/todoist-auto-*.json 符合統一 Schema 的驗證步驟清單"
+    read_when: "producing_results_json"

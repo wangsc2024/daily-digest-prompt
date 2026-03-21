@@ -1,0 +1,22 @@
+version: 1
+enabled: true  # Phase 0 機器注入開關；false=依賴 preamble.md 自律讀取，true=PS Phase 0d 機器強制注入
+# 維護方式：workflow-forge 步驟 6 自動 append task_type_mapping；勿手動刪除 entries
+# Phase 0d 說明：run-todoist-agent-team.ps1 在 Phase 1 之前讀取此檔案，
+#               若 enabled=true，將 global_reads[].path 內容組裝為 WorkflowInjectPrefix，
+#               前置注入到每個 Phase 2 自動任務的 prompt 開頭（機器強制，不依賴 Agent 自律）。
+
+# 全域讀取（所有任務均可受益）
+global_reads:
+  - path: "workflows/index.yaml"
+    purpose: "workflow 索引，Agent 依 task_type 篩選適用 workflow"
+    required: false
+
+# 任務類型專屬映射（workflow-forge 步驟 6 自動 append）
+task_type_mapping:
+  workflow_forge:
+    reads:
+      - path: "workflows/prompt-output-validation-checklist.md"
+        purpose: "prompt 輸出格式驗證清單"
+        when: "always"
+    enabled: true
+  # workflow-forge 後續 append 的位置
