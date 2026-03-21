@@ -10,6 +10,14 @@
 4. **Skill 鏈式組合**：積極串聯多個 Skill（如：todoist → knowledge-query → ntfy-notify）
 5. **所有外部 API 必經 api-cache**：任何 curl 呼叫前，必須先走快取流程
 
+## Workflow 自動引用規則
+
+若你是 `todoist-auto-*` 自動任務，在執行主要步驟**之前**：
+1. 讀取 `workflows/index.yaml`（不存在則略過）
+2. 找出 `task_types` 包含你的 task_key 或 `"all"` 的 entries
+3. 用 Read 工具讀取匹配的 workflow 文件，遵守其規範
+4. 無匹配或 index 不存在 → 略過，繼續主任務
+
 ## 禁止行為
 - 不讀 SKILL.md 就直接呼叫 API
 - 自行拼 curl 指令而不參考 SKILL.md 中的正確格式

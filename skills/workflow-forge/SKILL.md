@@ -39,7 +39,7 @@ depends-on:
 執行鏈：
 ```
 觀測（config + prompts + 失敗案例）→ 識別（格式/一致性缺口）→ 設計（工作流或 Schema）
-→ 生成（YAML/JSON Schema）→ 驗證（格式 + 必填）→ 整合（config 或 docs/workflows）→ 通知
+→ 生成（YAML/JSON Schema）→ 驗證（格式 + 必填）→ 整合（config 或 workflows/）→ 通知
 ```
 
 ---
@@ -106,11 +106,38 @@ depends-on:
 
 依 `context/workflow_forge_spec.json` 的規格產出實體檔案：
 
-- **Workflow YAML**：寫入 `config/` 或 `docs/workflows/`（新檔或擴充既有），符合專案 YAML 風格（注釋、鍵名與 config 一致）
-- **Output Schema**：寫入 `config/schemas/` 或 `docs/workflows/`，例如 `results-auto-task-schema.json`（JSON Schema 格式），或 Markdown 規格檔
-- **驗證清單**：寫入 `docs/workflows/validation-checklist.md` 或附加至既有檢查文件
+- **Workflow YAML**：寫入 `workflows/`（新檔）或 `config/`（若為配置擴充），符合專案 YAML 風格（注釋、鍵名與 config 一致）
+- **Output Schema**：寫入 `config/schemas/`（JSON Schema 格式）或 `workflows/`（Markdown 規格檔）
+- **驗證清單**：寫入 `workflows/`（如 `workflows/validation-checklist.md`）
 
 **約束**：不修改 `state/scheduler-state.json`、`config/frequency-limits.yaml` 的 tasks 區塊（僅可新增獨立檔案或 config 內新鍵）；不刪除既有 config 鍵。
+
+**產出後必須執行（步驟 4 結束前）**：
+
+1. 讀取 `workflows/index.yaml`（不存在則用以下結構初始化）：
+   ```yaml
+   version: "1.0.0"
+   updated_at: ""
+   description: "workflow-forge 產出物索引，Agent 執行前依 task_type 篩選適用 workflow"
+   entries: []
+   ```
+2. 在 `entries[]` **開頭**插入新 entry：
+   ```yaml
+   - id: "wf-{YYYYMMDD}-{artifact_slug}"
+     path: "{artifact_path}"           # 統一使用 workflows/ 前綴
+     type: "{workflow_yaml|output_schema|validation_checklist|report|code|config|documentation}"
+     title: "{產物標題（10-20 字）}"
+     version: "1.0.0"
+     created_at: "{YYYY-MM-DD}"
+     task_types:
+       - "{適用 task_key 或 all}"
+     priority: "{P0|P1|P2}"
+     summary: "{缺口描述（30-50 字）}"
+     read_when: "{always|producing_results_json|developing_or_reviewing_prompt}"
+   ```
+3. 更新頂層 `updated_at` 為今日日期（YYYY-MM-DD）
+4. 用 Write 工具完整覆寫 `workflows/index.yaml`
+5. **所有新產出的 workflow 檔案一律寫入 `workflows/`**（不再寫 `docs/workflows/`）
 
 ---
 
@@ -129,6 +156,22 @@ depends-on:
 - 若產物為新檔：在 `docs/ARCHITECTURE.md` 或 `config/README.md` 中新增一筆說明（標題 + 路徑 + 一句用途），或更新 `config/README.md` 的配置速查表
 - 若產物為擴充既有 config：在該 YAML 頂部注釋或 README 中註明本次新增鍵的用途
 - 將本次產物路徑、缺口類型、優先級寫入 `context/workflow-forge-registry.json`（若不存在則建立；格式：`{"entries": [{"date": "YYYY-MM-DD", "artifact_path": "...", "gap_type": "...", "priority": "P1"}]}`），供日後去重與追蹤
+
+**步驟 6 結束前必須執行：同步更新 `config/agent-extra-reads.yaml`**
+
+讀取 `config/agent-extra-reads.yaml`，在 `task_type_mapping` 下新增或更新 entry：
+- 若產物的 `task_types` **包含特定 task_key**（非 `"all"`），新增對應映射：
+  ```yaml
+  {task_key}:
+    reads:
+      - path: "{artifact_path}"
+        purpose: "{summary 前 30 字}"
+        when: "always"
+    enabled: true
+  ```
+- 若 `task_type_mapping` 下已存在該 task_key，在其 `reads[]` 末尾 **append** 新項目（不替換）
+- 若產物 `task_types` 僅含 `"all"`，跳過此步驟（全局 workflow 由 preamble 統一處理）
+- 用 Write 工具完整覆寫 `config/agent-extra-reads.yaml`（保留原有頂層結構和其他 task_key）
 
 ---
 
@@ -175,4 +218,4 @@ depends-on:
 ## 降級處理
 
 - **缺口清單為空**：從 improvement-backlog 選一項與「流程/格式」最相關者，產出對應的驗證清單或小改動建議，仍寫入結果 JSON，status 設為 `partial`，message 註明「無高優先級缺口，已產出建議清單」。
-- **步驟 4 無法在不改核心 config 前提下產出**：改為產出 `docs/workflows/` 下「建議變更」Markdown，不直接改 config，integration_status 設為 `proposed`。
+- **步驟 4 無法在不改核心 config 前提下產出**：改為產出 `workflows/` 下「建議變更」Markdown，不直接改 config，integration_status 設為 `proposed`。

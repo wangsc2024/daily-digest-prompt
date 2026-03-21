@@ -4,7 +4,7 @@ version: "3.0.0"
 description: |
   知識庫治理工具。去重、品質評分、過期清理、主題分佈分析、內容品質深度評分（四維度：非知識/完整性/保留價值/知識價值）。
   Use when: 知識庫治理、KB 去重、筆記品質、過期清理、主題分佈、知識庫清理、內容評分。
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash, Read, Write, Edit
 cache-ttl: 0min
 triggers:
   - "知識庫治理"
@@ -24,7 +24,7 @@ triggers:
   - "content scoring"
 depends-on:
   - "knowledge-query"
-  - "groq"
+  - "groq"  # 軟依賴：模組 E Step 3 使用，Relay 不可用時記錄 skip 並繼續
   - "config/dependencies.yaml"
 ---
 

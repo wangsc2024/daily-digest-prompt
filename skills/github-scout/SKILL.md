@@ -1,9 +1,10 @@
 ---
 name: github-scout
-version: "1.2.0"
+version: "2.0.0"
 description: |
-  GitHub 靈感蒐集工具。搜尋熱門 Agent/Skill/Hook 專案，分析與本系統的改進機會。
-  Use when: GitHub 趨勢、熱門專案、開源靈感、最佳實踐、系統改進、架構借鑑、開源專案分析。
+  GitHub 靈感蒐集工具。搜尋熱門 Agent/Skill/Hook 專案，分析改進機會，研擬落實方案存 KB，
+  反覆審查可行性與穩定性後主動落實。每日 2 次，全天執行。
+  Use when: GitHub 趨勢、熱門專案、開源靈感、最佳實踐、系統改進、架構借鑑、開源專案分析、落實改進。
 allowed-tools: Read, Write, Bash, WebSearch, WebFetch
 cache-ttl: N/A
 triggers:
@@ -182,16 +183,125 @@ curl -s -X POST "http://localhost:3000/api/import" \
 rm import_note.json
 ```
 
-## 星期過濾（自動任務模式）
+## 步驟 7：落實方案研擬並存入 KB
 
-自動任務模板中會加入星期檢查，僅週三和週日執行。
-非執行日直接輸出 DONE_CERT 跳過。
+針對步驟 4 中 `priority=P0` 或 `priority=P1` 的改進建議，研擬具體落實方案：
+
+### 落實方案格式
+```json
+{
+  "proposal_id": "github_scout_{timestamp}_{index}",
+  "source_project": "project/name",
+  "source_url": "https://github.com/...",
+  "pattern": "借鑑的模式名稱",
+  "implementation_plan": {
+    "target_files": ["config/xxx.yaml", "hooks/xxx.py"],
+    "changes_summary": "具體修改說明（≥100字）",
+    "risk_level": "low/medium/high",
+    "estimated_effort": "low/medium/high",
+    "rollback_plan": "如何復原",
+    "verification_steps": ["驗證步驟 1", "驗證步驟 2"]
+  },
+  "feasibility_score": null,
+  "stability_score": null,
+  "review_rounds": 0,
+  "status": "draft"
+}
+```
+
+存入 KB：
+```bash
+# 用 Write 建立 import_plan.json（UTF-8）
+# {
+#   "notes": [{
+#     "title": "GitHub Scout 落實方案：{pattern} - {日期}",
+#     "contentText": "Markdown 格式的完整落實方案，包含目標、步驟、風險評估",
+#     "tags": ["GitHub", "落實方案", "系統改進", "{pattern}", "{topic}"],
+#     "source": "import"
+#   }],
+#   "autoSync": true
+# }
+curl -s -X POST "http://localhost:3000/api/import" \
+  -H "Content-Type: application/json; charset=utf-8" \
+  -d @import_plan.json
+# 清理
+rm import_plan.json
+```
+
+若 KB 服務未啟動：將方案寫入 `context/improvement-backlog.json` 對應 entry 的 `implementation_plan` 欄位。
+
+## 步驟 8：審查可行性與穩定性（最多 3 輪）
+
+對每個落實方案進行自我審查，最多 3 輪：
+
+### 審查清單（每輪）
+| 面向 | 問題 | 評分 0-10 |
+|------|------|-----------|
+| **可行性** | 所需工具/環境是否具備？ | |
+| **可行性** | 修改是否在現有架構框架內？ | |
+| **穩定性** | 是否有明確 rollback 方案？ | |
+| **穩定性** | 是否影響現有功能？ | |
+| **相依性** | 是否需要其他 ADR/Skill 配合？ | |
+
+### 通過標準
+- `feasibility_score` ≥ 7 且 `stability_score` ≥ 7 → 進入步驟 9 落實
+- 若未通過 → 修訂方案後重新審查（最多 3 輪）
+- 3 輪仍未通過 → 標記 `status: needs_human_review`，輸出通知後跳過落實
+
+### 每輪審查後更新 backlog entry
+```json
+{
+  "feasibility_score": 8,
+  "stability_score": 7,
+  "review_rounds": 1,
+  "review_notes": "第 1 輪：可行，已補充 rollback 步驟",
+  "status": "approved/needs_revision/needs_human_review"
+}
+```
+
+## 步驟 9：主動落實
+
+依 `risk_level` 決定落實方式：
+
+### 低風險（`risk_level=low`）：直接執行
+可直接落實的類型：
+- 更新 `config/*.yaml` 配置（新增欄位、調整閾值）
+- 更新 `skills/*/SKILL.md` 的 triggers 或 description
+- 更新 `context/improvement-backlog.json` 結構
+- 新增 `templates/` 模板（不修改現有模板）
+
+執行流程：
+1. 備份目標檔案（Bash：`cp target_file target_file.bak_$(date +%Y%m%d%H%M%S)`）
+2. 用 Edit 工具套用修改
+3. 執行驗證步驟（`implementation_plan.verification_steps`）
+4. 驗證通過：更新 backlog entry `status: implemented`
+5. 驗證失敗：`cp target_file.bak_* target_file` 還原，標記 `status: rollback`
+
+### 中/高風險（`risk_level=medium/high`）：輸出計畫
+不自動執行，改為：
+1. 在 `docs/plans/` 建立落實計畫 Markdown 檔（`github-scout-{timestamp}.md`）
+2. 包含：背景、目標、詳細步驟、風險評估、驗證方法
+3. 標記 backlog entry `status: plan_ready`
+
+## 步驟 10：落實後驗證與通知
+
+完成落實後（含低風險直接執行和中高風險計畫輸出），發送 ntfy 通知：
 
 ```bash
-# 星期檢查
-day=$(date +%u)
-# 3=週三, 7=週日 → 繼續；其他 → 跳過
+# 用 Write 建立 notify.json（UTF-8）
+# {
+#   "topic": "wangsc2025",
+#   "title": "🔧 GitHub Scout 落實完成",
+#   "message": "已落實：{pattern}（來源：{source_project}）\n風險等級：{risk_level}\n狀態：{status}\n報告網址：{source_url}",
+#   "tags": ["white_check_mark"]
+# }
+curl -H "Content-Type: application/json; charset=utf-8" \
+  -d @notify.json https://ntfy.sh
+rm notify.json
 ```
+
+## 星期過濾
+已移除星期限制，每日 2 次全天執行。
 
 ## 錯誤處理與降級
 
