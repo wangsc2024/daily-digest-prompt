@@ -262,6 +262,28 @@
       "date": "2026-03-20",
       "time": "2026-03-20 07:30:45",
       "channel": "ntfy/wangsc2025"
+    },
+    {
+      "author": "釋迦牟尼佛",
+      "date": "2026-03-21",
+      "verse_text": "知幻即離，不作方便；離幻即覺，亦無漸次。",
+      "verse_id": 25,
+      "time": "2026-03-21 06:30:02",
+      "channel": "ntfy/wangsc2025",
+      "session": "morning",
+      "status": "success",
+      "source": "《圓覺經》"
+    },
+    {
+      "verse_id": 26,
+      "channel": "ntfy/wangsc2025",
+      "time": "2026-03-21 17:05:02",
+      "date": "2026-03-21",
+      "session": "evening",
+      "verse_text": "過去心不可得，現在心不可得，未來心不可得。",
+      "status": "success",
+      "author": "釋迦牟尼佛",
+      "source": "《金剛般若波羅蜜經》"
     }
   ]
 }

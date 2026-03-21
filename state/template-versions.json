@@ -1,0 +1,533 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-20T10:04:36.549598",
+  "adr": "ADR-20260320-034",
+  "description": "記錄所有 prompts/team/*.md 和 templates/auto-tasks/*.md 的版本歷史",
+  "templates": [
+    {
+      "name": "assemble-audit",
+      "path": "prompts/team/assemble-audit.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "assemble-digest",
+      "path": "prompts/team/assemble-digest.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "chatroom-query",
+      "path": "prompts/team/chatroom-query.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-audit-dim1-5",
+      "path": "prompts/team/fetch-audit-dim1-5.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-audit-dim2-6",
+      "path": "prompts/team/fetch-audit-dim2-6.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-audit-dim3-7",
+      "path": "prompts/team/fetch-audit-dim3-7.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-audit-dim4",
+      "path": "prompts/team/fetch-audit-dim4.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-chatroom",
+      "path": "prompts/team/fetch-chatroom.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-gmail",
+      "path": "prompts/team/fetch-gmail.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-hackernews",
+      "path": "prompts/team/fetch-hackernews.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-news",
+      "path": "prompts/team/fetch-news.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-security",
+      "path": "prompts/team/fetch-security.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "fetch-todoist",
+      "path": "prompts/team/fetch-todoist.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "jiaoguang-podcast-one-episode",
+      "path": "prompts/team/jiaoguang-podcast-one-episode.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-assemble",
+      "path": "prompts/team/todoist-assemble.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ai_deep_research",
+      "path": "prompts/team/todoist-auto-ai_deep_research.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ai_github_research",
+      "path": "prompts/team/todoist-auto-ai_github_research.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ai_smart_city",
+      "path": "prompts/team/todoist-auto-ai_smart_city.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ai_sysdev",
+      "path": "prompts/team/todoist-auto-ai_sysdev.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ai_workflow_github",
+      "path": "prompts/team/todoist-auto-ai_workflow_github.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-arch_evolution",
+      "path": "prompts/team/todoist-auto-arch_evolution.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-chatroom_optimize",
+      "path": "prompts/team/todoist-auto-chatroom_optimize.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-creative_game_optimize",
+      "path": "prompts/team/todoist-auto-creative_game_optimize.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-fahua",
+      "path": "prompts/team/todoist-auto-fahua.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-future_plan_optimize",
+      "path": "prompts/team/todoist-auto-future_plan_optimize.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-git_push",
+      "path": "prompts/team/todoist-auto-git_push.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-github_scout",
+      "path": "prompts/team/todoist-auto-github_scout.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-insight_briefing",
+      "path": "prompts/team/todoist-auto-insight_briefing.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-jiaoguangzong",
+      "path": "prompts/team/todoist-auto-jiaoguangzong.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-jingtu",
+      "path": "prompts/team/todoist-auto-jingtu.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-kb_insight_evaluation",
+      "path": "prompts/team/todoist-auto-kb_insight_evaluation.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-log_audit",
+      "path": "prompts/team/todoist-auto-log_audit.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-ntfy_review",
+      "path": "prompts/team/todoist-auto-ntfy_review.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-podcast_create",
+      "path": "prompts/team/todoist-auto-podcast_create.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-podcast_jiaoguangzong",
+      "path": "prompts/team/todoist-auto-podcast_jiaoguangzong.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-qa_optimize",
+      "path": "prompts/team/todoist-auto-qa_optimize.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-self_heal",
+      "path": "prompts/team/todoist-auto-self_heal.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-shurangama",
+      "path": "prompts/team/todoist-auto-shurangama.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-skill_audit",
+      "path": "prompts/team/todoist-auto-skill_audit.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-skill_forge",
+      "path": "prompts/team/todoist-auto-skill_forge.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-system_insight",
+      "path": "prompts/team/todoist-auto-system_insight.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-tech_research",
+      "path": "prompts/team/todoist-auto-tech_research.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-unsloth_research",
+      "path": "prompts/team/todoist-auto-unsloth_research.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-auto-workflow_forge",
+      "path": "prompts/team/todoist-auto-workflow_forge.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "todoist-query",
+      "path": "prompts/team/todoist-query.md",
+      "template_type": "team_prompt",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "ai-deep-research",
+      "path": "templates/auto-tasks/ai-deep-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "ai-domain-research",
+      "path": "templates/auto-tasks/ai-domain-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "ai-github-research",
+      "path": "templates/auto-tasks/ai-github-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "ai-workflow-github-research",
+      "path": "templates/auto-tasks/ai-workflow-github-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "arch-evolution",
+      "path": "templates/auto-tasks/arch-evolution.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "buddhist-research",
+      "path": "templates/auto-tasks/buddhist-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "chatroom-optimize",
+      "path": "templates/auto-tasks/chatroom-optimize.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "creative-game-optimize",
+      "path": "templates/auto-tasks/creative-game-optimize.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "git-push",
+      "path": "templates/auto-tasks/git-push.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "github-scout",
+      "path": "templates/auto-tasks/github-scout.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "log-audit",
+      "path": "templates/auto-tasks/log-audit.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "podcast-create",
+      "path": "templates/auto-tasks/podcast-create.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "podcast-jiaoguangzong",
+      "path": "templates/auto-tasks/podcast-jiaoguangzong.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "qa-system-optimize",
+      "path": "templates/auto-tasks/qa-system-optimize.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "self-heal",
+      "path": "templates/auto-tasks/self-heal.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "shurangama-research",
+      "path": "templates/auto-tasks/shurangama-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "skill-audit",
+      "path": "templates/auto-tasks/skill-audit.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "system-insight",
+      "path": "templates/auto-tasks/system-insight.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "tech-research",
+      "path": "templates/auto-tasks/tech-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    },
+    {
+      "name": "unsloth-research",
+      "path": "templates/auto-tasks/unsloth-research.md",
+      "template_type": "auto_task_template",
+      "version": "1.0.0",
+      "released_at": "2026-03-20",
+      "action": "inserted"
+    }
+  ],
+  "meta": {
+    "total": 65,
+    "updated": 65,
+    "current_version": "1.0.0"
+  }
+}

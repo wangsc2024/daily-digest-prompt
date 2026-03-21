@@ -235,6 +235,38 @@ function Update-FailureStats {
     if ($null -eq $totalVal) { $totalVal = 0 }
     $stats.total | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($totalVal + 1) -Force
 
+    # 同步 failure_taxonomy（確保 total 與 taxonomy 一致）
+    $taxonomyDefs = @{
+        timeout        = @{ blast_radius = "single_task"; description = "Agent 或 API 呼叫超時" }
+        phase_failure  = @{ blast_radius = "phase"; description = "Phase 執行失敗（LLM 錯誤、結果檔缺失）" }
+        api_error      = @{ blast_radius = "dependent_tasks"; description = "外部 API 不可用（KB、Todoist、ntfy）" }
+        circuit_open   = @{ blast_radius = "all_tasks"; description = "斷路器開啟導致任務跳過" }
+        parse_error    = @{ blast_radius = "single_task"; description = "結果 JSON 格式錯誤或 schema 不符" }
+        quota_exceeded = @{ blast_radius = "all_tasks"; description = "Token 或 API 配額耗盡" }
+        unknown        = @{ blast_radius = "unknown"; description = "未分類失敗" }
+    }
+    if (-not $stats.failure_taxonomy) {
+        $stats | Add-Member -NotePropertyName "failure_taxonomy" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+    foreach ($ft in $taxonomyDefs.Keys) {
+        $cnt = $stats.total.$ft
+        if ($null -eq $cnt) { $cnt = 0 }
+        $lastOcc = $null
+        # 從 daily 找最後出現日期
+        $dailyDates = @($stats.daily.PSObject.Properties.Name | Sort-Object -Descending)
+        foreach ($d in $dailyDates) {
+            $dVal = $stats.daily.$d.$ft
+            if ($null -ne $dVal -and $dVal -gt 0) { $lastOcc = $d; break }
+        }
+        $def = $taxonomyDefs[$ft]
+        $stats.failure_taxonomy | Add-Member -NotePropertyName $ft -NotePropertyValue ([PSCustomObject]@{
+            count           = $cnt
+            blast_radius    = $def.blast_radius
+            last_occurrence = $lastOcc
+            description     = $def.description
+        }) -Force
+    }
+
     # 只保留 30 天
     $cutoff = (Get-Date).AddDays(-30).ToString("yyyy-MM-dd")
     $oldKeys = @($stats.daily.PSObject.Properties.Name | Where-Object { $_ -lt $cutoff })
@@ -242,6 +274,7 @@ function Update-FailureStats {
         $stats.daily.PSObject.Properties.Remove($k)
     }
 
+    $stats | Add-Member -NotePropertyName "schema_version" -NotePropertyValue 2 -Force
     $stats | Add-Member -NotePropertyName "updated" -NotePropertyValue (Get-Date -Format "yyyy-MM-ddTHH:mm:ss") -Force
 
     # 原子寫入（write-to-temp + rename）
@@ -283,7 +316,7 @@ function Repair-CompletedAutoTaskResultFile {
     if (Test-Path $resultFile) {
         try {
             $existing = Get-Content -Path $resultFile -Raw -Encoding UTF8 | ConvertFrom-Json
-            $existingValid = (($existing.type -or $existing.agent) -and $existing.status)
+            $existingValid = (($existing.type -or $existing.agent -or $existing.task_key) -and $existing.status)
         } catch {
             $existing = $null
             $existingValid = $false
@@ -891,6 +924,20 @@ function Start-CursorCliJob {
     return $job
 }
 
+# 移除 Markdown frontmatter（--- ... ---），避免 claude -p 將 prompt 誤判為貼上的文件
+function Strip-Frontmatter {
+    param([string]$Content)
+    $lines = $Content -split "`n"
+    if ($lines.Count -gt 0 -and $lines[0].Trim() -eq '---') {
+        for ($i = 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i].Trim() -eq '---') {
+                return ($lines[($i+1)..($lines.Count-1)] -join "`n").TrimStart("`n`r")
+            }
+        }
+    }
+    return $Content
+}
+
 # ============================================
 # Start execution
 # ============================================
@@ -1024,6 +1071,7 @@ $claudePath = Get-Command claude -ErrorAction SilentlyContinue
 if (-not $claudePath) {
     Write-Log "[ERROR] claude not found, install: npm install -g @anthropic-ai/claude-code"
     Update-State -Status "failed" -Duration 0 -ErrorMsg "claude not found" -Sections @{}
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
     exit 1
 }
 
@@ -1134,6 +1182,7 @@ if (Test-Path $timeoutsPath) {
                             curl -s -X POST "https://ntfy.sh" -H "Content-Type: application/json; charset=utf-8" -d "@$bodyFile" | Out-Null
                         } catch { Write-Log "[Phase0b] ntfy 告警發送失敗: $_" }
                         if (Test-Path $bodyFile) { Remove-Item $bodyFile -Force }
+                        if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
                         exit 1
                     }
                 }
@@ -1272,6 +1321,7 @@ $queryPrompt = "$AgentDir\prompts\team\todoist-query.md"
 if (-not (Test-Path $queryPrompt)) {
     Write-Log "[ERROR] Query prompt not found: $queryPrompt"
     Update-State -Status "failed" -Duration 0 -ErrorMsg "query prompt not found" -Sections @{}
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
     exit 1
 }
 
@@ -1299,7 +1349,7 @@ print(total)
     Write-Log "[Phase1] WARN: todoist-daily-cap.json 未寫入，Phase 1 將自行從 YAML 加總: $_"
 }
 
-$queryContent = Get-Content -Path $queryPrompt -Raw -Encoding UTF8
+$queryContent = Strip-Frontmatter (Get-Content -Path $queryPrompt -Raw -Encoding UTF8)
 $phase1Success = $false
 $phase1Attempt = 0
 
@@ -1380,7 +1430,7 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
         $chatroomQueryPrompt = "$AgentDir\prompts\team\chatroom-query.md"
         $chatroom_job = $null
         if (Test-Path $chatroomQueryPrompt) {
-            $chatroomContent = Get-Content -Path $chatroomQueryPrompt -Raw -Encoding UTF8
+            $chatroomContent = Strip-Frontmatter (Get-Content -Path $chatroomQueryPrompt -Raw -Encoding UTF8)
             $botApiSecret = $env:BOT_API_SECRET  # 讀取 bot API secret（若未設定則空字串）
             $chatroom_job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
                 param($prompt, $logDir, $timestamp, $traceId, $botSecret)
@@ -1425,7 +1475,22 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             for ($i = $startIdx; $i -lt $outputLines.Count; $i++) {
                 Write-Log "  [query] $($outputLines[$i])"
             }
-            if ($job.State -eq 'Completed') { $phase1Success = $true }
+            if ($job.State -eq 'Completed') {
+                $phase1Success = $true
+                # ─── 驗證 plan 檔案是否在本次 Phase 1 執行期間寫入 ───
+                # 防止 LLM 給出對話性回應（未寫入 plan）時誤用前次 run 的舊 plan
+                if (Test-Path "$ResultsDir\todoist-plan.json") {
+                    $planWriteTime = (Get-Item "$ResultsDir\todoist-plan.json").LastWriteTime
+                    if ($planWriteTime -lt $phase1Start) {
+                        $planAgeMin = [int]((Get-Date) - $planWriteTime).TotalMinutes
+                        Write-Log "[Phase1] WARN: plan 檔案（寫入 ${planAgeMin} min ago）早於本次 Phase 1 開始，LLM 疑似對話性回應未寫入新 plan，標記為失敗重試"
+                        $phase1Success = $false
+                    }
+                } else {
+                    Write-Log "[Phase1] WARN: LLM job 完成但未產出 plan 檔案，疑似對話性回應，標記為失敗重試"
+                    $phase1Success = $false
+                }
+            }
         }
         Remove-Job $job -Force
 
@@ -1463,18 +1528,22 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
     $phase1Attempt++
 }
 
-# ─── Phase 1 Fallback: 若計畫檔在執行視窗內已寫入，即使 Job 超時也視為成功 ───
+# ─── Phase 1 Fallback: 若計畫檔在本次執行視窗內已寫入，即使 Job 超時也視為成功 ───
 # 根因：Claude CLI 寫完 todoist-plan.json 後可能繼續做收尾（日誌/狀態），
 # 導致 PS Job 超時而計畫檔實際上已完整產出。
+# 注意：必須同時滿足「本次 phase1Start 之後寫入」才能啟用 Fallback，
+# 避免對話性回應後誤用前次 run 的舊 plan（若舊 plan 仍在 900s 視窗內）。
 if (-not $phase1Success -and (Test-Path "$ResultsDir\todoist-plan.json")) {
-    $planAge = [int]((Get-Date) - (Get-Item "$ResultsDir\todoist-plan.json").LastWriteTime).TotalSeconds
+    $planItem = Get-Item "$ResultsDir\todoist-plan.json"
+    $planAge = [int]((Get-Date) - $planItem.LastWriteTime).TotalSeconds
     $maxValidAge = ($MaxPhase1Retries + 1) * $Phase1TimeoutSeconds + 60  # 執行視窗（2×420）+ 60s 緩衝 = 900s
-    if ($planAge -lt $maxValidAge) {
+    $planWrittenThisRun = ($planItem.LastWriteTime -ge $phase1Start)
+    if ($planAge -lt $maxValidAge -and $planWrittenThisRun) {
         $phase1Success = $true
-        Write-Log "[Phase1] Fallback: 計畫檔在超時前已寫入（age=${planAge}s），繼續執行"
+        Write-Log "[Phase1] Fallback: 計畫檔在本次執行超時前已寫入（age=${planAge}s），繼續執行"
     }
     else {
-        Write-Log "[Phase1] 計畫檔過舊（age=${planAge}s, threshold=${maxValidAge}s），跳過"
+        Write-Log "[Phase1] Fallback 跳過：計畫檔過舊（age=${planAge}s）或非本次產出（writtenThisRun=$planWrittenThisRun）"
     }
 }
 
@@ -1507,6 +1576,7 @@ if (-not $phase1Success -or -not (Test-Path $planFile)) {
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "phase 1 failed" -Sections @{ query = "failed" }
     Send-FailureAlert -Phase "Phase1" -Reason "查詢/規劃逾時（$($MaxPhase1Retries + 1) 次嘗試均失敗）"
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
     exit 1
 }
 
@@ -1521,6 +1591,7 @@ catch {
     Update-FailureStats "parse_error" "phase1" "todoist"
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan parse error" -Sections @{ query = "failed" }
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
     exit 1
 }
 
@@ -1604,6 +1675,23 @@ if (Test-Path $runtimePolicyFile) {
                 "tech_research", "ai_deep_research", "ai_github_research", "ai_workflow_github",
                 "ai_smart_city", "ai_sysdev", "shurangama", "jiaoguangzong", "fahua", "jingtu"
             )
+            $blockedTaskKeys = @()
+
+            if (-not $allowHeavy) {
+                if ($runtimePolicy.policies.heavy_task_keys) {
+                    $heavyTaskKeys = @($runtimePolicy.policies.heavy_task_keys)
+                }
+            }
+            if (-not $allowResearch) {
+                if ($runtimePolicy.policies.research_task_keys) {
+                    $researchTaskKeys = @($runtimePolicy.policies.research_task_keys)
+                }
+            }
+            if ($runtimePolicy.policies.blocked_task_keys) {
+                $blockedTaskKeys = @($runtimePolicy.policies.blocked_task_keys)
+            }
+
+            $tasksBeforeFilter = @($selectedTasks)
 
             if (-not $allowHeavy) {
                 $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $heavyTaskKeys })
@@ -1611,13 +1699,39 @@ if (Test-Path $runtimePolicyFile) {
             if (-not $allowResearch) {
                 $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $researchTaskKeys })
             }
+            if ($blockedTaskKeys.Count -gt 0) {
+                $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $blockedTaskKeys })
+            }
             if ($selectedTasks.Count -gt $maxParallel) {
                 $selectedTasks = @($selectedTasks | Select-Object -First $maxParallel)
             }
 
+            # 為被自主模式過濾掉的任務補寫佔位結果檔（skipped），
+            # 避免 Phase 3 誤報「未產出結果檔案」
+            $filteredOutTasks = @($tasksBeforeFilter | Where-Object { $_.key -notin ($selectedTasks | ForEach-Object { $_.key }) })
+            foreach ($ft in $filteredOutTasks) {
+                $skippedResultPath = "results/todoist-auto-$($ft.key).json"
+                $skipReason = if (-not $allowHeavy -and $ft.key -in $heavyTaskKeys) { "autonomy_heavy_blocked" }
+                              elseif (-not $allowResearch -and $ft.key -in $researchTaskKeys) { "autonomy_research_blocked" }
+                              elseif ($ft.key -in $blockedTaskKeys) { "autonomy_explicit_blocked" }
+                              else { "autonomy_max_parallel_exceeded" }
+                $skippedResult = [ordered]@{
+                    agent   = "todoist-auto-$($ft.key)"
+                    status  = "skipped"
+                    task_id = $null
+                    type    = $ft.key
+                    topic   = $null
+                    summary = "自主模式降速：任務被阻擋（$skipReason）"
+                    error   = $skipReason
+                    done_cert = $null
+                }
+                $skippedResult | ConvertTo-Json -Depth 5 | Set-Content -Path $skippedResultPath -Encoding UTF8 -Force
+                Write-Log "[Autonomy] Wrote skipped placeholder: $skippedResultPath (reason=$skipReason)"
+            }
+
             $plan.auto_tasks.selected_tasks = $selectedTasks
             $plan | ConvertTo-Json -Depth 10 | Set-Content -Path $planFile -Encoding UTF8 -Force
-            Write-Log "[Autonomy] auto-tasks adjusted: $beforeCount -> $($selectedTasks.Count) (allowHeavy=$allowHeavy, allowResearch=$allowResearch, maxParallel=$maxParallel)"
+            Write-Log "[Autonomy] auto-tasks adjusted: $beforeCount -> $($selectedTasks.Count) (allowHeavy=$allowHeavy, allowResearch=$allowResearch, maxParallel=$maxParallel, blocked=$($blockedTaskKeys.Count))"
         }
     } catch {
         Write-Log "[Autonomy] WARN: runtime policy parse failed: $_"
@@ -1704,7 +1818,7 @@ elseif ($plan.plan_type -eq "tasks") {
             Write-Log "[Phase2] Task prompt not found: $promptFile"
             continue
         }
-        $taskPrompt = Get-Content -Path "$AgentDir\$promptFile" -Raw -Encoding UTF8
+        $taskPrompt = Strip-Frontmatter (Get-Content -Path "$AgentDir\$promptFile" -Raw -Encoding UTF8)
         # 確保 Write 在 allowedTools（子 Agent 需要 Write 才能產出結果 JSON）
         $taskTools = $task.allowed_tools
         if ($taskTools -notmatch '\bWrite\b') {
@@ -1873,6 +1987,32 @@ elseif ($plan.plan_type -eq "auto") {
         }
         Write-Log "[Phase2] Discovered $($dedicatedPrompts.Count) dedicated prompts: $($dedicatedPrompts.Keys -join ', ')"
 
+        # ADR-028: Phase 2 Resume — 跳過 60 分鐘內已產出結果檔的任務（斷點續跑）
+        $resumeSkippedKeys = @()
+        $resumeableTasks = [System.Collections.Generic.List[object]]::new()
+        foreach ($rtask in $selectedTasks) {
+            $rKey = ($rtask.key -replace '-', '_')
+            $rResultFile = "$ResultsDir\todoist-auto-$rKey.json"
+            if (Test-Path $rResultFile) {
+                $fileAgeMins = ((Get-Date) - (Get-Item $rResultFile).LastWriteTime).TotalMinutes
+                if ($fileAgeMins -lt 60) {
+                    $resumeSkippedKeys += $rKey
+                    Write-Log "[Phase2-Resume] ADR-028 跳過 $rKey（結果檔距今 $([int]$fileAgeMins) min，視為已完成）"
+                    continue
+                }
+            }
+            $resumeableTasks.Add($rtask) | Out-Null
+        }
+        if ($resumeSkippedKeys.Count -gt 0) {
+            $selectedTasks = $resumeableTasks.ToArray()
+            Write-Log "[Phase2-Resume] ADR-028 resume 完成：跳過 $($resumeSkippedKeys.Count) 個，剩餘 $($selectedTasks.Count) 個任務"
+        }
+        # 寫入 Phase 2 snapshot（供後續診斷）
+        try {
+            @{ run_id = $RunId; timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss"); selected_tasks = @($selectedTasks | ForEach-Object { $_.key }); skipped_resume = $resumeSkippedKeys } |
+                ConvertTo-Json | Set-Content "$AgentDir\state\phase2-snapshot.json" -Encoding UTF8 -Force
+        } catch { Write-Log "[Phase2-Resume] snapshot 寫入失敗（不影響主流程）: $_" "WARN" }
+
         foreach ($autoTask in $selectedTasks) {
             $taskKey = $autoTask.key
             $taskName = $autoTask.name
@@ -1942,7 +2082,7 @@ elseif ($plan.plan_type -eq "auto") {
                 continue
             }
 
-            $promptContent = Get-Content -Path $promptToUse -Raw -Encoding UTF8
+            $promptContent = Strip-Frontmatter (Get-Content -Path $promptToUse -Raw -Encoding UTF8)
 
             # G10: 若 todoist-plan.json 中有 prompt_content，前置到 prompt 開頭
             # JSON null → PS $null；字串 "null" 亦排除（防 LLM 將 null 輸出為字串）
@@ -2613,10 +2753,85 @@ if (Test-Path $scoreScript) {
 }
 
 # ============================================
+# Phase 2.5: OODA Act 強制觸發
+# arch_evolution 完成且有 pending immediate_fix 時，直接觸發 self_heal，
+# 無需等待下輪 round-robin（參考 run-system-audit-team.ps1 Phase 4 模式）
+# ============================================
+if ($plan.plan_type -eq "auto") {
+    $archEvoRan  = ($sections["auto-arch_evolution"] -eq "success")
+    $selfHealRan = ($sections["auto-self_heal"] -ne $null)
+    $archDecPath = "$AgentDir\context\arch-decision.json"
+
+    if ($archEvoRan -and -not $selfHealRan -and (Test-Path $archDecPath)) {
+        try {
+            $archDec = Get-Content $archDecPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            $archAgeMin = if ($archDec.generated_at) {
+                [int]((Get-Date) - [DateTime]$archDec.generated_at).TotalMinutes
+            } else { 999 }
+            $pendingFixes = @()
+            if ($archDec.decisions) {
+                $pendingFixes = @($archDec.decisions | Where-Object {
+                    $_.action -eq "immediate_fix" -and $_.execution_status -eq "pending"
+                })
+            }
+
+            if ($archAgeMin -le 90 -and $pendingFixes.Count -gt 0) {
+                Write-Log "[Phase2.5] OODA Act：arch_evolution 產出 $($pendingFixes.Count) 個 immediate_fix，直接觸發 self_heal"
+                $selfHealPromptPath = "$AgentDir\prompts\team\todoist-auto-self_heal.md"
+                if (Test-Path $selfHealPromptPath) {
+                    $phase25LogFile = "$LogDir\phase25-selfheal-$($traceId.Substring(0,8)).log"
+                    $phase25Start   = Get-Date
+                    try {
+                        $selfHealContent = Strip-Frontmatter (Get-Content $selfHealPromptPath -Raw -Encoding UTF8)
+                        Write-Log "[Phase2.5] self_heal 啟動（OODA Act 強制觸發）"
+                        $selfHealContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" `
+                            --model claude-sonnet-4-5-20251001 2>$phase25LogFile
+                        $phase25Sec = [int]((Get-Date) - $phase25Start).TotalSeconds
+                        Write-Log "[Phase2.5] self_heal 完成（OODA Act, ${phase25Sec}s）"
+                        Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase25" -State "completed" `
+                            -AgentType "todoist" -Detail "$($pendingFixes.Count) immediate_fix 已執行"
+                    } catch {
+                        $phase25Sec = [int]((Get-Date) - $phase25Start).TotalSeconds
+                        Write-Log "[Phase2.5] self_heal 失敗（OODA Act, ${phase25Sec}s）：$_" "WARN"
+                    }
+                } else {
+                    Write-Log "[Phase2.5] self_heal prompt 不存在，跳過 OODA Act 觸發" "WARN"
+                }
+            } else {
+                Write-Log "[Phase2.5] OODA Act 跳過：pending=$($pendingFixes.Count) arch-age=${archAgeMin}m"
+            }
+        } catch {
+            Write-Log "[Phase2.5] 讀取 arch-decision.json 失敗，跳過 OODA Act：$_" "WARN"
+        }
+    } elseif (-not $archEvoRan) {
+        # arch_evolution 本輪未執行，靜默跳過（round-robin 正常輪轉）
+    } elseif ($selfHealRan) {
+        Write-Log "[Phase2.5] OODA Act 跳過：self_heal 本輪已執行"
+    }
+}
+
+# ============================================
 # Phase 3: Assembly (close + update + notify)
 # ============================================
 Write-Log ""
 Write-Log "=== Phase 3: Assembly start ==="
+
+# ─── Phase 1 結果驗證（防止 Phase 3 在 Phase 1 失敗時執行無效組裝）───
+# 根因：Phase 1 LLM 對話性回應後 Fallback 若繞過驗證，Phase 3 會拿到舊 plan
+# 組裝出完全無意義的結果（且 Phase 3 LLM 自身也會對話性崩潰）。
+if (-not $phase1Success) {
+    Write-Log "[Phase3] SKIP: Phase 1 未成功（phase1Success=false），跳過組裝以避免髒資料"
+    Update-FailureStats "phase_failure" "phase3" "todoist"
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "skipped" -AgentType "todoist" -Detail "phase1 failed"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "phase 1 failed, phase 3 skipped" -Sections @{ query = "failed"; assemble = "skipped" }
+    if (Test-Path $TodoistTeamLockFile) {
+        Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue
+        Write-Log "[Cleanup] Lock file removed (pre-exit)"
+    }
+    exit 1
+}
+
 Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "running" -AgentType "todoist"
 
 $assemblePrompt = "$AgentDir\prompts\team\todoist-assemble.md"
@@ -2624,10 +2839,11 @@ if (-not (Test-Path $assemblePrompt)) {
     Write-Log "[ERROR] Assembly prompt not found: $assemblePrompt"
     $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
     Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "assembly prompt not found" -Sections $sections
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
     exit 1
 }
 
-$assembleContent = Get-Content -Path $assemblePrompt -Raw -Encoding UTF8
+$assembleContent = Strip-Frontmatter (Get-Content -Path $assemblePrompt -Raw -Encoding UTF8)
 $phase3Success = $false
 $phase3Seconds = 0
 $attempt = 0
@@ -2696,11 +2912,22 @@ while ($attempt -le $MaxPhase3Retries) {
         }
 
         if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-            $phase3Success = $true
-            $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
-            Write-Log "[Phase3] Assembly completed (${phase3Seconds}s)"
-            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "completed" -AgentType "todoist"
-            break
+            # ─── 偵測 LLM 對話性回應（未真正執行組裝）───
+            $outputText = $output -join "`n"
+            # 行首錨定：避免 LLM 正常輸出中引用這些短語時誤判（如 "提示用戶：請問你希望..."）
+            $conversationalPattern = '(?m)^\s*(?:你貼了|已收到.*完整內容|請問你希望我做什麼|請問需要我做什麼|請說明你的需求)'
+            if ($outputText -match $conversationalPattern) {
+                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+                Write-Log "[Phase3] WARN: LLM 給出對話性回應（${phase3Seconds}s），未執行組裝，標記為失敗重試"
+                Update-FailureStats "phase_failure" "phase3" "todoist"
+                Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "failed" -AgentType "todoist" -Detail "conversational response"
+            } else {
+                $phase3Success = $true
+                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+                Write-Log "[Phase3] Assembly completed (${phase3Seconds}s)"
+                Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase3" -State "completed" -AgentType "todoist"
+                break
+            }
         }
         else {
             Write-Log "[Phase3] Assembly exited with code: $LASTEXITCODE"

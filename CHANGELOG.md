@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- 系統審查報告 2026-03-21（Phase 2 組裝 + 1 項自動修正，88.10/A，+0.53）
 - 系統審查報告 2026-03-20（Phase 2 組裝 + 1 項自動修正，87.57/A，+2.19）
 - 系統審查報告 2026-03-19（Phase 2 組裝 + 1 項自動修正，85.38/A，-2.50）
 - 系統審查報告 2026-03-18（Phase 2 組裝 + 1 項自動修正，87.88/A，+2.83）
@@ -26,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - feat: `templates/research/` — 研究模板目錄
 
 ### Changed
+- docs: ntfy／arch-evolution — [Publishing](https://docs.ntfy.sh/publish/)（JSON 根 URL、`markdown`、多行訊息）＋[Markdown formatting](https://docs.ntfy.sh/publish/#markdown-formatting) **適用語法表**（web app only 註記、未列 GFM 擴展勿用）；`ntfy-notify` v2.0.3、`markdown-editor` 與 prompt 互相引用
 - chore: Skill 計數 20 → 26（19 核心 + 7 工具）
 - chore: 自動任務頻率上限 40 → 47 次/日
 - refactor: `config/hook-rules.yaml` v2 → v3（20 條規則 + 3 個 preset）

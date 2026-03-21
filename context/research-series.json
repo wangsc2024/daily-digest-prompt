@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-20T07:06:47.576498+08:00",
+  "updated_at": "2026-03-21T15:49:06.583621+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -161,7 +161,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-20",
+      "last_active": "2026-03-21",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -281,7 +281,7 @@
           ]
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "started_at": "2026-03-03",
           "kb_notes": [
             "楞嚴經與天台宗的義理會通",
@@ -307,7 +307,8 @@
             "楞嚴經研究：會通四科圓彰七大 — 卷三破相顯性的義理脈絡、祖師註疏與修行觀照法門",
             "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話",
             "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結",
-            "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南"
+            "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南",
+            "楞嚴經修行體系的當代實踐整合 — 從破妄顯真到圓通成就的現代禪修完整路徑（synthesis 完結篇）"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -424,22 +425,26 @@
             "都攝六根淨念相繼的修證次第",
             "大勢至與觀音圓通的會通",
             "念佛三昧在楞嚴經的定位",
-            "大勢至圓通與淨土宗的實修連結"
+            "大勢至圓通與淨土宗的實修連結",
+            "全經修行體系的現代整合",
+            "分階段實踐路徑",
+            "與當代禪修方法的對接",
+            "常見修行障礙與對治"
           ],
-          "completed_at": "2026-03-14"
+          "completed_at": "2026-03-21"
         }
       },
       "current_stage": "synthesis",
-      "completion_pct": 80,
+      "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "大勢至圓通研究後，可繼續：楞嚴經與當代神經科學對話、數位時代的魔境、念佛圓通與禪觀的融通"
+      "next_research_hint": "楞嚴經系列五階段已完成，可考慮：1) 與其他經典（華嚴、圓覺）的跨系列整合；2) 更深入的修行專題（如楞嚴咒專修、耳根圓通深化）"
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-19",
+      "last_active": "2026-03-20",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -475,7 +480,8 @@
             "觀法修持",
             "判教實例",
             "化法四教之通教 — 無生四諦、體空觀、幻有即空與通前通後的判教樞紐",
-            "化法四教之藏教 — 生滅四諦、析空觀、七賢位與四果修證體系"
+            "化法四教之藏教 — 生滅四諦、析空觀、七賢位與四果修證體系",
+            "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應"
           ],
           "covered_concepts": [
             "析空觀",
@@ -492,7 +498,12 @@
             "幻有即空",
             "通前通後",
             "三乘共十地",
-            "被接入別圓"
+            "被接入別圓",
+            "無作四諦的三層語義",
+            "四諦即實相的圓教詮釋",
+            "無作四諦與一心三觀的內在對應",
+            "圓頓止觀實修操作",
+            "四弘誓願的圓教發心"
           ]
         },
         "application": {
@@ -937,7 +948,7 @@
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-19",
+      "last_active": "2026-03-21",
       "tags": [
         "淨土宗",
         "佛學",
@@ -1054,13 +1065,26 @@
           ]
         },
         "synthesis": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "慧遠大師研究：淨土宗初祖與東林蓮社念佛結社運動"
+          ],
+          "covered_concepts": [
+            "慧遠大師",
+            "東林蓮社",
+            "白蓮社",
+            "般舟三昧",
+            "觀想念佛",
+            "形盡神不滅論",
+            "三報論",
+            "六時念佛"
+          ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "完成後可進入 synthesis：四十八願、三輩往生與臨終正念、台淨會通之整合研究。"
+      "next_research_hint": "完成初祖研究後，可繼續補足其他祖師（二祖善導已研究，三四五祖待補）"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -1326,7 +1350,7 @@
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-19",
+      "last_active": "2026-03-20",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1357,7 +1381,8 @@
           "status": "completed",
           "kb_notes": [
             "Temporal 深度研究報告 - AI工作流自動化",
-            "mcp-agent 深度研究報告 - AI工作流自動化"
+            "mcp-agent 深度研究報告 - AI工作流自動化",
+            "Langfuse 深度研究報告 - AI工作流自動化"
           ],
           "covered_concepts": [
             "workflow_orchestration",
@@ -1369,9 +1394,12 @@
             "MCP-native workflow runtime",
             "共享協議下的 agent/worker 協調模式",
             "MCP transport 與持久化執行整合",
-            "Claude Agent 系統的 MCP workflow 借鑑"
+            "Claude Agent 系統的 MCP workflow 借鑑",
+            "Langfuse 事件攝入架構",
+            "Prompt management 與 datasets 在 AI workflow 中的角色",
+            "Langfuse 與 daily-digest-prompt 的落地映射"
           ],
-          "completed_at": "2026-03-09"
+          "completed_at": "2026-03-20"
         },
         "application": {
           "status": "completed",
@@ -1433,10 +1461,10 @@
           ]
         }
       },
-      "current_stage": "mechanism",
+      "current_stage": "application",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "mechanism：深化 trace schema、eval pipeline 與 OpenTelemetry Collector 整合"
+      "next_research_hint": "application：比較 Langfuse 與 OpenLIT/Phoenix 的 trace schema、eval workflow 與落地成本"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -2534,7 +2562,7 @@
       "domain": "寫作計畫方法論 / 研究規劃框架 / 資料來源策略 / 章節大綱設計 / 驗收條件形式化",
       "description": "研究寫作方法論系列，涵蓋寫作計畫框架、研究規劃流程、資料來源分級評估、章節大綱設計原則與驗收條件定義。",
       "initiated_at": "2026-03-13",
-      "last_active": "2026-03-13",
+      "last_active": "2026-03-20",
       "tags": [
         "寫作計畫",
         "研究規劃",
@@ -2562,7 +2590,23 @@
           ]
         },
         "mechanism": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "研究計畫與章節大綱設計機制 — 從資料來源策略到核心議題映射的完整方法論",
+            "Agent Harness 研究規劃機制 — 核心議題、資料來源策略與驗收條件的結構化設計"
+          ],
+          "covered_concepts": [
+            "研究計畫的階段推進機制",
+            "核心議題的聚類與排序方法",
+            "章節大綱與證據映射表",
+            "資料來源多層證據鏈設計",
+            "研究簡報到正式知識筆記的轉換模板",
+            "agent harness 研究規劃的完整核心議題清單與排序原則",
+            "各議題對應的官方文件、程式碼、設計文件、內部 KB 與實測資料來源策略",
+            "每個議題的明確驗收條件與停損門檻",
+            "研究輸出如何映射到 implementation brief 或 review checklist",
+            "研究完成後如何判定可進入 application 階段的機器可驗證標準"
+          ]
         },
         "application": {
           "status": "pending"
@@ -2580,7 +2624,7 @@
         "ai-requirements-engineering",
         "knowledge-base-architecture"
       ],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入寫作計畫的內部運作機制 — 大綱迭代演算法、資料來源可信度評分模型、驗收條件的自動化驗證邏輯"
+      "next_research_hint": "完成後進入 application：把 agent harness 研究 brief 落成固定 JSON schema、範例樣本與 review checklist。"
     },
     "agentic-security-research": {
       "series_id": "agentic-security-research",
@@ -3012,7 +3056,7 @@
       "domain": "AI Software Development / Agent Architecture / System Engineering",
       "description": "AI 應用於系統開發的深入研究系列，涵蓋 Context Management、Memory Architecture、Agent 設計模式等核心機制",
       "initiated_at": "2026-03-15",
-      "last_active": "2026-03-17",
+      "last_active": "2026-03-21",
       "tags": [
         "AI",
         "系統開發",
@@ -3045,7 +3089,8 @@
           "started_at": "2026-03-15",
           "kb_notes": [
             "AI Agent Context Management 與 Long-Term Memory 架構 — 從短期上下文到持久化記憶的機制設計與實作模式（2026）",
-            "AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質保證（2026）"
+            "AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質保證（2026）",
+            "AI 軟體開發系統核心架構實作指南 — Agent SDK、工作流引擎與程式碼生成管線的設計模式與實作細節（2026-03-21）"
           ],
           "covered_concepts": [
             "Context Window Management",
@@ -3057,7 +3102,13 @@
             "Test-Time Scaling 在測試中的應用",
             "Mutation Testing 自動化",
             "Property-Based Testing with AI",
-            "Test Oracle Problem 解法"
+            "Test Oracle Problem 解法",
+            "Agent SDK 核心模組設計（Task/Tool/Memory 架構）",
+            "工作流引擎 DAG 編排實作（Temporal/Airflow 類比）",
+            "程式碼生成管線設計（AST 解析 → 語義分析 → 生成 → 驗證）",
+            "Multi-Agent 協作協定（通訊機制、狀態同步、衝突解決）",
+            "自主軟體工程的測試策略（單元測試生成、回歸測試自動化）",
+            "AI 輔助重構引擎（程式碼氣味偵測 → 重構建議 → 自動應用）"
           ]
         },
         "application": {
@@ -3065,7 +3116,10 @@
           "started_at": "2026-03-17",
           "kb_notes": [
             "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）",
-            "Daily-Digest-Prompt 長期記憶與 Context Management 實作指南"
+            "Daily-Digest-Prompt 長期記憶與 Context Management 實作指南",
+            "Agent Harness 自主管理實作指南 — 控制流程、恢復佇列與故障演練在 daily-digest-prompt 的落地",
+            "Agent Harness 架構、工作流與部署實作指南",
+            "Agent Harness 自主管理優化基準與通知治理實作指南"
           ],
           "covered_concepts": [
             "MCP 整合",
@@ -3075,20 +3129,53 @@
             "Context retrieval / compression / injection 的量化評估指標",
             "記憶命中率與 token 成本的 benchmark 設計",
             "錯誤恢復、記憶污染與 stale context 防護機制",
-            "面向 hooks、skills、research brief 的端到端實作藍圖"
+            "面向 hooks、skills、research brief 的端到端實作藍圖",
+            "agent harness 的效能與可靠性 benchmark 設計",
+            "恢復佇列優先級 / 去重 / 背壓策略的實作細節",
+            "自治決策的安全護欄與人工升級政策",
+            "多 agent / 多工作流共用 harness 的擴展模式",
+            "實際故障案例回放與驗證報告",
+            "agent harness 的核心元件圖與資料流",
+            "實際執行迴圈、訊息路由與調度機制",
+            "部署前置需求、設定檔與 secrets 管理",
+            "本地、容器與雲端部署的逐步流程",
+            "範例程式碼與驗證 checklist",
+            "自治決策成效 benchmark 與 MTTR / resumed ratio / budget burn 指標基線",
+            "通知去重、靜默、升級與人工批准 gate 的統一策略",
+            "snapshot / override / self-heal request 的端到端驗證矩陣",
+            "多 workflow 共用 harness 時的治理成本模型與容量規劃"
           ]
         },
         "optimization": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "Agent Harness 自主管理優化指南（量化指標、背壓策略與自治護欄）"
+          ],
+          "covered_concepts": [
+            "benchmark 與效能基準設計",
+            "恢復延遲與佇列背壓量化",
+            "自主管理風險分級與 rollback 策略",
+            "成本/可靠性權衡模型",
+            "跨 agent / 跨 workflow 的觀測整合"
+          ]
         },
         "synthesis": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "Agent Harness 自治系統整合框架 — 效能測試、觀測治理與 wsngsc2025 通知閉環"
+          ],
+          "covered_concepts": [
+            "agent harness 與 observability/incident triage 的統一整合模型",
+            "端到端效能測試計畫與 SLO/SLA 指標體系",
+            "通知主題、告警分級與人工接管流程的閉環設計",
+            "多 workflow 共用 harness 的跨系統治理藍圖"
+          ]
         }
       },
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 optimization：量化 token 成本、記憶命中率、context 壓縮效果與開發者體驗提升"
+      "next_research_hint": "完成 mechanism 階段後進入 application：實作可執行的 Agent SDK 原型、工作流編排引擎最小實作、程式碼生成管線 PoC"
     },
     "claude-code-cli-automation": {
       "series_id": "claude-code-cli-automation",
@@ -4491,6 +4578,222 @@
         "powershell-automation-patterns"
       ],
       "next_research_hint": "mechanism：深入事件關聯、根因排序與自動修復安全閘門"
+    },
+    "jiaoguan-gangzong": {
+      "series_id": "jiaoguan-gangzong",
+      "domain": "教觀綱宗 / Tiantai Buddhist Doctrine",
+      "description": "天台宗教觀綱宗判教體系深度研究系列，涵蓋五時八教、化法化儀、觀法修持等核心理論",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-21",
+      "tags": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗",
+        "五時八教",
+        "判教",
+        "蕅益大師",
+        "智者大師"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-15",
+          "completed_at": "2026-03-15",
+          "kb_notes": [
+            "教觀綱宗概論：天台宗判教體系總覽",
+            "教觀綱宗研究：五時判教 — 天台宗判釋一代時教的五個時期",
+            "教觀綱宗研究：八教分類 — 化法四教與化儀四教的完整體系",
+            "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+          ],
+          "covered_concepts": [
+            "五時八教",
+            "化法四教",
+            "化儀四教",
+            "藏通別圓",
+            "頓漸秘密不定",
+            "教觀雙美",
+            "判教體系"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-03-20",
+          "completed_at": "2026-03-20",
+          "kb_notes": [
+            "化儀四教的施教機制與判釋體系 — 頓漸秘密不定四教的運作原理、相互關係與化法配置"
+          ],
+          "covered_concepts": [
+            "頓教施教機制",
+            "漸教次第結構",
+            "秘密教同會異聞",
+            "不定教跨類悟入",
+            "化儀化法交叉配置",
+            "藥方藥味關係"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "completed_at": "2026-03-21",
+          "kb_notes": [
+            "化儀四教實踐應用指南 — 從理論到實修的根機診斷與修行路徑選擇"
+          ],
+          "covered_concepts": [
+            "根機自我評估",
+            "七維度診斷工具",
+            "頓漸秘密不定路徑對照",
+            "分眾實踐指南（初學/資深/在家/出家）",
+            "化儀化法交叉應用",
+            "21天體驗計畫",
+            "常見問題對治"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "optimization",
+      "completion_pct": 60,
+      "related_series": [
+        "shurangama-sutra",
+        "fahua-sutra"
+      ],
+      "next_research_hint": "完成 application 後進入 optimization：化儀四教實踐的常見障礙與對治、根機轉化進階技巧、與現代心理學對話"
+    },
+    "pingtung-transport-hsr-bus-hotel-pricing": {
+      "series_id": "pingtung-transport-hsr-bus-hotel-pricing",
+      "domain": "屏東, 交通時刻表, 住宿價格, 高鐵, 客運",
+      "description": "",
+      "initiated_at": "2026-03-20",
+      "last_active": "2026-03-20",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-20",
+          "kb_notes": [
+            "屏東旅遊交通與住宿基礎研究：高鐵、客運時刻表與價格來源總覽"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "foundation 完成後進入 mechanism：分析高鐵、客運、住宿價格的變動規則、資料更新頻率與跨來源整合方法。"
+    },
+    "ai-smart-healthcare": {
+      "series_id": "ai-smart-healthcare",
+      "domain": "AI 智慧醫療",
+      "description": "",
+      "initiated_at": "2026-03-21",
+      "last_active": "2026-03-21",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "智慧醫療",
+        "smart-city",
+        "healthcare"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "completed_at": "2026-02-21",
+          "kb_notes": [
+            "AI 驅動的智慧醫療：疫情預測、遠距醫療與公共衛生決策支援技術全景（2026）"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "in_progress",
+          "started_at": "2026-03-21",
+          "kb_notes": [
+            "偏鄉遠距醫療整合系統設計：從 5G+AIoT 架構到排程管理的完整實作指南（屏東縣應用）"
+          ],
+          "covered_concepts": [
+            "偏鄉遠距醫療系統設計",
+            "視訊診療排程管理",
+            "電子病歷整合",
+            "5G+AIoT架構",
+            "HL7 FHIR",
+            "DICOM"
+          ]
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "application",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 optimization：效能調優、成本效益分析與服務品質監控"
+    },
+    "open-webui": {
+      "series_id": "open-webui",
+      "domain": "Open WebUI — 自托管 AI 对话平台",
+      "description": "Open WebUI 自托管 AI 对话平台研究系列",
+      "initiated_at": "2026-03-21",
+      "last_active": "2026-03-21",
+      "tags": [
+        "GitHub",
+        "Open WebUI",
+        "自托管",
+        "AI平台",
+        "Local-First",
+        "ChatGPT界面"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-21",
+          "completed_at": "2026-03-21",
+          "kb_notes": [
+            "Open WebUI — 自托管 AI 对话平台深度研究（foundation 阶段）"
+          ],
+          "covered_concepts": [
+            "架构设计",
+            "RAG整合",
+            "Pipelines插件",
+            "企业级功能",
+            "Docker部署"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成 foundation 后，进入 mechanism 阶段：深入 Open WebUI 的技术架构、API 设计、Ollama 通讯协议"
     }
   }
 }

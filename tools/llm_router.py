@@ -82,12 +82,25 @@ def validate_relay_response(mode: str, raw_result) -> dict:
 
 
 def _validate_schema(data: dict, schema: dict) -> None:
-    """簡易 JSON schema 驗證（不引入 jsonschema 依賴）。"""
+    """簡易 JSON schema 驗證（不引入 jsonschema 依賴）。
+
+    檢查：1) 資料必須為 dict  2) 必填欄位存在  3) 欄位型別符合 schema
+    """
     if not isinstance(data, dict):
         raise TypeError(f"期望 dict，得到 {type(data)}")
     for field in schema.get("required", []):
         if field not in data:
             raise ValueError(f"缺少必填欄位：{field}")
+    # 型別驗證：檢查 properties 中定義的型別
+    _type_map = {"string": str, "number": (int, float), "array": list, "object": dict}
+    for field, prop_schema in schema.get("properties", {}).items():
+        if field not in data:
+            continue
+        expected_type = _type_map.get(prop_schema.get("type"))
+        if expected_type and not isinstance(data[field], expected_type):
+            raise TypeError(
+                f"欄位 '{field}' 期望 {prop_schema['type']}，得到 {type(data[field]).__name__}"
+            )
 
 
 def _load_yaml(path: Path) -> dict:
@@ -111,8 +124,21 @@ def match_rule(config: dict, task_type: str) -> dict | None:
     routing_rules 是 mapping 格式（key=task_type）O(1) lookup。
     回傳規則 dict 或 None（未命中）。
     """
+    if not task_type:
+        return None
     rules = config.get("routing_rules", {})
-    return rules.get(task_type)
+    rule = rules.get(task_type)
+    if rule is None and "-" in task_type:
+        # 容錯：嘗試將連字號轉為底線（常見命名錯誤）
+        underscore_key = task_type.replace("-", "_")
+        rule = rules.get(underscore_key)
+        if rule:
+            print(
+                f"[llm_router] task_type '{task_type}' 未命中，但 '{underscore_key}' 命中"
+                "（建議修正為底線命名）",
+                file=sys.stderr,
+            )
+    return rule
 
 
 def call_groq_relay(endpoint: str, mode: str, content: str, max_tokens: int) -> dict:
@@ -149,7 +175,7 @@ def update_token_usage(provider: str) -> None:
         TOKEN_USAGE_PATH.write_text(
             json.dumps(usage, ensure_ascii=False, indent=2), encoding="utf-8"
         )
-    except Exception:
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, OSError):
         pass  # token usage 追蹤失敗不中斷主流程
 
 
@@ -189,13 +215,14 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
         }
 
     provider = rule.get("provider", "claude")
+    groq_cfg = config.get("providers", {}).get("groq", {})
 
     if dry_run:
         return {
             "provider": provider,
             "rule": {"task_type": task_type, **rule},
             "dry_run": True,
-            "endpoint": config.get("providers", {}).get("groq", {}).get("endpoint"),
+            "endpoint": groq_cfg.get("endpoint"),
         }
 
     # 預算預檢查（P4-C）
@@ -204,7 +231,7 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
         return budget_block
 
     if provider == "groq":
-        provider_cfg = config.get("providers", {}).get("groq", {})
+        provider_cfg = groq_cfg
         endpoint = provider_cfg.get("endpoint", "http://localhost:3002/groq/chat")
         # 優先讀 groq_mode，回退到 mode，再回退到 summarize
         mode = rule.get("groq_mode") or rule.get("mode", "summarize")
@@ -240,7 +267,7 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
                 "action": fallback_action,
                 "task_type": task_type,
             }
-        except Exception as e:
+        except (TimeoutError, json.JSONDecodeError, ConnectionError, OSError) as e:
             update_token_usage("groq_skipped")  # 記錄 Groq 降級次數（其他錯誤）
             return {
                 "provider": "fallback_skipped",

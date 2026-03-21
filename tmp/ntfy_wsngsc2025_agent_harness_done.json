@@ -1,0 +1,10 @@
+{
+  "tags": [
+    "white_check_mark",
+    "memo",
+    "computer"
+  ],
+  "topic": "wsngsc2025",
+  "message": "Agent Harness 自主管理優化已完成，交付物位於 docs/reports/agent-harness-autonomy-final-report_20260320.md，並已補上 Windows 低權限資源監控 fallback、測試與完成通知。",
+  "title": "Agent Harness 任務完成"
+}

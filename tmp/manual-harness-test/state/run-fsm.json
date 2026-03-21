@@ -1,0 +1,14 @@
+{
+  "runs": {
+    "todoist_deadbeef": {
+      "agent_type": "todoist",
+      "phases": {
+        "phase2": {
+          "state": "running",
+          "updated": "2026-03-20T06:00:00+08:00"
+        }
+      }
+    }
+  },
+  "updated": "2026-03-20T06:00:00+08:00"
+}

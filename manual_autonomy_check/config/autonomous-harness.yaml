@@ -1,0 +1,87 @@
+autonomous_harness:
+  agent_registry_path: state/autonomous-agent-registry.json
+  api_health_path: state/api-health.json
+  auto_task_fairness_path: state/auto-task-fairness-hint.json
+  discovery:
+    auto_tasks_glob: templates/auto-tasks/*.md
+    core_fetch_agents:
+    - todoist
+    - news
+    - hackernews
+    fetch_agents_glob: prompts/team/fetch-*.md
+    heavy_task_patterns:
+    - podcast
+    - research
+    - shurangama
+    optional_fetch_agents:
+    - gmail
+    - security
+    - chatroom
+    research_task_patterns:
+    - research
+    - ai_
+    - shurangama
+  dispatch:
+    daily-digest:
+      restart_command:
+      - pwsh
+      - -File
+      - run-agent-team.ps1
+    todoist:
+      restart_command:
+      - pwsh
+      - -File
+      - run-todoist-agent-team.ps1
+  failed_auto_tasks_path: state/failed-auto-tasks.json
+  failure_stats_path: state/failure-stats.json
+  output_plan_path: state/autonomous-harness-plan.json
+  recovery_queue_path: state/autonomous-recovery-queue.json
+  resource_snapshot_path: state/autonomous-resource-snapshot.json
+  resources:
+    cpu_percent_high: 85
+    gpu_memory_percent_high: 80
+    gpu_percent_high: 85
+    memory_percent_high: 80
+  run_fsm_path: state/run-fsm.json
+  runtime_profiles:
+    degraded:
+      allow_heavy_auto_tasks: false
+      allow_research_auto_tasks: true
+      blocked_fetch_agents:
+      - security
+      - chatroom
+      daily_digest_assembly_mode: degraded
+      daily_digest_phase2_retries: 0
+      max_parallel_auto_tasks: 2
+      max_parallel_fetch_agents: 4
+    normal:
+      allow_heavy_auto_tasks: true
+      allow_research_auto_tasks: true
+      blocked_fetch_agents: []
+      daily_digest_assembly_mode: full
+      daily_digest_phase2_retries: 1
+      max_parallel_auto_tasks: 4
+      max_parallel_fetch_agents: 6
+    recovery:
+      allow_heavy_auto_tasks: false
+      allow_research_auto_tasks: false
+      blocked_fetch_agents:
+      - gmail
+      - security
+      - chatroom
+      daily_digest_assembly_mode: skip
+      daily_digest_phase2_retries: 0
+      max_parallel_auto_tasks: 1
+      max_parallel_fetch_agents: 3
+  runtime_state_path: state/autonomous-runtime.json
+  scheduler_heartbeat_path: state/scheduler-heartbeat.json
+  scheduler_state_path: state/scheduler-state.json
+  thresholds:
+    api_open_circuit_threshold: 1
+    failed_auto_task_threshold: 2
+    heartbeat_stale_minutes: 20
+    scheduler_failure_threshold: 2
+    scheduler_failure_window: 10
+    stale_run_minutes: 45
+    starvation_task_threshold: 3
+  token_budget_state_path: state/token-budget-state.json

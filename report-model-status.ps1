@@ -207,6 +207,53 @@ $ntfyFile = "$LogDir\ntfy_model_report_temp.json"
 curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyFile" https://ntfy.sh | Out-Null
 Remove-Item $ntfyFile -Force -ErrorAction SilentlyContinue
 
+# 高失敗率（≥30%）或 Token critical/emergency → 寫入 improvement-backlog.json 讓 arch_evolution 決策
+$failRatio = if ($totalRuns -gt 0) { $failedRuns / $totalRuns } else { 0 }
+$isModelCritical = ($failRatio -ge 0.3 -and $failedRuns -gt 0) -or ($tokenLevel -in @("critical","emergency"))
+if ($isModelCritical) {
+    try {
+        $backlogPath = "$AgentDir\context\improvement-backlog.json"
+        $backlogData = if (Test-Path $backlogPath) {
+            Get-Content $backlogPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        } else { [PSCustomObject]@{ items = @() } }
+        if (-not $backlogData.PSObject.Properties["items"]) {
+            $backlogData | Add-Member -NotePropertyName "items" -NotePropertyValue @() -Force
+        }
+        # 24h 去重
+        $today = (Get-Date -Format "yyyy-MM-dd")
+        $dupCheck = @($backlogData.items) | Where-Object {
+            $_.source -eq "model_report" -and $_.created_at -like "$today*"
+        }
+        if (-not $dupCheck) {
+            $problemParts = @()
+            if ($failRatio -ge 0.3 -and $failedRuns -gt 0) {
+                $failPct = [math]::Round($failRatio * 100)
+                $problemParts += "失敗率 ${failPct}%（$failedRuns/$totalRuns）"
+            }
+            if ($tokenLevel -in @("critical","emergency")) {
+                $problemParts += "Token ${tokenLevel}（$tokenStr）"
+            }
+            $problemStr = $problemParts -join "，"
+            $newItem = [PSCustomObject]@{
+                id          = "backlog_model_$(Get-Date -Format 'yyyyMMddHHmm')"
+                source      = "model_report"
+                title       = "19:00 模型報告異常：$problemStr"
+                description = "每日 19:00 模型執行報告偵測到：$problemStr"
+                priority    = if ($tokenLevel -eq "emergency") { "high" } else { "medium" }
+                effort      = "low"
+                created_at  = (Get-Date -Format "o")
+                status      = "pending"
+                tags        = @("model_report", "auto_detected")
+            }
+            $backlogData.items = @($backlogData.items) + $newItem
+            $backlogData | ConvertTo-Json -Depth 6 | Set-Content -Path $backlogPath -Encoding UTF8
+            Write-Host "[model-report] 問題已寫入 improvement-backlog.json（$problemStr）" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "[model-report] improvement-backlog 更新失敗（非阻斷性）：$_" -ForegroundColor Yellow
+    }
+}
+
 # ── 寫入報告日誌 ───────────────────────────────────────────
 $reportFile = "$LogDir\model-report_${Today}_$(Get-Date -Format 'HHmmss').log"
 $reportContent = @"

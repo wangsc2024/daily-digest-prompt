@@ -3,6 +3,26 @@
   "schedule_type": "system_audit",
   "description": "每日 00:40 系統審查的執行記錄，每日獨立一筆",
   "records": {
+    "2026-03-21": {
+      "run_id": "20260321_0044",
+      "completed_at": "2026-03-21T00:44:00+08:00",
+      "health_score": 88.10,
+      "grade": "A",
+      "top_issues": [
+        "5.4 跨平台相容性 55 分（Wontfix）",
+        "5.5 技術債務 65 分（99 處 TODO/FIXME）",
+        "1.4 依賴安全 75 分（pyasn1 CVE）",
+        "5.3 工具鏈完整度 80 分（缺 SAST/DAST）"
+      ],
+      "fixes_applied": 1,
+      "fixes_list": [
+        "CHANGELOG.md 新增 2026-03-21 審查記錄"
+      ],
+      "trend_vs_prev": "improved",
+      "consecutive_decline_count": 0,
+      "report_path": "docs/系統審查報告_20260321_0044.md",
+      "status": "completed"
+    },
     "2026-03-20": {
       "run_id": "20260320_0046",
       "completed_at": "2026-03-20T00:49:00+08:00",
@@ -61,26 +81,6 @@
       "trend_vs_prev": "improved",
       "consecutive_decline_count": 0,
       "report_path": "docs/系統審查報告_20260318_0042.md",
-      "status": "completed"
-    },
-    "2026-03-17": {
-      "run_id": "20260317_0115",
-      "completed_at": "2026-03-17T01:49:00+08:00",
-      "health_score": 85.05,
-      "grade": "A",
-      "top_issues": [
-        "5.5 技術債務 58 分（87 處 TODO/FIXME）",
-        "5.4 跨平台相容性 65 分（by design）",
-        "3.1 測試覆蓋率 72 分（行覆蓋率 10.39%）",
-        "7.4 測試覆蓋率 74 分"
-      ],
-      "fixes_applied": 1,
-      "fixes_list": [
-        "CHANGELOG.md 新增 2026-03-17 審查記錄"
-      ],
-      "trend_vs_prev": "declined",
-      "consecutive_decline_count": 2,
-      "report_path": "docs/系統審查報告_20260317_0115.md",
       "status": "completed"
     }
   }

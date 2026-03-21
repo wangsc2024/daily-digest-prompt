@@ -4,6 +4,14 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-20T07:15:00+08:00",
+      "topic": "系統健康良好：0 嚴重問題，1 監控性改善建議（Bot Server）",
+      "status": "completed",
+      "key_findings": "掃描最近 10 個日誌檔案，scheduler-state 最近 10 筆全部 success（100% 成功率）。發現 1 個改善建議：chatroom-scheduler 未啟動導致 Bot Server 健康檢查失敗（2026-03-20 00:15:56，重試 3 次）。其他檢測均為虛警：nul 54 次（preamble.md 文檔文本）、failed 11 次（正常日誌含字串）、sandbox error 232（正常終止）。系統整體狀態良好，無需程式碼修復。",
+      "kb_note_ids": ["cbda7bb5-ca54-4783-ad71-fe8fc2ace7ea"],
+      "next_suggested_angle": "追蹤 chatroom-scheduler 穩定性，監控 Bot Server 健康檢查失敗頻率"
+    },
+    {
       "executed_at": "2026-03-19T09:02:00+08:00",
       "topic": "系統健康度極佳：0 嚴重問題、僅 1 環境層 ERROR",
       "status": "completed",
@@ -34,14 +42,6 @@
       "key_findings": "掃描 200 個 log 檔案，發現 3 個觀察性問題：API 配額耗盡（42 次，等待 03-17 13:32 恢復）、done_cert JSON 損壞（80 次，03-16 後已消失）、OOM 錯誤（1 次單一事件）。系統整體健康度良好，最近 10 筆排程全部成功。無需修復，建議加強監控機制。",
       "kb_note_ids": ["5ba7e697-b524-4d55-98b7-925c6c9e69f2"],
       "next_suggested_angle": "追蹤 API 配額恢復後自動任務執行情況，監控 done_cert 問題是否復發"
-    },
-    {
-      "executed_at": "2026-03-16T22:37:00+08:00",
-      "topic": "Groq 配額超限與 Stale lock 清理修復",
-      "status": "completed",
-      "key_findings": "發現並修復 2 個問題：P1-Groq API 配額超限（降低速率 5→3），P2-Stale lock 清理頻繁（強化末尾清理邏輯）。所有修改已通過驗證並歸檔至知識庫。",
-      "kb_note_ids": ["c6bfc6f2-4359-4571-939d-5d0d87ee9f8c"],
-      "next_suggested_angle": "監控 Groq 429 錯誤消失情況，追蹤 Stale lock 頻率變化"
     }
   ]
 }

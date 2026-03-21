@@ -1,0 +1,6 @@
+{
+  "topic": "wsngsc2025",
+  "title": "Agent Harness 任務完成",
+  "message": "Agent Harness 自主管理優化已完成：已補齊 daily-digest 與 Todoist 雙 Harness runtime policy 接管，交付物位於 docs/reports/agent-harness-autonomy-final-report_20260320.md 與 docs/reports/wsngsc2025-agent-harness-completion-notice_20260320.md；知識庫匯入成功，後續建議請見完成通知。",
+  "tags": ["white_check_mark", "memo", "computer"]
+}

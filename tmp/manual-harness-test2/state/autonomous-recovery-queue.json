@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "queued_at": "2026-03-20T07:00:00+08:00",
+      "target": "scheduler-heartbeat",
+      "action_type": "queue_self_heal",
+      "reason": "scheduler heartbeat 最後更新於 2026-03-20T06:00:00+08:00，超過自治閾值",
+      "severity": "critical",
+      "status": "pending"
+    }
+  ],
+  "updated_at": "2026-03-20T07:00:00+08:00"
+}

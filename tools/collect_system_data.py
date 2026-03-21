@@ -14,7 +14,7 @@ STATE_DIR = BASE_DIR / "state"
 CONTEXT_DIR = BASE_DIR / "context"
 
 # 時間範圍（近 7 天）
-END_DATE = datetime(2026, 3, 16)
+END_DATE = datetime.now()
 START_DATE = END_DATE - timedelta(days=6)
 
 def collect_jsonl_stats():

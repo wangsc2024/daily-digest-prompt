@@ -1,27 +1,5 @@
 [
   {
-    "timestamp": "2026-03-11T04:42:30.9433574+08:00",
-    "claude_md_lines": 167,
-    "skill_index_lines": 54,
-    "yaml_total_lines": 3058,
-    "yaml_count": 22,
-    "skill_count": 30,
-    "auto_task_templates": 20,
-    "team_prompt_count": 36,
-    "hook_lines": 4651
-  },
-  {
-    "timestamp": "2026-03-11T04:42:47.8614873+08:00",
-    "claude_md_lines": 167,
-    "skill_index_lines": 54,
-    "yaml_total_lines": 3058,
-    "yaml_count": 22,
-    "skill_count": 30,
-    "auto_task_templates": 20,
-    "team_prompt_count": 36,
-    "hook_lines": 4651
-  },
-  {
     "timestamp": "2026-03-11T04:46:27.9178007+08:00",
     "claude_md_lines": 167,
     "skill_index_lines": 54,
@@ -328,5 +306,27 @@
     "auto_task_templates": 20,
     "team_prompt_count": 45,
     "hook_lines": 5194
+  },
+  {
+    "timestamp": "2026-03-21T07:15:14.340581+08:00",
+    "claude_md_lines": 199,
+    "skill_index_lines": 76,
+    "yaml_total_lines": 4072,
+    "yaml_count": 29,
+    "skill_count": 52,
+    "auto_task_templates": 20,
+    "team_prompt_count": 45,
+    "hook_lines": 5228
+  },
+  {
+    "timestamp": "2026-03-21T12:03:26.2548544+08:00",
+    "claude_md_lines": 199,
+    "skill_index_lines": 77,
+    "yaml_total_lines": 4084,
+    "yaml_count": 29,
+    "skill_count": 53,
+    "auto_task_templates": 20,
+    "team_prompt_count": 45,
+    "hook_lines": 5258
   }
 ]

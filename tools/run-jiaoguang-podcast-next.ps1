@@ -96,7 +96,17 @@ if ($Backend -eq "cursor_cli") {
         exit 1
     }
     try {
-        Get-Content $promptPath -Raw -Encoding UTF8 | claude -p --allowedTools Read,Bash,Write,Edit 2>&1 | ForEach-Object { Write-Host $_ }
+        $jiaoguangContent = Get-Content $promptPath -Raw -Encoding UTF8
+        # 移除 frontmatter（--- ... ---），避免 claude -p 將 prompt 誤判為貼上的文件
+        $jiaoguangLines = $jiaoguangContent -split "`n"
+        if ($jiaoguangLines.Count -gt 0 -and $jiaoguangLines[0].Trim() -eq '---') {
+            for ($fi = 1; $fi -lt $jiaoguangLines.Count; $fi++) {
+                if ($jiaoguangLines[$fi].Trim() -eq '---') {
+                    $jiaoguangContent = ($jiaoguangLines[($fi+1)..($jiaoguangLines.Count-1)] -join "`n").TrimStart("`n`r"); break
+                }
+            }
+        }
+        $jiaoguangContent | claude -p --allowedTools Read,Bash,Write,Edit 2>&1 | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0) { $err = "cursor_cli (claude -p) 結束碼 $LASTEXITCODE" }
     } catch {
         $err = $_.Exception.Message
@@ -116,25 +126,28 @@ if ($Backend -eq "cursor_cli") {
     }
 }
 
-# --- 寫回下一集編號 + 今日計數（僅 claude 模式；cursor_cli 由 agent 依 prompt 更新）---
-if ($Backend -eq "claude") {
-    $nextNext = if ($next -ge $MaxEpisode) { 1 } else { $next + 1 }
-    $stateDir = Split-Path -Parent $StatePath
-    if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Force -Path $stateDir | Out-Null }
-    @{
-        next_episode  = $nextNext
-        last_produced = $next
-        last_topic    = $topicName
-        today_date    = $today
-        today_count   = $todayCount + 1
-        updated_at    = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-    } | ConvertTo-Json -Depth 3 | Set-Content -Path $StatePath -Encoding UTF8
-}
-
 if ($err) {
-    Write-Host "[jiaoguang-podcast-next] 製作完成但發生錯誤: $err"
+    Write-Host "[jiaoguang-podcast-next] 製作失敗: $err"
     exit 1
 }
+
+# --- 成功後寫回下一集編號 + 今日計數（無論 backend 均更新，確保 daily limit 有效）---
+$nextNext = if ($next -ge $MaxEpisode) { 1 } else { $next + 1 }
+$stateDir = Split-Path -Parent $StatePath
+if (-not (Test-Path $stateDir)) { New-Item -ItemType Directory -Force -Path $stateDir | Out-Null }
+# 讀現有狀態並合併，避免覆蓋 cursor_cli agent 已更新的欄位
+$existingState = if (Test-Path $StatePath) {
+    try { Get-Content $StatePath -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $null }
+} else { $null }
+$stateToWrite = [ordered]@{
+    next_episode  = if ($Backend -eq "claude") { $nextNext } elseif ($existingState.next_episode) { $existingState.next_episode } else { $next + 1 }
+    last_produced = if ($Backend -eq "claude") { $next } elseif ($existingState.last_produced) { $existingState.last_produced } else { $next }
+    last_topic    = if ($Backend -eq "claude") { $topicName } elseif ($existingState.last_topic) { $existingState.last_topic } else { $topicName }
+    today_date    = $today
+    today_count   = $todayCount + 1   # 成功後才遞增，primary 失敗→備援成功只計 1 次
+    updated_at    = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+}
+$stateToWrite | ConvertTo-Json -Depth 3 | Set-Content -Path $StatePath -Encoding UTF8
 if ($Backend -eq "claude") {
     $nextNext = if ($next -ge $MaxEpisode) { 1 } else { $next + 1 }
     Write-Host "[jiaoguang-podcast-next] 完成；下一集將為第 $nextNext 集"

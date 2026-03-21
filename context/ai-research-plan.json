@@ -1,19 +1,24 @@
-﻿{
-  "date": "2026-03-20",
-  "topic": "Computer-Using Agents（GUI Agent）— 多模態電腦操作代理的架構、評測與實務落地",
+{
+  "date": "2026-03-21",
+  "topic": "AI Benchmark 演進與評估方法論（2026）",
   "research_questions": [
-    "Computer-Using Agents 與一般工具型 Agent、browser agent 的關鍵差異是什麼？",
-    "此類代理的核心技術棧包含哪些模組：GUI 感知、推理控制、動作執行、驗證與安全？",
-    "哪些 benchmark 與實際案例最能反映 2025-2026 年的能力上限與主要瓶頸？"
+    "AI Benchmark 的演進脈絡是什麼？從單維度準確率到 HELM 全面評估經歷了哪些階段？",
+    "2026 年新一代 benchmark（MMLU、GPQA、HELM、LiveBench、FrontierMath）各自解決了什麼核心問題？",
+    "Benchmark Saturation 與 Data Leakage 問題如何影響模型評估的可信度？新一代如何應對？"
   ],
-  "methodology": "以官方產品/研究文件建立概念框架，再交叉對照學術 benchmark 論文與技術文章，最後回推對 daily-digest-prompt 與個人專案有價值的落地情境與後續研究方向。",
+  "methodology": "文獻綜述法 + 交叉比對法。蒐集學術論文（HELM 原始論文、Stanford CRFM）、官方文件（OpenAI/Anthropic benchmark 報告）、技術博客（AI leaderboard 平台分析），進行三角佐證。重點提取：(1) 各 benchmark 的設計理念與方法論，(2) 防污染機制的實作細節，(3) 全面評估框架的 7 維度指標。",
   "keywords": [
-    "Computer-Using Agent",
-    "GUI Agent",
-    "computer use",
-    "OSWorld",
-    "WebArena",
-    "multimodal agent"
+    "AI Benchmark",
+    "MMLU",
+    "GPQA",
+    "HELM",
+    "LiveBench",
+    "FrontierMath",
+    "Holistic Evaluation",
+    "Contamination-Free Testing",
+    "Benchmark Saturation",
+    "Data Leakage",
+    "評估方法論"
   ],
   "stage_completed": 1
 }

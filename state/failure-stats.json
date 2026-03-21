@@ -83,14 +83,73 @@
       "circuit_open": 0,
       "parse_error": 0,
       "phase_failure": 2
+    },
+    "2026-03-20": {
+      "timeout": 0,
+      "api_error": 0,
+      "circuit_open": 0,
+      "parse_error": 0,
+      "phase_failure": 21
+    },
+    "2026-03-21": {
+      "api_error": 0,
+      "circuit_open": 0,
+      "parse_error": 0,
+      "timeout": 2,
+      "phase_failure": 2
     }
   },
   "total": {
     "api_error": 0,
     "circuit_open": 0,
     "parse_error": 0,
-    "timeout": 11,
-    "phase_failure": 31
+    "timeout": 13,
+    "phase_failure": 54
   },
-  "updated": "2026-03-19T21:18:20"
+  "failure_taxonomy": {
+    "parse_error": {
+      "count": 0,
+      "blast_radius": "single_task",
+      "last_occurrence": null,
+      "description": "結果 JSON 格式錯誤或 schema 不符"
+    },
+    "circuit_open": {
+      "count": 0,
+      "blast_radius": "all_tasks",
+      "last_occurrence": null,
+      "description": "斷路器開啟導致任務跳過"
+    },
+    "unknown": {
+      "count": 0,
+      "blast_radius": "unknown",
+      "last_occurrence": null,
+      "description": "未分類失敗"
+    },
+    "phase_failure": {
+      "count": 54,
+      "blast_radius": "phase",
+      "last_occurrence": "2026-03-21",
+      "description": "Phase 執行失敗（LLM 錯誤、結果檔缺失）"
+    },
+    "timeout": {
+      "count": 13,
+      "blast_radius": "single_task",
+      "last_occurrence": "2026-03-21",
+      "description": "Agent 或 API 呼叫超時"
+    },
+    "api_error": {
+      "count": 0,
+      "blast_radius": "dependent_tasks",
+      "last_occurrence": null,
+      "description": "外部 API 不可用（KB、Todoist、ntfy）"
+    },
+    "quota_exceeded": {
+      "count": 0,
+      "blast_radius": "all_tasks",
+      "last_occurrence": null,
+      "description": "Token 或 API 配額耗盡"
+    }
+  },
+  "schema_version": 2,
+  "updated": "2026-03-21T15:04:04"
 }

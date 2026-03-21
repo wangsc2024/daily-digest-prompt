@@ -1,0 +1,16 @@
+{
+  "runs": [
+    {
+      "agent": "todoist-team",
+      "status": "failed"
+    },
+    {
+      "agent": "todoist-team",
+      "status": "failed"
+    },
+    {
+      "agent": "daily-digest-team",
+      "status": "success"
+    }
+  ]
+}

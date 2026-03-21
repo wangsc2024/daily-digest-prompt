@@ -1,19 +1,19 @@
 {
   "version": 2,
-  "updated_at": "2026-03-19T15:30:00+08:00",
+  "updated_at": "2026-03-20T13:40:00+08:00",
   "summary": {
-    "total": 28,
+    "total": 31,
     "proposed": 6,
-    "accepted": 20,
+    "accepted": 23,
     "deferred": 1,
     "wontfix": 1,
     "rejected": 0,
     "superseded": 0,
     "implementation_breakdown": {
-      "done": 20,
+      "done": 28,
       "partial": 0,
-      "pending": 6,
-      "immediate_fix": 1
+      "pending": 0,
+      "immediate_fix": 0
     }
   },
   "records": [
@@ -814,10 +814,10 @@
     {
       "id": "ADR-20260318-027",
       "title": "自動任務公平輪轉修復（加權輪轉 + 飢餓保護）",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-18",
-      "decided_at": null,
+      "decided_at": "2026-03-20",
       "source": "improvement-backlog",
       "source_pattern": "自動任務公平輪轉修復",
       "priority": "P0",
@@ -850,10 +850,10 @@
     {
       "id": "ADR-20260318-028",
       "title": "Phase 2 快照恢復與故障續跑機制",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-18",
-      "decided_at": null,
+      "decided_at": "2026-03-20",
       "source": "improvement-backlog",
       "source_pattern": "Phase 2 快照恢復與故障續跑",
       "priority": "P0",
@@ -887,7 +887,7 @@
       "id": "ADR-20260319-029",
       "title": "快取命中率調優與自適應 TTL 治理",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-19",
       "decided_at": "2026-03-19",
       "source": "improvement-backlog",
@@ -920,10 +920,10 @@
     {
       "id": "ADR-20260319-030",
       "title": "統一 execution trace schema 與因果追蹤",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-19",
-      "decided_at": null,
+      "decided_at": "2026-03-20",
       "source": "improvement-backlog",
       "source_pattern": "統一 execution trace schema 與因果追蹤",
       "priority": "P1",
@@ -956,10 +956,10 @@
     {
       "id": "ADR-20260319-031",
       "title": "宣告式 hook registry 與 stage 化 guard 鏈",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-19",
-      "decided_at": null,
+      "decided_at": "2026-03-20",
       "source": "improvement-backlog",
       "source_pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
       "priority": "P1",
@@ -989,6 +989,111 @@
       "tech_debt_score": 0.0,
       "auto_generated": true,
       "review_due": "2026-06-17"
+    },
+    {
+      "id": "ADR-20260320-032",
+      "title": "每日成功率根因分類與 SLO/Error Budget 治理",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-20",
+      "decided_at": "2026-03-20",
+      "source": "improvement-backlog",
+      "source_pattern": "每日成功率根因分類與 SLO/Error Budget 治理",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "system-insight 於 2026-03-19 顯示 daily_success_rate 僅 84.6%，低於 90% 門檻。建議將失敗 run 依 failure mode 分類，建立 SLO、error budget、postmortem 觸發與降級策略，讓成功率改善有一致的優先順序與驗收基準。",
+      "decision": "自動接受：盤點近 7 天失敗 runs 並建立 failure mode taxonomy，定義 SLI/SLO 與 28 天 error budget，操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "7 天內所有 failed runs 至少 90% 可歸類到明確 failure mode",
+          "system-insight 新增 budget burn 或 failure-class distribution 指標",
+          "連續 2 週 daily_success_rate 達到或高於 0.90"
+        ],
+        "negative": [
+          "需建立 state/failure-stats.json 與 failure mode taxonomy",
+          "SLO 定義需與現有 ntfy 告警與 fallback/retry 機制協調"
+        ]
+      },
+      "related_files": [
+        "state/failure-stats.json",
+        "context/system-insight.json",
+        "logs/structured/*.jsonl",
+        "config/slo.yaml"
+      ],
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-18"
+    },
+    {
+      "id": "ADR-20260320-033",
+      "title": "Machine-readable Skill Registry 與 Schema 驗證",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-20",
+      "decided_at": "2026-03-20",
+      "source": "improvement-backlog",
+      "source_pattern": "Machine-readable Skill Registry 與 Schema 驗證",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "近 3 天洞察指出目前 Skill 發現仍以文字索引為主，建議補上 machine-readable registry 與 schema 驗證，降低 SKILL_INDEX、frontmatter、依賴與觸發詞漂移。",
+      "decision": "自動接受：定義 skill-registry.json schema，掃描 SKILL.md frontmatter 建立欄位對映，用 JSON Schema 驗證 registry 結構，操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "registry 可列出 100% 現有 skills，且 path/name/frontmatter 驗證通過",
+          "新增或變更 Skill 時，可自動檢出 trigger/depends_on 衝突",
+          "SKILL_INDEX 與 machine-readable registry 的技能數量與名稱一致"
+        ],
+        "negative": [
+          "需建立 config/schemas/skill-registry.schema.json",
+          "registry 產出流程需接到既有 skill-registry-sync 或檢查腳本"
+        ]
+      },
+      "related_files": [
+        "skills/**/SKILL.md",
+        "skills/SKILL_INDEX.md",
+        "config/schemas/skill-registry.schema.json",
+        "context/skill-registry.json"
+      ],
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-18"
+    },
+    {
+      "id": "ADR-20260320-034",
+      "title": "Prompt/模板版本追蹤與結果對映",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-20",
+      "decided_at": "2026-03-20",
+      "source": "improvement-backlog",
+      "source_pattern": "Prompt/模板版本追蹤與結果對映",
+      "priority": "P1",
+      "effort": "medium",
+      "context": "近 3 天洞察建議將 prompts、templates 與 results 建立版本對映，讓同一 task_key 的輸出可回溯到當時使用的模板版本，降低回歸分析與 A/B 比對成本。",
+      "decision": "自動接受：為 prompts/ 與 templates/ 建立 version 欄位或 tag/hash 產生不可變版本標識，在 results/*.json 新增 prompt_version、template_version、prompt_source 欄位，操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "新產生的自動任務結果檔至少 90% 含 prompt_version 或等價不可變版本標識",
+          "任一回歸案例可回溯到對應 prompt/template 版本與來源檔",
+          "重大模板調整可區分 major/minor/patch，且不會覆寫歷史版本對應"
+        ],
+        "negative": [
+          "需建立版本發布流程（草稿驗證後再提升為穩定版）",
+          "若模板由外部服務或快取提供，需補上 fallback/stale 版本記錄"
+        ]
+      },
+      "related_files": [
+        "prompts/",
+        "templates/",
+        "results/",
+        "state/template-versions.json"
+      ],
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "auto_generated": true,
+      "review_due": "2026-06-18"
     }
   ]
 }

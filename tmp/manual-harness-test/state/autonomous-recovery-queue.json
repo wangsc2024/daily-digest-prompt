@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "queued_at": "2026-03-20T07:00:00+08:00",
+      "target": "todoist",
+      "action_type": "restart_agent",
+      "reason": "todoist_deadbeef:phase2 持續 running 60 分鐘，超過自治閾值",
+      "severity": "critical",
+      "status": "pending"
+    },
+    {
+      "queued_at": "2026-03-20T07:00:00+08:00",
+      "target": "todoist",
+      "action_type": "restart_agent",
+      "reason": "最近 10 次排程中失敗 2 次",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "queued_at": "2026-03-20T07:00:00+08:00",
+      "target": "self_heal",
+      "action_type": "queue_self_heal",
+      "reason": "自動任務已連續失敗 2 次，需插入自癒佇列",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "queued_at": "2026-03-20T07:00:00+08:00",
+      "target": "gun-bot",
+      "action_type": "queue_self_heal",
+      "reason": "gun-bot circuit breaker 為 open，需自動降級與恢復檢查",
+      "severity": "medium",
+      "status": "pending"
+    }
+  ],
+  "updated_at": "2026-03-20T07:00:00+08:00"
+}

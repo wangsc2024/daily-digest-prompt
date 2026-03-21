@@ -1,0 +1,18 @@
+{
+  "notes": [
+    {
+      "title": "Agent Harness 研究報告與自主管理落地（2026-03-20）",
+      "contentText": "# Agent Harness 研究報告與自主管理落地（2026-03-20）\n\n- 版本基線：目前專案內建 harness 從 `0.1.0`（2026-02-15）演進到 `0.2.0`（2026-03-09），`Unreleased` 已含 autonomous runtime、schema、Skill registry 等新能力。\n- 核心架構：`run-agent-team.ps1` 為 digest 兩階段 orchestrator；`run-todoist-agent-team.ps1` 為 Todoist 三階段 orchestrator；`tools/autonomous_harness.py` 為自治控制面。\n- 已有自癒能力：instance lock、timeout/retry/backoff、circuit breaker、cache fallback、run-fsm、failure-stats、runtime policy。\n- 主要缺口：原始 recovery queue 沒有獨立 consumer、Phase 2 snapshot/resume 未完成、trace schema 尚未統一、SLO/Error Budget 尚未強制化。\n- 本次實作：新增 `tools/autonomous_recovery_worker.py`，將 `restart_agent`、`queue_self_heal`、`rebalance_tasks`、`scale_down_workload` 從 queue 轉為實際動作；新增 `state/autonomous-runtime-overrides.json` 與 `state/autonomous-self-heal-requests.json`；`tools/autonomous_harness.py` 現在可讀取 runtime override 並重新生成 runtime policy。\n- 優化方向：\n  1. recovery worker + runtime override 閉環\n  2. Phase 2 snapshot / resume durability\n  3. 統一 execution trace schema 與 recovery causality\n  4. SLO / Error Budget 治理強制化\n- 外部對照：OpenTelemetry traces 官方規格適合作為 trace schema 依據；Google SRE error budget policy 適合作為穩定性治理依據。\n- 驗證結果：`tools/autonomous_harness.py --format json` 與 `tools/autonomous_recovery_worker.py --limit 2` 可執行並落盤 state；pytest 因本機 ACL 限制無法完整跑完 fixture-based tests，但腳本級驗證已確認 override 與 queue 消費生效。",
+      "tags": [
+        "agent-harness",
+        "autonomous-management",
+        "runtime-policy",
+        "recovery-worker",
+        "self-healing",
+        "research"
+      ],
+      "source": "import"
+    }
+  ],
+  "autoSync": true
+}

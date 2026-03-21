@@ -1,0 +1,9 @@
+{
+  "apis": {
+    "gun-bot": {
+      "circuit_breaker": {
+        "state": "open"
+      }
+    }
+  }
+}

@@ -4,13 +4,19 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-21T14:50:00+08:00",
+      "topic": "AI 軟體開發系統核心架構實作指南 — Agent SDK、工作流引擎與程式碼生成管線",
+      "status": "completed",
+      "key_findings": "本次為 ai-software-development 系列 mechanism 階段研究，深入三大支柱實作細節：(1) Agent SDK 的 Task/Tool/Memory 模組與 Harness 架構（LangChain 2026 核心論述）；(2) 工作流引擎的 DAG 拓撲排序、事件溯源與 durable execution（Temporal vs Airflow）；(3) 程式碼生成管線的 AST 解析、語義分析與 Linter-Directed 驗證循環（Tree-sitter + LLMLOOP 框架）。對 daily-digest-prompt 最直接的價值是三個優化方向：引入 Temporal 替代 PowerShell FSM、MCP 標準化工具整合、LLM-as-Router 預分類。",
+      "kb_note_ids": ["371a14dd-2b57-4294-b7a3-7476233c0a55"],
+      "next_suggested_angle": "進入 application 階段：實作 Agent SDK 原型（含 ReAct 循環）、工作流編排引擎最小實作、程式碼生成管線 PoC"
+    },
+    {
       "executed_at": "2026-03-20T07:06:47.576498+08:00",
       "topic": "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化",
       "status": "completed",
       "key_findings": "本次聚焦 incident response 冷門面向，整理出 triage、RCA、runbook automation 的共通架構：先蒐證與假設排序，再用 guardrail 控制自動修復。對 daily-digest-prompt 最直接的價值是把 KB 匯入、registry 更新、排程失敗等問題提升為可重用 incident runbook，而非一次性除錯。",
-      "kb_note_ids": [
-        "81574d50-842c-4f3c-a85b-226473c4bde3"
-      ],
+      "kb_note_ids": ["81574d50-842c-4f3c-a85b-226473c4bde3"],
       "next_suggested_angle": "深入事件關聯、根因排序與自動修復安全閘門"
     },
     {
@@ -18,9 +24,7 @@
       "topic": "AI 程式碼審查優化：誤報治理、風險分級與修補建議驗證閉環",
       "status": "completed",
       "key_findings": "本次將 AI code review 從一般 PR 留言收斂為可治理閉環：先以 SARIF fingerprint、precision、security-severity 做排序與去重，再用 AI triage 壓低誤報，最後以 CI、re-scan 與人工覆核驗證 AI 修補建議。對 daily-digest-prompt 最直接的價值是減少規則誤報與重複告警，並把 workflow 修補納入明確 merge gate。",
-      "kb_note_ids": [
-        "afe2f5c9-fc53-4974-acce-a815ec98aad2"
-      ],
+      "kb_note_ids": ["afe2f5c9-fc53-4974-acce-a815ec98aad2"],
       "next_suggested_angle": "延伸到 synthesis：把 code review、需求閘門與 ADR 治理串成工程政策閉環"
     },
     {
@@ -28,9 +32,7 @@
       "topic": "AI 驅動的持續整合進階實作：Flaky Test 根因分類、隔離治理與預測式選測",
       "status": "completed",
       "key_findings": "本次聚焦 flaky test 治理而非泛化 CI/CD 概論，整理出預測式選測、同 commit pass/fail 偵測、mute 優先於 skip 的隔離策略，以及 GitLab root-cause taxonomy。可直接用於降低 daily-digest-prompt 排程假失敗與驗證等待時間。",
-      "kb_note_ids": [
-        "5556934b-d083-4065-89a5-34efb5fdd528"
-      ],
+      "kb_note_ids": ["5556934b-d083-4065-89a5-34efb5fdd528"],
       "next_suggested_angle": "延伸到 build failure prediction 與自動回滾閘門"
     },
     {
@@ -38,20 +40,8 @@
       "topic": "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化",
       "status": "completed",
       "key_findings": "完整的 MCP 配置工作流程（VS Code + Claude Code）、CI/CD Agent 三核心架構設計（Brain-Tools-Memory）、信心度閾值機制（90%自主/60-89%審核），涵蓋實作程式碼與安全防護",
-      "kb_note_ids": [
-        "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c"
-      ],
+      "kb_note_ids": ["f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c"],
       "next_suggested_angle": "進入 optimization 階段：效能優化（測試執行時間、API 成本）、開發者體驗提升（錯誤訊息品質、學習曲線）"
-    },
-    {
-      "executed_at": "2026-03-16T14:48:29.187761+08:00",
-      "topic": "AI 測試生成與 Test-Time Compute 驗證機制",
-      "status": "completed",
-      "key_findings": "Meta TestGen-LLM 三層過濾機制（73% 接受率）、Test-Time Compute Verifier 提升品質、LLM 驅動的 Mutation Testing（ACH）在工業級部署中展現成效",
-      "kb_note_ids": [
-        "9846abc5-ea48-4608-b13e-fb8d3a99978c"
-      ],
-      "next_suggested_angle": "進入 application 階段：實作 pytest + LLM + mutation testing 的整合工具鏈"
     }
   ]
 }

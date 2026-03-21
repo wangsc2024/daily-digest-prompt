@@ -1,0 +1,25 @@
+autonomous_harness:
+  api_health_path: state/api-health.json
+  dispatch:
+    daily-digest:
+      restart_command:
+      - pwsh
+      - -File
+      - run-agent-team.ps1
+    todoist:
+      restart_command:
+      - pwsh
+      - -File
+      - run-todoist-agent-team.ps1
+  failed_auto_tasks_path: state/failed-auto-tasks.json
+  failure_stats_path: state/failure-stats.json
+  output_plan_path: state/autonomous-harness-plan.json
+  recovery_queue_path: state/autonomous-recovery-queue.json
+  run_fsm_path: state/run-fsm.json
+  scheduler_state_path: state/scheduler-state.json
+  thresholds:
+    api_open_circuit_threshold: 1
+    failed_auto_task_threshold: 2
+    scheduler_failure_threshold: 2
+    scheduler_failure_window: 10
+    stale_run_minutes: 45

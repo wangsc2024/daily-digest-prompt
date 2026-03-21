@@ -108,6 +108,14 @@ schedules:
     retry: 0
     description: "Groq-Relay Watchdog（每 5 分鐘，進程死亡即自動重啟 + ntfy 告警）"
 
+  autonomous-harness:
+    cron: "*/5 * * * *"
+    script: run-autonomous-harness.ps1
+    workdir: "D:/Source/daily-digest-prompt"
+    timeout: 60
+    retry: 0
+    description: "Agent Harness 自治週期（每 5 分鐘，build_plan + recovery_worker 消費佇列）"
+
 ---
 
 # Heartbeat 排程定義
@@ -131,6 +139,7 @@ schedules:
 | chatroom-watchdog | 每 10 分鐘 | bot/watchdog-chatroom.ps1 | 60s | Chatroom-Scheduler Watchdog（死亡自動重啟 + ntfy 告警） |
 | groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
 | groq-relay-watchdog | 每 5 分鐘 | bot/watchdog-groq-relay.ps1 | 30s | Groq-Relay Watchdog（死亡自動重啟 + ntfy 告警） |
+| autonomous-harness | 每 5 分鐘 | run-autonomous-harness.ps1 | 60s | Agent Harness 自治週期（build_plan + recovery_worker） |
 
 ## 注意：Todoist 團隊模式與排程重疊
 

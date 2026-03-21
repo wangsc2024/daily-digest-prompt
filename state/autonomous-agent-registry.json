@@ -1,0 +1,208 @@
+{
+  "generated_at": "2026-03-20T12:15:12.650138+08:00",
+  "managed_agents": [
+    "daily-digest",
+    "todoist"
+  ],
+  "fetch_agents": [
+    {
+      "key": "audit-dim1-5",
+      "path": "prompts/team/fetch-audit-dim1-5.md",
+      "source": "prompt"
+    },
+    {
+      "key": "audit-dim2-6",
+      "path": "prompts/team/fetch-audit-dim2-6.md",
+      "source": "prompt"
+    },
+    {
+      "key": "audit-dim3-7",
+      "path": "prompts/team/fetch-audit-dim3-7.md",
+      "source": "prompt"
+    },
+    {
+      "key": "audit-dim4",
+      "path": "prompts/team/fetch-audit-dim4.md",
+      "source": "prompt"
+    },
+    {
+      "key": "chatroom",
+      "path": "prompts/team/fetch-chatroom.md",
+      "source": "prompt"
+    },
+    {
+      "key": "gmail",
+      "path": "prompts/team/fetch-gmail.md",
+      "source": "prompt"
+    },
+    {
+      "key": "hackernews",
+      "path": "prompts/team/fetch-hackernews.md",
+      "source": "prompt"
+    },
+    {
+      "key": "news",
+      "path": "prompts/team/fetch-news.md",
+      "source": "prompt"
+    },
+    {
+      "key": "security",
+      "path": "prompts/team/fetch-security.md",
+      "source": "prompt"
+    },
+    {
+      "key": "todoist",
+      "path": "prompts/team/fetch-todoist.md",
+      "source": "prompt"
+    }
+  ],
+  "auto_tasks": [
+    {
+      "key": "ai_deep_research",
+      "path": "templates/auto-tasks/ai-deep-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "ai_domain_research",
+      "path": "templates/auto-tasks/ai-domain-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "ai_github_research",
+      "path": "templates/auto-tasks/ai-github-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "ai_workflow_github_research",
+      "path": "templates/auto-tasks/ai-workflow-github-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "arch_evolution",
+      "path": "templates/auto-tasks/arch-evolution.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "buddhist_research",
+      "path": "templates/auto-tasks/buddhist-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "chatroom_optimize",
+      "path": "templates/auto-tasks/chatroom-optimize.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "creative_game_optimize",
+      "path": "templates/auto-tasks/creative-game-optimize.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "git_push",
+      "path": "templates/auto-tasks/git-push.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "github_scout",
+      "path": "templates/auto-tasks/github-scout.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "log_audit",
+      "path": "templates/auto-tasks/log-audit.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "podcast_create",
+      "path": "templates/auto-tasks/podcast-create.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": false
+    },
+    {
+      "key": "podcast_jiaoguangzong",
+      "path": "templates/auto-tasks/podcast-jiaoguangzong.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "qa_system_optimize",
+      "path": "templates/auto-tasks/qa-system-optimize.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "self_heal",
+      "path": "templates/auto-tasks/self-heal.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "shurangama_research",
+      "path": "templates/auto-tasks/shurangama-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "skill_audit",
+      "path": "templates/auto-tasks/skill-audit.md",
+      "source": "template",
+      "is_heavy": false,
+      "is_research": false
+    },
+    {
+      "key": "system_insight",
+      "path": "templates/auto-tasks/system-insight.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "tech_research",
+      "path": "templates/auto-tasks/tech-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    },
+    {
+      "key": "unsloth_research",
+      "path": "templates/auto-tasks/unsloth-research.md",
+      "source": "template",
+      "is_heavy": true,
+      "is_research": true
+    }
+  ],
+  "summary": {
+    "managed_agent_count": 2,
+    "fetch_agent_count": 10,
+    "auto_task_count": 20,
+    "heavy_auto_task_count": 11,
+    "research_auto_task_count": 10
+  }
+}

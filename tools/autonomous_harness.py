@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -53,6 +55,17 @@ def _write_json(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _parse_typeperf_value(output: str) -> float | None:
+    for line in reversed(output.splitlines()):
+        match = re.search(r'"([-+]?\d+(?:\.\d+)?)"\s*$', line.strip())
+        if match:
+            try:
+                return float(match.group(1))
+            except ValueError:
+                return None
+    return None
+
+
 @dataclass
 class Action:
     action_type: str
@@ -81,6 +94,9 @@ class AutonomousHarness:
         self.thresholds = self.settings["thresholds"]
         self.dispatch = self.settings.get("dispatch", {})
         self.runtime_profiles = self.settings.get("runtime_profiles", {})
+        self.discovery = self.settings.get("discovery", {})
+        self.resources = self.settings.get("resources", {})
+        self.recovery_worker = self.settings.get("recovery_worker", {})
 
     def _resolve(self, key: str) -> Path:
         return self.repo_root / self.settings[key]
@@ -88,6 +104,185 @@ class AutonomousHarness:
     def _recent_scheduler_runs(self, scheduler_state: dict[str, Any]) -> list[dict[str, Any]]:
         runs = scheduler_state.get("runs", [])
         return runs[-self.thresholds["scheduler_failure_window"] :]
+
+    def _classify_auto_task(self, task_key: str) -> dict[str, bool]:
+        heavy_patterns = self.discovery.get("heavy_task_patterns", [])
+        research_patterns = self.discovery.get("research_task_patterns", [])
+        is_heavy = any(pattern in task_key for pattern in heavy_patterns)
+        is_research = any(pattern in task_key for pattern in research_patterns)
+        return {"is_heavy": is_heavy, "is_research": is_research}
+
+    def _discover_agent_registry(
+        self, run_fsm: dict[str, Any], scheduler_state: dict[str, Any]
+    ) -> dict[str, Any]:
+        fetch_agents: list[dict[str, Any]] = []
+        auto_tasks: list[dict[str, Any]] = []
+
+        for prompt_path in sorted(self.repo_root.glob(self.discovery.get("fetch_agents_glob", ""))):
+            name = prompt_path.stem.replace("fetch-", "")
+            fetch_agents.append(
+                {
+                    "key": name,
+                    "path": str(prompt_path.relative_to(self.repo_root)).replace("\\", "/"),
+                    "source": "prompt",
+                }
+            )
+
+        for task_path in sorted(self.repo_root.glob(self.discovery.get("auto_tasks_glob", ""))):
+            key = task_path.stem.replace("-", "_")
+            classification = self._classify_auto_task(key)
+            auto_tasks.append(
+                {
+                    "key": key,
+                    "path": str(task_path.relative_to(self.repo_root)).replace("\\", "/"),
+                    "source": "template",
+                    **classification,
+                }
+            )
+
+        runtime_agents = sorted(
+            {
+                run.get("agent_type", "unknown")
+                for run in run_fsm.get("runs", {}).values()
+                if run.get("agent_type")
+            }
+            | {
+                "daily-digest" if "daily" in str(item.get("agent")) else "todoist"
+                if "todoist" in str(item.get("agent"))
+                else str(item.get("agent"))
+                for item in scheduler_state.get("runs", [])
+                if item.get("agent")
+            }
+            | set(self.dispatch.keys())
+        )
+
+        registry = {
+            "generated_at": _now().isoformat(),
+            "managed_agents": runtime_agents,
+            "fetch_agents": fetch_agents,
+            "auto_tasks": auto_tasks,
+            "summary": {
+                "managed_agent_count": len(runtime_agents),
+                "fetch_agent_count": len(fetch_agents),
+                "auto_task_count": len(auto_tasks),
+                "heavy_auto_task_count": sum(1 for item in auto_tasks if item["is_heavy"]),
+                "research_auto_task_count": sum(1 for item in auto_tasks if item["is_research"]),
+            },
+        }
+        return registry
+
+    def _run_powershell_json(self, script: str) -> dict[str, Any] | None:
+        command = ["powershell", "-NoProfile", "-Command", script]
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=10,
+                check=False,
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return None
+
+        if completed.returncode != 0 or not completed.stdout.strip():
+            return None
+        try:
+            return json.loads(completed.stdout)
+        except json.JSONDecodeError:
+            return None
+
+    def _run_typeperf(self, counter: str) -> float | None:
+        """執行 typeperf 取得單一效能計數器值，失敗回傳 None。"""
+        try:
+            result = subprocess.run(
+                ["typeperf", counter, "-sc", "1"],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=10,
+                check=False,
+            )
+            if result.returncode == 0:
+                return _parse_typeperf_value(result.stdout)
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+        return None
+
+    def _collect_resource_snapshot(self) -> dict[str, Any]:
+        snapshot: dict[str, Any] = {
+            "generated_at": _now().isoformat(),
+            "cpu": {"percent": None},
+            "memory": {"percent": None, "available_mb": None},
+            "gpu": {"available": False, "devices": []},
+        }
+
+        if os.name == "nt":
+            system_stats = self._run_powershell_json(
+                """
+$cpu = (Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples[0].CookedValue
+$os = Get-CimInstance Win32_OperatingSystem
+[pscustomobject]@{
+  cpu_percent = [math]::Round($cpu, 2)
+  memory_percent = [math]::Round((($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / $os.TotalVisibleMemorySize) * 100, 2)
+  available_mb = [math]::Round($os.FreePhysicalMemory / 1024, 2)
+} | ConvertTo-Json -Compress
+""".strip()
+            )
+            if system_stats:
+                snapshot["cpu"]["percent"] = system_stats.get("cpu_percent")
+                snapshot["memory"]["percent"] = system_stats.get("memory_percent")
+                snapshot["memory"]["available_mb"] = system_stats.get("available_mb")
+
+            if snapshot["cpu"]["percent"] is None:
+                snapshot["cpu"]["percent"] = self._run_typeperf(
+                    r"\Processor(_Total)\% Processor Time"
+                )
+            if snapshot["memory"]["available_mb"] is None:
+                snapshot["memory"]["available_mb"] = self._run_typeperf(
+                    r"\Memory\Available MBytes"
+                )
+            if snapshot["memory"]["percent"] is None:
+                snapshot["memory"]["percent"] = self._run_typeperf(
+                    r"\Memory\% Committed Bytes In Use"
+                )
+
+        try:
+            gpu_result = subprocess.run(
+                [
+                    "nvidia-smi",
+                    "--query-gpu=utilization.gpu,memory.used,memory.total,name",
+                    "--format=csv,noheader,nounits",
+                ],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=5,
+                check=False,
+            )
+            if gpu_result.returncode == 0 and gpu_result.stdout.strip():
+                devices = []
+                for raw_line in gpu_result.stdout.strip().splitlines():
+                    util_str, used_str, total_str, name = [part.strip() for part in raw_line.split(",", 3)]
+                    used = float(used_str)
+                    total = float(total_str)
+                    devices.append(
+                        {
+                            "name": name,
+                            "utilization_percent": float(util_str),
+                            "memory_used_mb": used,
+                            "memory_total_mb": total,
+                            "memory_percent": round((used / total) * 100, 2) if total else None,
+                        }
+                    )
+                snapshot["gpu"] = {"available": True, "devices": devices}
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+
+        return snapshot
 
     def _stale_run_actions(self, run_fsm: dict[str, Any], now: datetime) -> list[Action]:
         actions: list[Action] = []
@@ -104,7 +299,8 @@ class AutonomousHarness:
                 if age <= stale_after:
                     continue
                 agent_type = run.get("agent_type", "unknown")
-                command = self.dispatch.get(agent_type, {}).get("restart_command")
+                dispatch_entry = self.dispatch.get(agent_type) or {}
+                command = dispatch_entry.get("restart_command") or []
                 reason = (
                     f"{run_key}:{phase_name} 持續 running {int(age.total_seconds() // 60)} 分鐘，"
                     "超過自治閾值"
@@ -226,12 +422,65 @@ class AutonomousHarness:
             )
         ]
 
+    def _resource_actions(self, resource_snapshot: dict[str, Any]) -> list[Action]:
+        actions: list[Action] = []
+        cpu_percent = resource_snapshot.get("cpu", {}).get("percent")
+        memory_percent = resource_snapshot.get("memory", {}).get("percent")
+        gpu_devices = resource_snapshot.get("gpu", {}).get("devices", [])
+
+        if cpu_percent is not None and cpu_percent >= self.resources.get("cpu_percent_high", 85):
+            actions.append(
+                Action(
+                    action_type="scale_down_workload",
+                    target="cpu",
+                    reason=f"CPU 使用率 {cpu_percent}% 已超過閾值",
+                    severity="high",
+                )
+            )
+        if memory_percent is not None and memory_percent >= self.resources.get("memory_percent_high", 80):
+            actions.append(
+                Action(
+                    action_type="scale_down_workload",
+                    target="memory",
+                    reason=f"記憶體使用率 {memory_percent}% 已超過閾值",
+                    severity="high",
+                )
+            )
+        for device in gpu_devices:
+            gpu_percent = device.get("utilization_percent")
+            gpu_memory_percent = device.get("memory_percent")
+            if gpu_percent is not None and gpu_percent >= self.resources.get("gpu_percent_high", 85):
+                actions.append(
+                    Action(
+                        action_type="scale_down_workload",
+                        target=f"gpu:{device['name']}",
+                        reason=f"GPU 使用率 {gpu_percent}% 已超過閾值",
+                        severity="medium",
+                    )
+                )
+            if (
+                gpu_memory_percent is not None
+                and gpu_memory_percent >= self.resources.get("gpu_memory_percent_high", 80)
+            ):
+                actions.append(
+                    Action(
+                        action_type="scale_down_workload",
+                        target=f"gpu-memory:{device['name']}",
+                        reason=f"GPU 記憶體使用率 {gpu_memory_percent}% 已超過閾值",
+                        severity="medium",
+                    )
+                )
+        return actions
+
     def _derive_runtime_state(
         self,
         plan: dict[str, Any],
         fairness_hint: dict[str, Any],
         token_budget_state: dict[str, Any],
         scheduler_heartbeat: dict[str, Any],
+        resource_snapshot: dict[str, Any],
+        agent_registry: dict[str, Any],
+        runtime_override: dict[str, Any],
     ) -> dict[str, Any]:
         has_critical = any(action["severity"] == "critical" for action in plan["actions"])
         has_high = any(action["severity"] == "high" for action in plan["actions"])
@@ -246,12 +495,65 @@ class AutonomousHarness:
         else:
             mode = "normal"
 
+        override_active = False
+        override_reason = None
+        override_mode = runtime_override.get("mode")
+        override_until = _parse_datetime(runtime_override.get("expires_at"))
+        if override_mode and override_until and override_until >= _parse_datetime(plan["generated_at"]):
+            mode_order = {"normal": 0, "degraded": 1, "recovery": 2}
+            if mode_order.get(override_mode, -1) > mode_order.get(mode, -1):
+                mode = override_mode
+            override_active = True
+            override_reason = runtime_override.get("reason")
+
         profile = self.runtime_profiles.get(mode, {})
+        core_fetch_agents = self.discovery.get("core_fetch_agents", [])
+        optional_fetch_agents = self.discovery.get("optional_fetch_agents", [])
+        blocked_fetch_agents = list(profile.get("blocked_fetch_agents", []))
+        fetch_agent_keys = [item["key"] for item in agent_registry.get("fetch_agents", [])]
+        allowed_fetch_agents = [
+            key for key in fetch_agent_keys if key not in blocked_fetch_agents
+        ]
+        heavy_task_keys = [
+            item["key"] for item in agent_registry.get("auto_tasks", []) if item.get("is_heavy")
+        ]
+        research_task_keys = [
+            item["key"] for item in agent_registry.get("auto_tasks", []) if item.get("is_research")
+        ]
+        blocked_task_keys: list[str] = []
+        if not profile.get("allow_heavy_auto_tasks", True):
+            blocked_task_keys.extend(heavy_task_keys)
+        if not profile.get("allow_research_auto_tasks", True):
+            blocked_task_keys.extend(research_task_keys)
+        blocked_fetch_agents.extend(runtime_override.get("blocked_fetch_agents", []))
+        blocked_task_keys.extend(runtime_override.get("blocked_task_keys", []))
+        max_parallel_auto_tasks = profile.get("max_parallel_auto_tasks", 4)
+        if runtime_override.get("max_parallel_auto_tasks") is not None:
+            max_parallel_auto_tasks = min(
+                max_parallel_auto_tasks,
+                int(runtime_override["max_parallel_auto_tasks"]),
+            )
+        max_parallel_fetch_agents = profile.get("max_parallel_fetch_agents", len(fetch_agent_keys))
+        if runtime_override.get("max_parallel_fetch_agents") is not None:
+            max_parallel_fetch_agents = min(
+                max_parallel_fetch_agents,
+                int(runtime_override["max_parallel_fetch_agents"]),
+            )
+        allowed_fetch_agents = [
+            key for key in fetch_agent_keys if key not in sorted(set(blocked_fetch_agents))
+        ]
         reasons = [action["reason"] for action in plan["actions"][:5]]
+        if override_reason:
+            reasons.append(f"override: {override_reason}")
         return {
             "generated_at": plan["generated_at"],
             "mode": mode,
             "reasons": reasons,
+            "override": {
+                "active": override_active,
+                "reason": override_reason,
+                "expires_at": runtime_override.get("expires_at"),
+            },
             "gates": {
                 "heartbeat_stale": heartbeat_stale,
                 "starvation_detected": starvation_detected,
@@ -259,15 +561,27 @@ class AutonomousHarness:
                 "open_circuits": plan["summary"]["open_circuits"],
             },
             "policies": {
-                "max_parallel_auto_tasks": profile.get("max_parallel_auto_tasks", 4),
+                "max_parallel_auto_tasks": max_parallel_auto_tasks,
+                "max_parallel_fetch_agents": max_parallel_fetch_agents,
                 "allow_heavy_auto_tasks": profile.get("allow_heavy_auto_tasks", True),
                 "allow_research_auto_tasks": profile.get("allow_research_auto_tasks", True),
+                "daily_digest_assembly_mode": profile.get("daily_digest_assembly_mode", "full"),
+                "daily_digest_phase2_retries": profile.get("daily_digest_phase2_retries", 1),
+                "core_fetch_agents": core_fetch_agents,
+                "optional_fetch_agents": optional_fetch_agents,
+                "blocked_fetch_agents": sorted(set(blocked_fetch_agents)),
+                "allowed_fetch_agents": allowed_fetch_agents,
+                "heavy_task_keys": heavy_task_keys,
+                "research_task_keys": research_task_keys,
+                "blocked_task_keys": sorted(set(blocked_task_keys)),
                 "priority_recovery_targets": [
                     action["target"]
                     for action in plan["actions"]
                     if action["action_type"] in {"queue_self_heal", "rebalance_tasks"}
                 ],
             },
+            "resource_snapshot": resource_snapshot,
+            "agent_registry_summary": agent_registry.get("summary", {}),
             "scheduler_heartbeat": scheduler_heartbeat,
         }
 
@@ -281,6 +595,12 @@ class AutonomousHarness:
         fairness_hint = _load_json(self._resolve("auto_task_fairness_path"), {})
         token_budget_state = _load_json(self._resolve("token_budget_state_path"), {})
         scheduler_heartbeat = _load_json(self._resolve("scheduler_heartbeat_path"), {})
+        runtime_override = _load_json(
+            self._resolve("runtime_override_path"),
+            {"mode": None, "reason": None, "expires_at": None},
+        )
+        agent_registry = self._discover_agent_registry(run_fsm, scheduler_state)
+        resource_snapshot = self._collect_resource_snapshot()
 
         actions = []
         actions.extend(self._stale_run_actions(run_fsm, now))
@@ -290,6 +610,7 @@ class AutonomousHarness:
         actions.extend(self._fairness_actions(fairness_hint))
         actions.extend(self._token_budget_actions(token_budget_state, now))
         actions.extend(self._heartbeat_actions(scheduler_heartbeat, now))
+        actions.extend(self._resource_actions(resource_snapshot))
 
         deduped: list[Action] = []
         seen = set()
@@ -322,13 +643,24 @@ class AutonomousHarness:
                 "fairness_hint": fairness_hint,
                 "token_budget_state": token_budget_state,
                 "scheduler_heartbeat": scheduler_heartbeat,
+                "runtime_override": runtime_override,
+                "resource_snapshot": resource_snapshot,
+                "agent_registry": agent_registry,
                 "scheduler_state_recent_statuses": [
                     run.get("status") for run in self._recent_scheduler_runs(scheduler_state)
                 ],
             },
             "actions": [action.as_dict() for action in deduped],
         }
-        plan["runtime"] = self._derive_runtime_state(plan, fairness_hint, token_budget_state, scheduler_heartbeat)
+        plan["runtime"] = self._derive_runtime_state(
+            plan,
+            fairness_hint,
+            token_budget_state,
+            scheduler_heartbeat,
+            resource_snapshot,
+            agent_registry,
+            runtime_override,
+        )
         return plan
 
     def enqueue_recovery(self, plan: dict[str, Any]) -> dict[str, Any]:
@@ -365,12 +697,38 @@ class AutonomousHarness:
         _write_json(queue_path, queue)
         return queue
 
+    # 允許執行的命令白名單前綴（防止任意命令注入）
+    ALLOWED_COMMAND_PREFIXES = (
+        "pwsh",
+        "powershell",
+        "uv run",
+    )
+
+    def _validate_command(self, command: list[str] | str) -> bool:
+        """驗證命令是否在白名單中。僅允許已知安全的命令前綴。"""
+        if isinstance(command, list):
+            cmd_str = " ".join(command)
+        else:
+            cmd_str = str(command)
+        cmd_lower = cmd_str.strip().lower()
+        return any(cmd_lower.startswith(prefix) for prefix in self.ALLOWED_COMMAND_PREFIXES)
+
     def execute(self, plan: dict[str, Any]) -> list[dict[str, Any]]:
         executions: list[dict[str, Any]] = []
         for action in plan["actions"]:
             if action["action_type"] != "restart_agent" or not action.get("command"):
                 continue
             command = action["command"]
+            if not self._validate_command(command):
+                executions.append(
+                    {
+                        "target": action["target"],
+                        "returncode": -1,
+                        "stdout": "",
+                        "stderr": f"Command blocked: not in allowed prefix whitelist",
+                    }
+                )
+                continue
             completed = subprocess.run(
                 command,
                 cwd=self.repo_root,
@@ -401,6 +759,8 @@ def main() -> None:
     plan = harness.build_plan()
     _write_json(harness._resolve("output_plan_path"), plan)
     _write_json(harness._resolve("runtime_state_path"), plan["runtime"])
+    _write_json(harness._resolve("agent_registry_path"), plan["signals"]["agent_registry"])
+    _write_json(harness._resolve("resource_snapshot_path"), plan["signals"]["resource_snapshot"])
     queue = harness.enqueue_recovery(plan)
     if args.execute:
         plan["executions"] = harness.execute(plan)

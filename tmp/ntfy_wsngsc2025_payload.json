@@ -1,0 +1,10 @@
+{
+  "topic": "wsngsc2025",
+  "tags": [
+    "white_check_mark",
+    "memo",
+    "computer"
+  ],
+  "title": "Agent Harness 任務完成",
+  "message": "Agent Harness 自主管理優化已完成。已交付研究總報告、部署手冊、故障排除指南，並完成 supervisor/registry/runtime policy 落地。驗證：python tools/autonomous_harness.py --format json 成功；pytest 受本機 ACL 限制。詳見 docs/reports/wsngsc2025-agent-harness-completion-notice_20260320.md"
+}

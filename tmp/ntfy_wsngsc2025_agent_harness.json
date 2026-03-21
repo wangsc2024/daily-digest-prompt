@@ -1,0 +1,11 @@
+{
+  "tags": [
+    "white_check_mark",
+    "memo",
+    "computer"
+  ],
+  "priority": 4,
+  "message": "已完成 agent harness 研究、優化方案與第一版自主管理實作。新增 recovery worker 與 runtime override 閉環；腳本級驗證通過，pytest 受本機 ACL 限制未能完整跑完。文件：docs/agent-harness-research-report-20260320.md、docs/agent-harness-self-management-plan-20260320.md",
+  "title": "Agent Harness 自主管理完成",
+  "topic": "wsngsc2025"
+}

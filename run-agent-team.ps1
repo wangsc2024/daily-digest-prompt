@@ -192,6 +192,38 @@ function Update-FailureStats {
     if ($null -eq $totalVal) { $totalVal = 0 }
     $stats.total | Add-Member -NotePropertyName $FailureType -NotePropertyValue ($totalVal + 1) -Force
 
+    # 同步 failure_taxonomy（確保 total 與 taxonomy 一致）
+    $taxonomyDefs = @{
+        timeout        = @{ blast_radius = "single_task"; description = "Agent 或 API 呼叫超時" }
+        phase_failure  = @{ blast_radius = "phase"; description = "Phase 執行失敗（LLM 錯誤、結果檔缺失）" }
+        api_error      = @{ blast_radius = "dependent_tasks"; description = "外部 API 不可用（KB、Todoist、ntfy）" }
+        circuit_open   = @{ blast_radius = "all_tasks"; description = "斷路器開啟導致任務跳過" }
+        parse_error    = @{ blast_radius = "single_task"; description = "結果 JSON 格式錯誤或 schema 不符" }
+        quota_exceeded = @{ blast_radius = "all_tasks"; description = "Token 或 API 配額耗盡" }
+        unknown        = @{ blast_radius = "unknown"; description = "未分類失敗" }
+    }
+    if (-not $stats.failure_taxonomy) {
+        $stats | Add-Member -NotePropertyName "failure_taxonomy" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+    foreach ($ft in $taxonomyDefs.Keys) {
+        $cnt = $stats.total.$ft
+        if ($null -eq $cnt) { $cnt = 0 }
+        $lastOcc = $null
+        # 從 daily 找最後出現日期
+        $dailyDates = @($stats.daily.PSObject.Properties.Name | Sort-Object -Descending)
+        foreach ($d in $dailyDates) {
+            $dVal = $stats.daily.$d.$ft
+            if ($null -ne $dVal -and $dVal -gt 0) { $lastOcc = $d; break }
+        }
+        $def = $taxonomyDefs[$ft]
+        $stats.failure_taxonomy | Add-Member -NotePropertyName $ft -NotePropertyValue ([PSCustomObject]@{
+            count           = $cnt
+            blast_radius    = $def.blast_radius
+            last_occurrence = $lastOcc
+            description     = $def.description
+        }) -Force
+    }
+
     # 只保留 30 天
     $cutoff = (Get-Date).AddDays(-30).ToString("yyyy-MM-dd")
     $oldKeys = @($stats.daily.PSObject.Properties.Name | Where-Object { $_ -lt $cutoff })
@@ -199,6 +231,7 @@ function Update-FailureStats {
         $stats.daily.PSObject.Properties.Remove($k)
     }
 
+    $stats | Add-Member -NotePropertyName "schema_version" -NotePropertyValue 2 -Force
     $stats | Add-Member -NotePropertyName "updated" -NotePropertyValue (Get-Date -Format "yyyy-MM-ddTHH:mm:ss") -Force
 
     # 原子寫入（write-to-temp + rename）
@@ -359,6 +392,20 @@ function Write-Span {
     } catch {
         Write-Log "[Span] Write failed: $_"
     }
+}
+
+# 移除 Markdown frontmatter（--- ... ---），避免 claude -p 將 prompt 誤判為貼上的文件
+function Strip-Frontmatter {
+    param([string]$Content)
+    $lines = $Content -split "`n"
+    if ($lines.Count -gt 0 -and $lines[0].Trim() -eq '---') {
+        for ($i = 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i].Trim() -eq '---') {
+                return ($lines[($i+1)..($lines.Count-1)] -join "`n").TrimStart("`n`r")
+            }
+        }
+    }
+    return $Content
 }
 
 # ============================================
@@ -542,6 +589,57 @@ $fetchAgents = @(
     @{ Name = "security";   Prompt = "$AgentDir\prompts\team\fetch-security.md";   Result = "$ResultsDir\security.json" },
     @{ Name = "chatroom";   Prompt = "$AgentDir\prompts\team\fetch-chatroom.md";   Result = "$ResultsDir\fetch-chatroom.json" }
 )
+$dailyDigestAssemblyMode = "full"
+
+# ============================================
+# Autonomous runtime policy (由 supervisor 輸出)
+# ============================================
+$runtimePolicyFile = Join-Path $AgentDir "state\autonomous-runtime.json"
+if (Test-Path $runtimePolicyFile) {
+    try {
+        $runtimePolicy = Get-Content -Path $runtimePolicyFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $mode = if ($runtimePolicy.mode) { $runtimePolicy.mode } else { "normal" }
+        Write-Log "[Autonomy] runtime mode=$mode"
+
+        if ($runtimePolicy.policies) {
+            $allowedFetchAgents = @()
+            $blockedFetchAgents = @()
+            $maxParallelFetchAgents = $fetchAgents.Count
+
+            if ($runtimePolicy.policies.allowed_fetch_agents) {
+                $allowedFetchAgents = @($runtimePolicy.policies.allowed_fetch_agents)
+            }
+            if ($runtimePolicy.policies.blocked_fetch_agents) {
+                $blockedFetchAgents = @($runtimePolicy.policies.blocked_fetch_agents)
+            }
+            if ($runtimePolicy.policies.max_parallel_fetch_agents) {
+                $maxParallelFetchAgents = [int]$runtimePolicy.policies.max_parallel_fetch_agents
+            }
+            if ($runtimePolicy.policies.daily_digest_assembly_mode) {
+                $dailyDigestAssemblyMode = [string]$runtimePolicy.policies.daily_digest_assembly_mode
+            }
+            if ($null -ne $runtimePolicy.policies.daily_digest_phase2_retries) {
+                $MaxPhase2Retries = [int]$runtimePolicy.policies.daily_digest_phase2_retries
+            }
+
+            $beforeCount = $fetchAgents.Count
+            if ($allowedFetchAgents.Count -gt 0) {
+                $fetchAgents = @($fetchAgents | Where-Object { $_.Name -in $allowedFetchAgents })
+            }
+            if ($blockedFetchAgents.Count -gt 0) {
+                $fetchAgents = @($fetchAgents | Where-Object { $_.Name -notin $blockedFetchAgents })
+            }
+            if ($fetchAgents.Count -gt $maxParallelFetchAgents) {
+                $fetchAgents = @($fetchAgents | Select-Object -First $maxParallelFetchAgents)
+            }
+
+            Write-Log "[Autonomy] fetch agents adjusted: $beforeCount -> $($fetchAgents.Count) (maxParallel=$maxParallelFetchAgents, blocked=$($blockedFetchAgents -join ','))"
+            Write-Log "[Autonomy] phase2 assembly mode=$dailyDigestAssemblyMode retries=$MaxPhase2Retries"
+        }
+    } catch {
+        Write-Log "[Autonomy] WARN: runtime policy parse failed: $_"
+    }
+}
 
 $jobs = @()
 foreach ($agent in $fetchAgents) {
@@ -598,7 +696,7 @@ foreach ($agent in $fetchAgents) {
         Write-Log "[Phase1] Starting: $agentName (Circuit Breaker: CLOSED)"
     }
 
-    $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
+    $promptContent = Strip-Frontmatter (Get-Content -Path $agent.Prompt -Raw -Encoding UTF8)
     $agentName = $agent.Name
 
     $job = Start-Job -WorkingDirectory $AgentDir -ScriptBlock {
@@ -753,67 +851,81 @@ if (-not (Test-Path $assemblePrompt)) {
     exit 1
 }
 
-$assembleContent = Get-Content -Path $assemblePrompt -Raw -Encoding UTF8
+$assembleContent = Strip-Frontmatter (Get-Content -Path $assemblePrompt -Raw -Encoding UTF8)
 $phase2Success = $false
 $phase2Seconds = 0
 $attempt = 0
 $phase2StartOuter = Get-Date
+$phase2StatusForSpan = "failed"
 
-while ($attempt -le $MaxPhase2Retries) {
-    if ($attempt -gt 0) {
-        $backoff = [math]::Min(60 * [math]::Pow(2, $attempt), 300)
-        $jitter = Get-Random -Minimum 0 -Maximum 15
-        $waitSec = [int]($backoff + $jitter)
-        Write-Log "[Phase2] Retry attempt $($attempt + 1) in ${waitSec}s (backoff=${backoff}+jitter=${jitter})..."
-        Start-Sleep -Seconds $waitSec
+if ($dailyDigestAssemblyMode -eq "skip") {
+    Write-Log "[Phase2] Skipped by autonomous runtime policy (mode=skip)"
+    $phase2Success = $true
+    $phase2StatusForSpan = "skipped"
+    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "daily-digest" -Detail "skipped by autonomous runtime policy"
+}
+else {
+    if ($dailyDigestAssemblyMode -eq "degraded") {
+        Write-Log "[Phase2] Degraded mode enabled by autonomous runtime policy"
     }
 
-    Write-Log "[Phase2] Running assembly agent (attempt $($attempt + 1))..."
-    $phase2Start = Get-Date
-
-    try {
-        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-        $OutputEncoding = [System.Text.Encoding]::UTF8
-
-        # Set trace ID and phase marker for Phase 2
-        $env:DIGEST_TRACE_ID = $traceId
-        $env:AGENT_PHASE = "phase2"
-        $env:AGENT_NAME = "assemble-digest"
-
-        $stderrFile = "$LogDir\assemble-stderr-$Timestamp-$($traceId.Substring(0,8)).log"
-        $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
-
-        # 清理 stderr（空檔或僅含已知無害警告）
-        Remove-StderrIfBenign $stderrFile
-
-        $output | ForEach-Object {
-            Write-Log "  [assemble] $_"
+    while ($attempt -le $MaxPhase2Retries) {
+        if ($attempt -gt 0) {
+            $backoff = [math]::Min(60 * [math]::Pow(2, $attempt), 300)
+            $jitter = Get-Random -Minimum 0 -Maximum 15
+            $waitSec = [int]($backoff + $jitter)
+            Write-Log "[Phase2] Retry attempt $($attempt + 1) in ${waitSec}s (backoff=${backoff}+jitter=${jitter})..."
+            Start-Sleep -Seconds $waitSec
         }
 
-        if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-            $phase2Success = $true
-            $phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
-            Write-Log "[Phase2] Assembly completed (${phase2Seconds}s)"
-            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "daily-digest"
-            break
+        Write-Log "[Phase2] Running assembly agent (attempt $($attempt + 1))..."
+        $phase2Start = Get-Date
+
+        try {
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+
+            # Set trace ID and phase marker for Phase 2
+            $env:DIGEST_TRACE_ID = $traceId
+            $env:AGENT_PHASE = "phase2"
+            $env:AGENT_NAME = "assemble-digest"
+
+            $stderrFile = "$LogDir\assemble-stderr-$Timestamp-$($traceId.Substring(0,8)).log"
+            $output = $assembleContent | claude -p --allowedTools "Read,Bash,Write" 2>$stderrFile
+
+            # 清理 stderr（空檔或僅含已知無害警告）
+            Remove-StderrIfBenign $stderrFile
+
+            $output | ForEach-Object {
+                Write-Log "  [assemble] $_"
+            }
+
+            if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
+                $phase2Success = $true
+                $phase2Seconds = [int]((Get-Date) - $phase2Start).TotalSeconds
+                $phase2StatusForSpan = if ($dailyDigestAssemblyMode -eq "degraded") { "degraded_ok" } else { "ok" }
+                Write-Log "[Phase2] Assembly completed (${phase2Seconds}s)"
+                Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "daily-digest"
+                break
+            }
+            else {
+                Write-Log "[Phase2] Assembly exited with code: $LASTEXITCODE"
+                Update-FailureStats "phase_failure" "phase2" "daily-digest"
+                Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "exit code $LASTEXITCODE"
+            }
         }
-        else {
-            Write-Log "[Phase2] Assembly exited with code: $LASTEXITCODE"
+        catch {
+            Write-Log "[Phase2] Assembly failed: $_"
             Update-FailureStats "phase_failure" "phase2" "daily-digest"
-            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "exit code $LASTEXITCODE"
+            Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "$_"
         }
-    }
-    catch {
-        Write-Log "[Phase2] Assembly failed: $_"
-        Update-FailureStats "phase_failure" "phase2" "daily-digest"
-        Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "failed" -AgentType "daily-digest" -Detail "$_"
-    }
 
-    $attempt++
+        $attempt++
+    }
 }
 
 # 若 phase2 未成功完成（失敗/未賦值），用外層計時作為估算
-if ($phase2Seconds -eq 0) {
+if (-not $phase2Success -and $phase2Seconds -eq 0) {
     $phase2Seconds = [int]((Get-Date) - $phase2StartOuter).TotalSeconds
 }
 
@@ -833,7 +945,7 @@ $phaseBreakdown = [PSCustomObject]@{
 $runEnd = Get-Date
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "phase2" `
     -StartTime $phase2StartOuter -EndTime $runEnd `
-    -Status (if ($phase2Success) { "ok" } else { "failed" })
+    -Status (if ($phase2Success) { $phase2StatusForSpan } else { "failed" })
 Write-Span -TraceId $traceId -SpanType "phase" -Phase "overall" `
     -StartTime $startTime -EndTime $runEnd `
     -Status (if ($phase2Success) { "ok" } else { "failed" })

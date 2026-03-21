@@ -1,0 +1,11 @@
+{
+  "notes": [
+    {
+      "title": "Agent Harness 自主管理優化與雙 Harness runtime policy 接管（2026-03-20）",
+      "contentText": "# Agent Harness 自主管理優化\n\n日期：2026-03-20\n\n## 核心成果\n- 建立 `tools/autonomous_harness.py` 作為控制面，統一彙整 run FSM、scheduler state、failure stats、failed auto tasks、API health、fairness、token budget、heartbeat 與資源快照。\n- `run-todoist-agent-team.ps1` 已依 `state/autonomous-runtime.json` 對 auto-task 實施動態降載。\n- 本次再把 `run-agent-team.ps1` 納入同一份 runtime policy，讓 daily-digest Phase 1 fetch agent 也能在 degraded / recovery 模式下降載。\n\n## 新增自治策略\n- runtime policy 新增 `max_parallel_fetch_agents`、`blocked_fetch_agents`、`allowed_fetch_agents`。\n- `config/autonomous-harness.yaml` 定義核心 fetch agent：`todoist`、`news`、`hackernews`。\n- degraded 模式封鎖 `security`、`chatroom`；recovery 模式再封鎖 `gmail`，只保留三個核心 fetch agent。\n\n## 驗證結果\n- `python tools/autonomous_harness.py --format json` 成功，實際輸出 `mode=degraded`、`max_parallel_auto_tasks=2`、`max_parallel_fetch_agents=4`。\n- 手動隔離情境驗證顯示 recovery 模式下只允許 `todoist/news/hackernews`，且 recovery queue 會寫入待處理項目。\n- `pytest` 因 Windows ACL 阻斷 tmp cleanup 而失敗，屬環境問題，不是 harness 邏輯錯誤。\n\n## 已知限制\n- Cursor CLI 依 `skills/cursor-cli/SKILL.md` 實際執行 `agent -p` 時回傳 `Error: [internal]`，本輪採本地 fallback 完成實作。\n- `run-agent-team.ps1` 的 Phase 2 assembly 尚未接入自治 gate。\n\n## 後續方向\n- 增加 recovery worker 消費 `state/autonomous-recovery-queue.json`。\n- 將 done_cert 成功率與 recovery 成功率納入長期調參指標。\n",
+      "tags": ["agent-harness", "autonomous-management", "runtime-policy", "daily-digest", "todoist"],
+      "source": "import"
+    }
+  ],
+  "autoSync": true
+}

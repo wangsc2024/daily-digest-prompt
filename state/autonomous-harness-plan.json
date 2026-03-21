@@ -1,43 +1,275 @@
 {
-  "generated_at": "2026-03-20T07:20:38.067080+08:00",
+  "generated_at": "2026-03-20T12:15:14.277197+08:00",
   "summary": {
     "scheduler_runs_analyzed": 0,
     "open_circuits": 0,
     "failed_auto_tasks": 0,
-    "pending_actions": 1
+    "pending_actions": 2
   },
   "signals": {
-    "run_fsm_updated": "2026-03-20T07:11:37",
-    "failure_stats_updated": "2026-03-19T21:18:20",
+    "run_fsm_updated": "2026-03-20T12:00:22",
+    "failure_stats_updated": "2026-03-20T12:00:22",
     "fairness_hint": {
-      "generated_at": "2026-03-20T07:00:03.133508",
+      "generated_at": "2026-03-20T12:00:03.947949",
       "date": "2026-03-20",
-      "starvation_count": 11,
+      "starvation_count": 3,
       "starvation_detected": true,
       "zero_count_tasks": [
-        "ai_sysdev",
-        "skill_audit",
-        "log_audit",
-        "git_push",
         "system_insight",
-        "arch_evolution",
-        "self_heal",
-        "ai_workflow_github",
-        "github_scout",
-        "podcast_create"
+        "podcast_create",
+        "podcast_jiaoguangzong"
       ],
-      "fairness_score": 0.0,
+      "fairness_score": 0.326,
       "pointer_reset": false,
-      "next_execution_order": 10,
+      "next_execution_order": 4,
       "max_execution_order": 29
     },
     "token_budget_state": {
-      "last_alerted_date": "2026-03-19"
+      "last_alerted_date": "2026-03-20"
     },
     "scheduler_heartbeat": {
-      "timestamp": "2026-03-20T07:02:58.732201",
+      "timestamp": "2026-03-20T12:10:54.793660",
       "status": "running",
-      "pid": 632736
+      "pid": 203716
+    },
+    "runtime_override": {
+      "mode": "degraded",
+      "reason": "偵測到 3 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "expires_at": "2026-03-20T12:45:14.275197+08:00",
+      "blocked_task_keys": [],
+      "blocked_fetch_agents": [],
+      "max_parallel_auto_tasks": 2,
+      "max_parallel_fetch_agents": 4
+    },
+    "resource_snapshot": {
+      "generated_at": "2026-03-20T12:15:14.280198+08:00",
+      "cpu": {
+        "percent": 7.47
+      },
+      "memory": {
+        "percent": 48.29,
+        "available_mb": 16822.44
+      },
+      "gpu": {
+        "available": true,
+        "devices": [
+          {
+            "name": "NVIDIA GeForce RTX 4090",
+            "utilization_percent": 0.0,
+            "memory_used_mb": 783.0,
+            "memory_total_mb": 24564.0,
+            "memory_percent": 3.19
+          }
+        ]
+      }
+    },
+    "agent_registry": {
+      "generated_at": "2026-03-20T12:15:14.280198+08:00",
+      "managed_agents": [
+        "daily-digest",
+        "todoist"
+      ],
+      "fetch_agents": [
+        {
+          "key": "audit-dim1-5",
+          "path": "prompts/team/fetch-audit-dim1-5.md",
+          "source": "prompt"
+        },
+        {
+          "key": "audit-dim2-6",
+          "path": "prompts/team/fetch-audit-dim2-6.md",
+          "source": "prompt"
+        },
+        {
+          "key": "audit-dim3-7",
+          "path": "prompts/team/fetch-audit-dim3-7.md",
+          "source": "prompt"
+        },
+        {
+          "key": "audit-dim4",
+          "path": "prompts/team/fetch-audit-dim4.md",
+          "source": "prompt"
+        },
+        {
+          "key": "chatroom",
+          "path": "prompts/team/fetch-chatroom.md",
+          "source": "prompt"
+        },
+        {
+          "key": "gmail",
+          "path": "prompts/team/fetch-gmail.md",
+          "source": "prompt"
+        },
+        {
+          "key": "hackernews",
+          "path": "prompts/team/fetch-hackernews.md",
+          "source": "prompt"
+        },
+        {
+          "key": "news",
+          "path": "prompts/team/fetch-news.md",
+          "source": "prompt"
+        },
+        {
+          "key": "security",
+          "path": "prompts/team/fetch-security.md",
+          "source": "prompt"
+        },
+        {
+          "key": "todoist",
+          "path": "prompts/team/fetch-todoist.md",
+          "source": "prompt"
+        }
+      ],
+      "auto_tasks": [
+        {
+          "key": "ai_deep_research",
+          "path": "templates/auto-tasks/ai-deep-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "ai_domain_research",
+          "path": "templates/auto-tasks/ai-domain-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "ai_github_research",
+          "path": "templates/auto-tasks/ai-github-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "ai_workflow_github_research",
+          "path": "templates/auto-tasks/ai-workflow-github-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "arch_evolution",
+          "path": "templates/auto-tasks/arch-evolution.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "buddhist_research",
+          "path": "templates/auto-tasks/buddhist-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "chatroom_optimize",
+          "path": "templates/auto-tasks/chatroom-optimize.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "creative_game_optimize",
+          "path": "templates/auto-tasks/creative-game-optimize.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "git_push",
+          "path": "templates/auto-tasks/git-push.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "github_scout",
+          "path": "templates/auto-tasks/github-scout.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "log_audit",
+          "path": "templates/auto-tasks/log-audit.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "podcast_create",
+          "path": "templates/auto-tasks/podcast-create.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": false
+        },
+        {
+          "key": "podcast_jiaoguangzong",
+          "path": "templates/auto-tasks/podcast-jiaoguangzong.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "qa_system_optimize",
+          "path": "templates/auto-tasks/qa-system-optimize.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "self_heal",
+          "path": "templates/auto-tasks/self-heal.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "shurangama_research",
+          "path": "templates/auto-tasks/shurangama-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "skill_audit",
+          "path": "templates/auto-tasks/skill-audit.md",
+          "source": "template",
+          "is_heavy": false,
+          "is_research": false
+        },
+        {
+          "key": "system_insight",
+          "path": "templates/auto-tasks/system-insight.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "tech_research",
+          "path": "templates/auto-tasks/tech-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        },
+        {
+          "key": "unsloth_research",
+          "path": "templates/auto-tasks/unsloth-research.md",
+          "source": "template",
+          "is_heavy": true,
+          "is_research": true
+        }
+      ],
+      "summary": {
+        "managed_agent_count": 2,
+        "fetch_agent_count": 10,
+        "auto_task_count": 20,
+        "heavy_auto_task_count": 11,
+        "research_auto_task_count": 10
+      }
     },
     "scheduler_state_recent_statuses": []
   },
@@ -45,34 +277,141 @@
     {
       "action_type": "rebalance_tasks",
       "target": "todoist",
-      "reason": "偵測到 11 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "reason": "偵測到 3 個任務飢餓，需降低並行並優先補跑低頻任務",
       "severity": "high"
+    },
+    {
+      "action_type": "scale_down_workload",
+      "target": "global",
+      "reason": "今日已觸發 token budget 告警，需暫停高成本自動任務",
+      "severity": "medium"
     }
   ],
   "runtime": {
-    "generated_at": "2026-03-20T07:20:38.067080+08:00",
+    "generated_at": "2026-03-20T12:15:14.277197+08:00",
     "mode": "degraded",
     "reasons": [
-      "偵測到 11 個任務飢餓，需降低並行並優先補跑低頻任務"
+      "偵測到 3 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "今日已觸發 token budget 告警，需暫停高成本自動任務",
+      "override: 偵測到 3 個任務飢餓，需降低並行並優先補跑低頻任務"
     ],
+    "override": {
+      "active": true,
+      "reason": "偵測到 3 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "expires_at": "2026-03-20T12:45:14.275197+08:00"
+    },
     "gates": {
       "heartbeat_stale": false,
       "starvation_detected": true,
-      "token_budget_alert": false,
+      "token_budget_alert": true,
       "open_circuits": 0
     },
     "policies": {
       "max_parallel_auto_tasks": 2,
+      "max_parallel_fetch_agents": 4,
       "allow_heavy_auto_tasks": false,
       "allow_research_auto_tasks": true,
+      "daily_digest_assembly_mode": "degraded",
+      "daily_digest_phase2_retries": 0,
+      "core_fetch_agents": [
+        "todoist",
+        "news",
+        "hackernews"
+      ],
+      "optional_fetch_agents": [
+        "gmail",
+        "security",
+        "chatroom"
+      ],
+      "blocked_fetch_agents": [
+        "chatroom",
+        "security"
+      ],
+      "allowed_fetch_agents": [
+        "audit-dim1-5",
+        "audit-dim2-6",
+        "audit-dim3-7",
+        "audit-dim4",
+        "gmail",
+        "hackernews",
+        "news",
+        "todoist"
+      ],
+      "heavy_task_keys": [
+        "ai_deep_research",
+        "ai_domain_research",
+        "ai_github_research",
+        "ai_workflow_github_research",
+        "buddhist_research",
+        "podcast_create",
+        "podcast_jiaoguangzong",
+        "shurangama_research",
+        "system_insight",
+        "tech_research",
+        "unsloth_research"
+      ],
+      "research_task_keys": [
+        "ai_deep_research",
+        "ai_domain_research",
+        "ai_github_research",
+        "ai_workflow_github_research",
+        "buddhist_research",
+        "podcast_jiaoguangzong",
+        "shurangama_research",
+        "system_insight",
+        "tech_research",
+        "unsloth_research"
+      ],
+      "blocked_task_keys": [
+        "ai_deep_research",
+        "ai_domain_research",
+        "ai_github_research",
+        "ai_workflow_github_research",
+        "buddhist_research",
+        "podcast_create",
+        "podcast_jiaoguangzong",
+        "shurangama_research",
+        "system_insight",
+        "tech_research",
+        "unsloth_research"
+      ],
       "priority_recovery_targets": [
         "todoist"
       ]
     },
+    "resource_snapshot": {
+      "generated_at": "2026-03-20T12:15:14.280198+08:00",
+      "cpu": {
+        "percent": 7.47
+      },
+      "memory": {
+        "percent": 48.29,
+        "available_mb": 16822.44
+      },
+      "gpu": {
+        "available": true,
+        "devices": [
+          {
+            "name": "NVIDIA GeForce RTX 4090",
+            "utilization_percent": 0.0,
+            "memory_used_mb": 783.0,
+            "memory_total_mb": 24564.0,
+            "memory_percent": 3.19
+          }
+        ]
+      }
+    },
+    "agent_registry_summary": {
+      "managed_agent_count": 2,
+      "fetch_agent_count": 10,
+      "auto_task_count": 20,
+      "heavy_auto_task_count": 11,
+      "research_auto_task_count": 10
+    },
     "scheduler_heartbeat": {
-      "timestamp": "2026-03-20T07:02:58.732201",
+      "timestamp": "2026-03-20T12:10:54.793660",
       "status": "running",
-      "pid": 632736
+      "pid": 203716
     }
   }
 }

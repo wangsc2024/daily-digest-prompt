@@ -1,10 +1,15 @@
 {
   "version": 2,
-  "updated_at": "2026-03-19T15:24:20",
+  "updated_at": "2026-03-21T15:24:11",
   "summary": {
-    "total_episodes": 69,
+    "total_episodes": 75,
     "cooldown_days": 30,
     "recent_note_ids": [
+      "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+      "b76a6cad-8e37-4676-b5d3-44e7186e690c",
+      "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+      "6de7ac89-bed0-4657-88de-116583d8da1f",
+      "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
       "ed138bbf-b608-4f05-8311-f6fc2e865392",
       {
         "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
@@ -13,9 +18,17 @@
       }
     ],
     "recent_topics": [
-      "教觀綱宗",
+      "法華經",
       "佛學",
       "天台宗",
+      "教觀綱宗",
+      "金剛經",
+      "般若",
+      "淨土宗",
+      "念佛",
+      "Vite",
+      "SSG",
+      "靜態網站",
       {
         "topic": "別教",
         "last_used": "2026-03-19",
@@ -24,6 +37,114 @@
     ]
   },
   "episodes": [
+    {
+      "episode_title": "法華壽量品的永恆奧義",
+      "notes_used": [
+        "f735b445-c2e4-417f-aa5a-76692d05b4b0"
+      ],
+      "note_titles": [
+        "法華經壽量品研究：如來壽量無量與本門開近顯遠的核心思想"
+      ],
+      "topics": [
+        "法華經",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-21T15:24:11",
+      "mp3_url": "https://podcasts.pdoont.us.kg/note-f735b445-20260321.mp3",
+      "slug": "note-f735b445-20260321"
+    },
+    {
+      "episode_title": "天台十乘觀法解析",
+      "notes_used": [
+        "b76a6cad-8e37-4676-b5d3-44e7186e690c"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：十乘觀法 — 天台圓教觀行的十重修證次第"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-21T15:09:04",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep4-20260321.mp3",
+      "slug": "jiaoguang-ep4-20260321"
+    },
+    {
+      "episode_title": "金剛經智慧解讀",
+      "notes_used": [
+        "5c3f760c-42d2-4d85-a7a1-77d38b49285f"
+      ],
+      "note_titles": [
+        "金剛般若論會釋 卷第1"
+      ],
+      "topics": [
+        "佛學",
+        "金剛經",
+        "般若"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-21T14:00:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/製作30秒-podcast-開場白腳本-20260321.mp3",
+      "slug": "製作30秒-podcast-開場白腳本-20260321"
+    },
+    {
+      "episode_title": "本願稱名與平生業成",
+      "notes_used": [
+        "6de7ac89-bed0-4657-88de-116583d8da1f"
+      ],
+      "note_titles": [
+        "無量壽經研究：第十八願的本願稱名與平生業成"
+      ],
+      "topics": [
+        "淨土宗",
+        "佛學",
+        "念佛"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-21T11:59:44",
+      "mp3_url": "https://podcasts.pdoont.us.kg/podcast-workflow-製作一-20260321.mp3",
+      "slug": "podcast-workflow-製作一-20260321"
+    },
+    {
+      "episode_title": "本願稱名與平生業成",
+      "notes_used": [
+        "6de7ac89-bed0-4657-88de-116583d8da1f"
+      ],
+      "note_titles": [
+        "無量壽經研究：第十八願的本願稱名與平生業成"
+      ],
+      "topics": [
+        "淨土宗",
+        "佛學",
+        "念佛"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-21T11:52:21",
+      "mp3_url": "https://podcasts.pdoont.us.kg/podcast-workflow-製作一-20260321.mp3",
+      "slug": "podcast-workflow-製作一-20260321"
+    },
+    {
+      "episode_title": "Vite 靜態網站生成實戰",
+      "notes_used": [
+        "01b8d87c-cf79-4a97-9e23-9730d3b33fbc"
+      ],
+      "note_titles": [
+        "Vite SSG 靜態網站生成與知識庫驅動內容管線 — 從 RAG 資料源到高效能知識分享網站的完整建構策略（2026）"
+      ],
+      "topics": [
+        "Vite",
+        "SSG",
+        "靜態網站"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-20T15:24:59",
+      "mp3_url": "https://podcasts.pdoont.us.kg/note-01b8d87c-20260320.mp3",
+      "slug": "note-01b8d87c-20260320"
+    },
     {
       "episode_title": "天台止觀修行法門",
       "notes_used": [
@@ -1733,6 +1854,54 @@
       "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
       "slug": "note-ed138bbf-20260319",
       "used_at": "2026-03-19T15:24:20"
+    },
+    {
+      "note_id": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
+      "note_title": "Vite SSG 靜態網站生成與知識庫驅動內容管線 — 從 RAG 資料源到高效能知識分享網站的完整建構策略（2026）",
+      "query": "",
+      "note_id_input": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
+      "slug": "note-01b8d87c-20260320",
+      "used_at": "2026-03-20T15:24:59"
+    },
+    {
+      "note_id": "6de7ac89-bed0-4657-88de-116583d8da1f",
+      "note_title": "無量壽經研究：第十八願的本願稱名與平生業成",
+      "query": "podcast workflow] 製作一段 30 秒的每日開場白",
+      "note_id_input": "",
+      "slug": "podcast-workflow-製作一-20260321",
+      "used_at": "2026-03-21T11:52:21"
+    },
+    {
+      "note_id": "6de7ac89-bed0-4657-88de-116583d8da1f",
+      "note_title": "無量壽經研究：第十八願的本願稱名與平生業成",
+      "query": "podcast workflow] 製作一段 30 秒的每日開場白",
+      "note_id_input": "",
+      "slug": "podcast-workflow-製作一-20260321",
+      "used_at": "2026-03-21T11:59:44"
+    },
+    {
+      "note_id": "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+      "note_title": "金剛般若論會釋 卷第1",
+      "query": "製作30秒 podcast 開場白腳本",
+      "note_id_input": "",
+      "slug": "製作30秒-podcast-開場白腳本-20260321",
+      "used_at": "2026-03-21T14:00:00"
+    },
+    {
+      "note_id": "b76a6cad-8e37-4676-b5d3-44e7186e690c",
+      "note_title": "教觀綱宗研究：十乘觀法 — 天台圓教觀行的十重修證次第",
+      "query": "皈依的意義與方法 第002講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep4-20260321",
+      "used_at": "2026-03-21T15:09:04"
+    },
+    {
+      "note_id": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+      "note_title": "法華經壽量品研究：如來壽量無量與本門開近顯遠的核心思想",
+      "query": "",
+      "note_id_input": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+      "slug": "note-f735b445-20260321",
+      "used_at": "2026-03-21T15:24:11"
     }
   ]
 }

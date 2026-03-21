@@ -1,0 +1,8 @@
+{
+  "entries": [
+    {
+      "task_key": "self_heal",
+      "consecutive_count": 2
+    }
+  ]
+}

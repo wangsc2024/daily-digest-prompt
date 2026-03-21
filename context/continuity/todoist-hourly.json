@@ -5,9 +5,37 @@
   "max_runs": 3,
   "runs": [
     {
-      "run_id": "20260320070850",
-      "started_at": "2026-03-19T23:01:30Z",
-      "completed_at": "2026-03-20T07:08:50",
+      "run_id": "20260321083037",
+      "started_at": "2026-03-21T08:30:37Z",
+      "completed_at": "2026-03-21T16:38:05",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["arch_evolution", "self_heal"],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "架構演進決策完成17項決策（14個backlog已有ADR對應，3個告警超閾值），系統自癒修復gmail快取（circuit breaker open）",
+      "notable": "兩個starvation_boosted任務（arch_evolution、self_heal）成功執行；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
+    },
+    {
+      "run_id": "20260321080037",
+      "started_at": "2026-03-21T08:00:37Z",
+      "completed_at": "2026-03-21T16:13:15",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["system_insight"],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": ["github_scout"],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "系統洞察分析完成，偵測3個critical告警（成功率86.5%、公平性1.403、I/O負載26.6KB）+1個warning（快取21.3%），已寫入3個P0改進項目",
+      "notable": "github_scout非執行日跳過；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
+    },
+    {
+      "run_id": "20260321073047",
+      "started_at": "2026-03-21T07:30:47Z",
+      "completed_at": "2026-03-21T15:51:20",
       "plan_type": "auto",
       "auto_tasks_executed": ["ai_sysdev", "skill_audit"],
       "auto_tasks_failed": [],
@@ -15,36 +43,8 @@
       "human_tasks_completed": [],
       "human_tasks_failed": [],
       "all_exhausted": false,
-      "phase3_summary": "完成 AI Incident Triage/Runbook 自動化研究（品質4/5）、Skill 審查 context-budget-monitor+execution-journal 修正4處（品質5/5）",
-      "notable": "聊天室廣播認證失敗（BOT_API_SECRET 未設定）— 連續多次"
-    },
-    {
-      "run_id": "20260320063917",
-      "started_at": "2026-03-19T22:31:08Z",
-      "completed_at": "2026-03-20T06:39:17",
-      "plan_type": "auto",
-      "auto_tasks_executed": ["ai_github_research", "ai_smart_city"],
-      "auto_tasks_failed": [],
-      "auto_tasks_skipped": [],
-      "human_tasks_completed": [],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "完成 ComfyUI GitHub AI 專案研究（品質4/5）、智慧交通多代理強化學習號誌控制研究（品質4/5）",
-      "notable": "聊天室廣播認證失敗（BOT_API_SECRET 未設定）— 連續多次"
-    },
-    {
-      "run_id": "20260320061251",
-      "started_at": "2026-03-19T22:00:39Z",
-      "completed_at": "2026-03-20T06:12:51",
-      "plan_type": "auto",
-      "auto_tasks_executed": ["tech_research", "ai_deep_research"],
-      "auto_tasks_failed": [],
-      "auto_tasks_skipped": [],
-      "human_tasks_completed": [],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "完成 Execution Trace Schema 技術研究（品質5/5）、Computer-Using Agents Stage 1 研究計畫（品質4/5）",
-      "notable": "聊天室廣播認證失敗（BOT_API_SECRET 未設定）— 連續多次"
+      "phase3_summary": "AI系統開發完成Agent SDK/工作流引擎/程式碼生成管線實作指南（KB:371a14dd，備援claude_sonnet45），Skill審查完成deep-research修正2項（KB:b76bbb17）",
+      "notable": "兩任務品質均5/5；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
     }
   ]
 }

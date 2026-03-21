@@ -41,9 +41,17 @@ def check_budget(task_type: str, provider: str, estimated_tokens: int = 50) -> d
     """
     try:
         config = _load_budget_config()
-        usage_data = json.loads(TOKEN_USAGE.read_text(encoding="utf-8"))
+        try:
+            usage_data = json.loads(TOKEN_USAGE.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            # token-usage.json 不存在：自動初始化空結構，確保首次啟動即受預算管控
+            usage_data = {"schema_version": 2, "daily": {}}
+            TOKEN_USAGE.parent.mkdir(parents=True, exist_ok=True)
+            TOKEN_USAGE.write_text(
+                json.dumps(usage_data, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
     except FileNotFoundError:
-        # 配置或用量檔案尚未建立，允許通過（向後相容）
+        # budget.yaml 配置檔不存在，允許通過（向後相容）
         return {"allowed": True, "utilization": 0.0}
     except (ImportError, json.JSONDecodeError) as e:
         # 配置損壞或依賴缺失：允許通過但記錄警告
@@ -98,6 +106,7 @@ def _send_budget_warning(provider: str, utilization: float) -> None:
         "message": f"{provider} 用量已達每日上限 {utilization:.1%}，請注意",
         "priority": 3,
     }
+    tmp = None
     try:
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".json", delete=False, encoding="utf-8"
@@ -114,9 +123,14 @@ def _send_budget_warning(provider: str, utilization: float) -> None:
             capture_output=True,
             timeout=10,
         )
-        os.unlink(tmp)
-    except Exception:
-        pass  # 通知失敗不中斷主流程
+    except Exception as e:
+        print(f"[budget_guard] ntfy 通知失敗（不中斷主流程）：{e}", file=sys.stderr)
+    finally:
+        if tmp:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
 
 
 def get_status() -> dict:

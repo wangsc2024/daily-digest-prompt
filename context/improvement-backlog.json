@@ -7,6 +7,51 @@
   "grade": "A",
   "items": [
     {
+      "id": "backlog_si_20260321_daily_success_rate",
+      "source": "system_insight",
+      "title": "系統洞察告警：daily_success_rate 超閾值",
+      "description": "daily_success_rate=0.865，門檻 0.95。建議：檢查高失敗時段（5、7、13 時）的根因，可能與外部 API 不穩定或資源競爭有關",
+      "priority": "high",
+      "effort": "low",
+      "created_at": "2026-03-21T16:09:22.138757",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "critical"
+      ]
+    },
+    {
+      "id": "backlog_si_20260321_auto_task_fairness",
+      "source": "system_insight",
+      "title": "系統洞察告警：auto_task_fairness 超閾值",
+      "description": "auto_task_fairness=1.403，門檻 0.5。建議：29 個任務中大部分僅執行 0-1 次，檢查 frequency-limits.yaml 配置或 round-robin 輪轉邏輯",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-21T16:09:22.138757",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "critical"
+      ]
+    },
+    {
+      "id": "backlog_si_20260321_avg_io_per_call",
+      "source": "system_insight",
+      "title": "系統洞察告警：avg_io_per_call 超閾值",
+      "description": "avg_io_per_call=26567，門檻 5000。建議：立即啟用 context-budget-monitor Skill 並強制委派大量讀取任務給子 Agent",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-21T16:09:22.138757",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "critical"
+      ]
+    },
+    {
       "rank": 1,
       "priority": "P1",
       "pattern": "跨平台路徑硬編碼清理",

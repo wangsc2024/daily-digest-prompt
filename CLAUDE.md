@@ -110,7 +110,7 @@
 | Hook | 類型 | 用途 |
 |------|------|------|
 | `pre_bash_guard.py` | PreToolUse:Bash | nul重導向、危險操作攔截 |
-| `pre_write_guard.py` | PreToolUse:Write/Edit | nul寫入、敏感檔案、路徑遍歷攔截 |
+| `pre_write_guard.py` | PreToolUse:Write/Edit | nul寫入、敏感檔案；專案外路徑僅告警不阻擋 |
 | `pre_read_guard.py` | PreToolUse:Read | 敏感路徑讀取攔截 |
 | `post_tool_logger.py` | PostToolUse:* | 結構化 JSONL 日誌（自動標籤 + 50MB 輪轉） |
 | `cjk_guard.py` | PostToolUse:Write/Edit | CJK 字元守衛（日文變體修正） |
@@ -148,6 +148,26 @@
 - **全域 Claude Skills**（56 個）：位於 `C:\Users\user\.claude\skills\`（含 code-assistant、issue-resolver-skill、knowledge-query、pingtung-news 等專屬 skills）
 - Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含
 
+## LINE 訊息回覆架構
+
+LINE 訊息的回覆必須透過遠端 Gun Relay 進行，**不可從 bot.js 直接推播**（bot.js 本地無 LINE_CHANNEL_ACCESS_TOKEN）。
+
+### 回覆路徑
+```
+任務完成
+  └─ routes.js → sendReply(replyMsg, lineReplyTarget)
+       └─ bot.js sendSystemReply → Gun payload { text, lineReplyTarget, ... }（加密）
+            └─ https://gun-relay-bxdc.onrender.com/ startReplyForwarder
+                 └─ 解密 → postToLine(entry.lineReplyTarget || lineUserId)
+                      └─ LINE push → user / group
+```
+
+### 重要規則
+- **LINE_CHANNEL_ACCESS_TOKEN 在 Render 上**：`https://gun-relay-bxdc.onrender.com/` 的環境變數中
+- **lineReplyTarget**：group 訊息 → `groupId`，room 訊息 → `roomId`，user 訊息 → `userId`
+- **sendSystemReply(text, lineReplyTarget)**：第二參數將 `lineReplyTarget` 帶入 Gun payload，讓遠端 relay 精確回覆正確目標，不依賴揮發的模組變數 `lineUserId`
+- **修改 relay 後必須部署**：`d:\Source\my-gun-relay\index.js` 的修改需 push 並讓 Render 重新部署才能在遠端生效
+
 ## ntfy 通知注意事項
 - Windows 環境必須用 JSON 檔案方式發送，不可用 inline JSON 字串（會亂碼）
 - 必須加 `charset=utf-8` header：`curl -H "Content-Type: application/json; charset=utf-8" -d @file.json https://ntfy.sh`
@@ -158,7 +178,7 @@
 - 全程使用正體中文；日誌檔名：`yyyyMMdd_HHmmss.log`；保留 7 天自動清理
 - 所有 .ps1 腳本使用 PowerShell 7 (`pwsh`)；`.ps1` 建議 UTF-8 with BOM
 - Python 依賴由 uv 管理，使用 `uv run python` 執行（非裸 `python`）
-- **計畫檔存放**：一律放在 `docs/plans/` 目錄下（格式：`{feature}-plan.md`），禁止存放至專案目錄外（pre_write_guard.py 會攔截路徑遍歷）
+- **計畫檔存放**：一律放在 `docs/plans/` 目錄下（格式：`{feature}-plan.md`）；寫入專案外僅會觸發 Write Guard 告警（不阻擋）
 
 ### 自動任務命名規範（嚴禁使用連字號）
 

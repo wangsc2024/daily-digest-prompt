@@ -271,6 +271,20 @@ function Write-Span {
     } catch { Write-Host "[Span] Write failed: $_" }
 }
 
+# 移除 Markdown frontmatter（--- ... ---），避免 claude -p 將 prompt 誤判為貼上的文件
+function Strip-Frontmatter {
+    param([string]$Content)
+    $lines = $Content -split "`n"
+    if ($lines.Count -gt 0 -and $lines[0].Trim() -eq '---') {
+        for ($i = 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i].Trim() -eq '---') {
+                return ($lines[($i+1)..($lines.Count-1)] -join "`n").TrimStart("`n`r")
+            }
+        }
+    }
+    return $Content
+}
+
 # ============================================
 # Main Execution
 # ============================================
@@ -374,7 +388,7 @@ $phase1Prompts = @(
 )
 
 foreach ($agent in $phase1Prompts) {
-    $promptContent = Get-Content -Path $agent.Prompt -Raw -Encoding UTF8
+    $promptContent = Strip-Frontmatter (Get-Content -Path $agent.Prompt -Raw -Encoding UTF8)
     $job = Start-Job -ScriptBlock {
         param($promptContent, $agentDir, $agentName, $logDir, $timestamp, $traceId, $apiToken)
 
@@ -504,7 +518,7 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
     }
 
     try {
-        $phase2Content = Get-Content -Path $phase2Prompt -Raw -Encoding UTF8
+        $phase2Content = Strip-Frontmatter (Get-Content -Path $phase2Prompt -Raw -Encoding UTF8)
         $job = Start-Job -ScriptBlock {
             param($phase2Content, $agentDir, $logDir, $timestamp, $traceId, $apiToken)
 
@@ -674,7 +688,7 @@ if (-not $skipPhase3) {
             $phase3Start = Get-Date
 
             try {
-                $archContent = Get-Content $archPromptFile -Raw -Encoding UTF8
+                $archContent = Strip-Frontmatter (Get-Content $archPromptFile -Raw -Encoding UTF8)
                 Write-Log "[Phase 3] Starting arch-evolution (direct trigger)" "INFO"
 
                 $archContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$archLogFile
@@ -711,7 +725,7 @@ if ($script:phase3Ran -eq $true) {
         $phase4LogFile = "$AgentDir\logs\phase4-selfheal-$($traceId.Substring(0,8)).log"
         $phase4Start = Get-Date
         try {
-            $selfHealContent = Get-Content $selfHealPromptFile -Raw -Encoding UTF8
+            $selfHealContent = Strip-Frontmatter (Get-Content $selfHealPromptFile -Raw -Encoding UTF8)
             Write-Log "[Phase 4] Starting self-heal (direct trigger after arch-evolution)" "INFO"
             $selfHealContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$phase4LogFile
             $phase4Seconds = [int]((Get-Date) - $phase4Start).TotalSeconds

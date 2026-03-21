@@ -1,0 +1,109 @@
+{
+  "generated_at": "2026-03-20T10:04:49.555618",
+  "window_days": 28,
+  "total_runs": 200,
+  "success_rate": 0.985,
+  "slo_status": {
+    "SLO-001": {
+      "name": "每日摘要執行成功率",
+      "target": 0.995,
+      "actual": 0.985,
+      "budget_total_pct": 0.5,
+      "budget_consumed_pct": 200.0,
+      "budget_remaining_pct": 0.0,
+      "status": "red"
+    },
+    "SLO-002": {
+      "name": "快取命中率",
+      "target": 0.4,
+      "actual": 0.985,
+      "budget_total_pct": 60.0,
+      "budget_consumed_pct": 0.0,
+      "budget_remaining_pct": 100.0,
+      "status": "green"
+    },
+    "SLO-006": {
+      "name": "Skill 讀取完整率",
+      "target": 3,
+      "actual": 0.985,
+      "budget_total_pct": -200.0,
+      "budget_consumed_pct": 0.0,
+      "budget_remaining_pct": 100.0,
+      "status": "green"
+    },
+    "SLO-007": {
+      "name": "Phase 2 成功率",
+      "target": 0.95,
+      "actual": 0.985,
+      "budget_total_pct": 5.0,
+      "budget_consumed_pct": 0.0,
+      "budget_remaining_pct": 100.0,
+      "status": "green"
+    },
+    "SLO-008": {
+      "name": "自動任務完成率",
+      "target": 0.85,
+      "actual": 0.985,
+      "budget_total_pct": 15.0,
+      "budget_consumed_pct": 0.0,
+      "budget_remaining_pct": 100.0,
+      "status": "green"
+    }
+  },
+  "failure_taxonomy": {
+    "timeout": {
+      "count": 11,
+      "blast_radius": "single_task",
+      "last_occurrence": null
+    },
+    "api_error": {
+      "count": 0,
+      "blast_radius": "dependent_tasks",
+      "last_occurrence": null
+    },
+    "phase_failure": {
+      "count": 3,
+      "blast_radius": "phase",
+      "last_occurrence": "2026-03-18T05:31:39"
+    },
+    "parse_error": {
+      "count": 0,
+      "blast_radius": "single_task",
+      "last_occurrence": null
+    },
+    "quota_exceeded": {
+      "count": 0,
+      "blast_radius": "all_tasks",
+      "last_occurrence": null
+    },
+    "template_missing": {
+      "count": 0,
+      "blast_radius": "single_task",
+      "last_occurrence": null
+    },
+    "config_error": {
+      "count": 0,
+      "blast_radius": "all_tasks",
+      "last_occurrence": null
+    },
+    "unknown": {
+      "count": 0,
+      "blast_radius": "unknown",
+      "last_occurrence": null
+    }
+  },
+  "unknown_rate_pct": 0.0,
+  "postmortem_triggered": true,
+  "postmortem_reasons": [
+    "SLO-001 budget consumed 200.0% >= trigger 20%"
+  ],
+  "top_recurring_causes": [
+    {
+      "mode": "phase_failure",
+      "count": 3,
+      "blast_radius": "phase"
+    }
+  ],
+  "action_level": "full_freeze",
+  "_adr": "ADR-20260320-032"
+}

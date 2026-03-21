@@ -1,0 +1,1641 @@
+{
+  "version": 1,
+  "generated_at": "2026-03-20T11:16:23.258328",
+  "generated_by": "tools/sync_skill_registry.py",
+  "adr": "ADR-20260320-033",
+  "skills": [
+    {
+      "name": "academic-paper-research",
+      "path": "skills/academic-paper-research/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "學術研究",
+        "文獻回顧",
+        "研究報告",
+        "指定議題研究",
+        "論文等級",
+        "同行評審",
+        "literature review",
+        "systematic review",
+        "academic research"
+      ],
+      "depends_on": [
+        "web-research",
+        "knowledge-query"
+      ],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "WebSearch",
+        "WebFetch",
+        "Bash"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "agent-result-validator",
+      "path": "skills/agent-result-validator/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "結果驗證",
+        "result validation",
+        "schema 驗證",
+        "格式漂移",
+        "format drift",
+        "agent-result-validator",
+        "結果檔案檢查",
+        "handoff 驗證"
+      ],
+      "depends_on": [
+        "system-insight"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "api-cache",
+      "path": "skills/api-cache/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "快取",
+        "cache",
+        "降級",
+        "API 故障",
+        "快取策略",
+        "TTL",
+        "降級服務",
+        "API 快取",
+        "cache hit",
+        "快取命中"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "arch-evolution",
+      "path": "skills/arch-evolution/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "架構決策",
+        "ADR",
+        "技術債",
+        "依賴圖",
+        "OODA",
+        "arch-evolution",
+        "架構治理",
+        "漸進式改進",
+        "改進計畫",
+        "架構演化"
+      ],
+      "depends_on": [
+        "system-audit",
+        "system-insight"
+      ],
+      "allowed_tools": [
+        "Read",
+        "Bash",
+        "Write",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "atomic-habits",
+      "path": "skills/atomic-habits/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "習慣",
+        "行為改變",
+        "原子習慣",
+        "習慣堆疊",
+        "好習慣",
+        "壞習慣",
+        "每日提示",
+        "行為設計",
+        "James Clear",
+        "身份認同",
+        "兩分鐘法則"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "behavior-pattern-analyzer",
+      "path": "skills/behavior-pattern-analyzer/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "行為模式分析",
+        "behavior pattern",
+        "模式挖掘",
+        "Skill 演化",
+        "行為聚類",
+        "agent 行為",
+        "behavior-pattern-analyzer"
+      ],
+      "depends_on": [
+        "system-insight",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "cache-optimizer",
+      "path": "skills/cache-optimizer/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "快取優化",
+        "快取分析",
+        "cache optimization",
+        "TTL 調優",
+        "命中率分析",
+        "快取效率",
+        "快取診斷"
+      ],
+      "depends_on": [
+        "api-cache",
+        "scheduler-state"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "chatroom-query",
+      "path": "skills/chatroom-query/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "chatroom",
+        "聊天室",
+        "bot.js",
+        "Gun.js 任務",
+        "任務佇列",
+        "pending 任務",
+        "wsc-bot",
+        "聊天室任務",
+        "bot 任務"
+      ],
+      "depends_on": [
+        "api-cache",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "chatroom-task-delivery",
+      "path": "skills/chatroom-task-delivery/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "chatroom delivery",
+        "task delivery",
+        "mk_",
+        "/api/task",
+        "未入列",
+        "未執行",
+        "假成功",
+        "receipt timeout",
+        "bot receipt",
+        "Gun relay 任務"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Grep",
+        "Bash"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "context-budget-monitor",
+      "path": "skills/context-budget-monitor/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "context-budget-monitor",
+        "I/O 預算",
+        "Context 保護",
+        "Context 膨脹",
+        "session I/O",
+        "avg_io_per_call",
+        "I/O 超標",
+        "預算監控"
+      ],
+      "depends_on": [
+        "system-insight",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "cursor-cli",
+      "path": "skills/cursor-cli/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "cursor cli",
+        "agent -p",
+        "agent --print",
+        "Cursor Agent 終端",
+        "CLI 任務",
+        "非互動 Agent",
+        "腳本化 Cursor",
+        "排程呼叫 Agent",
+        "cursor-cli"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "digest-memory",
+      "path": "skills/digest-memory/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "記憶",
+        "連續天數",
+        "上次執行",
+        "跨次追蹤",
+        "記憶追蹤",
+        "連續報到",
+        "streak",
+        "執行統計",
+        "趨勢"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "execution-journal",
+      "path": "skills/execution-journal/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "execution-journal",
+        "執行追蹤",
+        "trace 分析",
+        "失敗回溯",
+        "Skill chain",
+        "執行日誌",
+        "跨 Phase 因果"
+      ],
+      "depends_on": [
+        "scheduler-state",
+        "system-insight",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "game-design",
+      "path": "skills/game-design/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "遊戲",
+        "game",
+        "遊戲優化",
+        "遊戲設計",
+        "HTML5 遊戲",
+        "遊戲品質",
+        "Canvas 遊戲",
+        "JavaScript 遊戲",
+        "遊戲部署",
+        "遊戲效能",
+        "HTML5"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "game-workflow-design",
+      "path": "skills/game-workflow-design/SKILL.md",
+      "version": "1.2.0",
+      "description": "|",
+      "triggers": [
+        "工作流設計遊戲",
+        "以工作流設計遊戲",
+        "Flame Engine",
+        "Flutter 遊戲",
+        "flame",
+        "遊戲開發流程",
+        "遊戲工作流",
+        "OpenMoji",
+        "ZapSplat",
+        "素材管線",
+        "Bonfire",
+        "flame_svg",
+        "flame_audio",
+        "Cloudflare Pages"
+      ],
+      "depends_on": [
+        "knowledge-query"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "git-smart-commit",
+      "path": "skills/git-smart-commit/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "git commit",
+        "smart commit",
+        "智慧提交",
+        "conventional commit",
+        "分群提交",
+        "git push",
+        "自動提交"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "github-scout",
+      "path": "skills/github-scout/SKILL.md",
+      "version": "1.2.0",
+      "description": "|",
+      "triggers": [
+        "GitHub 趨勢",
+        "熱門專案",
+        "開源靈感",
+        "最佳實踐",
+        "github-scout",
+        "系統改進",
+        "架構借鑑",
+        "開源分析",
+        "GitHub trending",
+        "trending repos",
+        "專案靈感",
+        "改進建議"
+      ],
+      "depends_on": [
+        "web-research",
+        "knowledge-query",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Bash",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "gmail",
+      "path": "skills/gmail/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "gmail",
+        "email",
+        "郵件",
+        "信箱",
+        "未讀",
+        "收件匣",
+        "inbox",
+        "mail",
+        "Google 信箱",
+        "重要郵件",
+        "郵件摘要"
+      ],
+      "depends_on": [
+        "api-cache",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "groq",
+      "path": "skills/groq/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "groq",
+        "快速摘要",
+        "快速翻譯",
+        "en_to_zh",
+        "英文摘要",
+        "批次翻譯",
+        "輕量分類",
+        "groq-relay",
+        "前處理"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "hackernews-ai-digest",
+      "path": "skills/hackernews-ai-digest/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "AI 新聞",
+        "LLM",
+        "GPT",
+        "Claude",
+        "機器學習",
+        "Hacker News",
+        "技術動態",
+        "HN",
+        "人工智慧",
+        "深度學習",
+        "AI動態",
+        "ML",
+        "Transformer"
+      ],
+      "depends_on": [
+        "api-cache",
+        "groq",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "hook-registry",
+      "path": "skills/hook-registry/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "hook-registry",
+        "hook 規則盤點",
+        "guard 鏈審計",
+        "hook 規則漂移",
+        "hook 一致性",
+        "hook registry",
+        "hook 治理"
+      ],
+      "depends_on": [
+        "system-insight",
+        "config/hook-rules.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "insight-briefing",
+      "path": "skills/insight-briefing/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "深度研究洞察簡報",
+        "insight briefing",
+        "研究簡報",
+        "多 Skill 研究簡報"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "web-research",
+        "kb-research-strategist",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "WebSearch",
+        "WebFetch",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "kb-curator",
+      "path": "skills/kb-curator/SKILL.md",
+      "version": "3.0.0",
+      "description": "|",
+      "triggers": [
+        "知識庫治理",
+        "KB 去重",
+        "筆記品質",
+        "過期清理",
+        "主題分佈",
+        "kb-curator",
+        "清理",
+        "重複筆記",
+        "品質檢查",
+        "知識庫清理",
+        "筆記統計",
+        "內容評分",
+        "非知識",
+        "不完整",
+        "content scoring"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "groq",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "kb-research-strategist",
+      "path": "skills/kb-research-strategist/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "研究策略",
+        "系列研究",
+        "深化研究",
+        "知識差距分析",
+        "研究計畫",
+        "KB 擴充",
+        "知識系列",
+        "kb-research-strategist"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "knowledge-domain-builder",
+      "path": "skills/knowledge-domain-builder/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "建立知識庫",
+        "搭建知識領域",
+        "Obsidian vault",
+        "知識體系",
+        "knowledge domain",
+        "build vault",
+        "知識架構",
+        "一鍵建庫"
+      ],
+      "depends_on": [
+        "ntfy-notify"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "knowledge-query",
+      "path": "skills/knowledge-query/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "知識庫",
+        "筆記",
+        "搜尋筆記",
+        "匯入",
+        "研究成果",
+        "知識查詢",
+        "KB",
+        "knowledge base",
+        "查詢筆記",
+        "寫入筆記",
+        "知識管理"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "learning-mastery",
+      "path": "skills/learning-mastery/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "學習",
+        "費曼",
+        "刻意練習",
+        "間隔複習",
+        "深度學習的技術",
+        "學習方法",
+        "學習技巧",
+        "記憶法",
+        "五層學習",
+        "楊大輝",
+        "知識連結",
+        "提取練習"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "markdown-editor",
+      "path": "skills/markdown-editor/SKILL.md",
+      "version": "2.0.1",
+      "description": "|",
+      "triggers": [
+        "Markdown",
+        "md",
+        "格式化",
+        "摘要",
+        "TOC",
+        "目錄生成",
+        "表格",
+        "程式碼區塊",
+        "連結替換",
+        "Markdown 編輯",
+        "內容總結",
+        "文件排版",
+        "GFM",
+        "CommonMark",
+        "大綱",
+        "錨點",
+        "腳註",
+        "Mermaid",
+        "告警區塊"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "ntfy-notify",
+      "path": "skills/ntfy-notify/SKILL.md",
+      "version": "2.0.3",
+      "description": "|",
+      "triggers": [
+        "通知",
+        "提醒",
+        "notify",
+        "完成後通知",
+        "做完通知",
+        "完成後提醒",
+        "處理完提醒",
+        "推播",
+        "ntfy",
+        "訊息推送",
+        "告警"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml",
+        "skills/markdown-editor/SKILL.md"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "pingtung-news",
+      "path": "skills/pingtung-news/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "屏東新聞",
+        "屏東縣政",
+        "周春米",
+        "縣府公告",
+        "屏東縣政府",
+        "屏東最新消息",
+        "屏東縣長",
+        "新聞稿",
+        "地方新聞"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "pingtung-policy-expert",
+      "path": "skills/pingtung-policy-expert/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "政策",
+        "施政",
+        "長照",
+        "托育",
+        "產業",
+        "屏東政策",
+        "醫療",
+        "交通",
+        "農業",
+        "觀光",
+        "治水",
+        "教育",
+        "施政報告",
+        "政策解讀",
+        "社會福利"
+      ],
+      "depends_on": [
+        "pingtung-news"
+      ],
+      "allowed_tools": [
+        "Read"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "pre-flight-check",
+      "path": "skills/pre-flight-check/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "pre-flight-check",
+        "執行前檢查",
+        "飛行檢查",
+        "依賴健康",
+        "時段風險",
+        "go/no-go",
+        "預防性檢查"
+      ],
+      "depends_on": [
+        "scheduler-state",
+        "api-cache"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "prompt-lint",
+      "path": "skills/prompt-lint/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "prompt-lint",
+        "prompt 檢查",
+        "模板分析",
+        "prompt 品質",
+        "模板膨脹",
+        "prompt 反模式",
+        "prompt 優化"
+      ],
+      "depends_on": [
+        "system-insight",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "quality-tracker",
+      "path": "skills/quality-tracker/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "品質追蹤",
+        "品質回歸",
+        "quality tracking",
+        "quality regression",
+        "品質趨勢",
+        "quality trend",
+        "品質閘門",
+        "DONE_CERT 分析",
+        "品質監控"
+      ],
+      "depends_on": [
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "scheduler-state",
+      "path": "skills/scheduler-state/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "狀態",
+        "健康度",
+        "執行記錄",
+        "排程狀態",
+        "排程紀錄",
+        "成功率",
+        "系統狀態",
+        "scheduler",
+        "平均耗時"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "skill-forge",
+      "path": "skills/skill-forge/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "skill-forge",
+        "生成 Skill",
+        "新增 Skill",
+        "Skill 缺口",
+        "能力缺口",
+        "Skill 鑄造",
+        "自動生成技能"
+      ],
+      "depends_on": [
+        "kb-research-strategist",
+        "skill-scanner",
+        "ntfy-notify",
+        "knowledge-query",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "skill-lifecycle-manager",
+      "path": "skills/skill-lifecycle-manager/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "skill-lifecycle-manager",
+        "Skill 生命週期",
+        "Skill 退役",
+        "Skill 升級",
+        "Skill 分層",
+        "lifecycle",
+        "deprecation",
+        "版本升級評估",
+        "穩定度評分"
+      ],
+      "depends_on": [
+        "skill-registry-sync",
+        "system-insight",
+        "arch-evolution",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "skill-registry-sync",
+      "path": "skills/skill-registry-sync/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "skill-registry-sync",
+        "Skill 索引同步",
+        "Skill registry",
+        "觸發詞衝突",
+        "依賴圖驗證",
+        "Skill manifest",
+        "Skill 一致性"
+      ],
+      "depends_on": [
+        "knowledge-query"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "skill-scanner",
+      "path": "skills/skill-scanner/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "安全掃描",
+        "skill 掃描",
+        "security scan",
+        "audit skills",
+        "安全稽核",
+        "掃描技能",
+        "安全檢查",
+        "漏洞掃描",
+        "Cisco AI Defense",
+        "YARA"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Bash",
+        "Read"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "skill-test-scaffolder",
+      "path": "skills/skill-test-scaffolder/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "skill-test-scaffolder",
+        "生成 Skill 測試",
+        "Skill 測試骨架",
+        "自動生成測試",
+        "測試覆蓋擴充",
+        "補測試",
+        "scaffold test"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "slo-budget-manager",
+      "path": "skills/slo-budget-manager/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "slo-budget-manager",
+        "SLO 治理",
+        "Error Budget",
+        "失敗分類",
+        "failure mode",
+        "成功率治理",
+        "postmortem",
+        "budget burn",
+        "穩定性治理"
+      ],
+      "depends_on": [
+        "scheduler-state",
+        "system-insight",
+        "arch-evolution",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "system-audit",
+      "path": "skills/system-audit/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "系統審查",
+        "系統評分",
+        "品質評估",
+        "system audit",
+        "system review",
+        "安全評分",
+        "架構評審",
+        "完成度檢查",
+        "系統健檢",
+        "system score"
+      ],
+      "depends_on": [
+        "skill-scanner",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Glob",
+        "Grep",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "system-insight",
+      "path": "skills/system-insight/SKILL.md",
+      "version": "1.4.0",
+      "description": "|",
+      "triggers": [
+        "系統分析",
+        "執行報告",
+        "效能分析",
+        "Skill 使用統計",
+        "健康檢查",
+        "system-insight",
+        "自省",
+        "洞察",
+        "趨勢分析",
+        "統計報告",
+        "執行品質"
+      ],
+      "depends_on": [
+        "ntfy-notify"
+      ],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Bash",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "task-fairness-analyzer",
+      "path": "skills/task-fairness-analyzer/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "任務公平性",
+        "排程公平",
+        "任務飢餓",
+        "task fairness",
+        "starvation",
+        "任務再平衡",
+        "rebalance",
+        "公平性分析",
+        "round-robin 偏差"
+      ],
+      "depends_on": [
+        "scheduler-state",
+        "system-insight"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "task-manager",
+      "path": "skills/task-manager/SKILL.md",
+      "version": "1.3.0",
+      "description": "|",
+      "triggers": [
+        "新增自動任務",
+        "增加排程",
+        "新增排程任務",
+        "單次執行",
+        "task-manager",
+        "任務管理",
+        "add task",
+        "新增排程",
+        "自動任務管理",
+        "round-robin"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "todo-scanner",
+      "path": "skills/todo-scanner/SKILL.md",
+      "version": "0.5.0",
+      "description": "|",
+      "triggers": [
+        "TODO 清理",
+        "FIXME 掃描",
+        "todo-scanner",
+        "程式碼衛生",
+        "TODO 分類",
+        "待辦標記統計",
+        "技術債盤點"
+      ],
+      "depends_on": [
+        "system-insight"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "todoist",
+      "path": "skills/todoist/SKILL.md",
+      "version": "2.1.0",
+      "description": "|",
+      "triggers": [
+        "todoist",
+        "待辦事項",
+        "todo",
+        "任務",
+        "今日任務",
+        "過期任務",
+        "新增任務",
+        "完成任務",
+        "指派任務",
+        "幫我新增",
+        "加一個任務",
+        "排進待辦",
+        "task",
+        "to-do list",
+        "待辦清單",
+        "to-do",
+        "待辦"
+      ],
+      "depends_on": [
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "todoist-task-creator",
+      "path": "skills/todoist-task-creator/SKILL.md",
+      "version": "1.1.0",
+      "description": "|",
+      "triggers": [
+        "新增 Todoist 任務",
+        "建立排程任務",
+        "add todoist task",
+        "新增待辦排程",
+        "todoist 新增",
+        "新增可執行任務",
+        "todoist-task-creator",
+        "新增排程待辦",
+        "建立 todoist"
+      ],
+      "depends_on": [
+        "todoist",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "web-research",
+      "path": "skills/web-research/SKILL.md",
+      "version": "1.1.1",
+      "description": "|",
+      "triggers": [
+        "研究",
+        "WebSearch",
+        "web research",
+        "來源品質",
+        "網路搜尋",
+        "技術調查",
+        "外部趨勢",
+        "深度研究",
+        "資料蒐集",
+        "調研"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "WebSearch",
+        "WebFetch"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "workflow-forge",
+      "path": "skills/workflow-forge/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "workflow-forge",
+        "workflow 鑄造",
+        "流程標準化",
+        "輸出格式規範",
+        "工作流定義",
+        "系統一致性",
+        "格式驗證",
+        "結果 Schema",
+        "輸出標準化",
+        "工作流 YAML",
+        "驗證清單"
+      ],
+      "depends_on": [
+        "knowledge-query",
+        "system-insight",
+        "ntfy-notify",
+        "config/dependencies.yaml"
+      ],
+      "allowed_tools": [
+        "Bash",
+        "Read",
+        "Write",
+        "Edit",
+        "Glob",
+        "Grep"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "writing-masters",
+      "path": "skills/writing-masters/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "寫作技巧",
+        "writing",
+        "寫作",
+        "文字",
+        "創作",
+        "冰山理論",
+        "極簡",
+        "海明威",
+        "史蒂芬金",
+        "show don't tell"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Write"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    },
+    {
+      "name": "writing-plans",
+      "path": "skills/writing-plans/SKILL.md",
+      "version": "1.0.0",
+      "description": "|",
+      "triggers": [
+        "write plan",
+        "create plan",
+        "implementation plan",
+        "計畫",
+        "規劃",
+        "怎麼實作",
+        "步驟",
+        "拆解任務"
+      ],
+      "depends_on": [],
+      "allowed_tools": [
+        "Read",
+        "Write",
+        "Bash"
+      ],
+      "stability": "stable",
+      "updated_at": null,
+      "source": "project",
+      "in_skill_index": true
+    }
+  ],
+  "meta": {
+    "total_skills": 52,
+    "skills_in_index": 52,
+    "skills_missing_from_index": 0,
+    "trigger_conflicts": 0,
+    "broken_dependencies": 0
+  }
+}

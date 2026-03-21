@@ -53,6 +53,42 @@ if ($Scheduled) {
     curl -s -H "Content-Type: application/json; charset=utf-8" -d "@$ntfyFile" https://ntfy.sh | Out-Null
     Remove-Item $ntfyFile -Force -ErrorAction SilentlyContinue
 
+    # 若有 逾時 或 Phase失敗，寫入 improvement-backlog.json 讓 arch_evolution 下輪決策並由 self_heal 落實
+    if ($issues.Count -gt 0 -and ($issues -contains "逾時" -or $issues -contains "Phase失敗")) {
+        try {
+            $backlogPath = "$AgentDir\context\improvement-backlog.json"
+            $backlogData = if (Test-Path $backlogPath) {
+                Get-Content $backlogPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            } else { [PSCustomObject]@{ items = @() } }
+            if (-not $backlogData.PSObject.Properties["items"]) {
+                $backlogData | Add-Member -NotePropertyName "items" -NotePropertyValue @() -Force
+            }
+            # 24h 去重：同日同 source 不重複新增
+            $today = (Get-Date -Format "yyyy-MM-dd")
+            $dupCheck = @($backlogData.items) | Where-Object {
+                $_.source -eq "health_check" -and $_.created_at -like "$today*"
+            }
+            if (-not $dupCheck) {
+                $newItem = [PSCustomObject]@{
+                    id          = "backlog_health_$(Get-Date -Format 'yyyyMMddHHmm')"
+                    source      = "health_check"
+                    title       = "每日健康檢查發現問題：$issueStr"
+                    description = "07:15 健康檢查偵測到：成功率 $srText，問題：$issueStr。Log: $logName"
+                    priority    = "high"
+                    effort      = "low"
+                    created_at  = (Get-Date -Format "o")
+                    status      = "pending"
+                    tags        = @("health_check", "auto_detected")
+                }
+                $backlogData.items = @($backlogData.items) + $newItem
+                $backlogData | ConvertTo-Json -Depth 6 | Set-Content -Path $backlogPath -Encoding UTF8
+                Write-Host "[Scheduled] 問題已寫入 improvement-backlog.json（供 arch_evolution 決策）" -ForegroundColor Yellow
+            }
+        } catch {
+            Write-Host "[Scheduled] improvement-backlog 更新失敗（非阻斷性）：$_" -ForegroundColor Yellow
+        }
+    }
+
     # ADR-010：pip-audit 發現漏洞時另發 critical 告警
     if ($output | Select-String "pip-audit 發現漏洞") {
         $secPayload = [ordered]@{
@@ -1921,6 +1957,110 @@ if (Test-Path $stateFile) {
     }
 } else {
     Write-Host "  ℹ️  state/scheduler-state.json 不存在" -ForegroundColor DarkGray
+}
+
+Write-Host ""
+
+# --- Skill Registry 健康度（ADR-033）---
+Write-Host "[Skill Registry]" -ForegroundColor Yellow
+$skillRegistryFile = "$AgentDir\context\skill-registry.json"
+if (Test-Path $skillRegistryFile) {
+    try {
+        $registry = Get-Content $skillRegistryFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $meta = $registry.meta
+        $total = $meta.total_skills
+        $inIndex = $meta.skills_in_index
+        $missingIdx = $meta.skills_missing_from_index
+        $conflicts = $meta.trigger_conflicts
+        $brokenDeps = $meta.broken_dependencies
+        $genAt = $registry.generated_at
+
+        $completeness = if ($total -gt 0) { [math]::Round($inIndex / $total * 100, 1) } else { 0 }
+        Write-Host ("  總 Skills: {0}  |  Registry 完整率: {1}%  |  更新: {2}" -f $total, $completeness, $genAt) -ForegroundColor White
+        Write-Host ("  未在 SKILL_INDEX: {0}  |  觸發詞衝突: {1}  |  依賴缺漏: {2}" -f $missingIdx, $conflicts, $brokenDeps) -ForegroundColor $(if ($missingIdx -eq 0 -and $conflicts -eq 0 -and $brokenDeps -eq 0) { "Green" } else { "Yellow" })
+
+        if ($conflicts -gt 0) {
+            Write-Host "  ⚠️  有 $conflicts 組觸發詞衝突，詳見 context/skill-registry-conflicts.md" -ForegroundColor Yellow
+        }
+        if ($missingIdx -gt 0) {
+            Write-Host "  ⚠️  有 $missingIdx 個 Skills 未列於 SKILL_INDEX.md" -ForegroundColor Yellow
+        }
+        if ($brokenDeps -gt 0) {
+            Write-Host "  ❌ 有 $brokenDeps 個依賴缺漏" -ForegroundColor Red
+        }
+        if ($completeness -ge 95 -and $conflicts -eq 0 -and $brokenDeps -eq 0) {
+            Write-Host "  ✅ Skill Registry 健康" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "  skill-registry.json 解析失敗：$_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "  尚無 Registry（執行 uv run python tools/sync_skill_registry.py 產生）" -ForegroundColor DarkGray
+}
+
+Write-Host ""
+
+# --- Error Budget 狀態（ADR-032）---
+Write-Host "[Error Budget 狀態]" -ForegroundColor Yellow
+$sloReportFile = "$AgentDir\state\slo-budget-report.json"
+if (Test-Path $sloReportFile) {
+    try {
+        $sloReport = Get-Content $sloReportFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        $actionLevel = $sloReport.action_level
+        $successRate = $sloReport.success_rate
+        $postmortem = $sloReport.postmortem_triggered
+        $topCauses = $sloReport.top_recurring_causes
+        $genAt = $sloReport.generated_at
+
+        $actionColor = switch ($actionLevel) {
+            "normal"              { "Green" }
+            "slow_down"           { "Yellow" }
+            "freeze_non_critical" { "Red" }
+            "full_freeze"         { "Red" }
+            default               { "Gray" }
+        }
+        $actionLabel = switch ($actionLevel) {
+            "normal"              { "正常" }
+            "slow_down"           { "減速（優先穩定性）" }
+            "freeze_non_critical" { "凍結非關鍵變更" }
+            "full_freeze"         { "全面凍結" }
+            default               { "未知" }
+        }
+
+        $rateStr = if ($null -ne $successRate) { "{0:P1}" -f [double]$successRate } else { "N/A" }
+        Write-Host ("  動作等級: {0}  |  28天成功率: {1}" -f $actionLabel, $rateStr) -ForegroundColor $actionColor
+        Write-Host ("  更新: {0}" -f $genAt) -ForegroundColor DarkGray
+
+        if ($postmortem) {
+            Write-Host "  Postmortem 已觸發（詳見 context/postmortem/）" -ForegroundColor Red
+        }
+
+        if ($sloReport.slo_status) {
+            $slos = $sloReport.slo_status.PSObject.Properties
+            foreach ($slo in $slos) {
+                $sid = $slo.Name
+                $b = $slo.Value
+                $remaining = $b.budget_remaining_pct
+                $status = $b.status
+                $sloColor = switch ($status) { "green" { "Green" } "yellow" { "Yellow" } "red" { "Red" } default { "Gray" } }
+                $sloIcon  = switch ($status) { "green" { "[OK]" } "yellow" { "[!!]" } "red" { "[XX]" } default { "[?]" } }
+                Write-Host ("  {0} {1}: actual={2:P1} target={3:P0} budget_remaining={4}%" -f $sloIcon, $sid, [double]$b.actual, [double]$b.target, $remaining) -ForegroundColor $sloColor
+            }
+        }
+
+        if ($topCauses -and $topCauses.Count -gt 0) {
+            $causeList = ($topCauses | ForEach-Object {
+                if ($_ -is [string]) { $_ }
+                elseif ($null -ne $_.mode) { "$($_.mode)($($_.count))" }
+                else { $_.ToString() }
+            }) -join ", "
+            Write-Host ("  主要失敗模式: {0}" -f $causeList) -ForegroundColor White
+        }
+    } catch {
+        Write-Host "  slo-budget-report.json 解析失敗：$_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "  尚無報告（執行 uv run python tools/slo_budget_manager.py 產生）" -ForegroundColor DarkGray
 }
 
 Write-Host ""
