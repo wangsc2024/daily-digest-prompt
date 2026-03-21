@@ -1,6 +1,6 @@
 ---
 name: system-insight
-version: "1.4.0"
+version: "1.5.0"
 description: |
   系統自省引擎。分析 Agent 執行品質、Skill 使用頻率、失敗模式，產出結構化洞察報告。
   Use when: 系統分析、執行報告、效能分析、Skill 使用統計、健康檢查、洞察趨勢、自動任務公平性評估。
@@ -33,6 +33,9 @@ triggers:
 Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → Act(self-heal)
 ```
 產出的 `context/system-insight.json` 被 `system-audit` 讀取作為評分輸入。
+
+**快速通道（步驟 5）**：warning / critical alert 直接寫入 `context/improvement-backlog.json`，
+讓同輪的 arch_evolution（order 17）在**不等待 kb_insight_evaluation 跨輪中轉**的情況下立即決策。
 
 ## 執行步驟
 
@@ -118,6 +121,31 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 
 ### 步驟 4：異常時通知
 若有 critical 等級的 alert → 先讀取 `skills/ntfy-notify/SKILL.md`，依其標準流程（Write JSON → curl 發送 → rm 暫存檔）發送系統洞察警告至 ntfy。
+
+### 步驟 5：backlog_feed（告警轉 OODA 行動鏈）
+
+> **目的**：system_insight（order 16）→ improvement-backlog → arch_evolution（order 17）構成**同輪即可決策的快速通道**，無需繞經 kb_insight_evaluation 的跨輪中轉。
+
+1. 讀取 `context/system-insight.json` 的 `alerts` 陣列
+2. 篩選等級為 `"warning"` 或 `"critical"` 的 alert
+3. 若篩選結果 = 0 條 → 跳過本步驟（無告警時不寫入，避免噪音）
+4. 讀取 `context/improvement-backlog.json`（不存在則建立 `{ "items": [] }`）
+5. **24h 去重**：檢查 `items` 中是否已有 `source: "system_insight"` 且 `created_at` 為今日的條目；若有則跳過，避免同日多次執行時重複累積
+6. 若無重複，取**嚴重度最高的前 3 條**（critical 優先於 warning），逐條追加：
+   ```json
+   {
+     "id": "backlog_si_<YYYYMMDD>_<metric>",
+     "source": "system_insight",
+     "title": "系統洞察告警：<metric> 超閾值",
+     "description": "<metric>=<value>，門檻 <threshold>。建議：<recommendations 中對應文字>",
+     "priority": "high（critical）或 medium（warning）",
+     "effort": "low",
+     "created_at": "ISO 8601 時間戳",
+     "status": "pending",
+     "tags": ["system_insight", "auto_detected", "<level>"]
+   }
+   ```
+7. 用 Write 將更新後的完整 backlog 寫回 `context/improvement-backlog.json`
 
 ## 錯誤處理
 - 若 JSONL 日誌不存在或為空 → 跳過該資料源，metrics 中標記 `"data_source": "partial"`

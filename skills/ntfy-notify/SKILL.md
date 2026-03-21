@@ -1,15 +1,16 @@
 ---
 name: ntfy-notify
-version: "2.0.1"
+version: "2.0.3"
 description: |
   透過 ntfy.sh 發送任務完成通知。當用戶說「完成後通知 xxx」、
   「做完通知 xxx」、「完成後提醒 xxx」時，xxx 即為 ntfy topic，
-  任務完成後使用 JSON 檔案 + curl 發送通知到 ntfy.sh/xxx。
+  任務完成後使用 JSON 檔案 + curl 發送到 **https://ntfy.sh 根網址**（topic 寫在 JSON 內，見下文「常見錯誤」）。
   Use when: 任務完成推播、即時提醒、通知發送、排程結果通知、告警推播。
 allowed-tools: Bash, Read, Write
 cache-ttl: 0min
 depends-on:
   - config/dependencies.yaml
+  - skills/markdown-editor/SKILL.md
 triggers:
   - "通知"
   - "提醒"
@@ -68,6 +69,48 @@ triggers:
 - `完成後通知 + topic名稱`
 - `做完通知 + topic名稱`
 
+## 官方文件對齊
+
+發送行為以 [ntfy Publishing](https://docs.ntfy.sh/publish/) 為準，專案內常用段落：
+
+| 主題 | 文件錨點 |
+|------|----------|
+| JSON 發布（根 URL、`topic` 必填等） | [Publish as JSON](https://docs.ntfy.sh/publish/#publish-as-json) |
+| `markdown` 欄位與 Markdown 語法範圍 | [Markdown formatting](https://docs.ntfy.sh/publish/#markdown-formatting) |
+| HTTP 標頭別名（`Markdown` / `X-Markdown` / `md`） | 同上節（純文字 body 情境；**JSON 發布建議用 body 內 `markdown: true`**） |
+
+### ntfy Markdown 適用範圍（官方摘要）
+
+> 來源：[Markdown formatting](https://docs.ntfy.sh/publish/#markdown-formatting)。ntfy 指向 [Markdown Guide — Basic Syntax](https://www.markdownguide.org/basic-syntax/) 作為語法參考，但**實際支援集合以官方列表為準**（非整份 GFM／CommonMark）。
+
+**開關（預設純文字）**
+
+- JSON 發布：`"markdown": true`（[欄位說明](https://docs.ntfy.sh/publish/#publish-as-json)）。
+- 純文字 POST：HTTP 標頭 `X-Markdown`（別名 `Markdown`、`md`）設為 `true` / `1` / `yes`，或 `Content-Type: text/markdown`。
+
+**客戶端（重要）**
+
+- 官方原文：**Supported Markdown features (web app only for now)**。亦即文件明列的格式化能力，**以網頁版檢視較完整**；iOS／Android 等 App 內通知可能接近純文字或精簡顯示。**推播內文請以「全客戶端可讀的純文字＋保守 Markdown」為原則**，勿假設表格或程式碼區塊在手機上排版完美。
+
+**官方明列支援的類型**（與文件條目一一對應）
+
+| 類型 | 說明／語法提示 |
+|------|----------------|
+| Horizontal rules | `---` |
+| Blockquotes | `>` 開頭 |
+| Lists | `-` 無序、`1.` 有序 |
+| Headings | `#`～`######`（`#` 後須空格） |
+| Code | 围栏程式碼區塊與行內反引號 |
+| Images | `![說明](https://…)` |
+| Links | `[文字](https://…)` |
+| Emphasis | `**粗體**`、`*斜體*` |
+
+**官方該節未列出**（勿依賴於 ntfy）：GFM **表格**、**任務清單** `- [ ]`、**刪除線** `~~…~~`、**Mermaid**、`> [!NOTE]` 等告警區塊、腳註等擴展語法。
+
+**與 `markdown-editor` Skill**：撰寫 `message` 時可 Read **`skills/markdown-editor/SKILL.md`** 核對標題／清單／粗體等**基礎寫法**，但**可用品項以上表為準**，不得假設 ntfy 等同 GitHub 預覽。
+
+---
+
 ## 通知發送格式（跨平台）
 
 **重要：使用 JSON 檔案方式發送，確保 Windows/macOS/Linux 都能正常運作。**
@@ -85,6 +128,8 @@ triggers:
 }
 ```
 
+純文字可省略 `markdown`。若 `message` 含 `##`、清單、`**粗體**` 等 Markdown，請加 **`"markdown": true`**（[官方 JSON 欄位表](https://docs.ntfy.sh/publish/#publish-as-json)）。
+
 **步驟 2：使用 curl 發送**
 
 ```bash
@@ -99,6 +144,17 @@ curl -H "Content-Type: application/json; charset=utf-8" -d @payload.json https:/
 | Windows | ❌ 編碼問題 | ✅ 正常 |
 | 中文支援 | ⚠️ 可能亂碼 | ✅ 完美 |
 
+### 常見錯誤：通知內文變成整段 `{ "topic": ... }`
+
+若使用 **JSON 檔** 發送，**POST 目標必須是** `https://ntfy.sh`（路徑為空）。**不要**使用 `https://ntfy.sh/你的topic`。
+
+| 寫法 | 結果 |
+|------|------|
+| `-d @payload.json https://ntfy.sh` | ✅ 伺服器解析 JSON，`title` / `message` 分開顯示 |
+| `-d @payload.json https://ntfy.sh/wangsc2025` | ❌ 整份 JSON 被當成純文字訊息，手機上只看到原始 JSON |
+
+`topic` 請只放在 JSON 的 `"topic"` 欄位（與專案內 `skills/skill-forge/SKILL.md` 說明一致）。
+
 ---
 
 ## JSON 欄位說明
@@ -108,6 +164,7 @@ curl -H "Content-Type: application/json; charset=utf-8" -d @payload.json https:/
 | `topic` | 是 | 通知頻道名稱 |
 | `message` | 是 | 通知內容 |
 | `title` | 否 | 通知標題（支援中文） |
+| `markdown` | 否 | `true` 時依 Markdown 渲染 `message`（官方 bool 欄位） |
 | `tags` | 否 | 標籤陣列，自動轉為 emoji |
 | `priority` | 否 | 優先級 1-5（5 最高） |
 | `click` | 否 | 點擊通知開啟的 URL |
@@ -336,8 +393,9 @@ rm ntfy_payload_tmp.json
 
 1. **禁止使用附件功能**：發送通知時不要使用 `attach` 欄位，只發送純文字訊息
 2. **必須使用 charset=utf-8**：確保中文正確顯示
-3. **必須使用 https://ntfy.sh**：完整 URL，不要只用 ntfy.sh
-4. **建議刪除暫存檔**：發送完成後清理 JSON 檔案
+3. **JSON 發送時 POST 至 `https://ntfy.sh`（根網址）**：完整 URL；**禁止** `https://ntfy.sh/<topic>` 搭配 JSON body（否則內文會變整段 JSON）
+4. **Markdown**：`message` 使用 Markdown 語法時必加 **`"markdown": true`**；撰寫規則參考 **`skills/markdown-editor/SKILL.md`**
+5. **建議刪除暫存檔**：發送完成後清理 JSON 檔案
 
 ---
 
@@ -360,9 +418,11 @@ import requests; requests.post('https://ntfy.sh', json={'topic':'TOPIC','title':
 ```python
 import requests
 
-def notify(topic, title, message, tags=None, priority=None):
+def notify(topic, title, message, tags=None, priority=None, markdown=False):
     """發送 ntfy 通知"""
     payload = {'topic': topic, 'title': title, 'message': message}
+    if markdown:
+        payload['markdown'] = True
     if tags:
         payload['tags'] = tags
     if priority:

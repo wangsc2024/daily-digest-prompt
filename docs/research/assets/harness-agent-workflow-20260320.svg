@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <style>
+    .title { font: 700 28px sans-serif; fill: #123; }
+    .subtitle { font: 500 16px sans-serif; fill: #345; }
+    .lane { fill: #f8fbff; stroke: #aac3de; stroke-width: 1.5; }
+    .step { fill: #fff; stroke: #3a6ea5; stroke-width: 2; rx: 12; ry: 12; }
+    .decision { fill: #fff6ea; stroke: #bf7a21; stroke-width: 2; }
+    .term { fill: #effbf3; stroke: #2d8a57; stroke-width: 2; rx: 20; ry: 20; }
+    .label { font: 700 17px sans-serif; fill: #123; }
+    .text { font: 14px sans-serif; fill: #234; }
+    .arrow { stroke: #456; stroke-width: 2.5; fill: none; marker-end: url(#arrow2); }
+  </style>
+  <defs>
+    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#456"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="45" class="title">Harness Agent 工作流圖</text>
+  <text x="40" y="74" class="subtitle">根據 README 描述的 run loop、permission mode、sub-agent、session/context 行為重建</text>
+
+  <rect x="40" y="100" width="1120" height="140" class="lane"/>
+  <rect x="40" y="260" width="1120" height="170" class="lane"/>
+  <rect x="40" y="450" width="1120" height="130" class="lane"/>
+  <rect x="40" y="600" width="1120" height="110" class="lane"/>
+
+  <text x="55" y="128" class="label">1. 觸發與初始化</text>
+  <text x="55" y="288" class="label">2. 推理迴圈與工具執行</text>
+  <text x="55" y="478" class="label">3. 狀態持久化與回饋</text>
+  <text x="55" y="628" class="label">4. 結束 / 中止</text>
+
+  <rect x="90" y="145" width="150" height="60" class="term"/>
+  <text x="135" y="180" class="label">使用者輸入</text>
+
+  <rect x="290" y="145" width="180" height="60" class="step"/>
+  <text x="320" y="173" class="label">載入設定</text>
+  <text x="320" y="193" class="text">env / TOML / HARNESS.md</text>
+
+  <rect x="520" y="145" width="180" height="60" class="step"/>
+  <text x="545" y="173" class="label">建立 session</text>
+  <text x="545" y="193" class="text">session id、成本/狀態容器</text>
+
+  <rect x="750" y="145" width="220" height="60" class="step"/>
+  <text x="782" y="173" class="label">組裝上下文</text>
+  <text x="782" y="193" class="text">歷史訊息、記憶、技能、工作區</text>
+
+  <rect x="150" y="320" width="200" height="70" class="step"/>
+  <text x="178" y="350" class="label">呼叫模型提供者</text>
+  <text x="178" y="372" class="text">Anthropic / OpenAI / Google / Ollama</text>
+
+  <polygon points="430,355 520,310 610,355 520,400" class="decision"/>
+  <text x="472" y="350" class="label">模型輸出</text>
+  <text x="458" y="371" class="text">文字 or tool call</text>
+
+  <rect x="680" y="320" width="200" height="70" class="step"/>
+  <text x="725" y="350" class="label">權限檢查</text>
+  <text x="700" y="372" class="text">default / plan / accept_edits / bypass</text>
+
+  <rect x="930" y="320" width="180" height="70" class="step"/>
+  <text x="958" y="350" class="label">執行工具</text>
+  <text x="958" y="372" class="text">Bash / Read / Task / MCP / Web</text>
+
+  <rect x="240" y="500" width="220" height="60" class="step"/>
+  <text x="272" y="527" class="label">寫入 session JSONL</text>
+  <text x="272" y="547" class="text">turn、tool use、result</text>
+
+  <rect x="500" y="500" width="220" height="60" class="step"/>
+  <text x="535" y="527" class="label">context compaction</text>
+  <text x="522" y="547" class="text">接近 85% 時摘要到約 50%</text>
+
+  <rect x="760" y="500" width="220" height="60" class="step"/>
+  <text x="796" y="527" class="label">使用者回饋</text>
+  <text x="782" y="547" class="text">串流文字、/status、/cost、async steering</text>
+
+  <polygon points="340,655 430,620 520,655 430,690" class="decision"/>
+  <text x="388" y="650" class="label">是否完成？</text>
+  <text x="394" y="670" class="text">或 hit max turns</text>
+
+  <rect x="590" y="625" width="180" height="60" class="term"/>
+  <text x="628" y="652" class="label">輸出結果</text>
+  <text x="620" y="672" class="text">summary / cost / diff</text>
+
+  <rect x="830" y="625" width="200" height="60" class="term"/>
+  <text x="866" y="652" class="label">錯誤 / 中止</text>
+  <text x="850" y="672" class="text">工具失敗、權限拒絕、人工終止</text>
+
+  <path d="M240 175 L290 175" class="arrow"/>
+  <path d="M470 175 L520 175" class="arrow"/>
+  <path d="M700 175 L750 175" class="arrow"/>
+  <path d="M860 205 L860 320" class="arrow"/>
+  <path d="M350 355 L430 355" class="arrow"/>
+  <path d="M610 355 L680 355" class="arrow"/>
+  <path d="M880 355 L930 355" class="arrow"/>
+  <path d="M1020 390 L1020 500" class="arrow"/>
+  <path d="M930 530 L980 530" class="arrow"/>
+  <path d="M760 530 L720 530" class="arrow"/>
+  <path d="M500 530 L460 530" class="arrow"/>
+  <path d="M350 560 L350 655" class="arrow"/>
+  <path d="M520 655 L590 655" class="arrow"/>
+  <path d="M430 620 L430 390" class="arrow"/>
+  <path d="M520 655 L830 655" class="arrow"/>
+</svg>

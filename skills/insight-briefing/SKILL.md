@@ -1,6 +1,6 @@
 ---
 name: insight-briefing
-version: "1.0.0"
+version: "1.1.0"
 description: |
   深度研究洞察簡報。依 config/insight-briefing-workflow.yaml 串接多種 Skill：研究策略→蒐集→洞察萃取→簡報產出→KB 匯入→通知。
   產出結構化 Markdown 簡報（可選 .pptx），複用 web-research、kb-research-strategist、knowledge-query、markdown-editor、ntfy-notify。
@@ -122,6 +122,35 @@ optional-depends-on:
 3. 更新頂層 `topics_index[本次 topic] = "YYYY-MM-DD"`
 4. 更新 `summary`：`summary.total` += 1、`summary.by_type["insight_briefing"]` += 1（若 by_type 無此鍵則先設為 0 再加）、`summary.last_updated` = 今日日期
 5. 移除超過 7 天的舊 entry（與 config/dedup-policy.yaml 的 retention_days 一致）
+
+---
+
+## 步驟 8b：backlog_feed（洞察轉 OODA 行動鏈）
+
+> **目的**：insight_briefing（order 29）產出的系統改善洞察直接寫入 `context/improvement-backlog.json`，讓 arch_evolution（order 17）**下一輪即可決策**，無需人工中轉。
+
+1. 掃描步驟 4（synthesize）產出的核心洞見清單，篩選含以下主題的條目：
+   - Agent 架構 / Skill 設計 / Prompt 優化
+   - 工作流程改善 / 系統整合 / 自動化效率
+   - **排除**：純學術研究、特定技術框架調研、新聞趨勢（這類條目屬研究類，非系統改善）
+2. 若篩選結果 = 0 條 → 跳過本步驟（無改善洞察時不寫入，避免噪音）
+3. 讀取 `context/improvement-backlog.json`（不存在則建立 `{ "items": [] }`）
+4. **24h 去重**：檢查 `items` 中是否已有 `source: "insight_briefing"` 且 `created_at` 為今日的條目；若有則跳過，避免同日多次執行時重複累積
+5. 若無重複，取**最具系統改善價值的前 2 條**洞見，逐條追加：
+   ```json
+   {
+     "id": "backlog_ib_<YYYYMMDD>_<topic_slug>",
+     "source": "insight_briefing",
+     "title": "研究洞察建議：<簡短洞見標題>",
+     "description": "<洞見內容摘要，含來源主題與具體建議行動>",
+     "priority": "medium",
+     "effort": "medium",
+     "created_at": "ISO 8601 時間戳",
+     "status": "pending",
+     "tags": ["insight_briefing", "research_derived", "<本次研究主題 slug>"]
+   }
+   ```
+6. 用 Write 將更新後的完整 backlog 寫回 `context/improvement-backlog.json`
 
 ---
 

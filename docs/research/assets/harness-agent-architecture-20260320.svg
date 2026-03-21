@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <style>
+    .title { font: 700 28px sans-serif; fill: #123; }
+    .subtitle { font: 500 16px sans-serif; fill: #345; }
+    .box { fill: #f7fbff; stroke: #3a6ea5; stroke-width: 2; rx: 12; ry: 12; }
+    .box2 { fill: #fff9f2; stroke: #c47c2f; stroke-width: 2; rx: 12; ry: 12; }
+    .box3 { fill: #f4fff7; stroke: #2d8a57; stroke-width: 2; rx: 12; ry: 12; }
+    .label { font: 700 18px sans-serif; fill: #123; }
+    .text { font: 14px sans-serif; fill: #234; }
+    .arrow { stroke: #456; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#456"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="45" class="title">Harness Agent 架構圖</text>
+  <text x="40" y="74" class="subtitle">依 README / PyPI / 倉庫目錄整理，外部 API 與部分內部互動為推論性建模</text>
+
+  <rect x="40" y="110" width="240" height="130" class="box"/>
+  <text x="60" y="140" class="label">CLI / UI 層</text>
+  <text x="60" y="170" class="text">cli/</text>
+  <text x="60" y="195" class="text">ui/</text>
+  <text x="60" y="220" class="text">互動 REPL、slash 指令、串流輸出、diff 顯示</text>
+
+  <rect x="330" y="110" width="260" height="130" class="box"/>
+  <text x="350" y="140" class="label">核心控制層</text>
+  <text x="350" y="170" class="text">core/engine.py</text>
+  <text x="350" y="195" class="text">core/loop.py</text>
+  <text x="350" y="220" class="text">core/context.py / session.py / steering.py</text>
+
+  <rect x="640" y="110" width="240" height="130" class="box2"/>
+  <text x="660" y="140" class="label">安全與治理</text>
+  <text x="660" y="170" class="text">permissions/</text>
+  <text x="660" y="195" class="text">hooks/</text>
+  <text x="660" y="220" class="text">技能規則、工具前後攔截、審計點</text>
+
+  <rect x="920" y="110" width="240" height="130" class="box2"/>
+  <text x="940" y="140" class="label">記憶與設定</text>
+  <text x="940" y="170" class="text">core/config.py</text>
+  <text x="940" y="195" class="text">memory/</text>
+  <text x="940" y="220" class="text">HARNESS.md、~/.harness/config.toml、自動記憶</text>
+
+  <rect x="40" y="310" width="300" height="180" class="box3"/>
+  <text x="60" y="340" class="label">工具執行層</text>
+  <text x="60" y="370" class="text">tools/</text>
+  <text x="60" y="395" class="text">Read / Write / Edit / Bash / Glob / Grep</text>
+  <text x="60" y="420" class="text">Task / WebFetch / AskUser / Checkpoint</text>
+  <text x="60" y="445" class="text">本機檔案系統、shell、網頁抓取、快照</text>
+
+  <rect x="380" y="310" width="250" height="180" class="box3"/>
+  <text x="400" y="340" class="label">子代理層</text>
+  <text x="400" y="370" class="text">agents/</text>
+  <text x="400" y="395" class="text">general / explore / plan / review</text>
+  <text x="400" y="420" class="text">AgentManager</text>
+  <text x="400" y="445" class="text">平行分解、唯讀探索、結構化審查</text>
+
+  <rect x="670" y="310" width="240" height="180" class="box3"/>
+  <text x="690" y="340" class="label">模型提供者層</text>
+  <text x="690" y="370" class="text">providers/</text>
+  <text x="690" y="395" class="text">anthropic / openai / google / ollama</text>
+  <text x="690" y="420" class="text">registry.py</text>
+  <text x="690" y="445" class="text">以 HTTPS API 或本機模型呼叫 LLM</text>
+
+  <rect x="950" y="310" width="210" height="180" class="box3"/>
+  <text x="970" y="340" class="label">外部擴充層</text>
+  <text x="970" y="370" class="text">mcp/</text>
+  <text x="970" y="395" class="text">skills/</text>
+  <text x="970" y="420" class="text">MCP server discovery</text>
+  <text x="970" y="445" class="text">SKILL.md 載入與專案指令</text>
+
+  <rect x="210" y="560" width="780" height="120" class="box"/>
+  <text x="230" y="592" class="label">持久化與觀測</text>
+  <text x="230" y="620" class="text">session.jsonl、context compaction、cost/status、bench/、eval-results/、audit-oriented hooks</text>
+  <text x="230" y="648" class="text">README 僅明示 JSONL session 與 benchmark 輸出；更細的 trace/metrics 格式仍待原始碼或文件補證</text>
+
+  <path d="M280 175 L330 175" class="arrow"/>
+  <path d="M590 175 L640 175" class="arrow"/>
+  <path d="M590 205 L920 205" class="arrow"/>
+  <path d="M460 240 L460 310" class="arrow"/>
+  <path d="M350 200 L190 310" class="arrow"/>
+  <path d="M570 240 L790 310" class="arrow"/>
+  <path d="M760 240 L1040 310" class="arrow"/>
+  <path d="M190 490 L350 560" class="arrow"/>
+  <path d="M505 490 L560 560" class="arrow"/>
+  <path d="M790 490 L720 560" class="arrow"/>
+  <path d="M1040 490 L880 560" class="arrow"/>
+</svg>

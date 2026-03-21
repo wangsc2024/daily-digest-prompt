@@ -9,7 +9,6 @@ description: |
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 cache-ttl: N/A
 triggers:
-  - "新增任務"
   - "新增自動任務"
   - "增加排程"
   - "新增排程任務"

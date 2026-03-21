@@ -1,6 +1,6 @@
 ---
 name: markdown-editor
-version: "2.0.0"
+version: "2.0.1"
 description: |
   Markdown 指令、編輯與總結 Skill。依知識庫「Markdown 指令、編輯與總結 Skill 完整指南」建立，涵蓋 CommonMark 0.30 + GFM 全語法（33 種指令）、解析機制、MD 格式編輯流程、內容總結方法（TOC/大綱/摘要）、跨平台渲染差異。
   Use when: 編輯或格式化 Markdown、產生目錄或摘要、查詢語法、批次連結替換、表格/程式碼區塊/引用撰寫、確認 GitHub/Typora/VS Code 相容性。
@@ -43,6 +43,7 @@ references:
 - 產生 TOC、大綱、摘要或關鍵詞
 - 批次替換連結/路徑、標題編號、清單排序
 - 確認語法在 GitHub / Typora / VS Code / Obsidian 的相容性
+- 組寫 [ntfy](https://docs.ntfy.sh/publish/) 推播的 `message`（JSON 發布且 `"markdown": true`）：**可用品項**以 **`skills/ntfy-notify/SKILL.md`** →「ntfy Markdown 適用範圍（官方摘要）」為準（非完整 GFM；官方註 web app 較完整）；發送流程亦見該 Skill
 
 **完整指南路徑**：`docs/research/Markdown_指令_編輯與總結_skill.md`（33 種指令詳解、解析機制、編輯七步驟、摘要準則、附錄兼容性矩陣）。
 

@@ -1,8 +1,8 @@
 # Skills 索引與路由引擎
 
-> **更新時間:** 2026-03-20 | **能用 Skill 就用 Skill，絕不自行拼湊。**
+> **更新時間:** 2026-03-21 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（19 個核心 + 32 個工具 = 51 個 Skills）
+## 速查表（20 個核心 + 33 個工具 = 53 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -27,6 +27,7 @@
 | 17 | github-scout | GitHub 靈感蒐集（熱門專案分析） | GitHub 趨勢、熱門專案、開源靈感、最佳實踐、github-scout、系統改進、架構借鑑、開源分析、GitHub trending、trending repos、專案靈感、改進建議 |
 | 18 | kb-research-strategist | 研究前 KB 全文分析 + 長期系列研究管理（五階段進度追蹤，無 TTL）+ 結構化深化計畫 | 研究策略、系列研究、深化研究、知識差距分析、研究計畫、KB 擴充、知識系列、kb-research-strategist |
 | 19 | groq | Groq 快速推理前處理層（透過本機 Relay，supports 摘要/翻譯/分類/萃取，depends-on: bot/groq-relay.js） | groq、快速摘要、快速翻譯、en_to_zh、英文摘要、批次翻譯、輕量分類、groq-relay、前處理 |
+| 20 | deep-research | 企業級深度研究框架（8 相位管線、三角佐證 3+ 來源、批判循環、防幻覺，Use when: 技術趨勢報告/AI 產業分析/開源專案研究/學術調研，depends-on: web-research、knowledge-query） | 深度研究、三角佐證、引用追蹤、多來源驗證、品質報告、deep research、citation、批判審查、防幻覺、研究品質 |
 
 ### 工具 Skill（按需使用，互動式觸發）
 
@@ -64,6 +65,7 @@
 | 49 | hook-registry | 宣告式 Hook 規則盤點與 Registry 治理（hooks/*.py 掃描→hook-rules.yaml 比對→漂移偵測→審計報告，depends-on: system-insight） | hook-registry、hook 規則盤點、guard 鏈審計、hook 規則漂移、hook 一致性、hook registry、hook 治理 |
 | 50 | skill-lifecycle-manager | Skill 生命週期管理（穩定度評分/分層分級/退役候選識別/版本升級建議，depends-on: skill-registry-sync、system-insight、arch-evolution） | skill-lifecycle-manager、Skill 生命週期、Skill 退役、Skill 升級、Skill 分層、lifecycle、deprecation、版本升級評估、穩定度評分 |
 | 51 | game-workflow-design | Flutter + Flame 遊戲開發工作流（Phase 0–5、OpenMoji/ZapSplat 素材管線、Cloudflare Pages 部署，依 KB 4b7bf8f5，depends-on: knowledge-query） | 工作流設計遊戲、Flame Engine、Flutter 遊戲、遊戲開發流程、遊戲工作流、OpenMoji、ZapSplat、素材管線、Bonfire、flame_svg、flame_audio、Cloudflare Pages |
+| 52 | slo-budget-manager | SLO/Error Budget 治理（失敗分類 taxonomy→SLI/SLO 定義→28 天 Error Budget 計算→postmortem 觸發，depends-on: scheduler-state、system-insight、arch-evolution） | slo-budget-manager、SLO 治理、Error Budget、失敗分類、failure mode、成功率治理、postmortem、budget burn、穩定性治理 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

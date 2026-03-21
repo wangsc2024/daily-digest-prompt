@@ -121,7 +121,7 @@ pwsh -ExecutionPolicy Bypass -File scripts/normalize-failed-auto-tasks.ps1
 **已實施行為**（bot/process_messages.ps1）：
 1. **失敗偵測**：Codex 執行後檢查 (1) `$LASTEXITCODE -ne 0`、(2) 輸出是否含 `failed to refresh available models`、`timeout waiting for child process to exit` 或 `ERROR codex_core`。
 2. **重試一次**：第一次偵測到失敗時自動再執行一次 Codex。
-3. **Fallback 至 Cursor CLI**：重試仍失敗則改以 `agent -p ... --model composer-1.5` 執行同一任務，並將該輸出作為結果回傳，避免把錯誤訊息當成結果。
+3. **Fallback 至 Cursor CLI**：重試仍失敗則改以 `agent -p ... --model composer-2-fast` 執行同一任務，並將該輸出作為結果回傳，避免把錯誤訊息當成結果。
 
 **若仍常發生**：
 - 手動在終端執行一次 `codex exec --full-auto -m gpt-5.4` 並輸入一句簡單指令，確認是否能正常完成（若手動也逾時，為 Codex/環境問題）。
@@ -227,7 +227,7 @@ node --env-file=bot/.env bot/test-line-task-types.mjs full
 1. 注入一筆研究任務：`node bot/scripts/inject-one-research-task.mjs "提出八識規矩頌的深入研究報告"`
 2. 重啟 bot（讓 store 重新載入 `bot/data/records.json`）
 3. 執行：`pwsh -ExecutionPolicy Bypass -File bot/process_messages.ps1`（會處理第一筆 pending）
-4. 查看 `bot/logs/task_log_<日期>.log`：若有 Codex 失敗會出現 `[Codex 失敗輸出摘要]`（含用量上限等）；fallback 成功會出現「Cursor CLI (composer-1.5, Codex fallback)」與任務完畢。
+4. 查看 `bot/logs/task_log_<日期>.log`：若有 Codex 失敗會出現 `[Codex 失敗輸出摘要]`（含用量上限等）；fallback 成功會出現「Cursor CLI (composer-2-fast, Codex fallback)」與任務完畢。
 
 ---
 
