@@ -158,6 +158,25 @@ cd D:/Source/daily-digest-prompt && git add {related_files 清單} && git commit
    ```
    → `failed_max_retry` 項目發送 warning 通知：「{backlog_id} 修復失敗達 3 次，需人工介入」
 
+   → **同時回寫 improvement-backlog.json**（讓 arch_evolution 下輪重新規劃修復策略）：
+   1. 讀取 `context/improvement-backlog.json`
+   2. **24h 去重**：檢查是否已有 `source: "self_heal_failed"` 且 `id` 含同一 backlog_id 的條目；若有則跳過
+   3. 追加新條目：
+      ```json
+      {
+        "id": "backlog_sh_failed_<YYYYMMDD>_<backlog_id>",
+        "source": "self_heal_failed",
+        "title": "自癒失敗（3次）：<backlog_id>",
+        "description": "<execution_note>；需 arch_evolution 重新規劃修復策略或拆分為更小步驟",
+        "priority": "high",
+        "effort": "medium",
+        "created_at": "ISO 8601 時間戳",
+        "status": "pending",
+        "tags": ["self_heal_failed", "manual_intervention", "<backlog_id>"]
+      }
+      ```
+   4. 寫回 `context/improvement-backlog.json`
+
 **安全中止條件**：若某項修復執行失敗，記錄錯誤後繼續下一項，不中止整個步驟。
 
 **步驟 h 備援來源（adr-registry）**：當 arch-decision 無可執行的 immediate_fix（篩選後 0 項）或 arch-decision 不存在/過期時，再讀取 `context/adr-registry.json`：
@@ -199,12 +218,27 @@ cd D:/Source/daily-digest-prompt && git add {related_files 清單} && git commit
 - 每個 task_key 同一天最多重置 1 次（防止無限循環）
 - `reset_count` 累積超過 5 次的 entry → 發送 priority=4 告警：「{task_key} 已重置 5 次，需人工檢查 prompt/config」
 
+#### j. improvement-backlog.json TTL 清理
+
+讀取 `context/improvement-backlog.json`（不存在則跳過此步驟）：
+
+- **清理規則**（兩條，缺一不可）：
+  | 條件 | 動作 |
+  |------|------|
+  | `status` 為 `"completed"` 或 `"done"`，且 `created_at` 距今 > **7 天** | 刪除 |
+  | `status` 為 `"pending"`，且 `created_at` 距今 > **30 天** | 刪除（stale，多輪未被 arch_evolution 消費） |
+- 其餘條目（含 `failed_max_retry`、`in_progress`）**保留**，不受 TTL 影響
+- 計算刪除數量 `pruned_count`；若 = 0 則不重寫（避免無謂 I/O）
+- 若 `pruned_count > 0`：用 Write 寫回 `context/improvement-backlog.json`，並記錄 `"[fix] improvement-backlog TTL 清理：移除 {pruned_count} 條過期條目"` 到報告
+
+---
+
 ### 步驟 3：記錄修復行為
 每項修復動作記錄到結構化日誌（透過工具呼叫自動被 post_tool_logger.py 記錄）。
 
 ### 步驟 4：驗證修復結果
 - 對每項修復重新檢查，確認已修復
-- 統計：修復嘗試 N 項（含步驟 a–g 的常規修復 + 步驟 h 的 arch-decision 修復），成功 M 項
+- 統計：修復嘗試 N 項（含步驟 a–g 的常規修復 + 步驟 h 的 arch-decision 修復 + 步驟 i 的失敗追蹤），成功 M 項；步驟 j TTL 清理 `pruned_count` 條
 - **步驟 h 報告**：必須明確列出「arch-decision 執行 K 項」（K = 本次實際執行的 immediate_fix 數量）；若 K = 0，寫「arch-decision 可執行 0 項（原因：無 action=immediate_fix 且 execution_status=pending 的條目 / 或 arch-decision 不存在/過期）」
 - **步驟 h 通知措辭規範**：若所有條目均為 `action=skip`，通知中不得只寫「2 done, 3 partial」而不說明這是 ADR 背景狀態。正確格式：「arch-decision 可執行 0 項（5 項均已有對應 ADR：其中 done=2, partial=3，均跳過）」，避免用戶誤解為本次執行了 5 項。
 

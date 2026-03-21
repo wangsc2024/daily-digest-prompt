@@ -34,33 +34,6 @@ NTFY_MAX_BYTES = 4096  # ntfy message size limit
 _PROJ_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def _get_skill_diff(reserved_bytes: int = 0) -> str:
-    """Run git diff on SKILL.md files from repo root; truncated if exceeds ntfy limit."""
-    try:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
-        common = {"capture_output": True, "text": True, "timeout": 10, "cwd": project_root}
-        result = subprocess.run(
-            ["git", "diff", "skills/*/SKILL.md"],
-            **common,
-        )
-        diff = result.stdout.strip()
-        if not diff:
-            result = subprocess.run(
-                ["git", "diff", "--cached", "skills/*/SKILL.md"],
-                **common,
-            )
-            diff = result.stdout.strip()
-        if not diff:
-            return "（工作區無差異：可能已 commit、已還原或未寫入磁碟）"
-        max_bytes = NTFY_MAX_BYTES - reserved_bytes
-        encoded = diff.encode("utf-8")
-        if len(encoded) > max_bytes:
-            diff = encoded[: max_bytes - 20].decode("utf-8", errors="ignore") + "\n... (已截斷)"
-        return diff
-    except Exception as e:
-        return f"（git diff 失敗: {e}）"
-
 
 def _offset_file() -> str:
     """Return path to the offset tracking file for today."""
@@ -247,13 +220,11 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
         if severity != "critical":
             severity = "warning"
 
-    # Check SKILL.md modifications (informational, not an error)
+    # Check SKILL.md modifications (informational, listed in warning/critical only)
     if analysis["skill_modified_count"] > 0:
         info_items.append(f"已修改 SKILL.md ({analysis['skill_modified_count']} 個檔案):")
         for path in analysis["skill_modified_paths"]:
             info_items.append(f"  - {path}")
-        if not issues:  # Only if no errors/blocks, make this a warning
-            severity = "warning"
 
     # Check Token budget (informational warning if exceeded)
     token_warning = _check_token_budget()
@@ -261,20 +232,6 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
         issues.append(f"{token_warning}")
         if severity not in ("critical", "warning"):
             severity = "warning"
-
-    # If only SKILL.md modifications (no errors/blocks), send as info notification
-    if not issues and info_items:
-        # Build message for info-level SKILL.md notification
-        header = (
-            f"工具呼叫: {analysis['total_calls']} | "
-            f"API: {analysis['api_calls']} | "
-            f"快取讀取: {analysis['cache_reads']}"
-        )
-        title = "SKILL.md 修改通知"
-        body = header + "\n\n" + "\n".join(info_items) + "\n\n[git diff skills/*/SKILL.md]\n"
-        reserved = len(body.encode("utf-8"))
-        message = body + _get_skill_diff(reserved_bytes=reserved)
-        return "info", title, message
 
     if not issues:
         return None
@@ -296,10 +253,6 @@ def build_alert_message(analysis: dict, gmail_expiry: "dict | None" = None) -> t
 
     all_items = issues + ([""] + info_items if info_items else [])
     message = header + "\n\n" + "\n".join(all_items)
-    if info_items:
-        diff_prefix = "\n\n[git diff skills/*/SKILL.md]\n"
-        reserved = len((message + diff_prefix).encode("utf-8"))
-        message += diff_prefix + _get_skill_diff(reserved_bytes=reserved)
     return severity, title, message
 
 

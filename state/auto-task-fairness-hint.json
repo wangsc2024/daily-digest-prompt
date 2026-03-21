@@ -1,22 +1,15 @@
 {
-  "generated_at": "2026-03-21T17:00:03.245540",
+  "generated_at": "2026-03-21T20:00:04.236915",
   "date": "2026-03-21",
-  "starvation_count": 12,
+  "starvation_count": 3,
   "starvation_detected": true,
   "zero_count_tasks": [
-    "log_audit",
-    "git_push",
-    "ai_workflow_github",
-    "github_scout",
-    "podcast_create",
-    "podcast_jiaoguangzong",
     "skill_forge",
     "ntfy_review",
-    "future_plan_optimize",
-    "kb_insight_evaluation"
+    "workflow_forge"
   ],
-  "fairness_score": 0.0,
+  "fairness_score": 0.199,
   "pointer_reset": false,
-  "next_execution_order": 19,
+  "next_execution_order": 27,
   "max_execution_order": 35
 }

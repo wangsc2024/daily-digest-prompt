@@ -55,6 +55,10 @@ released_at: "2026-03-21"
 
 ## 第一步：分析今日已完成任務的技術需求
 
+**【連續記憶參考】** 用 Read 讀取 `context/continuity/auto-task-tech_research.json`（不存在則跳過）
+- 若存在，取 `runs[0].next_suggested_angle` 作為**補充候選技術方向**
+- 若今日任務無明確技術主題，優先採用此方向（確認不在冷卻期內）
+
 讀取 `context/auto-tasks-today.json`，取得 `closed_task_ids`。
 讀取 `state/todoist-history.json`，找出今天的 `daily_summary` 中已完成任務。
 
@@ -157,14 +161,16 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 ## 第五步：寫入結果 JSON（必須執行）
 
-**必須**用 Write 工具寫入 `results/todoist-auto-tech_research.json`（不可僅在對話中輸出 JSON）。  
+**必須**用 Write 工具寫入 `results/todoist-auto-tech_research.json`（不可僅在對話中輸出 JSON）。
 最終內容**至少須含**：`agent`、`type`、`status`、`summary`；Phase 3 依此檔更新計數與通知，缺檔或缺欄位將視為失敗。
+
+> **status 規則**：研究完成（含 KB 不可用降級）→ `"success"`；研究本身未完成 → `"failed"`；**禁止寫 `"partial"`**（下游 Phase 3 會誤判為失敗）。
 
 範例（用 Write 覆寫整份檔案）：
 ```json
 {
   "agent": "todoist-auto-tech_research",
-  "status": "success 或 partial 或 failed",
+  "status": "success 或 failed",
   "task_id": null,
   "type": "tech_research",
   "topic": "研究主題名稱",

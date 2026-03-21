@@ -1,42 +1,183 @@
 {
   "version": 2,
-  "updated_at": "2026-03-21T15:24:11",
+  "updated_at": "2026-03-21T19:12:45+08:00",
   "summary": {
-    "total_episodes": 75,
-    "cooldown_days": 30,
+    "total_episodes": 77,
+    "cooldown_days": 90,
     "recent_note_ids": [
-      "f735b445-c2e4-417f-aa5a-76692d05b4b0",
-      "b76a6cad-8e37-4676-b5d3-44e7186e690c",
-      "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
-      "6de7ac89-bed0-4657-88de-116583d8da1f",
-      "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
-      "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      {
+        "note_id": "9d73c34f-fb52-447e-8c76-e9ce5514b238",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "380fd658-b788-4d1b-8744-41cf650c3596",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "8c14fbf0-4d12-4f3d-b9d4-3aaeaf3c644b",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "b76a6cad-8e37-4676-b5d3-44e7186e690c",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "6de7ac89-bed0-4657-88de-116583d8da1f",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
       {
         "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
         "last_used": "2026-03-18",
-        "expires_at": "2026-04-17"
+        "expires_at": "2026-06-16"
+      },
+      {
+        "note_id": "893e05b0-2573-489f-b9d4-455364a6a9f8",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
       }
     ],
     "recent_topics": [
-      "法華經",
-      "佛學",
-      "天台宗",
-      "教觀綱宗",
-      "金剛經",
-      "般若",
-      "淨土宗",
-      "念佛",
-      "Vite",
-      "SSG",
-      "靜態網站",
+      {
+        "topic": "法華經",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "佛學",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "天台宗",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "教觀綱宗",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "金剛經",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "般若",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "淨土宗",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "念佛",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "Vite",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "SSG",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "靜態網站",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
       {
         "topic": "別教",
         "last_used": "2026-03-19",
-        "expires_at": "2026-04-18"
+        "expires_at": "2026-06-17"
+      },
+      {
+        "topic": "歷史傳承",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "判教演進",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "topic": "教觀雙美",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
       }
     ]
   },
   "episodes": [
+    {
+      "episode_title": "天台判教千年演進",
+      "notes_used": [
+        "893e05b0-2573-489f-b9d4-455364a6a9f8"
+      ],
+      "note_titles": [
+        "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+      ],
+      "topics": [
+        "歷史傳承",
+        "判教演進",
+        "教觀雙美"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-21T19:12:45+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep05_歷史傳承_天台判教千年演進.mp3",
+      "slug": "淨土學苑_ep05_歷史傳承_天台判教千年演進"
+    },
+    {
+      "episode_title": "事件驅動、Claude CI／CD 與 vLLM 推理的三篇技術對談",
+      "notes_used": [
+        "8c14fbf0-4d12-4f3d-b9d4-3aaeaf3c644b",
+        "380fd658-b788-4d1b-8744-41cf650c3596",
+        "9d73c34f-fb52-447e-8c76-e9ce5514b238"
+      ],
+      "note_titles": [
+        "事件驅動架構（Event-Driven Architecture）— 從 Cron 排程到事件觸發的個人自動化系統設計模式：四大 EDA 模式、遷移決策框架與 Daily-Digest 系統應用展望（2026）",
+        "Claude Code CI/CD 整合與 Headless 自動化完整指南 — GitHub Actions、非互動式批次執行與持續整合管線最佳實踐（2026）",
+        "vLLM — 開源 LLM 推理與 Serving 引擎深度研究：PagedAttention、V1 執行迴圈重構、OpenAI 相容介面與生產部署權衡（73.4K Stars, 2026-03）"
+      ],
+      "topics": [
+        "事件驅動架構",
+        "Claude Code",
+        "vLLM"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-21T17:35:00+08:00"
+    },
     {
       "episode_title": "法華壽量品的永恆奧義",
       "notes_used": [
@@ -1902,6 +2043,30 @@
       "note_id_input": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
       "slug": "note-f735b445-20260321",
       "used_at": "2026-03-21T15:24:11"
+    },
+    {
+      "note_id": "8c14fbf0-4d12-4f3d-b9d4-3aaeaf3c644b",
+      "note_title": "事件驅動架構（Event-Driven Architecture）— 從 Cron 排程到事件觸發的個人自動化系統設計模式：四大 EDA 模式、遷移決策框架與 Daily-Digest 系統應用展望（2026）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260321",
+      "used_at": "2026-03-21T17:35:00+08:00"
+    },
+    {
+      "note_id": "380fd658-b788-4d1b-8744-41cf650c3596",
+      "note_title": "Claude Code CI/CD 整合與 Headless 自動化完整指南 — GitHub Actions、非互動式批次執行與持續整合管線最佳實踐（2026）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260321",
+      "used_at": "2026-03-21T17:35:00+08:00"
+    },
+    {
+      "note_id": "9d73c34f-fb52-447e-8c76-e9ce5514b238",
+      "note_title": "vLLM — 開源 LLM 推理與 Serving 引擎深度研究：PagedAttention、V1 執行迴圈重構、OpenAI 相容介面與生產部署權衡（73.4K Stars, 2026-03）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260321",
+      "used_at": "2026-03-21T17:35:00+08:00"
     }
   ]
 }

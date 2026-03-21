@@ -76,6 +76,10 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 讀取 `templates/shared/kb-depth-check.md`，以「GitHub AI 開源專案」為查詢詞執行完整流程。
 
+**【連續記憶參考】** 用 Read 讀取 `context/continuity/auto-task-ai_github_research.json`（不存在則跳過）
+- 若存在，取 `runs[0].next_suggested_angle`（上次建議的探索方向）作為**優先候選方向**
+- 若此方向涉及特定專案或技術類型且未在冷卻期內 → 第二步 WebSearch 優先搜尋此方向
+
 ## 第二步：發現熱門專案
 
 使用 WebSearch 搜尋：
@@ -156,11 +160,16 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 若未通過：補充 → 修正（最多 2 次）。
 
 ## 第五步：寫入結果 JSON
+
+> ⛔ **必須**用 Write 工具寫入 `results/todoist-auto-ai_github_research.json`（不可僅在對話中輸出 JSON）；Phase 3 依此檔更新計數，缺檔或缺欄位將視為失敗。
+
+> **status 規則**：研究完成（含 KB 不可用降級）→ `"success"`；研究本身未完成 → `"failed"`；**禁止寫 `"partial"`**（下游 Phase 3 會誤判為失敗）。
+
 用 Write 建立 `results/todoist-auto-ai_github_research.json`：
 ```json
 {
   "agent": "todoist-auto-ai_github_research",
-  "status": "success 或 partial 或 failed",
+  "status": "success 或 failed",
   "task_id": null,
   "type": "ai_github_research",
   "topic": "研究的專案名稱",

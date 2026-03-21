@@ -44,7 +44,7 @@ except ImportError:
     BEHAVIOR_TRACKER_AVAILABLE = False
 
 # Import shared API source patterns and sanitization
-from hook_utils import API_SOURCE_PATTERNS, sanitize_sensitive_data
+from hook_utils import API_SOURCE_PATTERNS, sanitize_sensitive_data, send_ntfy_alert
 
 # Error keywords in tool output
 ERROR_KEYWORDS = [
@@ -618,6 +618,32 @@ def main():
         output_len=entry.get("output_len", 0),
         tool_name=entry.get("tool", ""),
     )
+
+    # Skill 修改通知：當 SKILL.md 被 Write/Edit 時發送 ntfy（標題含 Skill 名稱，內文 500 字摘要）
+    if "skill-modified" in tags:
+        try:
+            _skill_path = tool_input.get("file_path", "")
+            # 從路徑萃取 Skill 名稱：取 SKILL.md 的上一層目錄名
+            _path_parts = _skill_path.replace("\\", "/").rstrip("/").split("/")
+            _skill_name = "unknown"
+            for _i, _part in enumerate(_path_parts):
+                if _part.upper() == "SKILL.MD" and _i > 0:
+                    _skill_name = _path_parts[_i - 1]
+                    break
+
+            # 建立 500 字摘要（Write: content；Edit: new_string）
+            _change_text = tool_input.get("content") or tool_input.get("new_string", "")
+            _summary = _change_text[:500].strip()
+            if len(_change_text) > 500:
+                _summary += "…"
+
+            send_ntfy_alert(
+                title=f"[Skill 修改] {_skill_name}",
+                message=f"路徑: {_skill_path}\n\n變更摘要:\n{_summary}",
+                severity="info",
+            )
+        except Exception:
+            pass  # 通知失敗不影響主流程
 
     # Behavior pattern tracking (Instinct Lite)
     if BEHAVIOR_TRACKER_AVAILABLE:

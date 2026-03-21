@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-03-21T19:30:00+08:00",
+  "research_topic": "Context Window 壓縮策略與 I/O 減量工具",
+  "series": {
+    "series_id": "context-compression",
+    "is_new": true,
+    "current_stage": "foundation",
+    "completion_pct": 0,
+    "stage_context": "新系列，KB 有 2 篇相關筆記（Context Management + Context Window 治理），但未涵蓋壓縮策略實作"
+  },
+  "kb_foundation": {
+    "notes_analyzed": 2,
+    "depth_level": "foundation",
+    "synthesis": "KB 掌握 Context Window 60-70% 法則、Memory 分層架構概念、I/O 預算監控建議，但缺乏具體壓縮策略實作（BufferWindow、Summary 等演算法）",
+    "covered_concepts": ["Context Window 容量限制", "I/O 預算監控", "子 Agent 委派原則"],
+    "partial_concepts": ["壓縮觸發閾值（65% 軟限制概念已提出但未實作）"],
+    "missing_concepts": ["BufferWindow 演算法", "Summary 壓縮策略", "per-phase 壓縮觸發機制", "壓縮前後效果量測"]
+  },
+  "knowledge_gaps": [
+    {
+      "type": "mechanism",
+      "gap": "缺少具體壓縮演算法（BufferWindow vs Summary 的選擇與實作）",
+      "why_important": "avg_io_per_call 26567 超標 5.3 倍，需要主動壓縮而非僅監控",
+      "builds_on": "現有 context-budget-monitor 的 I/O 分析基礎",
+      "stage": "mechanism"
+    },
+    {
+      "type": "application",
+      "gap": "缺少可呼叫的壓縮工具（Python script）",
+      "why_important": "Skill 需要可執行的壓縮函數供其他模板呼叫",
+      "builds_on": "KB 的 per-phase token budget 概念",
+      "stage": "application"
+    }
+  ],
+  "research_plan": {
+    "stage": "foundation",
+    "primary_question": "如何設計 Context Window 壓縮策略工具，支援 BufferWindow 與 Summary 兩種模式？",
+    "approach": "基於 KB 現有知識 + system-insight 數據設計",
+    "steps": [
+      {
+        "step": 1,
+        "action": "分析 post_tool_logger JSONL 找出最大 I/O 來源",
+        "search_keywords": ["agent context I/O analysis"],
+        "expected_insight": "識別 top 5 高 I/O 工具呼叫類型"
+      },
+      {
+        "step": 2,
+        "action": "設計 BufferWindow 與 Summary 壓縮策略",
+        "search_keywords": ["context window compression strategy LLM"],
+        "expected_insight": "兩種策略的適用場景與參數"
+      }
+    ],
+    "kb_enrichment_plan": {
+      "new_note_title": "Context Compressor Skill 設計與壓縮策略（2026-03-21）",
+      "tags": ["Context Window", "壓縮策略", "Skill設計", "系統優化"],
+      "references_from_existing": ["AI Agent Context Management", "Agent Context Window 治理"],
+      "cross_reference_note": "新系列 foundation 階段",
+      "series_stage_completion": "foundation"
+    }
+  },
+  "series_update": {
+    "action": "create_series",
+    "series_id": "context-compression",
+    "stage_to_update": "foundation",
+    "new_status": "in_progress",
+    "next_stage_hint": "完成後進入 mechanism：壓縮演算法細節"
+  },
+  "recommendation": "explore_new",
+  "skip_reason": null
+}

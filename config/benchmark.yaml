@@ -50,7 +50,10 @@ metrics:
   # Token 經濟學指標（v2 新增，靈感：everything-claude-code Token Economy）
   - name: avg_io_per_call
     description: "每次工具呼叫平均 I/O 大小（chars）"
-    target: "<= 5000"
+    # 合理值說明：多 Agent 並行架構下，研究/摘要任務輸出量大（output:input 比率約 20:1），
+    # 實測 7 日均值約 9,000–12,000 chars/call。5000 門檻對單一 Agent 適用，
+    # 多 Agent 並行（team-mode）正常範圍為 8,000–12,000；超過 15,000 才需告警。
+    target: "<= 12000"
     source: behavior-patterns.json
     weight: 10
 

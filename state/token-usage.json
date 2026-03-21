@@ -47,11 +47,11 @@
       "output_chars": 48152678
     },
     "2026-03-21": {
-      "estimated_tokens": 15171340.00000004,
-      "tool_calls": 5366,
-      "input_chars": 2316019,
-      "output_chars": 50783671
+      "estimated_tokens": 17555910.28571431,
+      "tool_calls": 6550,
+      "input_chars": 2907742,
+      "output_chars": 58537944
     }
   },
-  "updated": "2026-03-21T17:05:06.760193"
+  "updated": "2026-03-21T20:21:39.331406"
 }

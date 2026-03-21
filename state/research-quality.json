@@ -1,5 +1,5 @@
 {
-  "updated": "2026-03-21T07:50:12.737466+00:00",
+  "updated": "2026-03-21T09:41:25.964396+00:00",
   "summary": {
     "ai_github_research": {
       "avg": 45.2,
@@ -50,9 +50,9 @@
       "alert": true
     },
     "ai_workflow_github": {
-      "avg": 34.2,
-      "count": 9,
-      "last": 30,
+      "avg": 34.3,
+      "count": 10,
+      "last": 35,
       "alert": true
     }
   },
@@ -3110,6 +3110,22 @@
       },
       "output_length": 673,
       "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_sysdev.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "ai_workflow_github",
+      "timestamp": "2026-03-21T09:41:25.959396+00:00",
+      "score": 35,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 10,
+        "tool_utilization": 0
+      },
+      "output_length": 604,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_workflow_github.json",
       "backend": "unknown",
       "alert": true
     }

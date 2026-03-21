@@ -1,8 +1,8 @@
 ---
 name: "podcast-create"
 template_type: "auto_task_template"
-version: "1.0.0"
-released_at: "2026-03-20"
+version: "1.1.0"
+released_at: "2026-03-21"
 ---
 # 自動任務：Podcast 生成（AI 雙主持人知識電台）
 
@@ -18,6 +18,21 @@ released_at: "2026-03-20"
 先讀取以下 SKILL.md：
 - skills/knowledge-query/SKILL.md
 - skills/ntfy-notify/SKILL.md
+- skills/deep-research/SKILL.md（腳本研究品質協議）
+
+---
+
+## 步驟 -1：讀取自動任務連續記憶（preamble 協議）
+
+遵守 `templates/shared/preamble.md` 的自動任務連續記憶規則。
+
+用 Read 讀取 `context/continuity/auto-task-podcast_create.json`（不存在則略過）。
+
+若存在，取 `runs[0]`：
+- `key_findings`：本次選材時避免製作過相同結論的集數
+- `next_suggested_angle`：若有，優先考慮此主題方向（確認不在冷卻期內）
+
+> **注意**：podcast 任務的主要去重記憶在 `context/podcast-history.json`（TTL 結構），步驟 0 即讀取。此檔僅記錄任務層級狀態，供 Todoist 趨勢感知使用。
 
 ---
 
@@ -79,9 +94,76 @@ curl -s "http://localhost:3000/api/notes/{note_id}"
 
 ---
 
+## 步驟 2.5：腳本研究準備（Deep Research P1–P5）
+
+> 依 `skills/deep-research/SKILL.md` Standard 層級管線執行。目標：在寫腳本前確立學習方向、豐富來源、交叉驗證核心主張。
+
+### P1：SCOPE（界定本集學習目標）
+```
+【方向鎖定】本集節目以「深入學習」為導向，非「學術討論」。
+對話應聚焦於「聽眾能理解什麼、能應用什麼、能從中學到什麼」。
+```
+根據步驟 2 取得的 3 筆筆記，分解 3-5 個**本集子問題**：
+- 每個子問題格式：「聽完後，聽眾能___嗎？」
+- 確認成功標準：聽眾聽完後能**理解核心機制、掌握關鍵概念、知道如何應用**
+- 排除項：不以爭議誰對誰錯、窮舉學術觀點為目標
+
+輸出：「🎯 本集學習目標：[3-5 個子問題列表]」
+
+---
+
+### P2：PLAN（規劃補充搜尋角度）
+依 3 筆筆記的主題，識別**腳本尚缺乏**的補充角度（例如：實際案例、數據佐證、類比說明）。
+列出 2-3 個 KB 補充搜尋關鍵詞。
+
+---
+
+### P3：RETRIEVE（並行 KB 豐富化搜尋）⚡
+```
+【強制規則】並行執行，不可串行等待。
+```
+對每個補充關鍵詞**並行**執行 KB hybrid search：
+```bash
+curl -s -X POST "http://localhost:3000/api/search/hybrid" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{補充關鍵詞}", "topK": 5}'
+```
+- 每筆相關結果記錄：`{ noteId, title, relevance, key_point }`（1-2 句摘要）
+- 豐富化目標：補充 2-5 筆**非原始 3 筆**的佐證筆記（`credibility: high`）
+
+> KB 不可用時跳過本步驟，直接進入 P4（以原 3 筆為唯一來源，主張標記「待驗證⚠️」）。
+
+---
+
+### P4：TRIANGULATE（主張三角佐證）🔺
+列出本集 **3-6 個核心主張**（factual claim，例如「X 技術能實現 Y」）：
+- 每個主張標記支持來源數（原始筆記 + KB 補充）
+- 來源 ≥ 2 筆 → 標記「已驗證✅」，腳本可作為確定事實陳述
+- 來源 = 1 筆 → 標記「待驗證⚠️」，腳本中以「根據 [來源]」說明，不作為絕對結論
+
+---
+
+### P5：OUTLINE（本集大綱確認）
+依 P1 學習目標 + P4 驗證主張，修正本集對話大綱（與步驟 3 腳本結構對齊）：
+
+```
+本集大綱（確認版）：
+1. 開場：學習鉤（hook）— 為何聽眾應關注本集主題？
+2. 主題一：[筆記1 主題] — 核心概念 → 應用場景
+3. 主題二：[筆記2 主題] — 與主題一的連結 / 對比
+4. 主題三：[筆記3 主題] — 實際應用視角
+5. 總結：聽眾學完後「可以做什麼」— 具體行動建議
+```
+
+輸出：「📋 本集大綱已確認，已驗證主張 N 條，待驗證 M 條」
+
+---
+
 ## 步驟 3：生成雙主持人對話腳本（JSONL 格式）
 
-根據 3 筆筆記內容，撰寫 AI 雙主持人對話：
+> 依 `skills/deep-research/SKILL.md` **Phase 6：SYNTHESIZE（學習導向撰寫）** 原則執行
+
+根據步驟 2.5 確認的**學習目標、已驗證主張、本集大綱**，撰寫 AI 雙主持人對話：
 
 **主持人設定：**
 - **host_a（曉晨，女聲解說者）**：條理清晰、善用比喻、深入淺出解說核心概念
@@ -89,17 +171,19 @@ curl -s "http://localhost:3000/api/notes/{note_id}"
 
 **腳本結構（每集約 20-30 輪對話，目標字數 1500-2500 字）：**
 
-1. **開場白**（2 輪）：host_a 問候 + 本集主題預告
-2. **主題一**（6-8 輪）：第一筆筆記核心概念深度討論
-3. **主題二**（6-8 輪）：第二筆筆記，與主題一的連結/對比
-4. **主題三**（4-6 輪）：第三筆筆記，融入實際應用視角
-5. **總結與展望**（2 輪）：本集重點回顧 + 下集預告
+1. **開場鉤**（2 輪）：host_b 提出引發好奇心的問題（hook）+ host_a 介紹本集能學到什麼
+2. **主題一**（6-8 輪）：第一筆筆記核心概念 → host_a 說明機制，host_b 詢問應用場景
+3. **主題二**（6-8 輪）：第二筆筆記，與主題一的連結/對比 → 引導聽眾建立知識網絡
+4. **主題三**（4-6 輪）：第三筆筆記，融入實際應用視角 → host_b 提問「我可以怎麼用？」
+5. **行動總結**（2 輪）：本集重點 + 聽眾「學完能做什麼」的具體行動建議（非僅摘要）
 
-**對話寫作原則：**
-- 對話自然流暢，避免說教感
+**對話寫作原則（Phase 6 學習導向）：**
+- **教學者語氣**：host_a 以「教學者向學習者說明」為基調，每個解說後連結實際應用
+- 對話自然流暢，避免說教感；適時加入「對！」「有意思」「好問題」等接話詞
 - 每段對話 50-150 字，TTS 友善（無特殊符號、數學符號展開說明）
-- 適時加入「對！」「有意思」「好問題」等接話詞增加對話感
 - 技術術語首次出現時需解釋（TTS 需展開縮寫：AI→人工智慧，ML→機器學習）
+- **核心主張引用**：已驗證✅主張可直接陳述；待驗證⚠️主張使用「根據 [筆記標題]」說明來源
+- 爭議性觀點若與學習無直接關聯，縮減篇幅或移至「延伸思考」段落
 
 **JSONL 格式（每行一個 JSON 物件）：**
 ```json
@@ -108,6 +192,29 @@ curl -s "http://localhost:3000/api/notes/{note_id}"
 ```
 
 `tts_text` 欄位：與 `text` 相同，但展開所有縮寫（AI→人工智慧、API→應用程式介面）。
+
+---
+
+## 步驟 3.5：腳本品質審查（Deep Research P7 Critique Gate）🛡️
+
+```
+【強制規則】完成腳本草稿後，以下檢查必須全部通過才能進入步驟 4 儲存。
+```
+
+**7 項 Podcast 品質閘：**
+1. ✅ **學習目標覆蓋**：P1 定義的每個子問題在腳本中都有被回答
+2. ✅ **主張有來源**：已驗證主張✅ 有對應筆記，待驗證主張⚠️ 有標明來源
+3. ✅ **無捏造事實**：所有數據、案例均來自步驟 2/2.5 取得的筆記內容（不推斷填充）
+4. ✅ **行動建議存在**：總結段含具體「聽眾學完能做什麼」（非僅內容摘要）
+5. ✅ **字數合理**：1500-2500 字，對話 20-30 輪
+6. ✅ **TTS 友善**：無特殊符號、縮寫已展開、無難以口語化的片段
+7. ✅ **雙主持人平衡**：host_a / host_b 發言輪次比例在 40:60 到 60:40 之間
+
+**批判角色模擬：**
+- 懷疑聽眾：「這個說法有依據嗎？我聽完真的學到東西了嗎？」
+- 忙碌工程師：「這集對我的工作有什麼幫助？值得 15 分鐘嗎？」
+
+**若批判發現問題 → 修正腳本後再次確認（最多 2 次循環）。**
 
 ---
 
@@ -199,41 +306,70 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 ```
 標題：🎙️ Podcast 已發佈：{本集主題}
 內容：AI 雙主持人對話 | {主題1} × {主題2} × {主題3} | {對話輪數} 輪對話
+      {cloud_url}   ← 完整 MP3 直連網址（須寫入 message 內文）
 Tags: headphones, white_check_mark
-Click: https://podcast.pdoont.us.kg   ← 網站首頁（播放時自動觸發計數器）
+Click: {cloud_url}  ← 點擊直接播放（使用實際 R2 MP3 URL，非網站首頁）
 ```
 
-若 `cloud_url = "未上傳"`：省略 Click 欄位，通知內容改為「本地檔案已就緒，尚未上傳至雲端」。
+若 `cloud_url = "未上傳"`：省略 Click 欄位，通知內容改為「本地檔案已就緒，尚未上傳至雲端」，message 中不含 URL。
 
 ---
 
 ## 步驟 8.5：寫入 KB 筆記（Podcast 摘要）
 
-依照 skills/knowledge-query/SKILL.md 的 POST /api/notes 說明，匯入本集 Podcast 摘要筆記：
+依照 skills/knowledge-query/SKILL.md 的 POST /api/notes 說明，匯入本集 Podcast 摘要筆記。
+
+> ⚠️ **必須用 Python json.dumps 建立 JSON 檔**（腳本文字含引號，直接 Write 會導致 JSON 損毀）：
+
+```bash
+python -c "
+import json, datetime
+content = '''## 本集摘要
+
+**主題**：{主題1} × {主題2} × {主題3}
+**對話輪數**：{turns} 輪
+**雲端連結**：{cloud_url}
+
+## 使用的知識庫筆記
+
+1. {note_title_1}（{note_id_1}）
+2. {note_title_2}（{note_id_2}）
+3. {note_title_3}（{note_id_3}）
+
+## 本集學習目標（P1 SCOPE）
+
+{P1 學習子問題列表，每條一行}
+
+## 重點摘錄（已驗證主張）
+
+{從 P4 三角佐證的已驗證主張中提取 3-5 條，格式：- 主張內容 [來源：筆記標題]}
+'''
+payload = {
+    'title': '【Podcast】{episode_title}',
+    'contentText': content,
+    'tags': ['Podcast製作', 'AI雙主持人', '{主題1}', '{主題2}', '{主題3}'],
+    'source': 'import'
+}
+open('temp/podcast-kb-note.json', 'w', encoding='utf-8').write(json.dumps(payload, ensure_ascii=False))
+print('JSON 建立完成')
+"
+```
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/notes" \
   -H "Content-Type: application/json; charset=utf-8" \
-  -d @temp/podcast-kb-note.json
-```
+  -d @temp/podcast-kb-note.json > /tmp/podcast-kb-result.json
 
-先用 Write 工具建立 `temp/podcast-kb-note.json`（UTF-8）：
-```json
-{
-  "title": "【Podcast】{episode_title}",
-  "contentText": "## 本集摘要\n\n**主題**：{主題1} × {主題2} × {主題3}\n**對話輪數**：{turns} 輪\n**雲端連結**：{cloud_url}\n\n## 使用的知識庫筆記\n\n1. {note_title_1}（{note_id_1}）\n2. {note_title_2}（{note_id_2}）\n3. {note_title_3}（{note_id_3}）\n\n## 重點摘錄\n\n從腳本中提取 3-5 個核心觀點（各 1-2 句話）：\n- [從對話腳本提取 host_a 的核心解說句]\n- [從對話腳本提取另一核心觀點]\n- ...",
-  "tags": ["Podcast製作", "AI雙主持人", "{主題1}", "{主題2}", "{主題3}"],
-  "source": "import"
-}
+grep -q '"id"' /tmp/podcast-kb-result.json && echo "✅ KB 寫入成功" || echo "❌ KB 寫入失敗"
 ```
 
 解析回傳 JSON 取得 `kb_note_id`（即 `id` 欄位）：
-- 成功（HTTP 201）：記錄 `kb_note_id`，後續寫入結果 JSON
+- 成功（含 `"id"` 欄位）：記錄 `kb_note_id`，後續寫入結果 JSON
 - 失敗（網路/API 錯誤）：`kb_note_id = null`，繼續執行（非致命）
 
 發送後刪除暫存檔：
 ```bash
-rm -f temp/podcast-kb-note.json
+rm -f temp/podcast-kb-note.json /tmp/podcast-kb-result.json
 ```
 
 ---
@@ -299,6 +435,40 @@ rm -f temp/podcast-kb-note.json
 ```bash
 uv run --project . python tools/score-kb-notes.py --limit 50
 ```
+
+---
+
+## 步驟 11.5：同步 topics 至 research-registry.json（跨任務去重防線）
+
+Read `context/research-registry.json`，在頂層 `topics_index{}` 中：
+- 以本集每個 note_title 為 key、今日日期（YYYY-MM-DD）為 value，**新增或更新**
+- 同時加入 `episode_title` 作為 key（若與 note_title 不同）
+- 用 Write 工具完整覆寫 `context/research-registry.json`（保留 `entries[]` 原樣）
+
+> **目的**：讓研究任務（tech_research / ai_deep_research 等）的去重步驟能偵測到 Podcast 已處理過的主題，避免同天重複研究相同知識點。
+
+---
+
+## 步驟 12：寫入自動任務連續記憶（preamble 協議）
+
+> **必須在步驟 9 寫完 results JSON 之後才執行**（preamble 規定順序：results → continuity）。
+
+1. Read `context/continuity/auto-task-podcast_create.json`
+   - 不存在 → 初始化：`{"task_key":"podcast_create","schema_version":1,"max_runs":5,"runs":[]}`
+2. 在 `runs[]` 開頭插入本次記錄，超過 5 筆刪除最舊：
+```json
+{
+  "executed_at": "今日 ISO 8601 時間",
+  "topic": "本集主題（10-20 字，例：《RAG 進階技術》× 《Agent 架構》× 《推理優化》）",
+  "status": "completed 或 failed",
+  "key_findings": "本集核心學習要點 1-2 句（例：RAG 的混合搜尋策略能提升 23% 準確率）",
+  "kb_note_ids": ["kb_note_id（步驟 8.5 取得，若無則空陣列）"],
+  "next_suggested_angle": "下集可深化的方向（10-20 字，例：繼續探索 RAG 的 re-ranking 技術）"
+}
+```
+3. 用 Write 工具完整覆寫 `context/continuity/auto-task-podcast_create.json`
+
+---
 
 完成！在最終輸出中列出：
 - 本集主題

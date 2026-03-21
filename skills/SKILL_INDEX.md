@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-21 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（20 個核心 + 33 個工具 = 53 個 Skills）
+## 速查表（20 個核心 + 34 個工具 = 54 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -66,6 +66,7 @@
 | 50 | skill-lifecycle-manager | Skill 生命週期管理（穩定度評分/分層分級/退役候選識別/版本升級建議，depends-on: skill-registry-sync、system-insight、arch-evolution） | skill-lifecycle-manager、Skill 生命週期、Skill 退役、Skill 升級、Skill 分層、lifecycle、deprecation、版本升級評估、穩定度評分 |
 | 51 | game-workflow-design | Flutter + Flame 遊戲開發工作流（Phase 0–5、OpenMoji/ZapSplat 素材管線、Cloudflare Pages 部署，依 KB 4b7bf8f5，depends-on: knowledge-query） | 工作流設計遊戲、Flame Engine、Flutter 遊戲、遊戲開發流程、遊戲工作流、OpenMoji、ZapSplat、素材管線、Bonfire、flame_svg、flame_audio、Cloudflare Pages |
 | 52 | slo-budget-manager | SLO/Error Budget 治理（失敗分類 taxonomy→SLI/SLO 定義→28 天 Error Budget 計算→postmortem 觸發，depends-on: scheduler-state、system-insight、arch-evolution） | slo-budget-manager、SLO 治理、Error Budget、失敗分類、failure mode、成功率治理、postmortem、budget burn、穩定性治理 |
+| 53 | context-compressor | Context Window 壓縮策略工具（BufferWindow/Summary/Delegation 三策略，主動壓縮 I/O，depends-on: context-budget-monitor） | context-compressor、Context 壓縮、壓縮策略、I/O 減量、BufferWindow、Summary 壓縮、Context 瘦身、壓縮摘要 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

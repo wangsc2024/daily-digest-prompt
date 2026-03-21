@@ -327,6 +327,10 @@ ntfy 範例（有 episode_url 時）：
 2. `curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh`
 3. `rm ntfy_temp.json`
 
+### ntfy 日誌 agent 欄位（強制）
+ntfy 日誌的 `"agent"` 欄位**必須**使用環境變數 `$AGENT_NAME`（由 PS 腳本注入為 `todoist-assemble`）。
+**禁止**自行拼寫 agent 名稱（如 `todoist-assembly`、`todoist-phase3-assembly` 等變體）。
+
 ### ntfy tags
 - tasks 成功 → `["white_check_mark"]`
 - tasks 有失敗 → `["warning"]`

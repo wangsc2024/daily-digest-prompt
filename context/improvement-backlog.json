@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-03-20T02:36:35.4832535+08:00",
+  "generated_at": "2026-03-21T18:49:16.438777",
   "source": "system-audit",
   "audit_date": "2026-03-18",
   "total_score": 87.88,
@@ -429,6 +429,174 @@
       ],
       "selected_reason": "這項可直接改善回歸追查與模板治理，目前 backlog 尚未正式列為 item。",
       "rank": 14
+    },
+    {
+      "id": "backlog_ib_20260321_realtime_budget",
+      "source": "insight_briefing",
+      "title": "研究洞察建議：實時預算監控與 per-trace 成本歸因",
+      "description": "來源：Agent Context Window 治理研究（洞見 3）。建議實作 tools/budget_guard.py，讀取 config/budget.yaml 定義的 per-phase token budget，在每個 Phase 結束時累計 token 用量，超過 80% warning、100% 暫停執行並發送 ntfy 告警。在 results/*.json 新增 token_usage 欄位。長期整合 Langfuse 監控平台。",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-21T18:42:23.430366",
+      "status": "pending",
+      "tags": [
+        "insight_briefing",
+        "research_derived",
+        "budget-monitoring",
+        "observability"
+      ]
+    },
+    {
+      "id": "backlog_ib_20260321_context_compression",
+      "source": "insight_briefing",
+      "title": "研究洞察建議：Context Compression 閾值觸發機制",
+      "description": "來源：Agent Context Window 治理研究（洞見 4）。建議在 post_tool_logger.py 新增 context_usage_tracker，累計當前 Session 的 input_tokens，當使用率超過 65% 時注入強制提示。實作 tools/context_compressor.py 支援 BufferWindow（保留最近 20 筆摘要）與 Summary（壓縮 Phase 1 結果為 200 字）兩種策略。",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-21T18:42:23.430366",
+      "status": "pending",
+      "tags": [
+        "insight_briefing",
+        "research_derived",
+        "context-compression",
+        "hook-enhancement"
+      ]
+    },
+    {
+      "id": "backlog_kie_20260321_time_slot_risk",
+      "source": "kb_insight_evaluation",
+      "title": "高失敗時段根因分析與時段風險評估",
+      "description": "system-insight 顯示 5、7、13 時為高失敗時段（可能與外部 API 不穩定或資源競爭有關）。建議建立時段失敗統計、外部 SLA 盤點、系統資源監控、風險評分模型與預防性檢查機制，在高風險時段降級執行或跳過非關鍵任務。",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-21T18:49:16.438777",
+      "status": "pending",
+      "tags": [
+        "kb_insight_evaluation",
+        "time_slot_analysis",
+        "risk_assessment",
+        "reliability"
+      ],
+      "execution_plan": [
+        "時段失敗統計分析（掃描近 30 天 logs，按小時統計失敗率與失敗類型，產出 analysis/hourly-failure-pattern.json）",
+        "外部依賴 SLA 盤點（盤點外部服務維護時間窗口，產出 config/external-sla.yaml）",
+        "系統資源監控補強（post_tool_logger 新增 system_snapshot，scheduler-state 新增 concurrent_runs）",
+        "時段風險評分模型（建立 tools/time_slot_risk_scorer.py，計算 risk_score = 歷史失敗率×0.4 + 外部維護×0.3 + 並行負載×0.2 + 系統資源×0.1）",
+        "預防性檢查整合（Phase 0 加入風險閘門：risk_score > 0.7 降級、> 0.9 跳過非關鍵任務並 ntfy 告警）",
+        "驗證與回饋（高風險時段觀察 1 週，記錄降級策略生效次數與成功率變化）"
+      ],
+      "research_summary": "Google SRE Book 強調 Golden Signals（latency、traffic、errors、saturation）與自動化異常偵測；InfoQ 指出漸進式部署需分配足夠監控時間窗口以早期偵測問題。時段分析應結合外部服務 SLA、系統資源監控與並行負載評估，建立多因子風險評分模型。",
+      "sources": [
+        {
+          "title": "Google SRE Book: Monitoring Distributed Systems",
+          "url": "https://sre.google/sre-book/monitoring-distributed-systems/"
+        },
+        {
+          "title": "InfoQ: Change as Metrics - Measuring System Reliability Through Change Delivery Signals",
+          "url": "https://www.infoq.com/articles/change-metrics-system-reliability/"
+        }
+      ],
+      "acceptance": [
+        "近 7 天的 system-insight 中，5、7、13 時的失敗率下降至少 30%",
+        "hourly-risk-score.json 可識別至少 80% 的高失敗時段（與實際失敗統計比對）",
+        "預防性檢查機制至少觸發 3 次且有明確 log 記錄（降級或跳過決策）"
+      ],
+      "prerequisites": [
+        "可讀取 logs/structured/*.jsonl、state/scheduler-state.json、context/system-insight.json",
+        "現有 ntfy 告警機制保持不變，風險評估作為補充層"
+      ],
+      "dimension": "系統穩定性"
+    },
+    {
+      "id": "backlog_kie_20260321_skill_anomaly",
+      "source": "kb_insight_evaluation",
+      "title": "Skill 使用模式異常偵測與低效鏈優化",
+      "description": "avg_io_per_call 達 26567（超標 5.3 倍），建議識別過度使用、使用不足、高失敗率、低效 I/O、重複 API 呼叫等 5 類異常模式，並識別低效 Skill 鏈（多次 Read 同一檔案、未走 cache、循環呼叫），產出優化建議並納入 Skill 生命週期管理。",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-21T18:49:16.438777",
+      "status": "pending",
+      "tags": [
+        "kb_insight_evaluation",
+        "skill_optimization",
+        "anomaly_detection",
+        "efficiency"
+      ],
+      "execution_plan": [
+        "Skill 使用統計基線建立（掃描近 30 天 logs，統計每個 Skill 的呼叫次數、耗時、失敗率、I/O 大小、呼叫來源，產出 analysis/skill-usage-baseline.json）",
+        "異常模式定義與偵測（定義 5 類異常：過度使用、使用不足、高失敗率、低效 I/O、重複 API，建立 tools/skill_anomaly_detector.py）",
+        "低效 Skill 鏈識別（提取 skill_chain，識別 Read 同一檔 > 3 次、未走 cache、循環呼叫，產出 analysis/inefficient-skill-chains.json）",
+        "優化建議生成（對每個異常模式生成具體建議：過度使用→快取/rate limiting、使用不足→檢查觸發詞/退役、高失敗率→檢查依賴/錯誤處理、低效 I/O→委派子 Agent/摘要模式、重複 API→強制走 cache/調整 TTL）",
+        "整合至 Skill 生命週期管理（更新 skill-lifecycle-manager 或建立 context/skill-health-report.json，標記需優化 Skill）",
+        "驗證與回饋（選擇 top 3 異常 Skill 進行優化，觀察 1 週後的呼叫次數、I/O、失敗率變化）"
+      ],
+      "research_summary": "AI Agent Monitoring 強調量化指標（response times、error rates、token usage、costs）與異常偵測（延遲峰值、失敗率激增）；LangSmith 從生產流量揭示使用模式並捕獲為測試數據集。Skill 異常偵測應涵蓋頻率、效能、品質三維度，並識別低效呼叫鏈。",
+      "sources": [
+        {
+          "title": "AI Agent Monitoring and Observability: Production Best Practices",
+          "url": "https://www.ai-agentsplus.com/blog/ai-agent-monitoring-observability-2026"
+        },
+        {
+          "title": "Why LLM observability and monitoring needs evaluations",
+          "url": "https://www.langchain.com/articles/llm-monitoring-observability"
+        }
+      ],
+      "acceptance": [
+        "識別至少 5 個異常 Skill 並產出具體優化建議",
+        "至少 1 個低效 Skill 鏈被優化（呼叫次數下降 20% 或 I/O 下降 30%）",
+        "skill-health-report.json 可作為 system-audit 的輸入來源"
+      ],
+      "prerequisites": [
+        "可讀取 logs/structured/*.jsonl、context/system-insight.json、skills/SKILL_INDEX.md",
+        "現有 behavior-pattern-analyzer Skill 作為參考，不重複其功能"
+      ],
+      "dimension": "開發效率"
+    },
+    {
+      "id": "backlog_kie_20260321_research_saturation",
+      "source": "kb_insight_evaluation",
+      "title": "研究主題飽和度分析與收穫遞減偵測",
+      "description": "context/research-registry.json 含 152 筆研究（topic_diversity 97.4%），建議分析已飽和主題（多次研究但新發現遞減）與待深化主題（初步涉獵高潛力），建立飽和度評分模型與收穫遞減偵測，產出研究方向建議並整合至研究系列管理。",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-21T18:49:16.438777",
+      "status": "pending",
+      "tags": [
+        "kb_insight_evaluation",
+        "research_strategy",
+        "saturation_analysis",
+        "knowledge_management"
+      ],
+      "execution_plan": [
+        "研究主題聚類與頻率統計（讀取 research-registry.json 的 152 筆 entries，提取 topic 進行語義聚類，統計研究次數、最近時間、累計字數，產出 analysis/research-topic-clusters.json）",
+        "飽和度評分模型（定義 saturation_score = 研究次數×0.4 + (1-新穎度)×0.3 + 時間間隔×0.2 + (1-深度)×0.1，建立 tools/research_saturation_analyzer.py）",
+        "收穫遞減偵測（對 saturation_score > 0.7 的主題，檢查最近 3 次新發現數量是否遞減或高度重複，標記為收穫遞減）",
+        "待深化主題識別（對 saturation_score < 0.3 的主題，檢查研究次數 < 3 且深度低，與知識庫相關性高，產出 analysis/high-potential-topics.json）",
+        "研究方向建議生成（已飽和→暫停/轉子主題、收穫遞減→換角度、待深化→優先研究並列出具體研究問題）",
+        "整合至研究系列管理（更新 context/research-series.json，將飽和度分數與建議寫入各系列，kb-research-strategist 優先參考）",
+        "驗證與回饋（選擇 1 個待深化主題深度研究驗證高潛力、1 個已飽和主題暫停 1 個月觀察）"
+      ],
+      "research_summary": "質性研究的飽和度是指收集數據到收益遞減點，約 10-15 次訪談後達飽和；知識貢獻效能呈曲線模式，成長後出現收益遞減。飽和度評分應綜合研究次數、新穎度、時間間隔、深度等多因子，識別已飽和與高潛力主題。",
+      "sources": [
+        {
+          "title": "Saturation: An Overworked and Misunderstood Concept?",
+          "url": "https://journals.sagepub.com/doi/10.1177/10778004231183948"
+        },
+        {
+          "title": "Diminishing returns of information quality: Untangling the determinants of best answer selection",
+          "url": "https://www.sciencedirect.com/science/article/abs/pii/S0747563221003320"
+        }
+      ],
+      "acceptance": [
+        "識別至少 3 個已飽和主題（saturation_score > 0.7）與 3 個待深化主題（< 0.3）",
+        "產出至少 5 條具體研究方向建議",
+        "待深化主題的深度研究驗證新發現數量 > 3（證明確實高潛力）"
+      ],
+      "prerequisites": [
+        "可讀取 context/research-registry.json、context/research-series.json、context/kb-research-brief.json（若存在）",
+        "現有 kb-research-strategist Skill 作為參考，飽和度分析作為補充維度"
+      ],
+      "dimension": "知識管理"
     }
   ],
   "entries": [

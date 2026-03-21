@@ -4,7 +4,7 @@ tools/score-kb-notes.py
 知識庫筆記品質評分工具
 
 輸入：從 KB API (localhost:3000) 查詢所有筆記
-輸出：state/kb-note-scores.json（30 日滾動窗口）
+輸出：state/kb-note-scores.json（90 日滾動窗口）
 
 評分維度（共 100 分）：
   content_length    (0-25)：內容字數，1000+ = 滿分
@@ -15,8 +15,10 @@ tools/score-kb-notes.py
 
 使用方式：
     uv run python tools/score-kb-notes.py
-    uv run python tools/score-kb-notes.py --top 10         # 只輸出前 10 名
-    uv run python tools/score-kb-notes.py --limit 100      # 查詢最多 100 筆
+    uv run python tools/score-kb-notes.py --top 10                          # 只輸出前 10 名
+    uv run python tools/score-kb-notes.py --limit 100                       # 查詢最多 100 筆
+    uv run python tools/score-kb-notes.py --top 10 --exclude-history        # 排除 podcast-history 冷卻中筆記
+    uv run python tools/score-kb-notes.py --top 10 --exclude-history --exclude-tags 佛學,天台宗  # 額外排除 tag
 """
 
 import argparse
@@ -30,12 +32,13 @@ from pathlib import Path
 # ─── 設定 ────────────────────────────────────────────────
 PROJECT_DIR   = Path(__file__).parent.parent
 SCORES_PATH   = PROJECT_DIR / "state" / "kb-note-scores.json"
+HISTORY_PATH  = PROJECT_DIR / "context" / "podcast-history.json"
 try:
     from tools.config_loader import get_kb_api_base
     KB_API_BASE = get_kb_api_base()
 except ImportError:
     KB_API_BASE = "http://localhost:3000"
-ROLLING_DAYS  = 30
+ROLLING_DAYS  = 90
 DEFAULT_LIMIT = 200
 
 
@@ -216,6 +219,33 @@ def save_scores(data: dict):
 
 # ─── 主程式 ─────────────────────────────────────────────────
 
+def load_excluded_ids(history_path: Path) -> set[str]:
+    """從 podcast-history.json 的 summary.recent_note_ids 取得冷卻中筆記 ID。"""
+    if not history_path.exists():
+        return set()
+    try:
+        data = json.loads(history_path.read_text(encoding='utf-8'))
+        now = datetime.now(timezone.utc)
+        excluded = set()
+        for entry in data.get('summary', {}).get('recent_note_ids', []):
+            if isinstance(entry, str):
+                excluded.add(entry)
+            elif isinstance(entry, dict):
+                expires_at = entry.get('expires_at', '')
+                try:
+                    exp_dt = datetime.fromisoformat(expires_at)
+                    if exp_dt.tzinfo is None:
+                        exp_dt = exp_dt.replace(tzinfo=timezone.utc)
+                    if exp_dt > now:
+                        excluded.add(entry['note_id'])
+                except Exception:
+                    excluded.add(entry.get('note_id', ''))
+        return excluded
+    except Exception as e:
+        print(f"[WARN] 無法讀取 podcast-history.json: {e}", file=__import__('sys').stderr)
+        return set()
+
+
 def main():
     parser = argparse.ArgumentParser(description="知識庫筆記品質評分")
     parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT,
@@ -224,6 +254,10 @@ def main():
                         help="輸出前 N 名筆記（預設 10）")
     parser.add_argument("--json", action="store_true",
                         help="輸出 JSON 格式（供其他工具讀取）")
+    parser.add_argument("--exclude-history", action="store_true",
+                        help="排除 context/podcast-history.json 中冷卻期未到的筆記")
+    parser.add_argument("--exclude-tags", default="",
+                        help="額外排除含有指定 tag 的筆記（逗號分隔，如 '佛學,天台宗'）")
     args = parser.parse_args()
 
     # 健康檢查
@@ -270,12 +304,34 @@ def main():
     save_scores(result)
     print(f"[INFO] 評分完成，共 {len(all_scored)} 筆，已存入 {SCORES_PATH}")
 
+    # 去重過濾（--exclude-history）
+    display_scored = all_scored
+    if args.exclude_history:
+        excluded_ids = load_excluded_ids(HISTORY_PATH)
+        before = len(display_scored)
+        display_scored = [n for n in display_scored if n['note_id'] not in excluded_ids]
+        print(f"[INFO] 排除冷卻中筆記 {before - len(display_scored)} 筆（剩 {len(display_scored)} 筆可選）")
+
+    # 額外排除 tag（--exclude-tags）
+    if args.exclude_tags:
+        exclude_tag_set = {t.strip() for t in args.exclude_tags.split(',') if t.strip()}
+        before = len(display_scored)
+        display_scored = [
+            n for n in display_scored
+            if not any(tag in exclude_tag_set for tag in n.get('tags', []))
+        ]
+        print(f"[INFO] 排除指定 tag 筆記 {before - len(display_scored)} 筆（tags: {args.exclude_tags}）")
+
     # 輸出結果
-    top_n = all_scored[:args.top]
+    top_n = display_scored[:args.top]
     if args.json:
         print(json.dumps(top_n, ensure_ascii=False, indent=2))
     else:
-        print(f"\n📊 Top {args.top} 筆記（播客適合度排行）:")
+        label = f"Top {args.top} 筆記（播客適合度排行"
+        if args.exclude_history:
+            label += "，已排除冷卻中"
+        label += "）"
+        print(f"\n📊 {label}:")
         print("-" * 72)
         for i, n in enumerate(top_n, 1):
             d = n['dims']

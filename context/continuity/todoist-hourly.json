@@ -5,46 +5,46 @@
   "max_runs": 3,
   "runs": [
     {
-      "run_id": "20260321083037",
-      "started_at": "2026-03-21T08:30:37Z",
-      "completed_at": "2026-03-21T16:38:05",
+      "run_id": "20260321120042",
+      "started_at": "2026-03-21T12:00:42Z",
+      "completed_at": "2026-03-21T20:16:00",
       "plan_type": "auto",
-      "auto_tasks_executed": ["arch_evolution", "self_heal"],
+      "auto_tasks_executed": ["skill_forge", "ntfy_review"],
       "auto_tasks_failed": [],
       "auto_tasks_skipped": [],
       "human_tasks_completed": [],
       "human_tasks_failed": [],
       "all_exhausted": false,
-      "phase3_summary": "架構演進決策完成17項決策（14個backlog已有ADR對應，3個告警超閾值），系統自癒修復gmail快取（circuit breaker open）",
-      "notable": "兩個starvation_boosted任務（arch_evolution、self_heal）成功執行；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
+      "phase3_summary": "Skill鑄造生成context-compressor Skill（v0.5.0）解決I/O超標，ntfy審查19筆100%成功並修復agent命名變體",
+      "notable": "兩任務均為starvation_boosted提升；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
     },
     {
-      "run_id": "20260321080037",
-      "started_at": "2026-03-21T08:00:37Z",
-      "completed_at": "2026-03-21T16:13:15",
+      "run_id": "20260321113209",
+      "started_at": "2026-03-21T11:32:09Z",
+      "completed_at": "2026-03-21T19:41:42",
       "plan_type": "auto",
-      "auto_tasks_executed": ["system_insight"],
+      "auto_tasks_executed": ["future_plan_optimize", "podcast_create"],
       "auto_tasks_failed": [],
       "auto_tasks_skipped": ["github_scout"],
       "human_tasks_completed": [],
       "human_tasks_failed": [],
       "all_exhausted": false,
-      "phase3_summary": "系統洞察分析完成，偵測3個critical告警（成功率86.5%、公平性1.403、I/O負載26.6KB）+1個warning（快取21.3%），已寫入3個P0改進項目",
-      "notable": "github_scout非執行日跳過；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
+      "phase3_summary": "未來計畫優化新增6項待辦整合KB研究，Podcast生成事件驅動架構主題（人工補救TTS），GitHub Scout非執行日跳過",
+      "notable": "podcast_create由人工補救完成後製與上傳；github_scout非執行日（僅週三/週日）"
     },
     {
-      "run_id": "20260321073047",
-      "started_at": "2026-03-21T07:30:47Z",
-      "completed_at": "2026-03-21T15:51:20",
+      "run_id": "20260321110213",
+      "started_at": "2026-03-21T11:02:13Z",
+      "completed_at": "2026-03-21T19:16:30",
       "plan_type": "auto",
-      "auto_tasks_executed": ["ai_sysdev", "skill_audit"],
+      "auto_tasks_executed": ["podcast_create", "podcast_jiaoguangzong"],
       "auto_tasks_failed": [],
       "auto_tasks_skipped": [],
       "human_tasks_completed": [],
       "human_tasks_failed": [],
       "all_exhausted": false,
-      "phase3_summary": "AI系統開發完成Agent SDK/工作流引擎/程式碼生成管線實作指南（KB:371a14dd，備援claude_sonnet45），Skill審查完成deep-research修正2項（KB:b76bbb17）",
-      "notable": "兩任務品質均5/5；聊天室廣播認證失敗（BOT_API_SECRET未設定）"
+      "phase3_summary": "完成Podcast雙主持人生成（cursor_cli fallback）+ 教觀綱宗ep05天台判教千年演進53輪（KB:893e05b0，R2已上傳）",
+      "notable": "podcast_create使用cursor_cli後端API fallback模式選材；兩任務均為starvation_boosted提升"
     }
   ]
 }

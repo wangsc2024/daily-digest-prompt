@@ -66,7 +66,7 @@ released_at: "2026-03-21"
 0. 用 Read 讀取 `context/continuity/auto-task-ai_deep_research.json`（不存在則跳過）
    - 若存在，取 `runs[0].next_suggested_angle`（上次建議的深化方向）作為**優先候選方向**
 1. 用 WebSearch 搜尋「AI latest breakthroughs 2026」「AI trending topics」
-2. 查詢知識庫已有 AI 研究：
+2. 查詢知識庫已有 AI 研究（KB 不可用時跳過，僅依 registry + WebSearch 結果選主題）：
 ```bash
 curl -s -X POST "http://localhost:3000/api/search/hybrid" \
   -H "Content-Type: application/json" \
@@ -163,7 +163,8 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
    - ✅ 主要洞見有 3+ 來源佐證
    - ✅ 字數 ≥ 800 字
    - 未通過 → 補充 → 修正（最多 2 次循環）
-4. 匯入知識庫：
+4. 匯入知識庫（依 `skills/knowledge-query/SKILL.md` 指示）：
+   - **先確認 KB 可用**：用 Read 讀取 `cache/kb_live_status.json`（`kb_alive=true` 且 30 分鐘內）或執行 health curl；KB 不可用 → 跳過匯入，最終 `kb_imported=false`，不影響 `status=success`
    - tags: ["AI深度研究", "主題名稱", "2026"]
    - contentText: 完整報告
    - source: "import"

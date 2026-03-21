@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-21T15:49:06.583621+08:00",
+  "updated_at": "2026-03-21T17:39:57.662217+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -4794,6 +4794,40 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "完成 foundation 后，进入 mechanism 阶段：深入 Open WebUI 的技术架构、API 设计、Ollama 通讯协议"
+    },
+    "n8n-workflow-automation": {
+      "series_id": "n8n-workflow-automation",
+      "domain": "n8n — No-code AI 工作流自動化平台",
+      "description": "",
+      "initiated_at": "2026-03-21",
+      "last_active": "2026-03-21",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-21",
+          "kb_notes": [
+            "n8n 深度研究報告 — No-code AI 工作流自動化平台"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 n8n 的節點系統、工作流引擎與執行機制"
     }
   }
 }

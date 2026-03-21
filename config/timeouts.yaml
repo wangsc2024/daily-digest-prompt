@@ -66,12 +66,12 @@ todoist_team:
     # === 創意類 ===
     creative_game_optimize: 900 # sync-games.ps1 npm build 最長 ~15 min
     qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改
-    podcast_create: 2400        # 腳本生成 + TTS(40段×~10s) + concat + R2 上傳
-    podcast_jiaoguangzong: 2400 # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
+    podcast_create: 4000        # 腳本生成 + TTS(40段×~10s) + concat + R2 上傳
+    podcast_jiaoguangzong: 4000 # 教觀綱宗 Podcast：30-40 輪 TTS + concat + R2 上傳
     # === Skill 鑄造（claude_sonnet 預設）===
     skill_forge: 900            # 上下文讀取(30s) + 子Agent去重(60s) + KB研究(300s) + Skill生成(120s) + 驗證整合(120s) + 自評分(60s) + 緩衝
     # === ntfy 審查（claude_opus46）===
-    ntfy_review: 1200           # 日誌讀取(60s) + 模式分析(120s) + 優化工作流(600s) + 格式化通知(60s) + 緩衝
+    ntfy_review: 3000           # 日誌讀取(60s) + 內容情報分析(180s) + 問題修復執行(900s) + 優化落實(900s) + 功能登記(120s) + 報告+通知(120s) + 緩衝（v2.0 即時行動政策）
     # === 未來計畫與洞察評估 ===
     future_plan_optimize: 900   # 讀待辦 + KB 查詢 + 完善細節 + 寫回 MD + 結果 JSON
     kb_insight_evaluation: 1200 # 讀 system-insight + 擇 3 項 + 研究 + 執行方案 + 寫回 improvement-backlog
@@ -103,15 +103,15 @@ fsm:
 media_pipeline:
   video_phase1_timeout: 600    # Phase 1: Claude 生成腳本+分鏡稿（KB查詢+分析+寫檔）
   video_phase3_timeout: 1800   # Phase 3: Remotion 渲染（10 分鐘影片約需 3-5 分鐘）
-  podcast_phase1_timeout: 600  # Phase 1: Claude 生成雙主持人對話腳本
-  tts_per_segment_timeout: 60  # Phase 2: 每段 TTS 最長等待（edge-tts 通常 <10s）
+  podcast_phase1_timeout: 1200  # Phase 1: Claude 生成雙主持人對話腳本
+  tts_per_segment_timeout: 600  # Phase 2: 每段 TTS 最長等待（edge-tts 通常 <10s）
 
 # 排程式媒體工具 wrapper（run-video-latest-research.ps1 / run-podcast-latest-buddhist.ps1）
 media_scheduled:
-  kb_search_timeout: 15        # Invoke-RestMethod KB 搜尋超時（秒）
-  kb_health_timeout: 5         # KB health check 超時（秒）
-  video_total_timeout: 2400    # 影片完整流程（含 Remotion 渲染）
-  podcast_total_timeout: 2400  # Podcast 完整流程（含 TTS 所有段落）
+  kb_search_timeout: 300        # Invoke-RestMethod KB 搜尋超時（秒）
+  kb_health_timeout: 300         # KB health check 超時（秒）
+  video_total_timeout: 3000    # 影片完整流程（含 Remotion 渲染）
+  podcast_total_timeout: 4000  # Podcast 完整流程（含 TTS 所有段落）
 
 # ADR-024：高失敗時段差異化 timeout 配置
 # 分析依據：系統審查（2026-03-17）識別 9:00/14:00/15:00 為高失敗時段
@@ -156,4 +156,4 @@ scheduler:
   todoist_single: 2400      # 整點 Todoist
   todoist_team: 3600        # 半點 Todoist（PT1H，含 creative-game 1020s + buffer）
   media_video_research: 2400  # 13:20 影片製作
-  media_podcast_buddhist: 2400  # 15:20 Podcast 製作
+  media_podcast_buddhist: 4000  # 15:20 Podcast 製作

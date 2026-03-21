@@ -1,7 +1,8 @@
 """
 tools/generate_podcast_audio.py
-Podcast 雙聲道 TTS 生成：讀取 podcast-script.jsonl，
-依 host 使用不同 edge-tts 聲音，逐段輸出 WAV 檔案。
+Podcast TTS 生成：讀取 podcast-script.jsonl，
+依 host 使用不同 edge-tts 聲音，逐段輸出 MP3 檔案。
+支援三聲道（host_a 曉晨、host_b 云哲、host_guest 特別來賓）。
 """
 
 import argparse
@@ -13,6 +14,21 @@ from pathlib import Path
 
 import edge_tts
 import yaml
+
+
+def resolve_host_key(turn: dict) -> str:
+    """從 host 或 speaker 取得 TTS 與檔名用的 host 鍵。
+    支援 host_a（曉晨）、host_b（云哲）、host_guest（特別來賓）。
+    """
+    h = turn.get("host")
+    if h in ("host_a", "host_b", "host_guest"):
+        return h
+    sp = str(turn.get("speaker", "")).strip()
+    if sp in ("Host-B", "host-b") or "Host-B" in sp:
+        return "host_b"
+    if sp in ("Host-Guest", "host-guest", "guest") or "Guest" in sp:
+        return "host_guest"
+    return "host_a"
 
 
 def load_abbrev_rules(rules_path: str) -> dict:
@@ -68,11 +84,14 @@ async def generate_all(
     voice_a: str,
     voice_b: str,
     abbrev_rules: dict,
+    voice_guest: str | None = None,
 ) -> int:
     """批次生成所有對話段落音訊，回傳失敗數量。"""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     voice_map = {"host_a": voice_a, "host_b": voice_b}
+    if voice_guest:
+        voice_map["host_guest"] = voice_guest
     failures = 0
 
     with open(script_path, encoding="utf-8") as f:
@@ -90,7 +109,7 @@ async def generate_all(
             continue
 
         turn_num = turn.get("turn", i)
-        host = turn.get("host", "host_a")
+        host = resolve_host_key(turn)
         # 優先使用已展開的 tts_text，否則使用 text
         raw_text = turn.get("tts_text") or turn.get("text", "")
         tts_text = expand_abbreviations(raw_text, abbrev_rules)
@@ -116,8 +135,9 @@ def main():
     parser = argparse.ArgumentParser(description="Podcast 雙聲道 TTS 生成")
     parser.add_argument("--input", required=True, help="podcast-script.jsonl 路徑")
     parser.add_argument("--output", required=True, help="音訊輸出目錄")
-    parser.add_argument("--voice-a", default="zh-TW-HsiaoChenNeural", help="host_a 聲音")
-    parser.add_argument("--voice-b", default="zh-TW-YunJheNeural", help="host_b 聲音")
+    parser.add_argument("--voice-a", default="zh-TW-HsiaoChenNeural", help="host_a 聲音（曉晨）")
+    parser.add_argument("--voice-b", default="zh-TW-YunJheNeural", help="host_b 聲音（云哲）")
+    parser.add_argument("--voice-guest", default=None, help="host_guest 聲音（特別來賓，可選）")
     parser.add_argument("--abbrev-rules", default="config/tts-abbreviation-rules.yaml")
     args = parser.parse_args()
 
@@ -130,7 +150,7 @@ def main():
 
     rules = load_abbrev_rules(args.abbrev_rules)
     failures = asyncio.run(
-        generate_all(script_path, output_dir, args.voice_a, args.voice_b, rules)
+        generate_all(script_path, output_dir, args.voice_a, args.voice_b, rules, args.voice_guest)
     )
 
     if failures > 0:

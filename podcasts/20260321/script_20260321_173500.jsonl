@@ -1,0 +1,43 @@
+{"speaker": "Host-A", "text": "大家好，歡迎收聽今天的知識電台，我是主持人 A。"}
+{"speaker": "Host-B", "text": "我是主持人 B。今天我們挑了三篇跟自動化、開發流程與推論服務有關的筆記，準備用對話把它們講清楚。"}
+{"speaker": "Host-A", "text": "第一篇談的是事件驅動架構：怎麼從單純的 Cron 排程，走向更像產品級的觸發與回應。"}
+{"speaker": "Host-B", "text": "很多人一開始都用工作排程器每小時跑一次，這樣哪裡不夠？"}
+{"speaker": "Host-A", "text": "Cron 很穩，但它比較像鬧鐘：時間到了就做，不管世界有沒有真的需要。當任務變多、相依變複雜，你會遇到空轉、重疊執行、以及難以追蹤因果。"}
+{"speaker": "Host-B", "text": "所以事件驅動的核心是什麼？"}
+{"speaker": "Host-A", "text": "核心是把「發生了什麼」變成明確事件，例如 Webhook、佇列訊息、或監控指標超標，再由消費端決定要不要做事。"}
+{"speaker": "Host-B", "text": "聽起來很適合個人自動化專案？"}
+{"speaker": "Host-A", "text": "對，像 daily-digest 這類管線，短期可以用 Cron 保底，中期加上 Webhook 與佇列，就能把尖峰與重試變得比較優雅。"}
+{"speaker": "Host-B", "text": "那如果一口氣全改成事件驅動，會不會過度設計？"}
+{"speaker": "Host-A", "text": "會。筆記裡也提醒：務實路線往往是事件為主、Cron 為輔，讓排程變成巡檢與兜底，而不是唯一的大腦。"}
+{"speaker": "Host-B", "text": "我懂了：不是誰取代誰，而是分工。接下來換第二篇，跟 Claude Code 的 CI／CD 有關對吧？"}
+{"speaker": "Host-A", "text": "沒錯。第二篇談 Claude Code 怎麼用非互動模式嵌進 GitHub Actions 這類管線。"}
+{"speaker": "Host-B", "text": "所謂 Headless，跟平常在終端裡聊天有什麼差？"}
+{"speaker": "Host-A", "text": "差在沒有人類在旁邊一步一步確認。典型做法是用列印模式把提示詞丟進去，拿到結果就結束，適合跑在 CI 容器裡。"}
+{"speaker": "Host-B", "text": "這樣能做哪些事？"}
+{"speaker": "Host-A", "text": "例如自動產測試、修 lint、整理 PR 描述、或批次做靜態檢查。重點是把輸入輸出契約寫清楚，失敗時要能重跑與記錄日誌。"}
+{"speaker": "Host-B", "text": "安全面呢？把強大的代理放進 CI，風險不小吧。"}
+{"speaker": "Host-A", "text": "風險確實在。需要最小權限、鎖定可寫目錄、避免任意安裝依賴，最好再加上人工審查關卡，讓自動化停在「產出補丁」而不是直接上線。"}
+{"speaker": "Host-B", "text": "如果團隊還很小，值得從哪裡開始？"}
+{"speaker": "Host-A", "text": "先從單一、可重複的工作開始，例如產生變更日誌或檢查文件連結，成功率高、回滾也容易。"}
+{"speaker": "Host-B", "text": "嗯，等流程穩了，再擴到測試生成與修復，比一次上全套穩健。"}
+{"speaker": "Host-B", "text": "好，我們進入第三篇：vLLM。這個名字最近常常在推理部署裡看到。"}
+{"speaker": "Host-A", "text": "vLLM 主要是把大型語言模型做成高吞吐的服務引擎，重點技術之一是 PagedAttention，用比較聰明的方式管 KV Cache。"}
+{"speaker": "Host-B", "text": "為什麼 KV Cache 這麼關鍵？"}
+{"speaker": "Host-A", "text": "因為自回歸模型每多產一個 token，都要帶著前面的上下文狀態走；快取管不好，記憶體很快就爆，吞吐也掉。"}
+{"speaker": "Host-B", "text": "所以 vLLM 適合誰？"}
+{"speaker": "Host-A", "text": "適合想把開源模型變成內部 API 的團隊：需要 OpenAI 相容介面、連續批次、以及能往多卡擴展。"}
+{"speaker": "Host-B", "text": "那有沒有它不擅長或要注意的坑？"}
+{"speaker": "Host-A", "text": "筆記提到幾點：部署參數多、某些情境下競品可能更快、以及安全預設不能當成完整方案，例如金鑰與網路暴露都要另外加固。"}
+{"speaker": "Host-B", "text": "若我手邊只有單張消費級顯卡，還值得學 vLLM 嗎？"}
+{"speaker": "Host-A", "text": "值得學概念：即使你先用較小模型，理解批次、快取與延遲的權衡，之後換硬體也比較不會重寫整套。"}
+{"speaker": "Host-B", "text": "三篇放在一起，我覺得有一條隱藏主線：從排程、到開發自動化、再到模型服務化。"}
+{"speaker": "Host-A", "text": "你說得對。下層是時間與事件怎麼驅動工作，中層是把 AI 嵌進軟體流程，上層是把模型當成可觀測的服務。"}
+{"speaker": "Host-B", "text": "若只能選一個最小實驗，你會建議聽眾先做哪個？"}
+{"speaker": "Host-A", "text": "我會建議先為一個現有腳本加上清楚的成功／失敗訊號與重試，這是事件驅動與 CI 兩邊都吃得到的基礎。"}
+{"speaker": "Host-B", "text": "第二小步呢？"}
+{"speaker": "Host-A", "text": "在 CI 裡加一個只讀、可重跑的檢查型任務，習慣 Headless 的輸入輸出格式。"}
+{"speaker": "Host-B", "text": "最後再碰本地或內網的推理服務？"}
+{"speaker": "Host-A", "text": "對，等你真的需要共用模型給多個客戶端，再把 vLLM 這類引擎納入評估，比較不會過早優化。"}
+{"speaker": "Host-B", "text": "今天內容涵蓋架構取捨、工程實務與推理部署，謝謝 A 的整理。"}
+{"speaker": "Host-A", "text": "謝謝 B 的提問。我們下集再見，也別忘了把學到的東西試著用在手邊最小的工作流上。"}
+{"speaker": "Host-B", "text": "下集見！"}

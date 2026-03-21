@@ -1595,6 +1595,34 @@ catch {
     exit 1
 }
 
+# ─── Plan Schema 驗證：防止 LLM 輸出合法 JSON 但非 plan 格式（對話性 JSON）───
+$validPlanTypes = @("tasks", "auto", "idle")
+if (-not $plan.plan_type -or $plan.plan_type -notin $validPlanTypes) {
+    Write-Log "[ERROR] Plan schema invalid: plan_type='$($plan.plan_type)' 不在 $($validPlanTypes -join '/')"
+    Update-FailureStats "parse_error" "phase1" "todoist"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan schema invalid: bad plan_type" -Sections @{ query = "failed" }
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
+    exit 1
+}
+if ($plan.plan_type -eq "tasks" -and ($null -eq $plan.tasks)) {
+    Write-Log "[ERROR] Plan schema invalid: plan_type=tasks 但 tasks 欄位缺失"
+    Update-FailureStats "parse_error" "phase1" "todoist"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan schema invalid: tasks missing" -Sections @{ query = "failed" }
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
+    exit 1
+}
+if ($plan.plan_type -eq "auto" -and ($null -eq $plan.auto_tasks -or $null -eq $plan.auto_tasks.selected_tasks)) {
+    Write-Log "[ERROR] Plan schema invalid: plan_type=auto 但 auto_tasks.selected_tasks 欄位缺失"
+    Update-FailureStats "parse_error" "phase1" "todoist"
+    $totalDuration = [int]((Get-Date) - $startTime).TotalSeconds
+    Update-State -Status "failed" -Duration $totalDuration -ErrorMsg "plan schema invalid: auto_tasks missing" -Sections @{ query = "failed" }
+    if (Test-Path $TodoistTeamLockFile) { Remove-Item $TodoistTeamLockFile -Force -ErrorAction SilentlyContinue }
+    exit 1
+}
+Write-Log "[Phase1] Plan schema OK: plan_type=$($plan.plan_type)"
+
 $forcedAutoTasksRaw = $env:TODOIST_TEAM_FORCE_AUTO_TASKS
 if ($forcedAutoTasksRaw) {
     $forcedTaskKeys = @($forcedAutoTasksRaw.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })

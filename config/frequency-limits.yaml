@@ -284,7 +284,7 @@ phase_overrides:
 #   template_version: 模板版本號（配合模板內部版本控制）
 #   template_params:  傳入模板的參數（僅參數化模板使用）
 #   history_type:     歷史記錄分類 key
-#   execution_order:  round-robin 輪轉順序（1-27，非連續）
+#   execution_order:  round-robin 輪轉順序（1-35，非連續；active: 1-26,28；disabled: 34,35）
 #   skills:           此任務依賴的 Skills 清單
 #
 # 群組摘要（11 群組，27 任務，合計依 daily_limit 加總）：
@@ -527,7 +527,7 @@ tasks:
     template: "templates/auto-tasks/git-push.md"
     template_version: 1
     history_type: "git_push"
-    execution_order: 13
+    execution_order: 23  # 原 13，讓位給 insight_briefing（需在 arch_evolution 之前完成洞察產出）
     timeout_seconds: 600
     result_suffix: "json"
     skills: [knowledge-query, git-smart-commit]
@@ -653,26 +653,26 @@ tasks:
     daily_limit: 2  # 停用：使用 claude_sonnet45
     counter_field: "podcast_create_count"
     template: "templates/auto-tasks/podcast-create.md"
-    template_version: 1
+    template_version: 2
     history_type: "podcast_create"
     execution_order: 21
     timeout_seconds: 2400
     result_suffix: "json"
-    skills: [knowledge-query, ntfy-notify]
-    description: "評分非佛學類別的 KB 筆記，選出最佳 3 篇，生成雙主持人對話腳本，TTS 合成後上傳 R2 並通知"
+    skills: [knowledge-query, ntfy-notify, deep-research]
+    description: "評分非佛學類別的 KB 筆記，選出最佳 3 篇（Deep Research P1-P5 確立學習目標+KB 豐富化+三角佐證），生成雙主持人對話腳本（P6 學習導向），P7 品質審查後 TTS 合成上傳 R2 並通知"
 
   podcast_jiaoguangzong:
     name: "教觀綱宗 Podcast 生成（每日 3 集）"
-    daily_limit: 3  
+    daily_limit: 3
     counter_field: "podcast_jiaoguangzong_count"
     template: "templates/auto-tasks/podcast-jiaoguangzong.md"
-    template_version: 1
+    template_version: 2
     history_type: "podcast_jiaoguangzong"
     execution_order: 22
     timeout_seconds: 2400
     result_suffix: "json"
-    skills: [knowledge-query, ntfy-notify]
-    description: "從知識庫選取教觀綱宗未用筆記，生成雙主持人對話腳本（30-40 輪），TTS 合成後上傳 R2。每次執行 1 集，每日合計 30 集，與 podcast_create 共享 podcast-history.json 去重機制"
+    skills: [knowledge-query, ntfy-notify, deep-research]
+    description: "從知識庫選取教觀綱宗未用筆記，Deep Research P1-P5 確立學習目標+KB 豐富化+三角佐證，生成雙主持人對話腳本（30-40 輪，P6 學習導向），P7 品質審查後 TTS 合成上傳 R2。與 podcast_create 共享 podcast-history.json 去重機制"
 
   # --- Skill 鑄造群組（共 1 次/日）---
   skill_forge:
@@ -749,7 +749,7 @@ tasks:
     template: "prompts/team/todoist-auto-insight_briefing.md"
     template_version: 1
     history_type: "insight_briefing"
-    execution_order: 29
+    execution_order: 13  # 原 29，提前到 arch_evolution(17) 之前，洞察當輪即可被決策消費
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist, markdown-editor, ntfy-notify]

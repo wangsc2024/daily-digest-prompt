@@ -107,15 +107,28 @@ def read_turn_order(script_path: Path) -> list[dict]:
     """讀取 podcast-script.jsonl，回傳按 turn 排序的段落列表。"""
     turns = []
     with open(script_path, encoding="utf-8") as f:
-        for line in f:
+        for idx, line in enumerate(f, 1):
             line = line.strip()
             if not line:
                 continue
             try:
-                turns.append(json.loads(line))
+                t = json.loads(line)
+                if "turn" not in t:
+                    t["turn"] = idx
+                turns.append(t)
             except json.JSONDecodeError:
                 pass
     return sorted(turns, key=lambda t: t.get("turn", 0))
+
+
+def resolve_host_key(turn: dict) -> str:
+    h = turn.get("host")
+    if h in ("host_a", "host_b"):
+        return h
+    sp = str(turn.get("speaker", "")).strip()
+    if sp in ("Host-B", "host-b") or "Host-B" in sp:
+        return "host_b"
+    return "host_a"
 
 
 def concat_and_export(
@@ -136,7 +149,7 @@ def concat_and_export(
     turn_wavs: list[Path] = []
     for turn in turns:
         turn_num = turn.get("turn", 0)
-        host = turn.get("host", "host_a")
+        host = resolve_host_key(turn)
         mp3_file = audio_dir / f"turn_{turn_num:03d}_{host}.mp3"
         if not mp3_file.exists():
             print(f"[WARN] 音訊段落不存在，跳過: {mp3_file}", file=sys.stderr)
