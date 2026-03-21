@@ -1,11 +1,58 @@
 {
   "version": 1,
-  "generated_at": "2026-03-21T18:49:16.438777",
-  "source": "system-audit",
-  "audit_date": "2026-03-18",
+  "generated_at": "2026-03-22T05:34:15+08:00",
+  "source": "system_insight",
   "total_score": 87.88,
   "grade": "A",
   "items": [
+    {
+      "id": "backlog_si_20260322_daily_success_rate",
+      "source": "system_insight",
+      "title": "系統洞察告警：daily_success_rate 超閾值（持續第 2 天）",
+      "description": "daily_success_rate=0.865（持平），門檻 0.95。建議：檢查高失敗時段（5、7、13 時）的根因，可能與外部 API 不穩定或資源競爭有關。趨勢：與昨日相比持平（0.865 → 0.865），問題未改善。",
+      "priority": "high",
+      "effort": "low",
+      "created_at": "2026-03-22T05:34:15+08:00",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "warning",
+        "persistent"
+      ]
+    },
+    {
+      "id": "backlog_si_20260322_cache_hit_ratio",
+      "source": "system_insight",
+      "title": "系統洞察告警：cache_hit_ratio 超閾值（持續第 2 天）",
+      "description": "cache_hit_ratio=0.2167（微升），門檻 0.4。建議：使用 cache-optimizer Skill 分析各端點 TTL 配置，可能需延長 pingtung-news 或 hackernews 的快取時間。趨勢：與昨日相比微升（0.2126 → 0.2167, +0.4pp），改善緩慢。",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-22T05:34:15+08:00",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "warning",
+        "persistent"
+      ]
+    },
+    {
+      "id": "backlog_si_20260322_auto_task_fairness",
+      "source": "system_insight",
+      "title": "系統洞察告警：auto_task_fairness 超閾值（改善中）",
+      "description": "auto_task_fairness=1.211（改善），門檻 0.5。建議：29 個任務中今日僅 13 個有執行記錄，執行 task-fairness-analyzer Skill 分析 round-robin 邏輯。趨勢：與昨日相比改善（1.403 → 1.211, -13.7%），但仍超標。",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-22T05:34:15+08:00",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "warning",
+        "improving"
+      ]
+    },
     {
       "id": "backlog_si_20260321_daily_success_rate",
       "source": "system_insight",
@@ -826,6 +873,138 @@
         },
         "research_depth": "adequate",
         "notes": "三個專案均為 2026 年熱門框架，stars 數量與活躍度皆高，資訊來源可靠。OpenClaw 的 Skill 系統與我們 Skill-First 策略高度相關；CrewAI 的多 Agent 編排與我們 Team 模式契合；LangGraph 的持久化執行可補強我們系統的容錯能力。"
+      }
+    },
+    {
+      "version": 1,
+      "scouted_at": "2026-03-22T00:00:00+08:00",
+      "topic": "自癒與自動修復系統",
+      "projects": [
+        {
+          "name": "openclaw/openclaw",
+          "url": "https://github.com/openclaw/openclaw",
+          "stars": 329000,
+          "description": "本地優先的 AI 助理，採用 Local-first Gateway 架構，支援 20+ 通道整合。明確拒絕 heavy orchestration 和 agent-hierarchy。",
+          "relevance": "high",
+          "last_updated": "2026-03",
+          "key_patterns": [
+            "WebSocket Gateway 控制平面（ws://127.0.0.1:18789）",
+            "反模式：明確拒絕重編排層與 Agent 層級框架",
+            "Plugin System（Skills）透過 ClawHub registry 動態載入",
+            "多通道抽象（20+ 平台統一接口）",
+            "RPC 模式 Agent Runtime"
+          ]
+        },
+        {
+          "name": "Ramsbaby/openclaw-self-healing",
+          "url": "https://github.com/Ramsbaby/openclaw-self-healing",
+          "stars": 31,
+          "description": "AI-powered 自癒系統，5-tier 自主恢復機制。實戰數據：9/14 事件完全自動解決。",
+          "relevance": "high",
+          "last_updated": "2026-02",
+          "key_patterns": [
+            "5-tier 分級恢復（Preflight→KeepAlive→Watchdog→AI Emergency→Human Alert）",
+            "LLM-Agnostic 設計（支援 Claude、OpenAI、Gemini、Ollama）",
+            "Prometheus 可觀測性（健康狀態、恢復成功率、持續時間）",
+            "tmux PTY 隔離與環境變數轉發",
+            "Crash counter 與 6 小時自動衰減防止誤判"
+          ]
+        },
+        {
+          "name": "medik8s/self-node-remediation",
+          "url": "https://github.com/medik8s/self-node-remediation",
+          "stars": 67,
+          "description": "Kubernetes 節點自動修復，無需 BMC。節點自我診斷與恢復機制。",
+          "relevance": "medium",
+          "last_updated": "2026-02-25",
+          "key_patterns": [
+            "Kubernetes Operator 模式",
+            "無需外部基礎設施（BMC-less）的自癒",
+            "節點自我健康偵測與修復",
+            "與 Node Health Check Operator 協同",
+            "Go 實作的控制器模式"
+          ]
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "openclaw-self-healing",
+          "pattern": "5-tier 分級自癒機制",
+          "target_files": [
+            "run-todoist-agent-team.ps1",
+            "run-agent-team.ps1",
+            "config/recovery-tiers.yaml"
+          ],
+          "priority": "P0",
+          "effort": "high",
+          "description": "引入分級自動恢復機制：Tier 0（Preflight 配置驗證）→ Tier 1（即時重試，< 30s）→ Tier 2（Watchdog 健康檢查，3 分鐘）→ Tier 3（AI 診斷，30 分鐘失敗後）→ Tier 4（人工告警）。目前系統僅有單次重試與 ntfy 告警，缺乏分級恢復策略。參考 openclaw-self-healing 的實戰數據（9/14 完全自動解決），可大幅降低人工介入需求。"
+        },
+        {
+          "source_project": "openclaw-self-healing",
+          "pattern": "LLM-Agnostic 設計",
+          "target_files": [
+            "config/llm-router.yaml",
+            "tools/llm_router.py",
+            "bot/groq-relay.js"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "強化 LLM-Agnostic 支援，參考 openclaw-self-healing 的 OPENCLAW_LLM_PROVIDER 環境變數機制。目前系統已有 llm-router.yaml 與 groq-relay，但配置分散。建議統一為單一 LLM_PROVIDER 環境變數 + routing_rules 映射，支援 Claude（預設）、Groq（快速摘要）、Ollama（離線備援）三模式動態切換。"
+        },
+        {
+          "source_project": "openclaw-self-healing",
+          "pattern": "Prometheus 可觀測性指標",
+          "target_files": [
+            "tools/prometheus_exporter.py",
+            "config/metrics.yaml",
+            "check-health.ps1"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "引入 Prometheus metrics exporter，暴露關鍵指標：系統健康狀態、自動任務成功率、恢復嘗試次數、最近恢復持續時間、cache_hit_ratio、daily_success_rate。參考 openclaw-self-healing 的 0-100% 恢復百分比設計，可視化系統自癒能力。目前 check-health.ps1 僅輸出文字報告，缺乏時序指標與趨勢分析。"
+        },
+        {
+          "source_project": "openclaw/openclaw",
+          "pattern": "簡化編排層（反模式借鑑）",
+          "target_files": [
+            "run-todoist-agent-team.ps1",
+            "prompts/team/todoist-query.md"
+          ],
+          "priority": "P2",
+          "effort": "low",
+          "description": "OpenClaw 明確拒絕 heavy orchestration 和 agent-hierarchy，強調「shipped fast」的價值。反思本系統的 3-phase Team 模式是否過度編排。建議：Phase 1（查詢）→ Phase 2（並行執行）可簡化為「動態任務清單 + 並行執行」模式，移除固定的 Phase 分界，讓 Agent 更自主決定何時結束。可參考 OpenClaw 的 RPC 模式，每個 Agent 獨立運行並透過 WebSocket 回報結果。"
+        },
+        {
+          "source_project": "medik8s/self-node-remediation",
+          "pattern": "無外部依賴的自癒（BMC-less）",
+          "target_files": [
+            "hooks/on_stop_alert.py",
+            "tools/autonomous_recovery_worker.py"
+          ],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "參考 self-node-remediation 的 BMC-less 設計，減少對外部服務的依賴。目前系統依賴 ntfy.sh、knowledge API（localhost:3000）、Groq Relay 等外部服務。建議：建立降級模式配置，當外部服務不可用時，系統仍可自癒。例如：ntfy 失敗時寫入本地日誌、KB API 失敗時直接寫 JSON 檔案、Groq 失敗時回退到 Claude。參考 autonomous_recovery_worker.py 的設計，建立完全離線的恢復能力。"
+        },
+        {
+          "source_project": "openclaw-self-healing",
+          "pattern": "Crash counter 與自動衰減",
+          "target_files": [
+            "state/failed-auto-tasks.json",
+            "run-todoist-agent-team.ps1"
+          ],
+          "priority": "P1",
+          "effort": "low",
+          "description": "引入 crash counter 與時間衰減機制。參考 openclaw-self-healing 的 6 小時自動衰減設計，避免偶發性失敗被累計為長期問題。目前 failed-auto-tasks.json 記錄失敗但無衰減機制，導致偶發錯誤可能長期標記任務為「有問題」。建議：failed_count 每 6 小時自動 -1（最低為 0），連續成功 3 次則重置為 0。"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 1,
+          "B": 2
+        },
+        "research_depth": "adequate",
+        "notes": "OpenClaw（329K stars）是 2026 年最熱門專案，提供架構反模式借鑑。openclaw-self-healing 雖 stars 較少（31）但有實戰數據與創新 5-tier 設計，高度相關。self-node-remediation（67 stars）提供 Kubernetes 場景的自癒模式參考。三個專案皆於 2026 年 2-3 月更新，資訊時效性高。"
       }
     }
   ]

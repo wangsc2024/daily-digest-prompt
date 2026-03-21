@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-21T21:41:21.532195+08:00",
+  "updated_at": "2026-03-22T06:45:05.933066+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -48,7 +48,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "深入 Shannon 的 Claude Agent SDK 整合機制、Temporal 工作流定義與安全工具編排原理"
+      "next_research_hint": "深入 Shannon 的 Claude Agent SDK 整合機制、Temporal 工作流定義與安全工具編排原理",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "logical-thinking-frameworks": {
       "series_id": "logical-thinking-frameworks",
@@ -154,14 +156,16 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成 application 後進入 optimization：預測校準度追蹤工具、決策日誌模板、團隊決策流程最佳化"
+      "next_research_hint": "完成 application 後進入 optimization：預測校準度追蹤工具、決策日誌模板、團隊決策流程最佳化",
+      "saturation_score": 0.398,
+      "saturation_matched_cluster": "系統思考（Systems Thinking）— Donella Meadows 十二槓桿點與 Peter Senge 第五項修練"
     },
     "shurangama-sutra": {
       "series_id": "shurangama-sutra",
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-21",
+      "last_active": "2026-03-22",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -281,7 +285,7 @@
           ]
         },
         "synthesis": {
-          "status": "completed",
+          "status": "in_progress",
           "started_at": "2026-03-03",
           "kb_notes": [
             "楞嚴經與天台宗的義理會通",
@@ -308,7 +312,8 @@
             "楞嚴經五十陰魔的現代心理學詮釋 — 禪修心理學、認知科學與佛教修行論的跨學科對話",
             "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結",
             "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南",
-            "楞嚴經修行體系的當代實踐整合 — 從破妄顯真到圓通成就的現代禪修完整路徑（synthesis 完結篇）"
+            "楞嚴經修行體系的當代實踐整合 — 從破妄顯真到圓通成就的現代禪修完整路徑（synthesis 完結篇）",
+            "楞嚴經與華嚴經的義理會通 — 如來藏與法界、性起與性具、一真法界與首楞嚴三昧的圓教對話"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -437,7 +442,9 @@
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "楞嚴經系列五階段已完成，可考慮：1) 與其他經典（華嚴、圓覺）的跨系列整合；2) 更深入的修行專題（如楞嚴咒專修、耳根圓通深化）"
+      "next_research_hint": "完成後可繼續：楞嚴經與圓覺經會通、楞嚴經在藏傳佛教的傳播與詮釋",
+      "saturation_score": 0.5,
+      "saturation_matched_cluster": null
     },
     "jiaoguangzong": {
       "series_id": "jiaoguangzong",
@@ -678,7 +685,9 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "synthesis 持續深化：跨宗派會通（唯識、三論等）"
+      "next_research_hint": "synthesis 持續深化：跨宗派會通（唯識、三論等）",
+      "saturation_score": 0.4803,
+      "saturation_matched_cluster": "化儀四教實踐應用指南 — 從理論到實修的根機診斷與修行路徑選擇"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -948,14 +957,16 @@
         "shurangama-sutra",
         "jiaoguangzong"
       ],
-      "next_research_hint": "囑累品研究後，synthesis 階段尚缺：法師功德品（六根清淨）、授學無學人記品（阿難羅睺羅授記）、陀羅尼品（護持法華咒語）、妙莊嚴王本事品（在家修行典範）。完成後可進入跨系列整合：法華經 × 楞嚴經 × 教觀綱宗的三經會通。"
+      "next_research_hint": "囑累品研究後，synthesis 階段尚缺：法師功德品（六根清淨）、授學無學人記品（阿難羅睺羅授記）、陀羅尼品（護持法華咒語）、妙莊嚴王本事品（在家修行典範）。完成後可進入跨系列整合：法華經 × 楞嚴經 × 教觀綱宗的三經會通。",
+      "saturation_score": 0.6029,
+      "saturation_matched_cluster": "法華經（妙法蓮華經）深度研究 — 一佛乘義理、重點品章與修行實踐綜論"
     },
     "pure-land-buddhism": {
       "series_id": "pure-land-buddhism",
       "domain": "淨土宗 / 念佛法門",
       "description": "淨土宗念佛法門深度研究系列：從淨土三經、祖師思想到具體實修方法的完整體系",
       "initiated_at": "2026-02-01",
-      "last_active": "2026-03-21",
+      "last_active": "2026-03-22",
       "tags": [
         "淨土宗",
         "佛學",
@@ -1075,7 +1086,8 @@
           "status": "in_progress",
           "kb_notes": [
             "慧遠大師研究：淨土宗初祖與東林蓮社念佛結社運動",
-            "道綽大師研究：《安樂集》與聖道淨土二門判教體系"
+            "道綽大師研究：《安樂集》與聖道淨土二門判教體系",
+            "徹悟大師（夢東禪師）淨土思想研究 — 十二祖的禪淨合一與《夢東語錄》念佛要旨"
           ],
           "covered_concepts": [
             "慧遠大師",
@@ -1092,14 +1104,22 @@
             "末法思想",
             "玄中寺三祖",
             "念珠計數",
-            "《安樂集》十二大門"
+            "《安樂集》十二大門",
+            "徹悟大師生平與時代背景",
+            "徹悟禪師（夢東禪師）禪淨思想",
+            "徹悟大師《夢東語錄》核心教義",
+            "徹悟大師對省庵大師思想的繼承",
+            "徹悟大師對印光大師的影響",
+            "徹悟大師念佛開示與修持要訣"
           ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "完成道綽大師後，可繼續補足四祖法照、五祖少康（synthesis階段完結），或探索淨土宗與天台、華嚴的跨系列會通"
+      "next_research_hint": "補足徹悟大師後，可考慮完成四祖法照、五祖少康的深入研究，或進入跨系列會通（淨土與天台、華嚴的義理對話），達成 synthesis 階段的 100% 完成。",
+      "saturation_score": 0.5454,
+      "saturation_matched_cluster": "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -1139,7 +1159,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 WORKFORCE 訓練演算法、Agent 通訊協定、任務分解機制"
+      "next_research_hint": "完成後進入 mechanism：深入 WORKFORCE 訓練演算法、Agent 通訊協定、任務分解機制",
+      "saturation_score": 0.4765,
+      "saturation_matched_cluster": "Agency-Agents — IDE 多 Agent AI 工作室框架"
     },
     "ai-code-review": {
       "series_id": "ai-code-review",
@@ -1222,7 +1244,9 @@
       "related_series": [
         "ai-security-testing"
       ],
-      "next_research_hint": "完成 optimization 後，可進入 synthesis：把 code review 與 CI、需求品質閘門、ADR 治理串成全鏈路工程治理。"
+      "next_research_hint": "完成 optimization 後，可進入 synthesis：把 code review 與 CI、需求品質閘門、ADR 治理串成全鏈路工程治理。",
+      "saturation_score": 0.3,
+      "saturation_matched_cluster": null
     },
     "test-time-compute-reasoning": {
       "series_id": "test-time-compute-reasoning",
@@ -1260,7 +1284,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 PRM/ORM 訓練方法、Tree Search 演算法、推理 token 經濟學"
+      "next_research_hint": "完成後進入 mechanism：深入 PRM/ORM 訓練方法、Tree Search 演算法、推理 token 經濟學",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "aiops-devops-intelligence": {
       "series_id": "aiops-devops-intelligence",
@@ -1310,7 +1336,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism 階段：深入異常偵測演算法、因果 AI 原理、RAG 輔助診斷機制"
+      "next_research_hint": "mechanism 階段：深入異常偵測演算法、因果 AI 原理、RAG 輔助診斷機制",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "gunjs-decentralized-db": {
       "series_id": "gunjs-decentralized-db",
@@ -1358,14 +1386,16 @@
           ]
         }
       },
-      "next_research_hint": "完成後進入 synthesis：Gun.js 與其他 P2P 技術的生態整合、去中心化架構在 AI Agent 系統中的應用前景"
+      "next_research_hint": "完成後進入 synthesis：Gun.js 與其他 P2P 技術的生態整合、去中心化架構在 AI Agent 系統中的應用前景",
+      "saturation_score": 0.3,
+      "saturation_matched_cluster": null
     },
     "ai-workflow-automation": {
       "series_id": "ai-workflow-automation",
       "domain": "AI 工作流自動化 Dify",
       "description": "AI 工作流自動化研究系列：涵蓋 No-code 平台、多 Agent 框架、工作流引擎與 AI Pipeline 觀測",
       "initiated_at": "2026-03-07",
-      "last_active": "2026-03-20",
+      "last_active": "2026-03-22",
       "tags": [
         "AI工作流",
         "自動化",
@@ -1417,15 +1447,19 @@
           "completed_at": "2026-03-20"
         },
         "application": {
-          "status": "completed",
+          "status": "in_progress",
           "completed_at": "2026-03-10",
           "kb_notes": [
-            "Phoenix 深度研究報告 - AI工作流自動化"
+            "Phoenix 深度研究報告 - AI工作流自動化",
+            "MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框架"
           ],
           "covered_concepts": [
             "OpenTelemetry 與 OpenInference 在 Agent 工作流中的接線方式",
             "trace -> dataset -> experiment 的閉環驗證流程",
-            "與 Claude Agent SDK / MCP 工具的實際整合路徑"
+            "與 Claude Agent SDK / MCP 工具的實際整合路徑",
+            "CrewAI 角色系統",
+            "層級式任務委派",
+            "工作流自動規劃"
           ]
         },
         "optimization": {
@@ -1477,9 +1511,11 @@
         }
       },
       "current_stage": "application",
-      "completion_pct": 80,
+      "completion_pct": 60,
       "related_series": [],
-      "next_research_hint": "application：比較 Langfuse 與 OpenLIT/Phoenix 的 trace schema、eval workflow 與落地成本"
+      "next_research_hint": "完成後可進入 optimization：框架效能比較與最佳實踐",
+      "saturation_score": 0.6883,
+      "saturation_matched_cluster": "n8n"
     },
     "da-bei-chan-fa": {
       "series_id": "da-bei-chan-fa",
@@ -1568,7 +1604,9 @@
         "lotus-sutra",
         "pure-land-buddhism"
       ],
-      "next_research_hint": "可選後續：田野調查（台灣道場質性訪談）、跨文化比較（藏傳金剛薩埵懺/南傳四正勤）、心理學實證（fMRI/HRV）、數位人文（CBETA 演變脈絡）、線上共修效果研究；或深化 optimization：持誦品質提升、常見障礙排除、進階觀法與感應道交"
+      "next_research_hint": "可選後續：田野調查（台灣道場質性訪談）、跨文化比較（藏傳金剛薩埵懺/南傳四正勤）、心理學實證（fMRI/HRV）、數位人文（CBETA 演變脈絡）、線上共修效果研究；或深化 optimization：持誦品質提升、常見障礙排除、進階觀法與感應道交",
+      "saturation_score": 0.5,
+      "saturation_matched_cluster": null
     },
     "slm-on-device-ai": {
       "series_id": "slm-on-device-ai",
@@ -1602,7 +1640,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入量化演算法原理（GPTQ vs AWQ vs GGUF）、知識蒸餾技術、Speculative Decoding 與 NPU 硬體加速機制"
+      "next_research_hint": "完成後進入 mechanism：深入量化演算法原理（GPTQ vs AWQ vs GGUF）、知識蒸餾技術、Speculative Decoding 與 NPU 硬體加速機制",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "markdown-gfm-writing": {
       "series_id": "markdown-gfm-writing",
@@ -1653,7 +1693,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 mechanism 後進入 application：實作 Markdown 編輯/總結 Skill（SKILL.md + 自動化腳本）"
+      "next_research_hint": "完成 mechanism 後進入 application：實作 Markdown 編輯/總結 Skill（SKILL.md + 自動化腳本）",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "knowledge-base-architecture": {
       "series_id": "knowledge-base-architecture",
@@ -1708,7 +1750,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "下一步可進一步研究查詢日誌驅動的權重自適應與離線評測基準。"
+      "next_research_hint": "下一步可進一步研究查詢日誌驅動的權重自適應與離線評測基準。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "open-webui-platform": {
       "series_id": "open-webui-platform",
@@ -1770,7 +1814,9 @@
       "related_series": [
         "ai-workflow-automation"
       ],
-      "next_research_hint": "下一步進入 application 階段：實際部署 Open WebUI 並實作自訂 Function/Tool，驗證架構理論。"
+      "next_research_hint": "下一步進入 application 階段：實際部署 Open WebUI 並實作自訂 Function/Tool，驗證架構理論。",
+      "saturation_score": 0.2,
+      "saturation_matched_cluster": null
     },
     "ai-assisted-coding-workflows": {
       "series_id": "ai-assisted-coding-workflows",
@@ -1831,7 +1877,9 @@
       "related_series": [
         "ai-code-review"
       ],
-      "next_research_hint": "下一步可深化 application：針對 monorepo、前端專案、CLI 專案整理可直接複用的 contract 範本與 CI 驗證閘門。"
+      "next_research_hint": "下一步可深化 application：針對 monorepo、前端專案、CLI 專案整理可直接複用的 contract 範本與 CI 驗證閘門。",
+      "saturation_score": 0.2,
+      "saturation_matched_cluster": null
     },
     "hono-edge-web-framework": {
       "series_id": "hono-edge-web-framework",
@@ -1882,7 +1930,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism 階段：深入 RegExpRouter 的 Trie 正則編譯實作、SmartRouter 動態切換演算法、中介層效能最佳化"
+      "next_research_hint": "mechanism 階段：深入 RegExpRouter 的 Trie 正則編譯實作、SmartRouter 動態切換演算法、中介層效能最佳化",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "llm-structured-output-pipeline": {
       "series_id": "llm-structured-output-pipeline",
@@ -1955,7 +2005,9 @@
         "ai-assisted-coding-workflows",
         "knowledge-base-architecture"
       ],
-      "next_research_hint": "下一步可進入 optimization：比較不同模型供應商的 strict schema 支援、token 成本與失敗觀測指標。"
+      "next_research_hint": "下一步可進入 optimization：比較不同模型供應商的 strict schema 支援、token 成本與失敗觀測指標。",
+      "saturation_score": 0.3,
+      "saturation_matched_cluster": null
     },
     "ai-requirements-engineering": {
       "series_id": "ai-requirements-engineering",
@@ -2040,7 +2092,9 @@
       "related_series": [
         "ai-assisted-coding-workflows"
       ],
-      "next_research_hint": "下一步進入 synthesis：把需求品質閘門與 spec-driven development、AI coding agents、測試生成與 release governance 串成端到端交付閉環。"
+      "next_research_hint": "下一步進入 synthesis：把需求品質閘門與 spec-driven development、AI coding agents、測試生成與 release governance 串成端到端交付閉環。",
+      "saturation_score": 0.4,
+      "saturation_matched_cluster": null
     },
     "openclaw-personal-ai-agent": {
       "series_id": "openclaw-personal-ai-agent",
@@ -2088,7 +2142,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "深入 Gateway WebSocket 路由機制與 Skill 自動生成的實作細節"
+      "next_research_hint": "深入 Gateway WebSocket 路由機制與 Skill 自動生成的實作細節",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "vite-knowledge-sync-pipeline": {
       "series_id": "vite-knowledge-sync-pipeline",
@@ -2136,7 +2192,9 @@
       "related_series": [
         "knowledge-base-architecture"
       ],
-      "next_research_hint": "下一步可進入 application：把 sync_knowledge.py、Vite build 與 Cloudflare deploy 串成可重用 CI/CD 範本。"
+      "next_research_hint": "下一步可進入 application：把 sync_knowledge.py、Vite build 與 Cloudflare deploy 串成可重用 CI/CD 範本。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "sglang-inference-serving": {
       "series_id": "sglang-inference-serving",
@@ -2185,7 +2243,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "下一步可進入 mechanism：深入 RadixAttention、scheduler 與 PD/EP 的實作機制及與 vLLM 的取捨。"
+      "next_research_hint": "下一步可進入 mechanism：深入 RadixAttention、scheduler 與 PD/EP 的實作機制及與 vLLM 的取捨。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "ai-model-scaling": {
       "series_id": "ai-model-scaling",
@@ -2219,7 +2279,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 Scaling Laws 數學推導、Chinchilla 修正模型、MoE 路由演算法、資料混合最佳化演算法（DoReMi / DSIR）"
+      "next_research_hint": "完成後進入 mechanism：深入 Scaling Laws 數學推導、Chinchilla 修正模型、MoE 路由演算法、資料混合最佳化演算法（DoReMi / DSIR）",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "ai-model-compression": {
       "series_id": "ai-model-compression",
@@ -2253,7 +2315,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：AWQ 量化實作（AutoAWQ）、Wanda 剪枝實作（官方 repo）、DoRA 微調實作（PEFT/Unsloth），含完整程式碼範例與部署指南"
+      "next_research_hint": "完成後進入 application：AWQ 量化實作（AutoAWQ）、Wanda 剪枝實作（官方 repo）、DoRA 微調實作（PEFT/Unsloth），含完整程式碼範例與部署指南",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "multi-agent-runtime-middleware-orchestration": {
       "series_id": "multi-agent-runtime-middleware-orchestration",
@@ -2300,7 +2364,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "下一步進入 mechanism：深入工作佇列、狀態機、取消傳播與排程公平性。"
+      "next_research_hint": "下一步進入 mechanism：深入工作佇列、狀態機、取消傳播與排程公平性。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "regex-redos-security": {
       "series_id": "regex-redos-security",
@@ -2356,7 +2422,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 application：針對 pre_bash_guard.py、輸入驗證器與 CI 規則設計可執行的掃描與測試流程。"
+      "next_research_hint": "完成後進入 application：針對 pre_bash_guard.py、輸入驗證器與 CI 規則設計可執行的掃描與測試流程。",
+      "saturation_score": 0.2,
+      "saturation_matched_cluster": null
     },
     "todoist-api-v1-integration": {
       "series_id": "todoist-api-v1-integration",
@@ -2418,7 +2486,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "下一步進入 optimization：快取策略、分散式 sync_token 管理、速率限制自適應演算法、MCP 整合深化。"
+      "next_research_hint": "下一步進入 optimization：快取策略、分散式 sync_token 管理、速率限制自適應演算法、MCP 整合深化。",
+      "saturation_score": 0.2,
+      "saturation_matched_cluster": null
     },
     "opik-llm-observability-evaluation": {
       "series_id": "opik-llm-observability-evaluation",
@@ -2467,7 +2537,9 @@
       "related_series": [
         "llm-structured-output-pipeline"
       ],
-      "next_research_hint": "下一步進入 mechanism：深入 traces、experiments、online evaluation rules 與 optimizer 的資料流與排程機制。"
+      "next_research_hint": "下一步進入 mechanism：深入 traces、experiments、online evaluation rules 與 optimizer 的資料流與排程機制。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "lmcache-kv-cache-infrastructure": {
       "series_id": "lmcache-kv-cache-infrastructure",
@@ -2514,7 +2586,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "下一步進入 mechanism：深入 chunking、blending、cache-aware routing 與 disaggregated prefill/decode 的資料流。"
+      "next_research_hint": "下一步進入 mechanism：深入 chunking、blending、cache-aware routing 與 disaggregated prefill/decode 的資料流。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "ai-living-documentation-pipeline": {
       "series_id": "ai-living-documentation-pipeline",
@@ -2586,7 +2660,9 @@
       "related_series": [
         "llm-structured-output-pipeline"
       ],
-      "next_research_hint": "下一步可研究文件品質評分、docs drift 偵測、失真告警與 agent 驗收測試。"
+      "next_research_hint": "下一步可研究文件品質評分、docs drift 偵測、失真告警與 agent 驗收測試。",
+      "saturation_score": 0.3,
+      "saturation_matched_cluster": null
     },
     "research-writing-methodology": {
       "series_id": "research-writing-methodology",
@@ -2655,7 +2731,9 @@
         "ai-requirements-engineering",
         "knowledge-base-architecture"
       ],
-      "next_research_hint": "完成後進入 application：把 agent harness 研究 brief 落成固定 JSON schema、範例樣本與 review checklist。"
+      "next_research_hint": "完成後進入 application：把 agent harness 研究 brief 落成固定 JSON schema、範例樣本與 review checklist。",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "agentic-security-research": {
       "series_id": "agentic-security-research",
@@ -2698,7 +2776,9 @@
       "related_series": [
         "ai-security-testing"
       ],
-      "next_research_hint": "建立 Agentic Security 威脅模型概論、Prompt Injection 攻擊分類、Browser/Coding Agent 安全挑戰"
+      "next_research_hint": "建立 Agentic Security 威脅模型概論、Prompt Injection 攻擊分類、Browser/Coding Agent 安全挑戰",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "eighty-eight-buddhas-repentance-writing": {
       "series_id": "eighty-eight-buddhas-repentance-writing",
@@ -2754,7 +2834,9 @@
         "lotus-sutra",
         "shurangama-sutra"
       ],
-      "next_research_hint": "完成 foundation 後進入 mechanism：懺悔心理機制深度分析、奧威爾六原則逐條應用於懺悔文的修辭檢驗、海明威精準法在宗教經典翻譯中的體現、CBETA 文獻計量分析"
+      "next_research_hint": "完成 foundation 後進入 mechanism：懺悔心理機制深度分析、奧威爾六原則逐條應用於懺悔文的修辭檢驗、海明威精準法在宗教經典翻譯中的體現、CBETA 文獻計量分析",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "powershell-quality-gates": {
       "series_id": "powershell-quality-gates",
@@ -2799,7 +2881,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入自訂規則 AST、baseline/suppression 治理與大型腳本模組化配套。"
+      "next_research_hint": "完成後進入 mechanism：深入自訂規則 AST、baseline/suppression 治理與大型腳本模組化配套。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "nvidia-bionemo-platform": {
       "series_id": "nvidia-bionemo-platform",
@@ -2843,7 +2927,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "下一步可深入 mechanism：Evo2 / ESM2 / MolMIM 等模型的資料流、並行策略與 NIM 部署機制。"
+      "next_research_hint": "下一步可深入 mechanism：Evo2 / ESM2 / MolMIM 等模型的資料流、並行策略與 NIM 部署機制。",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "github-ai-open-source-projects": {
       "series_id": "github-ai-open-source-projects",
@@ -2911,7 +2997,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "下一步可進入 application：實作 ComfyUI API 工作流、客製節點與自動化素材管線整合。"
+      "next_research_hint": "下一步可進入 application：實作 ComfyUI API 工作流、客製節點與自動化素材管線整合。",
+      "saturation_score": 0.6606,
+      "saturation_matched_cluster": "ComfyUI"
     },
     "urban-digital-twin-decision-platforms": {
       "series_id": "urban-digital-twin-decision-platforms",
@@ -2969,7 +3057,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "下一步可進入 application：針對防災道路、橋梁監測、園區開發與交通控制建立 PoC 實作藍圖。"
+      "next_research_hint": "下一步可進入 application：針對防災道路、橋梁監測、園區開發與交通控制建立 PoC 實作藍圖。",
+      "saturation_score": 0.2,
+      "saturation_matched_cluster": null
     },
     "tiantai-zhiguan-practice": {
       "series_id": "tiantai-zhiguan-practice",
@@ -3021,7 +3111,9 @@
       "related_series": [
         "jiaoguangzong"
       ],
-      "next_research_hint": "完成foundation後進入mechanism：摩訶止觀十乘觀法深度研究"
+      "next_research_hint": "完成foundation後進入mechanism：摩訶止觀十乘觀法深度研究",
+      "saturation_score": 0.4439,
+      "saturation_matched_cluster": "天台止觀實修：《小止觀》完整研究"
     },
     "ai-smart-city": {
       "series_id": "ai-smart-city",
@@ -3080,7 +3172,9 @@
       "current_stage": "application",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 optimization：效能優化、成本控制、隱私保護技術"
+      "next_research_hint": "完成後進入 optimization：效能優化、成本控制、隱私保護技術",
+      "saturation_score": 0.5725,
+      "saturation_matched_cluster": "環境監測 — AI 空氣品質預測與城市熱風險聯防"
     },
     "ai-software-development": {
       "series_id": "ai-software-development",
@@ -3206,7 +3300,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 mechanism 階段後進入 application：實作可執行的 Agent SDK 原型、工作流編排引擎最小實作、程式碼生成管線 PoC"
+      "next_research_hint": "完成 mechanism 階段後進入 application：實作可執行的 Agent SDK 原型、工作流編排引擎最小實作、程式碼生成管線 PoC",
+      "saturation_score": 0.5005,
+      "saturation_matched_cluster": "Context Engineering（上下文工程）— 2026 年 AI Agent 開發核心範式"
     },
     "claude-code-cli-automation": {
       "series_id": "claude-code-cli-automation",
@@ -3247,7 +3343,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入探討 CLI 的內部機制與進階參數"
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入探討 CLI 的內部機制與進階參數",
+      "saturation_score": 0.4352,
+      "saturation_matched_cluster": "pytest 測試框架與覆蓋率追蹤最佳實踐 — 從單元測試到 CI/CD 整合的完整工作流（2026）"
     },
     "ai-smart-grid-energy": {
       "series_id": "ai-smart-grid-energy",
@@ -3311,7 +3409,9 @@
       "current_stage": "synthesis",
       "completion_pct": 60,
       "related_series": [],
-      "next_research_hint": "完成後進入 synthesis：與其他智慧城市子系統（智慧交通、智慧建築）整合，探討電網-交通-建築三網融合的綜效"
+      "next_research_hint": "完成後進入 synthesis：與其他智慧城市子系統（智慧交通、智慧建築）整合，探討電網-交通-建築三網融合的綜效",
+      "saturation_score": 0.5725,
+      "saturation_matched_cluster": "環境監測 — AI 空氣品質預測與城市熱風險聯防"
     },
     "dify-ai-workflow": {
       "series_id": "dify-ai-workflow",
@@ -3350,7 +3450,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入 Dify 的工作流引擎與 RAG 實作細節"
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入 Dify 的工作流引擎與 RAG 實作細節",
+      "saturation_score": 0.6883,
+      "saturation_matched_cluster": "n8n"
     },
     "json-schema-validation-automation": {
       "series_id": "json-schema-validation-automation",
@@ -3395,7 +3497,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 schema 編譯、快取機制、格式漂移偵測"
+      "next_research_hint": "完成後進入 mechanism：深入 schema 編譯、快取機制、格式漂移偵測",
+      "saturation_score": 0.4996,
+      "saturation_matched_cluster": "JSON Schema 驗證與自動化"
     },
     "langgraph": {
       "series_id": "langgraph",
@@ -3442,7 +3546,9 @@
       "related_series": [
         "multi-agent-frameworks"
       ],
-      "next_research_hint": "完成 foundation 後進入 mechanism：深入 State Graph 實作原理、MessageGraph 與 StateGraph 的差異、Checkpointing 機制"
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入 State Graph 實作原理、MessageGraph 與 StateGraph 的差異、Checkpointing 機制",
+      "saturation_score": 0.4882,
+      "saturation_matched_cluster": "LangGraph — 圖形化 Agent 工作流框架深度研究"
     },
     "qdrant-vector-database": {
       "series_id": "qdrant-vector-database",
@@ -3492,7 +3598,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "深入 HNSW 算法實現細節、量化壓縮數學原理、過濾機制的內部實作"
+      "next_research_hint": "深入 HNSW 算法實現細節、量化壓縮數學原理、過濾機制的內部實作",
+      "saturation_score": 0.4771,
+      "saturation_matched_cluster": "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略"
     },
     "pureland-jiaoguan-podcast-planning": {
       "series_id": "pureland-jiaoguan-podcast-planning",
@@ -3631,7 +3739,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 application 樣本與模板後，進入 optimization：欄位自動驗證、批次抽樣 QA 與跨集一致性監控。"
+      "next_research_hint": "完成 application 樣本與模板後，進入 optimization：欄位自動驗證、批次抽樣 QA 與跨集一致性監控。",
+      "saturation_score": 0.519,
+      "saturation_matched_cluster": "淨土教觀學苑 Podcast 製作研究規劃（機制細化版）"
     },
     "motivation-science": {
       "series_id": "motivation-science",
@@ -3680,7 +3790,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism: 深入內化過程的神經科學基礎、OIT 各調節類型的轉化機制"
+      "next_research_hint": "mechanism: 深入內化過程的神經科學基礎、OIT 各調節類型的轉化機制",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "vllm-llm-serving": {
       "series_id": "vllm-llm-serving",
@@ -3729,7 +3841,9 @@
         "qdrant-vector-database",
         "ai-software-development"
       ],
-      "next_research_hint": "mechanism：深入 PagedAttention、KV cache 轉移、平行化與排程細節"
+      "next_research_hint": "mechanism：深入 PagedAttention、KV cache 轉移、平行化與排程細節",
+      "saturation_score": 0.6606,
+      "saturation_matched_cluster": "ComfyUI"
     },
     "ai-smart-governance": {
       "series_id": "ai-smart-governance",
@@ -3775,7 +3889,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism：深化 RAG、案件路由與公文分類模型的技術設計"
+      "next_research_hint": "mechanism：深化 RAG、案件路由與公文分類模型的技術設計",
+      "saturation_score": 0.5725,
+      "saturation_matched_cluster": "環境監測 — AI 空氣品質預測與城市熱風險聯防"
     },
     "hybrid-search-rag": {
       "series_id": "hybrid-search-rag",
@@ -3834,7 +3950,9 @@
       "related_series": [
         "qdrant-vector-database"
       ],
-      "next_research_hint": "application：把 hybrid search 參數、去重策略與 KB API 驗證流程落到 daily-digest-prompt"
+      "next_research_hint": "application：把 hybrid search 參數、去重策略與 KB API 驗證流程落到 daily-digest-prompt",
+      "saturation_score": 0.4771,
+      "saturation_matched_cluster": "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略"
     },
     "tiantai-panjiao-wushi": {
       "series_id": "tiantai-panjiao-wushi",
@@ -3892,7 +4010,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "可進入 application：華嚴時修法在實修中的應用"
+      "next_research_hint": "可進入 application：華嚴時修法在實修中的應用",
+      "saturation_score": 0.6029,
+      "saturation_matched_cluster": "法華經（妙法蓮華經）深度研究 — 一佛乘義理、重點品章與修行實踐綜論"
     },
     "rag-kb-import-workflow": {
       "series_id": "rag-kb-import-workflow",
@@ -3938,7 +4058,9 @@
       "related_series": [
         "hybrid-search-rag"
       ],
-      "next_research_hint": "mechanism：深入 chunking、metadata schema 與 idempotent import 的內部設計"
+      "next_research_hint": "mechanism：深入 chunking、metadata schema 與 idempotent import 的內部設計",
+      "saturation_score": 0.1,
+      "saturation_matched_cluster": null
     },
     "chrome-devtools-mcp": {
       "series_id": "chrome-devtools-mcp",
@@ -3986,7 +4108,9 @@
         "vllm-llm-serving",
         "rag-kb-import-workflow"
       ],
-      "next_research_hint": "mechanism：深入 pageId 平行多頁工作流、daemon client 與 Lighthouse/trace 資料映射"
+      "next_research_hint": "mechanism：深入 pageId 平行多頁工作流、daemon client 與 Lighthouse/trace 資料映射",
+      "saturation_score": 0.6606,
+      "saturation_matched_cluster": "ComfyUI"
     },
     "ai-smart-environment-air-heat": {
       "series_id": "ai-smart-environment-air-heat",
@@ -4030,7 +4154,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism：深化多模態預測、告警門檻與決策支援架構"
+      "next_research_hint": "mechanism：深化多模態預測、告警門檻與決策支援架構",
+      "saturation_score": 0.5725,
+      "saturation_matched_cluster": "環境監測 — AI 空氣品質預測與城市熱風險聯防"
     },
     "jingtu-three-sutras-faith-vow-practice": {
       "series_id": "jingtu-three-sutras-faith-vow-practice",
@@ -4086,7 +4212,9 @@
         "shurangama-sutra",
         "jingtu-podcast-research-pack"
       ],
-      "next_research_hint": "可進一步研究三經如何對應不同根器與不同日課配置。"
+      "next_research_hint": "可進一步研究三經如何對應不同根器與不同日課配置。",
+      "saturation_score": 0.6002,
+      "saturation_matched_cluster": "慧遠大師 — 淨土宗初祖與東林蓮社念佛結社運動"
     },
     "powershell-automation-patterns": {
       "series_id": "powershell-automation-patterns",
@@ -4143,7 +4271,9 @@
       "related_series": [
         "rag-kb-import-workflow"
       ],
-      "next_research_hint": "把此模式落到 results/*.json、KB API 呼叫與排程腳本，建立可重試範本。"
+      "next_research_hint": "把此模式落到 results/*.json、KB API 呼叫與排程腳本，建立可重試範本。",
+      "saturation_score": 0.5305,
+      "saturation_matched_cluster": "PowerShell 7 結構化錯誤處理、JSON 契約與並行工作流"
     },
     "gitnexus-code-intelligence": {
       "series_id": "gitnexus-code-intelligence",
@@ -4199,7 +4329,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 Graph RAG 檢索管線與 Cypher 查詢最佳化"
+      "next_research_hint": "完成後進入 mechanism：深入 Graph RAG 檢索管線與 Cypher 查詢最佳化",
+      "saturation_score": 0.6606,
+      "saturation_matched_cluster": "ComfyUI"
     },
     "github-repo-research-pipeline": {
       "series_id": "github-repo-research-pipeline",
@@ -4244,7 +4376,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "mechanism：把 GraphQL 查詢模板、去重規則與品質分數做成可執行腳本"
+      "next_research_hint": "mechanism：把 GraphQL 查詢模板、去重規則與品質分數做成可執行腳本",
+      "saturation_score": 0.4771,
+      "saturation_matched_cluster": "Hybrid Search 混合檢索在 RAG 的去重、召回與排序策略"
     },
     "flutter-flame-gamedev": {
       "series_id": "flutter-flame-gamedev",
@@ -4294,7 +4428,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "深入 Flame 內部機制：Game Loop 效能調優、Component 生命週期、碰撞偵測演算法"
+      "next_research_hint": "深入 Flame 內部機制：Game Loop 效能調優、Component 生命週期、碰撞偵測演算法",
+      "saturation_score": 0.4229,
+      "saturation_matched_cluster": "Flutter Flame Engine 遊戲開發 Workflow"
     },
     "logical-thinking": {
       "series_id": "logical-thinking",
@@ -4363,7 +4499,9 @@
       "current_stage": "application",
       "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "application 階段：實際案例研究、程式碼範例、決策工具實作"
+      "next_research_hint": "application 階段：實際案例研究、程式碼範例、決策工具實作",
+      "saturation_score": 0.4459,
+      "saturation_matched_cluster": "認知偏誤圖鑑與實用去偏技術 — 從 Fasolo 整合框架到 11 步檢查清單的決策品質提升方法論"
     },
     "yixin-sanguan": {
       "series_id": "yixin-sanguan",
@@ -4435,7 +4573,9 @@
         "jiaoguangzong",
         "shurangama-sutra"
       ],
-      "next_research_hint": "進入 optimization 階段：深入常見障礙對治、不同根器調整方法、與念佛禪觀會通"
+      "next_research_hint": "進入 optimization 階段：深入常見障礙對治、不同根器調整方法、與念佛禪觀會通",
+      "saturation_score": 0.4733,
+      "saturation_matched_cluster": "一心三觀具體修持指南 — 從教觀綱宗到摩訶止觀的圓頓觀法實操步驟"
     },
     "jingtu-end-of-life-right-mindfulness": {
       "series_id": "jingtu-end-of-life-right-mindfulness",
@@ -4493,7 +4633,9 @@
       "related_series": [
         "jingtu-three-sutras-faith-vow-practice"
       ],
-      "next_research_hint": "下一步可進入 application：整理助念團培訓、臨終 checklist 與居家/醫院兩種情境範本。"
+      "next_research_hint": "下一步可進入 application：整理助念團培訓、臨終 checklist 與居家/醫院兩種情境範本。",
+      "saturation_score": 0.6002,
+      "saturation_matched_cluster": "慧遠大師 — 淨土宗初祖與東林蓮社念佛結社運動"
     },
     "execution-trace-schema": {
       "series_id": "execution-trace-schema",
@@ -4560,7 +4702,9 @@
       "related_series": [
         "ai-workflow-automation"
       ],
-      "next_research_hint": "進入 optimization：研究 sampling、trace 壓縮、跨 agent 關聯與成本控制"
+      "next_research_hint": "進入 optimization：研究 sampling、trace 壓縮、跨 agent 關聯與成本控制",
+      "saturation_score": 0.4878,
+      "saturation_matched_cluster": "Execution Trace Schema 統一與 Agent 工作流結構化追蹤"
     },
     "ai-incident-triage-runbook-automation": {
       "series_id": "ai-incident-triage-runbook-automation",
@@ -4608,7 +4752,9 @@
         "execution-trace-schema",
         "powershell-automation-patterns"
       ],
-      "next_research_hint": "mechanism：深入事件關聯、根因排序與自動修復安全閘門"
+      "next_research_hint": "mechanism：深入事件關聯、根因排序與自動修復安全閘門",
+      "saturation_score": 0.444,
+      "saturation_matched_cluster": "AI 驅動 Incident Triage、Log Root Cause 與 Runbook 自動化"
     },
     "jiaoguan-gangzong": {
       "series_id": "jiaoguan-gangzong",
@@ -4691,7 +4837,9 @@
         "shurangama-sutra",
         "fahua-sutra"
       ],
-      "next_research_hint": "完成 application 後進入 optimization：化儀四教實踐的常見障礙與對治、根機轉化進階技巧、與現代心理學對話"
+      "next_research_hint": "完成 application 後進入 optimization：化儀四教實踐的常見障礙與對治、根機轉化進階技巧、與現代心理學對話",
+      "saturation_score": 0.4439,
+      "saturation_matched_cluster": "天台止觀實修：《小止觀》完整研究"
     },
     "pingtung-transport-hsr-bus-hotel-pricing": {
       "series_id": "pingtung-transport-hsr-bus-hotel-pricing",
@@ -4725,7 +4873,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "foundation 完成後進入 mechanism：分析高鐵、客運、住宿價格的變動規則、資料更新頻率與跨來源整合方法。"
+      "next_research_hint": "foundation 完成後進入 mechanism：分析高鐵、客運、住宿價格的變動規則、資料更新頻率與跨來源整合方法。",
+      "saturation_score": 0.0,
+      "saturation_matched_cluster": null
     },
     "ai-smart-healthcare": {
       "series_id": "ai-smart-healthcare",
@@ -4776,7 +4926,9 @@
       "current_stage": "application",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成後進入 optimization：效能調優、成本效益分析與服務品質監控"
+      "next_research_hint": "完成後進入 optimization：效能調優、成本效益分析與服務品質監控",
+      "saturation_score": 0.4466,
+      "saturation_matched_cluster": "偏鄉遠距醫療整合系統設計：從 5G+AIoT 架構到排程管理的完整實作指南（屏東縣應用）"
     },
     "open-webui": {
       "series_id": "open-webui",
@@ -4824,7 +4976,9 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "完成 foundation 后，进入 mechanism 阶段：深入 Open WebUI 的技术架构、API 设计、Ollama 通讯协议"
+      "next_research_hint": "完成 foundation 后，进入 mechanism 阶段：深入 Open WebUI 的技术架构、API 设计、Ollama 通讯协议",
+      "saturation_score": 0.4354,
+      "saturation_matched_cluster": "Open WebUI"
     },
     "n8n-workflow-automation": {
       "series_id": "n8n-workflow-automation",
@@ -4858,7 +5012,9 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 n8n 的節點系統、工作流引擎與執行機制"
+      "next_research_hint": "完成後進入 mechanism：深入 n8n 的節點系統、工作流引擎與執行機制",
+      "saturation_score": 0.6883,
+      "saturation_matched_cluster": "n8n"
     },
     "context-compression": {
       "series_id": "context-compression",
@@ -4892,7 +5048,61 @@
       "current_stage": "foundation",
       "completion_pct": 0,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：壓縮演算法細節"
+      "next_research_hint": "完成後進入 mechanism：壓縮演算法細節",
+      "saturation_score": 0.4505,
+      "saturation_matched_cluster": "Agent Context Window 治理與 I/O 預算監控最佳實踐"
+    },
+    "smart-water-ai": {
+      "series_id": "smart-water-ai",
+      "domain": "智慧水務 — AI 水質監測與供水調度",
+      "description": "",
+      "initiated_at": "2026-03-22",
+      "last_active": "2026-03-22",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "智慧水務",
+        "水質監測",
+        "供水調度",
+        "smart-city",
+        "smart-water"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-22",
+          "completed_at": "2026-03-22",
+          "kb_notes": [],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "in_progress",
+          "started_at": "2026-03-22",
+          "kb_notes": [
+            "AI 智慧水務深度技術解析 — 水質預測演算法、供水調度優化與台灣實踐（mechanism 階段）"
+          ],
+          "covered_concepts": [
+            "供水調度優化演算法",
+            "水質預測模型細節",
+            "台灣水利署系統架構",
+            "屏東縣農業灌溉整合",
+            "多目標優化（成本vs品質vs環境）"
+          ]
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 application：實作指南與程式碼範例（Python/開源工具鏈）"
     }
   }
 }

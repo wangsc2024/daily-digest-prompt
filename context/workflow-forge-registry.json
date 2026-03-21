@@ -24,7 +24,7 @@
     },
     {
       "date": "2026-03-19",
-      "artifact_path": "docs/workflows/results-validation-checklist.md",
+      "artifact_path": "workflows/results-validation-checklist.md",
       "gap_type": "validation_checklist",
       "gap_description": "雖有 tools/validate_results.py 與 results-auto-task-schema.json，但未整合至任何自動化流程（無 pre-commit hook、無 Phase 3 驗證、無 CI 驗證），30 個自動任務結果 JSON 依賴 Agent 自律而非機器強制",
       "priority": "P0",
@@ -63,6 +63,30 @@
         "hooks_post_tool_logger": "可擴充為驗證每筆 JSONL 符合此 schema",
         "system_insight": "可新增 trace_completeness 指標（檢查必填欄位完整率）",
         "execution_journal_skill": "未來若實作，可直接使用此 schema 產出結構化日誌"
+      }
+    },
+    {
+      "date": "2026-03-21",
+      "artifact_path": "workflows/prompt-output-validation-checklist.md",
+      "gap_type": "validation_checklist",
+      "gap_description": "29 個 todoist-auto-*.md prompts 的輸出 JSON 規範不一致：部分有詳細「關鍵欄位確認清單」，部分僅有基本範例；命名不一致（task_type vs agent）；缺少統一的必填欄位檢查列表",
+      "priority": "P0",
+      "total_score": 100,
+      "impact_range": "29 個 todoist-auto-*.md prompts",
+      "integration_status": "integrated",
+      "documented_in": "CLAUDE.md",
+      "checklist_version": "1.0.0",
+      "validation_items": 24,
+      "validation_categories": 6,
+      "signal_source": [
+        "system-insight.json: avg_io_per_call=26567 (超標 5.3 倍)",
+        "improvement-backlog.json: P0「自動任務公平輪轉修復」",
+        "prompts 格式不一致導致 Phase 3 組裝失敗風險"
+      ],
+      "expected_outcome": {
+        "immediate": "所有 prompt 開發者有明確檢查列表",
+        "mid_term": "結果 JSON 格式一致性提升至 95% 以上（目前約 70%）",
+        "long_term": "avg_io_per_call 因減少重複格式說明而下降 10-15%"
       }
     }
   ]

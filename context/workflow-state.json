@@ -1,75 +1,9 @@
 {
-  "run_id": "125cbb65f92c",
-  "updated_at": "2026-03-21T16:35:31.929477+08:00",
+  "current_step": "complete",
   "status": "completed",
+  "run_id": "94691a565a01",
+  "updated_at": "2026-03-22T06:37:29.434521+08:00",
   "history": [
-    {
-      "status": "completed",
-      "step": "decide",
-      "ts": "2026-03-19T15:35:00+08:00",
-      "artifacts": [
-        "context/adr-registry.json（28 個 ADR：+3 新增 ADR-029/030/031）",
-        "context/arch-decision.json（11 項決策：1 immediate_fix, 4 schedule_adr, 6 skip）"
-      ]
-    },
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-19T10:36:16+08:00",
-      "repairs": "1/1 項（含 arch-decision 1 項）"
-    },
-    {
-      "ts": "2026-03-19T10:36:16+08:00",
-      "status": "completed",
-      "step": "complete"
-    },
-    {
-      "ts": "2026-03-20T00:40:02+08:00",
-      "status": "running",
-      "step": "orient"
-    },
-    {
-      "ts": "2026-03-20T00:50:03+08:00",
-      "status": "completed",
-      "step": "orient"
-    },
-    {
-      "ts": "2026-03-20T00:50:03+08:00",
-      "status": "skipped",
-      "step": "decide"
-    },
-    {
-      "status": "running",
-      "step": "decide",
-      "ts": "2026-03-20T01:00:00+08:00",
-      "note": "arch-evolution 啟動（改善清單 11 項，來源：system-audit 87.88/100）"
-    },
-    {
-      "status": "completed",
-      "step": "decide",
-      "ts": "2026-03-20T01:02:00+08:00",
-      "artifacts": [
-        "context/adr-registry.json（28 個 ADR：無變更）",
-        "context/arch-decision.json（11 項決策：0 immediate_fix, 4 schedule_adr, 7 skip）"
-      ]
-    },
-    {
-      "ts": "2026-03-20T00:50:03+08:00",
-      "status": "completed",
-      "step": "act"
-    },
-    {
-      "status": "completed",
-      "step": "act",
-      "ts": "2026-03-20T08:00:00+08:00",
-      "repairs": "2/2 項（含 arch-decision 0 項）"
-    },
-    {
-      "status": "running",
-      "step": "decide",
-      "ts": "2026-03-20T13:40:00+08:00",
-      "note": "arch-evolution 啟動（改善清單 14 項，來源：system-audit 87.88/100）"
-    },
     {
       "status": "completed",
       "step": "decide",
@@ -151,7 +85,73 @@
       "step": "act",
       "ts": "2026-03-21T16:35:31.929477+08:00",
       "repairs": "1/1 項（含 arch-decision 0 項）"
+    },
+    {
+      "ts": "2026-03-21T16:35:31.929477+08:00",
+      "status": "completed",
+      "step": "act"
+    },
+    {
+      "ts": "2026-03-22T00:40:03+08:00",
+      "status": "running",
+      "step": "orient"
+    },
+    {
+      "ts": "2026-03-22T00:49:29+08:00",
+      "status": "completed",
+      "step": "orient"
+    },
+    {
+      "ts": "2026-03-22T00:49:29+08:00",
+      "status": "pending",
+      "step": "decide"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-22T00:51:00+08:00",
+      "note": "arch-evolution 啟動（改善清單 22 項，來源：system-audit 87.88/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-22T00:53:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（36 個 ADR：+5 新增 ADR-035/036/037/038/039）",
+        "context/arch-decision.json（25 項決策：2 immediate_fix, 3 schedule_adr, 17 skip, 3 preserved_success）"
+      ]
+    },
+    {
+      "ts": "2026-03-22T00:53:00+08:00",
+      "status": "completed",
+      "step": "act"
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-22T01:12:00+08:00",
+      "repairs": "3/3 項（含 arch-decision 2 項）"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-22T06:18:00+08:00",
+      "note": "arch-evolution 啟動（改善清單 22 項，來源：system-audit 87.88/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-22T06:20:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（36 個 ADR：無變更）",
+        "context/arch-decision.json（22 項決策：0 immediate_fix, 22 skip）"
+      ]
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-22T06:37:29.434521+08:00",
+      "repairs": "0/0 項（含 arch-decision 0 項）"
     }
-  ],
-  "current_step": "act"
+  ]
 }

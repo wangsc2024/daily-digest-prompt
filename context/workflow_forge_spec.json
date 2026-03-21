@@ -1,197 +1,100 @@
 {
-  "version": 2,
-  "generated_at": "2026-03-20T07:15:00+08:00",
-  "gap_type": "output_schema",
-  "gap_title": "Execution Trace Schema 統一",
-  "gap_description": "trace_id、span_id、parent_span_id、phase、tool_or_skill、status、duration_ms、artifacts 等欄位分散在多個輸出檔案中，缺乏統一 schema，導致追蹤與回溯成本高",
-  "gap_source": "improvement-backlog.json Rank 10 (P1)",
-  "priority": "P1",
-  "score": 95,
-  "impact_scope": "所有 Agent 執行追蹤（daily-digest、todoist-agent-team、system-audit-team、gmail-agent）",
-  "artifact_type": "output_schema",
-  "artifact_path": "config/schemas/execution-trace-schema.json",
-  "artifact_description": "為 Agent 執行追蹤定義統一 JSON Schema，包含 trace_id、span_id、phase、status、artifacts、cause_chain 等欄位，供 logs/structured/*.jsonl 與 system-insight 使用",
-  "specification": {
-    "schema_format": "JSON Schema Draft 2020-12",
-    "target_files": [
-      "logs/structured/*.jsonl（每行一個 trace entry）",
-      "results/*.json（trace_id 欄位）",
-      "state/run-fsm.json（phase 追蹤）"
-    ],
-    "core_fields": [
+  "version": 3,
+  "generated_at": "2026-03-21T20:34:00+08:00",
+  "gap_identified": {
+    "type": "一致性缺失",
+    "title": "Prompt 輸出規範不一致",
+    "description": "29 個 todoist-auto-*.md prompts 的輸出 JSON 規範不一致：部分有詳細「關鍵欄位確認清單」，部分僅有基本範例；命名不一致（task_type vs agent）；缺少統一的必填欄位檢查列表。",
+    "impact": "導致 Phase 3 組裝時可能因欄位缺失失敗；system-insight 告警 avg_io_per_call 超標 5.3 倍，部分原因是 prompt 需重複說明輸出格式。",
+    "source_files": [
+      "prompts/team/todoist-auto-*.md (29 個檔案)",
+      "config/schemas/results-auto-task-schema.json",
+      "context/system-insight.json"
+    ]
+  },
+  "artifact_spec": {
+    "type": "validation_checklist",
+    "path": "workflows/prompt-output-validation-checklist.md",
+    "format": "Markdown",
+    "sections": [
       {
-        "name": "trace_id",
-        "type": "string",
-        "description": "追蹤 ID，格式為 {YYYYMMDD_HHmmss} 或自訂格式",
-        "required": true,
-        "examples": ["20260320_071500", "interactive-20260320_071500"]
+        "section": "1. Frontmatter 驗證",
+        "checks": [
+          "prompt 檔案開頭必須有 YAML frontmatter（---包裹）",
+          "frontmatter 必須含 name、template_type、version、released_at 四個欄位",
+          "name 欄位格式：todoist-auto-{task_key}（與 task_key 一致）",
+          "template_type 固定為 team_prompt",
+          "version 遵循 semver（如 1.0.0）",
+          "released_at 為 YYYY-MM-DD 格式"
+        ]
       },
       {
-        "name": "span_id",
-        "type": "string",
-        "description": "Span ID，唯一識別當前操作",
-        "required": true,
-        "examples": ["phase1-001", "phase2-tech_research-001"]
+        "section": "2. 結果 JSON 路徑驗證",
+        "checks": [
+          "prompt 必須明確指定結果檔案路徑：results/todoist-auto-{task_key}.json",
+          "task_key 必須使用底線（_），禁用連字號（-）",
+          "結果檔案路徑在 prompt 中至少出現 2 次（共用規則區塊 + 輸出規格區塊）"
+        ]
       },
       {
-        "name": "parent_span_id",
-        "type": "string",
-        "description": "父 Span ID，用於建立因果關聯",
-        "required": false,
-        "examples": ["phase1-001", null]
+        "section": "3. 必填欄位檢查列表",
+        "checks": [
+          "prompt 必須明確列出「關鍵欄位確認清單」或「必填欄位」區塊",
+          "必填欄位最少包含：agent（或 task_type）、task_key、status",
+          "agent 欄位格式：todoist-auto-{task_key}（與檔名、結果路徑一致）",
+          "task_key 欄位值：與 config/frequency-limits.yaml 中的 tasks 鍵名完全一致（底線）",
+          "status 欄位值域：必須明確列出允許值（success/partial/failed/format_failed）"
+        ]
       },
       {
-        "name": "task_key",
-        "type": "string",
-        "description": "任務鍵（自動任務）或 agent 名稱（daily-digest）",
-        "required": true,
-        "pattern": "^[a-z_]+$",
-        "examples": ["tech_research", "daily-digest", "system-audit"]
+        "section": "4. 欄位命名一致性",
+        "checks": [
+          "優先使用 agent 欄位（推薦），避免混用 task_type",
+          "若使用 agent 欄位，格式必須為 todoist-auto-{task_key}",
+          "所有欄位名稱必須與 config/schemas/results-auto-task-schema.json 定義一致"
+        ]
       },
       {
-        "name": "phase",
-        "type": "string",
-        "enum": ["init", "phase0", "phase1", "phase2", "phase3", "finalize"],
-        "description": "執行階段",
-        "required": true
+        "section": "5. Schema 對齊驗證",
+        "checks": [
+          "prompt 輸出規格必須參考 config/schemas/results-auto-task-schema.json",
+          "所有選填欄位（如 artifact、integration_status、kb_imported）若使用，必須符合 Schema 定義",
+          "artifact.type 若使用，必須是 Schema 允許的 enum 值之一（workflow_yaml/output_schema/validation_checklist/report/code/config/documentation）"
+        ]
       },
       {
-        "name": "tool_or_skill",
-        "type": "string",
-        "description": "使用的工具或 Skill 名稱",
-        "required": false,
-        "examples": ["Read", "Bash", "knowledge-query", "todoist"]
-      },
-      {
-        "name": "status",
-        "type": "string",
-        "enum": ["started", "running", "success", "failed", "timeout"],
-        "description": "執行狀態",
-        "required": true
-      },
-      {
-        "name": "duration_ms",
-        "type": "number",
-        "description": "執行耗時（毫秒）",
-        "required": false,
-        "minimum": 0
-      },
-      {
-        "name": "artifacts",
-        "type": "array",
-        "description": "產出的 artifact 列表",
-        "required": false,
-        "items": {
-          "type": "object",
-          "properties": {
-            "path": {"type": "string"},
-            "type": {"type": "string", "enum": ["json", "md", "log", "state"]},
-            "size_bytes": {"type": "number"}
-          },
-          "required": ["path", "type"]
-        }
-      },
-      {
-        "name": "attributes",
-        "type": "object",
-        "description": "額外屬性（key-value pairs）",
-        "required": false,
-        "examples": [{"cache_hit": true, "retry_count": 0}]
-      },
-      {
-        "name": "events",
-        "type": "array",
-        "description": "執行過程中的事件列表",
-        "required": false,
-        "items": {
-          "type": "object",
-          "properties": {
-            "timestamp": {"type": "string", "format": "date-time"},
-            "name": {"type": "string"},
-            "attributes": {"type": "object"}
-          },
-          "required": ["timestamp", "name"]
-        }
-      },
-      {
-        "name": "cause_chain",
-        "type": "object",
-        "description": "因果鏈，串接 selected task、cache hit/miss、retry、failure point 與最終 artifact",
-        "required": false,
-        "properties": {
-          "task_selection": {"type": "string"},
-          "cache_status": {"type": "string", "enum": ["hit", "miss", "stale", "bypass"]},
-          "retry_attempts": {"type": "number"},
-          "failure_point": {"type": "string"},
-          "final_artifact": {"type": "string"}
-        }
-      },
-      {
-        "name": "timestamp",
-        "type": "string",
-        "format": "date-time",
-        "description": "記錄時間戳（ISO 8601，Asia/Taipei）",
-        "required": true
+        "section": "6. 執行流程完整性",
+        "checks": [
+          "prompt 必須包含「共用規則」區塊，引用 templates/shared/preamble.md",
+          "prompt 必須包含「Skill-First」區塊，明確列出需讀取的 SKILL.md 檔案",
+          "prompt 必須包含「嚴格禁止事項」區塊，列出至少 3 項禁止操作",
+          "prompt 必須包含「輸出規格」區塊，明確定義結果 JSON 的欄位與格式"
+        ]
       }
     ],
-    "validation_rules": [
-      "trace_id 必須在同一次執行內保持一致",
-      "span_id 在同一 trace 內必須唯一",
-      "parent_span_id 必須指向同一 trace 內的有效 span_id（若非 null）",
-      "phase 欄位必須與執行階段對應",
-      "status=failed 時，events 應包含錯誤事件",
-      "duration_ms 在 status=success 或 failed 時為必填"
-    ],
-    "example_valid_entry": {
-      "trace_id": "20260320_071500",
-      "span_id": "phase2-tech_research-001",
-      "parent_span_id": "phase1-001",
-      "task_key": "tech_research",
-      "phase": "phase2",
-      "tool_or_skill": "knowledge-query",
-      "status": "success",
-      "duration_ms": 1450,
-      "artifacts": [
-        {
-          "path": "results/todoist-auto-tech_research.json",
-          "type": "json",
-          "size_bytes": 2048
-        }
-      ],
-      "attributes": {
-        "cache_hit": false,
-        "kb_imported": true
-      },
-      "cause_chain": {
-        "task_selection": "round-robin",
-        "cache_status": "miss",
-        "retry_attempts": 0,
-        "failure_point": null,
-        "final_artifact": "results/todoist-auto-tech_research.json"
-      },
-      "timestamp": "2026-03-20T07:15:00+08:00"
+    "validation_method": {
+      "manual": "人工審查 prompts/team/ 目錄下的 todoist-auto-*.md 檔案，逐條核對清單",
+      "automated": "可選：建立 tools/validate_prompt_output.py 腳本，自動掃描 prompt 檔案並驗證上述規則"
+    },
+    "integration": {
+      "location": "workflows/prompt-output-validation-checklist.md",
+      "reference_in": [
+        "docs/ARCHITECTURE.md（配置文件速查表新增一行）",
+        "CLAUDE.md（文件驅動架構設計原則新增驗證清單說明）"
+      ]
+    },
+    "alignment_with_existing": {
+      "schema_file": "config/schemas/results-auto-task-schema.json",
+      "example_prompts": [
+        "prompts/team/todoist-auto-skill_forge.md（良好範例：有完整「關鍵欄位確認清單」）",
+        "prompts/team/todoist-auto-system_insight.md（待改善範例：僅有基本 JSON 範例）"
+      ]
     }
   },
-  "integration_plan": {
-    "step1": "用 Write 工具建立 config/schemas/execution-trace-schema.json",
-    "step2": "在 docs/ARCHITECTURE.md 的「配置文件速查」表格新增一筆：config/schemas/execution-trace-schema.json",
-    "step3": "在 config/schemas/README.md 中新增此 schema 的說明",
-    "step4": "將產物路徑寫入 context/workflow-forge-registry.json"
-  },
-  "validation_method": {
-    "method": "Python jsonschema 驗證",
-    "command": "uv run python -c \"import json, jsonschema; schema=json.load(open('config/schemas/execution-trace-schema.json')); sample={'trace_id':'20260320_071500','span_id':'phase1-001','task_key':'daily-digest','phase':'phase1','status':'success','timestamp':'2026-03-20T07:15:00+08:00'}; jsonschema.validate(sample, schema); print('✅ 驗證通過')\"",
-    "note": "驗證樣本為最小必填欄位組合"
-  },
-  "future_integration": {
-    "hooks_post_tool_logger": "hooks/post_tool_logger.py 可擴充為驗證每筆 JSONL 符合此 schema",
-    "system_insight": "context/system-insight.json 可新增 trace_completeness 指標（檢查必填欄位完整率）",
-    "execution_journal_skill": "未來若實作 execution-journal Skill，可直接使用此 schema 產出結構化日誌"
-  },
-  "notes": [
-    "此 schema 借鑑 OpenTelemetry Traces 規範（trace_id、span_id、parent_span_id、attributes、events）",
-    "允許額外欄位存在（additionalProperties: true），以支援未來擴充",
-    "cause_chain 欄位為本專案特有設計，用於串接任務選擇至最終產出的完整因果鏈",
-    "未來可與 OpenTelemetry SDK 整合，產出標準化 trace 資料"
-  ]
+  "gap_addressed": "解決 29 個自動任務 prompts 的輸出格式不一致問題，確保每個 prompt 都明確列出必填欄位、遵守命名規範、對齊 Schema 定義，降低 Phase 3 組裝失敗率與 avg_io_per_call 負擔。",
+  "expected_outcome": {
+    "immediate": "所有 prompt 開發者有明確檢查列表，新增/修改 prompt 時可自我驗證",
+    "mid_term": "結果 JSON 格式一致性提升至 95% 以上（目前約 70%），Phase 3 組裝失敗率下降",
+    "long_term": "avg_io_per_call 因減少重複格式說明而下降 10-15%，系統輸出穩定度顯著提升"
+  }
 }
