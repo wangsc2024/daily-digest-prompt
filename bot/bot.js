@@ -192,6 +192,8 @@ const GUN_RELAY_URL = process.env.GUN_RELAY_URL;
 if (!GUN_RELAY_URL) {
     console.warn('[警告] GUN_RELAY_URL 未設定，Gun.js 將無法連線至 relay 伺服器');
 }
+// relay HTTP base（去除末尾 /gun），用於 /api/notify 直接推播
+const GUN_RELAY_BASE = GUN_RELAY_URL ? GUN_RELAY_URL.replace(/\/gun$/, '') : null;
 const gun = Gun({
     peers: GUN_RELAY_URL ? [GUN_RELAY_URL] : [],
     radisk: true,       // 持久化至 data/radata/（重啟後恢復 Gun graph）
@@ -275,24 +277,50 @@ function generateId(prefix) {
 // 註：my-gun-relay 會把自己註冊為「客戶端」（wsc-bot/handshake/clients/<relay.pub>），
 // 故只要 relay 已啟動且與 bot 完成 ECDH 握手，sharedSecrets 即含 relay，無需瀏覽器開聊天室。
 async function sendSystemReply(text, lineReplyTarget) {
+    const ts = Date.now();
+    const replyId = generateId('reply');
+
+    // ── 主路徑：HTTP POST 到 relay /api/notify（HTTPS 可靠，供 LINE 推播）────
+    if (GUN_RELAY_BASE && lineReplyTarget) {
+        try {
+            const resp = await fetch(`${GUN_RELAY_BASE}/api/notify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${process.env.API_SECRET_KEY || ''}`,
+                },
+                body: JSON.stringify({ text, lineReplyTarget, msgId: replyId }),
+                signal: AbortSignal.timeout(8000),
+            });
+            if (resp.ok) {
+                console.log(`[sendSystemReply] HTTP notify 成功 → ${lineReplyTarget.slice(0, 8)}… msgId=${replyId}`);
+            } else {
+                console.warn(`[sendSystemReply] HTTP notify 回傳 ${resp.status}，改依 Gun P2P`);
+            }
+        } catch (e) {
+            console.warn(`[sendSystemReply] HTTP notify 失敗 (${e.message})，改依 Gun P2P`);
+        }
+    }
+
+    // ── 次要路徑：Gun P2P 廣播（供瀏覽器聊天室，fire-and-forget）────────────
     if (app.locals.sharedSecrets.size === 0) {
-        console.warn('[sendSystemReply] 無已連線節點（sharedSecrets 為空），跳過回傳至 Gun relay。請確認 my-gun-relay 已啟動且與 bot 完成握手（或至少有一聊天室客戶端曾連線）。');
+        if (!GUN_RELAY_BASE || !lineReplyTarget) {
+            console.warn('[sendSystemReply] 無已連線節點（sharedSecrets 為空），Gun 廣播跳過。');
+        }
         return;
     }
     try {
-        const ts = Date.now();
-        const replyId = generateId('reply');
         let i = 0;
         for (const ss of app.locals.sharedSecrets.values()) {
             const nodeId = `${replyId}_${i}`;
-            const payloadObj = { id: nodeId, text, ts, updatedAt: ts };
+            const payloadObj = { id: nodeId, msgId: replyId, text, ts, updatedAt: ts };
             if (lineReplyTarget) payloadObj.lineReplyTarget = lineReplyTarget;
             const encrypted = await SEA.encrypt(JSON.stringify(payloadObj), ss);
             gun.get(chatRoomName).get(nodeId).put(encrypted);
             i++;
         }
     } catch (err) {
-        console.error('[sendSystemReply] 失敗:', err.message);
+        console.error('[sendSystemReply] Gun 廣播失敗:', err.message);
     }
 }
 
