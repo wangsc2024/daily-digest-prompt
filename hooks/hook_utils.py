@@ -329,7 +329,7 @@ def output_decision(decision, reason=None, protocol_version="1.0"):
     sys.exit(0)
 
 
-class file_lock:
+class FileLock:
     """跨平台檔案鎖 context manager（Windows msvcrt / POSIX fcntl）。
 
     用於保護 read-modify-write 序列的互斥性，防止團隊並行模式下

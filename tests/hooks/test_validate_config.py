@@ -252,8 +252,8 @@ class TestSchemaCoverage:
             assert "required_keys" in schema, f"{name} missing required_keys"
 
     def test_schema_count_matches_config_files(self):
-        """SCHEMAS should cover all 25 config YAML files."""
-        assert len(SCHEMAS) == 25
+        """SCHEMAS should cover all 26 config YAML files."""
+        assert len(SCHEMAS) == 26
 
     def test_pipeline_covered(self):
         assert "pipeline.yaml" in SCHEMAS

@@ -123,10 +123,10 @@ def track(tool: str, summary: str, tags: list, has_error: bool = False,
         # 消毒摘要，移除敏感資訊後再儲存
         safe_summary = _sanitize_summary(summary)
 
-        # file_lock 保護 read-modify-write 序列，防並行覆蓋
+        # FileLock 保護 read-modify-write 序列，防並行覆蓋
         try:
-            from hook_utils import file_lock
-            lock_ctx = file_lock(PATTERNS_FILE)
+            from hook_utils import FileLock
+            lock_ctx = FileLock(PATTERNS_FILE)
         except ImportError:
             from contextlib import nullcontext
             lock_ctx = nullcontext()

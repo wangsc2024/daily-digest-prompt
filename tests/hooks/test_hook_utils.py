@@ -781,31 +781,31 @@ class TestLoadYamlConfigExceptionNarrowing:
         assert "YAML 載入失敗" in captured.err
 
     def test_docstring_context_manager_example(self):
-        """file_lock docstring 範例使用 with open() 而非裸 open()。"""
-        from hook_utils import file_lock
-        docstring = file_lock.__doc__
+        """FileLock docstring 範例使用 with open() 而非裸 open()。"""
+        from hook_utils import FileLock
+        docstring = FileLock.__doc__
         assert "with open(" in docstring
         assert "json.load(open(" not in docstring
 
 
 class TestFileLockTimeout:
-    """file_lock 超時機制測試（2026-03-20 安全優化）。"""
+    """FileLock 超時機制測試（2026-03-20 安全優化）。"""
 
     def test_lock_accepts_timeout_parameter(self):
-        """file_lock 應接受 timeout_seconds 參數。"""
-        from hook_utils import file_lock
-        lock = file_lock("/tmp/test.json", timeout_seconds=5)
+        """FileLock 應接受 timeout_seconds 參數。"""
+        from hook_utils import FileLock
+        lock = FileLock("/tmp/test.json", timeout_seconds=5)
         assert lock.timeout_seconds == 5
 
     def test_lock_default_timeout(self):
-        """file_lock 預設超時應為 10 秒。"""
-        from hook_utils import file_lock
-        lock = file_lock("/tmp/test.json")
+        """FileLock 預設超時應為 10 秒。"""
+        from hook_utils import FileLock
+        lock = FileLock("/tmp/test.json")
         assert lock.timeout_seconds == 10
 
     def test_lock_timeout_raises_on_contention(self, tmp_path):
         """當鎖被佔用且超時時應引發 TimeoutError。"""
-        from hook_utils import file_lock
+        from hook_utils import FileLock
         target = str(tmp_path / "contested.json")
         # 手動佔用鎖檔案
         lock_path = target + ".lock"
@@ -819,7 +819,7 @@ class TestFileLockTimeout:
 
             if held_locked:
                 with pytest.raises(TimeoutError):
-                    with file_lock(target, timeout_seconds=0.5):
+                    with FileLock(target, timeout_seconds=0.5):
                         pass
                 # 釋放手動鎖
                 try:

@@ -44,7 +44,7 @@ except ImportError:
     BEHAVIOR_TRACKER_AVAILABLE = False
 
 # Import shared API source patterns and sanitization
-from hook_utils import API_SOURCE_PATTERNS, sanitize_sensitive_data, send_ntfy_alert
+from hook_utils import sanitize_sensitive_data, send_ntfy_alert
 
 # Error keywords in tool output
 ERROR_KEYWORDS = [
@@ -186,9 +186,9 @@ def classify_bash(command: str) -> tuple:
     if _cmd_has_word(command, "python") or _cmd_has_word(command, "pytest"):
         tags.append("python")
     # Cognitive tags: 追蹤路由決策與技能選擇的讀取行為
-    _ROUTING_CONFIGS = ("routing.yaml", "scoring.yaml", "frequency-limits.yaml",
-                        "hook-rules.yaml", "dedup-policy.yaml")
-    if any(cfg in command for cfg in _ROUTING_CONFIGS):
+    routing_configs = ("routing.yaml", "scoring.yaml", "frequency-limits.yaml",
+                       "hook-rules.yaml", "dedup-policy.yaml")
+    if any(cfg in command for cfg in routing_configs):
         tags.append("cognitive-routing")
     if "SKILL.md" in command or "SKILL_INDEX" in command:
         tags.append("cognitive-skill-select")
@@ -332,7 +332,7 @@ def _find_token_usage_file() -> str:
 def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None:
     """累積 Token 估算統計（input_len/3.5 + output_len/3.5 ≈ tokens）。
 
-    使用 hook_utils.file_lock 保護 read-modify-write 序列，防止團隊並行模式
+    使用 hook_utils.FileLock 保護 read-modify-write 序列，防止團隊並行模式
     （5 路 Phase 1）下多個進程同時更新導致計數遺失。
 
     Note: output_len depends on what the Claude Code hooks protocol passes
@@ -340,11 +340,11 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
     some tool types, so output_chars may undercount actual output volume.
     """
     try:
-        from hook_utils import atomic_write_json, file_lock, safe_load_json
+        from hook_utils import FileLock, atomic_write_json, safe_load_json
 
         token_file = _find_token_usage_file()
 
-        with file_lock(token_file):
+        with FileLock(token_file):
             today = datetime.now().strftime("%Y-%m-%d")
 
             # 持鎖後重新讀取（確保讀到最新狀態）

@@ -425,11 +425,11 @@ def _update_metrics_daily() -> None:
     """從今日所有 JSONL 記錄計算日指標，更新 context/metrics-daily.json。
 
     完整重算今日記錄（覆寫模式），保留 14 天滾動窗口。
-    使用 file_lock + atomic_write_json 防止並行 session 競態條件。
+    使用 FileLock + atomic_write_json 防止並行 session 競態條件。
     由 main() 在 _rotate_logs() 之後呼叫。
     """
     try:
-        from hook_utils import atomic_write_json, file_lock, safe_load_json
+        from hook_utils import FileLock, atomic_write_json, safe_load_json
     except ImportError:
         return  # hook_utils 不可用時靜默跳過
 
@@ -529,7 +529,7 @@ def _update_metrics_daily() -> None:
 
     try:
         os.makedirs(os.path.dirname(metrics_file), exist_ok=True)
-        with file_lock(metrics_file):
+        with FileLock(metrics_file):
             data = safe_load_json(metrics_file, default={"schema_version": 1, "records": []})
             records: list = data.get("records", [])
             # 覆寫今日記錄（每次 session 結束後完整重算，不增量累積）
@@ -712,16 +712,16 @@ def check_gmail_token_expiry() -> "dict | None":
     # 用腳本位置推算專案根目錄，避免 cwd 不同時找不到檔案
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _project_root = os.path.dirname(_script_dir)
-    TOKEN_PATH = os.path.join(_project_root, "key", "token.json")
-    STATE_PATH = os.path.join(_project_root, "state", "gmail-oauth-state.json")
-    EXPIRE_DAYS = 7
-    WARN_DAYS = 2
+    token_path = os.path.join(_project_root, "key", "token.json")
+    state_path = os.path.join(_project_root, "state", "gmail-oauth-state.json")
+    expire_days = 7
+    warn_days = 2
 
-    if not os.path.exists(TOKEN_PATH):
+    if not os.path.exists(token_path):
         return None
 
     try:
-        with open(TOKEN_PATH, encoding="utf-8") as f:
+        with open(token_path, encoding="utf-8") as f:
             token_data = json.load(f)
     except (json.JSONDecodeError, OSError):
         return None
@@ -738,23 +738,23 @@ def check_gmail_token_expiry() -> "dict | None":
 
     # Load existing state
     state = {}
-    if os.path.exists(STATE_PATH):
+    if os.path.exists(state_path):
         try:
-            with open(STATE_PATH, encoding="utf-8") as f:
+            with open(state_path, encoding="utf-8") as f:
                 state = json.load(f)
         except (json.JSONDecodeError, OSError):
             state = {}
 
     def _save_state(s: dict):
-        state_dir = os.path.dirname(STATE_PATH)
+        state_dir = os.path.dirname(state_path)
         if state_dir:
             os.makedirs(state_dir, exist_ok=True)
         try:
             from hook_utils import atomic_write_json
-            atomic_write_json(STATE_PATH, s)
+            atomic_write_json(state_path, s)
         except ImportError:
             try:
-                with open(STATE_PATH, "w", encoding="utf-8") as f:
+                with open(state_path, "w", encoding="utf-8") as f:
                     json.dump(s, f, ensure_ascii=False)
             except OSError:
                 pass
@@ -773,7 +773,7 @@ def check_gmail_token_expiry() -> "dict | None":
             state["issued_date"] = today.isoformat()
             _save_state(state)
 
-    expire_date = issued_date + timedelta(days=EXPIRE_DAYS)
+    expire_date = issued_date + timedelta(days=expire_days)
     days_remaining = (expire_date - today).days
 
     today_str = today.isoformat()
@@ -782,7 +782,7 @@ def check_gmail_token_expiry() -> "dict | None":
         "days_remaining": days_remaining,
         "expire_date": expire_date.isoformat(),
         "issued_date": issued_date.isoformat(),
-        "needs_alert": days_remaining <= WARN_DAYS and not already_alerted_today,
+        "needs_alert": days_remaining <= warn_days and not already_alerted_today,
         "expired": days_remaining <= 0,
     }
 

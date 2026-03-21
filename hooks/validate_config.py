@@ -508,6 +508,12 @@ SCHEMAS = {
     "insight-briefing-workflow.yaml": {
         "required_keys": [],
     },
+    "agent-extra-reads.yaml": {
+        "required_keys": ["version", "enabled", "global_reads", "task_type_mapping"],
+        "list_fields": {
+            "global_reads": ["path", "purpose"],
+        },
+    },
 }
 
 
@@ -1457,6 +1463,73 @@ def check_auto_tasks_consistency(config_dir: str = ".") -> tuple:
     return issues, rows
 
 
+def validate_workflow_index(base_dir: str = ".") -> tuple:
+    """驗證 workflows/index.yaml 結構完整性。
+
+    檢查項目：
+    1. 檔案存在且可解析為有效 YAML
+    2. 頂層必要鍵：version、entries
+    3. entries 為 list，每項含 id、path、type、task_types、priority
+    4. 每個 entry 的 path 對應檔案實際存在
+    5. id 唯一性（無重複）
+    6. task_types 為 list 且非空
+
+    Returns:
+        (errors, warnings) — 各為字串 list
+    """
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    index_path = os.path.join(base_dir, "workflows", "index.yaml")
+
+    if not os.path.exists(index_path):
+        warnings.append("workflows/index.yaml 不存在（workflow-forge 尚未產出任何 workflow）")
+        return errors, warnings
+
+    data = _load_yaml(index_path)
+    if data is None:
+        errors.append("workflows/index.yaml: YAML 解析失敗（語法錯誤或 PyYAML 未安裝）")
+        return errors, warnings
+
+    for key in ["version", "entries"]:
+        if key not in data:
+            errors.append(f"workflows/index.yaml: 缺少必要鍵 '{key}'")
+
+    entries = data.get("entries", [])
+    if not isinstance(entries, list):
+        errors.append("workflows/index.yaml: 'entries' 應為 list 類型")
+        return errors, warnings
+
+    seen_ids: set = set()
+    required_entry_keys = ["id", "path", "type", "task_types", "priority"]
+    for i, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            errors.append(f"workflows/index.yaml: entries[{i}] 應為 dict 類型")
+            continue
+        for key in required_entry_keys:
+            if key not in entry:
+                errors.append(f"workflows/index.yaml: entries[{i}] 缺少 '{key}'")
+        entry_id = entry.get("id", "")
+        if entry_id in seen_ids:
+            errors.append(f"workflows/index.yaml: id '{entry_id}' 重複")
+        elif entry_id:
+            seen_ids.add(entry_id)
+        entry_path = entry.get("path", "")
+        if entry_path and not os.path.exists(os.path.join(base_dir, entry_path)):
+            warnings.append(
+                f"workflows/index.yaml: entries[{i}] path '{entry_path}' 對應檔案不存在"
+            )
+        task_types = entry.get("task_types", [])
+        if not isinstance(task_types, list):
+            errors.append(f"workflows/index.yaml: entries[{i}].task_types 應為 list 類型")
+        elif len(task_types) == 0:
+            warnings.append(
+                f"workflows/index.yaml: entries[{i}] task_types 為空（建議至少含一個 task_key 或 'all'）"
+            )
+
+    return errors, warnings
+
+
 def main():
     # Ensure UTF-8 output on Windows
     if hasattr(sys.stdout, "reconfigure"):
@@ -1469,6 +1542,7 @@ def main():
         print("  python validate_config.py                           # 驗證所有配置檔")
         print("  python validate_config.py --all                     # 驗證 + Routing + Skills + 交叉驗證")
         print("  python validate_config.py --check-auto-tasks        # 驗證自動任務三檔一致性")
+        print("  python validate_config.py --check-workflows         # 驗證 workflows/index.yaml 結構")
         print("  python validate_config.py --check-routing           # 僅檢查 Routing 一致性")
         print("  python validate_config.py --check-skills            # 僅檢查 Skill 品質")
         print("  python validate_config.py --cross-validate          # 交叉驗證（技能引用、模板路徑）")
@@ -1585,8 +1659,34 @@ def main():
             print(f"\n  ✅ 全部 {len(rows)} 個自動任務配置一致")
             sys.exit(0)
 
+    # 處理 --check-workflows（workflow index 驗證）
+    if "--check-workflows" in sys.argv:
+        w_errors, w_warnings = validate_workflow_index(base_dir=base_dir)
+        print("\n[Workflow Index 驗證]")
+        for w in w_warnings:
+            print(f"  ⚠️  {w}")
+        for e in w_errors:
+            print(f"  ❌ {e}")
+        if w_errors:
+            print(f"\n  共 {len(w_errors)} 個錯誤，{len(w_warnings)} 個警告")
+            sys.exit(1)
+        else:
+            idx_path = os.path.join(base_dir, "workflows", "index.yaml")
+            entry_count = 0
+            if os.path.exists(idx_path):
+                idx_data = _load_yaml(idx_path)
+                entry_count = len(idx_data.get("entries", [])) if idx_data else 0
+            print(f"  ✅ workflows/index.yaml 結構有效（{entry_count} 個 entries，{len(w_warnings)} 個警告）")
+            sys.exit(0)
+
     # 標準驗證模式
     errors, warnings, stats = validate_config()
+
+    # 新增：Workflow Index 驗證
+    if "--all" in sys.argv:
+        wf_errors, wf_warnings = validate_workflow_index(base_dir=base_dir)
+        errors.extend(wf_errors)
+        warnings.extend(wf_warnings)
 
     # 新增：Routing 一致性檢查
     if "--check-routing" in sys.argv or "--all" in sys.argv:

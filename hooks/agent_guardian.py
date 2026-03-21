@@ -32,7 +32,7 @@ from typing import Dict, Optional
 
 # Import shared API source patterns, regex cache, and file lock
 try:
-    from hook_utils import API_SOURCE_PATTERNS, file_lock, get_compiled_regex
+    from hook_utils import API_SOURCE_PATTERNS, FileLock, get_compiled_regex
     _FILE_LOCK_AVAILABLE = True
 except ImportError:
     _FILE_LOCK_AVAILABLE = False
@@ -308,14 +308,14 @@ class CircuitBreaker:
     def _atomic_update(self, updater):
         """以檔案鎖保護的 read-modify-write 操作。
 
-        使用 hook_utils.file_lock 避免團隊模式中多個並行 Agent
+        使用 hook_utils.FileLock 避免團隊模式中多個並行 Agent
         同時讀寫 api-health.json 導致狀態覆蓋（競態條件）。
 
         Args:
           updater: callable(state_dict) -> None，原地修改 state dict
         """
         if _FILE_LOCK_AVAILABLE:
-            with file_lock(self.state_file):
+            with FileLock(self.state_file):
                 state = self._load_state()
                 updater(state)
                 self._save_state(state)
