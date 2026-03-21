@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-21T17:39:57.662217+08:00",
+  "updated_at": "2026-03-21T21:41:21.532195+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -444,7 +444,7 @@
       "domain": "教觀綱宗 / Jiao Guan Gang Zong 天台宗判教研究",
       "description": "教觀綱宗深度研究系列，涵蓋天台宗五時八教判教體系與觀行修持",
       "initiated_at": "2026-03-03",
-      "last_active": "2026-03-20",
+      "last_active": "2026-03-21",
       "tags": [
         "教觀綱宗",
         "佛學",
@@ -594,7 +594,7 @@
           "completed_at": "2026-03-07"
         },
         "synthesis": {
-          "status": "completed",
+          "status": "in_progress",
           "kb_notes": [
             "教觀綱宗 synthesis 研究：注疏傳統文獻蒐集與分析、跨系列教觀會通框架及全書核心要點結構化報告",
             "教觀綱宗研究：「兼但對帶」的判教邏輯 — 五時與化法四教的交叉架構與教觀融合",
@@ -607,7 +607,8 @@
             "教觀綱宗研究:六即佛修證階位理論 — 理即至究竟即的縱向修證路徑與跨宗派對話",
             "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興",
             "教觀綱宗在現代禪修中的應用指南 — 從判教智慧到日常修持的落實路徑（synthesis 階段完結篇）",
-            "教觀綱宗研究：法華涅槃時 — 開權顯實會三歸一的純圓教觀與醍醐究竟"
+            "教觀綱宗研究：法華涅槃時 — 開權顯實會三歸一的純圓教觀與醍醐究竟",
+            "教觀綱宗與禪宗的關係 — 判教明晰與不立文字的會通智慧"
           ],
           "covered_concepts": [
             "教觀綱宗注疏傳統系統整理（歷代注解、科判、講記）",
@@ -661,7 +662,13 @@
             "一心三觀",
             "一念三千",
             "五味喻",
-            "迹門本門"
+            "迹門本門",
+            "宗門教下歷史",
+            "不立文字真義",
+            "圓頓止觀與南宗頓悟會通",
+            "永明延壽禪教淨三修",
+            "台禪雙修實踐",
+            "化儀四教宗門詮釋"
           ],
           "completed_at": "2026-03-19"
         }
@@ -671,7 +678,7 @@
       "related_series": [
         "shurangama-sutra"
       ],
-      "next_research_hint": "jiaoguangzong 系列已達 100% 完成。五時判教（華嚴、阿含、方等、般若、法華涅槃）已全面涵蓋，系列圓滿。"
+      "next_research_hint": "synthesis 持續深化：跨宗派會通（唯識、三論等）"
     },
     "lotus-sutra": {
       "series_id": "lotus-sutra",
@@ -1067,7 +1074,8 @@
         "synthesis": {
           "status": "in_progress",
           "kb_notes": [
-            "慧遠大師研究：淨土宗初祖與東林蓮社念佛結社運動"
+            "慧遠大師研究：淨土宗初祖與東林蓮社念佛結社運動",
+            "道綽大師研究：《安樂集》與聖道淨土二門判教體系"
           ],
           "covered_concepts": [
             "慧遠大師",
@@ -1077,14 +1085,21 @@
             "觀想念佛",
             "形盡神不滅論",
             "三報論",
-            "六時念佛"
+            "六時念佛",
+            "聖道門",
+            "淨土門",
+            "二門判教",
+            "末法思想",
+            "玄中寺三祖",
+            "念珠計數",
+            "《安樂集》十二大門"
           ]
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 80,
       "related_series": [],
-      "next_research_hint": "完成初祖研究後，可繼續補足其他祖師（二祖善導已研究，三四五祖待補）"
+      "next_research_hint": "完成道綽大師後，可繼續補足四祖法照、五祖少康（synthesis階段完結），或探索淨土宗與天台、華嚴的跨系列會通"
     },
     "owl-multi-agent": {
       "series_id": "owl-multi-agent",
@@ -2348,7 +2363,7 @@
       "domain": "Todoist API v1 整合實務",
       "description": "Todoist API v1、completed tasks、PowerShell 與 AI/MCP 整合研究系列",
       "initiated_at": "2026-03-11",
-      "last_active": "2026-03-11",
+      "last_active": "2026-03-21",
       "tags": [
         "Todoist API v1",
         "Todoist",
@@ -2372,10 +2387,26 @@
           ]
         },
         "mechanism": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-21",
+          "kb_notes": [
+            "Todoist API v1 實戰應用 — PowerShell/Python Sync API 整合、Webhook 接收端實作"
+          ],
+          "covered_concepts": [
+            "Sync API 批量操作與 commands 結構",
+            "UUID 冪等性機制",
+            "temp_id 依賴解析",
+            "增量同步與 sync_token 管理",
+            "todoist-api-python SDK v4.x",
+            "httpx 遷移與非同步客戶端",
+            "Webhook HMAC-SHA256 簽章驗證",
+            "指數退避重試邏輯",
+            "冪等性處理與 Redis 去重"
+          ]
         },
         "application": {
-          "status": "pending"
+          "status": "in_progress",
+          "started_at": "2026-03-21"
         },
         "optimization": {
           "status": "pending"
@@ -2384,10 +2415,10 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入 Sync、activities、webhook 簽章驗證與失敗重送策略。"
+      "next_research_hint": "下一步進入 optimization：快取策略、分散式 sync_token 管理、速率限制自適應演算法、MCP 整合深化。"
     },
     "opik-llm-observability-evaluation": {
       "series_id": "opik-llm-observability-evaluation",
@@ -4828,6 +4859,40 @@
       "completion_pct": 0,
       "related_series": [],
       "next_research_hint": "完成後進入 mechanism：深入 n8n 的節點系統、工作流引擎與執行機制"
+    },
+    "context-compression": {
+      "series_id": "context-compression",
+      "domain": "Context Window 壓縮策略與 I/O 減量工具",
+      "description": "",
+      "initiated_at": "2026-03-21",
+      "last_active": "2026-03-21",
+      "tags": [],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-21",
+          "kb_notes": [
+            "Context Compressor Skill 設計與壓縮策略（2026-03-21）"
+          ],
+          "covered_concepts": []
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：壓縮演算法細節"
     }
   }
 }
