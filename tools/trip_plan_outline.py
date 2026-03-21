@@ -68,7 +68,7 @@ def validate_date(value: str) -> ValidationResult:
         return ValidationResult(False, ["日期格式錯誤，請使用 YYYY-MM-DD（例：2026-03-21）"])
     try:
         parts = value.split("-")
-        y, m, d = int(parts[0]), int(parts[1]), int(parts[2])
+        _, m, d = int(parts[0]), int(parts[1]), int(parts[2])
         if m < 1 or m > 12 or d < 1 or d > 31:
             return ValidationResult(False, ["日期數值無效"])
     except (ValueError, IndexError):

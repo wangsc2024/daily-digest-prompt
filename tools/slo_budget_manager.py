@@ -4,11 +4,12 @@ SLO/Error Budget 治理工具（ADR-032）
 計算 failure mode taxonomy、error budget 狀態，觸發 postmortem 提案。
 """
 from __future__ import annotations
+
 import json
 import sys
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import Counter
 
 BASE = Path(__file__).parent.parent
 
@@ -123,7 +124,6 @@ def main() -> int:
 
     # 2. 讀取 failure-stats.json
     failure_stats = load_json(BASE / "state" / "failure-stats.json")
-    taxonomy_raw = failure_stats.get("failure_taxonomy", {})
 
     # 3. 分類近 28 天 failures from scheduler runs
     mode_counter: Counter = Counter()

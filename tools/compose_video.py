@@ -96,7 +96,7 @@ def _extract_loremflickr_keywords(image_prompt: str) -> str:
     if not image_prompt or not image_prompt.strip():
         return "nature,landscape"
 
-    STOP_WORDS = {
+    stop_words = {
         "a", "an", "the", "at", "in", "on", "of", "to", "and", "or", "with",
         "cinematic", "dark", "16:9", "no", "text", "light", "glowing",
         "abstract", "soft", "view", "aerial", "closeup", "close",
@@ -112,7 +112,7 @@ def _extract_loremflickr_keywords(image_prompt: str) -> str:
             mapped = mapped.replace(phrase, replacement.replace(",", " "))
 
     words = mapped.split()
-    keywords = [w for w in words if w not in STOP_WORDS and len(w) > 2][:max_keywords]
+    keywords = [w for w in words if w not in stop_words and len(w) > 2][:max_keywords]
     return ",".join(keywords) if keywords else "nature,landscape"
 
 

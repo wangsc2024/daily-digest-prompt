@@ -9,8 +9,9 @@
   uv run python tools/add_prompt_versions.py --skip-check # 跳過呼叫端安全檢查（不建議）
 """
 from __future__ import annotations
-import sys
+
 import argparse
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -70,7 +71,6 @@ def _check_callers() -> list[str]:
             # 安全條件：同行有 Strip-Frontmatter，或前後 20 行有去除邏輯
             context_start = max(0, i - 5)
             context_end = min(len(lines), i + 20)
-            context = "\n".join(lines[context_start:context_end])
 
             # 檢查上下文中是否有非注解行含有去除邏輯
             context_lines = lines[context_start:context_end]

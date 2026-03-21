@@ -11,16 +11,16 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
-import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from tools.autonomous_harness import (
+from tools.autonomous_harness import (  # noqa: E402
     CONFIG_PATH,
     AutonomousHarness,
     _load_json,

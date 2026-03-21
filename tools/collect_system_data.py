@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """系統洞察資料收集腳本"""
 import json
-import os
+import statistics
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict, Counter
-import statistics
 
 # 資料路徑（以腳本位置動態計算，tools/ 的上一層即專案根目錄）
 BASE_DIR = Path(__file__).resolve().parent.parent

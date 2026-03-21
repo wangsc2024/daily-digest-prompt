@@ -4,6 +4,7 @@ Skill Registry 同步工具（ADR-033）
 掃描 skills/**/SKILL.md frontmatter，產出 context/skill-registry.json 和 context/skill-registry-conflicts.md。
 """
 from __future__ import annotations
+
 import json
 import re
 import sys
@@ -28,7 +29,6 @@ def parse_frontmatter(text: str) -> dict:
         return {}
     fm_lines = lines[1:end]
     result: dict = {}
-    current_key = None
     current_list: list | None = None
     for line in fm_lines:
         # 跳過空行
@@ -51,16 +51,13 @@ def parse_frontmatter(text: str) -> dict:
                 items = [x.strip().strip('"').strip("'") for x in inner.split(",") if x.strip()]
                 result[key] = items
                 current_list = None
-                current_key = key
             elif val == "" or val is None:
                 # 下一行可能是 list
                 current_list = []
                 result[key] = current_list
-                current_key = key
             else:
                 result[key] = val
                 current_list = None
-                current_key = key
     return result
 
 
@@ -180,7 +177,7 @@ def main() -> int:
     conflicts_lines = [
         "# Skill Registry 衝突報告",
         f"> 生成時間：{datetime.now().isoformat()}",
-        f"> ADR-20260320-033",
+        "> ADR-20260320-033",
         "",
     ]
 
@@ -220,8 +217,8 @@ def main() -> int:
     conflicts_lines += [
         "## 統計摘要",
         "",
-        f"| 項目 | 數量 |",
-        f"|------|------|",
+        "| 項目 | 數量 |",
+        "|------|------|",
         f"| 總 Skills | {len(registry)} |",
         f"| 已在 SKILL_INDEX | {skills_in_index} |",
         f"| 未在 SKILL_INDEX | {len(skills_missing)} |",
@@ -231,7 +228,7 @@ def main() -> int:
 
     conflicts_path = BASE / "context" / "skill-registry-conflicts.md"
     conflicts_path.write_text("\n".join(conflicts_lines), encoding="utf-8")
-    print(f"[sync_skill_registry] context/skill-registry-conflicts.md 已寫入")
+    print("[sync_skill_registry] context/skill-registry-conflicts.md 已寫入")
     print(f"  trigger_conflicts: {len(trigger_conflicts)}")
     print(f"  skills_missing_from_index: {len(skills_missing)}")
     print(f"  broken_deps: {len(broken_deps)}")

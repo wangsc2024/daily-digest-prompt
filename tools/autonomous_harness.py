@@ -725,7 +725,7 @@ $os = Get-CimInstance Win32_OperatingSystem
                         "target": action["target"],
                         "returncode": -1,
                         "stdout": "",
-                        "stderr": f"Command blocked: not in allowed prefix whitelist",
+                        "stderr": "Command blocked: not in allowed prefix whitelist",
                     }
                 )
                 continue

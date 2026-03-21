@@ -5,7 +5,6 @@ from pathlib import Path
 
 from fpdf import FPDF
 
-
 OUTPUT = Path("docs/Long_Term_Memory_Optimization_Manual.pdf")
 
 CONTENT = [
