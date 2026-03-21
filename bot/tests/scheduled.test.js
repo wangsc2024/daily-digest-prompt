@@ -32,8 +32,6 @@ describe('scheduled tasks — store CRUD', () => {
             id: 'sched_abc',
             task_content: 'Remind me at 3pm',
             is_research: false,
-            is_workflow: false,
-            workflow_data: null,
             scheduled_at: '2026-03-01T15:00:00+08:00',
             created_at: new Date().toISOString(),
             source_id: 'msg_1',
@@ -47,9 +45,9 @@ describe('scheduled tasks — store CRUD', () => {
     });
 
     it('queryScheduledTasks filters by status and supports pagination', () => {
-        store.addScheduledTask({ id: 's1', task_content: 'A', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false, is_workflow: false, workflow_data: null });
-        store.addScheduledTask({ id: 's2', task_content: 'B', status: 'waiting', scheduled_at: '2026-03-02T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm2', is_research: false, is_workflow: false, workflow_data: null });
-        store.addScheduledTask({ id: 's3', task_content: 'C', status: 'triggered', scheduled_at: '2026-03-03T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm3', is_research: false, is_workflow: false, workflow_data: null });
+        store.addScheduledTask({ id: 's1', task_content: 'A', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false });
+        store.addScheduledTask({ id: 's2', task_content: 'B', status: 'waiting', scheduled_at: '2026-03-02T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm2', is_research: false });
+        store.addScheduledTask({ id: 's3', task_content: 'C', status: 'triggered', scheduled_at: '2026-03-03T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm3', is_research: false });
         const { total, scheduledTasks } = store.queryScheduledTasks({ status: 'waiting' });
         expect(total).toBe(2);
         expect(scheduledTasks.length).toBe(2);
@@ -62,30 +60,30 @@ describe('scheduled tasks — store CRUD', () => {
         const now = new Date().toISOString();
         const past = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-        store.addScheduledTask({ id: 'due1', task_content: 'Due', status: 'waiting', scheduled_at: past, created_at: new Date().toISOString(), source_id: 'm1', is_research: false, is_workflow: false, workflow_data: null });
-        store.addScheduledTask({ id: 'due2', task_content: 'Future', status: 'waiting', scheduled_at: future, created_at: new Date().toISOString(), source_id: 'm2', is_research: false, is_workflow: false, workflow_data: null });
-        store.addScheduledTask({ id: 'due3', task_content: 'Triggered', status: 'triggered', scheduled_at: past, created_at: new Date().toISOString(), source_id: 'm3', is_research: false, is_workflow: false, workflow_data: null });
+        store.addScheduledTask({ id: 'due1', task_content: 'Due', status: 'waiting', scheduled_at: past, created_at: new Date().toISOString(), source_id: 'm1', is_research: false });
+        store.addScheduledTask({ id: 'due2', task_content: 'Future', status: 'waiting', scheduled_at: future, created_at: new Date().toISOString(), source_id: 'm2', is_research: false });
+        store.addScheduledTask({ id: 'due3', task_content: 'Triggered', status: 'triggered', scheduled_at: past, created_at: new Date().toISOString(), source_id: 'm3', is_research: false });
         const due = store.getDueScheduledTasks(now);
         expect(due.length).toBe(1);
         expect(due[0].id).toBe('due1');
     });
 
     it('markScheduledTaskTriggered updates status', () => {
-        store.addScheduledTask({ id: 'trig1', task_content: 'T', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false, is_workflow: false, workflow_data: null });
+        store.addScheduledTask({ id: 'trig1', task_content: 'T', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false });
         const ok = store.markScheduledTaskTriggered('trig1');
         expect(ok).toBe(true);
         expect(store.getScheduledTask('trig1').status).toBe('triggered');
     });
 
     it('cancelScheduledTask sets status to cancelled only when waiting', () => {
-        store.addScheduledTask({ id: 'cancel1', task_content: 'C', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false, is_workflow: false, workflow_data: null });
+        store.addScheduledTask({ id: 'cancel1', task_content: 'C', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false });
         expect(store.cancelScheduledTask('cancel1')).toBe(true);
         expect(store.getScheduledTask('cancel1').status).toBe('cancelled');
         expect(store.cancelScheduledTask('cancel1')).toBe(false);
     });
 
     it('removeScheduledTask removes by id', () => {
-        store.addScheduledTask({ id: 'rem1', task_content: 'R', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false, is_workflow: false, workflow_data: null });
+        store.addScheduledTask({ id: 'rem1', task_content: 'R', status: 'waiting', scheduled_at: '2026-03-01T10:00:00+08:00', created_at: new Date().toISOString(), source_id: 'm1', is_research: false });
         expect(store.removeScheduledTask('rem1')).toBe(true);
         expect(store.getScheduledTask('rem1')).toBeNull();
         expect(store.removeScheduledTask('rem1')).toBe(false);
@@ -115,8 +113,7 @@ describe('scheduled tasks — classifier validateDecision', () => {
             cron_expression: '',
             is_scheduled: true,
             scheduled_at: future,
-            is_research: false,
-            is_workflow: false
+            intent: 'general'
         };
         expect(validateDecision(parsed)).toBe(true);
     });
@@ -129,8 +126,7 @@ describe('scheduled tasks — classifier validateDecision', () => {
             cron_expression: '',
             is_scheduled: true,
             scheduled_at: past,
-            is_research: false,
-            is_workflow: false
+            intent: 'general'
         };
         expect(validateDecision(parsed)).toBe(false);
     });
@@ -143,8 +139,7 @@ describe('scheduled tasks — classifier validateDecision', () => {
             cron_expression: '0 9 * * *',
             is_scheduled: true,
             scheduled_at: future,
-            is_research: false,
-            is_workflow: false
+            intent: 'general'
         };
         expect(validateDecision(parsed)).toBe(false);
     });
@@ -156,20 +151,28 @@ describe('scheduled tasks — classifier validateDecision', () => {
             cron_expression: '',
             is_scheduled: true,
             scheduled_at: 'not-a-date',
-            is_research: false,
-            is_workflow: false
+            intent: 'general'
         };
         expect(validateDecision(parsed)).toBe(false);
     });
 
-    it('accepts decision without is_scheduled (defaults)', () => {
+    it('accepts decision without is_scheduled (defaults to immediate)', () => {
         const parsed = {
             task_content: 'Immediate',
             is_periodic: false,
             cron_expression: '',
-            is_research: false,
-            is_workflow: false
+            intent: 'research'
         };
         expect(validateDecision(parsed)).toBe(true);
+    });
+
+    it('rejects unknown intent value', () => {
+        const parsed = {
+            task_content: 'Bad intent',
+            is_periodic: false,
+            cron_expression: '',
+            intent: 'unknown_type'
+        };
+        expect(validateDecision(parsed)).toBe(false);
     });
 });

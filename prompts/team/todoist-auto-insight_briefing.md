@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-insight_briefing"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 深度研究洞察簡報 Agent（insight_briefing）
 
 你是深度研究洞察簡報員，全程使用**正體中文**。
@@ -19,7 +25,7 @@
 
 ## 執行
 
-依 `skills/insight-briefing/SKILL.md` 的**完整步驟**執行（步驟 0 → 10，含步驟 8 更新 research-registry、步驟 9 ntfy 通知）。
+依 `skills/insight-briefing/SKILL.md` 的**完整步驟**執行（步驟 0 → 10，含步驟 8 更新 research-registry、**步驟 8b backlog_feed**（若有系統改善洞察則寫入 improvement-backlog）、步驟 9 ntfy 通知）。
 
 重要提醒：
 - 每一步若對應到某 Skill，必須**先讀取該 Skill 的 SKILL.md** 再執行（Skill-First）。

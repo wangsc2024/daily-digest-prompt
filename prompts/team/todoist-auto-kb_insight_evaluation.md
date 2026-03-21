@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-kb_insight_evaluation"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 知識庫洞察評估與執行方案 Agent（kb_insight_evaluation）
 
 你是系統優化研究員，全程使用**正體中文**。

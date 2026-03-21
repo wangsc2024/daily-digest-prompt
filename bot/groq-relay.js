@@ -38,6 +38,9 @@ if (!apiKey) {
     console.error('[groq-relay] 錯誤：請在 .env 中設定 GROQ_API_KEY');
     process.exit(1);
 }
+if (!apiKey.startsWith('gsk_')) {
+    console.warn('[groq-relay] 警告：GROQ_API_KEY 格式異常（預期以 gsk_ 開頭），請確認金鑰正確性');
+}
 
 const groq = new Groq({ apiKey });
 const app = express();
@@ -47,7 +50,7 @@ app.use(express.json({ limit: '1mb' }));
 // 注意：僅套用到 /groq/chat，health 端點不計入配額
 const limiter = rateLimit({
     windowMs: 60 * 1000,
-    max: parseInt(process.env.GROQ_RELAY_RATE_LIMIT || '5', 10),
+    max: Math.max(1, Math.min(100, parseInt(process.env.GROQ_RELAY_RATE_LIMIT || '5', 10) || 5)),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: '速率限制：請稍後再試（Groq 免費方案 5 req/min）' },
@@ -115,10 +118,19 @@ function getCached(mode, content) {
 function setCache(mode, content, result) {
     const k = cacheKey(mode, content);
     _cache.set(k, { result, ts: Date.now() });
-    // 限制快取大小，避免記憶體洩漏
+    // 限制快取大小：先清理過期項目，仍超限則刪除最舊的
     if (_cache.size > 500) {
-        const firstKey = _cache.keys().next().value;
-        _cache.delete(firstKey);
+        const now = Date.now();
+        for (const [key, entry] of _cache) {
+            if (now - entry.ts > GROQ_RELAY_CACHE_TTL_MS) {
+                _cache.delete(key);
+            }
+        }
+        // 過期清理後仍超限，刪除最舊的一筆
+        if (_cache.size > 500) {
+            const firstKey = _cache.keys().next().value;
+            _cache.delete(firstKey);
+        }
     }
 }
 
@@ -217,15 +229,6 @@ app.post('/groq/chat', limiter, async (req, res) => {
             error: '請求格式驗證失敗',
             details: validationErrors,
         });
-    }
-
-    if (!mode || !VALID_MODES.has(mode)) {
-        return res.status(422).json({
-            error: `無效 mode：${mode}，可用值：${[...VALID_MODES].join(', ')}`
-        });
-    }
-    if (!content || typeof content !== 'string' || !content.trim()) {
-        return res.status(400).json({ error: 'content 不可為空' });
     }
 
     // 快取命中

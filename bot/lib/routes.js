@@ -38,12 +38,17 @@ const MEMORY_MAX_ENTRIES = 20;
 function saveToKnowledgeBase(taskContent, resultStr) {
     const title = taskContent.trim().slice(0, 60) + (taskContent.length > 60 ? '…' : '');
     const noteContent = `## 任務\n${taskContent}\n\n## 執行結果\n${resultStr}`;
-    const body = JSON.stringify({ title, content: noteContent, source: 'manual' });
+    const body = JSON.stringify({ title, contentText: noteContent, source: 'manual' });
     const req = http.request(`${KB_URL}/api/notes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) }
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) },
+        timeout: 5000
     }, res => {
         console.log(`[KB] 已儲存任務至知識庫: ${title} (HTTP ${res.statusCode})`);
+    });
+    req.on('timeout', () => {
+        console.error('[KB] 儲存逾時（5s），中斷請求');
+        req.destroy();
     });
     req.on('error', e => console.error('[KB] 儲存失敗:', e.message));
     req.write(body);
@@ -188,10 +193,30 @@ function mount(app, opts = {}) {
             filters.state = req.query.state;
         }
         // D3: 分頁。M7: 預設 limit=50，避免未帶 limit 時回傳全部
-        filters.limit = req.query.limit !== undefined ? Math.max(1, Math.min(parseInt(req.query.limit, 10) || 50, 500)) : 50;
-        filters.offset = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10) || 0) : 0;
+        // 安全驗證：拒絕非數字字串（防 NaN 繞過）
+        if (req.query.limit !== undefined && !/^\d+$/.test(req.query.limit)) {
+            return res.status(400).json({ error: 'limit 必須為正整數' });
+        }
+        if (req.query.offset !== undefined && !/^\d+$/.test(req.query.offset)) {
+            return res.status(400).json({ error: 'offset 必須為非負整數' });
+        }
+        filters.limit = req.query.limit !== undefined ? Math.max(1, Math.min(parseInt(req.query.limit, 10), 500)) : 50;
+        filters.offset = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10)) : 0;
         const { total, records } = store.queryRecords(filters);
         res.json({ total, count: records.length, records });
+    });
+
+    // 建立任務記錄（供測試腳本或外部觸發使用）
+    app.post('/api/records', (req, res) => {
+        const { uid, taskContent, isResearch, taskType, lineUserId, lineReplyTarget, lineSourceType, contextKey, originalText } = req.body || {};
+        if (!uid || typeof uid !== 'string') return res.status(400).json({ error: 'uid 必填' });
+        if (!taskContent || typeof taskContent !== 'string') return res.status(400).json({ error: 'taskContent 必填' });
+        try {
+            store.addRecord(uid, taskContent, !!isResearch, taskType, lineUserId, lineReplyTarget, lineSourceType, contextKey, originalText);
+            res.json({ ok: true, uid });
+        } catch (e) {
+            res.status(500).json({ error: e.message });
+        }
     });
 
     // 查詢單筆任務 (Audit 6.5: 新增端點)
@@ -294,7 +319,7 @@ function mount(app, opts = {}) {
             const { claim_generation, result } = req.body || {};
             const uid = req.params.uid;
             const resultStatus = store.markProcessed(uid, claim_generation, result);
-            const { sendReply, clearTaskOnRelay } = opts;
+            const { sendReply, clearTaskOnRelay, addToConversationHistory } = opts;
             const statusMap = {
                 completed: () => {
                     // 工作流推進：回傳 { workflowId, completed, stepsStarted } 或 null（非工作流任務）
@@ -337,6 +362,14 @@ function mount(app, opts = {}) {
                         }
                         // 中間步驟：不發聊天室回覆，靜默完成（暫存於 records.json）
                         saveBotMemory(taskContent, resultStr, rec && rec.is_research);
+                        // 工作流完成後更新對話歷史
+                        if (wfResult.completed) {
+                            const wfContextKey = rec && rec.context_key;
+                            const wfOriginalText = rec && rec.original_text;
+                            if (wfContextKey && wfOriginalText && typeof addToConversationHistory === 'function') {
+                                addToConversationHistory(wfContextKey, wfOriginalText, resultStr.slice(0, 600));
+                            }
+                        }
                         res.json({ success: true });
                         return;
                     }
@@ -347,19 +380,23 @@ function mount(app, opts = {}) {
                         const truncated = resultStr.length > MAX_LEN
                             ? resultStr.slice(0, MAX_LEN) + '\n...[內容過長，已截斷]'
                             : resultStr;
-                        const taskLabel = taskContent.trim().slice(0, 80) + (taskContent.length > 80 ? '…' : '');
+                        // 優先用原始用戶訊息（original_text）作標籤，避免顯示歷史前置段落
+                        const labelSource = (rec && rec.original_text) || taskContent;
+                        const taskLabel = labelSource.trim().slice(0, 80) + (labelSource.length > 80 ? '…' : '');
                         const replyMsg = `[系統回覆] 任務完畢\n**任務**：${taskLabel}\n\n**結果**：\n${truncated}`;
 
+                        // LINE 回覆目標：group → groupId（全群組可見），user → userId（私訊）
+                        const lineTarget = rec && (rec.line_reply_target || rec.line_user_id);
+
                         if (typeof sendReply === 'function') {
-                            sendReply(replyMsg)
+                            // 將 lineReplyTarget 帶入 Gun payload，讓遠端 relay postToLine 能精確回覆正確目標
+                            sendReply(replyMsg, lineTarget || undefined)
                                 .catch(e => console.error('[routes/processed] sendReply 失敗:', e.message));
                         } else {
                             console.warn('[routes/processed] 未回傳至 Gun relay：sendReply 不可用（sharedSecrets 為空）。請確認 my-gun-relay 已啟動且與 bot 完成握手。結果已存於 records。');
                         }
 
-                        // LINE 來源任務：一律直接推播至 LINE（不依賴 relay 的揮發 lineUserId 變數）
-                        // line_reply_target：group → groupId（全群組可見），user → userId（私訊）
-                        const lineTarget = rec && (rec.line_reply_target || rec.line_user_id);
+                        // LINE 來源任務：若 bot 本地有 LINE token 則直接推播（不依賴 relay 揮發 lineUserId 變數）
                         if (lineTarget) {
                             lineWebhook.pushMessage(lineTarget, replyMsg)
                                 .catch(e => console.error(`[routes/processed] LINE push 失敗 (${rec.line_source_type || 'user'} → ${lineTarget.slice(0, 8)}…):`, e.message));
@@ -370,12 +407,21 @@ function mount(app, opts = {}) {
                         }
 
                         // 研究型一律存 KB；code 型一律存規劃結果至 KB；其餘依關鍵字
-                        if (shouldSaveToKB(taskContent, rec && rec.is_research, rec && rec.task_type)) {
-                            saveToKnowledgeBase(taskContent, resultStr);
+                        // 用原始訊息（不含歷史前置）存 KB，避免汙染知識庫標題
+                        const kbContent = (rec && rec.original_text) || taskContent;
+                        if (shouldSaveToKB(kbContent, rec && rec.is_research, rec && rec.task_type)) {
+                            saveToKnowledgeBase(kbContent, resultStr);
                         }
 
                         // 儲存至機器人記憶（供 Worker 下次執行前注入上下文，避免重複）
-                        saveBotMemory(taskContent, resultStr, rec && rec.is_research);
+                        saveBotMemory(kbContent, resultStr, rec && rec.is_research);
+
+                        // 更新連續對話歷史（讓後續對話知道此任務結果）
+                        const contextKey = rec && rec.context_key;
+                        const originalText = rec && rec.original_text;
+                        if (contextKey && originalText && typeof addToConversationHistory === 'function') {
+                            addToConversationHistory(contextKey, originalText, resultStr.slice(0, 600));
+                        }
                     }
                     res.json({ success: true });
                 },

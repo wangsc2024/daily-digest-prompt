@@ -1,3 +1,9 @@
+---
+name: "jiaoguang-podcast-one-episode"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 淨土教觀學苑 Podcast 依序製作 1 集（cursor-cli skill 模式）
 
 依 **docs/plans/淨土教觀學苑podcast專輯.md** 與 **context/jiaoguang-podcast-next.json** 依序製作 1 集，並更新下一集編號。

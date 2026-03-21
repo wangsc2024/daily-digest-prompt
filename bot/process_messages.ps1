@@ -4,7 +4,7 @@
 # 遵循 learn-claude-code s11: "Poll, claim, work, repeat"
 # Worker 主動認領任務，支援多 Worker 安全並行。
 #
-# 一般任務：使用 Cursor CLI (agent -p) + composer-1.5 執行；用法依 skills/cursor-cli/SKILL.md。
+# 一般任務：使用 Cursor CLI (agent -p) + composer-2-fast 執行；用法依 skills/cursor-cli/SKILL.md。
 # 研究型任務：使用 Codex (codex exec --full-auto -m gpt-5.4) 以研究工作流執行；前置 kb-research-strategist 與主任務皆由 Codex 執行；完成後 research-series 更新仍用 claude -p。
 # 備援鏈：非 Cursor CLI 方案（如 Codex）→ 以 Cursor CLI (agent -p) 為備援；Cursor CLI 方案 → 以 Claude (claude -p) 為備援。
 # 前置需求：agent（Cursor CLI）、codex（研究型）、claude CLI（研究後置）已安裝並完成認證。
@@ -57,6 +57,34 @@ function Write-Log {
     $logEntry = "[$timestamp] [$WorkerId] $Message"
     Write-Host $logEntry
     Add-Content -Path $LogFile -Value $logEntry -Encoding UTF8
+}
+
+# ── 錯誤通知：透過 ntfy 推播告警 ──
+function Send-NtfyAlert {
+    param(
+        [string]$Title,
+        [string]$Message,
+        [string]$Priority = "default",  # min | low | default | high | urgent
+        [string[]]$Tags = @("warning")
+    )
+    $topic = $env:NTFY_TOPIC
+    if ([string]::IsNullOrWhiteSpace($topic)) { $topic = "wangsc2025" }
+    $tmpFile = Join-Path $LogDir "ntfy_worker_alert_$(Get-Date -Format 'HHmmss').json"
+    try {
+        @{
+            topic    = $topic
+            title    = $Title
+            message  = $Message
+            priority = $Priority
+            tags     = $Tags
+        } | ConvertTo-Json | Set-Content $tmpFile -Encoding UTF8
+        curl -s -X POST "https://ntfy.sh" -H "Content-Type: application/json; charset=utf-8" -d "@$tmpFile" | Out-Null
+        Write-Log "[ntfy] 告警已送出: $Title"
+    } catch {
+        Write-Log "[ntfy] 告警送出失敗: $_"
+    } finally {
+        if (Test-Path $tmpFile) { Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue }
+    }
 }
 
 $CompletionLogFile = Join-Path $LogDir "completion_log.jsonl"
@@ -194,6 +222,9 @@ try {
     $response = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records?state=pending" -Method Get -Headers $DlHeaders
 } catch {
     Write-Log "無法連接到 API 伺服器: $_"
+    Send-NtfyAlert -Title "⚠️ Worker：Bot 伺服器無法連線" `
+        -Message "API $ApiBaseUrl 無回應，Worker 已中止。請確認 bot.js 是否在運行。`n錯誤：$_" `
+        -Priority "high" -Tags @("rotating_light","bot")
     exit
 }
 
@@ -228,6 +259,9 @@ try {
     }
     if ($slaWarns.Count -gt 0) {
         Write-Log "[SLA 告警] $($slaWarns -join ' | ')"
+        Send-NtfyAlert -Title "⏳ Worker SLA 告警：任務卡住" `
+            -Message ($slaWarns -join "`n") `
+            -Priority "default" -Tags @("warning","hourglass_flowing_sand")
     }
 } catch { Write-Log "[SLA] 無法查詢: $_" }
 
@@ -246,6 +280,7 @@ foreach ($record in @($record)) {
     $filename = $record.filename
     $isResearch = $record.is_research
     $taskType = $record.task_type   # general | code | podcast | detail | kb_answer | game；舊記錄可能為空
+    $originalText = if ($record.original_text) { [string]$record.original_text } else { '' }
 
     if ([string]::IsNullOrWhiteSpace($filename)) { continue }
 
@@ -312,7 +347,10 @@ foreach ($record in @($record)) {
             $researchKeywords = @($optimizeResp.research_keywords)
         }
         if ($optimizeResp -and $optimizeResp.is_research -eq $true) {
-            $isResearch = $true
+            # kb_answer 有專屬 RAG 路徑，不走研究工作流（避免 optimizer 誤判為研究型而觸發 Codex 路徑）
+            if ($taskType -ne 'kb_answer') {
+                $isResearch = $true
+            }
         }
 
         # ── 研究型一律採研究工作流：KB 深化預處理 + 系列上下文；完成後結果存知識庫（由 bot routes 完成時觸發）──
@@ -487,28 +525,47 @@ foreach ($record in @($record)) {
         $podcastCount = 1
         if ($taskType -eq 'podcast') {
             $podcastHandled = $true
-            # 若內容未匹配下方 regex，以任務本文前段作為查詢主題；完全無內容時用預設
-            $fallbackQuery = ($taskContent -split "`n")[0].Trim()
-            if ([string]::IsNullOrWhiteSpace($fallbackQuery)) { $fallbackQuery = $taskContent.Trim() }
+            # 優先使用 original_text（用戶原始訊息，無 [採用...] 前綴污染）作為查詢主題；
+            # 退而用 taskContent 第一行；完全無內容時用預設
+            if (-not [string]::IsNullOrWhiteSpace($originalText)) {
+                $fallbackQuery = $originalText.Trim()
+            } else {
+                # taskContent 可能含 [採用...workflow] 前綴，先剝除再取主題
+                $firstLine = ($taskContent -split "`n")[0].Trim()
+                $firstLine = $firstLine -replace '^\[採用[^\]]+\]\s*', ''
+                $fallbackQuery = if (-not [string]::IsNullOrWhiteSpace($firstLine)) { $firstLine } else { $taskContent.Trim() }
+            }
             if ($fallbackQuery.Length -gt 200) { $fallbackQuery = $fallbackQuery.Substring(0, 200) }
             if ([string]::IsNullOrWhiteSpace($fallbackQuery)) { $fallbackQuery = "未指定主題" }
             $podcastQuery = $fallbackQuery
         }
-        # 匹配格式：「製作N則X podcast/播客」或「X podcast/播客」（不分大小寫）
-        if ($taskContent -match '製作\s*(\d+)\s*則?\s*(.+?)\s*[Pp]odcast|製作\s*(\d+)\s*則?\s*(.+?)\s*播客') {
+        # 僅「製作N則X podcast」明確帶集數時才透過 regex 覆蓋主題；
+        # original_text 已存在時，topic 優先沿用 fallbackQuery，避免 regex 截斷（如「製作30秒 podcast」誤抓「秒」）。
+        # 無 original_text 時，才從 taskContent 用 regex 提取主題。
+        $querySource = if (-not [string]::IsNullOrWhiteSpace($originalText)) { $originalText } else { $taskContent }
+        if ($querySource -match '製作\s*(\d+)\s*則\s*(.+?)\s*[Pp]odcast|製作\s*(\d+)\s*則\s*(.+?)\s*播客') {
+            # 明確「N則」多集格式：提取集數；topic 僅在無 original_text 時才覆蓋
             $podcastCount = [int]$(if ($matches[1]) { $matches[1] } else { $matches[3] })
-            $podcastQuery = $(if ($matches[2]) { $matches[2] } else { $matches[4] }).Trim()
+            if ([string]::IsNullOrWhiteSpace($originalText)) {
+                $podcastQuery = $(if ($matches[2]) { $matches[2] } else { $matches[4] }).Trim()
+            }
             $podcastHandled = $true
-        } elseif ($taskContent -match '製作\s*(.+?)\s*[Pp]odcast|製作\s*(.+?)\s*播客') {
-            $podcastQuery = $(if ($matches[1]) { $matches[1] } else { $matches[2] }).Trim()
-            $podcastHandled = $true
+        } elseif ([string]::IsNullOrWhiteSpace($originalText) -and -not $podcastHandled) {
+            # 無 original_text 且非 podcast taskType 時（e.g. general 任務帶 podcast 關鍵字），
+            # 才從 taskContent 用 regex 提取主題；podcast taskType 已在上方設定 $podcastQuery，不可覆蓋
+            if ($taskContent -match '製作\s*(.+?)\s*[Pp]odcast|製作\s*(.+?)\s*播客') {
+                $podcastQuery = $(if ($matches[1]) { $matches[1] } else { $matches[2] }).Trim()
+                $podcastHandled = $true
+            }
         }
 
         if ($podcastHandled -and -not [string]::IsNullOrWhiteSpace($podcastQuery)) {
             Write-Log "🎙️ 偵測到 Podcast 製作任務（主題：$podcastQuery，集數：$podcastCount）"
             Write-Log "直接呼叫 article-to-podcast.ps1（略過 claude -p 自由詮釋）"
             Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
-            $ClaudeStartTime = Get-Date
+            $AgentStartTime = Get-Date
+            $ClaudeStartTime = $AgentStartTime
+            $toolUsed = "Podcast (article-to-podcast.ps1)"
             $podcastOutputParts = @()
             $podcastScript = Join-Path $ProjectRoot "tools\article-to-podcast.ps1"
 
@@ -540,7 +597,7 @@ foreach ($record in @($record)) {
 
         Write-CompletionLog -Uid $uid -Filename $filename -Event "started"
         $AgentStartTime = Get-Date
-        $toolUsed = "Cursor CLI (composer-1.5)"
+        $toolUsed = "Cursor CLI (composer-2-fast)"
         if ($isResearch -and $CodexAvailable) {
             # 研究型任務：以 Codex 研究工作流執行（codex exec --full-auto -m gpt-5.4，依 config/frequency-limits codex_exec）
             Write-Log "--> Worker 使用 Codex 研究工作流 (codex exec --full-auto -m gpt-5.4) 處理研究型任務 (關鍵詞: $($researchKeywords -join ', '), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
@@ -567,6 +624,14 @@ foreach ($record in @($record)) {
                 $str = if ($out -is [array]) { $out -join "`n" } else { [string]$out }
                 $str -match 'failed to refresh available models' -or $str -match 'timeout waiting for child process to exit' -or $str -match 'ERROR\s+codex_core'
             }
+            # agent / claude CLI 輸出失敗偵測（API 暫時不可用、過載、資源耗盡等）
+            $isAgentOutputFailure = {
+                param($out, $exitCode)
+                if ($null -ne $exitCode -and $exitCode -ne 0) { return $true }
+                $str = if ($out -is [array]) { $out -join "`n" } else { [string]$out }
+                $str -match '\[unavailable\]' -or $str -match '\[overloaded\]' -or $str -match '\[resource_exhausted\]' -or
+                $str -match 'API Error' -or $str -match '^Error:' -or $str -match 'Connection lost'
+            }
             try {
                 $output = $null
                 $codexExit = $null
@@ -582,7 +647,8 @@ foreach ($record in @($record)) {
                     $flat = ($outStr -replace "`r`n|`n", " ").Trim()
                     $snippet = if ($flat.Length -gt 0) { $flat.Substring(0, [Math]::Min(600, $flat.Length)) } else { "" }
                     if ($snippet.Length -gt 0) { Write-Log "[Codex 失敗輸出摘要] $snippet" }
-                    Write-Log "[WARN] Codex 失敗（$reason），重試一次..."
+                    Write-Log "[WARN] Codex 失敗（$reason），30 秒後重試（API 暫時不可用需冷卻）..."
+                    Start-Sleep -Seconds 30
                     if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
                         $output = & $runCodex $codexPromptFile $workDir $ProjectRoot
                     } else {
@@ -596,17 +662,22 @@ foreach ($record in @($record)) {
                     $snippet2 = if ($flat2.Length -gt 0) { $flat2.Substring(0, [Math]::Min(600, $flat2.Length)) } else { "" }
                     if ($snippet2.Length -gt 0) { Write-Log "[Codex 重試仍失敗輸出摘要] $snippet2" }
                     Write-Log "[WARN] Codex 重試仍失敗（exit $codexExit），fallback 至 Cursor CLI ($Script:AgentCmd)"
-                    $toolUsed = "Cursor CLI (composer-1.5, Codex fallback)"
+                    $toolUsed = "Cursor CLI (composer-2-fast, Codex fallback)"
                     try {
-                        if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-                            Push-Location $workDir
-                            try {
-                                $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
-                            } finally {
-                                Pop-Location
-                            }
-                        } else {
-                            $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
+                        $runFbAgent = {
+                            param($c, $d, $p)
+                            if ($d -and -not [string]::IsNullOrWhiteSpace($d)) {
+                                Push-Location $d
+                                try { & $Script:AgentCmd -p $c --workspace $p --model composer-2-fast --trust --force 2>&1 }
+                                finally { Pop-Location }
+                            } else { & $Script:AgentCmd -p $c --workspace $p --model composer-2-fast --trust --force 2>&1 }
+                        }
+                        $output = & $runFbAgent $effectiveContent $workDir $ProjectRoot
+                        $fbExit = $LASTEXITCODE
+                        if (& $isAgentOutputFailure $output $fbExit) {
+                            Write-Log "[WARN] Cursor CLI (Codex fallback) 輸出含失敗訊號，30 秒後重試..."
+                            Start-Sleep -Seconds 30
+                            $output = & $runFbAgent $effectiveContent $workDir $ProjectRoot
                         }
                     } catch {
                         Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
@@ -624,17 +695,17 @@ foreach ($record in @($record)) {
                 }
             } catch {
                 Write-Log "[WARN] Codex 執行失敗，fallback 至 Cursor CLI ($Script:AgentCmd): $_"
-                $toolUsed = "Cursor CLI (composer-1.5, Codex fallback)"
+                $toolUsed = "Cursor CLI (composer-2-fast, Codex fallback)"
                 try {
                     if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
                         Push-Location $workDir
                         try {
-                            $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
+                            $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-2-fast --trust --force 2>&1
                         } finally {
                             Pop-Location
                         }
                     } else {
-                        $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust --force 2>&1
+                        $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-2-fast --trust --force 2>&1
                     }
                 } catch {
                     Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
@@ -650,28 +721,51 @@ foreach ($record in @($record)) {
             } finally {
                 Remove-Item $codexPromptFile -Force -ErrorAction SilentlyContinue
             }
+        } elseif ($taskType -eq 'kb_answer') {
+            # kb_answer 型任務：RAG 前置使 optimizedContent 含 PowerShell 關鍵字觸發 $isCoding，
+            # 但知識庫查詢屬問答型非程式碼型，Cursor CLI 對此類任務耗時過長（>20min），
+            # 因此直接走 Claude（claude -p）以確保快速回應（~60-90s）。
+            Write-Log "--> kb_answer 型任務：跳過 Cursor CLI，直接使用 Claude (claude -p, RAG 查詢問答)"
+            $toolUsed = "Claude (kb_answer RAG)"
+            $savedClaudeCodeKb = $env:CLAUDECODE
+            Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue
+            try {
+                $output = & claude -p $effectiveContent --allowedTools "Read,Bash,Write" --max-turns 30 2>&1
+            } finally {
+                if ($null -ne $savedClaudeCodeKb) { $env:CLAUDECODE = $savedClaudeCodeKb } else { Remove-Item Env:\CLAUDECODE -ErrorAction SilentlyContinue }
+            }
         } else {
             # CODE 型 / 遊戲型 / 一般任務：皆依 skills/cursor-cli/SKILL.md，排程內 agent -p 須 --workspace 與 --trust
             if ($isGame) {
                 Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, 遊戲型) 處理遊戲型任務 (產出目錄: $GameWorkDir，Vite + Cloudflare Pages，記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
             } elseif ($isCoding) {
-                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, agent -p, composer-1.5) 處理 CODE 型任務 (工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+                Write-Log "--> Worker 使用 Cursor CLI (cursor-cli skill, agent -p, composer-2-fast) 處理 CODE 型任務 (工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
             } else {
-                Write-Log "--> Worker 使用 Cursor CLI (agent -p, composer-1.5) 處理一般任務 (從知識庫回答: $(if($taskType -eq 'kb_answer'){'是'}else{'否'}), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+                Write-Log "--> Worker 使用 Cursor CLI (agent -p, composer-2-fast) 處理一般任務 (從知識庫回答: $(if($taskType -eq 'kb_answer'){'是'}else{'否'}), 工作目錄: $(if($workDir){$workDir}else{'預設'}), 記憶注入: $(if($memoryContext){'是'}else{'否'}))..."
+            }
+            $runAgentInDir = {
+                param($content, $workDirPath, $projRoot)
+                if ($workDirPath -and -not [string]::IsNullOrWhiteSpace($workDirPath)) {
+                    Push-Location $workDirPath
+                    try { & $Script:AgentCmd -p $content --workspace $projRoot --model composer-2-fast --trust 2>&1 }
+                    finally { Pop-Location }
+                } else {
+                    & $Script:AgentCmd -p $content --workspace $projRoot --model composer-2-fast --trust 2>&1
+                }
             }
             try {
-                if ($workDir -and -not [string]::IsNullOrWhiteSpace($workDir)) {
-                    Push-Location $workDir
-                    try {
-                        $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust 2>&1
-                    } finally {
-                        Pop-Location
-                    }
-                } else {
-                    $output = & $Script:AgentCmd -p $effectiveContent --workspace $ProjectRoot --model composer-1.5 --trust 2>&1
+                $output = & $runAgentInDir $effectiveContent $workDir $ProjectRoot
+                $agentExit = $LASTEXITCODE
+                # 輸出失敗偵測：API 暫時不可用時重試一次（延遲 15 秒）
+                if (& $isAgentOutputFailure $output $agentExit) {
+                    $outFlat = (([string]($output -join "`n")) -replace "`r`n|`n", " ").Trim()
+                    Write-Log "[WARN] Cursor CLI 輸出含失敗訊號（$($outFlat.Substring(0,[Math]::Min(200,$outFlat.Length)))），30 秒後重試..."
+                    Start-Sleep -Seconds 30
+                    $output = & $runAgentInDir $effectiveContent $workDir $ProjectRoot
+                    $agentExit = $LASTEXITCODE
                 }
                 if ($isGame) { $toolUsed = "Cursor CLI (cursor-cli skill, 遊戲型)" }
-                elseif ($isCoding) { $toolUsed = "Cursor CLI (cursor-cli skill, composer-1.5)" }
+                elseif ($isCoding) { $toolUsed = "Cursor CLI (cursor-cli skill, composer-2-fast)" }
             } catch {
                 Write-Log "[WARN] Cursor CLI 失敗，fallback 至 Claude: $_"
                 $toolUsed = "Claude (Cursor CLI fallback)"
@@ -759,6 +853,10 @@ foreach ($record in @($record)) {
             $failResp = Invoke-RestMethod -Uri "$ApiBaseUrl/api/records/$uid/fail" -Method Post -Body $failBody -Headers $JsonHeaders
             if ($failResp.status -eq "dead_letter") {
                 Write-Log "任務已移入 Dead Letter Queue（重試 $($failResp.retry_count) 次後放棄）"
+                $shortUid = if ($uid.Length -ge 12) { $uid.Substring(0,12) } else { $uid }
+                Send-NtfyAlert -Title "💀 Worker：任務永久失敗 (DLQ)" `
+                    -Message "任務 $shortUid 已重試 $($failResp.retry_count) 次，移入 Dead Letter Queue。`n錯誤：$($errMsg.Substring(0,[Math]::Min($errMsg.Length,200)))" `
+                    -Priority "high" -Tags @("skull","warning")
             } else {
                 Write-Log "任務已重回佇列（第 $($failResp.retry_count) 次重試）"
             }

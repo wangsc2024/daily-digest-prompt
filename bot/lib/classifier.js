@@ -42,39 +42,17 @@ function isValidScheduledAt(scheduledAt) {
     return dt <= maxEnd;
 }
 
-const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_answer', 'game', 'system_cmd']);
+const VALID_INTENTS = new Set(['general', 'podcast', 'kb_answer', 'game', 'research']);
 
 function validateDecision(parsed) {
     if (typeof parsed !== 'object' || parsed === null) return false;
     if (typeof parsed.task_content !== 'string' || parsed.task_content.length === 0) return false;
     if (typeof parsed.is_periodic !== 'boolean') return false;
-    if (typeof parsed.is_research !== 'boolean') return false;
     if (parsed.is_periodic && (typeof parsed.cron_expression !== 'string' || !parsed.cron_expression)) return false;
-    if (parsed.is_workflow !== undefined && typeof parsed.is_workflow !== 'boolean') return false;
     if (parsed.is_scheduled !== undefined && typeof parsed.is_scheduled !== 'boolean') return false;
     if (parsed.is_periodic && parsed.is_scheduled) return false;
     if (parsed.is_scheduled && !isValidScheduledAt(parsed.scheduled_at)) return false;
-    if (parsed.task_type !== undefined && !VALID_TASK_TYPES.has(parsed.task_type)) return false;
-    return true;
-}
-
-function validateWorkflowDecomposition(parsed) {
-    if (typeof parsed !== 'object' || parsed === null) return false;
-    if (typeof parsed.name !== 'string' || parsed.name.length === 0) return false;
-    if (!Array.isArray(parsed.steps) || parsed.steps.length < 2) return false;
-    const ids = new Set();
-    for (const step of parsed.steps) {
-        if (!step.id || !step.task_content) return false;
-        if (typeof step.task_content !== 'string') return false;
-        if (ids.has(step.id)) return false;
-        ids.add(step.id);
-        if (step.depends_on && !Array.isArray(step.depends_on)) return false;
-        if (step.depends_on) {
-            for (const dep of step.depends_on) {
-                if (!ids.has(dep) && !parsed.steps.some(s => s.id === dep)) return false;
-            }
-        }
-    }
+    if (parsed.intent !== undefined && !VALID_INTENTS.has(parsed.intent)) return false;
     return true;
 }
 
@@ -105,16 +83,21 @@ function is429QuotaError(err) {
     return msg.includes('429') || msg.includes('rate_limit') || msg.includes('quota');
 }
 
-async function callGroq(prompt, options = {}) {
+async function callGroq(promptOrMessages, options = {}) {
     const { jsonMode = false, timeoutMs = GROQ_TIMEOUT_MS, maxTokens = 2048, systemPrompt = null } = options;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error(`Groq API 逾時 (${timeoutMs}ms)`)), timeoutMs)
     );
-    const messages = [];
-    if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
-    messages.push({ role: 'user', content: prompt });
+    let messages;
+    if (Array.isArray(promptOrMessages)) {
+        messages = promptOrMessages;
+    } else {
+        messages = [];
+        if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+        messages.push({ role: 'user', content: promptOrMessages });
+    }
     const params = {
         model: GROQ_MODEL,
         messages,
@@ -161,72 +144,71 @@ async function classify(userMessage, _429RetriesLeft = GROQ_429_MAX_RETRIES) {
     }
 
     const parsed = extractJSON(text);
+    const fallback = {
+        is_periodic: false,
+        cron_expression: '',
+        is_scheduled: false,
+        scheduled_at: '',
+        intent: 'general',
+        task_content: userMessage,
+        _degraded: true
+    };
     if (!parsed) {
         console.error('[classify] JSON 解析失敗，降級為一般任務');
-        return {
-            is_periodic: false,
-            cron_expression: '',
-            is_scheduled: false,
-            scheduled_at: '',
-            task_content: userMessage,
-            is_research: false,
-            is_workflow: false,
-            task_type: 'general'
-        };
+        return fallback;
     }
     if (!validateDecision(parsed)) {
         console.error('[classify] 回應缺少必要欄位，降級為一般任務');
-        return {
-            is_periodic: false,
-            cron_expression: '',
-            is_scheduled: false,
-            scheduled_at: '',
-            task_content: userMessage,
-            is_research: false,
-            is_workflow: false,
-            task_type: 'general'
-        };
+        return fallback;
     }
-    if (parsed.is_workflow === undefined) parsed.is_workflow = false;
     if (parsed.is_scheduled === undefined) parsed.is_scheduled = false;
     if (parsed.scheduled_at === undefined) parsed.scheduled_at = '';
-    if (!VALID_TASK_TYPES.has(parsed.task_type)) parsed.task_type = 'general';
+    if (parsed.cron_expression === undefined) parsed.cron_expression = '';
+    if (!VALID_INTENTS.has(parsed.intent)) parsed.intent = 'general';
     return parsed;
 }
 
 const QUICK_ANSWER_TIMEOUT_MS = 15000;
+const QUICK_ANSWER_SYSTEM_PROMPT =
+    '你是一個簡潔的助理。請「直接回答」以下問題，用一至三句話給出實質內容。' +
+    '不要只重述、改寫或總結問題，也不要回覆「您想了解的是…」這類句子。' +
+    '若為天氣、常識、建議類問題，請依你的知識簡要回答。' +
+    '若問題涉及之前的對話內容，請根據上下文回答。';
 
-async function answerQuestion(userMessage) {
+async function answerQuestion(userMessage, conversationHistory) {
     if (!groq || !userMessage || typeof userMessage !== 'string') return null;
     const trimmed = userMessage.trim();
     if (trimmed.length === 0) return null;
-    const prompt = loadSkill('quick-answer', { userMessage: trimmed });
-    try {
-        const text = await callGroq(prompt, { timeoutMs: QUICK_ANSWER_TIMEOUT_MS });
-        const out = text ? String(text).trim() : '';
-        return out.length > 0 ? out : null;
-    } catch (err) {
-        console.error('[classifier] quick-answer 失敗:', err.message);
-        return null;
+
+    if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
+        // 有對話歷史：構建多輪訊息，讓 LLM 理解上下文
+        const messages = [{ role: 'system', content: QUICK_ANSWER_SYSTEM_PROMPT }];
+        for (const turn of conversationHistory) {
+            messages.push({ role: turn.role === 'user' ? 'user' : 'assistant', content: turn.text });
+        }
+        messages.push({ role: 'user', content: trimmed });
+        try {
+            const text = await callGroq(messages, { timeoutMs: QUICK_ANSWER_TIMEOUT_MS });
+            const out = text ? String(text).trim() : '';
+            return out.length > 0 ? out : null;
+        } catch (err) {
+            console.error('[classifier] quick-answer (with history) 失敗:', err.message);
+            return null;
+        }
+    } else {
+        // 無歷史：保留原始行為
+        const prompt = loadSkill('quick-answer', { userMessage: trimmed });
+        try {
+            const text = await callGroq(prompt, { timeoutMs: QUICK_ANSWER_TIMEOUT_MS });
+            const out = text ? String(text).trim() : '';
+            return out.length > 0 ? out : null;
+        } catch (err) {
+            console.error('[classifier] quick-answer 失敗:', err.message);
+            return null;
+        }
     }
 }
 
-async function decomposeWorkflow(userMessage) {
-    if (!groq) throw new Error('Classifier 未初始化，請先呼叫 init()');
-    const prompt = loadSkill('workflow-decomposer', { userMessage });
-    try {
-        const text = await callGroq(prompt, { jsonMode: true });
-        const parsed = extractJSON(text);
-        if (!parsed || !validateWorkflowDecomposition(parsed)) {
-            console.error('[classifier] 工作流分解失敗，降級為單一任務');
-            return null;
-        }
-        return parsed;
-    } catch (err) {
-        console.error('[classify] 工作流分解失敗:', err.message);
-        return null;
-    }
-}
 
 const OPTIMIZE_TASK_TIMEOUT_MS = 45000;
 const OPTIMIZE_TASK_MAX_TOKENS = 8192;
@@ -306,9 +288,7 @@ module.exports = {
     clearSkillCache: skills.clearCache,
     classify,
     answerQuestion,
-    decomposeWorkflow,
     optimizeTask,
     extractJSON,
-    validateDecision,
-    validateWorkflowDecomposition
+    validateDecision
 };

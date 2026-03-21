@@ -1,3 +1,9 @@
+---
+name: "fetch-audit-dim4"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # Phase 1: 審查維度 4
 
 你是系統審查專家，全程使用正體中文。

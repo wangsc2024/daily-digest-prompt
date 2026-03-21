@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-future_plan_optimize"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # 未來計畫待辦優化 Agent（future_plan_optimize）
 
 你是專案規劃助手，全程使用**正體中文**。

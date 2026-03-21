@@ -68,9 +68,23 @@ process.on('uncaughtException', (err) => {
 // ============================================================
 const app = express();
 
-// 完全寬鬆的 CORS 中介層 (解決本地 file:// 存取問題)
+// CORS 中介層：限制允許的來源（白名單機制）
+const CORS_ALLOWED_ORIGINS = new Set([
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]);
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    // 允許白名單來源、無 origin（同源 / curl / 排程呼叫）
+    if (origin && CORS_ALLOWED_ORIGINS.has(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else if (!origin) {
+        // 同源請求（curl / 排程呼叫）：允許但不設 wildcard，避免 CORS 洩露
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    // 非白名單 origin：不設 Access-Control-Allow-Origin（瀏覽器將拒絕）
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') {
@@ -79,15 +93,23 @@ app.use((req, res, next) => {
     next();
 });
 
-// S12: 安全標頭 (在本地開發時暫時放寬)
+// S12: 安全標頭
 app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: { policy: "unsafe-none" }
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'", "ws:", "wss:"],
+            imgSrc: ["'self'", "data:"],
+        }
+    },
+    crossOriginResourcePolicy: { policy: "same-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin" }
 }));
 
-// S9: 請求體大小限制
-app.use(express.json({ limit: '100kb' }));
+// S9: 請求體大小限制（store.MAX_TASK_CONTENT_LENGTH=50KB，1MB 已足夠）
+app.use(express.json({ limit: '1mb' }));
 
 // 速率限制 (A2)。Worker 端 poll/claim/state/processed 單筆任務約 4+ 次，多筆易觸頂，故對 /api/records 放寬 (C5)
 const apiLimiter = rateLimit({
@@ -143,10 +165,12 @@ app.use((req, res, next) => {
 
     const auth = req.headers['authorization'];
     if (!auth) {
+        console.warn(`[AUTH] 401 缺少 Authorization header: ${req.method} ${cleanPath} from ${req.ip}`);
         return res.status(401).json({ error: '未授權：請提供有效的 API 金鑰' });
     }
     const expected = `Bearer ${API_SECRET_KEY}`;
     if (!timingSafeTokenCompare(auth, expected)) {
+        console.warn(`[AUTH] 401 無效 token: ${req.method} ${cleanPath} from ${req.ip}`);
         return res.status(401).json({ error: '未授權：請提供有效的 API 金鑰' });
     }
     next();
@@ -198,12 +222,47 @@ routes.mount(app, {
     startMessageLoop,
     classifier,
     sendReply: sendSystemReply,
-    clearTaskOnRelay
+    clearTaskOnRelay,
+    addToConversationHistory
 });
 
 // 訊息去重：使用 Map 記錄時間戳以支援定時清理
 const processedMessages = new Map();
 const MSG_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 小時
+
+// ============================================================
+// 連續對話歷史（per context key，in-memory）
+// ============================================================
+const CONV_MAX_TURNS = 6;           // 保留最近 6 輪（每輪 = user + assistant）
+const CONV_TTL_MS = 30 * 60 * 1000; // 30 分鐘無活動後清除
+const conversationHistories = new Map(); // contextKey → { turns: [{role, text}], lastTs }
+
+function getConversationHistory(contextKey) {
+    if (!contextKey) return [];
+    const entry = conversationHistories.get(contextKey);
+    if (!entry) return [];
+    if (Date.now() - entry.lastTs > CONV_TTL_MS) {
+        conversationHistories.delete(contextKey);
+        return [];
+    }
+    return entry.turns;
+}
+
+function addToConversationHistory(contextKey, userText, assistantText) {
+    if (!contextKey) return;
+    const turns = getConversationHistory(contextKey);
+    turns.push({ role: 'user', text: userText });
+    turns.push({ role: 'assistant', text: assistantText });
+    const trimmed = turns.slice(-(CONV_MAX_TURNS * 2));
+    conversationHistories.set(contextKey, { turns: trimmed, lastTs: Date.now() });
+}
+
+/** 將對話歷史格式化為任務檔前置區段，讓 Worker 理解上下文 */
+function formatHistoryForTask(history) {
+    if (!Array.isArray(history) || history.length === 0) return '';
+    const lines = history.map(t => `${t.role === 'user' ? '用戶' : '助理'}：${t.text}`).join('\n');
+    return `## 對話上下文\n${lines}\n\n---\n\n`;
+}
 
 let myPair = null;
 let epubSig = null; // 模組層級，供 gun.on('hi') 重連補發使用
@@ -215,7 +274,7 @@ function generateId(prefix) {
 // S5: sendSystemReply — 廣播給所有已連線節點（各自加密）
 // 註：my-gun-relay 會把自己註冊為「客戶端」（wsc-bot/handshake/clients/<relay.pub>），
 // 故只要 relay 已啟動且與 bot 完成 ECDH 握手，sharedSecrets 即含 relay，無需瀏覽器開聊天室。
-async function sendSystemReply(text) {
+async function sendSystemReply(text, lineReplyTarget) {
     if (app.locals.sharedSecrets.size === 0) {
         console.warn('[sendSystemReply] 無已連線節點（sharedSecrets 為空），跳過回傳至 Gun relay。請確認 my-gun-relay 已啟動且與 bot 完成握手（或至少有一聊天室客戶端曾連線）。');
         return;
@@ -226,8 +285,9 @@ async function sendSystemReply(text) {
         let i = 0;
         for (const ss of app.locals.sharedSecrets.values()) {
             const nodeId = `${replyId}_${i}`;
-            const payload = JSON.stringify({ id: nodeId, text, ts, updatedAt: ts });
-            const encrypted = await SEA.encrypt(payload, ss);
+            const payloadObj = { id: nodeId, text, ts, updatedAt: ts };
+            if (lineReplyTarget) payloadObj.lineReplyTarget = lineReplyTarget;
+            const encrypted = await SEA.encrypt(JSON.stringify(payloadObj), ss);
             gun.get(chatRoomName).get(nodeId).put(encrypted);
             i++;
         }
@@ -300,23 +360,16 @@ function isCronIntervalSafe(expression) {
     }
 }
 
-/** 檢查並觸發到期的單次定時任務 */
+/** 檢查並觸發到期的單次定時任務 — 以任務內容重新走分類流程 */
 async function checkDueScheduledTasks() {
     const now = new Date().toISOString();
     const due = store.getDueScheduledTasks(now);
     for (const t of due) {
         try {
-            if (t.workflow_data && t.workflow_data.name && Array.isArray(t.workflow_data.steps)) {
-                workflow.createWorkflow(t.workflow_data.name, t.workflow_data.steps, t.source_id);
-                await sendSystemReply(
-                    `[系統回覆] 定時任務已觸發：「${t.task_content}」（工作流），等待 Worker 依序處理中...`
-                );
-            } else {
-                store.addRecord(generateId('sched'), t.task_content, t.is_research, t.task_type);
-                await sendSystemReply(
-                    `[系統回覆] 定時任務已觸發：「${t.task_content}」，等待 Worker 認領處理中...`
-                );
-            }
+            classifyQueue.push({ id: generateId('sched'), text: t.task_content });
+            await sendSystemReply(
+                `[系統回覆] 定時任務已觸發：「${t.task_content}」，進入分類佇列處理中...`
+            );
             store.markScheduledTaskTriggered(t.id);
         } catch (err) {
             console.error(`[scheduled] 觸發任務 ${t.id} 失敗:`, err.message);
@@ -329,19 +382,52 @@ async function checkDueScheduledTasks() {
 // ============================================================
 // G27: 並行度從環境變數讀取（預設 1 避免免費額度 5 次/分鐘 觸發 429；付費方案設 CLASSIFY_CONCURRENCY=3）
 const CONCURRENCY = parseInt(process.env.CLASSIFY_CONCURRENCY || '1', 10);
+
+/** intent → 任務加註前綴（Worker 依此選擇對應 Skill/Workflow） */
+const INTENT_ANNOTATIONS = {
+    podcast:  '[採用製作podcast workflow] ',
+    kb_answer: '[採用查詢知識庫skill] ',
+    game:     '[採用設計遊戲workflow] ',
+    research: '[採用深度研究skill] '
+};
+
+/** intent → 顯示標籤 */
+const INTENT_LABELS = {
+    podcast:  'Podcast型',
+    kb_answer: '知識庫查詢型',
+    game:     '遊戲設計型',
+    research: '深度研究型',
+    general:  '一般型'
+};
+
+/** 從 intent 推導 is_research（供 store 欄位向後相容） */
+function intentToIsResearch(intent) { return intent === 'research'; }
+
+/** 從 intent 推導 task_type（供 store 欄位向後相容） */
+function intentToTaskType(intent) { return intent || 'general'; }
+
 const classifyQueue = createQueue({
     concurrency: CONCURRENCY,
     maxRetries: 3,
     processor: async (item) => classifier.classify(item.text),
     onComplete: async (item, decision) => {
+        const intent = decision.intent || 'general';
+        const annotation = INTENT_ANNOTATIONS[intent] || '';
+        const annotatedContent = annotation + decision.task_content;
+        const isResearch = intentToIsResearch(intent);
+        const taskType = intentToTaskType(intent);
+        const typeLabel = INTENT_LABELS[intent] || '一般型';
+
         // ---- 1. 週期性任務 → cron 排程 ----
         if (decision.is_periodic && cron.validate(decision.cron_expression)) {
             if (!isCronIntervalSafe(decision.cron_expression)) {
                 console.error(`[classify] cron 間隔過短，拒絕：${decision.cron_expression}`);
                 await sendSystemReply(
-                    `[系統回覆] 排程間隔過短（最少 ${CRON_MIN_INTERVAL_MINUTES} 分鐘），已降級為單次任務。`
+                    `[系統回覆] 排程間隔過短（最少 ${CRON_MIN_INTERVAL_MINUTES} 分鐘），已降級為立即執行。`,
+                    item.lineReplyTarget
                 );
-                store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type);
+                // 以原始任務內容重新進入分類流程（立即執行）
+                classifyQueue.push({ id: generateId('instant'), text: decision.task_content, lineUserId: item.lineUserId, lineReplyTarget: item.lineReplyTarget, lineSourceType: item.lineSourceType });
                 return;
             }
 
@@ -357,129 +443,92 @@ const classifyQueue = createQueue({
             }
 
             const cronId = generateId('cron');
+            // 觸發時以任務內容重新走分類流程，而非直接建檔
             const task = cron.schedule(decision.cron_expression, () => {
                 try {
-                    store.addRecord(generateId('cron'), decision.task_content, decision.is_research, decision.task_type);
+                    classifyQueue.push({ id: generateId('cron'), text: decision.task_content });
                 } catch (err) {
-                    console.error(`[cron ${cronId}] 建立任務失敗:`, err.message);
+                    console.error(`[cron ${cronId}] 推入分類佇列失敗:`, err.message);
                 }
             });
             app.locals.activeCronJobs[cronId] = task;
 
+            // 儲存原始任務內容（無加註），觸發時重新分類
             store.addCronJob({
                 id: cronId,
                 cron_expression: decision.cron_expression,
                 task_content: decision.task_content,
-                is_research: decision.is_research,
-                task_type: decision.task_type,
                 created_at: new Date().toISOString()
             });
 
-            const cronTypeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'game' ? '遊戲型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
             await sendSystemReply(
-                `[系統回覆] 已設定週期任務：「${decision.task_content}」(${cronTypeLabel})，排程：${decision.cron_expression}`
+                `[系統回覆] 已設定週期任務：「${decision.task_content}」(${typeLabel})，排程：${decision.cron_expression}`,
+                item.lineReplyTarget
             );
             return;
         }
 
-        // ---- 2. 單次定時任務 → 存入 scheduled_tasks ----
+        // ---- 2. 單次定時任務 → 存入 scheduled_tasks，觸發時重新分類 ----
         if (decision.is_scheduled && decision.scheduled_at) {
             const schedId = generateId('sched');
-            let workflowData = null;
-            if (decision.is_workflow) {
-                try {
-                    const decomposition = await classifier.decomposeWorkflow(decision.task_content);
-                    if (decomposition) workflowData = decomposition;
-                } catch (err) {
-                    console.error('[classify] 定時任務工作流分解失敗，存為單一任務:', err.message);
-                }
-            }
+            // 儲存原始任務內容（無加註），觸發時重新分類
             store.addScheduledTask({
                 id: schedId,
                 task_content: decision.task_content,
-                is_research: !!decision.is_research,
-                task_type: decision.task_type,
-                is_workflow: !!decision.is_workflow && !!workflowData,
-                workflow_data: workflowData,
                 scheduled_at: decision.scheduled_at.trim(),
                 created_at: new Date().toISOString(),
                 source_id: item.id,
                 status: 'waiting'
             });
             await sendSystemReply(
-                `[系統回覆] 已排定任務：「${decision.task_content}」，將於 ${decision.scheduled_at} 執行。`
+                `[系統回覆] 已排定任務：「${decision.task_content}」(${typeLabel})，將於 ${decision.scheduled_at} 執行。`,
+                item.lineReplyTarget
             );
             return;
         }
 
-        // ---- 3. 多步驟工作流 → 分解 + 建立工作流 ----
-        if (decision.is_workflow) {
-            try {
-                const decomposition = await classifier.decomposeWorkflow(decision.task_content);
-                if (decomposition) {
-                    const wf = workflow.createWorkflow(
-                        decomposition.name,
-                        decomposition.steps,
-                        item.id
-                    );
-                    const stepNames = wf.steps.map(s => s.name).join(' → ');
-                    await sendSystemReply(
-                        `[系統回覆] 已建立工作流「${wf.name}」（${wf.steps.length} 步驟）：${stepNames}` +
-                        `\n工作流 ID: ${wf.id}，等待 Worker 依序處理中...`
-                    );
-                    return;
-                }
-            } catch (err) {
-                console.error('[classify] 工作流分解失敗，降級為單一任務:', err.message);
-            }
-            // 分解失敗時降級為單一任務
-        }
-
-        // ---- 4. 即時單次任務 ----
+        // ---- 3. 無效 cron 警告（is_periodic 但表達式無效） ----
         if (decision.is_periodic) {
             console.error(`[classify] 無效的 cron 表達式: ${decision.cron_expression}`);
         }
-        // 防護：若訊息明顯為遊戲意圖但被分類為 general，強制改為 game，避免被簡答
-        const gameIntentPattern = /寫遊戲|做遊戲|寫一個.*遊戲|做一個.*遊戲|射擊遊戲|打磚塊|小遊戲|網頁遊戲|具創意的.*遊戲|遊戲$/m;
-        const rawText = (item.text || '').trim();
-        const taskText = (decision.task_content || '').trim();
-        if ((decision.task_type === 'general' || !decision.task_type) && !decision.is_research &&
-            (gameIntentPattern.test(rawText) || gameIntentPattern.test(taskText))) {
-            decision.task_type = 'game';
-            console.log('[classify] 偵測到遊戲意圖，改為遊戲型任務（避免簡答）');
-        }
-        // LINE 來源任務（id 前綴 line_）：無論 task_type 為何，一律納入 Worker 執行
-        // 理由：LINE 用於指派任務，而非即時問答，general 簡答會繞過 Worker 導致 LINE 收不到執行結果
-        const isLineTask = (item.id || '').startsWith('line_');
-        // 一般型（非 LINE 來源）：僅簡答回覆，不納入任務
-        const isGeneralOnly = !isLineTask && (decision.task_type === 'general' && !decision.is_research);
-        if (isGeneralOnly) {
+
+        // ---- 4. 即時任務 ----
+        // general：Groq 直接回覆（via Gun Relay → LINE），不建檔；降級時加前綴提示
+        if (intent === 'general') {
+            const degradedPrefix = decision._degraded ? '[降級回答] ' : '';
             try {
-                const quickAnswer = await classifier.answerQuestion(item.text);
-                if (quickAnswer) {
-                    await sendSystemReply(`[系統回覆] (簡答) ${quickAnswer}`);
-                } else {
-                    await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
-                }
-                // 持久化「已處理」記錄，重啟後 Gun 重播不會重複簡答（僅寫 records.json，不建 .md）
+                const quickAnswer = await classifier.answerQuestion(item.text, item.conversationHistory);
+                const reply = quickAnswer || '已收到您的訊息。';
+                await sendSystemReply(`[系統回覆] ${degradedPrefix}${reply}`, item.lineReplyTarget);
+                // 更新連續對話歷史
+                if (item.contextKey) addToConversationHistory(item.contextKey, item.text, reply);
+                // 持久化「已處理」記錄，重啟後 Gun 重播不會重複回覆（僅寫 records.json，不建 .md）
                 store.addProcessedOnlyRecord(item.id);
             } catch (err) {
                 console.error('[classify] 簡答發送失敗:', err.message);
-                await sendSystemReply(`[系統回覆] 已收到您的訊息。`);
+                await sendSystemReply(`[系統回覆] ${degradedPrefix}已收到您的訊息。`, item.lineReplyTarget);
                 store.addProcessedOnlyRecord(item.id);
             }
             return;
         }
-        // 所有型態（含 LINE 來源的 general）：納入任務，交由 Worker 執行
-        store.addRecord(item.id, decision.task_content, decision.is_research, decision.task_type, item.lineUserId, item.lineReplyTarget, item.lineSourceType);
-        const typeLabel = decision.is_research ? '研究型' : (decision.task_type === 'code' ? '程式碼型' : decision.task_type === 'game' ? '遊戲型' : decision.task_type === 'podcast' ? 'Podcast 型' : decision.task_type === 'detail' ? '詳細回答型' : decision.task_type === 'kb_answer' ? '從知識庫回答型' : '一般型');
+
+        // podcast / kb_answer / game / research：加註後建檔，交由 Worker 執行
+        // 將對話歷史前置於任務檔，讓 Worker 理解上下文
+        const historyPrefix = formatHistoryForTask(item.conversationHistory);
+        const taskWithContext = historyPrefix + annotatedContent;
+        store.addRecord(item.id, taskWithContext, isResearch, taskType, item.lineUserId, item.lineReplyTarget, item.lineSourceType, item.contextKey, item.text);
         await sendSystemReply(
-            `[系統回覆] 已將任務存為檔案 ${item.id}.md (${typeLabel})，等待 Worker 認領處理中...`
+            `[系統回覆] 已將任務存為檔案 ${item.id}.md (${typeLabel})，等待 Worker 認領處理中...`,
+            item.lineReplyTarget
         );
     },
     onError: (item, err) => {
         console.error('[classify] AI 分類失敗:', err.message);
-        store.addRecord(item.id, item.text, false, undefined, item.lineUserId, item.lineReplyTarget, item.lineSourceType);
+        sendSystemReply(
+            '[系統回覆] [降級回答] AI 分類服務暫時無法使用，請稍後再試。',
+            item.lineReplyTarget
+        ).catch(e => console.error('[classify] 降級回覆失敗:', e.message));
+        store.addProcessedOnlyRecord(item.id);
     }
 });
 
@@ -544,7 +593,9 @@ function startMessageLoop() {
             if (!text || text.startsWith('[系統回覆]')) return;
 
             processedMessages.set(id, Date.now());
-            if (!classifyQueue.push({ id, text, lineUserId, lineReplyTarget, lineSourceType })) {
+            const contextKey = lineReplyTarget || lineUserId || 'chatroom';
+            const conversationHistory = getConversationHistory(contextKey);
+            if (!classifyQueue.push({ id, text, lineUserId, lineReplyTarget, lineSourceType, contextKey, conversationHistory })) {
                 store.addRecord(id, text, false, undefined, lineUserId, lineReplyTarget, lineSourceType);
                 console.warn(`[message] 佇列已滿，直接存為未分類任務: ${id}`);
             }
@@ -676,13 +727,14 @@ async function init() {
     });
 
     // 重新載入 cron 排程 (P2)。L4: 重載時也檢查最小間隔，避免惡意表達式一旦寫入即永久生效
+    // 觸發時以任務內容重新走分類流程，確保 annotation 與 intent 邏輯保持最新
     for (const job of store.cronJobs) {
         if (cron.validate(job.cron_expression) && isCronIntervalSafe(job.cron_expression)) {
             const task = cron.schedule(job.cron_expression, () => {
                 try {
-                    store.addRecord(generateId('cron'), job.task_content, job.is_research, job.task_type);
+                    classifyQueue.push({ id: generateId('cron'), text: job.task_content });
                 } catch (err) {
-                    console.error(`[cron ${job.id}] 建立任務失敗:`, err.message);
+                    console.error(`[cron ${job.id}] 推入分類佇列失敗:`, err.message);
                 }
             });
             app.locals.activeCronJobs[job.id] = task;

@@ -161,7 +161,7 @@ const VALID_TASK_TYPES = new Set(['general', 'code', 'podcast', 'detail', 'kb_an
  * @param {string} [lineReplyTarget]  - 回覆目標：user→userId，group→groupId，room→roomId
  * @param {string} [lineSourceType]   - 來源類型：'user' | 'group' | 'room'
  */
-function addRecord(uid, taskContent, isResearch, taskType, lineUserId, lineReplyTarget, lineSourceType) {
+function addRecord(uid, taskContent, isResearch, taskType, lineUserId, lineReplyTarget, lineSourceType, contextKey, originalText) {
     if (records.some(r => r.uid === uid)) {
         console.log(`[addRecord] UID 已存在，跳過: ${uid}`);
         return;
@@ -199,6 +199,12 @@ function addRecord(uid, taskContent, isResearch, taskType, lineUserId, lineReply
     }
     if (lineSourceType && typeof lineSourceType === 'string') {
         record.line_source_type = lineSourceType;
+    }
+    if (contextKey && typeof contextKey === 'string') {
+        record.context_key = contextKey;
+    }
+    if (originalText && typeof originalText === 'string') {
+        record.original_text = originalText.slice(0, 500);
     }
     records.push(record);
     try {

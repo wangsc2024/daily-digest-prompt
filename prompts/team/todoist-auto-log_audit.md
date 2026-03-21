@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-log_audit"
+template_type: "team_prompt"
+version: "1.1.0"
+released_at: "2026-03-21"
+---
 你是系統維護助手，全程使用正體中文。
 你的任務是對 daily-digest-prompt 系統進行 Log 深度審查，找出問題並執行修正。
 完成後將結果寫入 `results/todoist-auto-log_audit.json`。
@@ -43,6 +49,75 @@ GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | p
 1. 讀取 `state/scheduler-state.json` — 分析最近 30 筆執行記錄
 2. 讀取 `context/digest-memory.json` — 分析記憶中的異常模式
 
+## 步驟 1b：排程系統健康診斷（三項必查）
+
+### 1b-1：執行錯誤彙總報告
+
+```bash
+pwsh -ExecutionPolicy Bypass -File query-logs.ps1 -Mode errors 2>&1
+```
+
+擷取輸出，整理：
+- 失敗次數與類型（phase_failure / timeout / api_error）
+- 失敗集中時段（哪些小時段高發？）
+- 區塊降級統計（query failed / gmail failed 等）
+
+用 Read 工具讀取 `state/failure-stats.json`，統計 `daily` 欄位中最近 7 天各日的 `phase_failure` 值。若**單日超過 10 次**，標記為 🔴 高風險，納入步驟 3 嚴重問題。
+
+用 Read 工具讀取 `state/slo-budget-report.json`（若存在），確認 `slo_status` 各項的 `budget_consumed_pct`。若任一 SLO 超過 100%，標記為 🔴 告警並列出受影響 SLO 名稱。
+
+### 1b-2：偵測 autonomous-runtime.json 殭屍降級狀態
+
+讀取 `state/autonomous-runtime.json`，執行過期判斷：
+
+```bash
+pwsh -Command "
+\$r = Get-Content state/autonomous-runtime.json | ConvertFrom-Json
+\$expired = \$false
+if (\$r.override.active -and \$r.override.expires_at) {
+    \$expiry = [datetime]::Parse(\$r.override.expires_at)
+    \$expired = \$expiry -lt (Get-Date)
+}
+Write-Host ('mode=' + \$r.mode + ' override.active=' + \$r.override.active + ' expired=' + \$expired + ' generated_at=' + \$r.generated_at)
+"
+```
+
+若 `mode=degraded` 且 `override.active=True` 且 `expired=True`：
+- 標記為 🔴 嚴重問題（殭屍降級狀態）
+- 計算持續時長：`(Get-Date) - [datetime]::Parse($r.override.expires_at)`
+- **立即自動修正**（不等步驟 6）：用 Write 工具覆寫 `state/autonomous-runtime.json`，將 `mode` 設為 `normal`，`override.active` 設為 `false`，`blocked_task_keys` 清空，`allow_heavy_auto_tasks` / `allow_research_auto_tasks` 設為 `true`，`max_parallel_auto_tasks` 設為 `4`
+- 寫入後記錄：「autonomous-runtime.json 殭屍狀態已自動清除，過期時長：X 分鐘」
+
+### 1b-3：偵測 LLM 對話性回應模式（Phase 1 與 Phase 3 分別統計）
+
+**Phase 1（todoist-query）偵測**：
+```bash
+# 偵測含 [query] 前綴的對話性回應（Phase 1 特徵）
+grep -rl "^\s*\[query\].*\(你貼了\|已收到\|請問你希望\|請問需要\)" logs/ 2>/dev/null | grep "todoist-team" | wc -l
+grep -rl "^\s*\[query\].*\(你貼了\|已收到\|請問你希望\|請問需要\)" logs/ 2>/dev/null | grep "todoist-team" | head -3
+```
+
+**Phase 3（assemble）偵測**：
+```bash
+# 偵測含 [assemble] 前綴的對話性回應（Phase 3 特徵）
+grep -rl "^\s*\[assemble\].*\(你貼了\|已收到\|請問你希望\|請問需要\)" logs/ 2>/dev/null | grep "todoist-team" | wc -l
+grep -rl "^\s*\[assemble\].*\(你貼了\|已收到\|請問你希望\|請問需要\)" logs/ 2>/dev/null | grep "todoist-team" | head -3
+```
+
+分別記錄 Phase 1 與 Phase 3 受影響的 run 數量與時段。
+
+**Phase 1 防護確認**：用 Grep 工具確認 `run-todoist-agent-team.ps1` 是否有 `planWriteTime -lt` 關鍵字
+- **存在** → 記錄「Phase 1 防護已到位」
+- **不存在** → 納入步驟 5-6 修正清單
+
+**Phase 3 防護確認**：用 Grep 工具確認 `run-todoist-agent-team.ps1` 是否有 `conversationalPattern` 關鍵字
+- **存在** → 記錄「Phase 3 防護已到位」
+- **不存在** → 納入步驟 5-6 修正清單，需加入輸出內容對話性偵測邏輯
+
+若 Phase 1 和 Phase 3 均無偵測到：記錄「LLM 對話性回應：未偵測到，系統運行正常」。
+
+---
+
 ## 步驟 2：委派 Explore 子 Agent 掃描 Log 檔案
 
 **禁止主 Agent 逐一 Read 每個 log 檔案**（10+ 個大型 .log 檔案會耗盡 context）。
@@ -61,26 +136,35 @@ GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | p
 ```
 🔍 Log 審查發現
 ━━━━━━━━━━━━━━━━━━━━━
-🔴 嚴重問題（必須修復）：
-🟡 改善建議（建議優化）：
+🔴 嚴重問題（立即修正，本次執行完成）：
+🟠 中優先問題（本次執行完成或記錄待修）：
+🟡 改善建議（記錄，不強制修正）：
 🟢 正常狀態
 ```
 
-若全部 🟢 → 跳至步驟 7（僅記錄，不修正）。
+**主動行動原則（強制）**：
+- 🔴 嚴重問題 → **本次執行必須完成修正**，不留待後續
+- 🟠 中優先問題 → **評估後立即修正**，若有風險則完整記錄根因與修正步驟
+- 🟡 改善建議 → 記錄即可，下次審查追蹤
+- 若全部 🟢 → 跳至步驟 7（僅記錄，不修正）
 
-## 步驟 4：深入根因分析
-對每個 🔴 和 🟡 回答：
-1. **根因**：為什麼？
-2. **模式**：偶發或規律？
-3. **影響**：高/中/低
-4. **關聯**：與其他問題共同根因？
+## 步驟 4：深入根因分析（主動查核）
+對每個 🔴 和 🟠 問題，**必須執行深入查核**（不只是表面描述）：
+
+1. **根因**：為什麼？追溯到具體程式碼行或配置值
+2. **模式**：用 `grep -c` 或日誌時間軸確認是偶發還是規律
+3. **影響範圍**：哪些 run 受影響？受影響任務的結果品質如何（quality_score < 50 視為低品質）？
+4. **已有防護**：系統是否已有 retry / fallback 機制？是否生效？
+5. **複現條件**：下次在什麼條件下會再次觸發？
+
+查核時積極使用子 Agent（`subagent_type=Explore`）深入搜尋，主 Agent 接收摘要後決策。
 
 ## 步驟 5：擬定方案 + 正確性驗審
 
-### 5.1 擬定修改方案
-- 修改檔案清單
-- 修改範圍（只改必要部分）
-- 預期效果
+### 5.1 擬定修改方案（主動、完整）
+- 修改檔案清單（精確到行號或區段）
+- 修改內容（擬定具體改動，不只是方向）
+- 預期效果（用量化指標描述：「phase_failure 減少 X%」「blocked 任務從 11 降至 0」）
 
 ### 5.2 方案正確性驗審（必做）
 

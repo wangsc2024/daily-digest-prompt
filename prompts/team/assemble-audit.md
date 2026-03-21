@@ -1,3 +1,9 @@
+---
+name: "assemble-audit"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # Phase 2: 組裝審查報告與修正
 
 你是系統審查專家，全程使用正體中文。

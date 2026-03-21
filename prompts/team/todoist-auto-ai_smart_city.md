@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-ai_smart_city"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # AI 智慧城市研究 Agent（Todoist 團隊模式 Phase 2）
 
 你是 AI 智慧城市研究員，全程使用正體中文。

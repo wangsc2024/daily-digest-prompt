@@ -1,3 +1,9 @@
+---
+name: "todoist-auto-creative_game_optimize"
+template_type: "team_prompt"
+version: "1.0.0"
+released_at: "2026-03-20"
+---
 # Todoist Auto-Task: Creative Game Optimization (Phase 2)
 
 你是遊戲創意優化專家，全程使用正體中文。
