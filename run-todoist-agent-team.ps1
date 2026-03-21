@@ -112,6 +112,15 @@ New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null
 New-Item -ItemType Directory -Force -Path $ResultsDir | Out-Null
 
+# ─── Loop-State 自動清理（保留 3 天，防止檔案膨脹）───
+$loopStatePattern = Join-Path $AgentDir "state\loop-state-*.json"
+$loopStateFiles = Get-ChildItem $loopStatePattern -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-3) }
+if ($loopStateFiles.Count -gt 0) {
+    $loopStateFiles | Remove-Item -Force -ErrorAction SilentlyContinue
+    Write-Host "[CLEANUP] Removed $($loopStateFiles.Count) stale loop-state files (>3 days old)"
+}
+
 # Generate log filename
 $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $LogFile = "$LogDir\todoist-team_$Timestamp.log"
@@ -1292,6 +1301,50 @@ print(json.dumps({'starvation_count': len(zero_tasks), 'fairness_score': fairnes
 }
 
 # ============================================
+# Phase 0d: Workflow 自動引用前置注入
+# 讀取 config/agent-extra-reads.yaml：
+#   enabled: false → 不注入（Agent 靠 preamble.md 自律讀取 workflows/index.yaml）
+#   enabled: true  → 將 global_reads[].path 組裝為前置指示，注入到 Phase 2 每個 prompt 開頭
+# 預設 enabled=false，不影響現有執行流程。
+# 啟用方式：將 config/agent-extra-reads.yaml 的 enabled 改為 true。
+# ============================================
+$script:WorkflowInjectPrefix = ""
+$extraReadsPath = Join-Path $AgentDir "config\agent-extra-reads.yaml"
+if (Test-Path $extraReadsPath) {
+    try {
+        $extraReadsCfg = uv run --project $AgentDir python -X utf8 -c @"
+import json, yaml
+with open(r'$($extraReadsPath -replace '\\', '\\\\')', encoding='utf-8') as f:
+    cfg = yaml.safe_load(f)
+print(json.dumps({'enabled': bool(cfg.get('enabled', False)), 'global_reads': cfg.get('global_reads', [])}))
+"@ 2>$null
+        if ($extraReadsCfg) {
+            $cfg = ConvertFrom-Json $extraReadsCfg
+            if ($cfg.enabled -eq $true) {
+                $pathList = @($cfg.global_reads | Where-Object { $_.path } | ForEach-Object { "- $($_.path)" }) -join "`n"
+                if ($pathList) {
+                    $script:WorkflowInjectPrefix = @"
+
+## 執行前置讀取（自動注入，來自 config/agent-extra-reads.yaml）
+在執行主要任務的第一個步驟之前，讀取以下 workflow 索引：
+$pathList
+然後依你的 task_key 篩選 task_types 匹配的 entries，讀取對應 workflow 文件並遵守其規範。
+
+"@
+                    Write-Log "[Phase0d] Workflow 注入前綴已準備（$(@($cfg.global_reads).Count) 個 global reads）"
+                }
+            } else {
+                Write-Log "[Phase0d] agent-extra-reads.yaml enabled=false，略過注入（Agent 靠 preamble 自律讀取）"
+            }
+        }
+    } catch {
+        Write-Log "[Phase0d] WARN: agent-extra-reads.yaml 讀取失敗，略過注入: $($_.Exception.Message)"
+    }
+} else {
+    Write-Log "[Phase0d] agent-extra-reads.yaml 不存在，略過"
+}
+
+# ============================================
 # Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
 # 用 Groq Llama 8B 快速判斷今日任務複雜度
 # 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
@@ -2111,6 +2164,12 @@ elseif ($plan.plan_type -eq "auto") {
             }
 
             $promptContent = Strip-Frontmatter (Get-Content -Path $promptToUse -Raw -Encoding UTF8)
+
+            # Phase 0d: Workflow 前置注入（agent-extra-reads.yaml enabled=true 時有效）
+            if ($script:WorkflowInjectPrefix -and $script:WorkflowInjectPrefix.Length -gt 0) {
+                $promptContent = $script:WorkflowInjectPrefix + $promptContent
+                Write-Log "[Phase2] Phase0d workflow prefix injected for $normalizedKey"
+            }
 
             # G10: 若 todoist-plan.json 中有 prompt_content，前置到 prompt 開頭
             # JSON null → PS $null；字串 "null" 亦排除（防 LLM 將 null 輸出為字串）
@@ -2942,8 +3001,9 @@ while ($attempt -le $MaxPhase3Retries) {
         if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
             # ─── 偵測 LLM 對話性回應（未真正執行組裝）───
             $outputText = $output -join "`n"
-            # 行首錨定：避免 LLM 正常輸出中引用這些短語時誤判（如 "提示用戶：請問你希望..."）
-            $conversationalPattern = '(?m)^\s*(?:你貼了|已收到.*完整內容|請問你希望我做什麼|請問需要我做什麼|請說明你的需求)'
+            # ADR-20260322-log-audit: 修正過嚴 regex，涵蓋「請問你想要我做什麼」等變體
+            # 移除 ^ 行首錨定（因 log 有 [assemble] 前綴），改匹配行內任意位置
+            $conversationalPattern = '(?:你貼了|已收到.*完整內容|請問你.*(?:希望|想要|需要).*做什麼|請說明你的需求|請告訴我你的需求)'
             if ($outputText -match $conversationalPattern) {
                 $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
                 Write-Log "[Phase3] WARN: LLM 給出對話性回應（${phase3Seconds}s），未執行組裝，標記為失敗重試"

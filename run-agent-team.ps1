@@ -47,6 +47,15 @@ New-Item -ItemType Directory -Force -Path "$AgentDir\context" | Out-Null
 New-Item -ItemType Directory -Force -Path "$AgentDir\cache" | Out-Null
 New-Item -ItemType Directory -Force -Path $ResultsDir | Out-Null
 
+# ─── Loop-State 自動清理（保留 3 天，防止檔案膨脹）───
+$loopStatePattern = Join-Path $AgentDir "state\loop-state-*.json"
+$loopStateFiles = Get-ChildItem $loopStatePattern -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-3) }
+if ($loopStateFiles.Count -gt 0) {
+    $loopStateFiles | Remove-Item -Force -ErrorAction SilentlyContinue
+    Write-Host "[CLEANUP] Removed $($loopStateFiles.Count) stale loop-state files (>3 days old)"
+}
+
 # ─── Instance Lock（防止同一腳本多實例並行）───
 $LockFile = "$AgentDir\state\run-agent-team.lock"
 if (Test-Path $LockFile) {
