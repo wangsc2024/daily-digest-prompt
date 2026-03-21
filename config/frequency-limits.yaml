@@ -633,19 +633,19 @@ tasks:
     skills: [knowledge-query, kb-research-strategist, web-research, github-scout]
     description: "從 GitHub 選出 AI 工作流自動化熱門專案（n8n/Dify/AutoGen/LangGraph 等），經 kb-research-strategist 優化選題後深度研究並將報告納入知識庫"
 
-  # --- GitHub 靈感群組（共 0 次/日，暫停）---
+  # --- GitHub 靈感群組（共 2 次/日）---
   github_scout:
     name: "GitHub 靈感蒐集"
-    daily_limit: 1
+    daily_limit: 2
     counter_field: "github_scout_count"
     template: "templates/auto-tasks/github-scout.md"
-    template_version: 1
+    template_version: 2
     history_type: "github_scout"
     execution_order: 15  # 原 23，前移至 arch_evolution(17) 之前（原 14/15 由 disabled 任務讓出），當輪即可被決策並落實
-    timeout_seconds: 600  # WebSearch×2 + WebFetch + 分析（無 KB 匯入，輕量）
+    timeout_seconds: 1800  # WebSearch×2 + WebFetch + 分析 + 落實方案研擬 + KB 匯入 + 審查優化 + 落實
     result_suffix: "json"
     skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
-    description: "自動蒐集 GitHub 熱門專案靈感，分析與本系統的改進機會（僅週三/週日執行）"
+    description: "自動蒐集 GitHub 熱門專案靈感，分析改進機會，研擬落實方案存 KB 並審查優化後主動落實（每日 2 次，全天執行）"
 
   # --- Podcast 生成群組（共 4 次/日）---
   podcast_create:
@@ -656,7 +656,7 @@ tasks:
     template_version: 2
     history_type: "podcast_create"
     execution_order: 21
-    timeout_seconds: 2400
+    timeout_seconds: 4000
     result_suffix: "json"
     skills: [knowledge-query, ntfy-notify, deep-research]
     description: "評分非佛學類別的 KB 筆記，選出最佳 3 篇（Deep Research P1-P5 確立學習目標+KB 豐富化+三角佐證），生成雙主持人對話腳本（P6 學習導向），P7 品質審查後 TTS 合成上傳 R2 並通知"
@@ -669,7 +669,7 @@ tasks:
     template_version: 2
     history_type: "podcast_jiaoguangzong"
     execution_order: 22
-    timeout_seconds: 2400
+    timeout_seconds: 4000
     result_suffix: "json"
     skills: [knowledge-query, ntfy-notify, deep-research]
     description: "從知識庫選取教觀綱宗未用筆記，Deep Research P1-P5 確立學習目標+KB 豐富化+三角佐證，生成雙主持人對話腳本（30-40 輪，P6 學習導向），P7 品質審查後 TTS 合成上傳 R2。與 podcast_create 共享 podcast-history.json 去重機制"
@@ -697,7 +697,7 @@ tasks:
     template_version: 1
     history_type: "ntfy_review"
     execution_order: 25
-    timeout_seconds: 1200
+    timeout_seconds: 3000
     result_suffix: "json"
     skills: [ntfy-notify, system-insight, self-heal, knowledge-query]
     description: "以 Claude Opus 4.6 審查 24h 內 logs/ntfy/ 下的通知日誌，識別失敗、異常模式與優化機會；若有問題則執行系統優化工作流（self_heal/system_insight），最後以格式化 ntfy 通知回報審查結果"

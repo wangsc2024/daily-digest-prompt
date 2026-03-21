@@ -62,7 +62,7 @@ todoist_team:
     chatroom_optimize: 480      # sub-agent log 分析 + routing.yaml 調整 + ntfy
     git_push: 600               # git log/diff + 隱私檢查 + commit + push + KB 同步
     log_audit: 720              # sub-agent 讀 10+ log + 分析修正 + KB 匯入
-    github_scout: 600           # WebSearch×2 + WebFetch + 分析（無 KB 匯入，輕量）
+    github_scout: 1800          # WebSearch×2 + WebFetch + 分析 + 落實方案研擬 + KB 匯入 + 審查優化（最多 3 輪）+ 落實
     # === 創意類 ===
     creative_game_optimize: 900 # sync-games.ps1 npm build 最長 ~15 min
     qa_optimize: 720            # WebSearch CVE + Grep 掃描 + 程式碼修改

@@ -95,7 +95,7 @@
           "description": "產出檔案路徑（相對專案根目錄）",
           "examples": [
             "config/schemas/results-auto-task-schema.json",
-            "docs/workflows/ooda-validation-checklist.md",
+            "workflows/ooda-validation-checklist.md",
             "context/arch-decision.json"
           ]
         },
