@@ -6,15 +6,17 @@ Hook 共用工具模組 — 提供 YAML 配置載入與結構化日誌記錄。
 """
 import json
 import os
+import random
 import re
 import subprocess
 import sys
+from collections import OrderedDict
 from datetime import datetime
 
-# 模組層級正則編譯快取（避免重複編譯 hot path 中的 pattern）
+# 模組層級正則編譯快取（真正 LRU：最近使用的移到末尾，淘汰最舊的前半）
 # 設有上限防止長時間運行進程記憶體膨脹
 _REGEX_CACHE_MAXSIZE = 512
-_compiled_regex_cache: dict = {}
+_compiled_regex_cache: OrderedDict = OrderedDict()
 
 # 模組層級 YAML 配置快取（避免同一進程多次開檔讀取 hook-rules.yaml）
 _yaml_config_cache: dict = {"loaded": False, "data": None}
@@ -31,17 +33,20 @@ except ImportError:
 def get_compiled_regex(pattern: str, flags: int = 0):
     """從快取取得已編譯正則，未命中時編譯並快取。
 
-    快取上限 _REGEX_CACHE_MAXSIZE，超過時清除最舊一半條目，
-    防止長時間運行的團隊模式進程記憶體膨脹。
+    使用 OrderedDict 實現真正 LRU：命中時 move_to_end，
+    淘汰時移除最舊（最久未使用）的前半條目。
+    快取上限 _REGEX_CACHE_MAXSIZE，防止長時間運行的團隊模式進程記憶體膨脹。
     """
     key = (pattern, flags)
-    if key not in _compiled_regex_cache:
-        if len(_compiled_regex_cache) >= _REGEX_CACHE_MAXSIZE:
-            # 淘汰前半快取（近似 LRU）
-            keys_to_remove = list(_compiled_regex_cache.keys())[:_REGEX_CACHE_MAXSIZE // 2]
-            for k in keys_to_remove:
-                del _compiled_regex_cache[k]
-        _compiled_regex_cache[key] = re.compile(pattern, flags)
+    if key in _compiled_regex_cache:
+        _compiled_regex_cache.move_to_end(key)
+        return _compiled_regex_cache[key]
+    if len(_compiled_regex_cache) >= _REGEX_CACHE_MAXSIZE:
+        # 漸進式淘汰最舊（最久未使用）的 10% 條目，避免雪崩式重編譯
+        evict_count = max(1, _REGEX_CACHE_MAXSIZE // 10)
+        for _ in range(evict_count):
+            _compiled_regex_cache.popitem(last=False)
+    _compiled_regex_cache[key] = re.compile(pattern, flags)
     return _compiled_regex_cache[key]
 
 
@@ -54,6 +59,20 @@ API_SOURCE_PATTERNS = {
     "ntfy": ["ntfy.sh"],
     "gmail": ["gmail.googleapis"],
 }
+
+
+def detect_api_sources(text: str) -> list:
+    """Detect which API sources are referenced in a command/path.
+
+    Uses the shared API_SOURCE_PATTERNS dict for consistent detection
+    across post_tool_logger and agent_guardian.
+    """
+    sources = []
+    lower = text.lower()
+    for source, patterns in API_SOURCE_PATTERNS.items():
+        if any(p in lower for p in patterns):
+            sources.append(source)
+    return sources
 
 
 # Prompt Injection 偵測 patterns（供 hook 或 Python 腳本引用）
@@ -230,7 +249,8 @@ def filter_rules_by_preset(rules, section_key="bash_rules"):
 
     enabled_priorities = preset_config.get("enabled_priorities", ["critical", "high", "medium", "low"])
 
-    filtered = [r for r in rules if r.get("priority", "medium") in enabled_priorities]
+    # ADR-031: 過濾 enabled: false 的規則（預設 true，可透過 YAML 停用個別規則）
+    filtered = [r for r in rules if r.get("enabled", True) and r.get("priority", "medium") in enabled_priorities]
 
     if not filtered:
         return rules
@@ -337,30 +357,16 @@ class file_lock:
 
     def __enter__(self):
         import time
-        self._lock_fd = open(self.lock_path, "w")
-        deadline = time.monotonic() + self.timeout_seconds
         try:
-            import msvcrt
-            # 使用 LK_NBLCK 搭配重試迴圈，避免無限阻塞導致死鎖
-            while True:
-                try:
-                    msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
-                    break  # 取得鎖
-                except OSError:
-                    if time.monotonic() >= deadline:
-                        self._lock_fd.close()
-                        self._lock_fd = None
-                        raise TimeoutError(
-                            f"file_lock 超時（{self.timeout_seconds}s）: {self.lock_path}"
-                        )
-                    time.sleep(0.1)
-        except ImportError:
+            self._lock_fd = open(self.lock_path, "w")
+            deadline = time.monotonic() + self.timeout_seconds
             try:
-                import fcntl
+                import msvcrt
+                # 使用 LK_NBLCK 搭配重試迴圈，避免無限阻塞導致死鎖
                 while True:
                     try:
-                        fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                        break
+                        msvcrt.locking(self._lock_fd.fileno(), msvcrt.LK_NBLCK, 1)
+                        break  # 取得鎖
                     except OSError:
                         if time.monotonic() >= deadline:
                             self._lock_fd.close()
@@ -368,9 +374,32 @@ class file_lock:
                             raise TimeoutError(
                                 f"file_lock 超時（{self.timeout_seconds}s）: {self.lock_path}"
                             )
-                        time.sleep(0.1)
+                        time.sleep(0.1 + random.random() * 0.05)
             except ImportError:
-                pass  # 無鎖可用時退化為無鎖模式
+                try:
+                    import fcntl
+                    while True:
+                        try:
+                            fcntl.flock(self._lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                            break
+                        except OSError:
+                            if time.monotonic() >= deadline:
+                                self._lock_fd.close()
+                                self._lock_fd = None
+                                raise TimeoutError(
+                                    f"file_lock 超時（{self.timeout_seconds}s）: {self.lock_path}"
+                                )
+                            time.sleep(0.1 + random.random() * 0.05)
+                except ImportError:
+                    pass  # 無鎖可用時退化為無鎖模式
+        except TimeoutError:
+            raise  # 超時例外向上傳遞
+        except Exception:
+            # 非預期例外時確保已開啟的 fd 被關閉，防止資源洩漏
+            if self._lock_fd:
+                self._lock_fd.close()
+                self._lock_fd = None
+            raise
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -428,8 +457,8 @@ def send_ntfy_alert(title: str, message: str, severity: str = "warning", topic: 
              "-d", f"@{fd.name}", "https://ntfy.sh"],
             capture_output=True, timeout=10,
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"[hook_utils] send_ntfy_alert 失敗: {exc}", file=sys.stderr)
     finally:
         if fd and os.path.exists(fd.name):
             try:

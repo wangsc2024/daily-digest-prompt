@@ -131,13 +131,13 @@ BENIGN_PATTERNS = _load_benign_patterns_from_yaml()
 
 
 def detect_api_sources(text: str) -> list:
-    """Detect which API sources are referenced in a command/path."""
-    sources = []
-    lower = text.lower()
-    for source, patterns in API_SOURCE_PATTERNS.items():
-        if any(p in lower for p in patterns):
-            sources.append(source)
-    return sources
+    """Detect which API sources are referenced in a command/path.
+
+    Delegates to hook_utils.detect_api_sources() for single-source-of-truth.
+    Kept here for backward compatibility (tests import from this module).
+    """
+    from hook_utils import detect_api_sources as _detect
+    return _detect(text)
 
 
 def _cmd_has_word(command: str, word: str) -> bool:
@@ -223,6 +223,10 @@ def classify_write(tool_input: dict) -> tuple:
         tags.append("history-write")
     if "SKILL.md" in path or path.endswith("SKILL.md"):
         tags.append("skill-modified")  # 高優先級事件
+    # ADR-030: 結果檔 artifact 偵測
+    _norm_path = path.replace("\\", "/")
+    if "/results/" in _norm_path or _norm_path.startswith("results/"):
+        tags.append("artifact-write")
 
     return summary, tags
 
@@ -378,7 +382,12 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
 def main():
     try:
         data = json.load(sys.stdin)
-    except (json.JSONDecodeError, Exception):
+    except json.JSONDecodeError as e:
+        print(f"[post_tool_logger] JSON parse failed: {e}", file=sys.stderr)
+        print("{}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"[post_tool_logger] stdin read error: {e}", file=sys.stderr)
         print("{}")
         sys.exit(0)
 
@@ -555,6 +564,7 @@ def main():
         "has_error": has_error,
         "tags": tags,
         "cause_chain": cause_chain,   # ADR-030: 因果鏈（task_key/cache_status/failure_point）
+        "artifacts": ([tool_input.get("file_path", "")] if "artifact-write" in tags else []),  # ADR-030
     }
 
     # Add loop detection details if detected

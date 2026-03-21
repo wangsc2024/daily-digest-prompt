@@ -466,6 +466,48 @@ SCHEMAS = {
             "audit_team": ["phase1_timeout", "phase2_timeout"],
         },
     },
+    "budget.yaml": {
+        "required_keys": ["version", "daily_budget"],
+        "nested_required": {
+            "daily_budget": ["claude_tokens", "groq_calls", "warn_threshold", "suspend_threshold"],
+        },
+    },
+    "slo.yaml": {
+        "required_keys": ["version", "slos", "budget_policy"],
+        "list_fields": {
+            "slos": ["id", "name", "target", "metric_direction"],
+        },
+    },
+    "llm-router.yaml": {
+        "required_keys": ["version", "providers", "routing_rules"],
+    },
+    "notification-events.yaml": {
+        "required_keys": ["version", "events"],
+    },
+    "ooda-workflow.yaml": {
+        "required_keys": [],
+    },
+    "autonomous-harness.yaml": {
+        "required_keys": ["version"],
+    },
+    "agent-pool.yaml": {
+        "required_keys": [],
+    },
+    "kb-content-scoring.yaml": {
+        "required_keys": [],
+    },
+    "media-pipeline.yaml": {
+        "required_keys": [],
+    },
+    "podcast.yaml": {
+        "required_keys": [],
+    },
+    "long_term_memory.yaml": {
+        "required_keys": ["version"],
+    },
+    "insight-briefing-workflow.yaml": {
+        "required_keys": [],
+    },
 }
 
 
@@ -856,7 +898,10 @@ def migrate_config(config_name, target_version=None, config_dir=None, dry_run=Tr
     # 8. 互動式確認（如果啟用）
     if interactive and not dry_run:
         print("\n".join(messages))
-        response = input("\n❓ 是否套用這些變更？(y/N): ")
+        try:
+            response = input("\n❓ 是否套用這些變更？(y/N): ")
+        except EOFError:
+            return False, ["❌ 非互動環境，無法確認。請使用 --yes 參數略過確認"]
         if response.lower() != "y":
             return False, ["❌ 用戶取消遷移"]
 

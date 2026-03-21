@@ -6,7 +6,7 @@ PreToolUse:Write/Edit Guard — 檔案寫入機器強制攔截。
   1. 寫入 nul 檔案 — Windows 上會建立實體檔案
   2. 寫入 scheduler-state.json — 該檔案由 PowerShell 腳本獨佔維護
   3. 寫入敏感檔案（.env, credentials.json 等）
-  4. 路徑遍歷攻擊（../ 逃逸專案目錄）
+  4. 路徑遍歷／專案外寫入 — 預設僅告警與 ntfy，不阻擋（action: warn_only）
 
 規則來源：config/hook-rules.yaml（不可用時回退至內建預設值）。
 攔截事件記錄至 logs/structured/YYYY-MM-DD.jsonl。
@@ -45,15 +45,17 @@ FALLBACK_WRITE_RULES = [
     {
         "id": "sensitive-files",
         "check": "basename_in",
-        "values": [".env", "credentials.json", "token.json", "secrets.json", ".htpasswd"],
+        "values": [".env", ".env.local", "credentials.json", "token.json",
+                   "secrets.json", ".htpasswd", "id_rsa", "id_ed25519"],
         "reason_template": "禁止寫入敏感檔案: {matched}",
         "guard_tag": "secret-guard",
     },
     {
         "id": "path-traversal",
         "check": "path_traversal",
-        "reason_template": "禁止路徑遍歷攻擊: 目標路徑在專案目錄外 ({resolved})",
+        "reason_template": "偵測到專案目錄外寫入（原路徑遍歷防護）: ({resolved})",
         "guard_tag": "traversal-guard",
+        "action": "warn_only",
     },
     # 註解：SKILL.md 保護規則已移除，因為會阻擋用戶明確要求的合法修改
     # 改依賴 Git 版本控制作為安全網
@@ -145,7 +147,9 @@ def check_write_path(file_path, rules=None, project_root=None):
         project_root: 專案根目錄（用於路徑遍歷檢查，預設為 cwd）
 
     Returns:
-        (blocked, reason, guard_tag) — 未命中時 reason 與 guard_tag 為 None。
+        (blocked, reason, guard_tag, traversal_warn) — 未命中時 reason、guard_tag 為 None，
+        traversal_warn 為 False。path_traversal 且 action=warn_only 時 blocked=False、
+        traversal_warn=True（僅記錄／通知，不阻擋）。
     """
     if rules is None:
         rules = load_write_rules()
@@ -162,24 +166,27 @@ def check_write_path(file_path, rules=None, project_root=None):
 
         if check_type == "basename_equals":
             if _check_basename_equals(rule, basename):
-                return True, _get_reason(rule), guard_tag
+                return True, _get_reason(rule), guard_tag, False
 
         elif check_type == "path_contains":
             value = rule.get("value", "")
             if value and value in file_path:
-                return True, _get_reason(rule), guard_tag
+                return True, _get_reason(rule), guard_tag, False
 
         elif check_type == "basename_in":
             matched, matched_value = _check_basename_in(rule, basename, file_path)
             if matched:
-                return True, _get_reason(rule, matched=matched_value), guard_tag
+                return True, _get_reason(rule, matched=matched_value), guard_tag, False
 
         elif check_type == "path_traversal":
             escaped, resolved = _check_path_traversal(file_path, project_root, allowlist)
             if escaped:
-                return True, _get_reason(rule, resolved=resolved), guard_tag
+                reason = _get_reason(rule, resolved=resolved)
+                if rule.get("action") == "warn_only":
+                    return False, reason, guard_tag, True
+                return True, reason, guard_tag, False
 
-    return False, None, None
+    return False, None, None, False
 
 
 # ADR-026：results/todoist-auto-*.json 的 schema 驗證
@@ -233,16 +240,25 @@ def main():
     file_path = tool_input.get("file_path", "")
     session_id = data.get("session_id", "")
 
-    blocked, reason, guard_tag = check_write_path(file_path)
+    blocked, reason, guard_tag, traversal_warn = check_write_path(file_path)
 
-    if blocked:
+    if traversal_warn:
+        log_blocked_event(
+            session_id, tool_name, file_path, reason, guard_tag, level="warn"
+        )
+        send_ntfy_alert(
+            f"[Write Guard] {guard_tag}（已放行）",
+            f"路徑: {file_path}\n原因: {reason}\n（僅通知，未阻擋寫入）",
+            "warning",
+        )
+    elif blocked:
         log_blocked_event(session_id, tool_name, file_path, reason, guard_tag)
         send_ntfy_alert(
             f"[Write Guard] {guard_tag}",
             f"路徑: {file_path}\n原因: {reason}",
             "warning",
         )
-        return output_decision("allow")
+        return output_decision("block", reason)
 
     # ADR-026：todoist-auto 結果檔 schema 驗證（warning-only，不攔截）
     if _AUTO_TASK_RESULT_PATTERN.search(file_path):

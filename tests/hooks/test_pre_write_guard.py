@@ -53,7 +53,7 @@ class TestNulFile:
         r"d:\Source\daily-digest-prompt\nul",
     ])
     def test_should_block(self, path):
-        blocked, _, tag = check_write_path(path)
+        blocked, _, tag, _ = check_write_path(path)
         assert blocked, f"Expected block for: {path}"
         assert tag == "nul-guard"
 
@@ -66,7 +66,7 @@ class TestNulFile:
     ])
     def test_should_allow(self, path):
         """非 nul basename 的檔案應放行（使用相對路徑避免觸發路徑遍歷規則）。"""
-        blocked, _, _ = check_write_path(path)
+        blocked, _, _, _ = check_write_path(path)
         assert not blocked, f"Should not block: {path}"
 
 
@@ -79,7 +79,7 @@ class TestSchedulerState:
         "scheduler-state.json",
     ])
     def test_should_block(self, path):
-        blocked, reason, tag = check_write_path(path)
+        blocked, reason, tag, _ = check_write_path(path)
         assert blocked, f"Expected block for: {path}"
         assert "scheduler-state" in reason
         assert tag == "state-guard"
@@ -90,7 +90,7 @@ class TestSchedulerState:
         "config.json",
     ])
     def test_should_allow(self, path):
-        blocked, _, _ = check_write_path(path)
+        blocked, _, _, _ = check_write_path(path)
         assert not blocked, f"Should not block: {path}"
 
 
@@ -107,7 +107,7 @@ class TestSensitiveFiles:
         r"d:\project\config\credentials.json",
     ])
     def test_should_block(self, path):
-        blocked, _, tag = check_write_path(path)
+        blocked, _, tag, _ = check_write_path(path)
         assert blocked, f"Expected block for: {path}"
         assert tag == "secret-guard"
 
@@ -119,26 +119,29 @@ class TestSensitiveFiles:
         "hook-rules.yaml",
     ])
     def test_should_allow(self, path):
-        blocked, _, _ = check_write_path(path)
+        blocked, _, _, _ = check_write_path(path)
         assert not blocked, f"Should not block: {path}"
 
     def test_reason_includes_matched_file(self):
         """攔截原因應包含命中的檔名。"""
-        blocked, reason, _ = check_write_path(".env")
+        blocked, reason, _, _ = check_write_path(".env")
         assert blocked
         assert ".env" in reason
 
 
 class TestPathTraversal:
-    """規則：path-traversal — 攔截路徑遍歷攻擊。"""
+    """規則：path-traversal — 專案外路徑僅告警（warn_only），不阻擋。"""
 
-    def test_should_block_escape(self, tmp_path):
-        """逃逸專案根目錄的路徑應被攔截。"""
+    def test_warn_only_escape(self, tmp_path):
+        """逃逸專案根目錄的路徑應觸發 traversal_warn，但不 blocked。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         evil_path = os.path.join(fake_root, "..", "..", "etc", "passwd")
-        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
-        assert blocked, f"Expected block for: {evil_path}"
+        blocked, _, tag, traversal_warn = check_write_path(
+            evil_path, project_root=fake_root
+        )
+        assert not blocked, f"Expected allow (warn-only) for: {evil_path}"
+        assert traversal_warn
         assert tag == "traversal-guard"
 
     def test_should_allow_within_project(self, tmp_path):
@@ -146,24 +149,29 @@ class TestPathTraversal:
         fake_root = str(tmp_path / "project")
         os.makedirs(os.path.join(fake_root, "sub"), exist_ok=True)
         safe_path = os.path.join(fake_root, "sub", "..", "file.txt")
-        blocked, _, _ = check_write_path(safe_path, project_root=fake_root)
+        blocked, _, _, tw = check_write_path(safe_path, project_root=fake_root)
         assert not blocked, f"Should not block: {safe_path}"
+        assert not tw
 
     def test_no_dotdot_allows(self):
         """不含 .. 的路徑不應觸發遍歷檢查。"""
-        blocked, _, _ = check_write_path(
+        blocked, _, _, tw = check_write_path(
             r"d:\Source\daily-digest-prompt\config\test.yaml",
             project_root=r"d:\Source\daily-digest-prompt",
         )
         assert not blocked
+        assert not tw
 
     def test_reason_includes_resolved_path(self, tmp_path):
-        """攔截原因應包含解析後的實際路徑。"""
+        """告警原因應包含解析後的實際路徑。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         evil_path = os.path.join(fake_root, "..", "..", "etc", "passwd")
-        blocked, reason, _ = check_write_path(evil_path, project_root=fake_root)
-        assert blocked
+        blocked, reason, _, traversal_warn = check_write_path(
+            evil_path, project_root=fake_root
+        )
+        assert not blocked
+        assert traversal_warn
         assert "passwd" in reason
 
 
@@ -181,8 +189,8 @@ class TestFallbackBehavior:
         ("hook-rules.yaml", False),
     ])
     def test_fallback_matches_yaml(self, path, expected_blocked):
-        blocked_fallback, _, _ = check_write_path(path, FALLBACK_WRITE_RULES)
-        blocked_yaml, _, _ = check_write_path(path, load_write_rules())
+        blocked_fallback, _, _, _ = check_write_path(path, FALLBACK_WRITE_RULES)
+        blocked_yaml, _, _, _ = check_write_path(path, load_write_rules())
         assert blocked_fallback == expected_blocked
         assert blocked_yaml == expected_blocked
         assert blocked_fallback == blocked_yaml
@@ -192,49 +200,47 @@ class TestEdgeCases:
     """邊界條件。"""
 
     def test_empty_path(self):
-        blocked, _, _ = check_write_path("")
+        blocked, _, _, _ = check_write_path("")
         assert not blocked
 
     def test_none_rules(self):
         """rules=None 應自動載入規則。"""
-        blocked, _, _ = check_write_path("normal.txt", None)
+        blocked, _, _, _ = check_write_path("normal.txt", None)
         assert not blocked
 
     def test_empty_rules_list(self):
         """空規則清單應放行所有路徑。"""
-        blocked, _, _ = check_write_path("nul", [])
+        blocked, _, _, _ = check_write_path("nul", [])
         assert not blocked
 
     def test_unknown_check_type_skipped(self):
         """未知的 check 類型應安全跳過（不引發例外）。"""
         rules = [{"id": "bad", "check": "nonexistent_type", "guard_tag": "test"}]
-        blocked, _, _ = check_write_path("anything", rules)
+        blocked, _, _, _ = check_write_path("anything", rules)
         assert not blocked
 
 
 class TestPathTraversalAbsolutePath:
-    """回歸測試：絕對路徑逃逸（P0-1 修復驗證）。
+    """回歸測試：絕對路徑專案外寫入仍會偵測並告警（warn_only），不阻擋。"""
 
-    修復前 _check_path_traversal 僅檢查 '..' 字元，
-    攻擊者可用不含 '..' 的絕對路徑直接逃逸專案目錄。
-    """
-
-    def test_absolute_path_outside_project_blocked(self, tmp_path):
-        """不含 .. 的絕對路徑指向專案外應被攔截。"""
+    def test_absolute_path_outside_project_warn_only(self, tmp_path):
+        """不含 .. 的絕對路徑指向專案外應 traversal_warn，不 block。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         evil_path = str(tmp_path / "outside" / "evil.txt")
-        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
-        assert blocked, f"Expected block for absolute escape: {evil_path}"
+        blocked, _, tag, tw = check_write_path(evil_path, project_root=fake_root)
+        assert not blocked, f"Expected allow (warn-only): {evil_path}"
+        assert tw
         assert tag == "traversal-guard"
 
-    def test_absolute_path_system_dir_blocked(self, tmp_path):
-        """寫入系統目錄（如 C:\\Windows）應被攔截。"""
+    def test_absolute_path_system_dir_warn_only(self, tmp_path):
+        """寫入系統目錄路徑應告警但不阻擋。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         system_path = r"C:\Windows\System32\evil.dll"
-        blocked, _, tag = check_write_path(system_path, project_root=fake_root)
-        assert blocked, f"Expected block for system path: {system_path}"
+        blocked, _, tag, tw = check_write_path(system_path, project_root=fake_root)
+        assert not blocked, f"Expected allow (warn-only): {system_path}"
+        assert tw
         assert tag == "traversal-guard"
 
     def test_absolute_path_within_project_allowed(self, tmp_path):
@@ -242,31 +248,30 @@ class TestPathTraversalAbsolutePath:
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         safe_path = os.path.join(fake_root, "config", "test.yaml")
-        blocked, _, _ = check_write_path(safe_path, project_root=fake_root)
+        blocked, _, _, tw = check_write_path(safe_path, project_root=fake_root)
         assert not blocked, f"Should not block: {safe_path}"
+        assert not tw
 
     def test_project_root_itself_allowed(self, tmp_path):
         """寫入專案根目錄本身應放行。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
-        blocked, _, _ = check_write_path(fake_root, project_root=fake_root)
+        blocked, _, _, tw = check_write_path(fake_root, project_root=fake_root)
         assert not blocked
+        assert not tw
 
-    def test_similar_prefix_dir_blocked(self, tmp_path):
-        """路徑前綴類似但非子目錄應被攔截（如 project-evil/ vs project/）。"""
+    def test_similar_prefix_dir_warn_only(self, tmp_path):
+        """路徑前綴類似但非子目錄應告警（如 project-evil/ vs project/）。"""
         fake_root = str(tmp_path / "project")
         os.makedirs(fake_root, exist_ok=True)
         evil_path = str(tmp_path / "project-evil" / "payload.txt")
-        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
-        assert blocked, f"Expected block for prefix trick: {evil_path}"
+        blocked, _, tag, tw = check_write_path(evil_path, project_root=fake_root)
+        assert not blocked, f"Expected allow (warn-only): {evil_path}"
+        assert tw
         assert tag == "traversal-guard"
 
-    def test_symlink_escape_blocked(self, tmp_path):
-        """Symlink 逃逸：專案內的 symlink 指向外部目錄應被攔截。
-
-        修復 2026-03-20：原使用 abspath 不解析 symlink，攻擊者可建立
-        專案內的 symlink 指向外部敏感目錄繞過路徑遍歷檢查。
-        """
+    def test_symlink_escape_warn_only(self, tmp_path):
+        """Symlink 逃逸：解析後在專案外則告警但不阻擋。"""
         fake_root = str(tmp_path / "project")
         outside = str(tmp_path / "outside_secrets")
         os.makedirs(fake_root, exist_ok=True)
@@ -277,6 +282,27 @@ class TestPathTraversalAbsolutePath:
         except (OSError, NotImplementedError):
             pytest.skip("Symlink creation requires elevated privileges on this system")
         evil_path = os.path.join(link_path, "evil.txt")
-        blocked, _, tag = check_write_path(evil_path, project_root=fake_root)
-        assert blocked, f"Symlink escape should be blocked: {evil_path}"
+        blocked, _, tag, tw = check_write_path(evil_path, project_root=fake_root)
+        assert not blocked, f"Expected allow (warn-only): {evil_path}"
+        assert tw
+        assert tag == "traversal-guard"
+
+    def test_path_traversal_without_warn_only_still_blocks(self, tmp_path):
+        """未設 action: warn_only 時應維持阻擋（回歸安全預設）。"""
+        fake_root = str(tmp_path / "project")
+        os.makedirs(fake_root, exist_ok=True)
+        evil_path = str(tmp_path / "outside" / "evil.txt")
+        rules = [
+            {
+                "id": "path-traversal-strict",
+                "check": "path_traversal",
+                "reason_template": "block: ({resolved})",
+                "guard_tag": "traversal-guard",
+            }
+        ]
+        blocked, _, tag, tw = check_write_path(
+            evil_path, rules=rules, project_root=fake_root
+        )
+        assert blocked
+        assert not tw
         assert tag == "traversal-guard"

@@ -173,7 +173,7 @@ def main():
             f"路徑: {file_path}\n原因: {reason}",
             "warning",
         )
-        return output_decision("allow")
+        return output_decision("block", reason)
 
     return output_decision("allow")
 

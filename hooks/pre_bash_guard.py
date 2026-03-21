@@ -36,8 +36,18 @@ FALLBACK_BASH_RULES = [
     },
     {
         "id": "scheduler-state-write",
-        # 移除 contains 預檢查，改用精確的寫入操作匹配（排除 ls/cat/grep/python read 等只讀操作）
-        "pattern": r"(?<![0-9&])>\s*[^&].*scheduler-state\.json|>>\s*.*scheduler-state\.json|(tee|cp|mv)\s+.*scheduler-state\.json|echo\s+.*>\s*.*scheduler-state\.json",
+        # 精確的寫入操作匹配（排除 ls/cat/grep/python read 等只讀操作）
+        # 覆蓋向量：重導向、tee/cp/mv、echo、dd、install、sed -i、ln
+        "patterns": [
+            r"(?<![0-9&])>\s*[^&].*scheduler-state\.json",
+            r">>\s*.*scheduler-state\.json",
+            r"(tee|cp|mv)\s+.*scheduler-state\.json",
+            r"echo\s+.*>\s*.*scheduler-state\.json",
+            r"dd\s+.*of=.*scheduler-state\.json",
+            r"install\s+.*scheduler-state\.json",
+            r"sed\s+-i.*scheduler-state\.json",
+            r"ln\s+.*scheduler-state\.json",
+        ],
         "reason": "禁止 Agent 寫入 scheduler-state.json（此檔案由 PowerShell 腳本維護）",
         "guard_tag": "state-guard",
     },

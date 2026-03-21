@@ -186,11 +186,22 @@ class TestRouteGroqFallback:
         assert result["action"] == "skip_and_log"
         assert "task_type" in result
 
-    def test_generic_exception_returns_fallback_skipped(self, fake_usage_file):
+    def test_unknown_exception_propagates(self, fake_usage_file):
+        """未知異常（如 RuntimeError）不再被靜默吞掉，應向上傳播。"""
         with patch("tools.llm_router.load_config", return_value=MINIMAL_CONFIG), \
              patch("tools.llm_router._check_budget", return_value=None), \
              patch("tools.llm_router.call_groq_relay",
                    side_effect=RuntimeError("unexpected")), \
+             patch("tools.llm_router.TOKEN_USAGE_PATH", fake_usage_file):
+            with pytest.raises(RuntimeError, match="unexpected"):
+                route("news_summary", "test", dry_run=False)
+
+    def test_connection_error_returns_fallback_skipped(self, fake_usage_file):
+        """已知的連線錯誤應被捕獲並降級。"""
+        with patch("tools.llm_router.load_config", return_value=MINIMAL_CONFIG), \
+             patch("tools.llm_router._check_budget", return_value=None), \
+             patch("tools.llm_router.call_groq_relay",
+                   side_effect=ConnectionError("refused")), \
              patch("tools.llm_router.TOKEN_USAGE_PATH", fake_usage_file):
             result = route("news_summary", "test", dry_run=False)
 
