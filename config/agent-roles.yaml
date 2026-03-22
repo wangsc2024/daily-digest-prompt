@@ -1,0 +1,39 @@
+version: 1
+description: |
+  標準 Agent 角色定義。Agent 在執行前聲明角色（透過 preamble.md 的規則）。
+  post_tool_logger.py 偵測 log_prefix 並在結構化日誌中加入 agent-role 標籤。
+
+roles:
+  fetcher:
+    description: "負責 API 呼叫與資料抓取"
+    primary_tools: [Bash, Read]
+    log_prefix: "[FETCH]"
+    examples:
+      - todoist-query.md（步驟1）
+      - fetch-hackernews.md
+
+  analyst:
+    description: "負責分析、評分、路由決策"
+    primary_tools: [Read, Bash]
+    log_prefix: "[ANLZ]"
+    examples:
+      - todoist-query.md（步驟2路由）
+      - system-insight Skill
+
+  assembler:
+    description: "負責整合多源資料並輸出最終結果"
+    primary_tools: [Read, Write, Bash]
+    log_prefix: "[ASMB]"
+    examples:
+      - assemble-digest.md
+      - todoist-assemble.md
+
+  auditor:
+    description: "負責系統審查與一致性檢查"
+    primary_tools: [Read, Bash, Glob, Grep]
+    log_prefix: "[AUDT]"
+    examples:
+      - fetch-audit-dim*.md
+      - system-audit Skill
+
+multi_role_note: "一個 prompt 按階段切換角色時，宣告佔時最長的主要角色即可"

@@ -2840,19 +2840,18 @@
       "total_input": 510,
       "total_output": 0
     },
-    "0cfd694173b6": {
+    "b04d680eb798": {
       "tool": "Bash",
-      "summary_sample": "cd /d/Source/daily-digest-prompt && python -c \"\nimport json\n\nplans = json.load(open('tmp/implementation-plans.json'))\n\n# 第 1 輪審查\nfor plan in plans:\n  ",
+      "summary_sample": "cd /d/Source/daily-digest-prompt && mkdir -p skills/task-quality-gate && echo \"✅ 建立 skills/task-quality-gate/ 目錄\"",
       "tags": [
-        "python",
         "team-mode"
       ],
-      "count": 2,
-      "confidence": 0.15000000000000002,
-      "success_count": 2,
-      "first_seen": "2026-03-22T12:45:13.742031+08:00",
-      "last_seen": "2026-03-22T12:46:03.053197+08:00",
-      "total_input": 8150,
+      "count": 1,
+      "confidence": 0.1,
+      "success_count": 1,
+      "first_seen": "2026-03-22T12:46:46.298279+08:00",
+      "last_seen": "2026-03-22T12:46:46.298279+08:00",
+      "total_input": 178,
       "total_output": 0
     }
   },
