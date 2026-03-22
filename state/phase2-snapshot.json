@@ -1,9 +1,9 @@
 {
+  "run_id": null,
   "selected_tasks": [
-    "ntfy_review",
-    "future_plan_optimize"
+    "github_scout",
+    "system_insight"
   ],
   "skipped_resume": [],
-  "timestamp": "2026-03-22T08:02:27",
-  "run_id": null
+  "timestamp": "2026-03-22T12:32:23"
 }

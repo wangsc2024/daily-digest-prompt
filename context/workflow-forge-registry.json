@@ -88,6 +88,30 @@
         "mid_term": "結果 JSON 格式一致性提升至 95% 以上（目前約 70%）",
         "long_term": "avg_io_per_call 因減少重複格式說明而下降 10-15%"
       }
+    },
+    {
+      "date": "2026-03-22",
+      "artifact_path": "workflows/config-consistency-validation-checklist.md",
+      "gap_type": "consistency",
+      "gap_description": "config/*.yaml 中定義的路徑、task_key、skills 等欄位與實際檔案系統、SKILL_INDEX.md、prompt 模板可能不一致，缺乏自動驗證機制",
+      "priority": "P0",
+      "total_score": 90,
+      "impact_range": "所有 29 個自動任務 + config/*.yaml",
+      "integration_status": "integrated",
+      "documented_in": "docs/ARCHITECTURE.md",
+      "checklist_version": "1.0.0",
+      "validation_items": 30,
+      "validation_categories": 7,
+      "signal_source": [
+        "analyze-config.ps1: 配置膨脹指標",
+        "CLAUDE.md: 自動任務命名規範底線規則",
+        "system-insight.json: auto_task_fairness=1.211 (任務分配不均)"
+      ],
+      "expected_outcome": {
+        "immediate": "所有 config 維護者有明確檢查列表，修改 config 時可自我驗證一致性",
+        "mid_term": "config 相關執行時錯誤（檔案找不到、Skill 不存在）減少 80% 以上",
+        "long_term": "配置膨脹指標（config_complexity）保持在健康範圍內"
+      }
     }
   ]
 }

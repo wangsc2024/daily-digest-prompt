@@ -38,7 +38,7 @@ todoist_team:
     auto: 600       # 自動任務（10 分鐘）
     gitpush: 360    # Git 推送（6 分鐘）
   # Phase 2 動態 timeout（按 auto-task key，優先級高於 phase2_timeout_by_type）
-  # 所有 23 個自動任務均有明確 timeout，不再依賴 phase2_timeout_by_type.auto 預設值
+  # 所有自動任務均有明確 timeout（見下列 phase2_timeout_by_task），不再依賴 phase2_timeout_by_type.auto 預設值
   # timeout_seconds in config/frequency-limits.yaml is the single source of truth for human-readable timeouts
   # Values here are kept for backward-compatibility but must stay in sync with frequency-limits.yaml
   phase2_timeout_by_task:
@@ -78,6 +78,7 @@ todoist_team:
     workflow_forge: 900         # 掃描 config/prompts + 缺口篩選 + 產物生成 + 驗證 + 整合
     insight_briefing: 900      # 深度研究洞察簡報：多 Skill 串接 + 簡報產出 + KB + ntfy
     zen_koan: 300              # 禪宗公案推播：選題(30s) + 撰寫(60s) + ntfy 發送(30s) + 寫回 JSON(10s)
+    phantom_butterfly_optimize: 1200  # 幻碟星域：程式碼優化 + 驗證 + game_web git commit/push
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:

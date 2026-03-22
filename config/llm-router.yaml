@@ -7,7 +7,29 @@
 #   - prompts/team/fetch-hackernews.md  → 使用 en_to_zh 規則
 #   - prompts/team/fetch-news.md        → 使用 news_summary 規則
 
-version: 1
+version: 2
+
+categories:
+  quick_summary:
+    description: "快速摘要/分類：低成本、低延遲"
+    preferred_provider: groq
+    max_tokens: 500
+    model: llama-3.1-8b-instant
+  deep_research:
+    description: "深度研究/長文合成：需要完整上下文理解"
+    preferred_provider: claude
+    max_tokens: 4000
+    model: claude-sonnet-4-6
+  complex_analysis:
+    description: "複雜分析/政策/安全：高精準需求"
+    preferred_provider: claude
+    max_tokens: 2000
+    model: claude-sonnet-4-6
+  translation:
+    description: "翻譯類任務：保留術語原文"
+    preferred_provider: groq
+    max_tokens: 800
+    model: llama-3.1-8b-instant
 
 providers:
   groq:
@@ -33,6 +55,7 @@ routing_rules:
     model: composer-2-fast
     mode: summarize
     max_tokens: 200
+    category: quick_summary
     description: 新聞標題或段落一句話摘要
     used_by: [fetch-news.md]
     max_input_chars: 500            # 每則新聞的摘要輸入上限
@@ -41,6 +64,7 @@ routing_rules:
     provider: groq_direct           # tools/groq_direct.py 直呼 Groq API，金鑰讀 bot/.env
     mode: translate
     max_tokens: 500
+    category: translation
     description: 英文技術文章標題轉正體中文，保留技術術語原文
     used_by: [fetch-hackernews.md]
     max_input_chars: 300            # 單篇標題上限
@@ -50,6 +74,7 @@ routing_rules:
     mode: classify
     groq_mode: classify
     max_tokens: 100
+    category: quick_summary
     description: 為文章或任務自動打主題標籤（JSON 輸出）
     used_by: []                     # 目前未在 prompt 中使用，預留
 
@@ -58,6 +83,7 @@ routing_rules:
     mode: extract
     groq_mode: extract
     max_tokens: 300
+    category: quick_summary
     description: 從非結構化文字萃取關鍵資訊（JSON 輸出）
     used_by: []                     # 預留
 
@@ -66,6 +92,7 @@ routing_rules:
     model: claude-haiku-4-5-20251001
     mode: classify
     max_tokens: 150
+    category: quick_summary
     description: 知識庫筆記內容品質語義評分（概念數、深度、密度、是否知識）
     used_by: [skills/kb-curator/SKILL.md]
     max_input_chars: 2000           # 取 contentText 前 2000 字
@@ -76,42 +103,49 @@ routing_rules:
     mode: extract
     groq_mode: extract              # P3-C ToolOrchestra 簡易查詢
     max_tokens: 500
+    category: quick_summary
     description: Todoist 任務簡易查詢格式化（關鍵字提取 + 優先級初步判斷）
     used_by: []                     # P3-C 啟用後使用
 
   # ── 保留給 Claude（深度推理、隱私、安全）──────────────────────
   policy_analysis:
     provider: claude
+    category: complex_analysis
     rationale: 需要深度語境理解與政策背景知識
     description: 屏東政策深度解讀
     used_by: [assemble-digest.md, prompts/team/fetch-news.md]
 
   code_review:
     provider: claude
+    category: complex_analysis
     rationale: 程式碼品質評估需要複雜推理
     description: 程式碼審查與修正建議
     used_by: [templates/sub-agent/code-task.md]
 
   kb_import:
     provider: claude
+    category: complex_analysis
     rationale: 語意去重需要 Claude 的語言理解能力
     description: 知識庫匯入前的品質評估與重複性判斷
     used_by: [skills/kb-curator/SKILL.md]
 
   research_synthesis:
     provider: claude
+    category: deep_research
     rationale: 需要複雜推理+長上下文融合
     description: 多篇研究來源的整合與摘要
     used_by: [templates/sub-agent/research-task.md]
 
   security_analysis:
     provider: claude
+    category: complex_analysis
     rationale: 高精準度需求，不送第三方
     description: 系統安全審查（Cisco AI Defense）
     used_by: [prompts/team/fetch-security.md]
 
   gmail_processing:
     provider: claude
+    category: complex_analysis
     rationale: 個人郵件資料不送第三方 Groq 服務
     description: Gmail 郵件分析（隱私考量）
     used_by: [prompts/team/fetch-gmail.md]

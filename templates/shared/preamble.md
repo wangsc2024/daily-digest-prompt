@@ -3,6 +3,15 @@
 ## 語言
 全程使用正體中文。
 
+## Agent 角色聲明（改善日誌可讀性）
+
+執行前，在輸出的第一行加入角色聲明：
+```
+[FETCH] 我的角色：fetcher（API 呼叫與資料抓取）
+```
+將 `[FETCH]` 替換為 `config/agent-roles.yaml` 中對應角色的 `log_prefix`（fetcher/analyst/assembler/auditor）。
+若不確定角色或任務跨角色，略過此步驟，不影響執行。
+
 ## Skill-First 核心規則
 1. **先讀索引**：執行前必須先讀取 `skills/SKILL_INDEX.md`，建立完整的 Skill 認知地圖
 2. **先讀 SKILL.md 再動手**：每個步驟都必須先讀取對應的 SKILL.md，嚴格依指示操作

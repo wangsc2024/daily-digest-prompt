@@ -51,6 +51,13 @@ daily-digest-prompt/
       skill-registry.schema.json       # Skill 登記表 Schema（供 sync_skill_registry.py）
       codex-auto-task-result.schema.json # Codex 任務結果格式驗證
 
+  # 工作流驗證層（workflow-forge 產出物）
+  workflows/
+    index.yaml                        # workflow 產出物索引（Agent 執行前依 task_type 篩選適用 workflow）
+    prompt-output-validation-checklist.md    # Prompt 輸出規範驗證清單（29 個自動任務 prompt）
+    results-validation-checklist.md          # 結果檔案格式驗證清單（results/todoist-auto-*.json）
+    config-consistency-validation-checklist.md # Config 一致性驗證清單（config/*.yaml 與檔案系統一致性）
+
   # 模板層（按需載入，不預載進 context window）
   templates/
     shared/

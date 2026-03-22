@@ -1,8 +1,8 @@
 # Skills 索引與路由引擎
 
-> **更新時間:** 2026-03-21 | **能用 Skill 就用 Skill，絕不自行拼湊。**
+> **更新時間:** 2026-03-22 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（20 個核心 + 36 個工具 = 56 個 Skills）
+## 速查表（20 個核心 + 37 個工具 = 57 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -69,6 +69,7 @@
 | 53 | context-compressor | Context Window 壓縮策略工具（BufferWindow/Summary/Delegation 三策略，主動壓縮 I/O，depends-on: context-budget-monitor） | context-compressor、Context 壓縮、壓縮策略、I/O 減量、BufferWindow、Summary 壓縮、Context 瘦身、壓縮摘要 |
 | 54 | research-saturation-analyzer [草稿] | 研究主題飽和度分析與收穫遞減偵測（多因子評分\主題聚類\待深化識別，depends-on: kb-research-strategist、knowledge-query、system-insight） | 研究飽和度、收穫遞減、主題飽和、研究主題分析、saturation analysis、diminishing returns、研究方向建議、待深化主題、research saturation |
 | 55 | auto-task-creator | 自動任務建立精靈（6 步 checklist：frequency-limits.yaml + prompt + timeouts + PS1 + allowed_days 星期限制，確保命名一致） | 新增自動任務、建立自動任務、增加自動任務、add auto task、auto-task-creator、新自動任務、auto task checklist |
+| 56 | add-podcast-task | 新增 Podcast 自動任務（依 auto-task-creator + podcast.yaml 節目名、ntfy 標題契約、模板／resolver／腳本對齊） | 新增podcast任務、新增 podcast 任務、add podcast task、建立 podcast 自動任務、podcast 自動任務、add-podcast-task |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

@@ -428,6 +428,22 @@ def main():
     tool_output = str(data.get("tool_output", ""))
     session_id = data.get("session_id", "")
 
+    # Agent role tag detection（#4 agent-roles.yaml）
+    # 偵測 assistant_output 中的角色前綴，加入 agent-role 標籤
+    _ROLE_PREFIX_MAP = {
+        "[FETCH]": "fetcher",
+        "[ANLZ]": "analyst",
+        "[ASMB]": "assembler",
+        "[AUDT]": "auditor",
+    }
+    _role_tag = None
+    _assistant_output = str(data.get("assistant_output") or "")
+    if _assistant_output:
+        for _prefix, _role in _ROLE_PREFIX_MAP.items():
+            if _prefix in _assistant_output[:500]:  # 只偵測前 500 字
+                _role_tag = f"agent-role:{_role}"
+                break
+
     # Classify tool call
     if tool_name == "Bash":
         summary, tags = classify_bash(tool_input.get("command", ""))
@@ -449,6 +465,10 @@ def main():
             if not any(benign in lower_output for benign in BENIGN_PATTERNS):
                 has_error = True
                 tags.append("error")
+
+    # Agent role tag（#4 agent-roles.yaml）
+    if _role_tag:
+        tags.append(_role_tag)
 
     # Team mode tagging (Phase 2.3: structured logging enhancement)
     if os.environ.get("CLAUDE_TEAM_MODE") == "1":

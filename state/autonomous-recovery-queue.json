@@ -126,7 +126,147 @@
         "effect": "runtime_override_updated",
         "expires_at": "2026-03-22T08:40:03.566913+08:00"
       }
+    },
+    {
+      "queued_at": "2026-03-22T08:15:01.105836+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 5 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:15:04.366816+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T08:45:04.367814+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:20:01.356902+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 5 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:20:05.283529+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T08:50:05.283529+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:25:01.071004+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 5 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:25:02.839912+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T08:55:02.839912+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:30:01.133359+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 5 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:30:03.020073+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:00:03.021073+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:35:00.211640+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:35:03.887485+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:05:03.887485+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:40:01.090943+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:40:02.817667+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:10:02.817667+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:45:01.031395+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:45:02.780787+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:15:02.781787+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:50:01.181262+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:50:04.925646+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:20:04.925646+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T08:55:01.056441+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T08:55:02.815711+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:25:02.816714+08:00"
+      }
+    },
+    {
+      "queued_at": "2026-03-22T09:00:01.116812+08:00",
+      "target": "todoist",
+      "action_type": "rebalance_tasks",
+      "reason": "偵測到 4 個任務飢餓，需降低並行並優先補跑低頻任務",
+      "severity": "high",
+      "status": "completed",
+      "processed_at": "2026-03-22T09:00:03.078864+08:00",
+      "result": {
+        "status": "completed",
+        "effect": "runtime_override_updated",
+        "expires_at": "2026-03-22T09:30:03.079864+08:00"
+      }
     }
   ],
-  "updated_at": "2026-03-22T08:10:03.566913+08:00"
+  "updated_at": "2026-03-22T12:45:02.951333+08:00"
 }

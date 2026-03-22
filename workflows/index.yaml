@@ -1,11 +1,23 @@
 version: "1.0.0"
-updated_at: "2026-03-21"
+updated_at: "2026-03-22"
 description: "workflow-forge 產出物索引，Agent 執行前依 task_type 篩選適用 workflow"
 # 維護方式：workflow-forge 步驟 4 自動 append；勿手動刪除 entries
 # 使用方式：讀取此 index.yaml，找出 task_types 包含你的 task_key 或 "all" 的 entries，
 #           在執行主要步驟前讀取對應 workflow 文件並遵守其規範。
 
 entries:
+  - id: "wf-20260322-config-consistency"
+    path: "workflows/config-consistency-validation-checklist.md"
+    type: "validation_checklist"
+    title: "Config 一致性驗證清單"
+    version: "1.0.0"
+    created_at: "2026-03-22"
+    task_types:
+      - "all"
+    priority: "P0"
+    summary: "確保 config/*.yaml 與檔案系統、SKILL_INDEX.md、prompt 模板一致，避免執行時錯誤與配置膨脹"
+    read_when: "modifying_config_or_adding_auto_task"
+
   - id: "wf-20260321-prompt-output-validation"
     path: "workflows/prompt-output-validation-checklist.md"
     type: "validation_checklist"

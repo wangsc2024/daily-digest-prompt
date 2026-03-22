@@ -1,100 +1,114 @@
 {
-  "version": 3,
-  "generated_at": "2026-03-21T20:34:00+08:00",
+  "version": 4,
+  "generated_at": "2026-03-22T08:55:00+08:00",
   "gap_identified": {
-    "type": "一致性缺失",
-    "title": "Prompt 輸出規範不一致",
-    "description": "29 個 todoist-auto-*.md prompts 的輸出 JSON 規範不一致：部分有詳細「關鍵欄位確認清單」，部分僅有基本範例；命名不一致（task_type vs agent）；缺少統一的必填欄位檢查列表。",
-    "impact": "導致 Phase 3 組裝時可能因欄位缺失失敗；system-insight 告警 avg_io_per_call 超標 5.3 倍，部分原因是 prompt 需重複說明輸出格式。",
+    "type": "consistency",
+    "title": "Config YAML 與實際檔案系統一致性缺口",
+    "description": "config/*.yaml 中定義的路徑、task_key、skills 等欄位與實際檔案系統、SKILL_INDEX.md、prompt 模板可能不一致，缺乏自動驗證機制。例如：frequency-limits.yaml 的 task_key 與 prompts/team/todoist-auto-{task_key}.md 檔名不一致、routing.yaml 引用的 skills 在 SKILL_INDEX.md 中不存在等。",
+    "impact": "導致執行時路徑錯誤、Skill 找不到、任務無法正常執行；配置膨脹問題（analyze-config.ps1 顯示配置複雜度）；命名不一致導致 Phase 2 未產出結果檔案（CLAUDE.md 自動任務命名規範的底線規則）。",
     "source_files": [
-      "prompts/team/todoist-auto-*.md (29 個檔案)",
-      "config/schemas/results-auto-task-schema.json",
-      "context/system-insight.json"
+      "config/frequency-limits.yaml",
+      "config/cache-policy.yaml",
+      "config/routing.yaml",
+      "config/pipeline.yaml",
+      "config/ooda-workflow.yaml",
+      "skills/SKILL_INDEX.md",
+      "prompts/team/todoist-auto-*.md"
     ]
   },
   "artifact_spec": {
     "type": "validation_checklist",
-    "path": "workflows/prompt-output-validation-checklist.md",
+    "path": "workflows/config-consistency-validation-checklist.md",
     "format": "Markdown",
     "sections": [
       {
-        "section": "1. Frontmatter 驗證",
+        "section": "1. frequency-limits.yaml 一致性",
         "checks": [
-          "prompt 檔案開頭必須有 YAML frontmatter（---包裹）",
-          "frontmatter 必須含 name、template_type、version、released_at 四個欄位",
-          "name 欄位格式：todoist-auto-{task_key}（與 task_key 一致）",
-          "template_type 固定為 team_prompt",
-          "version 遵循 semver（如 1.0.0）",
-          "released_at 為 YYYY-MM-DD 格式"
+          "每個任務的 task_key 與 prompts/team/todoist-auto-{task_key}.md 檔案存在且一致（底線命名）",
+          "每個任務的 counter_field 與 initial_schema 中的欄位一致（{task_key}_count）",
+          "每個任務的 template 路徑指向的檔案確實存在",
+          "execution_order 無重複值（1-35 範圍內）",
+          "allowed_days 值在 0-6 範圍內（Mon=0, Sun=6）",
+          "skills 陣列中的 Skill 在 SKILL_INDEX.md 中存在",
+          "prompt_file（若有）路徑存在"
         ]
       },
       {
-        "section": "2. 結果 JSON 路徑驗證",
+        "section": "2. cache-policy.yaml 一致性",
         "checks": [
-          "prompt 必須明確指定結果檔案路徑：results/todoist-auto-{task_key}.json",
-          "task_key 必須使用底線（_），禁用連字號（-）",
-          "結果檔案路徑在 prompt 中至少出現 2 次（共用規則區塊 + 輸出規格區塊）"
+          "每個 source 的 file 路徑父目錄（cache/）存在",
+          "volatility 段落的 key 與 sources 段落的 key 一致",
+          "tracking.write_to 指向的檔案（context/digest-memory.json）存在"
         ]
       },
       {
-        "section": "3. 必填欄位檢查列表",
+        "section": "3. routing.yaml 一致性",
         "checks": [
-          "prompt 必須明確列出「關鍵欄位確認清單」或「必填欄位」區塊",
-          "必填欄位最少包含：agent（或 task_type）、task_key、status",
-          "agent 欄位格式：todoist-auto-{task_key}（與檔名、結果路徑一致）",
-          "task_key 欄位值：與 config/frequency-limits.yaml 中的 tasks 鍵名完全一致（底線）",
-          "status 欄位值域：必須明確列出允許值（success/partial/failed/format_failed）"
+          "label_routing.mappings 引用的 skills 在 SKILL_INDEX.md 中存在",
+          "template 路徑指向的檔案確實存在（templates/sub-agent/*.md）",
+          "skill_aliases 中的 template 路徑存在",
+          "chatroom_task_source.template 路徑存在"
         ]
       },
       {
-        "section": "4. 欄位命名一致性",
+        "section": "4. pipeline.yaml 一致性",
         "checks": [
-          "優先使用 agent 欄位（推薦），避免混用 task_type",
-          "若使用 agent 欄位，格式必須為 todoist-auto-{task_key}",
-          "所有欄位名稱必須與 config/schemas/results-auto-task-schema.json 定義一致"
+          "每個 step 的 skill_files 路徑確實存在",
+          "cache_key 對應的 source 在 cache-policy.yaml 中存在",
+          "format_file（config/digest-format.md）存在",
+          "skills 陣列中的 Skill 在 SKILL_INDEX.md 中存在"
         ]
       },
       {
-        "section": "5. Schema 對齊驗證",
+        "section": "5. ooda-workflow.yaml 一致性",
         "checks": [
-          "prompt 輸出規格必須參考 config/schemas/results-auto-task-schema.json",
-          "所有選填欄位（如 artifact、integration_status、kb_imported）若使用，必須符合 Schema 定義",
-          "artifact.type 若使用，必須是 Schema 允許的 enum 值之一（workflow_yaml/output_schema/validation_checklist/report/code/config/documentation）"
+          "每個 step 的 prompt_file 路徑確實存在（若 trigger_mode 非 ps_script）",
+          "auto_task_key 與 frequency-limits.yaml 的 task_key 一致",
+          "state_file（context/workflow-state.json）父目錄存在",
+          "history_file（logs/structured/ooda-transitions.jsonl）父目錄存在"
         ]
       },
       {
-        "section": "6. 執行流程完整性",
+        "section": "6. 結果檔案命名一致性",
         "checks": [
-          "prompt 必須包含「共用規則」區塊，引用 templates/shared/preamble.md",
-          "prompt 必須包含「Skill-First」區塊，明確列出需讀取的 SKILL.md 檔案",
-          "prompt 必須包含「嚴格禁止事項」區塊，列出至少 3 項禁止操作",
-          "prompt 必須包含「輸出規格」區塊，明確定義結果 JSON 的欄位與格式"
+          "prompts/team/todoist-auto-{task_key}.md 中寫入的結果檔案路徑為 results/todoist-auto-{task_key}.json（底線一致）",
+          "結果 JSON 的 agent 欄位格式為 todoist-auto-{task_key}（與 task_key 一致）",
+          "結果 JSON 的 task_key 欄位與 frequency-limits.yaml 的 task_key 完全一致"
+        ]
+      },
+      {
+        "section": "7. SKILL.md 引用一致性",
+        "checks": [
+          "config/*.yaml 引用的所有 Skill 名稱在 skills/SKILL_INDEX.md 速查表中存在",
+          "prompts/team/*.md 引用的 SKILL.md 路徑確實存在",
+          "routing.yaml 的 skill_aliases 中標記為 no_skill_file: true 的項目無需檢查 SKILL.md"
         ]
       }
     ],
     "validation_method": {
-      "manual": "人工審查 prompts/team/ 目錄下的 todoist-auto-*.md 檔案，逐條核對清單",
-      "automated": "可選：建立 tools/validate_prompt_output.py 腳本，自動掃描 prompt 檔案並驗證上述規則"
+      "manual": "人工審查 config/ 目錄下的 YAML 檔案，逐條核對清單",
+      "automated": "可選：建立 tools/validate_config_consistency.py 腳本，自動掃描 config/*.yaml 並驗證上述規則"
     },
     "integration": {
-      "location": "workflows/prompt-output-validation-checklist.md",
+      "location": "workflows/config-consistency-validation-checklist.md",
       "reference_in": [
+        "workflows/index.yaml（新增 entry）",
         "docs/ARCHITECTURE.md（配置文件速查表新增一行）",
-        "CLAUDE.md（文件驅動架構設計原則新增驗證清單說明）"
+        "config/README.md（若存在，新增驗證清單說明）"
       ]
     },
     "alignment_with_existing": {
-      "schema_file": "config/schemas/results-auto-task-schema.json",
-      "example_prompts": [
-        "prompts/team/todoist-auto-skill_forge.md（良好範例：有完整「關鍵欄位確認清單」）",
-        "prompts/team/todoist-auto-system_insight.md（待改善範例：僅有基本 JSON 範例）"
-      ]
+      "similar_workflows": [
+        "workflows/prompt-output-validation-checklist.md（Prompt 輸出規範驗證）",
+        "workflows/results-validation-checklist.md（結果檔案格式驗證）"
+      ],
+      "complementary": "本清單聚焦於 config 與檔案系統的一致性，與現有 workflows 互補"
     }
   },
-  "gap_addressed": "解決 29 個自動任務 prompts 的輸出格式不一致問題，確保每個 prompt 都明確列出必填欄位、遵守命名規範、對齊 Schema 定義，降低 Phase 3 組裝失敗率與 avg_io_per_call 負擔。",
+  "gap_addressed": "解決 config/*.yaml 與實際檔案系統、SKILL_INDEX.md、prompt 模板的一致性缺口，確保配置定義與實際可用資源一致，降低執行時錯誤與配置膨脹風險。",
   "expected_outcome": {
-    "immediate": "所有 prompt 開發者有明確檢查列表，新增/修改 prompt 時可自我驗證",
-    "mid_term": "結果 JSON 格式一致性提升至 95% 以上（目前約 70%），Phase 3 組裝失敗率下降",
-    "long_term": "avg_io_per_call 因減少重複格式說明而下降 10-15%，系統輸出穩定度顯著提升"
+    "immediate": "所有 config 維護者有明確檢查列表，修改 config 時可自我驗證一致性",
+    "mid_term": "config 相關執行時錯誤（檔案找不到、Skill 不存在）減少 80% 以上",
+    "long_term": "配置膨脹指標（config_complexity）保持在健康範圍內，系統可維護性提升"
   }
 }

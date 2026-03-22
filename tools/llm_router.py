@@ -141,6 +141,25 @@ def match_rule(config: dict, task_type: str) -> dict | None:
     return rule
 
 
+def _apply_category_defaults(config: dict, rule: dict | None) -> dict | None:
+    """
+    合併 category 預設值（max_tokens / model）到 rule。
+    rule 層級設定優先；rule 為 None 時直接回傳 None（保持呼叫方的 None 判斷有效）。
+    """
+    if rule is None:
+        return None              # ← 必須回傳 None，不可回傳 {}，否則破壞下游 `if rule is None` 判斷
+    cat_name = rule.get("category")
+    if not cat_name:
+        return rule
+    cat = config.get("categories", {}).get(cat_name, {})
+    result = dict(rule)
+    if not result.get("max_tokens") and cat.get("max_tokens"):
+        result["max_tokens"] = cat["max_tokens"]
+    if not result.get("model") and cat.get("model"):
+        result["model"] = cat["model"]
+    return result
+
+
 def call_groq_relay(endpoint: str, mode: str, content: str, max_tokens: int) -> dict:
     """
     POST 到 groq-relay。
@@ -205,6 +224,7 @@ def _check_budget(task_type: str, provider: str) -> dict | None:
 def route(task_type: str, content: str, dry_run: bool = False) -> dict:
     config = load_config()
     rule = match_rule(config, task_type)
+    rule = _apply_category_defaults(config, rule)
 
     if rule is None:
         return {
@@ -222,6 +242,7 @@ def route(task_type: str, content: str, dry_run: bool = False) -> dict:
             "provider": provider,
             "rule": {"task_type": task_type, **rule},
             "dry_run": True,
+            "category": rule.get("category"),
             "endpoint": groq_cfg.get("endpoint"),
         }
 

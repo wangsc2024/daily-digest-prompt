@@ -37,5 +37,87 @@
     "高效引擎效能比較（XGrammar, llguidance, Outlines, Anthropic Claude）",
     "生產環境最佳實踐（JSONSchemaBench 評測、邊緣案例處理）"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "Draft-Conditioned Constrained Decoding for Structured Generation in LLMs",
+      "url": "https://arxiv.org/abs/2603.03305",
+      "credibility": "high",
+      "type": "academic_paper",
+      "key_points": [
+        "DCCD 兩階段方法：無約束 draft → 條件式約束解碼，解耦語義規劃與結構強制",
+        "GSM8K 1B 模型準確度從 15.2% 提升至 39.0%（+24 pp），證明小模型可匹配大模型效能",
+        "KL-projection 理論框架：draft 擴展可行概率質量，減少硬約束的「投影稅」",
+        "可選 best-of-K draft 選擇機制進一步優化效能",
+        "2026 年 2 月發表於 arXiv（論文 ID: 2603.03305）"
+      ]
+    },
+    {
+      "title": "Achieving Efficient, Flexible, and Portable Structured Generation with XGrammar",
+      "url": "https://blog.mlc.ai/2024/11/22/achieving-efficient-flexible-portable-structured-generation-with-xgrammar",
+      "credibility": "high",
+      "type": "official_blog",
+      "key_points": [
+        "JSON schema 任務快 3.5x，CFG 任務快 10x+（vs. Outlines/llama-cpp）",
+        "端到端推理：H100 + Llama-3.1-8B，JSON 快 14x，CFG 快 80x",
+        "生產整合：MLC-LLM、SGLang、WebLLM，即將支援 TensorRT-LLM、vLLM、Hugging Face",
+        "批次規模越大效能優勢越明顯（GPU 吞吐施壓於 CPU grammar 處理）",
+        "跨平台可攜性驗證（桌面、伺服器、瀏覽器）"
+      ]
+    },
+    {
+      "title": "JSONSchemaBench: A Rigorous Benchmark of Structured Outputs for Language Models",
+      "url": "https://arxiv.org/abs/2501.10868",
+      "credibility": "high",
+      "type": "academic_paper",
+      "key_points": [
+        "10K 真實 JSON schemas 評測框架（效率/覆蓋率/品質三維度）",
+        "約束解碼相比無約束加速 50%，下游任務效能提升最多 4%（即使 GSM8k 低結構任務）",
+        "覆蓋率差異顯著：最佳框架支援 schemas 數是最差的兩倍",
+        "評測六大框架：Guidance（覆蓋率最高，6/8 資料集 >90%）、Outlines、Llamacpp、XGrammar、OpenAI、Gemini",
+        "最佳實踐：評估時需考量「宣稱支援」與「實證覆蓋率」差異"
+      ]
+    },
+    {
+      "title": "Structured Outputs - Claude API Documentation",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+      "credibility": "high",
+      "type": "official_documentation",
+      "key_points": [
+        "通用可用（GA）：Opus 4.6、Sonnet 4.6/4.5、Opus 4.5、Haiku 4.5，支援 Claude API + Amazon Bedrock",
+        "兩大功能：JSON Outputs（output_config.format）+ Strict Tool Use（strict: true）",
+        "約束解碼在 token 生成時驗證，消除無效輸出，比事後驗證更高效",
+        "JSON schema 限制：不支援 minimum/maximum/minLength/maxLength/pattern，SDK 自動轉換 schema 並客戶端驗證",
+        "生產特性：Zero Data Retention、schemas 快取 24 小時、消除 JSON.parse() 錯誤",
+        "SDK 支援：Python（Pydantic）、TypeScript（Zod）、Java、Ruby，自動 schema 推導"
+      ]
+    },
+    {
+      "title": "llguidance: Super-fast Structured Outputs",
+      "url": "https://github.com/guidance-ai/llguidance",
+      "credibility": "high",
+      "type": "official_repository",
+      "key_points": [
+        "Rust 實作，Earley parser + regex derivatives，每 token ~50μs（128k tokenizer）",
+        "啟動成本可忽略（lazy automata construction），JSON Schema 平均 <50μs（2.5M tokens + 10k schemas）",
+        "可擴展性：16 cores + 10ms forward pass，batch size 可達 3200",
+        "生產採用：OpenAI Structured Outputs、Chromium、vLLM、SGLang、llama.cpp",
+        "v1.0.0（2025 年 6 月）發布，714 GitHub stars，1.1k 專案依賴"
+      ]
+    },
+    {
+      "title": "Guided Decoding Performance on vLLM and SGLang",
+      "url": "https://blog.squeezebits.com/guided-decoding-performance-vllm-sglang",
+      "credibility": "medium",
+      "type": "technical_blog",
+      "key_points": [
+        "重複 schemas（Book-Info）：XGrammar 勝出，快取策略優勢隨並發增加擴大",
+        "動態 schemas（Github Easy/Medium）：llguidance 勝出，XGrammar 快取失效",
+        "框架選擇關鍵：SGLang 遠勝 vLLM（重疊 mask 生成與推理），vLLM batch >8 時效能驟降",
+        "正確性提升：無約束 61-94% → 約束解碼 96-98%+（近乎完美）",
+        "實務建議：workload 特性（重複 vs. 動態）決定引擎選型"
+      ]
+    }
+  ],
+  "source_count": 6,
+  "stage_completed": 2
 }

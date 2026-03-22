@@ -142,9 +142,9 @@
 
 > **如何新增 ADR**：執行 `arch-evolution 模組 A`，自動從 `context/improvement-backlog.json` 轉化為 ADR。
 
-## Skills（專案 26 個 + 全域 54 個）
+## Skills（專案 27 個 + 全域 54 個）
 
-- **專案 Skills**（26 個）：完整清單見 `skills/SKILL_INDEX.md`（19 核心 + 7 工具）
+- **專案 Skills**（27 個）：完整清單見 `skills/SKILL_INDEX.md`（核心與工具分類以索引為準）
 - **全域 Cursor Skills**（54 個）：完整清單見 `C:\Users\user\.cursor\skills\SKILLS_INDEX.md`
 - **全域 Claude Skills**（56 個）：位於 `C:\Users\user\.claude\skills\`（含 code-assistant、issue-resolver-skill、knowledge-query、pingtung-news 等專屬 skills）
 - Skills 來源：`D:\Source\skills\`，複製到專案內確保自包含
@@ -179,35 +179,10 @@ LINE 訊息的回覆必須透過遠端 Gun Relay 進行，**不可從 bot.js 直
 - 全程使用正體中文；日誌檔名：`yyyyMMdd_HHmmss.log`；保留 7 天自動清理
 - 所有 .ps1 腳本使用 PowerShell 7 (`pwsh`)；`.ps1` 建議 UTF-8 with BOM
 - Python 依賴由 uv 管理，使用 `uv run python` 執行（非裸 `python`）
-- **計畫檔存放**：一律放在 `docs/plans/` 目錄下（格式：`{feature}-plan.md`）；寫入專案外僅會觸發 Write Guard 告警（不阻擋）
 
-### 自動任務命名規範（嚴禁使用連字號）
+> 自動任務命名規範（task_key 底線、prompt/JSON 命名一致性）詳見 [prompts/CLAUDE.md](prompts/CLAUDE.md)（Claude Code 自動載入）。
 
-> **背景**：連字號（`-`）vs 底線（`_`）命名不一致已多次導致「Phase 2 未產出結果檔案」靜默錯誤。
-
-| 項目 | 規範 | 反例 |
-|------|------|------|
-| **task_key**（frequency-limits.yaml 定義） | `ai_github_research` | ~~`ai-github-research`~~ |
-| **Prompt 檔名** | `todoist-auto-{task_key}.md` | 連字號 task_key 部分禁用 |
-| **結果 JSON 檔名** | `results/todoist-auto-{task_key}.json` | ~~`todoist-auto-ai-github.json`~~ |
-| **結果 JSON `agent` 欄位** | `"agent": "todoist-auto-{task_key}"` | ~~`"agent": "todoist-auto-ai-github"`~~ |
-
-**黃金規則**：`frequency-limits.yaml` 的 key 是**唯一真相來源**，prompt 檔名、結果 JSON 檔名、`agent` 欄位三者必須完全一致（含底線）。
-
-**新增自動任務 checklist**：
-1. `config/frequency-limits.yaml` 加入 task_key（底線）
-2. `prompts/team/todoist-auto-{task_key}.md`（底線）
-3. Prompt 內 `results/todoist-auto-{task_key}.json`（底線）
-4. Prompt 內 `"agent": "todoist-auto-{task_key}"`（底線）
-5. `run-todoist-agent-team.ps1` 的 `$AutoTaskTimeoutOverride`（底線）
-6. `config/timeouts.yaml` 的 `phase2_timeout_by_task`（底線）
-
-### 嚴禁產生 nul 檔案（最高優先級 — Hook 機器強制）
-- 禁止在 Bash 中使用 `> nul`、`2>nul`、`> NUL`（cmd 語法，在 bash 中會建立實體檔案）
-- 禁止使用 Write 工具寫入任何名為 `nul` 的檔案路徑
-- 要抑制輸出：`| Out-Null`（PowerShell）或 `> /dev/null`（bash）
-
-> **機器強制**：`hooks/pre_bash_guard.py` 和 `hooks/pre_write_guard.py` 在 runtime 攔截。
+> 禁止在 Bash 使用 `> nul`；改用 `> /dev/null 2>&1`。詳細 nul 禁令及 Hook 規範見 [hooks/CLAUDE.md](hooks/CLAUDE.md)。
 
 ## 排程配置
 

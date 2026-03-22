@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-22T06:45:05.933066+08:00",
+  "updated_at": "2026-03-22T11:43:39.485230+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -1083,11 +1083,12 @@
           ]
         },
         "synthesis": {
-          "status": "in_progress",
+          "status": "completed",
           "kb_notes": [
             "慧遠大師研究：淨土宗初祖與東林蓮社念佛結社運動",
             "道綽大師研究：《安樂集》與聖道淨土二門判教體系",
-            "徹悟大師（夢東禪師）淨土思想研究 — 十二祖的禪淨合一與《夢東語錄》念佛要旨"
+            "徹悟大師（夢東禪師）淨土思想研究 — 十二祖的禪淨合一與《夢東語錄》念佛要旨",
+            "淨土與唯識的會通研究 — 從阿賴耶識含藏佛號到轉識成智的念佛法門"
           ],
           "covered_concepts": [
             "慧遠大師",
@@ -1110,14 +1111,19 @@
             "徹悟大師《夢東語錄》核心教義",
             "徹悟大師對省庵大師思想的繼承",
             "徹悟大師對印光大師的影響",
-            "徹悟大師念佛開示與修持要訣"
-          ]
+            "徹悟大師念佛開示與修持要訣",
+            "唯識淨土會通",
+            "阿賴耶識薰習",
+            "轉識成智",
+            "九品往生與五位對應"
+          ],
+          "completed_at": "2026-03-22"
         }
       },
-      "current_stage": "synthesis",
-      "completion_pct": 80,
+      "current_stage": "completed",
+      "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "補足徹悟大師後，可考慮完成四祖法照、五祖少康的深入研究，或進入跨系列會通（淨土與天台、華嚴的義理對話），達成 synthesis 階段的 100% 完成。",
+      "next_research_hint": "synthesis 階段已完成！純密會通可作為未來擴展方向",
       "saturation_score": 0.5454,
       "saturation_matched_cluster": "無作四諦 — 圓教苦集滅道即實相的義理體系與一心三觀的內在對應"
     },
@@ -5103,6 +5109,52 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "完成後進入 application：實作指南與程式碼範例（Python/開源工具鏈）"
+    },
+    "skill-forge-system": {
+      "series_id": "skill-forge-system",
+      "domain": "skill-forge 系統",
+      "description": "自動化 Skill 鑄造系統的完整研究系列",
+      "initiated_at": "2026-03-22",
+      "last_active": "2026-03-22",
+      "tags": [
+        "skill-forge",
+        "Skill系統",
+        "自動化",
+        "元認知"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-03-22",
+          "completed_at": "2026-03-22",
+          "kb_notes": [
+            "skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 KB 整合機制（foundation 階段）"
+          ],
+          "covered_concepts": [
+            "skill-forge 核心流程",
+            "八階段執行管線",
+            "四維度評分算法",
+            "知識庫驅動版本決策",
+            "五維度 LLM 自評分"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "mechanism",
+      "completion_pct": 20,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入研究評分算法實作細節、KB 分析邏輯、去重機制"
     }
   }
 }

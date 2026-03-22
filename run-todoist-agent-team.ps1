@@ -94,6 +94,7 @@ $AutoTaskTimeoutOverride = @{
     "kb_insight_evaluation"  = 1200  # 洞察報告擇 3 項研究 + 執行方案 + improvement-backlog
     "workflow_forge"         = 900   # Workflow 鑄造廠：流程標準化 + 輸出 Schema + 一致性
     "insight_briefing"       = 900   # 深度研究洞察簡報：多 Skill 串接 + 簡報產出 + KB + ntfy
+    "phantom_butterfly_optimize" = 1200  # 幻碟星域優化 + game_web GitHub push
 }
 
 # 合併：config/timeouts.yaml 優先，hardcoded 為 fallback
@@ -3114,9 +3115,9 @@ while ($attempt -le $MaxPhase3Retries) {
         if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
             # ─── 偵測 LLM 對話性回應（未真正執行組裝）───
             $outputText = $output -join "`n"
-            # ADR-20260322-log-audit: 修正過嚴 regex，涵蓋「請問你想要我做什麼」等變體
-            # 移除 ^ 行首錨定（因 log 有 [assemble] 前綴），改匹配行內任意位置
-            $conversationalPattern = '(?:你貼了|已收到.*完整內容|請問你.*(?:希望|想要|需要).*做什麼|請說明你的需求|請告訴我你的需求)'
+            # ADR-20260322-log-audit-v2: 擴充對話性回應模式偵測
+            # 新增變體：「我看到你分享」「需要協助」「如何幫助」「請詳細說明」「這完整內容」
+            $conversationalPattern = '(?:你貼了|已收到.*完整內容|請問你.*(?:希望|想要|需要).*做什麼|請說明你的需求|請告訴我你的需求|我看到你.*分享|我.*收到.*內容|需要.*協助|如何.*幫助|請.*詳細說明|這.*完整.*內容)'
             if ($outputText -match $conversationalPattern) {
                 $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
                 Write-Log "[Phase3] WARN: LLM 給出對話性回應（${phase3Seconds}s），未執行組裝，標記為失敗重試"

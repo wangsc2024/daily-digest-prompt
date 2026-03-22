@@ -208,3 +208,9 @@ allowed_days: {allowed_days_list_or_remove_if_daily}
 | 忘記加 `initial_schema` 計數欄位 | `{task_key}_count: 0` |
 | 忘記加 `task_rules` 後端對應 | 未列則預設 `cursor_cli` |
 | `allowed_days` 格式錯誤 | 必須是整數 list：`[0, 3, 6]` |
+
+---
+
+## Podcast 自動任務
+
+若 `task_key` 為 **Podcast 製作管線**（TTS、R2、雙主持人腳本等），在完成本 Skill 六步後，**另讀** **`skills/add-podcast-task/SKILL.md`**，補齊 `config/podcast.yaml` 的 `series_by_task`、auto-task 模板中的 ntfy 標題契約與 `resolve_podcast_series.py`／腳本對齊。

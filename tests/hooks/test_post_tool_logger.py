@@ -294,6 +294,45 @@ class TestClassifyEdit:
         assert "json-edit" in tags
 
 
+class TestAgentRoleTagDetection:
+    """#4 Agent 角色標籤偵測（agent-roles.yaml）。"""
+
+    _ROLE_PREFIX_MAP = {
+        "[FETCH]": "agent-role:fetcher",
+        "[ANLZ]": "agent-role:analyst",
+        "[ASMB]": "agent-role:assembler",
+        "[AUDT]": "agent-role:auditor",
+    }
+
+    def _detect_role_tag(self, assistant_output: str) -> str | None:
+        """複製 post_tool_logger 的角色偵測邏輯供測試使用。"""
+        for prefix, role_name in {
+            "[FETCH]": "fetcher",
+            "[ANLZ]": "analyst",
+            "[ASMB]": "assembler",
+            "[AUDT]": "auditor",
+        }.items():
+            if prefix in assistant_output[:500]:
+                return f"agent-role:{role_name}"
+        return None
+
+    def test_fetch_role_tag_detected(self):
+        """[FETCH] 前綴 → 偵測到 agent-role:fetcher"""
+        result = self._detect_role_tag("[FETCH] 我的角色：fetcher（API 呼叫與資料抓取）")
+        assert result == "agent-role:fetcher"
+
+    def test_no_role_prefix_no_tag(self):
+        """無角色前綴 → 不加標籤（回傳 None）"""
+        result = self._detect_role_tag("開始執行任務，讀取 Todoist API...")
+        assert result is None
+
+    def test_role_tag_first_match_wins(self):
+        """同時含多個前綴時，依 map 插入順序取第一個命中的（[FETCH] > [ANLZ] > [ASMB] > [AUDT]）"""
+        # [FETCH] 在 map 中排第一，即使字串中 [ANLZ] 先出現，仍應偵測到 [FETCH]
+        result = self._detect_role_tag("[ANLZ] 分析中...\n後來又提到 [FETCH]")
+        assert result == "agent-role:fetcher"
+
+
 class TestErrorDetection:
     """錯誤偵測邏輯。"""
 

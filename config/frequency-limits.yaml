@@ -73,6 +73,7 @@ initial_schema: |
     "insight_briefing_count": 0,
     "ntfy_review_count": 0,
     "zen_koan_count": 0,
+    "phantom_butterfly_optimize_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -171,6 +172,7 @@ task_rules:
     - git_push               # 複雜多步驟 git/bash 序列，需可靠工具鏈（原 openrouter_standard 三連敗）
     - arch_evolution         # 架構決策分析：需讀取 improvement-backlog.json + context/*.json
     - zen_koan               # 禪宗公案：ntfy 推播任務，需 ntfy-notify Skill 與完整工具鏈
+    - phantom_butterfly_optimize  # 幻碟星域：跨目錄遊戲優化 + game_web 倉庫 git push，需可靠 Bash
 
 
   cursor_cli:           # Cursor CLI agent -p，非互動模式，完整工具權限（Write/Bash/Read）
@@ -291,7 +293,7 @@ phase_overrides:
 #                     未設定 = 每日執行；設定後 Phase 0c + Phase 1 均會跳過非允許日
 #   skills:           此任務依賴的 Skills 清單
 #
-# 群組摘要（11 群組，27 任務，合計依 daily_limit 加總）：
+# 群組摘要（12 群組，28 任務，合計依 daily_limit 加總）：
 #   佛學研究:        #1-#4   — 楞嚴經(1)、教觀綱宗(2)、法華經(3)、淨土宗(2) = 8
 #   AI/技術研究:     #5-#10  — 技術研究(2)、AI深度(3)、Unsloth(0)、GitHub AI(1)、智慧城市(1)、系統開發(1) = 8
 #   系統優化:        #11     — Skill審查(1) = 1
@@ -304,6 +306,7 @@ phase_overrides:
 #   Skill 鑄造:      #24     — skill-forge(2) = 2
 #   ntfy/未來/洞察:  #25-#27 — ntfy審查(1)、未來計畫(1)、KB洞察(1) = 3
 #   禪宗公案:        #29     — zen_koan(1, 僅一/四/日) = 1（限定星期一/四/日）
+#   幻碟星域:        #30     — phantom_butterfly_optimize(1) = 1（game_web 內遊戲 + GitHub 同步）
 tasks:
 
   # --- 佛學研究群組（共 4 次/日）---
@@ -776,6 +779,20 @@ tasks:
     skills: [ntfy-notify]
     description: "每週一/四/日選出一則禪宗公案（碧巖錄/無門關/景德傳燈錄），附白話釋義與禪門一語，透過 ntfy 推播給使用者"
 
+  phantom_butterfly_optimize:
+    name: "幻碟星域遊戲優化與 GitHub 同步"
+    daily_limit: 1
+    counter_field: "phantom_butterfly_optimize_count"
+    template: "prompts/team/todoist-auto-phantom_butterfly_optimize.md"
+    prompt_file: "prompts/team/todoist-auto-phantom_butterfly_optimize.md"
+    template_version: 1
+    history_type: "phantom_butterfly_optimize"
+    execution_order: 30
+    timeout_seconds: 1200
+    result_suffix: "json"
+    skills: [game-design, knowledge-query, git-smart-commit]
+    description: "以耐玩與創意為主軸優化 D:\\Source\\game_web\\games\\phantom-butterfly（幻碟星域），完成後於 D:\\Source\\game_web 提交並 push 至 GitHub 遠端"
+
 # ============================================================
 # 每日上限摘要
 # ============================================================
@@ -787,7 +804,7 @@ tasks:
 # Podcast（cursor_cli/claude_sonnet45）：podcast_create(2)+podcast_jiaoguangzong(3) = 5
 # Chatroom（claude_sonnet45）：chatroom_optimize(0) = 0
 # 其他：skill_forge(2)+ntfy_review(1)+future_plan(1)+kb_insight(1) = 5
-# 合計：38 次/日（含 daily_limit=0 的暫停任務 3 個：unsloth/creative_game/qa/chatroom）
+# 合計：39 次/日（含 daily_limit=0 的暫停任務 3 個：unsloth/creative_game/qa/chatroom；另含 phantom_butterfly_optimize 每日 1 次）
 
 # 歷史追蹤寫入規則
 history:

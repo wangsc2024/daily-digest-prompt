@@ -1,17 +1,11 @@
 {
-  "generated_at": "2026-03-22T08:00:02.588502",
+  "generated_at": "2026-03-22T12:30:01.817660",
   "date": "2026-03-22",
-  "starvation_count": 5,
-  "starvation_detected": true,
-  "zero_count_tasks": [
-    "ntfy_review",
-    "future_plan_optimize",
-    "kb_insight_evaluation",
-    "workflow_forge",
-    "insight_briefing"
-  ],
-  "fairness_score": 0.273,
+  "starvation_count": 0,
+  "starvation_detected": false,
+  "zero_count_tasks": [],
+  "fairness_score": 0.408,
   "pointer_reset": false,
-  "next_execution_order": 27,
+  "next_execution_order": 13,
   "max_execution_order": 35
 }

@@ -297,3 +297,52 @@ class TestUpdateTokenUsage:
         nonexistent = Path("/nonexistent/token-usage.json")
         with patch("tools.llm_router.TOKEN_USAGE_PATH", nonexistent):
             update_token_usage("groq")  # 不應拋出例外
+
+
+# ─── TestCategoryBasedRouting ────────────────────────────────────────────────
+
+from tools.llm_router import _apply_category_defaults  # noqa: E402
+
+
+class TestCategoryBasedRouting:
+    """#1 Category-Based Model Routing — _apply_category_defaults()"""
+
+    CATEGORY_CONFIG = {
+        "categories": {
+            "quick_summary": {
+                "max_tokens": 500,
+                "model": "llama-3.1-8b-instant",
+            },
+            "deep_research": {
+                "max_tokens": 4000,
+                "model": "claude-sonnet-4-6",
+            },
+        },
+        "routing_rules": {},
+    }
+
+    def test_none_rule_returns_none(self):
+        """rule=None → 回傳 None，不破壞 route() 的 if rule is None 判斷"""
+        result = _apply_category_defaults(self.CATEGORY_CONFIG, None)
+        assert result is None
+
+    def test_category_max_tokens_inherited(self):
+        """rule 無 max_tokens → 繼承 category 設定（news_summary → 500）"""
+        rule = {"provider": "groq", "category": "quick_summary"}
+        result = _apply_category_defaults(self.CATEGORY_CONFIG, rule)
+        assert result["max_tokens"] == 500
+        assert result["model"] == "llama-3.1-8b-instant"
+
+    def test_rule_max_tokens_overrides_category(self):
+        """rule 有 max_tokens → 不被 category 覆寫"""
+        rule = {"provider": "groq", "category": "quick_summary", "max_tokens": 200}
+        result = _apply_category_defaults(self.CATEGORY_CONFIG, rule)
+        assert result["max_tokens"] == 200  # 保留 rule 設定，不被 category 覆寫
+
+    def test_unknown_category_no_crash(self):
+        """category 不存在於 categories 段落時，rule 原樣回傳，不拋錯"""
+        rule = {"provider": "groq", "category": "nonexistent_category"}
+        result = _apply_category_defaults(self.CATEGORY_CONFIG, rule)
+        assert result is not None
+        assert result["provider"] == "groq"
+        assert "max_tokens" not in result  # 無繼承，欄位不存在

@@ -1,21 +1,21 @@
 {
-  "generated_at": "2026-03-22T08:10:01.512001+08:00",
+  "generated_at": "2026-03-22T12:45:01.119935+08:00",
   "cpu": {
-    "percent": 7.53
+    "percent": 0
   },
   "memory": {
-    "percent": 46.89,
-    "available_mb": 17277.27
+    "percent": 49.79,
+    "available_mb": 16334.59
   },
   "gpu": {
     "available": true,
     "devices": [
       {
         "name": "NVIDIA GeForce RTX 4090",
-        "utilization_percent": 6.0,
-        "memory_used_mb": 712.0,
+        "utilization_percent": 1.0,
+        "memory_used_mb": 762.0,
         "memory_total_mb": 24564.0,
-        "memory_percent": 2.9
+        "memory_percent": 3.1
       }
     ]
   }
