@@ -327,9 +327,9 @@ ntfy 範例（有 episode_url 時）：
 2. `curl -H "Content-Type: application/json; charset=utf-8" -d @ntfy_temp.json https://ntfy.sh`
 3. `rm ntfy_temp.json`
 
-### ntfy 日誌 agent 欄位（強制）
-ntfy 日誌的 `"agent"` 欄位**必須**使用環境變數 `$AGENT_NAME`（由 PS 腳本注入為 `todoist-assemble`）。
-**禁止**自行拼寫 agent 名稱（如 `todoist-assembly`、`todoist-phase3-assembly` 等變體）。
+### ntfy 日誌欄位（強制）
+- `"agent"` 欄位**必須**使用環境變數 `$AGENT_NAME`（由 PS 腳本注入為 `todoist-assemble`）。**禁止**自行拼寫 agent 名稱（如 `todoist-assembly`、`todoist-phase3-assembly` 等變體）。
+- `"trace_id"` 欄位**必須**使用環境變數 `$DIGEST_TRACE_ID`。若為空，用 Bash 取得：`TRACE_ID=${DIGEST_TRACE_ID:-"interactive-$(date +%Y%m%d_%H%M%S)"}`。**禁止**留空字串。
 
 ### ntfy tags
 - tasks 成功 → `["white_check_mark"]`

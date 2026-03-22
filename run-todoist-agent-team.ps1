@@ -121,6 +121,11 @@ if ($loopStateFiles.Count -gt 0) {
     Write-Host "[CLEANUP] Removed $($loopStateFiles.Count) stale loop-state files (>3 days old)"
 }
 
+# ADR-036: context-compression hint 清理（30 分鐘 TTL）
+Get-ChildItem "$AgentDir\state\context-compression-hint-*.txt" -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -lt (Get-Date).AddMinutes(-30) } |
+    Remove-Item -Force -ErrorAction SilentlyContinue
+
 # Generate log filename
 $Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $LogFile = "$LogDir\todoist-team_$Timestamp.log"
@@ -1250,8 +1255,15 @@ counts = {}
 for key in tasks:
     counts[key] = tracking.get(f'{key}_count', 0)
 
-# 偵測飢餓任務（今日執行次數 = 0）
-zero_tasks = [k for k, v in counts.items() if v == 0 and tasks[k].get('daily_limit', 0) > 0]
+# 偵測飢餓任務（今日執行次數 = 0，且今日為允許執行日）
+today_weekday = datetime.datetime.now().weekday()  # Mon=0...Sun=6
+def is_allowed_today(task):
+    allowed = task.get('allowed_days')
+    if not allowed:
+        return True
+    return today_weekday in allowed
+
+zero_tasks = [k for k, v in counts.items() if v == 0 and tasks[k].get('daily_limit', 0) > 0 and is_allowed_today(tasks[k])]
 
 # 偵測 next_execution_order 越界（大於所有 execution_order 的最大值 + 1）
 max_order = max((t.get('execution_order', 0) for t in tasks.values()), default=1)
@@ -1345,6 +1357,50 @@ $pathList
 }
 
 # ============================================
+# Phase 0e: ADR-037 時段風險評估閘門
+# 評估當前小時的執行風險，決定是否降級或跳過非關鍵任務
+# ============================================
+$script:ADR037_SkipTaskTypes = @()
+$script:ADR037_TimeoutMultiplier = 1.0
+$script:ADR037_CriticalRisk = $false
+try {
+    $riskScorerPath = Join-Path $AgentDir "tools\time_slot_risk_scorer.py"
+    if (Test-Path $riskScorerPath) {
+        $riskJson = uv run --project $AgentDir python $riskScorerPath --format json 2>$null
+        if ($riskJson) {
+            $riskData = $riskJson | ConvertFrom-Json
+            $riskLevel = $riskData.risk.risk_level
+            $riskScore = [double]$riskData.risk.risk_score
+            $riskAction = $riskData.risk.recommended_action
+            Write-Log "[Phase0e] ADR-037 時段風險: hour=$((Get-Date).Hour) level=$riskLevel score=$riskScore action=$riskAction"
+            switch ($riskAction) {
+                "extend_timeout" {
+                    $script:ADR037_TimeoutMultiplier = 1.30
+                    Write-Log "[Phase0e] Timeout +30% buffer 已啟用"
+                }
+                "skip_non_critical" {
+                    $script:ADR037_TimeoutMultiplier = 1.30
+                    if ($riskData.risk.skip_task_types) {
+                        $script:ADR037_SkipTaskTypes = @($riskData.risk.skip_task_types)
+                        Write-Log "[Phase0e] 跳過非關鍵任務類型: $($script:ADR037_SkipTaskTypes -join ', ')"
+                    }
+                }
+                "skip_phase2" {
+                    $script:ADR037_CriticalRisk = $true
+                    Write-Log "[Phase0e] WARN: critical 風險時段，Phase 2 執行受限"
+                }
+            }
+            # 持久化風險評估結果供後續分析
+            $riskJson | Set-Content (Join-Path $AgentDir "state\time-slot-risk.json") -Encoding UTF8
+        }
+    } else {
+        Write-Log "[Phase0e] time_slot_risk_scorer.py 不存在，略過風險評估"
+    }
+} catch {
+    Write-Log "[Phase0e] 風險評估失敗（不影響主流程）: $($_.Exception.Message)"
+}
+
+# ============================================
 # Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
 # 用 Groq Llama 8B 快速判斷今日任務複雜度
 # 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
@@ -1390,7 +1446,12 @@ cap_path = r'$($capPath -replace '\\','\\')'
 with open(freq_path, 'r', encoding='utf-8') as f:
     cfg = yaml.safe_load(f)
 tasks = cfg.get('tasks') or {}
-total = sum(int(t.get('daily_limit', 0)) for t in tasks.values())
+import datetime as _dt
+_today_wd = _dt.datetime.now().weekday()
+def _allowed(t):
+    ad = t.get('allowed_days')
+    return (not ad) or (_today_wd in ad)
+total = sum(int(t.get('daily_limit', 0)) for t in tasks.values() if _allowed(t))
 with open(cap_path, 'w', encoding='utf-8') as out:
     json.dump({'total_daily_cap': total}, out, ensure_ascii=False)
 print(total)
@@ -1606,6 +1667,17 @@ $phase1Duration = [int]($phase1End - $startTime).TotalSeconds
 Write-Log "=== Phase 1 complete (${phase1Duration}s from start, ${phase1Seconds}s phase-only) ==="
 if ($phase1Success) {
     Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "completed" -AgentType "todoist" -Detail "plan_type=$($plan.plan_type)"
+    # ADR-035: Phase 1 結束預算查核
+    try {
+        $bc1 = uv run --project $AgentDir python tools/phase_budget_reporter.py `
+            --phase phase1 --trace-id $traceId --no-alert --format json 2>$null | ConvertFrom-Json
+        if ($bc1 -and $bc1.warn_phase) {
+            Write-Log "[ADR-035] Phase 1 token 警告: $($bc1.phase_tokens) / $($bc1.phase_limit) ($([math]::Round($bc1.phase_utilization * 100, 0))%)"
+        }
+        if ($bc1 -and $bc1.warn_trace) {
+            Write-Log "[ADR-035] Trace token 警告: $($bc1.trace_tokens) / $($bc1.trace_warn_limit)"
+        }
+    } catch { }
 } else {
     Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "failed" -AgentType "todoist" -Detail "query/plan failed"
 }
@@ -1785,6 +1857,36 @@ if (Test-Path $runtimePolicyFile) {
             }
             if ($selectedTasks.Count -gt $maxParallel) {
                 $selectedTasks = @($selectedTasks | Select-Object -First $maxParallel)
+            }
+
+            # ADR-037: 時段風險評估降級過濾（Phase 0e 計算的高風險時段）
+            if ($script:ADR037_SkipTaskTypes.Count -gt 0) {
+                $adr037Blocked = @($selectedTasks | Where-Object {
+                    $taskType = $_.task_type
+                    $script:ADR037_SkipTaskTypes | Where-Object { $taskType -like "*$_*" }
+                })
+                $selectedTasks = @($selectedTasks | Where-Object {
+                    $taskType = $_.task_type
+                    -not ($script:ADR037_SkipTaskTypes | Where-Object { $taskType -like "*$_*" })
+                })
+                foreach ($bt in $adr037Blocked) {
+                    $skippedResultPath = "results/todoist-auto-$($bt.key).json"
+                    $adr037Result = [ordered]@{
+                        agent     = "todoist-auto-$($bt.key)"
+                        status    = "skipped"
+                        task_id   = $null
+                        type      = $bt.key
+                        topic     = $null
+                        summary   = "ADR-037 時段風險降級：$($bt.task_type) 類型在高風險時段暫停"
+                        error     = "adr037_time_slot_risk"
+                        done_cert = $null
+                    }
+                    $adr037Result | ConvertTo-Json -Depth 5 | Set-Content -Path $skippedResultPath -Encoding UTF8 -Force
+                    Write-Log "[Phase0e] ADR-037 跳過任務: $($bt.key) (type=$($bt.task_type))"
+                }
+                if ($adr037Blocked.Count -gt 0) {
+                    Write-Log "[Phase0e] ADR-037 降級過濾: $($adr037Blocked.Count) 個任務被跳過"
+                }
             }
 
             # 為被自主模式過濾掉的任務補寫佔位結果檔（skipped），
@@ -2735,6 +2837,17 @@ $phase2FailCount = @($phase2Jobs | Where-Object { $_.AgentName } | ForEach-Objec
     $n = $_.AgentName; $sections[$n]
 } | Where-Object { $_ -eq "failed" -or $_ -eq "timeout" }).Count
 Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "todoist" -Detail "$($phase2Jobs.Count) agents done, $phase2FailCount failed"
+# ADR-035: Phase 2 結束預算查核
+try {
+    $bc2 = uv run --project $AgentDir python tools/phase_budget_reporter.py `
+        --phase phase2 --trace-id $traceId --no-alert --format json 2>$null | ConvertFrom-Json
+    if ($bc2 -and $bc2.warn_phase) {
+        Write-Log "[ADR-035] Phase 2 token 警告: $($bc2.phase_tokens) / $($bc2.phase_limit) ($([math]::Round($bc2.phase_utilization * 100, 0))%)"
+    }
+    if ($bc2 -and $bc2.suspend_trace) {
+        Write-Log "[ADR-035] Trace token 超過暫停閾值，後續任務已中止"
+    }
+} catch { }
 # Level 3-A: per-agent spans + Phase 2 span
 foreach ($agentKey in $sections.Keys) {
     if ($sections[$agentKey] -ne "pending") {

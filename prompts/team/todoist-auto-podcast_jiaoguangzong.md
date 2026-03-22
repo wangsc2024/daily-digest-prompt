@@ -76,7 +76,7 @@ released_at: "2026-03-21"
      "agent": "todoist-auto-podcast_jiaoguangzong",
      "type": "podcast_jiaoguangzong",
      "status": "in_progress",
-     "summary": "正在生成教觀綱宗 Podcast，腳本已完成，TTS 進行中..."
+     "summary": "正在生成淨土學苑 Podcast（podcast_jiaoguangzong），腳本已完成，TTS 進行中..."
    }
    ```
    用 Write 工具寫入 `results/todoist-auto-podcast_jiaoguangzong.json`

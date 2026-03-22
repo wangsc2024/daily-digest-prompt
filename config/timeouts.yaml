@@ -77,6 +77,7 @@ todoist_team:
     kb_insight_evaluation: 1200 # 讀 system-insight + 擇 3 項 + 研究 + 執行方案 + 寫回 improvement-backlog
     workflow_forge: 900         # 掃描 config/prompts + 缺口篩選 + 產物生成 + 驗證 + 整合
     insight_briefing: 900      # 深度研究洞察簡報：多 Skill 串接 + 簡報產出 + KB + ntfy
+    zen_koan: 300              # 禪宗公案推播：選題(30s) + 撰寫(60s) + ntfy 發送(30s) + 寫回 JSON(10s)
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:
@@ -93,6 +94,10 @@ audit_team:
   phase1_timeout: 600       # Phase 1: 審查 Agent（10 分鐘）
   phase2_timeout: 1200      # Phase 2: 組裝+修正（20 分鐘）
   phase2_max_retries: 1     # Phase 2 重試次數
+  # Phase 3：審查後一律觸發 arch-evolution（含 backlog 空／檔案缺失，由 prompt 內建處理）
+  # 僅用「距離上次 arch-decision.json 的間隔」防連打；0 = 不啟用冷卻（每次審查皆跑 Phase 3）
+  # 腳本加碼：若 state/last-audit.json 有 fixes_applied>0 或 previous.delta < -0.25（分數退步），略過冷卻仍跑 Phase 3
+  phase3_arch_decision_cooldown_minutes: 90
 
 # FSM 生命週期管理
 fsm:

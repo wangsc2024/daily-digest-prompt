@@ -15,26 +15,15 @@ released_at: "2026-03-22"
 - 禁止使用 TodoWrite
 - 最小化工具呼叫
 
-## 前處理（Groq 加速）
+## 前處理（Haiku 加速）
 
-在執行流程前，嘗試用 Groq Relay 生成 trending 一句摘要：
+在執行流程前，用 Claude Haiku 生成搜尋方向建議：
 
 ```bash
-GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+claude -p "請為「GitHub 上與 Agent 系統相關的熱門專案」搜尋任務，提供一句搜尋方向建議（20字以內），只回覆建議本身" --model claude-haiku-4-5-20251001
 ```
 
-若 `GROQ_OK` 為 `ok`：
-1. 用 Write 工具建立 `temp/groq-req-github_scout.json`（UTF-8）：
-   ```json
-   {"mode": "summarize", "content": "請為「GitHub 上與 Agent 系統相關的熱門專案」搜尋任務，提供一句搜尋方向建議（20字以內）"}
-   ```
-2. 執行：
-   ```bash
-   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-github_scout.json > temp/groq-result-github_scout.json
-   ```
-3. Read `temp/groq-result-github_scout.json`，取得搜尋方向建議，補充到執行流程的搜尋關鍵字
-
-若 `GROQ_OK` 不為 `ok`：略過此步驟，依原執行流程進行。
+將輸出補充到執行流程的搜尋關鍵字。若呼叫失敗，略過此步驟，依原執行流程進行。
 
 ## 執行流程
 讀取 `templates/auto-tasks/github-scout.md`，依其完整步驟執行（含落實方案研擬、KB 存儲、審查優化、落實）。
@@ -62,5 +51,7 @@ GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | p
 
 ## 禁止事項
 - 禁止修改 scheduler-state.json
-- 禁止修改任何 SKILL.md
-- 禁止修改 config/*.yaml
+- 禁止修改核心攔截 hooks：pre_bash_guard.py、pre_write_guard.py、pre_read_guard.py
+- 禁止修改 run-*.ps1 腳本
+- 禁止修改 .claude/settings.json
+- **落實步驟（步驟 9）中**，依 SKILL.md 定義的低/中風險範圍，允許修改 config/*.yaml、templates/、prompts/team/todoist-auto-*.md、非攔截類 hooks 及 skills/*/SKILL.md 的 triggers/description

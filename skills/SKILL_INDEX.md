@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-21 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（20 個核心 + 34 個工具 = 54 個 Skills）
+## 速查表（20 個核心 + 36 個工具 = 56 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -67,6 +67,8 @@
 | 51 | game-workflow-design | Flutter + Flame 遊戲開發工作流（Phase 0–5、OpenMoji/ZapSplat 素材管線、Cloudflare Pages 部署，依 KB 4b7bf8f5，depends-on: knowledge-query） | 工作流設計遊戲、Flame Engine、Flutter 遊戲、遊戲開發流程、遊戲工作流、OpenMoji、ZapSplat、素材管線、Bonfire、flame_svg、flame_audio、Cloudflare Pages |
 | 52 | slo-budget-manager | SLO/Error Budget 治理（失敗分類 taxonomy→SLI/SLO 定義→28 天 Error Budget 計算→postmortem 觸發，depends-on: scheduler-state、system-insight、arch-evolution） | slo-budget-manager、SLO 治理、Error Budget、失敗分類、failure mode、成功率治理、postmortem、budget burn、穩定性治理 |
 | 53 | context-compressor | Context Window 壓縮策略工具（BufferWindow/Summary/Delegation 三策略，主動壓縮 I/O，depends-on: context-budget-monitor） | context-compressor、Context 壓縮、壓縮策略、I/O 減量、BufferWindow、Summary 壓縮、Context 瘦身、壓縮摘要 |
+| 54 | research-saturation-analyzer [草稿] | 研究主題飽和度分析與收穫遞減偵測（多因子評分\主題聚類\待深化識別，depends-on: kb-research-strategist、knowledge-query、system-insight） | 研究飽和度、收穫遞減、主題飽和、研究主題分析、saturation analysis、diminishing returns、研究方向建議、待深化主題、research saturation |
+| 55 | auto-task-creator | 自動任務建立精靈（6 步 checklist：frequency-limits.yaml + prompt + timeouts + PS1 + allowed_days 星期限制，確保命名一致） | 新增自動任務、建立自動任務、增加自動任務、add auto task、auto-task-creator、新自動任務、auto task checklist |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

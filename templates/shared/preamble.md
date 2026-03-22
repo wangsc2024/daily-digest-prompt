@@ -107,6 +107,17 @@ Read context/continuity/auto-task-{task_key}.json
 
 ---
 
+## Context 壓縮感知（ADR-036）
+
+在每個主要步驟開始前，檢查是否存在 `state/context-compression-hint-{SESSION_ID前8字}.txt`：
+- 若存在且非空：讀取並按指示壓縮工作記憶，然後刪除此檔案繼續執行
+- 若不存在：正常執行
+
+此機制由 Hook 系統（post_tool_logger.py）自動觸發，無需手動管理。
+壓縮策略：65-80% 使用率 → BufferWindow（保留最近 5 次關鍵結果）；> 80% → Summary（強制壓縮）。
+
+---
+
 ## 重要禁令：禁止產生 nul 檔案
 - 絕對禁止在 Bash 指令中使用 `> nul`、`2>nul`、`> NUL`，這會在 Windows 上產生名為 nul 的實體檔案
 - 絕對禁止用 Write 工具建立名為 nul 的檔案

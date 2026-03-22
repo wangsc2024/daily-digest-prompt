@@ -11,7 +11,9 @@ param(
     [string]$NoteId = "",
     [string]$Query = "",
     [string]$Slug = "",
-    [string]$Model = "claude-sonnet-4-5"
+    [string]$Model = "claude-sonnet-4-5",
+    # 空字串時依 config/podcast.yaml + slug（jiaoguang-*）由 resolve_podcast_series.py 解析
+    [string]$SeriesDisplayName = ""
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -439,7 +441,25 @@ if ($selectedNoteId -and (Test-Path $OutFile)) {
 # ============================================================
 Write-Log "--- Phase 6: ntfy 通知 ---"
 try {
-    $title = "Podcast 完成：$podcastTitle"
+    $seriesNtfy = $SeriesDisplayName.Trim()
+    if (-not $seriesNtfy) {
+        $resolver = Join-Path $ToolsDir "resolve_podcast_series.py"
+        if (Test-Path $resolver) {
+            try {
+                $raw = & uv run --project $AgentDir python $resolver --slug $Slug 2>$null
+                if ($null -ne $raw) {
+                    $seriesNtfy = if ($raw -is [System.Array]) { [string]$raw[-1] } else { [string]$raw }
+                    $seriesNtfy = $seriesNtfy.Trim()
+                }
+            } catch {
+                $seriesNtfy = ""
+            }
+        }
+    }
+    if (-not $seriesNtfy) {
+        $seriesNtfy = if ($Slug -like "jiaoguang-*") { "淨土學苑" } else { "知識電台" }
+    }
+    $title = "🎙️ $seriesNtfy Podcast：$podcastTitle"
     $sizeMBDisplay = if (Test-Path $OutFile) {
         [math]::Round((Get-Item $OutFile).Length / 1MB, 1)
     } else { "?" }

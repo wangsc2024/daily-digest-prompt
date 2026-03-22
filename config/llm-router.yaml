@@ -29,18 +29,17 @@ routing_rules:
 
   # ── 路由到 Groq（快速、結構化、低成本）─────────────────────
   news_summary:
-    provider: groq
+    provider: cursor_cli
+    model: composer-2-fast
     mode: summarize
-    groq_mode: summarize            # P1-B: llm_router.py 讀取此欄位（mode 別名，向後相容）
     max_tokens: 200
     description: 新聞標題或段落一句話摘要
     used_by: [fetch-news.md]
     max_input_chars: 500            # 每則新聞的摘要輸入上限
 
   en_to_zh:
-    provider: groq
+    provider: groq_direct           # tools/groq_direct.py 直呼 Groq API，金鑰讀 bot/.env
     mode: translate
-    groq_mode: translate
     max_tokens: 500
     description: 英文技術文章標題轉正體中文，保留技術術語原文
     used_by: [fetch-hackernews.md]
@@ -63,9 +62,9 @@ routing_rules:
     used_by: []                     # 預留
 
   kb_content_score:
-    provider: groq
-    mode: classify                  # relay 不支援 kb_score，改用 classify（P1-B 修正）
-    groq_mode: classify
+    provider: claude_haiku
+    model: claude-haiku-4-5-20251001
+    mode: classify
     max_tokens: 150
     description: 知識庫筆記內容品質語義評分（概念數、深度、密度、是否知識）
     used_by: [skills/kb-curator/SKILL.md]

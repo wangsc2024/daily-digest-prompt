@@ -47,11 +47,65 @@
       "output_chars": 68541860
     },
     "2026-03-22": {
-      "estimated_tokens": 4967439.428571433,
-      "tool_calls": 2252,
-      "input_chars": 1057379,
-      "output_chars": 16328659
+      "estimated_tokens": 6701661.428571428,
+      "tool_calls": 3064,
+      "input_chars": 1483304,
+      "output_chars": 21972511,
+      "phases": {
+        "phase2-auto": {
+          "estimated_tokens": 181159.99999999985,
+          "tool_calls": 105
+        },
+        "phase3": {
+          "estimated_tokens": 104697.42857142857,
+          "tool_calls": 74
+        },
+        "phase1": {
+          "estimated_tokens": 311554.857142857,
+          "tool_calls": 268
+        },
+        "phase2": {
+          "estimated_tokens": 75922.00000000001,
+          "tool_calls": 32
+        }
+      },
+      "traces": {
+        "77160efa301b": {
+          "start_time": "2026-03-22T07:12:33.510388",
+          "total_tokens": 36763.14285714285,
+          "phase_breakdown": {
+            "phase2-auto": 1266.0,
+            "phase3": 35497.14285714285
+          }
+        },
+        "92be9d17374c": {
+          "start_time": "2026-03-22T07:21:29.293630",
+          "total_tokens": 356202.85714285704,
+          "phase_breakdown": {
+            "phase1": 280280.8571428571,
+            "phase2": 75922.00000000001
+          }
+        },
+        "71a294e4acde": {
+          "start_time": "2026-03-22T07:30:15.525228",
+          "total_tokens": 133846.8571428571,
+          "phase_breakdown": {
+            "phase1": 15594.571428571426,
+            "phase2-auto": 80357.71428571426,
+            "phase3": 37894.57142857143
+          }
+        },
+        "920e8a7ba452": {
+          "start_time": "2026-03-22T08:00:16.063948",
+          "total_tokens": 146521.4285714286,
+          "phase_breakdown": {
+            "phase1": 15679.428571428572,
+            "phase2-auto": 99536.28571428575,
+            "phase3": 31305.714285714294
+          }
+        }
+      }
     }
   },
-  "updated": "2026-03-22T07:05:52.528834"
+  "updated": "2026-03-22T08:10:38.408666"
 }

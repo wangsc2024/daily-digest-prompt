@@ -16,8 +16,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections import defaultdict
-from datetime import date, timedelta
+from collections import Counter, defaultdict
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Iterator
 
@@ -251,7 +251,58 @@ def run_analysis(days: int = 3, trace_id_filter: str | None = None) -> dict:
         "healthy_traces": len(healthy_traces),
         "top_issues": top_issues,
         "traces": sorted(results, key=lambda r: r["error_count"], reverse=True),
+        "hour_breakdown": analyze_by_hour(entries),   # ADR-037: 時段失敗分佈
     }
+
+
+def analyze_by_hour(entries: list[dict]) -> dict[int, dict]:
+    """
+    ADR-037：依 hour_of_day 聚合失敗統計。
+
+    Args:
+        entries: 日誌記錄列表（來自 _load_recent_entries）
+
+    Returns:
+        dict mapping hour (0-23) → {
+            "hour": int,
+            "total": int,
+            "errors": int,
+            "failure_rate": float,
+            "top_modes": dict[str, int],  # 最多 3 個失敗模式
+        }
+    """
+    hour_data: dict[int, dict] = defaultdict(lambda: {
+        "total": 0, "errors": 0, "modes": Counter()
+    })
+
+    for entry in entries:
+        ts = entry.get("ts", "")
+        if not ts:
+            continue
+        try:
+            hour = datetime.fromisoformat(ts).hour
+        except (ValueError, TypeError):
+            continue
+
+        hour_data[hour]["total"] += 1
+        if entry.get("has_error"):
+            hour_data[hour]["errors"] += 1
+            mode = entry.get("error_category", "unknown")
+            hour_data[hour]["modes"][mode] += 1
+
+    result = {}
+    for h, data in sorted(hour_data.items()):
+        total = data["total"]
+        errors = data["errors"]
+        result[h] = {
+            "hour": h,
+            "total": total,
+            "errors": errors,
+            "failure_rate": round(errors / total, 4) if total > 0 else 0.0,
+            "top_modes": dict(data["modes"].most_common(3)),
+        }
+
+    return result
 
 
 def format_text_report(report: dict) -> str:

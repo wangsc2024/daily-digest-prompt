@@ -93,21 +93,6 @@ schedules:
     workdir: "D:/Source/daily-digest-prompt/bot"
     description: "Bot Server + Gun Relay 開機啟動（延遲 30s 等待網路）"
 
-  groq-relay-startup:
-    trigger: startup
-    delay: 45
-    command: "node groq-relay.js"
-    workdir: "D:/Source/daily-digest-prompt/bot"
-    description: "Groq Relay 服務（開機啟動，延遲 45s，port 3002，為 Claude Agent 提供快速翻譯/摘要前處理）"
-
-  groq-relay-watchdog:
-    cron: "*/5 * * * *"
-    script: bot/watchdog-groq-relay.ps1
-    workdir: "D:/Source/daily-digest-prompt"
-    timeout: 30
-    retry: 0
-    description: "Groq-Relay Watchdog（每 5 分鐘，進程死亡即自動重啟 + ntfy 告警）"
-
   autonomous-harness:
     cron: "*/5 * * * *"
     script: run-autonomous-harness.ps1
@@ -137,8 +122,6 @@ schedules:
 | bot-server-restart | 每日 00:15 | bot/restart-bot.ps1 | 180s (3min) | Bot + Gun Relay + Chatroom Scheduler 重啟 |
 | bot-startup | 開機啟動 +30s | bot/restart-bot.ps1 | 無限制 | Bot + Gun Relay + Chatroom Scheduler 開機啟動 |
 | chatroom-watchdog | 每 10 分鐘 | bot/watchdog-chatroom.ps1 | 60s | Chatroom-Scheduler Watchdog（死亡自動重啟 + ntfy 告警） |
-| groq-relay-startup | 開機啟動 +45s | node groq-relay.js | 無限制 | Groq Relay 服務（port 3002，Claude Agent 前處理層） |
-| groq-relay-watchdog | 每 5 分鐘 | bot/watchdog-groq-relay.ps1 | 30s | Groq-Relay Watchdog（死亡自動重啟 + ntfy 告警） |
 | autonomous-harness | 每 5 分鐘 | run-autonomous-harness.ps1 | 60s | Agent Harness 自治週期（build_plan + recovery_worker） |
 
 ## 注意：Todoist 團隊模式與排程重疊

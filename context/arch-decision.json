@@ -1,16 +1,16 @@
 {
   "version": 1,
-  "generated_at": "2026-03-22T06:19:00+08:00",
+  "generated_at": "2026-03-22T07:35:00+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
   "source_audit_score": 87.88,
   "decisions": [
     {
-      "backlog_id": "backlog_kie_20260321_skill_anomaly",
-      "backlog_pattern": "Skill 使用模式異常偵測與低效鏈優化",
+      "backlog_id": "backlog_si_20260322_daily_success_rate",
+      "backlog_pattern": "系統洞察告警：daily_success_rate 超閾值（持續第 2 天）",
       "action": "skip",
-      "skip_reason": "done",
-      "priority": "medium",
+      "skip_reason": "ongoing",
+      "priority": "high",
       "fix_instructions": null,
       "estimated_minutes": 0,
       "verification": null,
@@ -18,14 +18,30 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260322-038 Accepted/immediate_fix — tools/skill_anomaly_detector.py、analysis/skill-usage-baseline.json、analysis/inefficient-skill-chains.json、context/skill-health-report.json 均已建立完成（2026-03-22T01:10），execution_status=success",
+      "execution_note": "ADR-20260317-024 Accepted/done + ADR-20260320-032 Accepted/done — 失敗根因分析與 SLO/Error Budget 治理均已完成，daily_success_rate=0.865 仍低於 0.95 門檻，持續監控中",
       "validation_result": null
     },
     {
-      "backlog_id": "backlog_kie_20260321_research_saturation",
-      "backlog_pattern": "研究主題飽和度分析與收穫遞減偵測",
+      "backlog_id": "backlog_si_20260322_cache_hit_ratio",
+      "backlog_pattern": "系統洞察告警：cache_hit_ratio 超閾值（持續第 2 天）",
       "action": "skip",
-      "skip_reason": "done",
+      "skip_reason": "ongoing",
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260319-029 Accepted/done — TTL 調整與 adaptive_ttl 配置已完成，cache_hit_ratio=0.2167 仍低於 0.4 門檻，微升中（+0.4pp），持續觀察",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "backlog_si_20260322_auto_task_fairness",
+      "backlog_pattern": "系統洞察告警：auto_task_fairness 超閾值（改善中）",
+      "action": "skip",
+      "skip_reason": "ongoing",
       "priority": "medium",
       "fix_instructions": null,
       "estimated_minutes": 0,
@@ -34,7 +50,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260322-039 Accepted/immediate_fix — tools/research_saturation_analyzer.py、analysis/research-topic-clusters.json、analysis/high-potential-topics.json 均已建立完成（2026-03-22T01:10），execution_status=success",
+      "execution_note": "ADR-20260318-027 Accepted/done — fairness-hint 預計算已完成，auto_task_fairness=1.211（改善中，-13.7%），持續觀察輪轉效果",
       "validation_result": null
     },
     {
@@ -50,7 +66,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260317-024 Accepted/done — 失敗時段根因分析已完成，但 daily_success_rate=0.865 仍低於門檻 0.95。新增 ADR-20260322-037 進一步處理時段風險評估（Proposed/pending）",
+      "execution_note": "ADR-20260317-024 Accepted/done — 與 backlog_si_20260322_daily_success_rate 為同一指標的歷史數據點，持續監控",
       "validation_result": null
     },
     {
@@ -66,7 +82,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260318-027 Accepted/done — fairness-hint 預計算已完成，但 auto_task_fairness=1.403 仍高於門檻 0.5。持續監控輪轉機制，等待 7 天數據驗證",
+      "execution_note": "ADR-20260318-027 Accepted/done — 與 backlog_si_20260322_auto_task_fairness 為同一指標的歷史數據點，fairness 指標已改善（1.403→1.211）",
       "validation_result": null
     },
     {
@@ -82,7 +98,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260317-022 Accepted/done — context-budget-monitor Skill 已建立，但 avg_io_per_call=26567 仍超標 5.3 倍。新增 ADR-20260322-035/036 進一步處理 token 預算與 context 壓縮（Proposed/pending）",
+      "execution_note": "ADR-20260317-022 Accepted/done — context-budget-monitor 已建立。ADR-20260322-035 Proposed/pending（實時預算監控）+ ADR-20260322-036 Proposed/pending（Context Compression）進一步處理中，avg_io_per_call=26567 仍超標",
       "validation_result": null
     },
     {
@@ -178,7 +194,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260318-027 Accepted/done — fairness-hint 預計算與 Phase 2 結果檔快取恢復保護已完成（2026-03-20）",
+      "execution_note": "ADR-20260318-027 Accepted/done — fairness-hint 預計算與 Phase 2 結果檔快取恢復保護已完成",
       "validation_result": null
     },
     {
@@ -194,7 +210,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260318-028 Accepted/done — Phase 2 snapshot-resume 邏輯已完成（2026-03-20）",
+      "execution_note": "ADR-20260318-028 Accepted/done — Phase 2 snapshot-resume 邏輯已完成",
       "validation_result": null
     },
     {
@@ -258,7 +274,7 @@
       "retry_count": 0,
       "executed_at": null,
       "execution_result": null,
-      "execution_note": "ADR-20260319-031 Accepted/done — hook-registry 執行完成，snapshot + audit 報告已產出",
+      "execution_note": "ADR-20260319-031 Accepted/done — hook-registry 執行完成",
       "validation_result": null
     },
     {
@@ -312,8 +328,8 @@
     {
       "backlog_id": "backlog_ib_20260321_realtime_budget",
       "backlog_pattern": "實時預算監控與 per-trace 成本歸因",
-      "action": "skip",
-      "skip_reason": "pending_adr",
+      "action": "schedule_adr",
+      "skip_reason": null,
       "priority": "high",
       "fix_instructions": null,
       "estimated_minutes": 0,
@@ -328,8 +344,8 @@
     {
       "backlog_id": "backlog_ib_20260321_context_compression",
       "backlog_pattern": "Context Compression 閾值觸發機制",
-      "action": "skip",
-      "skip_reason": "pending_adr",
+      "action": "schedule_adr",
+      "skip_reason": null,
       "priority": "high",
       "fix_instructions": null,
       "estimated_minutes": 0,
@@ -344,8 +360,8 @@
     {
       "backlog_id": "backlog_kie_20260321_time_slot_risk",
       "backlog_pattern": "高失敗時段根因分析與時段風險評估",
-      "action": "skip",
-      "skip_reason": "pending_adr",
+      "action": "schedule_adr",
+      "skip_reason": null,
       "priority": "high",
       "fix_instructions": null,
       "estimated_minutes": 0,
@@ -356,6 +372,54 @@
       "execution_result": null,
       "execution_note": "ADR-20260322-037 Proposed/pending — 涉及 run-todoist-agent-team.ps1 Phase 0 風險閘門 + hooks/post_tool_logger.py system_snapshot（安全邊界），需人工確認風險評分模型與降級策略後才能執行",
       "validation_result": null
+    },
+    {
+      "backlog_id": "backlog_kie_20260321_skill_anomaly",
+      "backlog_pattern": "Skill 使用模式異常偵測與低效鏈優化",
+      "action": "skip",
+      "skip_reason": "done",
+      "priority": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260322-038 Accepted/done — tools/skill_anomaly_detector.py、analysis/skill-usage-baseline.json、analysis/inefficient-skill-chains.json、context/skill-health-report.json 均已建立完成（self-heal 於 01:12 執行成功）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "backlog_kie_20260321_research_saturation",
+      "backlog_pattern": "研究主題飽和度分析與收穫遞減偵測",
+      "action": "skip",
+      "skip_reason": "done",
+      "priority": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260322-039 Accepted/done — tools/research_saturation_analyzer.py、analysis/research-topic-clusters.json、analysis/high-potential-topics.json 均已建立完成（self-heal 於 01:12 執行成功）",
+      "validation_result": null
+    },
+    {
+      "backlog_id": "backlog_health_202603220715",
+      "backlog_pattern": "每日健康檢查發現問題：逾時, Phase失敗",
+      "action": "skip",
+      "skip_reason": "ongoing",
+      "priority": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "retry_count": 0,
+      "executed_at": null,
+      "execution_result": null,
+      "execution_note": "ADR-20260317-024 Accepted/done（失敗時段根因分析）+ ADR-20260320-032 Accepted/done（SLO/Error Budget）— 成功率 88% 為既有監控指標的最新數據點，逾時與 Phase 失敗已由既有 ADR 治理機制覆蓋。ADR-20260322-037 Proposed/pending 進一步處理時段風險評估",
+      "validation_result": null
     }
   ],
   "immediate_fix_summary": {
@@ -364,12 +428,11 @@
     "safe_to_automate": true
   },
   "meta": {
-    "decisions_total": 22,
+    "decisions_total": 26,
     "immediate_fix": 0,
-    "schedule_adr": 0,
+    "schedule_adr": 3,
     "deferred": 0,
     "wontfix": 0,
-    "skip": 22,
-    "preserved_success": 0
+    "skip": 23
   }
 }

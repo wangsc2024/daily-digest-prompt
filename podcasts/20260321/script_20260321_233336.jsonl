@@ -1,0 +1,50 @@
+{"speaker": "Host-A", "text": "大家好，歡迎收聽今天的知識電台，我是曉晨。"}
+{"speaker": "Host-B", "text": "我是云哲。今天我們從知識庫挑了三篇偏技術與方法論的筆記，用對談方式快速帶大家抓到重點。"}
+{"speaker": "Host-A", "text": "主題依序是：AI 自主編碼 Agent 深度研究 — 從輔助補全到端對端軟體工程的範式轉移：技術架構全…；AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）；還有 AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試…。"}
+{"speaker": "Host-A", "text": "先聊第一篇：AI 自主編碼 Agent 深度研究 — 從輔助補全到端對端軟體工程的範式轉移：技術架構全景、SWE-benc…。"}
+{"speaker": "Host-B", "text": "這篇最值得先記住的 takeaway 是什麼？"}
+{"speaker": "Host-A", "text": "# AI 自主編碼 Agent 深度研究"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "## 從輔助補全到端對端軟體工程的範式轉移：技術架構全景、SWE-bench 演進與 2026 前沿方向"}
+{"speaker": "Host-A", "text": "研究日期：2026-03-04"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "研究類型：AI 深度研究（四階段完整報告）"}
+{"speaker": "Host-A", "text": "2025-2026 年，AI 輔助編碼經歷從行內補全（Code Completion）到自主編碼 Agent（Autonomous Coding Agent）的範式轉移"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "SWE-bench Verified 分數從 2024 年的 12.5% 飆升至 2026 年的 76.8%，mini-SWE-agent 用 100 行 Python 達到接近頂尖效能，證明 LLM 基座能力而非框架複…"}
+{"speaker": "Host-A", "text": "Plan-Execute-Verify 迴圈已成共識架構，上下文管理與 MCP 工具整合是關鍵支撐"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "然而單 Agent vs 多 Agent、scaffold 重要性、程式碼量 vs 品質、基準測試可信度等四大分歧揭示深層張力"}
+{"speaker": "Host-A", "text": "最具啟發性的前沿方向包括 Inference-Time Scaling 搭配 Critic Model、Agent-Specific Fine-Tuning（32B 逼近 671B）、以及 SWE-fficiency 揭…"}
+{"speaker": "Host-B", "text": "好，我們往下一篇前進。"}
+{"speaker": "Host-A", "text": "先聊第二篇：AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）。"}
+{"speaker": "Host-B", "text": "這篇最值得先記住的 takeaway 是什麼？"}
+{"speaker": "Host-A", "text": "# AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "> **研究日期**：2026-03-17"}
+{"speaker": "Host-A", "text": "> **研究系列**：ai-software-development（application 階段）"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "> **交叉引用**：本文承接「AI Agent Context Management」與「AI 測試生成」的 mechanism 知識，進入 application 階段，探討 AI Agent 在實際開發環境中的整合…"}
+{"speaker": "Host-A", "text": "AI 開發環境整合已從單純的程式碼補全演進為涵蓋 IDE、MCP 伺服器、CI/CD 管線的全棧自動化架構"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "2026 年，超過 90% 的 Salesforce 開發者使用 Cursor，推動週期時間、PR 速度與程式碼品質雙位數提升"}
+{"speaker": "Host-A", "text": "企業研究顯示，樣板、測試與文件自動化可提升開發速度約 21%"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "核心技術支柱包含：(1) MCP（Model Context Protocol）作為 Agent-工具整合標準；(2) IDE 原生整合（VS Code、Cursor）實現即時協作；(3) CI/CD 管線的 Agent…"}
+{"speaker": "Host-A", "text": "本文提供從配置到部署的完整實作指南，涵蓋 Claude Code + VS Code、MCP 伺服器設定、CI/CD Agent 整合的實際操作步驟與程式碼範例"}
+{"speaker": "Host-B", "text": "好，我們往下一篇前進。"}
+{"speaker": "Host-A", "text": "先聊第三篇：AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質…。"}
+{"speaker": "Host-B", "text": "這篇最值得先記住的 takeaway 是什麼？"}
+{"speaker": "Host-A", "text": "# AI 測試生成與 Test-Time Compute 驗證機制"}
+{"speaker": "Host-B", "text": "嗯，這跟實務落地有什麼關係？"}
+{"speaker": "Host-B", "text": "我補一個情境：讀者可能會卡在哪些點？"}
+{"speaker": "Host-A", "text": "## LLM 驅動的自動測試合成、變異測試與品質保證（2026）"}
+{"speaker": "Host-A", "text": "> **研究日期**：2026-03-16"}

@@ -23,3 +23,24 @@ cost_tracking:                   # 成本估算（供財務監控，USD）
   claude_sonnet_per_1m_input: 3.00
   claude_sonnet_per_1m_output: 15.00
   groq_llama_8b_per_1m: 0.05
+
+# ADR-035: per-phase token 預算（估算上限，超過發 ntfy 告警）
+phase_budget:
+  phase1: 500_000                # Phase 1: 查詢規劃（500K tokens 警戒）
+  phase2: 2_000_000              # Phase 2: 任務執行（2M tokens 警戒）
+  phase3: 200_000                # Phase 3: 組裝通知（200K tokens 警戒）
+  phase2_auto: 800_000           # Phase 2 自動任務（800K tokens 警戒）
+
+# ADR-035: per-trace token 上限（單次完整執行）
+trace_budget:
+  warn_threshold: 3_000_000      # 3M tokens 發警告
+  suspend_threshold: 8_000_000   # 8M tokens 暫停後續 Phase 2 任務
+
+# ADR-036: Context Compression 閾值觸發
+context_compression:
+  enabled: true
+  max_context_tokens: 200_000    # Claude Sonnet 4.6 上下文視窗
+  warn_threshold: 0.65           # 65% → BufferWindow 策略
+  critical_threshold: 0.80       # 80% → Summary 策略
+  hint_file_ttl_minutes: 30      # 提示檔案超過 30 分鐘自動清理
+  cleanup_session_age_hours: 4   # Session 超過 4 小時清除

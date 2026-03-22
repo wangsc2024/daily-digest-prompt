@@ -8,7 +8,7 @@
 # Architecture:
 #   Phase 1: 4 parallel audit agents (dim1+5, dim2+6, dim3+7, dim4)
 #   Phase 2: 1 assembly agent (collect + fix + report + RAG)
-#   Phase 3: Decide（arch-evolution，backlog 非空時直接觸發）
+#   Phase 3: Decide（arch-evolution，審查後積極觸發；僅受 arch-decision 冷卻時間節流）
 #   Phase 4: Act（self-heal，Phase 3 執行後直接觸發，執行 immediate_fix）
 # ============================================
 
@@ -26,6 +26,26 @@ $ResultsDir = "$AgentDir\results"
 $MaxPhase2Retries = 1
 $Phase1TimeoutSeconds = 600  # 10 minutes per agent
 $Phase2TimeoutSeconds = 1200  # 20 minutes
+# Phase 3：與上次 arch-decision 最短間隔（分鐘）；0 = 每次審查皆跑 arch-evolution
+$Phase3ArchDecisionCooldownMinutes = 90
+
+# 從 config/timeouts.yaml 讀取 audit_team（與 run-agent-team.ps1 相同 uv+yaml 模式）
+$timeoutsPath = Join-Path $AgentDir "config\timeouts.yaml"
+if (Test-Path $timeoutsPath) {
+    try {
+        $tPath = $timeoutsPath -replace '\\', '/'
+        $json = uv run --project $AgentDir python -c "import json,yaml; d=yaml.safe_load(open(r'$tPath',encoding='utf-8')); a=d.get('audit_team') or {}; print(json.dumps({'phase1_timeout':a.get('phase1_timeout'),'phase2_timeout':a.get('phase2_timeout'),'phase2_max_retries':a.get('phase2_max_retries'),'phase3_arch_decision_cooldown_minutes':a.get('phase3_arch_decision_cooldown_minutes')}))"
+        $ta = $json | ConvertFrom-Json
+        if ($ta.phase1_timeout) { $Phase1TimeoutSeconds = [int]$ta.phase1_timeout }
+        if ($ta.phase2_timeout) { $Phase2TimeoutSeconds = [int]$ta.phase2_timeout }
+        if ($null -ne $ta.phase2_max_retries -and $ta.phase2_max_retries -ne '') { $MaxPhase2Retries = [int]$ta.phase2_max_retries }
+        if ($null -ne $ta.phase3_arch_decision_cooldown_minutes -and $ta.phase3_arch_decision_cooldown_minutes -ne '') {
+            $Phase3ArchDecisionCooldownMinutes = [int]$ta.phase3_arch_decision_cooldown_minutes
+        }
+    } catch {
+        # 保留上方 fallback
+    }
+}
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -283,6 +303,57 @@ function Strip-Frontmatter {
         }
     }
     return $Content
+}
+
+# JSON 反序列化後的 generated_at 可能是 string / DateTime / DateTimeOffset
+function ConvertTo-DateTimeOffsetFromAuditJson {
+    param($Raw)
+    if ($null -eq $Raw) { return $null }
+    if ($Raw -is [datetimeoffset]) { return $Raw }
+    if ($Raw -is [datetime]) { return [datetimeoffset]::new($Raw) }
+    $t = $Raw.ToString().Trim()
+    if ([string]::IsNullOrWhiteSpace($t)) { return $null }
+    try {
+        return [datetimeoffset]::Parse(
+            $t,
+            [System.Globalization.CultureInfo]::InvariantCulture,
+            [System.Globalization.DateTimeStyles]::RoundtripKind
+        )
+    } catch {
+        return $null
+    }
+}
+
+# 審查剛完成時：有自動修正或明顯退步 → 略過 arch-decision 冷卻，強制跑 Phase 3
+function Get-AuditPhase3CooldownBypass {
+    param([string]$LastAuditPath)
+    $out = [PSCustomObject]@{ Bypass = $false; Reason = "" }
+    if (-not (Test-Path $LastAuditPath)) { return $out }
+    try {
+        $la = Get-Content $LastAuditPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $fixes = 0
+        if ($null -ne $la.fixes_applied -and "$($la.fixes_applied)" -ne "") {
+            $fixes = [int]$la.fixes_applied
+        }
+        if ($fixes -gt 0) {
+            $out.Bypass = $true
+            $out.Reason = "fixes_applied=$fixes"
+            return $out
+        }
+        if ($la.previous -and $null -ne $la.previous.delta -and "$($la.previous.delta)" -ne "") {
+            [double]$dv = 0
+            if ([double]::TryParse($la.previous.delta.ToString(), [System.Globalization.NumberStyles]::Any, [cultureinfo]::InvariantCulture, [ref]$dv)) {
+                if ($dv -lt -0.25) {
+                    $out.Bypass = $true
+                    $out.Reason = "score_regression_delta=$dv"
+                    return $out
+                }
+            }
+        }
+    } catch {
+        Write-Log "[Phase 3] 讀取 last-audit 以判斷冷卻略過失敗: $_" "WARN"
+    }
+    return $out
 }
 
 # ============================================
@@ -578,24 +649,21 @@ while ($phase2Attempt -le $maxPhase2Attempts -and -not $phase2Success) {
             $phase2Success = $true
             Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase2" -State "completed" -AgentType "system-audit"
 
-            # OODA: Orient 完成，檢查是否需要觸發 Decide
+            # OODA: Orient 完成（Decide 由 Phase 3 執行；不再因 backlog 空而預先標記 skipped）
             Set-OodaState -Step "orient" -Status "completed"
-            $backlogFile = Join-Path $AgentDir "context\improvement-backlog.json"
-            if (Test-Path $backlogFile) {
+            $backlogFileOODA = Join-Path $AgentDir "context\improvement-backlog.json"
+            $blTotal = 0
+            $blPending = 0
+            if (Test-Path $backlogFileOODA) {
                 try {
-                    $backlog = Get-Content $backlogFile -Raw -Encoding UTF8 | ConvertFrom-Json
-                    $pendingItems = @($backlog.items | Where-Object { $_.status -eq "pending" })
-                    if ($pendingItems.Count -gt 0) {
-                        Write-Log "[OODA] improvement-backlog 有 $($pendingItems.Count) 筆待辦，記錄 decide 觸發信號"
-                        Set-OodaState -Step "decide" -Status "pending" -Meta @{ pending_items = $pendingItems.Count; trigger = "orient_completed" }
-                    } else {
-                        Write-Log "[OODA] improvement-backlog 為空，跳過 Decide/Act"
-                        Set-OodaState -Step "decide" -Status "skipped" -Meta @{ reason = "backlog_empty" }
-                    }
+                    $bl = Get-Content $backlogFileOODA -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $blTotal = @($bl.items).Count
+                    $blPending = @($bl.items | Where-Object { $_.status -eq "pending" }).Count
                 } catch {
-                    Write-Log "[OODA] 無法讀取 improvement-backlog.json: $_"
+                    Write-Log "[OODA] 無法解析 improvement-backlog.json: $_"
                 }
             }
+            Write-Log "[OODA] orient 完成；backlog items=$blTotal pending=$blPending（Phase 3 arch-evolution 依冷卻與 prompt 處理空清單）" "INFO"
 
             # ─── Circuit Breaker 自動更新（knowledge API）───
             if ($knowledgeAvailable) {
@@ -630,85 +698,114 @@ if (-not $phase2Success) {
 }
 
 # ============================================
-# Phase 3: Decide（arch-evolution，Orient 完成後直接觸發）
+# Phase 3: Decide（arch-evolution，審查後積極觸發；backlog 空／缺檔由 prompt 內建處理）
 # ============================================
 Write-Host "[Phase 3] OODA Decide 階段" -ForegroundColor Cyan
 $script:phase3Ran = $false
+$phase3Seconds = 0
 
 $backlogFile     = Join-Path $AgentDir "context\improvement-backlog.json"
 $archDecisionFile = Join-Path $AgentDir "context\arch-decision.json"
 $archPromptFile  = Join-Path $AgentDir "prompts\team\todoist-auto-arch_evolution.md"
 
-# 防重複執行：若今日已產出 arch-decision.json（generated_at 為今日），跳過 Phase 3
-$skipPhase3 = $false
-if (Test-Path $archDecisionFile) {
+# 節流：僅當 arch-decision.json 的 generated_at 距今短於冷卻時間時跳過（取代「當日僅一次」）
+$skipPhase3Cooldown = $false
+$ageMin = 0
+$cooldownMins = [int]$Phase3ArchDecisionCooldownMinutes
+if ($cooldownMins -gt 0 -and (Test-Path $archDecisionFile)) {
     try {
         $ad = Get-Content $archDecisionFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
         if ($ad.generated_at) {
-            $genDate = ([datetime]$ad.generated_at).ToString("yyyy-MM-dd")
-            if ($genDate -eq (Get-Date -Format "yyyy-MM-dd")) {
-                Write-Host "  [Phase 3] arch-decision.json 今日已產出（$($ad.generated_at)），跳過" -ForegroundColor Yellow
-                Write-Log "[Phase 3] Skipped: arch-decision.json already generated today" "INFO"
-                $skipPhase3 = $true
+            $genDto = ConvertTo-DateTimeOffsetFromAuditJson $ad.generated_at
+            if ($null -ne $genDto) {
+                $ageMin = [int]([datetimeoffset]::UtcNow - $genDto).TotalMinutes
+                if ($ageMin -lt 0) { $ageMin = 0 }
+                if ($ageMin -lt $cooldownMins) {
+                    $skipPhase3Cooldown = $true
+                }
+            } else {
+                Write-Log "[Phase 3] arch-decision generated_at 無法解析為時間，不套用冷卻" "WARN"
             }
         }
     } catch {
-        Write-Log "[Phase 3] arch-decision.json 解析失敗，繼續執行: $_" "WARN"
+        Write-Log "[Phase 3] arch-decision.json 解析失敗，不套用冷卻: $_" "WARN"
     }
 }
 
-if (-not $skipPhase3) {
-    # 確認 arch-evolution prompt 存在
+# 審查有落地修正或總分退步 → 略過冷卻（仍防一般重複觸發）
+if ($skipPhase3Cooldown) {
+    $auditLastPath = Join-Path $AgentDir "state\last-audit.json"
+    $cooldownBypass = Get-AuditPhase3CooldownBypass -LastAuditPath $auditLastPath
+    if ($cooldownBypass.Bypass) {
+        Write-Host ("  [Phase 3] 冷卻略過：{0}，仍執行 arch-evolution" -f $cooldownBypass.Reason) -ForegroundColor Cyan
+        Write-Log "[Phase 3] Cooldown overridden: $($cooldownBypass.Reason)" "INFO"
+        $skipPhase3Cooldown = $false
+    }
+}
+
+if ($skipPhase3Cooldown) {
+    $ageMinShow = $ageMin
+    Write-Host ("  [Phase 3] arch-decision 距今 {0} 分鐘（冷卻 {1} 分鐘），跳過 arch-evolution" -f $ageMinShow, $cooldownMins) -ForegroundColor Yellow
+    Write-Log "[Phase 3] Skipped: arch-decision cooldown (${ageMinShow}m < ${cooldownMins}m)" "INFO"
+    Set-OodaState -Step "decide" -Status "skipped" -Meta @{ reason = "arch_decision_cooldown"; age_minutes = $ageMinShow; cooldown_minutes = $cooldownMins }
+}
+
+if (-not $skipPhase3Cooldown) {
     if (-not (Test-Path $archPromptFile)) {
         Write-Host "  [Phase 3] arch-evolution prompt 不存在，跳過" -ForegroundColor Yellow
         Write-Log "[Phase 3] Skipped: $archPromptFile not found" "WARN"
-    } elseif (-not (Test-Path $backlogFile)) {
-        Write-Host "  [Phase 3] improvement-backlog.json 不存在，跳過" -ForegroundColor Yellow
-        Write-Log "[Phase 3] Skipped: improvement-backlog.json not found" "WARN"
+        Set-OodaState -Step "decide" -Status "skipped" -Meta @{ reason = "arch_prompt_missing" }
     } else {
-        # 確認 backlog 非空
-        $backlogHasItems = $false
-        try {
-            $backlog = Get-Content $backlogFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
-            if ($backlog.items -and $backlog.items.Count -gt 0) {
-                $backlogHasItems = $true
-                Write-Host ("  [Phase 3] improvement-backlog 有 {0} 項，觸發 arch-evolution..." -f $backlog.items.Count) -ForegroundColor Green
-            } else {
-                Write-Host "  [Phase 3] improvement-backlog 為空，跳過 arch-evolution" -ForegroundColor Yellow
-                Write-Log "[Phase 3] Skipped: improvement-backlog empty" "INFO"
+        $blCount = -1
+        if (Test-Path $backlogFile) {
+            try {
+                $backlog = Get-Content $backlogFile -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+                $blCount = @($backlog.items).Count
+            } catch {
+                Write-Log "[Phase 3] improvement-backlog.json 解析失敗，仍執行 arch-evolution（由 prompt 處理）: $_" "WARN"
+                $blCount = -1
             }
-        } catch {
-            Write-Log "[Phase 3] improvement-backlog.json 解析失敗: $_" "WARN"
+        } else {
+            Write-Log "[Phase 3] improvement-backlog.json 不存在，仍執行 arch-evolution（由 prompt 告警路徑處理）" "INFO"
+            $blCount = -1
+        }
+        if ($blCount -ge 0) {
+            Write-Host ("  [Phase 3] improvement-backlog items={0}，觸發 arch-evolution…" -f $blCount) -ForegroundColor Green
+        } else {
+            Write-Host "  [Phase 3] improvement-backlog 狀態未知，仍觸發 arch-evolution…" -ForegroundColor Green
         }
 
-        if ($backlogHasItems) {
-            Set-OodaState -Step "decide" -Status "pending" -Meta @{ triggered_by = "phase3_direct" }
+        Set-OodaState -Step "decide" -Status "pending" -Meta @{ triggered_by = "phase3_direct"; backlog_items = $blCount }
 
-            $archLogFile = "$AgentDir\logs\phase3-arch-$($traceId.Substring(0,8)).log"
-            $phase3Start = Get-Date
+        $archLogFile = "$AgentDir\logs\phase3-arch-$($traceId.Substring(0,8)).log"
+        $phase3Start = Get-Date
 
-            try {
-                $archContent = Strip-Frontmatter (Get-Content $archPromptFile -Raw -Encoding UTF8)
-                Write-Log "[Phase 3] Starting arch-evolution (direct trigger)" "INFO"
+        try {
+            $archContent = Strip-Frontmatter (Get-Content $archPromptFile -Raw -Encoding UTF8)
+            Write-Log "[Phase 3] Starting arch-evolution (direct trigger, aggressive follow-through)" "INFO"
 
-                $archContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$archLogFile
-
-                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+            $archContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$archLogFile
+            $archExit = $LASTEXITCODE
+            $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+            if ($archExit -ne 0) {
+                Write-Host ("  [Phase 3] arch-evolution 失敗：claude 結束代碼 {0}" -f $archExit) -ForegroundColor Red
+                Write-Log "[Phase 3] arch-evolution failed: claude exit code $archExit (${phase3Seconds}s)" "ERROR"
+                Set-OodaState -Step "decide" -Status "failed" -Meta @{ error = "claude_exit_$archExit"; duration_s = $phase3Seconds }
+            } else {
                 Write-Host ("  [Phase 3] arch-evolution 完成（{0}s）" -f $phase3Seconds) -ForegroundColor Green
                 Write-Log "[Phase 3] arch-evolution completed in ${phase3Seconds}s" "INFO"
-
                 Set-OodaState -Step "decide" -Status "completed" -Meta @{
-                    duration_s  = $phase3Seconds
-                    output_file = "context/arch-decision.json"
+                    duration_s    = $phase3Seconds
+                    output_file   = "context/arch-decision.json"
                 }
                 $script:phase3Ran = $true
-            } catch {
-                $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
-                Write-Host "  [Phase 3] arch-evolution 失敗：$_" -ForegroundColor Red
-                Write-Log "[Phase 3] arch-evolution failed: $_" "ERROR"
-                Set-OodaState -Step "decide" -Status "failed" -Meta @{ error = $_.ToString() }
-                # Phase 3 失敗不中止整體流程（orient 已成功）
             }
+        } catch {
+            $phase3Seconds = [int]((Get-Date) - $phase3Start).TotalSeconds
+            Write-Host "  [Phase 3] arch-evolution 失敗：$_" -ForegroundColor Red
+            Write-Log "[Phase 3] arch-evolution failed: $_" "ERROR"
+            Set-OodaState -Step "decide" -Status "failed" -Meta @{ error = $_.ToString() }
+            # Phase 3 失敗不中止整體流程（orient 已成功）
         }
     }
 }
@@ -718,6 +815,7 @@ if (-not $skipPhase3) {
 # ============================================
 # 僅在 Phase 3 實際執行 arch-evolution 後觸發，讓 immediate_fix 在同一輪完成，無需等待 round-robin。
 $phase4Ran = $false
+$phase4Seconds = 0
 if ($script:phase3Ran -eq $true) {
     $selfHealPromptFile = Join-Path $AgentDir "prompts\team\todoist-auto-self_heal.md"
     if (Test-Path $selfHealPromptFile) {
@@ -728,10 +826,16 @@ if ($script:phase3Ran -eq $true) {
             $selfHealContent = Strip-Frontmatter (Get-Content $selfHealPromptFile -Raw -Encoding UTF8)
             Write-Log "[Phase 4] Starting self-heal (direct trigger after arch-evolution)" "INFO"
             $selfHealContent | claude -p --allowedTools "Read,Write,Edit,Bash,Glob,Grep" 2>$phase4LogFile
+            $shExit = $LASTEXITCODE
             $phase4Seconds = [int]((Get-Date) - $phase4Start).TotalSeconds
-            Write-Host ("  [Phase 4] self-heal 完成（{0}s）" -f $phase4Seconds) -ForegroundColor Green
-            Write-Log "[Phase 4] self-heal completed in ${phase4Seconds}s" "INFO"
-            $phase4Ran = $true
+            if ($shExit -ne 0) {
+                Write-Host ("  [Phase 4] self-heal 失敗：claude 結束代碼 {0}" -f $shExit) -ForegroundColor Red
+                Write-Log "[Phase 4] self-heal failed: claude exit code $shExit (${phase4Seconds}s)" "ERROR"
+            } else {
+                Write-Host ("  [Phase 4] self-heal 完成（{0}s）" -f $phase4Seconds) -ForegroundColor Green
+                Write-Log "[Phase 4] self-heal completed in ${phase4Seconds}s" "INFO"
+                $phase4Ran = $true
+            }
         } catch {
             $phase4Seconds = [int]((Get-Date) - $phase4Start).TotalSeconds
             Write-Host "  [Phase 4] self-heal 失敗：$_" -ForegroundColor Red
@@ -750,6 +854,10 @@ if ($script:phase3Ran -eq $true) {
 Write-Log "=== System Audit Team Mode Completed ===" "INFO"
 Write-Log "Phase 1 log: $phase1LogFile" "INFO"
 Write-Log "Phase 2 log: $phase2LogFile" "INFO"
+$phase3LogCandidate = "$AgentDir\logs\phase3-arch-$($traceId.Substring(0,8)).log"
+if ($script:phase3Ran -and (Test-Path $phase3LogCandidate)) {
+    Write-Log "Phase 3 log: $phase3LogCandidate" "INFO"
+}
 if ($phase4Ran -and (Test-Path variable:phase4LogFile)) {
     Write-Log "Phase 4 log: $phase4LogFile" "INFO"
 }

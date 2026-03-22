@@ -447,7 +447,7 @@ Autonomous Harness 運作週期：
 | **Decide** | arch_evolution 自動任務 | arch-decision.json |
 | **Act** | self_heal 自動任務 | 修復執行、context 更新 |
 
-觸發路徑：每日 00:40 system-audit → 分析 → arch-decision → self_heal 強制觸發（`workflow-state.json current_step=act`）
+觸發路徑：每日 00:40 `run-system-audit-team.ps1` → Phase 2 組裝後 **Phase 3 直接跑 arch-evolution**（backlog 可空）→ 成功則 **Phase 4 self-heal**；冷卻與「修正／退步略過冷卻」見 `docs/OPERATIONS.md`。Todoist round-robin 另可觸發 arch_evolution／self-heal（`workflow-state.json`）。
 
 ---
 

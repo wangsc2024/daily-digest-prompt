@@ -1,0 +1,67 @@
+# 外部依賴服務 SLA 盤點（ADR-037）
+# 關聯：tools/time_slot_risk_scorer.py
+version: 1
+
+services:
+  todoist:
+    base_url: "https://api.todoist.com"
+    known_unstable_hours: []          # 已知不穩定時段（0-23）
+    typical_latency_ms: 500
+    sla_availability_target: 0.995
+    blast_radius: "all_tasks"         # 不可用時影響全部任務
+
+  pingtung_news:
+    base_url: "https://ptnews-mcp.pages.dev"
+    known_unstable_hours: []
+    typical_latency_ms: 800
+    sla_availability_target: 0.98
+    blast_radius: "single_task"
+
+  hackernews:
+    base_url: "https://hacker-news.firebaseio.com"
+    known_unstable_hours: []
+    typical_latency_ms: 600
+    sla_availability_target: 0.99
+    blast_radius: "single_task"
+
+  knowledge_base:
+    base_url: "http://localhost:3000"
+    known_unstable_hours: []
+    typical_latency_ms: 200
+    sla_availability_target: 0.98
+    blast_radius: "dependent_tasks"
+
+  groq_api:
+    base_url: "https://api.groq.com"
+    known_unstable_hours: []
+    typical_latency_ms: 300
+    sla_availability_target: 0.999
+    blast_radius: "single_task"
+
+# 風險評分模型配置
+risk_model:
+  weights:
+    historical_failure_rate: 0.40    # 歷史失敗率（主因子）
+    external_sla_risk: 0.25          # 外部服務 SLA 風險
+    resource_contention: 0.20        # 系統資源競爭（時段特徵）
+    task_complexity: 0.15            # 任務複雜度（並行任務數）
+  thresholds:
+    low: 0.30      # < 0.30  正常執行
+    medium: 0.55   # 0.30-0.55  加 30% timeout buffer
+    high: 0.75     # 0.55-0.75  降級執行（跳過非關鍵任務）
+                   # > 0.75  考慮跳過整個 Phase 2
+
+# 高風險時段（基於 system-insight 實測，5/7/13 時失敗率偏高）
+known_high_risk_hours: [5, 7, 13]
+
+# 降級策略
+degradation:
+  medium:
+    action: "extend_timeout"
+    timeout_multiplier: 1.30
+  high:
+    action: "skip_non_critical"
+    skip_task_types: ["research", "creative"]
+  critical:
+    action: "skip_phase2"
+    notify: true

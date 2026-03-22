@@ -311,6 +311,20 @@ curl -H "Content-Type: application/json" -d '{"topic":"TOPIC","title":"任務失
 
 ---
 
+## Podcast 類任務：標題節目名稱（名實相符）
+
+多條 Podcast 管線並存時，**禁止**把 KB hybrid 查詢關鍵字（例如「教觀綱宗」）直接當成 ntfy 標題上的節目品牌。
+
+| 步驟 | 做法 |
+|------|------|
+| 1 | Read **`config/podcast.yaml`** → `notification.series_by_task` |
+| 2 | 以本任務的 **`task_key`**（如 `podcast_jiaoguangzong`、`podcast_create`）取對應字串，記為 `series_display_name` |
+| 3 | JSON `title` 建議格式：`🎙️ {series_display_name} Podcast：{本集短標題}` |
+
+腳本可呼叫 **`tools/resolve_podcast_series.py`**（`--task <task_key>` 或 `--slug jiaoguang-...`）取得與設定檔一致的字串。新增任務時僅需在 `series_by_task` 加一列並在該任務模板註明 `task_key`。
+
+---
+
 ## 通知日誌記錄
 
 **每次發送 ntfy 通知，必須同時寫入一筆日誌**到 `logs/ntfy/` 目錄。

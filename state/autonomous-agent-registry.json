@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-03-20T12:15:12.650138+08:00",
+  "generated_at": "2026-03-22T08:10:01.512001+08:00",
   "managed_agents": [
     "daily-digest",
+    "system-audit",
     "todoist"
   ],
   "fetch_agents": [
@@ -199,7 +200,7 @@
     }
   ],
   "summary": {
-    "managed_agent_count": 2,
+    "managed_agent_count": 3,
     "fetch_agent_count": 10,
     "auto_task_count": 20,
     "heavy_auto_task_count": 11,

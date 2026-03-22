@@ -1,5 +1,8 @@
 {
   "plansDirectory": "./docs/plans",
+  "permissions": {
+    "additionalDirectories": ["D:\\Source\\daily-digest-prompt\\tmp"]
+  },
   "hooks": {
     "PreToolUse": [
       { "matcher": "Bash", "hooks": [{ "type": "command", "command": "uv run --project D:/Source/daily-digest-prompt python D:/Source/daily-digest-prompt/hooks/pre_bash_guard.py" }] },

@@ -32,3 +32,10 @@ notification:
   # click 欄位填入雲端 URL，手機點通知即可直接播放
   include_play_link: true
   tags: ["headphones", "white_check_mark"]
+  # 標題節目前綴（與 task_key 對應；對外品牌名，勿用 KB hybrid 查詢關鍵字代替）
+  # Agent：發 ntfy 前 Read 本檔；腳本：tools/resolve_podcast_series.py
+  series_by_task:
+    podcast_jiaoguangzong: "淨土學苑"
+    podcast_create: "知識電台"
+  # 無法對應 task、且 slug 非 jiaoguang-* 時的預設（article-to-podcast 等）
+  series_default: "知識電台"

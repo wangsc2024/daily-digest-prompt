@@ -18,6 +18,19 @@ from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 HISTORY_PATH = PROJECT_DIR / "context" / "podcast-history.json"
+PODCAST_CFG = PROJECT_DIR / "config" / "podcast.yaml"
+
+
+def podcast_series_display_name(task_key: str) -> str:
+    try:
+        import yaml
+
+        data = yaml.safe_load(PODCAST_CFG.read_text(encoding="utf-8")) or {}
+        n = data.get("notification") or {}
+        by = n.get("series_by_task") or {}
+        return str(by.get(task_key) or n.get("series_default") or "知識電台").strip()
+    except Exception:
+        return "知識電台"
 EXCLUDE_TAGS = {"佛學", "佛教", "淨土", "天台宗", "教觀綱宗", "禪", "法華", "八識", "唯識"}
 COOLDOWN_DAYS = 30
 KB_BASE = "http://localhost:3000"
@@ -343,9 +356,11 @@ def main():
             temp_dir = PROJECT_DIR / "temp"
             temp_dir.mkdir(parents=True, exist_ok=True)
             ntfy_path = temp_dir / "podcast-create-notify.json"
+            ep = (note_titles[0][:40] if note_titles else "本集").strip()
+            series = podcast_series_display_name("podcast_create")
             ntfy_body = {
                 "topic": "wangsc2025",
-                "title": f"Podcast 已發佈：{note_titles[0][:30] if note_titles else '知識電台'}",
+                "title": f"🎙️ {series} Podcast：{ep}",
                 "message": f"AI 雙主持人 | {len(turns)} 輪對話 | TTS={tts_status} R2={r2_status}",
                 "tags": ["headphones", "white_check_mark"],
                 "priority": 3,

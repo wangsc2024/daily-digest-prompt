@@ -17,8 +17,7 @@ released_at: "2026-03-20"
 用 Read 讀取：
 - `skills/pingtung-news/SKILL.md`
 - `skills/api-cache/SKILL.md`
-- `skills/groq/SKILL.md`
-- `config/llm-router.yaml`（確認 `news_summary` 規則的 provider）
+- `skills/cursor-cli/SKILL.md`（確認 agent -p 執行規則）
 
 ### 步驟 2：讀取快取狀態（PS 預計算）
 優先讀取 `cache/status.json`（由 PowerShell 在本次執行啟動時預計算，勿自行計算時間差）：
@@ -42,21 +41,18 @@ curl -s --max-time 10 -X POST https://ptnews-mcp.pages.dev/mcp \
   - **時間戳必須使用 UTC**：Bash 用 `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 - 全部重試失敗 → 嘗試用 Read 讀取過期快取，source 標記 "cache_degraded"
 
-### 步驟 3a：Groq 快速摘要（依 llm-router.yaml 的 news_summary 規則）
+### 步驟 3a：Cursor CLI 快速摘要（cursor-cli Skill）
 
-取得新聞後，先確認 Groq Relay 可用：
+對每則新聞（最多 5 則），逐則用 Bash 呼叫 Cursor CLI 產生一句話摘要：
+
 ```bash
-curl -s --max-time 3 http://localhost:3002/groq/health
+agent -p "請用30字以內正體中文寫一句話摘要，只回覆摘要本身，不加任何標點結尾：<新聞標題> <原始摘要（前300字）>" --model composer-2-fast --mode=ask
 ```
 
-- 若回傳 `{"status":"ok"}` → 對每則新聞（最多 5 則）用 Groq 產生一句話摘要：
-  1. 用 Write 工具建立 `cache/groq-news-summary.json`：`{"mode":"summarize","content":"<新聞標題> <原始摘要（前 300 字）>"}`
-  2. 執行：`curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @cache/groq-news-summary.json`
-  3. 從回應 `.result` 欄位取得摘要，存入各新聞項目的 `groq_summary` 欄位
-  - 篇間等待 0.3 秒（避免 429）
-- 若 Relay 不可用 → 記錄 `groq_skipped: true`，`groq_summary` 欄位省略（不影響後續政策解讀）
+將輸出存入各新聞項目的 `groq_summary` 欄位（欄位名稱維持向下相容）。
+若呼叫失敗（非零回傳碼）→ `groq_summary` 欄位省略，繼續下一則，不中斷主流程。
 
-**注意**：Groq 僅做快速摘要（前處理），政策深度解讀仍由 Phase 2 的 assemble-digest Agent（Claude）完成。
+**注意**：此步驟為輕量前處理（`--mode=ask` 唯讀，不寫入任何檔案），政策深度解讀仍由 Phase 2 的 assemble-digest Agent（Claude）完成。
 
 ### 步驟 4：寫入結果
 用 Write 工具建立 `results/news.json`，格式：
@@ -68,8 +64,8 @@ curl -s --max-time 3 http://localhost:3002/groq/health
   "source": "api 或 cache 或 cache_degraded 或 failed",
   "fetched_at": "ISO 時間",
   "retry_count": 0,
-  "groq_status": "summarized 或 skipped",
-  "skills_used": ["pingtung-news", "api-cache", "groq"],
+  "groq_status": "cursor_summarized 或 skipped",
+  "skills_used": ["pingtung-news", "api-cache", "cursor-cli"],
   "data": {
     "news": [
       {

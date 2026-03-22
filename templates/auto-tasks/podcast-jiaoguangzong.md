@@ -1,8 +1,8 @@
 ---
 name: "podcast-jiaoguangzong"
 template_type: "auto_task_template"
-version: "1.1.0"
-released_at: "2026-03-21"
+version: "1.2.0"
+released_at: "2026-03-22"
 ---
 # 自動任務：教觀綱宗 Podcast 生成（每次 1 集，每日合計 3 集）
 
@@ -19,6 +19,23 @@ released_at: "2026-03-21"
 - skills/knowledge-query/SKILL.md
 - skills/ntfy-notify/SKILL.md
 - skills/deep-research/SKILL.md（腳本研究品質協議）
+
+---
+
+## 任務識別與 ntfy 節目名稱（名實相符）
+
+**本任務 `task_key`：`podcast_jiaoguangzong`**
+
+發送 ntfy 前，用 **Read** 讀取 `config/podcast.yaml`，在 `notification.series_by_task` 取本鍵對應字串，記為 `series_display_name`（缺鍵時後備：**淨土學苑**）。
+
+| 用途 | 說明 |
+|------|------|
+| `series_display_name` | 通知**標題**上的節目品牌（例：淨土學苑） |
+| KB 查詢關鍵字（如「教觀綱宗」） | 僅用於選材／上傳 Topic，**不可**當作 ntfy 標題節目名 |
+
+**標題格式（固定）：** `🎙️ {series_display_name} Podcast：{podcast_title}`
+
+新增其他 Podcast 自動任務時：在 `series_by_task` 新增一列，並在該任務模板複製本節、改寫 `task_key` 與後備名稱。
 
 ---
 
@@ -279,7 +296,8 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 
 依照 skills/ntfy-notify/SKILL.md 指示，用 Write 工具建立通知 JSON 後發送：
 ```
-標題：🎙️ 教觀綱宗 Podcast：{podcast_title}
+標題：🎙️ {series_display_name} Podcast：{podcast_title}
+（`series_display_name` = `config/podcast.yaml` → `notification.series_by_task.podcast_jiaoguangzong`）
 內容：{對話輪數} 輪對話 | {topics 前 3 個主題}
       {cloud_url}   ← 完整 MP3 直連網址（須寫入 message 內文）
 Tags: headphones, white_check_mark

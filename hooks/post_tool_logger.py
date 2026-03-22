@@ -366,6 +366,38 @@ def _update_token_usage(input_len: int, output_len: int, tool_name: str) -> None
             day_data["input_chars"] = day_data.get("input_chars", 0) + input_len
             day_data["output_chars"] = day_data.get("output_chars", 0) + output_len
 
+            # ADR-035: per-phase 累計（schema v3，silent fail 包在外層 try/except）
+            phase_key = os.environ.get("AGENT_PHASE", "")
+            if phase_key:
+                phases = day_data.setdefault("phases", {})
+                if phase_key not in phases:
+                    phases[phase_key] = {"estimated_tokens": 0, "tool_calls": 0}
+                phases[phase_key]["estimated_tokens"] = phases[phase_key].get("estimated_tokens", 0) + estimated
+                phases[phase_key]["tool_calls"] = phases[phase_key].get("tool_calls", 0) + 1
+
+            # ADR-035: per-trace 累計（schema v3，silent fail 包在外層 try/except）
+            trace_id_env = os.environ.get("DIGEST_TRACE_ID", "")
+            if trace_id_env:
+                traces = day_data.setdefault("traces", {})
+                trace_key = trace_id_env[:12]
+                if trace_key not in traces:
+                    traces[trace_key] = {
+                        "start_time": datetime.now().isoformat(),
+                        "total_tokens": 0,
+                        "phase_breakdown": {},
+                    }
+                traces[trace_key]["total_tokens"] = traces[trace_key].get("total_tokens", 0) + estimated
+                if phase_key:
+                    pb = traces[trace_key].setdefault("phase_breakdown", {})
+                    pb[phase_key] = pb.get(phase_key, 0) + estimated
+                # 防止 traces 無限膨脹（超過 50 筆清除最舊）
+                if len(traces) > 50:
+                    oldest = sorted(
+                        traces.keys(),
+                        key=lambda k: traces[k].get("start_time", ""),
+                    )[0]
+                    del traces[oldest]
+
             usage["updated"] = datetime.now().isoformat()
 
             # 只保留 7 天
@@ -658,6 +690,35 @@ def main():
             )
         except Exception:
             pass  # Silent fail — behavior tracking is optional
+
+    # ADR-036: Context Compression 閾值追蹤（dynamic import，silent fail）
+    try:
+        import importlib.util as _ilu
+        import sys as _sys
+        _proj_root_cc = get_project_root()
+        _cc_path = os.path.join(_proj_root_cc, "tools", "context_compressor.py")
+        if os.path.exists(_cc_path):
+            _cc_mod_name = "context_compressor"
+            _spec = _ilu.spec_from_file_location(_cc_mod_name, _cc_path)
+            _cc_mod = _ilu.module_from_spec(_spec)
+            # 先注冊到 sys.modules，使 @dataclass 在 Python 3.11 可正確解析模組
+            _sys.modules[_cc_mod_name] = _cc_mod
+            _spec.loader.exec_module(_cc_mod)
+            _sid_cc = (session_id or "")[:8]
+            if _sid_cc:
+                _phase_cc = os.environ.get("AGENT_PHASE", "")
+                _sess = _cc_mod.update_session(_sid_cc, input_len, output_len, _phase_cc)
+                _threshold = _cc_mod.check_threshold(_sess)
+                if _threshold.get("prompt_injection"):
+                    _hint_path = os.path.join(
+                        _proj_root_cc, "state",
+                        f"context-compression-hint-{_sid_cc}.txt",
+                    )
+                    with open(_hint_path, "w", encoding="utf-8") as _hf:
+                        _hf.write(_threshold["prompt_injection"])
+                    tags.append(f"context-{_threshold.get('state', 'warning')}")
+    except Exception:
+        pass  # Silent fail — context compression tracking is optional
 
     print("{}")
     sys.exit(0)

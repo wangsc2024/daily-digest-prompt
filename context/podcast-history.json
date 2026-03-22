@@ -1,10 +1,30 @@
 {
   "version": 2,
-  "updated_at": "2026-03-21T19:12:45+08:00",
+  "updated_at": "2026-03-21T23:35:30.035023+00:00",
   "summary": {
-    "total_episodes": 77,
+    "total_episodes": 79,
     "cooldown_days": 90,
     "recent_note_ids": [
+      {
+        "note_id": "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "note_id": "27b39fa4-f2ad-4bc1-8c24-869396c8c6cf",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "9846abc5-ea48-4608-b13e-fb8d3a99978c",
+        "last_used": "2026-03-21",
+        "expires_at": "2026-06-19"
+      },
       {
         "note_id": "9d73c34f-fb52-447e-8c76-e9ce5514b238",
         "last_used": "2026-03-21",
@@ -51,17 +71,47 @@
         "expires_at": "2026-06-19"
       },
       {
-        "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
-        "last_used": "2026-03-18",
-        "expires_at": "2026-06-16"
-      },
-      {
         "note_id": "893e05b0-2573-489f-b9d4-455364a6a9f8",
         "last_used": "2026-03-21",
         "expires_at": "2026-06-19"
+      },
+      {
+        "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
+        "last_used": "2026-03-18",
+        "expires_at": "2026-06-16"
       }
     ],
     "recent_topics": [
+      {
+        "topic": "教觀綱宗",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "topic": "教觀雙美",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "topic": "蕅益智旭",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "topic": "融通諸宗",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "topic": "六即佛",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
+      {
+        "topic": "淨土",
+        "last_used": "2026-03-22",
+        "expires_at": "2026-06-20"
+      },
       {
         "topic": "法華經",
         "last_used": "2026-03-21",
@@ -74,11 +124,6 @@
       },
       {
         "topic": "天台宗",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "教觀綱宗",
         "last_used": "2026-03-21",
         "expires_at": "2026-06-19"
       },
@@ -118,11 +163,6 @@
         "expires_at": "2026-06-19"
       },
       {
-        "topic": "別教",
-        "last_used": "2026-03-19",
-        "expires_at": "2026-06-17"
-      },
-      {
         "topic": "歷史傳承",
         "last_used": "2026-03-21",
         "expires_at": "2026-06-19"
@@ -133,13 +173,60 @@
         "expires_at": "2026-06-19"
       },
       {
-        "topic": "教觀雙美",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
+        "topic": "別教",
+        "last_used": "2026-03-19",
+        "expires_at": "2026-06-17"
       }
-    ]
+    ],
+    "updated_at": "2026-03-22T07:41:30+08:00"
   },
   "episodes": [
+    {
+      "episode_title": "蕅益智旭判教革新",
+      "notes_used": [
+        "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：蕅益智旭的註解與貢獻 — 從天台正統到融通諸宗的判教革新"
+      ],
+      "topics": [
+        "蕅益智旭",
+        "教觀綱宗",
+        "融通諸宗",
+        "教觀雙美",
+        "六即佛",
+        "淨土"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-22T07:41:30+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep06_蕅益智旭_判教革新與融通諸宗.mp3",
+      "slug": "淨土學苑_ep06_蕅益智旭_判教革新與融通諸宗",
+      "episode": 6,
+      "has_guest": true,
+      "guest_name": "思齊"
+    },
+    {
+      "episode_title": "AI 工程三連擊：自主編碼 Agent、開發環境整合與測試生成",
+      "notes_used": [
+        "27b39fa4-f2ad-4bc1-8c24-869396c8c6cf",
+        "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c",
+        "9846abc5-ea48-4608-b13e-fb8d3a99978c"
+      ],
+      "note_titles": [
+        "AI 自主編碼 Agent 深度研究 — 從輔助補全到端對端軟體工程的範式轉移：技術架構全景、SWE-bench 演進與 2026 前沿方向",
+        "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）",
+        "AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質保證（2026）"
+      ],
+      "topics": [
+        "自主編碼Agent",
+        "開發環境",
+        "測試生成"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-21T23:35:30.035023+00:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/podcast-create-20260322-cursor.mp3",
+      "slug": "podcast-create-20260322-cursor"
+    },
     {
       "episode_title": "天台判教千年演進",
       "notes_used": [
@@ -2067,6 +2154,30 @@
       "note_id_input": "",
       "slug": "podcast-create-20260321",
       "used_at": "2026-03-21T17:35:00+08:00"
+    },
+    {
+      "note_id": "27b39fa4-f2ad-4bc1-8c24-869396c8c6cf",
+      "note_title": "AI 自主編碼 Agent 深度研究 — 從輔助補全到端對端軟體工程的範式轉移：技術架構全景、SWE-bench 演進與 2026 前沿方向",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322-cursor",
+      "used_at": "2026-03-21T23:35:30.035023+00:00"
+    },
+    {
+      "note_id": "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c",
+      "note_title": "AI 開發環境整合實踐指南 — IDE 整合、工具鏈配置與工作流程自動化（2026）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322-cursor",
+      "used_at": "2026-03-21T23:35:30.035023+00:00"
+    },
+    {
+      "note_id": "9846abc5-ea48-4608-b13e-fb8d3a99978c",
+      "note_title": "AI 測試生成與 Test-Time Compute 驗證機制 — LLM 驅動的自動測試合成、變異測試與品質保證（2026）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322-cursor",
+      "used_at": "2026-03-21T23:35:30.035023+00:00"
     }
   ]
 }

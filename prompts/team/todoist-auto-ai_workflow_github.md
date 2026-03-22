@@ -17,26 +17,15 @@ released_at: "2026-03-20"
 
 ---
 
-## 前處理（Groq 加速）
+## 前處理（Haiku 加速）
 
-在執行正式步驟前，嘗試用 Groq Relay 萃取 Workflow 模式：
+在執行正式步驟前，用 Claude Haiku 萃取 Workflow 模式關鍵字：
 
 ```bash
-GROQ_OK=$(curl -s --max-time 3 http://localhost:3002/groq/health 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('status',''))" 2>/dev/null)
+claude -p "請列出 GitHub 上值得追蹤的 AI Workflow 自動化框架關鍵字（每項10字以內，列出5項，只回覆關鍵字清單，每項一行）" --model claude-haiku-4-5-20251001
 ```
 
-若 `GROQ_OK` 為 `ok`：
-1. 用 Write 工具建立 `temp/groq-req-ai_workflow_github.json`（UTF-8）：
-   ```json
-   {"mode": "extract", "content": "請列出 GitHub 上值得追蹤的 AI Workflow 自動化框架關鍵字（每項 10 字以內，列出 5 項）"}
-   ```
-2. 執行：
-   ```bash
-   curl -s --max-time 20 -X POST http://localhost:3002/groq/chat -H "Content-Type: application/json; charset=utf-8" -d @temp/groq-req-ai_workflow_github.json > temp/groq-result-ai_workflow_github.json
-   ```
-3. Read `temp/groq-result-ai_workflow_github.json`，取得 Workflow 模式關鍵字，作為搜尋補充詞
-
-若 `GROQ_OK` 不為 `ok`：略過此步驟，由 Claude 自行完成。
+將輸出作為搜尋補充詞。若呼叫失敗，略過此步驟，由 Claude 自行完成。
 
 ---
 

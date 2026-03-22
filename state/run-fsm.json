@@ -1,66 +1,5 @@
 {
   "runs": {
-    "todoist_683c8b35": {
-      "run_id": "683c8b35",
-      "agent_type": "todoist",
-      "started": "2026-03-21T21:00:03",
-      "phases": {
-        "phase1": {
-          "state": "completed",
-          "updated": "2026-03-21T21:02:11",
-          "detail": "plan_type="
-        },
-        "phase2": {
-          "state": "completed",
-          "updated": "2026-03-21T21:20:55",
-          "detail": "2 agents done, 0 failed"
-        },
-        "phase3": {
-          "state": "completed",
-          "updated": "2026-03-21T21:24:26",
-          "detail": ""
-        }
-      }
-    },
-    "daily-digest_6b37078e": {
-      "run_id": "6b37078e",
-      "agent_type": "daily-digest",
-      "started": "2026-03-21T21:15:02",
-      "phases": {
-        "phase1": {
-          "state": "completed",
-          "updated": "2026-03-21T21:17:11",
-          "detail": "3 agents completed"
-        },
-        "phase2": {
-          "state": "completed",
-          "updated": "2026-03-21T21:23:21",
-          "detail": ""
-        }
-      }
-    },
-    "todoist_c25f5492": {
-      "run_id": "c25f5492",
-      "agent_type": "todoist",
-      "started": "2026-03-21T21:30:03",
-      "phases": {
-        "phase1": {
-          "state": "completed",
-          "updated": "2026-03-21T21:31:05",
-          "detail": "plan_type="
-        },
-        "phase2": {
-          "state": "completed",
-          "updated": "2026-03-21T21:41:59",
-          "detail": "2 agents done, 0 failed"
-        },
-        "phase3": {
-          "state": "completed",
-          "updated": "2026-03-21T21:42:23",
-          "detail": ""
-        }
-      }
-    },
     "todoist_dc3cd64b": {
       "run_id": "dc3cd64b",
       "agent_type": "todoist",
@@ -419,12 +358,78 @@
           "detail": "plan_type="
         },
         "phase2": {
+          "state": "completed",
+          "updated": "2026-03-22T07:12:43",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-03-22T07:16:48",
+          "detail": ""
+        }
+      }
+    },
+    "system-audit_92be9d17": {
+      "run_id": "92be9d17",
+      "agent_type": "system-audit",
+      "started": "2026-03-22T07:21:19",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-03-22T07:28:35",
+          "detail": "4 agents completed"
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-03-22T07:33:21",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_71a294e4": {
+      "run_id": "71a294e4",
+      "agent_type": "todoist",
+      "started": "2026-03-22T07:30:04",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-03-22T07:32:43",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-03-22T07:43:31",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
+          "state": "completed",
+          "updated": "2026-03-22T07:47:19",
+          "detail": ""
+        }
+      }
+    },
+    "todoist_920e8a7b": {
+      "run_id": "920e8a7b",
+      "agent_type": "todoist",
+      "started": "2026-03-22T08:00:03",
+      "phases": {
+        "phase1": {
+          "state": "completed",
+          "updated": "2026-03-22T08:02:26",
+          "detail": "plan_type="
+        },
+        "phase2": {
+          "state": "completed",
+          "updated": "2026-03-22T08:09:37",
+          "detail": "2 agents done, 0 failed"
+        },
+        "phase3": {
           "state": "running",
-          "updated": "2026-03-22T07:03:39",
+          "updated": "2026-03-22T08:09:38",
           "detail": ""
         }
       }
     }
   },
-  "updated": "2026-03-22T07:03:39"
+  "updated": "2026-03-22T08:09:38"
 }

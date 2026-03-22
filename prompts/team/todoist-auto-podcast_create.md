@@ -74,7 +74,7 @@ released_at: "2026-03-21"
      "agent": "todoist-auto-podcast_create",
      "type": "podcast_create",
      "status": "in_progress",
-     "summary": "正在生成 Podcast，腳本已完成，TTS 進行中..."
+     "summary": "正在生成知識電台 Podcast（podcast_create），腳本已完成，TTS 進行中..."
    }
    ```
    用 Write 工具寫入 `results/todoist-auto-podcast_create.json`

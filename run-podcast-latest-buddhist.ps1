@@ -95,8 +95,19 @@ Write-Log "目標筆記：[$noteId] $noteTitle"
 # ─── Step 3：呼叫 Podcast 工具 ───
 Write-Log "--- 呼叫 article-to-podcast.ps1 ---"
 $podcastScript = Join-Path $AgentDir "tools\article-to-podcast.ps1"
+$resolver = Join-Path $AgentDir "tools\resolve_podcast_series.py"
+$seriesNtfy = "淨土學苑"
+if (Test-Path $resolver) {
+    try {
+        $raw = & uv run --project $AgentDir python $resolver --task podcast_jiaoguangzong 2>$null
+        if ($null -ne $raw) {
+            $t = if ($raw -is [System.Array]) { [string]$raw[-1] } else { [string]$raw }
+            if ($t.Trim()) { $seriesNtfy = $t.Trim() }
+        }
+    } catch {}
+}
 
-pwsh -ExecutionPolicy Bypass -File $podcastScript -NoteId $noteId
+pwsh -ExecutionPolicy Bypass -File $podcastScript -NoteId $noteId -SeriesDisplayName $seriesNtfy
 $exitCode = $LASTEXITCODE
 
 if ($exitCode -eq 0) {

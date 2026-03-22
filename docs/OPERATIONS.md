@@ -50,7 +50,8 @@
    - Agent 3: 維度 3（系統品質）+ 維度 7（系統完成度）→ `results/audit-dim3-7.json`
    - Agent 4: 維度 4（系統工作流）→ `results/audit-dim4.json`
 3. **Phase 2**：組裝 Agent 計算加權總分 → 識別問題 → 自動修正（最多 5 項）→ 報告 → RAG 匯入（timeout 1200s）
-4. **Phase 3**（審查後）：若 `improvement-backlog.json` 非空，直接觸發 `arch_evolution` 任務
+4. **Phase 3**（審查後）：**一律**觸發 `arch_evolution`（`todoist-auto-arch_evolution.md`）；backlog 為空或檔案缺失時由該 prompt 內建處理（含 ADR 掃描／通知）。僅當 `arch-decision.json` 的 `generated_at` 距今短於 `config/timeouts.yaml` → `audit_team.phase3_arch_decision_cooldown_minutes`（預設 90 分鐘）時跳過；**例外**：若 `state/last-audit.json` 顯示本次有自動修正（`fixes_applied`>0）或總分較前次退步超過 0.25 分，則略過冷卻仍執行 Phase 3。`phase3_arch_decision_cooldown_minutes: 0` 表示不啟用冷卻。Phase 3／4 會檢查 `claude` 結束代碼，非 0 不視為成功（不觸發 Phase 4）。
+5. **Phase 4**：若 Phase 3 實際執行，接著觸發 `self_heal`（消費 `immediate_fix` 等）
 
 **輸出**：
 - 審查報告：`docs/系統審查報告_YYYYMMDD_HHMM.md`

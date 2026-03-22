@@ -25,10 +25,10 @@ released_at: "2026-03-22"
 
 ## 落實方案研擬與審查（新增）
 依 github-scout SKILL.md 的步驟 7-10 執行：
-- 步驟 7：針對高優先級建議研擬落實方案並存入 KB
-- 步驟 8：審查方案可行性與穩定性（最多 3 輪優化）
-- 步驟 9：對通過審查的方案主動落實（低風險直接執行，高風險輸出計畫）
-- 步驟 10：落實後驗證並輸出通知
+- 步驟 7：針對 P0/P1 建議研擬落實方案並存入 KB
+- 步驟 8：審查方案可行性與穩定性（最多 5 輪優化）
+- 步驟 9：對通過審查的方案主動落實（低/中風險直接執行，高風險輸出計畫至 docs/plans/）
+- 步驟 10：落實後依風險等級發送對應 ntfy 通知
 
 ## 研究註冊表更新
 完成後將本次研究寫入 `context/research-registry.json`：
@@ -53,13 +53,14 @@ released_at: "2026-03-22"
     "analysis_done": true,
     "backlog_updated": true,
     "implementation_plan_stored": true,
-    "review_passed": true,
-    "implemented": true
+    "review_completed": true,
+    "implemented_low_medium_count": 0,
+    "plan_ready_high_count": 0
   },
   "artifacts_produced": ["context/improvement-backlog.json"],
   "report_urls": ["https://github.com/..."],
   "quality_score": 4,
-  "self_assessment": "GitHub 靈感蒐集、落實方案研擬、審查並落實完成"
+  "self_assessment": "GitHub 靈感蒐集完成；已落實 N 個低/中風險方案，N 個高風險方案已輸出計畫"
 }
 ===DONE_CERT_END===
 ```

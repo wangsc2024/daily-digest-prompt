@@ -1,8 +1,8 @@
 ---
 name: "podcast-create"
 template_type: "auto_task_template"
-version: "1.1.0"
-released_at: "2026-03-21"
+version: "1.2.0"
+released_at: "2026-03-22"
 ---
 # 自動任務：Podcast 生成（AI 雙主持人知識電台）
 
@@ -19,6 +19,18 @@ released_at: "2026-03-21"
 - skills/knowledge-query/SKILL.md
 - skills/ntfy-notify/SKILL.md
 - skills/deep-research/SKILL.md（腳本研究品質協議）
+
+---
+
+## 任務識別與 ntfy 節目名稱（名實相符）
+
+**本任務 `task_key`：`podcast_create`**
+
+發送 ntfy 前，用 **Read** 讀取 `config/podcast.yaml`，在 `notification.series_by_task` 取本鍵對應字串，記為 `series_display_name`（缺鍵時後備：`notification.series_default`，再缺則 **知識電台**）。
+
+**標題格式（固定）：** `🎙️ {series_display_name} Podcast：{本集主題}`
+
+> 與佛學／淨土學苑專線任務（`podcast_jiaoguangzong`）分屬不同 `task_key`，節目名以設定檔為準，避免混用。
 
 ---
 
@@ -304,7 +316,8 @@ pwsh -ExecutionPolicy Bypass -File tools/upload-podcast.ps1 \
 
 通知內容（`cloud_url` 有值時加入播放連結）：
 ```
-標題：🎙️ Podcast 已發佈：{本集主題}
+標題：🎙️ {series_display_name} Podcast：{本集主題}
+（`series_display_name` = `config/podcast.yaml` → `notification.series_by_task.podcast_create`）
 內容：AI 雙主持人對話 | {主題1} × {主題2} × {主題3} | {對話輪數} 輪對話
       {cloud_url}   ← 完整 MP3 直連網址（須寫入 message 內文）
 Tags: headphones, white_check_mark

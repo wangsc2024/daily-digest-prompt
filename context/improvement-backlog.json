@@ -644,6 +644,20 @@
         "現有 kb-research-strategist Skill 作為參考，飽和度分析作為補充維度"
       ],
       "dimension": "知識管理"
+    },
+    {
+      "id": "backlog_health_202603220715",
+      "source": "health_check",
+      "title": "每日健康檢查發現問題：逾時, Phase失敗",
+      "description": "07:15 健康檢查偵測到：成功率 88%，問題：逾時, Phase失敗。Log: health-20260322_071503.log",
+      "priority": "high",
+      "effort": "low",
+      "created_at": "2026-03-22T07:15:35.8781062+08:00",
+      "status": "pending",
+      "tags": [
+        "health_check",
+        "auto_detected"
+      ]
     }
   ],
   "entries": [

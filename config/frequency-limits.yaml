@@ -72,6 +72,7 @@ initial_schema: |
     "workflow_forge_count": 0,
     "insight_briefing_count": 0,
     "ntfy_review_count": 0,
+    "zen_koan_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -169,6 +170,7 @@ task_rules:
     - podcast_jiaoguangzong  # 教觀綱宗 Podcast：與 podcast_create 相同流程
     - git_push               # 複雜多步驟 git/bash 序列，需可靠工具鏈（原 openrouter_standard 三連敗）
     - arch_evolution         # 架構決策分析：需讀取 improvement-backlog.json + context/*.json
+    - zen_koan               # 禪宗公案：ntfy 推播任務，需 ntfy-notify Skill 與完整工具鏈
 
 
   cursor_cli:           # Cursor CLI agent -p，非互動模式，完整工具權限（Write/Bash/Read）
@@ -284,7 +286,9 @@ phase_overrides:
 #   template_version: 模板版本號（配合模板內部版本控制）
 #   template_params:  傳入模板的參數（僅參數化模板使用）
 #   history_type:     歷史記錄分類 key
-#   execution_order:  round-robin 輪轉順序（1-35，非連續；active: 1-26,28；disabled: 34,35）
+#   execution_order:  round-robin 輪轉順序（1-35，非連續；active: 1-26,28,29；disabled: 34,35）
+#   allowed_days:     允許執行的星期幾清單（Python weekday：Mon=0,Tue=1,Wed=2,Thu=3,Fri=4,Sat=5,Sun=6）
+#                     未設定 = 每日執行；設定後 Phase 0c + Phase 1 均會跳過非允許日
 #   skills:           此任務依賴的 Skills 清單
 #
 # 群組摘要（11 群組，27 任務，合計依 daily_limit 加總）：
@@ -299,6 +303,7 @@ phase_overrides:
 #   Podcast/靈感:    #21-#23 — Podcast通用(2)、教觀綱宗Podcast(3)、GitHub Scout(1) = 6
 #   Skill 鑄造:      #24     — skill-forge(2) = 2
 #   ntfy/未來/洞察:  #25-#27 — ntfy審查(1)、未來計畫(1)、KB洞察(1) = 3
+#   禪宗公案:        #29     — zen_koan(1, 僅一/四/日) = 1（限定星期一/四/日）
 tasks:
 
   # --- 佛學研究群組（共 4 次/日）---
@@ -588,8 +593,8 @@ tasks:
     result_suffix: "json"
     skills: [system-insight, ntfy-notify]
     description: "讀取 improvement-backlog.json，對每個問題做出架構決策（immediate_fix/schedule_adr/wontfix/deferred），產出 arch-decision.json 供 self-heal 執行"
-    trigger_condition: "OODA orient 完成後，improvement-backlog.json 非空時觸發（ooda-workflow.yaml decide 步驟）；優先由 run-system-audit-team.ps1 Phase 3 直接觸發，無需等待 round-robin"
-    skip_if_condition: "arch-decision.json 存在且 generated_at 距今 < 4h（避免 run-system-audit Phase 3 與 round-robin 雙重觸發）"
+    trigger_condition: "① run-system-audit-team.ps1 於 Phase 2 後幾乎每次都跑 Phase 3 arch-evolution（backlog 可為空，見 todoist-auto-arch_evolution 步驟 1a）；② Todoist round-robin 於 improvement-backlog 有 pending 時納入（ooda-workflow.yaml decide）"
+    skip_if_condition: "（主要針對 Todoist round-robin）arch-decision.json 存在且 generated_at 距今 < 4h，減少與審查觸發重疊；審查腳本另依 config/timeouts.yaml audit_team.phase3_arch_decision_cooldown_minutes，且可在審查有修正／分數退步時略過冷卻"
 
   self_heal:
     name: "系統自癒迴圈"
@@ -754,6 +759,22 @@ tasks:
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist, markdown-editor, ntfy-notify]
     description: "運用多種 Skill 建立深度研究洞察簡報：研究策略→蒐集→洞察萃取→Markdown 簡報→KB 匯入→research-registry 更新→通知"
+
+  # --- 禪宗公案群組（每週一/四/日各 1 次）---
+  zen_koan:
+    name: "禪宗公案推播"
+    daily_limit: 1
+    counter_field: "zen_koan_count"
+    template: "prompts/team/todoist-auto-zen_koan.md"
+    prompt_file: "prompts/team/todoist-auto-zen_koan.md"
+    template_version: 1
+    history_type: "zen_koan"
+    execution_order: 29
+    timeout_seconds: 300
+    result_suffix: "json"
+    allowed_days: [0, 3, 6]   # Mon=0, Thu=3, Sun=6（Python weekday）
+    skills: [ntfy-notify]
+    description: "每週一/四/日選出一則禪宗公案（碧巖錄/無門關/景德傳燈錄），附白話釋義與禪門一語，透過 ntfy 推播給使用者"
 
 # ============================================================
 # 每日上限摘要

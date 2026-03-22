@@ -24,7 +24,6 @@ triggers:
   - "content scoring"
 depends-on:
   - "knowledge-query"
-  - "groq"  # 軟依賴：模組 E Step 3 使用，Relay 不可用時記錄 skip 並繼續
   - "config/dependencies.yaml"
 ---
 
@@ -32,13 +31,12 @@ depends-on:
 
 ## 依賴注入（DI）
 
-> 端點來源：`config/dependencies.yaml` → `skills.knowledge_query` / `skills.groq_relay`（ADR-001 Phase 3）
+> 端點來源：`config/dependencies.yaml` → `skills.knowledge_query`（ADR-001 Phase 3）
 > 執行前讀取 YAML 取得 `base_url`；若 YAML 不可讀則 fallback 使用下方預設值。
 >
 > **讀取片段**（在需要呼叫 API 的步驟前執行）：
 > ```bash
 > KB=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['knowledge_query']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3000")
-> GROQ=$(uv run python -X utf8 -c "import yaml; d=yaml.safe_load(open('config/dependencies.yaml')); print(d['skills']['groq_relay']['api']['base_url'])" 2>/dev/null || echo "http://localhost:3002")
 > ```
 
 提供知識庫的品質管理功能，確保 KB 內容不重複、不過時、品質一致。
@@ -562,42 +560,16 @@ for g, m in GRADES:
         print(f'  {g}: {cnt} 筆')
 ```
 
-#### Step 3：LLM 抽樣評分
+#### Step 3：Claude Haiku 抽樣評分
 
-先確認 Groq Relay 可用：
-```bash
-curl -s --max-time 3 http://localhost:3002/groq/health
-```
-
-- 若 Relay 可用 → 篩選 `total_score < 45` 或 `non_knowledge_flag_count >= 2` 或 `retention_flag_count >= 3` 的筆記
-- 逐筆呼叫（最多 20 筆，間隔 13 秒）：
+篩選 `total_score < 45` 或 `non_knowledge_flag_count >= 2` 或 `retention_flag_count >= 3` 的筆記（最多 20 筆），逐筆呼叫 Claude Haiku 評分：
 
 ```bash
-# 用 Write 工具建立 /tmp/groq-kb-score.json：
-# {"mode": "kb_score", "content": "<contentText 前 2000 字>"}
-curl -s --max-time 20 -X POST http://localhost:3002/groq/chat \
-  -H "Content-Type: application/json; charset=utf-8" \
-  -d @/tmp/groq-kb-score.json
+claude -p "你是知識庫品質評分助手。分析以下筆記內容，只回傳 JSON（不加任何說明）：{\"concept_count\":數字,\"depth_level\":\"foundation|mechanism|application|optimization|synthesis\",\"info_density\":\"low|medium|high\",\"is_knowledge\":true或false,\"is_derived\":true或false,\"retention_value\":\"low|medium|high\",\"issues\":[\"問題描述\"]}\n\n筆記內容：<contentText 前 2000 字>" --model claude-haiku-4-5-20251001
 ```
 
-回傳 JSON 格式：
-```json
-{
-  "result": {
-    "concept_count": 5,
-    "depth_level": "mechanism",
-    "info_density": "medium",
-    "is_knowledge": true,
-    "is_derived": false,
-    "retention_value": "high",
-    "issues": ["缺少來源引用"]
-  }
-}
-```
-
-將 LLM 結果合併到對應筆記的評分中，更新 B.3/B.5 與 C.1/C.4 分數。
-
-- 若 Relay 不可用 → 記錄 `llm_skipped: true`，使用規則評分結果
+將輸出 JSON 合併到對應筆記的評分中，更新 B.3/B.5 與 C.1/C.4 分數。
+若呼叫失敗 → 記錄 `llm_skipped: true`，使用規則評分結果繼續。
 
 #### Step 4：報告產出
 
