@@ -247,7 +247,7 @@ pwsh -Command "Get-Date -Format 'yyyyMMdd_HHmmss'"
 
 > ⚡ **必須用 Bash tool 實際執行，不得只輸出命令文字**
 
-從 config/media-pipeline.yaml 讀取聲音設定，然後執行：
+從 `config/media-pipeline.yaml` 的 `podcast.voice_a` / `voice_b` / `voice_guest` 讀取聲音（與下列預設值一致時可直接執行）：
 
 ```bash
 uv run --project . python tools/generate_podcast_audio.py \
@@ -255,6 +255,7 @@ uv run --project . python tools/generate_podcast_audio.py \
   --output "podcasts/{YYYYMMDD}/audio_{timestamp}/" \
   --voice-a "zh-TW-HsiaoChenNeural" \
   --voice-b "zh-TW-YunJheNeural" \
+  --voice-guest "zh-TW-HsiaoYuNeural" \
   --abbrev-rules "config/tts-abbreviation-rules.yaml"
 ```
 

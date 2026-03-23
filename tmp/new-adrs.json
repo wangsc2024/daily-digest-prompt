@@ -1,0 +1,216 @@
+[
+  {
+    "id": "ADR-20260323-045",
+    "title": "state檔案膨脹清理機制",
+    "status": "Accepted",
+    "implementation_status": "immediate_fix",
+    "created_at": "2026-03-23",
+    "decided_at": "2026-03-23",
+    "source": "improvement-backlog",
+    "source_pattern": "state檔案膨脹清理",
+    "priority": "P1",
+    "effort": "medium",
+    "context": "kb-note-scores.json (470KB, 15585 行) 和 research-quality.json (122KB, 4060 行) 佔 state/ 目錄 42% 空間。建議：① kb-curator 加入老舊評分清理機制（保留近 30 天）② research-quality 壓縮或歸檔 ③ 定期審查 state/ 目錄健康度",
+    "decision": "自動接受：清理 kb-note-scores.json（保留 30 天）與 research-quality.json 歸檔，由 self-heal git 備份後立即執行",
+    "consequences": {
+      "positive": [
+        "state/ 目錄大小降低 30%+，減少 git 操作與備份時間",
+        "kb-note-scores.json 僅保留有效數據，提升讀取效率",
+        "歸檔機制建立後可應用於其他 state 檔案"
+      ],
+      "negative": [
+        "需建立歸檔邏輯，增加維護成本",
+        "歷史數據查詢需訪問 archive/ 目錄"
+      ]
+    },
+    "related_files": [
+      "state/kb-note-scores.json",
+      "state/research-quality.json",
+      "skills/kb-curator/SKILL.md",
+      "tools/cleanup_state.py"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  },
+  {
+    "id": "ADR-20260323-046",
+    "title": "快取命中率優化：TTL 分層策略與 stale-while-revalidate",
+    "status": "Accepted",
+    "implementation_status": "immediate_fix",
+    "created_at": "2026-03-23",
+    "decided_at": "2026-03-23",
+    "source": "improvement-backlog",
+    "source_pattern": "cache_hit_ratio_optimization",
+    "priority": "P0",
+    "effort": "medium",
+    "context": "依據最佳實踐（Cachefly、Redis Blog、Medium），將快取命中率從 22.7% 提升至 40%+。採用 TTL 分層策略（高頻端點 4-8h、中頻 2-4h）、新增 stale-while-revalidate 機制、進行 per-endpoint 分析並形成閉環監控。",
+    "decision": "自動接受：採用 TTL 分層策略與 stale-while-revalidate 機制提升快取命中率至 40%+，由 self-heal git 備份後立即執行",
+    "consequences": {
+      "positive": [
+        "快取命中率提升至 40%+，降低外部 API 呼叫成本",
+        "TTL 分層策略讓高頻與中頻端點分別優化",
+        "stale-while-revalidate 機制提升回應速度"
+      ],
+      "negative": [
+        "需建立 per-endpoint 分析工具，增加維護成本",
+        "stale 數據可能導致短暫不一致性"
+      ]
+    },
+    "related_files": [
+      "config/cache-policy.yaml",
+      "tools/cache_analyzer.py",
+      "skills/cache-optimizer/SKILL.md"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  },
+  {
+    "id": "ADR-20260323-047",
+    "title": "高失敗時段根因分析與三層監控",
+    "status": "Accepted",
+    "implementation_status": "immediate_fix",
+    "created_at": "2026-03-23",
+    "decided_at": "2026-03-23",
+    "source": "improvement-backlog",
+    "source_pattern": "time_based_failure_diagnosis",
+    "priority": "P0",
+    "effort": "medium",
+    "context": "針對 7 點、13 點高失敗時段（成功率 87.5%）進行根因分析。依據 Dynatrace、JAMS、GeeksforGeeks 的最佳實踐，採用集中化日誌、趨勢分析、三層監控（alerts + logging + metrics）識別外部 API 不穩定、資源競爭等根因，並建立預防機制。",
+    "decision": "自動接受：針對 7 點、13 點高失敗時段進行根因分析並建立三層監控，由 self-heal git 備份後立即執行",
+    "consequences": {
+      "positive": [
+        "識別高失敗時段的根因（外部 API 不穩定、資源競爭）",
+        "三層監控提升問題預警能力",
+        "趨勢分析支援長期優化決策"
+      ],
+      "negative": [
+        "需建立時段統計與監控工具",
+        "監控成本增加（日誌與指標追蹤）"
+      ]
+    },
+    "related_files": [
+      "tools/peak_hour_analyzer.py",
+      "config/peak-hour-alerts.yaml",
+      "check-health.ps1"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  },
+  {
+    "id": "ADR-20260323-048",
+    "title": "Weighted Round-robin 任務排程與飢餓保護",
+    "status": "Proposed",
+    "implementation_status": "pending",
+    "created_at": "2026-03-23",
+    "decided_at": null,
+    "source": "improvement-backlog",
+    "source_pattern": "task_scheduling_fairness",
+    "priority": "P1",
+    "effort": "high",
+    "context": "針對自動任務飢餓問題（18 個零執行任務、fairness_stddev=1.371），依據 Wikipedia、GeeksforGeeks、Grokipedia 的排程理論，從純 round-robin 升級為 Weighted Round-robin + Aging 機制，消除任務飢餓並將 fairness_stddev 降至 <0.5。",
+    "decision": "",
+    "consequences": {
+      "positive": [
+        "消除任務飢餓，fairness_stddev 降至 <0.5",
+        "Weighted Round-robin 支援優先級與權重配置",
+        "Aging 機制確保長時間未執行任務獲得提升"
+      ],
+      "negative": [
+        "需重寫 run-todoist-agent-team.ps1 核心排程邏輯（安全邊界）",
+        "排程複雜度增加，需詳盡測試驗證",
+        "需設計權重配置與 Aging 參數"
+      ]
+    },
+    "related_files": [
+      "run-todoist-agent-team.ps1",
+      "config/frequency-limits.yaml",
+      "state/auto-task-fairness-hint.json"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  },
+  {
+    "id": "ADR-20260323-049",
+    "title": "自適應 TTL（d-TTL/f-TTL）演算法整合",
+    "status": "Proposed",
+    "implementation_status": "pending",
+    "created_at": "2026-03-23",
+    "decided_at": null,
+    "source": "improvement-backlog",
+    "source_pattern": "adaptive_ttl_academic",
+    "priority": "P0",
+    "effort": "medium",
+    "context": "當前系統 cache_hit_ratio 僅 21.7%（門檻 40%），學術論文驗證 d-TTL/f-TTL 可收斂至目標命中率（誤差 1.3%）。f-TTL 雙層架構空間效率更高，適合 CDN 場景。建議優先實作 d-TTL（複雜度較低），監控收斂速度與命中率提升幅度。來源：arXiv 1704.04448（5 億次 CDN 請求生產驗證）。",
+    "decision": "",
+    "consequences": {
+      "positive": [
+        "d-TTL 可自適應收斂至目標命中率（誤差 ≤ 1.3%）",
+        "學術驗證（5 億次 CDN 請求），演算法可靠性高",
+        "長期可升級至 f-TTL 雙層架構提升空間效率"
+      ],
+      "negative": [
+        "需修改 config/cache-policy.yaml 新增演算法段落（安全邊界）",
+        "收斂速度監控需額外工具支援",
+        "演算法複雜度高於靜態 TTL"
+      ]
+    },
+    "related_files": [
+      "config/cache-policy.yaml",
+      "tools/adaptive_ttl_engine.py",
+      "skills/cache-optimizer/SKILL.md"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  },
+  {
+    "id": "ADR-20260323-050",
+    "title": "ARC（Adaptive Replacement Cache）驅逐策略評估",
+    "status": "Accepted",
+    "implementation_status": "immediate_fix",
+    "created_at": "2026-03-23",
+    "decided_at": "2026-03-23",
+    "source": "improvement-backlog",
+    "source_pattern": "arc_eviction_policy",
+    "priority": "P1",
+    "effort": "medium",
+    "context": "ARC（Adaptive Replacement Cache）在混合工作負載下達 92% 命中率，比單純 LRU/LFU 高 12-18%（Redis 官方、Medium 實戰案例）。動態平衡時效性與頻率，適用於「無法事先判定 LRU/LFU 較佳」的場景。建議在測試環境比較 LRU/LFU/ARC 命中率，量測 ARC 元數據開銷，若開銷可接受則採用 ARC。來源：Redis 官方部落格、Stanford 論文。",
+    "decision": "自動接受：在測試環境比較 LRU/LFU/ARC 命中率並量測 ARC 元數據開銷，由 self-heal git 備份後立即執行",
+    "consequences": {
+      "positive": [
+        "ARC 命中率比 LRU/LFU 高 12-18%，適合混合工作負載",
+        "動態平衡時效性與頻率，無需事先判定策略",
+        "benchmark 數據支援決策，降低盲目採用風險"
+      ],
+      "negative": [
+        "ARC 元數據開銷需額外記憶體與計算成本",
+        "需建立 benchmark 工具量測三種策略",
+        "若開銷過高則需回退至 LRU/LFU"
+      ]
+    },
+    "related_files": [
+      "tools/cache_eviction_benchmark.py",
+      "analysis/cache-eviction-comparison.json",
+      "config/cache-policy.yaml"
+    ],
+    "notes": "",
+    "auto_generated": true,
+    "fitness_functions": [],
+    "tech_debt_score": 0.0,
+    "review_due": "2026-06-21"
+  }
+]

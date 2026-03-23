@@ -11,6 +11,12 @@
 #   Phase 3: 1 assembly agent (close + update + notify)
 # ============================================
 
+# 飢餓加班車模式：由 Phase 0f 非同步觸發，只補跑指定的飢餓任務
+param(
+    [switch]$StarvationRecovery,
+    [string]$PriorityTasks = ""   # 逗號分隔的 task_key，例如 "podcast_jiaoguangzong,system_insight"
+)
+
 # PowerShell 7 defaults to UTF-8, explicit set for safety
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8

@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-22 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（20 個核心 + 39 個工具 = 59 個 Skills）
+## 速查表（20 個核心 + 42 個工具 = 62 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -72,6 +72,9 @@
 | 56 | add-podcast-task | 新增 Podcast 自動任務（依 auto-task-creator + podcast.yaml 節目名、ntfy 標題契約、模板／resolver／腳本對齊） | 新增podcast任務、新增 podcast 任務、add podcast task、建立 podcast 自動任務、podcast 自動任務、add-podcast-task |
 | 57 | prompt-version-tracker | Prompt 模板主動版本管理（bump/init/report CLI、content hash registry、語義版本遞增、自主品質回歸偵測，depends-on: tools/prompt-versioning.py、system-insight、agent-result-validator） | prompt 版本、模板版本追蹤、prompt version、版本回溯、prompt history、模板變更追蹤、版本-品質分析、bump version、版本遞增、prompt changelog、版本覆蓋率 |
 | 58 | self-heal | 漸進式自我修復（Tier 0 預檢→Tier 1 重試→Tier 2 健康診斷→Tier 3 AI 診斷→Tier 4 人工告警，depends-on: config/recovery-tiers.yaml、cache-optimizer、task-fairness-analyzer、ntfy-notify） | self-heal、自我修復、系統修復、漸進式恢復、recovery tiers、失敗重試 |
+| 59 | failure-hour-analyzer | 高失敗時段根因分析（按小時失敗率統計→根因分類 taxonomy→時段風險評分→time-slot-risk.json，depends-on: scheduler-state、system-insight、pre-flight-check） | failure-hour-analyzer、高失敗時段、時段根因分析、失敗時段、peak hour diagnosis、時段風險、成功率診斷 |
+| 59 | task-quality-gate | LLM-as-a-Judge 品質門檻評估（使用 Claude Haiku 評估自動任務輸出完整性/連貫性/準確性，0-10 分，<7 標記 needs_review） | 品質評估、quality gate、LLM-as-a-judge、輸出品質檢查、task quality |
+| 60 | phase-snapshot-recovery | Phase 間快照恢復（Phase 轉換前快照→中斷偵測→快照續跑→過期清理，depends-on: scheduler-state、self-heal） | phase-snapshot-recovery、Phase 恢復、Phase 快照、管線中斷恢復、snapshot recovery |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 
@@ -80,7 +83,7 @@
 ## 使用強度
 
 - **必用**（每次必定使用）：todoist、pingtung-news、pingtung-policy-expert、hackernews-ai-digest、atomic-habits、learning-mastery、ntfy-notify、digest-memory、api-cache、scheduler-state
-- **積極用**（有機會就用）：knowledge-query、gmail
+- **積極用**（有機會就用）：knowledge-query、gmail、failure-hour-analyzer
 - **搭配用**：pingtung-policy-expert 必搭 pingtung-news、api-cache 必搭任何 API 呼叫、skill-scanner 搭配 Log 審查時、arch-evolution 搭配 system-audit 後轉化 ADR、groq 搭配 hackernews-ai-digest（批次翻譯）+ pingtung-news（快速摘要）作前處理
 
 ---

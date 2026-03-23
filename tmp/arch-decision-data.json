@@ -1,0 +1,686 @@
+{
+  "backlog_items": [
+    {
+      "id": "backlog_kso_20260323_state_file_bloat",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "kb-note-scores.json (470KB, 15585 行) 和 research-quality.json (122KB, 4060 行) 佔 state/ 目錄 42% 空間。建議：① kb-curator 加入老舊評分清理機制（保留近 30 天）② research-quality 壓縮或歸檔 ③ 定期審查 state/ 目錄健康度",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kb_insight_20260323_cache_optimization",
+      "pattern": "cache_hit_ratio_optimization",
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "依據最佳實踐（Cachefly、Redis Blog、Medium），將快取命中率從 22.7% 提升至 40%+。採用 TTL 分層策略（高頻端點 4-8h、中頻 2-4h）、新增 stale-while-revalidate 機制、進行 per-endpoint 分析並形成閉環監控。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kb_insight_20260323_peak_hour_diagnosis",
+      "pattern": "time_based_failure_diagnosis",
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "針對 7 點、13 點高失敗時段（成功率 87.5%）進行根因分析。依據 Dynatrace、JAMS、GeeksforGeeks 的最佳實踐，採用集中化日誌、趨勢分析、三層監控（alerts + logging + metrics）識別外部 API 不穩定、資源競爭等根因，並建立預防機制。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kb_insight_20260323_task_fairness_wrr",
+      "pattern": "task_scheduling_fairness",
+      "priority": "medium",
+      "effort": "high",
+      "related_files": [],
+      "description": "針對自動任務飢餓問題（18 個零執行任務、fairness_stddev=1.371），依據 Wikipedia、GeeksforGeeks、Grokipedia 的排程理論，從純 round-robin 升級為 Weighted Round-robin + Aging 機制，消除任務飢餓並將 fairness_stddev 降至 <0.5。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260323_daily_success_rate",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "daily_success_rate=0.875，門檻 0.95。建議：檢查失敗模式與高失敗時段（7 點、13 點）根因，可能與外部 API 不穩定或資源競爭有關。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260323_cache_hit_ratio",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "low",
+      "related_files": [],
+      "description": "cache_hit_ratio=0.227，門檻 0.40。建議：執行 cache-optimizer Skill 調整 TTL 設定或檢查 api-cache Skill 使用情況。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260323_auto_task_fairness",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "auto_task_fairness=1.371，門檻 0.5。建議：執行 task-fairness-analyzer Skill 診斷排程公平性與輪轉邏輯（18 個任務零執行）。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260322_daily_success_rate",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "daily_success_rate=0.865（持平），門檻 0.95。建議：檢查高失敗時段（5、7、13 時）的根因，可能與外部 API 不穩定或資源競爭有關。趨勢：與昨日相比持平（0.865 → 0.865），問題未改善。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260322_cache_hit_ratio",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "cache_hit_ratio=0.2167（微升），門檻 0.4。建議：使用 cache-optimizer Skill 分析各端點 TTL 配置，可能需延長 pingtung-news 或 hackernews 的快取時間。趨勢：與昨日相比微升（0.2126 → 0.2167, +0.4pp），改善緩慢。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260322_auto_task_fairness",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "auto_task_fairness=1.211（改善），門檻 0.5。建議：29 個任務中今日僅 13 個有執行記錄，執行 task-fairness-analyzer Skill 分析 round-robin 邏輯。趨勢：與昨日相比改善（1.403 → 1.211, -13.7%），但仍超標。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260321_daily_success_rate",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "daily_success_rate=0.865，門檻 0.95。建議：檢查高失敗時段（5、7、13 時）的根因，可能與外部 API 不穩定或資源競爭有關",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260321_auto_task_fairness",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "auto_task_fairness=1.403，門檻 0.5。建議：29 個任務中大部分僅執行 0-1 次，檢查 frequency-limits.yaml 配置或 round-robin 輪轉邏輯",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_si_20260321_avg_io_per_call",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "avg_io_per_call=26567，門檻 5000。建議：立即啟用 context-budget-monitor Skill 並強制委派大量讀取任務給子 Agent",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": "跨平台路徑硬編碼清理",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "14 個檔案含 D:\\Source 或 C:\\Users 硬編碼路徑，限制可攜性。建議改用環境變數或 $PSScriptRoot 相對路徑。",
+      "existing_adr": {
+        "id": "ADR-20260318-025",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "接受：用 $PSScriptRoot（PS1）和 Path(__file__).parent.parent（Python）取代硬編碼路徑。外部專案路徑（RAG_Skill、game_web）保留 fallback 字串並支援環境變數覆寫（$env:GAME_WEB_DIR）。.claude/settings.json 因 Claude Code 架構限制無法動態化，文件化為已知限制。"
+      }
+    },
+    {
+      "id": null,
+      "pattern": "輸入驗證強化",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "Hook 攔截為防禦性機制，缺少系統化 API 端點 schema 驗證。建議為 results/*.json 等結構化輸出加入 pydantic/jsonschema 驗證。",
+      "existing_adr": {
+        "id": "ADR-20260318-026",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "接受（warning-only 模式）：新增 validate_json_schema() 至 hook_utils.py（jsonschema 優先，內建 fallback），tools/validate_results.py 供手動批次驗證，pre_write_guard.py 在寫入 results/todoist-auto-*.json 時觸發 schema 驗證並記錄 warn 日誌（不..."
+      }
+    },
+    {
+      "id": null,
+      "pattern": "TODO/FIXME 持續清理",
+      "priority": "P1",
+      "effort": "low",
+      "related_files": [],
+      "description": "369 處 TODO/FIXME 分佈 76 檔案（Markdown 佔 30 檔）。建議定期清理規劃性 TODO 或轉入 tech-debt-backlog。",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": "測試覆蓋率門檻提升",
+      "priority": "P2",
+      "effort": "high",
+      "related_files": [],
+      "description": "覆蓋率門檻 44% 偏低（1086 測試），建議逐步提升至 60%。hook_utils 復用率 63.6% 可提升至 80%+。",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": "YAML 注釋密度持續提升",
+      "priority": "P2",
+      "effort": "low",
+      "related_files": [],
+      "description": "YAML 注釋密度 10.6%-13.2%，低於 20% 目標。關鍵配置檔案需補充說明注釋。",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": "自動任務公平輪轉修復",
+      "priority": "P0",
+      "effort": "medium",
+      "related_files": [],
+      "description": "system-insight 顯示 auto_task_fairness=1.993，29 個任務僅 6 個有執行紀錄。建議在 run-todoist-agent-team.ps1 導入可觀測的加權輪轉與飢餓保護，避免長期 0 次執行任務繼續被跳過。",
+      "existing_adr": {
+        "id": "ADR-20260318-027",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": ""
+      }
+    },
+    {
+      "id": null,
+      "pattern": "Phase 2 快照恢復與故障續跑",
+      "priority": "P0",
+      "effort": "medium",
+      "related_files": [],
+      "description": "針對近 7 天成功率僅 85.1% 的問題，優先補強 Phase 2 中斷後的快照恢復，避免單一 Agent timeout 導致整批重跑並放大失敗成本。",
+      "existing_adr": {
+        "id": "ADR-20260318-028",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": ""
+      }
+    },
+    {
+      "id": null,
+      "pattern": "Context Budget Guard 強制化",
+      "priority": "P0",
+      "effort": "medium",
+      "related_files": [],
+      "description": "avg_io_per_call 達 24875 chars，遠高於 benchmark 的 5000。建議把 Context 保護從提示規則提升為可量測、可拒絕、可降級的執行守門機制。",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": "快取命中率調優與自適應 TTL 治理",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "system-insight 顯示 cache_hit_ratio 僅 20.7%，遠低於 40% 門檻。建議以 cache-aside 原則重整 TTL、失效與命中觀測，並建立按 volatility/命中率調整的自適應 TTL 治理流程。",
+      "existing_adr": {
+        "id": "ADR-20260319-029",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "自動接受：調整 cache-policy.yaml TTL（pingtung-news 360→720 min、hackernews 180→360 min、knowledge 60→120 min），建立 adaptive_ttl 段落與 cache-optimizer Skill，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+      }
+    },
+    {
+      "id": null,
+      "pattern": "統一 execution trace schema 與因果追蹤",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "近 3 天洞察提議把 task_key、skill chain、cache 狀態、耗時、失敗點與輸出 artifact 納入統一 trace/event schema，降低只靠零散結果檔追查回歸的成本。",
+      "existing_adr": {
+        "id": "ADR-20260319-030",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": ""
+      }
+    },
+    {
+      "id": null,
+      "pattern": "宣告式 hook registry 與 stage 化 guard 鏈",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "近 3 天洞察指出目前 guard 規則分散在多個 hooks 腳本，建議整理成可排序、可停用、可分 stage 的 hook registry，降低規則漂移與例外處理成本。",
+      "existing_adr": {
+        "id": "ADR-20260319-031",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": ""
+      }
+    },
+    {
+      "id": null,
+      "pattern": "每日成功率根因分類與 SLO/Error Budget 治理",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "system-insight 於 2026-03-19 顯示 daily_success_rate 僅 84.6%，低於 90% 門檻。建議將失敗 run 依 failure mode 分類，建立 SLO、error budget、postmortem 觸發與降級策略，讓成功率改善有一致的優先順序與驗收基準。",
+      "existing_adr": {
+        "id": "ADR-20260320-032",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "自動接受：盤點近 7 天失敗 runs 並建立 failure mode taxonomy，定義 SLI/SLO 與 28 天 error budget，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+      }
+    },
+    {
+      "id": null,
+      "pattern": "Machine-readable Skill Registry 與 Schema 驗證",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "近 3 天洞察指出目前 Skill 發現仍以文字索引為主，建議補上 machine-readable registry 與 schema 驗證，降低 SKILL_INDEX、frontmatter、依賴與觸發詞漂移。",
+      "existing_adr": {
+        "id": "ADR-20260320-033",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "自動接受：定義 skill-registry.json schema，掃描 SKILL.md frontmatter 建立欄位對映，用 JSON Schema 驗證 registry 結構，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+      }
+    },
+    {
+      "id": null,
+      "pattern": "Prompt/模板版本追蹤與結果對映",
+      "priority": "P1",
+      "effort": "medium",
+      "related_files": [],
+      "description": "近 3 天洞察建議將 prompts、templates 與 results 建立版本對映，讓同一 task_key 的輸出可回溯到當時使用的模板版本，降低回歸分析與 A/B 比對成本。",
+      "existing_adr": {
+        "id": "ADR-20260320-034",
+        "status": "Accepted",
+        "implementation_status": "done",
+        "decision": "自動接受：為 prompts/ 與 templates/ 建立 version 欄位或 tag/hash 產生不可變版本標識，在 results/*.json 新增 prompt_version、template_version、prompt_source 欄位，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+      }
+    },
+    {
+      "id": "backlog_ib_20260321_realtime_budget",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "來源：Agent Context Window 治理研究（洞見 3）。建議實作 tools/budget_guard.py，讀取 config/budget.yaml 定義的 per-phase token budget，在每個 Phase 結束時累計 token 用量，超過 80% warning、100% 暫停執行並發送 ntfy 告警。在 results/*.json 新增 token_usage 欄位。長期整合 Langfuse 監控平台。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_ib_20260321_context_compression",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "來源：Agent Context Window 治理研究（洞見 4）。建議在 post_tool_logger.py 新增 context_usage_tracker，累計當前 Session 的 input_tokens，當使用率超過 65% 時注入強制提示。實作 tools/context_compressor.py 支援 BufferWindow（保留最近 20 筆摘要）與 Summary（壓縮 Phase 1 結果為 200 字）兩種策略。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260321_time_slot_risk",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "system-insight 顯示 5、7、13 時為高失敗時段（可能與外部 API 不穩定或資源競爭有關）。建議建立時段失敗統計、外部 SLA 盤點、系統資源監控、風險評分模型與預防性檢查機制，在高風險時段降級執行或跳過非關鍵任務。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260321_skill_anomaly",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "avg_io_per_call 達 26567（超標 5.3 倍），建議識別過度使用、使用不足、高失敗率、低效 I/O、重複 API 呼叫等 5 類異常模式，並識別低效 Skill 鏈（多次 Read 同一檔案、未走 cache、循環呼叫），產出優化建議並納入 Skill 生命週期管理。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260321_research_saturation",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "context/research-registry.json 含 152 筆研究（topic_diversity 97.4%），建議分析已飽和主題（多次研究但新發現遞減）與待深化主題（初步涉獵高潛力），建立飽和度評分模型與收穫遞減偵測，產出研究方向建議並整合至研究系列管理。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_health_202603220715",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "07:15 健康檢查偵測到：成功率 88%，問題：逾時, Phase失敗。Log: health-20260322_071503.log",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_ib_20260322_phase3_validation",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "來源：Agent 品質閘門研究（洞見 1）。建議在 prompts/team/todoist-assemble.md 步驟 6 加入驗證步驟，呼叫 tools/validate_results.py。驗證失敗時標記 format_failed 而非中斷流程，實現 composable + governance-aware 品質閘門模式。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_ib_20260322_agent_middleware",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "來源：Agent 品質閘門研究（洞見 2）。參考 Microsoft Agent Framework 三層架構，將 tools/validate_results.py 重構為 Agent middleware，在 run() 結束前自動驗證輸出 JSON（agent-level 而非 post-hoc）。驗證失敗時自動補上可修復欄位（Tier 1 auto-fix）。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260322_failure_taxonomy",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "建立 4 维度失败分类體系（External Dependency/Resource Contention/Schema Mismatch/Logic Error）+ leading/lagging indicators，整合至 system-insight。来源：Microsoft AI agents 失败模式白皮书 + AWS 弹性框架。目标：从 86.5% 成功率提升至 95%+，预警准确率 ≥ 60%。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260322_cache_optimizer_execution",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "立即执行 cache-optimizer Skill 分析近 7 天 JSONL logs，产出端点级 TTL 调优建议。采用混合驱逐策略（LFU + TTL），A/B 测试调整最低 2 个端点 TTL。来源：Redis 快取策略更新指南 + Fastly 最佳实践。目标：命中率从 21.67% 提升至 ≥ 27%（+5pp），无 throughput 损失。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_kie_20260322_behavior_pattern_skill_evolution",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "high",
+      "related_files": [],
+      "description": "从 200 个 behavior patterns（162 个高信心）中识别 Skill 候选，建立 3 维度评分模型（Support ≥ 10/周、Confidence ≥ 0.7、I/O Stability 标准差 < 20%）。来源：Pattern 评估方法 + 教育训练中的模式挖掘。目标：Top 10 候选中 ≥ 3 个通过审查，试点 Skill 7 天内被使用 ≥ 5 次，token 节省 ≥ 20%。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_health_202603230715",
+      "pattern": null,
+      "priority": "high",
+      "effort": "low",
+      "related_files": [],
+      "description": "07:15 健康檢查偵測到：成功率 89%，問題：逾時, Phase失敗。Log: health-20260323_071503.log",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_ib_20260323_adaptive_ttl",
+      "pattern": null,
+      "priority": "high",
+      "effort": "medium",
+      "related_files": [],
+      "description": "當前系統 cache_hit_ratio 僅 21.7%（門檻 40%），學術論文驗證 d-TTL/f-TTL 可收斂至目標命中率（誤差 1.3%）。f-TTL 雙層架構空間效率更高，適合 CDN 場景。建議優先實作 d-TTL（複雜度較低），監控收斂速度與命中率提升幅度。來源：arXiv 1704.04448（5 億次 CDN 請求生產驗證）。",
+      "existing_adr": null
+    },
+    {
+      "id": "backlog_ib_20260323_arc_eviction",
+      "pattern": null,
+      "priority": "medium",
+      "effort": "medium",
+      "related_files": [],
+      "description": "ARC（Adaptive Replacement Cache）在混合工作負載下達 92% 命中率，比單純 LRU/LFU 高 12-18%（Redis 官方、Medium 實戰案例）。動態平衡時效性與頻率，適用於「無法事先判定 LRU/LFU 較佳」的場景。建議在測試環境比較 LRU/LFU/ARC 命中率，量測 ARC 元數據開銷，若開銷可接受則採用 ARC。來源：Redis 官方部落格、Stanford 論文。",
+      "existing_adr": null
+    },
+    {
+      "id": null,
+      "pattern": null,
+      "priority": null,
+      "effort": null,
+      "related_files": [],
+      "description": "",
+      "existing_adr": null
+    }
+  ],
+  "adr_patterns": {
+    "依賴注入（Dependency Injection）模式": {
+      "id": "ADR-20260224-001",
+      "status": "Deferred",
+      "implementation_status": "done",
+      "decision": "延後（Deferred）。理由：effort=high 且影響所有 22 個 SKILL.md，全面遷移風險過高。採分階段策略：(1) 立即行動—建立 config/dependencies.yaml，萃取 3 個最高頻 Skill（todoist、knowledge-query、ntfy-notify）的端點設定；(2) 機會遷移—其他 Skill 在因其他原因修改時順帶遷移；(3) 全面 DI..."
+    },
+    "Guardrails 輸入輸出驗證層": {
+      "id": "ADR-20260224-002",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受。分三層分步實作：(1) quality-gate.md § 3.2 定義 3 個量化規則（研究 ≥300 字、摘要 ≥3 任務、通知 ≤50 字）；(2) done-cert.md 新增 schema_check 欄位；(3) on_stop_alert.py 新增 schema_violations 計數。不阻斷執行，schema fail 僅計入統計並在告警時顯示。實作日期：2026-0..."
+    },
+    "Agent Handoff 控制轉移機制": {
+      "id": "ADR-20260224-003",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（縮減範圍）。不重寫 PS1 team 腳本架構。具體行動：(1) 建立 config/schemas/agent-result.schema.json 定義 results/*.json 標準欄位（status/task_type/artifacts_produced/quality_score）；(2) 在 check-health.ps1 新增 schema 驗證區塊，偵測格式不符的結果..."
+    },
+    "Evals 評估系統": {
+      "id": "ADR-20260224-004",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（輕量版）。不引入完整 Evals SDK。具體行動：(1) 在 quality-gate.md 確認已有的 3 個量化指標；(2) on_stop_alert.py 新增 quality_scores 追蹤欄位；(3) context/metrics-daily.json 加入每日品質分數趨勢；(4) 完整 Evals 框架延後。"
+    },
+    "可組合工作流模式（Composable Workflow Patterns）": {
+      "id": "ADR-20260224-005",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（保守範圍）。不重寫 PowerShell Start-Job 架構。具體行動：Phase 1 的 cache/status.json valid 旗標已實作，延伸為條件跳過邏輯。"
+    },
+    "Daily-Digest-Prompt 可觀測性成熟度演進路線圖（KB: a085364f）": {
+      "id": "ADR-20260304-009",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自建輕量級四層可觀測性框架。採用 OpenTelemetry 語義欄位命名確保未來可遷移至標準 OTel。"
+    },
+    "依賴漏洞自動掃描": {
+      "id": "ADR-20260311-010",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受。pyproject.toml 新增 pip-audit，check-health.ps1 新增掃描區塊。"
+    },
+    "行覆蓋率提升計畫": {
+      "id": "ADR-20260311-011",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（分階段）。Hook 模組優先提升行覆蓋率。"
+    },
+    "YAML 注釋密度全面提升": {
+      "id": "ADR-20260311-012",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（立即修復）。對關鍵配置檔案新增說明注釋，達到 20% 注釋密度。"
+    },
+    "GitHub Actions CI 基礎建設": {
+      "id": "ADR-20260311-013",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "建立最小 CI：push to main 觸發 pytest + pip-audit。"
+    },
+    "跨平台排程抽象層": {
+      "id": "ADR-20260311-014",
+      "status": "Wontfix",
+      "implementation_status": "declined",
+      "decision": "不修復（Wontfix）。系統明確設計為 Windows-only 個人助理，無跨平台需求。"
+    },
+    "PS1 hardcoded timeout 消除": {
+      "id": "ADR-20260312-015",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "提議。在 PS1 啟動時讀取 config/timeouts.yaml 取代 hardcoded 值。"
+    },
+    "CI ruff lint 整合": {
+      "id": "ADR-20260314-016",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（立即修復）。在 ci.yml 新增 ruff check 步驟。"
+    },
+    "TODO/FIXME 規範性清理": {
+      "id": "ADR-20260314-017",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（分階段、人工排程）。規範性 TODO 直接移除，缺陷型轉 issue。"
+    },
+    "Phase 2 任務 retry 機制": {
+      "id": "ADR-20260314-018",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（人工排程）。Phase 2 迴圈加入 max 1 retry、exponential backoff。"
+    },
+    "CHANGELOG 格式規範化": {
+      "id": "ADR-20260317-019",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：規範 CHANGELOG.md 格式，補充缺失的版本標題與分類標籤（feat/fix/chore/refactor），操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Skills 測試覆蓋擴充": {
+      "id": "ADR-20260317-020",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（分階段實作，mock 優先策略）。測試架構策略：對有 Python script 的 Skills（todoist、gmail）補強現有測試；對純 prompt-based Skills（knowledge-query、ntfy-notify）建立輕量 Python 工具模組（ntfy_client.py、kb_search.py），封裝可測試的核心邏輯（payload 構建、回應解析、格式..."
+    },
+    "統一安裝指南文件": {
+      "id": "ADR-20260317-021",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：建立 docs/INSTALL.md 統一安裝指南，彙整散落的安裝步驟（uv 安裝、依賴安裝、排程設定、ntfy 訂閱），操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Context 保護規則強制執行": {
+      "id": "ADR-20260317-022",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（分步實作，監控優先）。具體行動：(1) 建立 skills/context-budget-monitor/SKILL.md，定義 session I/O 預算監控規則（累積 Read > 50KB 時強制委派子 Agent）；(2) 強化 preamble.md Context 保護規則，新增量化限制表（單次 Read ≤ 5 個檔案，累積 I/O ≤ 50KB，超出時必須切換子 Agent..."
+    },
+    "快取策略深度優化": {
+      "id": "ADR-20260317-023",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（即時調整 + 自適應機制）。具體行動：(1) 立即調整 cache-policy.yaml TTL：pingtung-news 360→720 min（12h）、hackernews 180→360 min（6h）、knowledge 60→120 min（2h）——三個端點的資料 volatility 均屬 low-medium，延長 TTL 可顯著提升命中率；(2) cache-poli..."
+    },
+    "失敗時段根因分析與預防機制": {
+      "id": "ADR-20260317-024",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（時段差異化配置 + 預防性檢查）。具體行動：(1) config/timeouts.yaml 新增 time_slot_profiles 段落，為 9:00/14:00/15:00 三個高失敗時段設定 +30% timeout buffer（對應早晨 API 高峰、午後系統負載高峰、下午 Todoist 請求密集）；(2) run-todoist-agent-team.ps1 Phase 0..."
+    },
+    "跨平台路徑硬編碼清理": {
+      "id": "ADR-20260318-025",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受：用 $PSScriptRoot（PS1）和 Path(__file__).parent.parent（Python）取代硬編碼路徑。外部專案路徑（RAG_Skill、game_web）保留 fallback 字串並支援環境變數覆寫（$env:GAME_WEB_DIR）。.claude/settings.json 因 Claude Code 架構限制無法動態化，文件化為已知限制。"
+    },
+    "輸入驗證強化": {
+      "id": "ADR-20260318-026",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "接受（warning-only 模式）：新增 validate_json_schema() 至 hook_utils.py（jsonschema 優先，內建 fallback），tools/validate_results.py 供手動批次驗證，pre_write_guard.py 在寫入 results/todoist-auto-*.json 時觸發 schema 驗證並記錄 warn 日誌（不..."
+    },
+    "自動任務公平輪轉修復": {
+      "id": "ADR-20260318-027",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": ""
+    },
+    "Phase 2 快照恢復與故障續跑": {
+      "id": "ADR-20260318-028",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": ""
+    },
+    "快取命中率調優與自適應 TTL 治理": {
+      "id": "ADR-20260319-029",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：調整 cache-policy.yaml TTL（pingtung-news 360→720 min、hackernews 180→360 min、knowledge 60→120 min），建立 adaptive_ttl 段落與 cache-optimizer Skill，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "統一 execution trace schema 與因果追蹤": {
+      "id": "ADR-20260319-030",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": ""
+    },
+    "宣告式 hook registry 與 stage 化 guard 鏈": {
+      "id": "ADR-20260319-031",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": ""
+    },
+    "每日成功率根因分類與 SLO/Error Budget 治理": {
+      "id": "ADR-20260320-032",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：盤點近 7 天失敗 runs 並建立 failure mode taxonomy，定義 SLI/SLO 與 28 天 error budget，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Machine-readable Skill Registry 與 Schema 驗證": {
+      "id": "ADR-20260320-033",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：定義 skill-registry.json schema，掃描 SKILL.md frontmatter 建立欄位對映，用 JSON Schema 驗證 registry 結構，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Prompt/模板版本追蹤與結果對映": {
+      "id": "ADR-20260320-034",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：為 prompts/ 與 templates/ 建立 version 欄位或 tag/hash 產生不可變版本標識，在 results/*.json 新增 prompt_version、template_version、prompt_source 欄位，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "實時預算監控與 per-trace 成本歸因": {
+      "id": "ADR-20260322-035",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "Accepted：tools/budget_guard.py 已實作 per-phase token budget 監控（80%警告/100%暫停），config/budget.yaml 定義預算門檻，post_tool_logger.py 整合 context-usage 追蹤。state/context-usage.json 持久化 Session token 用量。"
+    },
+    "Context Compression 閾值觸發機制": {
+      "id": "ADR-20260322-036",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "Accepted：tools/context_compressor.py 已實作 BufferWindow + Summary 兩種壓縮策略，context_usage_tracker 在 post_tool_logger.py 中追蹤 input_tokens，state/context-usage.json 持久化 Session 使用率。65% 閾值觸發壓縮提示。"
+    },
+    "高失敗時段根因分析與時段風險評估": {
+      "id": "ADR-20260322-037",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "Accepted：tools/time_slot_risk_scorer.py 已實作時段失敗統計、外部 SLA 盤點（config/external-sla.yaml）、RiskScore 評分模型。state/time-slot-risk.json 持久化當前時段風險評分，pre-flight-check Skill 整合高風險時段閘門。"
+    },
+    "Skill 使用模式異常偵測與低效鏈優化": {
+      "id": "ADR-20260322-038",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：建立 tools/skill_anomaly_detector.py 掃描 logs/structured/*.jsonl 統計 Skill 使用頻率、耗時與 I/O，偵測 5 類異常模式並產出 analysis/skill-usage-baseline.json 與 analysis/inefficient-skill-chains.json，操作安全且步驟明確，由 self-heal..."
+    },
+    "研究主題飽和度分析與收穫遞減偵測": {
+      "id": "ADR-20260322-039",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：建立 tools/research_saturation_analyzer.py 掃描 research-registry.json 進行主題聚類與飽和度評分（saturation_score = 研究次數×0.4 + (1-新穎度)×0.3 + 時間間隔×0.2 + (1-深度)×0.1），產出 analysis/research-topic-clusters.json 與 analy..."
+    },
+    "整合驗證至 Phase 3 assemble": {
+      "id": "ADR-20260323-040",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：在 todoist-assemble.md 步驟 6 後新增驗證步驟，soft-fail 模式確保品質閘門不阻塞流程，由 self-heal git 備份後立即執行"
+    },
+    "引入 Agent Middleware 驗證層": {
+      "id": "ADR-20260323-041",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：在 tools/validate_results.py 新增 middleware_validate() 與 auto_fix_tier1() 函數，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "失敗模式 Taxonomy 與根因自動分類系統": {
+      "id": "ADR-20260323-042",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：建立 config/failure-taxonomy.yaml 與 tools/classify_failure.py，操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Cache-optimizer Skill 立即執行與 TTL 調優": {
+      "id": "ADR-20260323-043",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：執行快取分析並保守調整最低 2 個端點 TTL（增幅 ≤ 50%），操作安全且步驟明確，由 self-heal git 備份後立即執行"
+    },
+    "Behavior Pattern → Skill 演化的自動化評估流程": {
+      "id": "ADR-20260323-044",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "decision": "自動接受：建立 config/skill-candidate-scoring.yaml 與 tools/score_skill_candidates.py，fix_instructions 拆分 6 步驟含 git 備份檢查點，由 self-heal 分批執行"
+    }
+  },
+  "summary": {
+    "total_backlog_items": 42,
+    "items_with_pattern": 17,
+    "items_with_existing_adr": 10,
+    "total_adr_records": 41
+  }
+}

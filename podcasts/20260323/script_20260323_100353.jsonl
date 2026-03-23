@@ -1,0 +1,50 @@
+{"turn": 1, "speaker": "Host-A", "text": "大家好，歡迎收聽今天的知識電台。", "tts_text": "大家好，歡迎收聽今天的知識電台。"}
+{"turn": 2, "speaker": "Host-B", "text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。", "tts_text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。"}
+{"turn": 3, "speaker": "Host-A", "text": "沒錯，我們選了 OpenClaw Gateway 內部機制深度解析 — WebSock…、2026-02-12 AI 最新技術研究筆記 等主題。", "tts_text": "沒錯，我們選了 OpenClaw Gateway 內部機制深度解析 — WebSock…、2026-02-12 A I 最新技術研究筆記 等主題。"}
+{"turn": 4, "speaker": "Host-A", "text": "我們先來看第一篇：OpenClaw Gateway 內部機制深度解析 — WebSocket 路由…。", "tts_text": "我們先來看第一篇：OpenClaw Gateway 內部機制深度解析 — WebSocket 路由…。"}
+{"turn": 5, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 6, "speaker": "Host-A", "text": "# OpenClaw Gateway 內部機制深度解析 — WebSocket 路由、Skill 熱載入與並發控制實作（mechanism 階段）", "tts_text": "# OpenClaw Gateway 內部機制深度解析 — WebSocket 路由、Skill 熱載入與並發控制實作（mechanism 階段）"}
+{"turn": 7, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 8, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 9, "speaker": "Host-A", "text": "> **研究日期**：2026-03-23", "tts_text": "> **研究日期**：2026-03-23"}
+{"turn": 10, "speaker": "Host-A", "text": "> **研究類型**：GitHub AI 專案研究（mechanism 階段）", "tts_text": "> **研究類型**：GitHub A I 專案研究（mechanism 階段）"}
+{"turn": 11, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 12, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 13, "speaker": "Host-A", "text": "> **系列**：openclaw-personal-ai-agent", "tts_text": "> **系列**：openclaw-personal-ai-agent"}
+{"turn": 14, "speaker": "Host-A", "text": "> **承接階段**：foundation → mechanism", "tts_text": "> **承接階段**：foundation → mechanism"}
+{"turn": 15, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 16, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 17, "speaker": "Host-A", "text": "> **GitHub Stars**：328,868 stars | TypeScript | MIT License", "tts_text": "> **GitHub Stars**：328,868 stars | TypeScript | MIT License"}
+{"turn": 18, "speaker": "Host-A", "text": "OpenClaw 作為 GitHub 史上增長最快的開源專案（210K+ stars），其核心競爭力不僅在於多頻道整合（30+ 渠道），更在於其精心設計的內部機制：**WebSocket 雙工協議路由…", "tts_text": "OpenClaw 作為 GitHub 史上增長最快的開源專案（210K+ stars），其核心競爭力不僅在於多頻道整合（30+ 渠道），更在於其精心設計的內部機制：**WebSocket 雙工協議路由…"}
+{"turn": 19, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 20, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 21, "speaker": "Host-A", "text": "本文深入 mechanism 階段，透過官方文件、源碼分析與社群討論的三角佐證，揭示 OpenClaw Gateway 的核心實作細節", "tts_text": "本文深入 mechanism 階段，透過官方文件、源碼分析與社群討論的三角佐證，揭示 OpenClaw Gateway 的核心實作細節"}
+{"turn": 22, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 23, "speaker": "Host-A", "text": "我們先來看第二篇：2026-02-12 AI 最新技術研究筆記。", "tts_text": "我們先來看第二篇：2026-02-12 A I 最新技術研究筆記。"}
+{"turn": 24, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 25, "speaker": "Host-A", "text": "# 2026 年 2 月 AI/LLM/ML 最新技術研究", "tts_text": "# 2026 年 2 月 A I/L L M/ML 最新技術研究"}
+{"turn": 26, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 27, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 28, "speaker": "Host-A", "text": "2026 年 2 月，AI 產業正處於從「炒作」轉向「務實應用」的關鍵轉折點", "tts_text": "2026 年 2 月，A I 產業正處於從「炒作」轉向「務實應用」的關鍵轉折點"}
+{"turn": 29, "speaker": "Host-A", "text": "本月重點包括：NASA 使用 Claude AI 控制火星探測車、AGI 定義的學術辯論、以及新一代推理模型的持續演進", "tts_text": "本月重點包括：NASA 使用 Claude A I 控制火星探測車、AGI 定義的學術辯論、以及新一代推理模型的持續演進"}
+{"turn": 30, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 31, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 32, "speaker": "Host-A", "text": "產業焦點已從「更大的模型」轉向「更智慧的系統」，強調代理工作流（Agentic Workflows）和自我驗證能力", "tts_text": "產業焦點已從「更大的模型」轉向「更智慧的系統」，強調代理工作流（Agentic Workflows）和自我驗證能力"}
+{"turn": 33, "speaker": "Host-A", "text": "### 1. NASA 使用 Claude AI 控制火星探測車", "tts_text": "### 1. NASA 使用 Claude A I 控制火星探測車"}
+{"turn": 34, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 35, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 36, "speaker": "Host-A", "text": "- NASA 噴射推進實驗室成功使用 Anthropic 的 Claude AI 為毅力號探測車規劃行駛路線", "tts_text": "- NASA 噴射推進實驗室成功使用 Anthropic 的 Claude A I 為毅力號探測車規劃行駛路線"}
+{"turn": 37, "speaker": "Host-A", "text": "- AI 生成 Rover Markup Language 指令，完成兩次總計超過 1,400 英尺的行駛", "tts_text": "- A I 生成 Rover Markup Language 指令，完成兩次總計超過 1,400 英尺的行駛"}
+{"turn": 38, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 39, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 40, "speaker": "Host-A", "text": "- 工程師發現 Claude 的路線規劃僅需微調", "tts_text": "- 工程師發現 Claude 的路線規劃僅需微調"}
+{"turn": 41, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 42, "speaker": "Host-A", "text": "我們先來看第三篇：心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal …。", "tts_text": "我們先來看第三篇：心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal …。"}
+{"turn": 43, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 44, "speaker": "Host-A", "text": "# 心流理論與深度工作的科學", "tts_text": "# 心流理論與深度工作的科學"}
+{"turn": 45, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 46, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 47, "speaker": "Host-A", "text": "本文整合心流理論（Flow Theory）與深度工作（Deep Work）兩大認知框架，探討如何透過最佳認知狀態提升待辦事項的執行品質與效率", "tts_text": "本文整合心流理論（Flow Theory）與深度工作（Deep Work）兩大認知框架，探討如何透過最佳認知狀態提升待辦事項的執行品質與效率"}
+{"turn": 48, "speaker": "Host-A", "text": "心流由 Mihaly Csikszentmihalyi 於 1970 年代提出，深度工作則由喬治城大學計算機科學教授 Cal Newport 系統化闡述", "tts_text": "心流由 Mihaly Csikszentmihalyi 於 1970 年代提出，深度工作則由喬治城大學計算機科學教授 Cal Newport 系統化闡述"}
+{"turn": 49, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 50, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}

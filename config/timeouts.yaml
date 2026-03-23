@@ -79,6 +79,12 @@ todoist_team:
     insight_briefing: 900      # 深度研究洞察簡報：多 Skill 串接 + 簡報產出 + KB + ntfy
     zen_koan: 300              # 禪宗公案推播：選題(30s) + 撰寫(60s) + ntfy 發送(30s) + 寫回 JSON(10s)
     phantom_butterfly_optimize: 1200  # 幻碟星域：程式碼優化 + 驗證 + game_web git commit/push
+    # === 文件生成（claude_sonnet45）===
+    doc_generation: 900             # git log + ast 解析 + llms.txt + OODA backlog 寫入
+    # === KB 系統優化（claude_sonnet45）===
+    kb_system_optimize: 2400        # KB 洞察查詢(120s) + 方案規劃(180s) + 備份+落實(600s) + 測試驗證(300s) + KB寫入+通知(120s) + 緩衝
+    # === 資產系統整合 ===
+    new_asset_onboard: 900          # 近三天新增資產整合（讀 Todoist + 整合 + 寫回）
 
 # Todoist 任務 - 單一模式 (run-todoist-agent.ps1)
 todoist_single:

@@ -278,6 +278,11 @@ uv run python tools/llm_router.py --task-type news_summary --dry-run
 # 任務對齊審計
 uv run python tools/audit_verify.py --mission-alignment
 
+# Prompt 版本管理
+uv run python tools/prompt-versioning.py check --dir prompts/team
+uv run python tools/prompt-versioning.py bump --prompt prompts/team/xxx.md --type patch --changes "修正步驟 3" --impact low
+uv run python tools/prompt-versioning.py report
+
 # 根因分析（近 3 天）
 uv run python tools/trace_analyzer.py --days 3
 

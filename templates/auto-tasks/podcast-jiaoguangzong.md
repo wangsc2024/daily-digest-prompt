@@ -235,16 +235,32 @@ curl -s -X POST "http://localhost:3000/api/search/hybrid" \
 
 ---
 
+### 一鍵收尾（推薦，等同步驟 5～7）
+
+本機可單次執行 TTS、合併、`podcast-final.mp3`、R2 上傳（`podcast-meta.json` 已含 `slug` / `podcast_title` / `topics` 時，`-Upload` 即可帶入）：
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File tools/finish-article-podcast.ps1 `
+  -ResultsDir "results/article-{slug}" -Upload -Ntfy
+```
+
+- 僅重跑 TTS（腳本已寫入、音檔需重製）：同上但**不要**加 `-SkipTts`。
+- 僅上傳（`podcast-final.mp3` 已存在）：`-SkipTts -SkipConcat -Upload`（可再加 `-Ntfy`）。
+
+---
+
 ## 步驟 5：TTS 語音合成
 
-> ⚡ **必須用 Bash tool 實際執行，不得只輸出命令文字**
+> ⚡ **必須用 Bash tool 實際執行，不得只輸出命令文字**  
+> 聲線以 `config/media-pipeline.yaml` 的 `podcast.voice_a` / `voice_b` / `voice_guest` 為準（下列為預設值）。
 
 ```bash
 uv run --project . python tools/generate_podcast_audio.py \
   --input "results/article-{slug}/podcast-script.jsonl" \
   --output "results/article-{slug}/podcast-audio/" \
   --voice-a "zh-TW-HsiaoChenNeural" \
-  --voice-b "zh-TW-YunJheNeural"
+  --voice-b "zh-TW-YunJheNeural" \
+  --voice-guest "zh-TW-HsiaoYuNeural"
 ```
 
 **✅ Checkpoint（必須執行）**：
@@ -264,7 +280,8 @@ ls results/article-{slug}/podcast-audio/*.mp3 2>/dev/null | wc -l
 uv run --project . python tools/concat_audio.py \
   --audio-dir "results/article-{slug}/podcast-audio/" \
   --script "results/article-{slug}/podcast-script.jsonl" \
-  --output "results/article-{slug}/podcast-final.mp3"
+  --output "results/article-{slug}/podcast-final.mp3" \
+  --config "config/media-pipeline.yaml"
 ```
 
 **✅ Checkpoint（必須執行）**：

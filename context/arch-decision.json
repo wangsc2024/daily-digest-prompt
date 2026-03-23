@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-03-23T16:13:05.495599+08:00",
+  "generated_at": "2026-03-23T18:09:00.201913+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
   "source_audit_score": 87.88,
@@ -68,45 +68,6 @@
       "execution_result": "success",
       "execution_note": "cache-optimizer Skill 執行完成：整體命中率 98.8%（3 個端點：unknown 96%, todoist 100%, pingtung-news 100%）。快取效率已良好，無需調整 TTL。report: results/cache-optimizer-report.json",
       "validation_result": null
-    },
-    {
-      "backlog_id": "backlog_kso_20260323_state_file_bloat",
-      "backlog_pattern": "state檔案膨脹清理",
-      "action": "immediate_fix",
-      "decision": "自動接受：清理 kb-note-scores.json（保留 30 天）與 research-quality.json 歸檔，由 self-heal git 備份後立即執行",
-      "priority": "medium",
-      "effort": "medium",
-      "fix_instructions": "步驟 1：備份現有檔案（git commit）。步驟 2：修改 kb-curator SKILL.md，加入老舊評分清理機制（保留近 30 天數據）。步驟 3：建立 tools/cleanup_state.py，實作清理邏輯並歸檔 research-quality.json 至 archive/ 目錄。",
-      "estimated_minutes": 45,
-      "verification": "執行清理後確認 state/ 目錄大小降低 30%+；驗證 kb-note-scores.json 僅保留近 30 天數據",
-      "execution_status": "pending",
-      "execution_note": "自動接受：不在安全邊界內（修改 state 檔案），effort=medium 拆分 3 步驟"
-    },
-    {
-      "backlog_id": "backlog_kb_insight_20260323_cache_optimization",
-      "backlog_pattern": "cache_hit_ratio_optimization",
-      "action": "immediate_fix",
-      "decision": "自動接受：採用 TTL 分層策略與 stale-while-revalidate 機制提升快取命中率至 40%+，由 self-heal git 備份後立即執行",
-      "priority": "high",
-      "effort": "medium",
-      "fix_instructions": "步驟 1：git 備份現有配置。步驟 2：修改 config/cache-policy.yaml，新增 tier_strategy 段落（高頻端點 4-8h、中頻 2-4h）。步驟 3：建立 tools/cache_analyzer.py，實作 per-endpoint 分析與 stale-while-revalidate 閥門。",
-      "estimated_minutes": 45,
-      "verification": "7 天後檢查 cache_hit_ratio 是否提升至 40%+；確認 stale-while-revalidate 機制正常運作",
-      "execution_status": "pending",
-      "execution_note": "自動接受：不在安全邊界內（修改 cache-policy.yaml），effort=medium 拆分 3 步驟"
-    },
-    {
-      "backlog_id": "backlog_kb_insight_20260323_peak_hour_diagnosis",
-      "backlog_pattern": "time_based_failure_diagnosis",
-      "action": "immediate_fix",
-      "decision": "自動接受：針對 7 點、13 點高失敗時段進行根因分析並建立三層監控，由 self-heal git 備份後立即執行",
-      "priority": "high",
-      "effort": "medium",
-      "fix_instructions": "步驟 1：建立 tools/peak_hour_analyzer.py，分析 logs/structured/*.jsonl 識別 7 點、13 點失敗模式。步驟 2：新增 config/peak-hour-alerts.yaml，定義三層監控（alerts + logging + metrics）閾值。步驟 3：整合至 check-health.ps1 的 [時段風險] 區塊。",
-      "estimated_minutes": 45,
-      "verification": "執行 peak_hour_analyzer.py 確認輸出根因報告；驗證 check-health.ps1 顯示時段風險警告",
-      "execution_status": "pending",
-      "execution_note": "自動接受：不在安全邊界內，effort=medium 拆分 3 步驟"
     },
     {
       "backlog_id": "backlog_kb_insight_20260323_task_fairness_wrr",
@@ -565,19 +526,6 @@
       "execution_note": "schedule_adr：涉及 config/cache-policy.yaml 新增 d-TTL/f-TTL 演算法段落（安全邊界），需人工確認演算法設計與收斂速度監控"
     },
     {
-      "backlog_id": "backlog_ib_20260323_arc_eviction",
-      "backlog_pattern": "arc_eviction_policy",
-      "action": "immediate_fix",
-      "decision": "自動接受：在測試環境比較 LRU/LFU/ARC 命中率並量測 ARC 元數據開銷，由 self-heal git 備份後立即執行",
-      "priority": "medium",
-      "effort": "medium",
-      "fix_instructions": "步驟 1：建立 tools/cache_eviction_benchmark.py，模擬 LRU/LFU/ARC 三種策略在近 7 天日誌數據下的命中率。步驟 2：量測 ARC 元數據開銷（記憶體與計算成本）。步驟 3：產出 analysis/cache-eviction-comparison.json，若 ARC 命中率提升 >5% 且開銷可接受則建議採用。",
-      "estimated_minutes": 45,
-      "verification": "執行 benchmark 確認 ARC 命中率提升幅度；驗證元數據開銷報告合理",
-      "execution_status": "pending",
-      "execution_note": "自動接受：不在安全邊界內（新增工具與分析報告），effort=medium 拆分 3 步驟"
-    },
-    {
       "backlog_id": "空項目",
       "backlog_pattern": null,
       "action": "skip",
@@ -588,24 +536,130 @@
       "verification": null,
       "execution_status": "pending",
       "execution_note": "空項目（所有欄位為 null/空字串），跳過"
+    },
+    {
+      "backlog_id": "ADR-20260323-051",
+      "backlog_pattern": "backlog_future_n9_self_heal_5tier",
+      "action": "schedule_adr",
+      "decision": "",
+      "priority": "high",
+      "effort": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "schedule_adr：5-tier 分級自癒機制（Tier 0-4 遞進）（安全邊界，需人工確認）"
+    },
+    {
+      "backlog_id": "ADR-20260323-052",
+      "backlog_pattern": "backlog_future_n10_llm_agnostic",
+      "action": "schedule_adr",
+      "decision": "",
+      "priority": "medium",
+      "effort": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "schedule_adr：LLM-Agnostic 統一環境變數（LLM_PROVIDER routing）（安全邊界，需人工確認）"
+    },
+    {
+      "backlog_id": "ADR-20260323-053",
+      "backlog_pattern": "backlog_future_n5_llm_judge",
+      "action": "immediate_fix",
+      "decision": "自動接受：LLM-as-Judge Agent 輸出品質四維度評估框架，由 self-heal git 備份後立即執行",
+      "priority": "medium",
+      "effort": "medium",
+      "fix_instructions": "步驟 1：git 備份現有配置。步驟 2：建立必要的工具或配置檔案。步驟 3：實作核心邏輯。步驟 4：驗證與測試。",
+      "estimated_minutes": 45,
+      "verification": "執行完成後驗證 LLM-as-Judge Agent 輸出品質四維度評估框架 功能正常運作",
+      "execution_status": "pending",
+      "execution_note": "自動接受：不在安全邊界內，effort=medium"
+    },
+    {
+      "backlog_id": "ADR-20260323-054",
+      "backlog_pattern": "backlog_future_gemini_error_classifier",
+      "action": "immediate_fix",
+      "decision": "自動接受：錯誤分類器 + Circuit Breaker（GeminiCli 借鑑 Phase B），由 self-heal git 備份後立即執行",
+      "priority": "high",
+      "effort": "medium",
+      "fix_instructions": "步驟 1：git 備份現有配置。步驟 2：建立必要的工具或配置檔案。步驟 3：實作核心邏輯。步驟 4：驗證與測試。",
+      "estimated_minutes": 45,
+      "verification": "執行完成後驗證 錯誤分類器 + Circuit Breaker（GeminiCli 借鑑 Phase B） 功能正常運作",
+      "execution_status": "pending",
+      "execution_note": "自動接受：不在安全邊界內，effort=medium"
+    },
+    {
+      "backlog_id": "ADR-20260323-055",
+      "backlog_pattern": "backlog_future_gemini_security_engine",
+      "action": "schedule_adr",
+      "decision": "",
+      "priority": "medium",
+      "effort": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "schedule_adr：分層安全策略引擎 + 結構化測試（GeminiCli Phase C）（安全邊界，需人工確認）"
+    },
+    {
+      "backlog_id": "backlog_future_adaptive_ttl",
+      "backlog_pattern": null,
+      "action": "skip",
+      "skip_reason": "duplicate",
+      "priority": "high",
+      "effort": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "ADR-20260323-049 Proposed/pending — 與 backlog_ib_20260323_adaptive_ttl 為同一問題（自適應 TTL 演算法）"
+    },
+    {
+      "backlog_id": "backlog_future_arc_eviction",
+      "backlog_pattern": null,
+      "action": "skip",
+      "skip_reason": "duplicate",
+      "priority": "medium",
+      "effort": "medium",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "ADR-20260323-050 Accepted/immediate_fix — 與 backlog_ib_20260323_arc_eviction 為同一問題（ARC 驅逐策略）"
+    },
+    {
+      "backlog_id": "backlog_future_wrr_fairness",
+      "backlog_pattern": null,
+      "action": "skip",
+      "skip_reason": "duplicate",
+      "priority": "high",
+      "effort": "high",
+      "fix_instructions": null,
+      "estimated_minutes": 0,
+      "verification": null,
+      "execution_status": "pending",
+      "execution_note": "ADR-20260323-048 Proposed/pending — 與 backlog_kb_insight_20260323_task_fairness_wrr 為同一問題（Weighted Round-robin）"
     }
   ],
   "immediate_fix_summary": {
-    "count": 4,
+    "count": 6,
     "items": [
-      "backlog_kso_20260323_state_file_bloat",
-      "backlog_kb_insight_20260323_cache_optimization",
-      "backlog_kb_insight_20260323_peak_hour_diagnosis",
-      "backlog_ib_20260323_arc_eviction"
+      "ADR-20260323-040",
+      "ADR-20260323-041",
+      "ADR-20260323-042",
+      "ADR-20260323-043",
+      "ADR-20260323-053",
+      "ADR-20260323-054"
     ],
     "safe_to_automate": true
   },
   "meta": {
-    "decisions_total": 42,
-    "immediate_fix": 4,
-    "schedule_adr": 2,
+    "decisions_total": 50,
+    "immediate_fix": 6,
+    "schedule_adr": 5,
     "deferred": 0,
     "wontfix": 0,
-    "skip": 36
+    "skip": 39
   }
 }

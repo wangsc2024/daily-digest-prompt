@@ -139,6 +139,28 @@
       },
       "additionalProperties": false
     },
+    "morning_verse": {
+      "type": "object",
+      "description": "晨間佛偈推播配置（可選）",
+      "properties": {
+        "title": { "type": "string" },
+        "topic": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 5 }
+      },
+      "additionalProperties": false
+    },
+    "evening_verse": {
+      "type": "object",
+      "description": "黃昏佛偈推播配置（可選）",
+      "properties": {
+        "title": { "type": "string" },
+        "topic": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 5 }
+      },
+      "additionalProperties": false
+    },
     "harness_alerts": {
       "type": "object",
       "description": "Harness 告警配置（on_stop_alert.py）",

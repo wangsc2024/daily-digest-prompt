@@ -3,7 +3,7 @@
 # 操作流程仍依 skills/api-cache/SKILL.md，此文件僅定義 TTL 數值
 
 # 檔案格式版本（保留供未來 schema 變更）
-version: 1
+version: 2
 # 快取根目錄（相對專案根目錄）
 cache_dir: "cache/"
 # 降級模式：API 失敗時允許使用過期快取的最長時效（小時）
@@ -21,7 +21,7 @@ sources:
 
   pingtung-news:
     file: "cache/pingtung-news.json"
-    ttl_minutes: 720  # ADR-023: 360→720（12h，屏東新聞 volatility=low，延長 TTL 提升命中率）
+    ttl_minutes: 1080  # kb-system-optimize: 720→1080（18h，命中率 22.7% 低於目標 40%，volatility=low，再延長 TTL）
     degraded_ttl_minutes: 2880  # 降級使用時限（48 小時）
 
   hackernews:
@@ -31,7 +31,7 @@ sources:
 
   knowledge:
     file: "cache/knowledge.json"
-    ttl_minutes: 120  # ADR-023: 60→120（2h，KB 資料穩定性高，命中率預期顯著提升）
+    ttl_minutes: 240  # kb-system-optimize: 120→240（4h，命中率 22.7% 低於目標 40%，volatility=low，倍增 TTL）
     degraded_ttl_minutes: 1440  # 降級使用時限（24 小時）
 
   gmail:

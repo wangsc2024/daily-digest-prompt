@@ -126,7 +126,7 @@
         },
         "template": {
           "type": "string",
-          "pattern": "^templates/auto-tasks/.+\\.md$",
+          "pattern": "^(templates/auto-tasks|prompts/team)/.+\\.md$",
           "description": "任務模板路徑"
         },
         "template_params": {
@@ -180,6 +180,44 @@
         "model": {
           "type": "string",
           "description": "執行此任務的 Claude 模型（可選，如 claude-haiku-4-5、claude-sonnet-4-5）"
+        },
+        "allowed_hours": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 23 },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "允許執行的小時範圍 [start_hour, end_hour]（可選）"
+        },
+        "allowed_days": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+          "minItems": 1,
+          "description": "允許執行的星期幾清單（Python weekday，可選）"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "任務超時時間（秒，可選）"
+        },
+        "result_suffix": {
+          "type": "string",
+          "description": "結果檔案副檔名（可選，如 json）"
+        },
+        "prompt_file": {
+          "type": "string",
+          "description": "實際執行的 prompt 檔案路徑（可選，覆蓋 template）"
+        },
+        "trigger_condition": {
+          "type": "string",
+          "description": "任務觸發條件說明（可選）"
+        },
+        "skip_if_condition": {
+          "type": "string",
+          "description": "跳過條件說明（可選）"
+        },
+        "backend": {
+          "type": "string",
+          "description": "執行後端（可選，如 claude、cursor_cli）"
         }
       },
       "additionalProperties": false

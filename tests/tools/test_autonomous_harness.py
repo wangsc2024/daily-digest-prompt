@@ -43,6 +43,7 @@ def _write_config(tmp_path: Path) -> Path:
                 "failed_auto_task_threshold": 2,
                 "api_open_circuit_threshold": 1,
                 "starvation_task_threshold": 3,
+                "starvation_boost": 2,
                 "heartbeat_stale_minutes": 40,
             },
             "discovery": {
@@ -62,6 +63,7 @@ def _write_config(tmp_path: Path) -> Path:
             "dispatch": {
                 "daily-digest": {"restart_command": ["pwsh", "-File", "run-agent-team.ps1"]},
                 "todoist": {"restart_command": ["pwsh", "-File", "run-todoist-agent-team.ps1"]},
+                "gun-bot": {"restart_command": ["pwsh", "-ExecutionPolicy", "Bypass", "-File", "bot/restart-bot.ps1"]},
             },
             "runtime_profiles": {
                 "normal": {
@@ -92,6 +94,7 @@ def _write_config(tmp_path: Path) -> Path:
                     "blocked_fetch_agents": ["gmail", "security", "chatroom"],
                 },
             },
+            "chatroom_scope_apis": ["gun-bot", "chatroom-scheduler"],
             "recovery_worker": {
                 "restart_timeout_seconds": 30,
                 "default_override_ttl_minutes": 30,
@@ -150,7 +153,7 @@ def test_build_plan_detects_stale_run_and_failed_tasks(tmp_path: Path) -> None:
     )
     _write_json(
         tmp_path / "state" / "api-health.json",
-        {"apis": {"gun-bot": {"circuit_breaker": {"state": "open"}}}},
+        {"gun-bot": {"state": "open", "failures": 3, "cooldown": None}},
     )
     _write_json(
         tmp_path / "state" / "auto-task-fairness-hint.json",
@@ -178,7 +181,7 @@ def test_build_plan_detects_stale_run_and_failed_tasks(tmp_path: Path) -> None:
     action_types = {(item["action_type"], item["target"]) for item in plan["actions"]}
     assert ("restart_agent", "todoist") in action_types
     assert ("queue_self_heal", "self_heal") in action_types
-    assert ("queue_self_heal", "gun-bot") in action_types
+    assert ("restart_agent", "gun-bot") in action_types
     assert ("rebalance_tasks", "todoist") in action_types
     assert ("scale_down_workload", "global") in action_types
     assert plan["runtime"]["mode"] == "recovery"  # stale run → critical severity → recovery mode
@@ -283,7 +286,7 @@ def test_build_plan_adds_resource_pressure_actions(tmp_path: Path) -> None:
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(tmp_path / "state" / "auto-task-fairness-hint.json", {"starvation_detected": False, "starvation_count": 0})
     _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
     _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"})
@@ -321,7 +324,7 @@ def test_runtime_policy_includes_fetch_agent_limits(tmp_path: Path) -> None:
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(tmp_path / "state" / "auto-task-fairness-hint.json", {"starvation_detected": False, "starvation_count": 0})
     _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
     _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T06:00:00+08:00", "status": "stale"})
@@ -409,7 +412,7 @@ def test_runtime_override_can_force_more_conservative_mode(tmp_path: Path) -> No
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(tmp_path / "state" / "auto-task-fairness-hint.json", {"starvation_detected": False, "starvation_count": 0})
     _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
     _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"})
@@ -444,13 +447,13 @@ def test_runtime_override_can_force_more_conservative_mode(tmp_path: Path) -> No
 
 
 def test_starved_heavy_tasks_are_exempt_from_degraded_block(tmp_path: Path) -> None:
-    """飢餓豁免：降速模式下，在 zero_count_tasks 內的 heavy task 不應被 blocked。"""
+    """飢餓豁免：飢餓偵測不再獨立觸發 degraded（改為 normal + 加速），starved heavy task 不被 blocked。"""
     config_path = _write_config(tmp_path)
     _write_json(tmp_path / "state" / "run-fsm.json", {"runs": {}, "updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(
         tmp_path / "state" / "auto-task-fairness-hint.json",
         {
@@ -472,17 +475,17 @@ def test_starved_heavy_tasks_are_exempt_from_degraded_block(tmp_path: Path) -> N
     }
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
-    assert plan["runtime"]["mode"] == "degraded"
+    assert plan["runtime"]["mode"] == "normal"
     assert plan["runtime"]["gates"]["starvation_detected"] is True
     # 核心斷言：飢餓任務不應出現在 blocked_task_keys
     assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
-    # 飢餓任務僅 1 個 → 不觸發飢餓加速（max_parallel 維持 degraded 基準值 3）
-    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 3
+    # 飢餓任務 >= 1 個 → 飢餓加速觸發（normal 的 4，加速至 team_mode+2=5）
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
 
 
 def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> None:
-    """飢餓加速：多個任務積壓時 max_parallel_auto_tasks >= team_mode（來自 frequency-limits.yaml）。
-    team_mode=3 > degraded 的 2，飢餓加速後應對齊 3。
+    """飢餓加速：多個任務積壓時保持 normal mode，max_parallel 提升至 team_mode+2=5。
+    starvation_detected 不再觸發 degraded；多任務飢餓直接走加速路徑。
     """
     config_path = _write_config(tmp_path)
     # 寫入 frequency-limits.yaml，team_mode=3 以驗證加速邏輯（高於 degraded 的 2）
@@ -497,7 +500,7 @@ def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> 
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(
         tmp_path / "state" / "auto-task-fairness-hint.json",
         {
@@ -518,7 +521,7 @@ def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> 
     }
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
-    assert plan["runtime"]["mode"] == "degraded"
+    assert plan["runtime"]["mode"] == "normal"
     # 飢餓加速：max_parallel 應為 team_mode(3) + 2 = 5
     assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
     # 飢餓任務仍不應被 blocked
@@ -532,7 +535,7 @@ def _make_starvation_state(tmp_path: Path, zero_count_tasks: list[str]) -> None:
     _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
     _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
     _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
-    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(tmp_path / "state" / "api-health.json", {})
     _write_json(
         tmp_path / "state" / "auto-task-fairness-hint.json",
         {"starvation_detected": True, "starvation_count": 5, "zero_count_tasks": zero_count_tasks},
@@ -583,9 +586,35 @@ def test_starvation_boost_in_normal_mode(tmp_path: Path) -> None:
     # normal mode 需要無 high/critical action：token alert 設為舊日期，無 open circuit
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
-    # starvation_detected=True → mode 至少 degraded（即使無其他 high action）
-    # normal mode 中飢餓本身會升 degraded，但 max_parallel 仍應被加速
+    # starvation_detected=True 不再觸發 degraded → mode 保持 normal
+    # 飢餓加速（>= 1 starved）將 max_parallel 提升至 team_mode+2=5
     assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
+
+
+def test_starvation_boost_uses_config_value(tmp_path: Path) -> None:
+    """starvation_boost 外部化：設 starvation_boost=1 時，加速上限應為 team_mode+1=4（非 hardcode 的 +2）。"""
+    config_path = _write_config(tmp_path)
+    # 覆寫 starvation_boost=1
+    cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    cfg["autonomous_harness"]["thresholds"]["starvation_boost"] = 1
+    config_path.write_text(yaml.dump(cfg, allow_unicode=True), encoding="utf-8")
+
+    _make_starvation_state(tmp_path, ["tech_research"])
+    _write_json(
+        tmp_path / "state" / "scheduler-heartbeat.json",
+        {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"},
+    )
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 20},
+        "memory": {"percent": 40, "available_mb": 4096},
+        "gpu": {"available": False, "devices": []},
+    }
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    # starvation_boost=1 → team_mode(3) + 1 = 4（正常 profile 也是 4，取 max → 4）
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 4
 
 
 def test_recovery_mode_sends_ntfy_notification(tmp_path: Path) -> None:
@@ -649,3 +678,41 @@ def test_recovery_mode_ntfy_respects_cooldown(tmp_path: Path) -> None:
     assert plan["runtime"]["mode"] == "recovery"
     # 冷卻期內不應呼叫 curl
     assert mock_run.call_count == 0
+
+
+def test_chatroom_scope_api_open_does_not_degrade_mode(tmp_path: Path) -> None:
+    """gun-bot 熔斷（chatroom scope）不應觸發 degraded mode，只鎖定 chatroom fetch agent。"""
+    config_path = _write_config(tmp_path)
+    _write_json(tmp_path / "state" / "run-fsm.json", {"runs": {}, "updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
+    _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
+    _write_json(
+        tmp_path / "state" / "api-health.json",
+        {"gun-bot": {"state": "open", "failures": 4, "cooldown": None}},
+    )
+    _write_json(tmp_path / "state" / "auto-task-fairness-hint.json", {"starvation_detected": False, "starvation_count": 0})
+    _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
+    _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"})
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 10},
+        "memory": {"percent": 30, "available_mb": 8192},
+        "gpu": {"available": False, "devices": []},
+    }
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    # chatroom scope API 不計入 open_circuits
+    assert plan["summary"]["open_circuits"] == 0
+    # 系統保持 normal mode
+    assert plan["runtime"]["mode"] == "normal"
+    # chatroom fetch agent 被鎖定
+    assert "chatroom" in plan["runtime"]["policies"]["blocked_fetch_agents"]
+    # 其他 fetch agents 不受影響
+    assert "gmail" not in plan["runtime"]["policies"]["blocked_fetch_agents"]
+    # gun-bot 有 dispatch 設定 → 產生 restart_agent（非 queue_self_heal）
+    action_types = {(item["action_type"], item["target"]) for item in plan["actions"]}
+    assert ("restart_agent", "gun-bot") in action_types
+    assert ("queue_self_heal", "gun-bot") not in action_types

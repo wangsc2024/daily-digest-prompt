@@ -826,7 +826,7 @@ gmail = [
 
 [package.metadata]
 requires-dist = [
-    { name = "edge-tts", specifier = ">=6.1.0,<7.0.0" },
+    { name = "edge-tts", specifier = "==7.2.8" },
     { name = "fpdf2", specifier = ">=2.8.4,<3.0.0" },
     { name = "google-api-python-client", marker = "extra == 'gmail'", specifier = ">=2.80.0" },
     { name = "google-auth-httplib2", marker = "extra == 'gmail'", specifier = ">=0.1.0" },
@@ -854,15 +854,18 @@ wheels = [
 
 [[package]]
 name = "edge-tts"
-version = "6.1.19"
+version = "7.2.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
     { name = "certifi" },
+    { name = "tabulate", version = "0.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "tabulate", version = "0.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2b/81/58663476b9afe5ae7f28767d6cadffbf30ed99063a219e213edacecb841b/edge_tts-6.1.19.tar.gz", hash = "sha256:52fdfbaef2b3afee98bbba5e5c6365b5a6156fe78fe4e81e55749f7a563add38", size = 20131, upload-time = "2024-11-22T01:18:03.991Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3f/60/afbf548b43c78355e03926c6b1fff7500303a2da4d84db9e1324119e21ae/edge_tts-7.2.8.tar.gz", hash = "sha256:fcf185a0d527a0d2d003f9d5841facc1d5e0e7b3b88d5df9c32990402c6b8cd0", size = 27875, upload-time = "2026-03-22T19:57:50.962Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/52/8d/6b91e2efa7e6f2438888142a66ff053e2bc301b8eddd3cb0fd2452644890/edge_tts-6.1.19-py3-none-any.whl", hash = "sha256:af49ea0539f54b0d76a73bc76cefd9deb2010a11c5ee2a189967e15830a6ba37", size = 22125, upload-time = "2024-11-22T01:18:01.14Z" },
+    { url = "https://files.pythonhosted.org/packages/8c/2b/a8cb687b92a2690d2ad171f0c2fd1c8f18690363cca7618bab2bbe4cdf2b/edge_tts-7.2.8-py3-none-any.whl", hash = "sha256:361fe48ce7ef613adbe30f664e3765dd71029c6cb57427279eff8ad6df2eb211", size = 31026, upload-time = "2026-03-22T19:57:49.672Z" },
 ]
 
 [[package]]
@@ -2484,6 +2487,31 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
+name = "tabulate"
+version = "0.9.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.10'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/fe/802052aecb21e3797b8f7902564ab6ea0d60ff8ca23952079064155d1ae1/tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c", size = 81090, upload-time = "2022-10-06T17:21:48.54Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/40/44/4a5f08c96eb108af5cb50b41f76142f0afa346dfa99d5296fe7202a11854/tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f", size = 35252, upload-time = "2022-10-06T17:21:44.262Z" },
+]
+
+[[package]]
+name = "tabulate"
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.13'",
+    "python_full_version >= '3.10' and python_full_version < '3.13'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/46/58/8c37dea7bbf769b20d58e7ace7e5edfe65b849442b00ffcdd56be88697c6/tabulate-0.10.0.tar.gz", hash = "sha256:e2cfde8f79420f6deeffdeda9aaec3b6bc5abce947655d17ac662b126e48a60d", size = 91754, upload-time = "2026-03-04T18:55:34.402Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl", hash = "sha256:f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3", size = 39814, upload-time = "2026-03-04T18:55:31.284Z" },
 ]
 
 [[package]]

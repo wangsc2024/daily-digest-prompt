@@ -140,7 +140,7 @@ class TestSyntheticConfigs:
                 "write_rules": [{"id": "w1", "check": "nul", "reason": "test", "guard_tag": "g1"}],
             },
             "routing.yaml": {"pre_filter": {}, "label_routing": {}},
-            "cache-policy.yaml": {"version": 1},
+            "cache-policy.yaml": {"version": 2},
             "frequency-limits.yaml": {
                 "version": 1,
                 "tasks": {

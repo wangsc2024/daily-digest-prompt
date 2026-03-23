@@ -1,7 +1,7 @@
 # config/media-pipeline.yaml
 # 媒體管線共用配置（影片 + Podcast 工具）
 # 修改此文件可調整 TTS 聲音、輸出格式等，不需動腳本
-version: 1
+version: 2
 
 # 知識庫 API（文章來源）
 knowledge_base:
@@ -32,6 +32,7 @@ video:
 podcast:
   voice_a: "zh-TW-HsiaoChenNeural"     # host_a：解說者（女聲）
   voice_b: "zh-TW-YunJheNeural"        # host_b：好奇提問者（男聲）
+  voice_guest: "zh-TW-HsiaoYuNeural"   # host_guest：特別來賓（女聲，與曉晨區隔）
   target_words: 2500                   # 目標字數（約 10-15 分鐘）
   silence_between_turns_ms: 100        # 對話段落間靜音（毫秒）
   # 音訊後製

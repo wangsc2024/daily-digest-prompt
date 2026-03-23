@@ -1,59 +1,95 @@
-# 計畫：程式碼註解、API 文件、變更日誌智能化工作流
+# 計畫：程式碼文件、變更日誌智能化工作流（持續改善整合版）
 
 **計畫 ID**：twinkling-soaring-seahorse
 **建立日期**：2026-03-23
-**狀態**：已審查優化 v2
+**版本**：v4（schema 精確對齊 + 安全邊界修正）
+**狀態**：已審查，待批准
 
 ---
 
 ## Context
 
-**問題**：系統擁有 47 個工具、12 個 Hooks、58 個 Skills，但沒有任何自動化的文件生成工作流：
+### 問題
+系統擁有 47 個工具、12 個 Hooks、58 個 Skills，但沒有任何自動化的文件生成工作流：
 - `CHANGELOG.md` 完全手動維護，容易漏記或格式不一致
-- `tools/` 和 `hooks/` 下的 Python 檔案缺乏系統性 docstring 追蹤
-- 無法量化「文件債務」（未加 docstring 的公開函式佔比）
+- `tools/` 和 `hooks/` 的 Python 程式碼缺乏系統性 docstring 追蹤，文件債務不可見
+- Agent 對系統自身結構的理解靠逐一讀檔，無統一索引入口
 
-**來源**：KB 筆記「AI 文件生成與自動化完整指南 — 程式碼註解、API 文件、變更日誌的智能化工作流（2026）」（ID: 27f25242）識別了本專案 4 個具體應用場景，本計畫落實其中最高價值的 3 個：
+### KB 知識基礎（兩篇筆記）
 
-| 場景 | 本計畫交付 |
+| 筆記 ID | 標題 | 階段 | 關鍵洞察 |
+|---------|------|------|---------|
+| 27f25242 | AI 文件生成與自動化完整指南（2026） | foundation | LLM 節省 85-90% 文件維護時間；4 個本專案應用場景 |
+| 524c2011 | AI 活文件管線實作（2026-03-12） | application | docs-as-code 概念；`llms.txt` 讓 agent 快速理解系統；`results/*.json` 可延伸為 weekly digest |
+
+### KB 識別的 4 個本專案應用場景 → 本計畫落實
+
+| 場景 | 本計畫交付物 |
 |------|-----------|
 | CHANGELOG 自動生成 | `tools/changelog_generator.py` + auto-task |
-| 程式碼文件覆蓋率 | `tools/doc_scanner.py` |
+| 程式碼文件覆蓋率追蹤 | `tools/doc_scanner.py` |
 | Hook 規則文件化 | doc_scanner 含 `hooks/` 目錄掃描 |
-| 系統審查報告 | 已由 system-audit Skill 覆蓋，本計畫不重複 |
+| Agent 可讀文件索引 | `docs/llms.txt` + `tools/llms_txt_generator.py` |
 
-**預期效果**：依 KB 筆記數據，CHANGELOG 維護時間節省 90%；docstring 覆蓋率可量化追蹤，文件債務可視化。
+### OODA 閉環整合策略
+
+`doc_generation` 不孤立運行，而是融入 OODA 閉環：
+
+```
+[doc_generation]（每日凌晨）
+     │
+     ├── changelog_generator.py  →  CHANGELOG.md
+     ├── doc_scanner.py          →  覆蓋率報告
+     ├── llms_txt_generator.py   →  docs/llms.txt
+     │
+     └── coverage < 60% OR debt > 20?
+            │ Yes
+            ▼
+    improvement-backlog.json 新增條目
+    （source_pattern: "doc_coverage_deficit"）
+            │
+            ▼
+    [arch_evolution]（下一次 OODA 循環）
+    讀取 backlog → 安全邊界判斷：
+    ├── tools/*.py docstring → immediate_fix（安全邊界外）
+    └── hooks/*.py docstring → schedule_adr（安全邊界內，需人工確認）
+```
 
 ---
 
-## 交付物清單
+## 交付物清單（依實作順序）
+
+> `tests/tools/__init__.py` 已存在（已驗證），不在清單中。
 
 | # | 檔案 | 類型 | 說明 |
 |---|------|------|------|
-| 1 | `config/doc-generation.yaml` | 新建 | 文件生成工作流配置（所有參數的唯一定義處） |
-| 2 | `tools/changelog_generator.py` | 新建 | Git commits → CHANGELOG.md 條目 |
-| 3 | `tools/doc_scanner.py` | 新建 | Python 檔案 docstring 覆蓋率掃描 |
-| 4 | `prompts/team/todoist-auto-doc_generation.md` | 新建 | Auto-task prompt（CHANGELOG + doc scan） |
-| 5 | `config/frequency-limits.yaml` | 修改 | 新增 `doc_generation` 任務條目（execution_order: 33） |
-| 6 | `tests/tools/__init__.py` | 新建（若不存在） | 空檔，讓 pytest 發現 tests/tools/ |
-| 7 | `tests/tools/test_changelog_generator.py` | 新建 | changelog_generator 單元測試（≥12 個） |
-| 8 | `tests/tools/test_doc_scanner.py` | 新建 | doc_scanner 單元測試（≥10 個） |
+| 1 | `config/doc-generation.yaml` | 新建 | 所有參數的唯一定義處 |
+| 2 | `tests/tools/test_changelog_generator.py` | 新建 | TDD 先寫測試（紅燈） |
+| 3 | `tools/changelog_generator.py` | 新建 | Git commits → CHANGELOG.md（綠燈） |
+| 4 | `tests/tools/test_doc_scanner.py` | 新建 | TDD 先寫測試（紅燈） |
+| 5 | `tools/doc_scanner.py` | 新建 | Docstring 覆蓋率掃描（綠燈） |
+| 6 | `tools/llms_txt_generator.py` | 新建 | 生成/更新 `docs/llms.txt` |
+| 7 | `docs/llms.txt` | 新建 | Agent 可讀系統索引（首次由工具生成） |
+| 8 | `prompts/team/todoist-auto-doc_generation.md` | 新建 | Auto-task prompt（7 步驟） |
+| 9 | `config/frequency-limits.yaml` | 修改 | 新增 `doc_generation` 任務 + `initial_schema` 計數欄位 |
 
 ---
 
 ## 詳細設計
 
-### 1. `config/doc-generation.yaml`（先建，其他工具引用）
+### 1. `config/doc-generation.yaml`（先建，所有工具引用）
 
 ```yaml
 # 文件生成工作流配置（唯一真相來源）
+# 引用者：tools/changelog_generator.py, doc_scanner.py,
+#         llms_txt_generator.py, todoist-auto-doc_generation.md
 version: 1
 
 changelog:
-  output_file: CHANGELOG.md          # 相對專案根目錄
-  unreleased_section: "[Unreleased]" # 目標插入區段標題
-  insert_marker: "### Added"         # 在此標題下一行插入（避免覆蓋手動條目）
-  commit_type_mapping:               # Conventional Commit type → CHANGELOG 分類
+  output_file: CHANGELOG.md
+  unreleased_section: "[Unreleased]"
+  insert_after: "### Added"        # 在此小節標題下方第一行插入新條目
+  commit_type_mapping:
     feat: Added
     fix: Fixed
     refactor: Changed
@@ -61,14 +97,13 @@ changelog:
     chore: Changed
     perf: Changed
     test: Changed
-  breaking_label: "Breaking Changes" # BREAKING CHANGE! 提交的分類
-  ignored_prefixes:                  # 符合這些前綴的提交直接略過
+  breaking_label: "Breaking Changes"
+  ignored_prefixes:
     - "Merge"
     - "merge"
     - "wip"
   default_lookback_days: 7
-  # 防重複：掃描 CHANGELOG.md 現有條目，若相同 commit hash 或描述已存在則略過
-  dedup_strategy: "hash"             # 以 git short-hash 比對（7碼）
+  dedup_strategy: "hash"           # 以 git 7-char short-hash 去重
 
 doc_scanner:
   scan_dirs:
@@ -76,57 +111,80 @@ doc_scanner:
     - tools
   exclude_patterns:
     - "__init__.py"
-    - "query_logs.py"        # 互動式查詢工具
-    - "generate_*.py"        # 多媒體生成腳本（格式不同）
+    - "query_logs.py"
+    - "generate_*.py"
     - "concat_audio.py"
     - "compose_video.py"
     - "trip_plan_outline.py"
-  count_module_doc: true     # 模組頂層 docstring 計入分母
-  count_class_doc: true      # 公開類別 docstring 計入
-  count_function_doc: true   # 非 `_` 開頭的函式/方法 docstring 計入
-  min_coverage_pct: 60       # 低於此值在 auto-task 中警告
-  debt_threshold: 20         # debt_items 超過此數觸發 LLM 建議
+    - "resolve_podcast_series.py"
+    - "run_podcast_create.py"
+  count_module_doc: true
+  count_class_doc: true
+  count_function_doc: true         # 非 `_` 開頭；dunder（__init__ 等）不計
+  min_coverage_pct: 60
+  debt_threshold: 20               # 超過此數觸發 improvement-backlog 寫入
+
+llms_txt:
+  output_file: docs/llms.txt
+  site_name: "Daily Digest Prompt"
+  site_description: >
+    AI 自動化研究與知識庫系統。提供 Skills、研究模板、自動任務、
+    Hook 機器層、OODA 閉環自癒機制。
+  sections:
+    - title: "Core Rules"
+      paths:
+        - templates/shared/preamble.md
+        - CLAUDE.md
+    - title: "Skill Map"
+      paths:
+        - skills/SKILL_INDEX.md
+    - title: "Architecture"
+      paths:
+        - docs/ARCHITECTURE.md
+        - docs/OPERATIONS.md
+    - title: "Config"
+      paths:
+        - config/frequency-limits.yaml
+        - config/hook-rules.yaml
+        - config/doc-generation.yaml
+  optional_paths:
+    - context/research-registry.json
+    - state/autonomous-harness-plan.json
 
 auto_task:
+  result_file: results/todoist-auto-doc_generation.json
   kb_tag: "文件生成"
-  result_key: "doc_generation"
-  result_file: "results/todoist-auto-doc_generation.json"
+  improvement_backlog_source_pattern: "doc_coverage_deficit"   # arch_evolution 去重 key
+  improvement_backlog_priority: "medium"
+  improvement_backlog_effort: "medium"
 ```
 
 ---
 
 ### 2. `tools/changelog_generator.py`
 
-**目的**：從 git log 解析 Conventional Commits，生成結構化 CHANGELOG 條目，支援去重（不重複插入同一 commit）。
+**目的**：解析 git log Conventional Commits → 去重後插入 CHANGELOG.md。
 
-**CLI 介面**：
-
+**CLI**：
 ```bash
-# 最近 7 天 dry-run（只印，不寫檔）
 uv run python tools/changelog_generator.py --since 7d --dry-run
-
-# 自動更新 CHANGELOG.md（插入 [Unreleased] → ### Added 下方）
 uv run python tools/changelog_generator.py --since 7d --update-changelog
-
-# 指定日期範圍，JSON 輸出
 uv run python tools/changelog_generator.py --since 2026-03-01 --until 2026-03-23 --format json
-
-# 最近 N 筆提交
 uv run python tools/changelog_generator.py --last-n 20 --dry-run
 ```
 
-**參數規格**：
+**參數**：
 
 | 參數 | 說明 | 預設 |
 |------|------|------|
-| `--since 7d` / `--since 2026-03-01` | 起始時間（相對天數或 ISO 日期） | `7d` |
-| `--until 2026-03-23` | 截止日期（ISO 日期） | 今日 |
-| `--last-n N` | 最近 N 筆提交（與 since/until 互斥） | — |
+| `--since 7d \| YYYY-MM-DD` | 起始（相對天數或 ISO 日期） | `7d` |
+| `--until YYYY-MM-DD` | 截止日期 | 今日 |
+| `--last-n N` | 最近 N 筆（與 since/until 互斥） | — |
 | `--format markdown\|json` | 輸出格式 | `markdown` |
 | `--dry-run` | 只列印，不修改任何檔案 | false |
 | `--update-changelog` | 寫入 CHANGELOG.md（含去重） | false |
 
-**輸出 JSON 格式**：
+**JSON 輸出**：
 ```json
 {
   "generated_at": "2026-03-23T10:00:00+08:00",
@@ -136,57 +194,38 @@ uv run python tools/changelog_generator.py --last-n 20 --dry-run
   "new_entries_count": 8,
   "skipped_duplicates": 4,
   "grouped": {
-    "Added": [
-      {"hash": "220a108", "message": "feat: AI 架構治理方案完整實施"},
-      {"hash": "02cb253", "message": "feat: kb-research-strategist Skill"}
-    ],
-    "Changed": [
-      {"hash": "7337e40", "message": "refactor: hook-rules.yaml v2→v3"}
-    ],
+    "Added": [{"hash": "220a108", "message": "feat: AI 架構治理方案"}],
+    "Changed": [{"hash": "7337e40", "message": "refactor: hook-rules v2→v3"}],
     "Fixed": [],
     "Breaking Changes": [],
-    "Other": [
-      {"hash": "35b6950", "message": "解決飢餓問題"}
-    ]
+    "Other": [{"hash": "35b6950", "message": "解決飢餓問題"}]
   },
-  "markdown_block": "### Added\n- feat: AI 架構治理方案完整實施 (`220a108`)\n..."
+  "markdown_block": "### Added\n- feat: AI 架構治理方案 (`220a108`)\n"
 }
 ```
 
-**關鍵實作細節**：
-- 使用 `subprocess.run(["git", "log", "--oneline", "--format=%h %s", f"--since={since}"])` 呼叫 git（stdlib，不依賴額外套件）
-- 正規表達式：`r'^(\w+)(?:\(([^)]+)\))?!?: (.+)$'` 解析 Conventional Commits
-- `BREAKING CHANGE!` 或 `!:` 提交 → `Breaking Changes` 分類
-- 無法解析的提交（無類型前綴）→ `Other` 分類
-- **去重策略**：插入前讀取 CHANGELOG.md，提取現有 7 碼 hash，跳過已存在的提交
-- **插入位置**：找到 `## [Unreleased]` 後再找 `### Added`，在其下方第一行插入新條目（保留既有手動條目）
-- 若 `### Added` 不存在，自動建立此小節
+**關鍵實作**：
+- `subprocess.run(["git", "log", "--format=%h %s", f"--since={since}"])` — 純 stdlib
+- 正規表達式 `r'^(\w+)(?:\(([^)]+)\))?!?: (.+)$'` 解析 Conventional Commits
+- 去重：讀 CHANGELOG.md 提取所有 7-char hash（`\(`([0-9a-f]{7})`\)` 模式），跳過已存在的 commit
+- 插入：找 `## [Unreleased]` → 找 `### Added` → 在其下一行插入；若不存在則自動建立小節
 
 ---
 
 ### 3. `tools/doc_scanner.py`
 
-**目的**：用 `ast` 模組解析 Python 源碼，量化 docstring 覆蓋率，識別文件債務（僅計算**公開**項目）。
+**目的**：用 `ast` 模組量化 Python 程式碼 docstring 覆蓋率，識別文件債務。
 
-**「公開」定義**：名稱不以 `_` 開頭的函式、方法、類別（`__init__` 等 dunder 方法不計）。
+**「公開項目」定義**：名稱不以 `_` 開頭的函式、方法、類別；dunder 方法（`__init__` 等）不計。
 
-**CLI 介面**：
-
+**CLI**：
 ```bash
-# 完整掃描，JSON 輸出（機器可讀）
-uv run python tools/doc_scanner.py
-
-# 只列出低於 70% 覆蓋率的檔案
-uv run python tools/doc_scanner.py --min-coverage 70
-
-# 人類可讀的文字報告
-uv run python tools/doc_scanner.py --format text
-
-# 指定掃描目錄（覆蓋 config）
-uv run python tools/doc_scanner.py --dirs hooks tools/agent_pool
+uv run python tools/doc_scanner.py                    # JSON 輸出（預設）
+uv run python tools/doc_scanner.py --format text      # 人類可讀報告
+uv run python tools/doc_scanner.py --min-coverage 70  # 只顯示低於門檻的檔案
 ```
 
-**輸出 JSON 格式**（`--format json`，預設）：
+**JSON 輸出**：
 ```json
 {
   "scanned_at": "2026-03-23T10:00:00+08:00",
@@ -201,7 +240,11 @@ uv run python tools/doc_scanner.py --dirs hooks tools/agent_pool
   "by_file": {
     "hooks/pre_bash_guard.py": {
       "module_doc": true,
-      "public_functions": {"total": 3, "documented": 2, "missing": ["check_dangerous_cmd"]},
+      "public_functions": {
+        "total": 3,
+        "documented": 2,
+        "missing": ["check_dangerous_cmd"]
+      },
       "public_classes": {"total": 0, "documented": 0, "missing": []},
       "coverage_pct": 83.3
     }
@@ -213,26 +256,65 @@ uv run python tools/doc_scanner.py --dirs hooks tools/agent_pool
 }
 ```
 
-**輸出文字報告**（`--format text`）：
+**文字報告**（`--format text`）：
 ```
-=== Doc Scanner Report (2026-03-23) ===
-Coverage: 52/87 items (59.8%)  Debt: 35 items
+=== Doc Scanner (2026-03-23) ===
+Coverage: 52/87 (59.8%)  Debt: 35 items
 
-FILES BELOW 60%:
-  tools/autonomous_harness.py    31.2%  (5/16)  missing: run_analysis, plan_recovery, ...
-  hooks/agent_guardian.py        40.0%  (2/5)   missing: classify_error, reset_circuit
+BELOW 60%:
+  tools/autonomous_harness.py  31.2%  missing: run_analysis, plan_recovery...
+  hooks/agent_guardian.py      40.0%  missing: classify_error, reset_circuit
 
-DEBT TOP 5:
+TOP 5 DEBT FILES:
   tools/autonomous_harness.py — 11 missing
-  hooks/post_tool_logger.py   — 6 missing
-  ...
+  hooks/post_tool_logger.py   —  6 missing
 ```
 
 ---
 
-### 4. `prompts/team/todoist-auto-doc_generation.md`
+### 4. `tools/llms_txt_generator.py`
 
-**格式**：仿照 `todoist-auto-log_audit.md`（YAML front-matter + 共用規則 + 步驟）。
+**目的**：依 `config/doc-generation.yaml` 的 `llms_txt` 區段，生成/更新 `docs/llms.txt`，讓 agent 快速理解系統結構（KB 524c2011 核心建議）。
+
+**CLI**：
+```bash
+uv run python tools/llms_txt_generator.py            # 更新 docs/llms.txt
+uv run python tools/llms_txt_generator.py --dry-run  # 只印出，不寫檔
+```
+
+**輸出格式**（符合 llmstxt.org 規格）：
+```markdown
+# Daily Digest Prompt
+
+> AI 自動化研究與知識庫系統。提供 Skills、研究模板、自動任務、Hook 機器層、OODA 閉環自癒機制。
+
+## Core Rules
+- [templates/shared/preamble.md](templates/shared/preamble.md): 所有 agent 共同規則（Skill-First + nul 禁令）
+- [CLAUDE.md](CLAUDE.md): 專案完整指引、架構決策、慣例
+
+## Skill Map
+- [skills/SKILL_INDEX.md](skills/SKILL_INDEX.md): 58 個 Skills 完整索引
+
+## Architecture
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): 系統架構圖與決策
+- [docs/OPERATIONS.md](docs/OPERATIONS.md): 執行流程與 Hooks 詳解
+
+## Config
+- [config/frequency-limits.yaml](config/frequency-limits.yaml): 自動任務頻率（唯一真相來源）
+- [config/hook-rules.yaml](config/hook-rules.yaml): Hook 攔截規則
+- [config/doc-generation.yaml](config/doc-generation.yaml): 文件生成工作流配置
+
+## Optional
+- [context/research-registry.json](context/research-registry.json): 近期研究索引（7天滾動）
+- [state/autonomous-harness-plan.json](state/autonomous-harness-plan.json): 自主改善計畫狀態
+
+---
+*Generated by tools/llms_txt_generator.py — 2026-03-23T10:00:00+08:00*
+```
+
+---
+
+### 5. `prompts/team/todoist-auto-doc_generation.md`
 
 **Front-matter**：
 ```yaml
@@ -244,58 +326,89 @@ released_at: "2026-03-23"
 ---
 ```
 
-**完整步驟結構**：
+**完整步驟**：
 
 ```markdown
 你是文件維護助手，全程使用正體中文。
-任務：自動更新 CHANGELOG.md 並掃描程式碼文件覆蓋率。
-完成後將結果寫入 `results/todoist-auto-doc_generation.json`。
+任務：自動更新 CHANGELOG.md、掃描程式碼文件覆蓋率、維護 docs/llms.txt。
+完成後將結果寫入 results/todoist-auto-doc_generation.json。
 
 ## 共用規則
-先讀取 `templates/shared/preamble.md`，遵守 Skill-First + nul 禁令。
+先讀取 templates/shared/preamble.md，遵守 Skill-First + nul 禁令。
 
-## 立即行動：寫入 Fail-Safe 結果（最高優先）
-用 Write 工具建立 `results/todoist-auto-doc_generation.json`：
+## 立即行動：Fail-Safe 結果寫入（最高優先）
+用 Write 工具建立 results/todoist-auto-doc_generation.json：
 {"agent":"todoist-auto-doc_generation","status":"failed","type":"doc_generation",
- "error":"task_did_not_complete_or_timeout","summary":"任務啟動但未完成","completed":false}
+ "error":"task_did_not_complete_or_timeout","completed":false}
 
-## 步驟 1：CHANGELOG 生成
-1a. 執行：`uv run python tools/changelog_generator.py --since 7d --format json`
-1b. 讀取輸出，若 new_entries_count > 0 → 執行：
-    `uv run python tools/changelog_generator.py --since 7d --update-changelog`
-1c. 記錄：changelog_entries_added = new_entries_count
+## 步驟 1：CHANGELOG 自動更新
+1a. 讀取 config/doc-generation.yaml
+1b. 執行：uv run python tools/changelog_generator.py --since 7d --format json
+1c. 讀取輸出，記錄 new_entries_count 與 skipped_duplicates
+1d. 若 new_entries_count > 0：
+    執行：uv run python tools/changelog_generator.py --since 7d --update-changelog
 
 ## 步驟 2：文件覆蓋率掃描
-2a. 執行：`uv run python tools/doc_scanner.py`
-2b. 讀取輸出 JSON，提取 summary.coverage_pct 和 debt_report
-2c. 找出 debt_items 最多的前 3 個檔案
+2a. 執行：uv run python tools/doc_scanner.py
+2b. 讀取輸出 JSON，記錄 summary.coverage_pct 和 summary.debt_items
+2c. 找出 debt_report 中 debt 最多的前 3 個檔案
 
-## 步驟 3：LLM 分析（條件觸發）
-僅在以下任一條件成立時執行：
-- summary.coverage_pct < 60（低於 config 門檻）
-- summary.debt_items > 20
+## 步驟 3：維護 llms.txt
+3a. 執行：uv run python tools/llms_txt_generator.py
+3b. 確認 docs/llms.txt 已成功更新（讀取最後一行確認時間戳）
 
-若觸發：為 debt top 3 檔案中每個缺失的公開函式，產生符合現有風格的 docstring 建議範本，
-以 Write 工具寫入 docs/doc-suggestions-<YYYYMMDD>.md。
+## 步驟 4：OODA 整合（條件觸發）
+條件：summary.coverage_pct < 60 OR summary.debt_items > 20
 
-## 步驟 4：寫入知識庫
-讀取 `skills/knowledge-query/SKILL.md`，將本次掃描摘要（覆蓋率、債務趨勢、changelog 摘要）
-匯入知識庫，tag: ["文件生成", "doc-coverage", "changelog"]。
+若觸發：
+  4a. 讀取 context/improvement-backlog.json（若不存在初始化為 {"version":1,"items":[]}）
+  4b. 檢查 items 中是否已有 source_pattern = "doc_coverage_deficit" 且 status = "Proposed"
+      若已存在 → 更新該條目的 context 欄位，跳過新增
+      若不存在 → 新增以下格式的條目：
 
-## 步驟 5：最終結果 JSON
-用 Write 工具覆寫 `results/todoist-auto-doc_generation.json`：
+  {
+    "id": "backlog_doc_coverage_<YYYYMMDD>",
+    "source": "doc_generation",
+    "source_pattern": "doc_coverage_deficit",
+    "title": "程式碼文件覆蓋率低於門檻（<X>%）",
+    "priority": "medium",
+    "effort": "medium",
+    "context": "文件覆蓋率 <X>%，低於 60% 門檻；債務 <N> 項。tools/*.py 可 immediate_fix；hooks/*.py 需 schedule_adr（安全邊界內）",
+    "decision": "",
+    "consequences": "文件債務持續累積，降低系統可維護性",
+    "related_files": [<top 3 debt file paths>],
+    "status": "Proposed",
+    "implementation_status": "pending",
+    "created_at": "<ISO 時間>"
+  }
+
+  4c. 用 Write 工具更新 context/improvement-backlog.json
+
+## 步驟 5：LLM 分析（條件觸發，僅在 coverage < 60%）
+為 top 3 債務檔案中缺失的公開函式，建議符合現有風格的 docstring 範本，
+寫入 docs/doc-suggestions-<YYYYMMDD>.md。
+
+## 步驟 6：寫入知識庫
+讀取 skills/knowledge-query/SKILL.md，將本次掃描摘要匯入 KB：
+tag: ["文件生成", "doc-coverage", "changelog"]
+
+## 步驟 7：最終結果 JSON（覆寫 Fail-Safe 佔位符）
+用 Write 工具覆寫 results/todoist-auto-doc_generation.json：
 {
   "agent": "todoist-auto-doc_generation",
   "status": "success",
   "type": "doc_generation",
   "changelog_entries_added": <數字>,
+  "changelog_skipped_duplicates": <數字>,
   "doc_coverage_pct": <數字>,
   "debt_items": <數字>,
-  "top_debt_files": [<前3個檔案名>],
+  "top_debt_files": [<前3個路徑>],
+  "llms_txt_updated": true,
+  "ooda_backlog_written": <true/false>,
   "llm_suggestions_generated": <true/false>,
   "kb_imported": <true/false>,
   "done_cert": {"status": "DONE", "quality_score": 4, "remaining_issues": []},
-  "summary": "CHANGELOG 新增 N 條；文件覆蓋率 X%，債務 Y 項",
+  "summary": "CHANGELOG 新增 N 條；文件覆蓋率 X%，債務 Y 項；llms.txt 已更新",
   "completed": true,
   "error": null
 }
@@ -303,9 +416,9 @@ released_at: "2026-03-23"
 
 ---
 
-### 5. `config/frequency-limits.yaml` 修改
+### 6. `config/frequency-limits.yaml` 修改
 
-在 `tasks:` 區段末尾（kb_system_optimize 之後）新增：
+**修改 1**：在 `tasks:` 末尾（qa_optimize，execution_order: 35 之後）新增：
 
 ```yaml
   doc_generation:
@@ -315,58 +428,61 @@ released_at: "2026-03-23"
     template: "prompts/team/todoist-auto-doc_generation.md"
     template_version: 1
     history_type: "doc_generation"
-    execution_order: 33           # 現有最大值為 32（kb_system_optimize）
-    allowed_hours: [3, 4]         # 凌晨低峰，避開業務高峰
-    timeout_seconds: 900          # 15 分鐘上限（git log + ast 解析均快速）
+    execution_order: 36           # 現有最大值 35（qa_optimize）；跳號 27/33 為歷史預留
+    allowed_hours: [3, 4]         # 凌晨低峰
+    timeout_seconds: 900          # 15 分鐘上限
     result_suffix: "json"
     backend: claude_sonnet45
     skills: [knowledge-query]
 ```
 
-同時將頂層 `daily_limit:` 從 `47` 改為 `48`。
+**修改 2**：在 `initial_schema:` 的計數器欄位區段（所有 `_count: 0` 行之列）新增：
+```yaml
+    "doc_generation_count": 0,
+```
+
+> **注意**：本專案無頂層 `daily_limit` 欄位；各任務各自定義 `daily_limit`。
 
 ---
 
-### 6. 測試設計
+## 測試設計
 
-**前置條件**：確認 `tests/tools/__init__.py` 存在（空檔，讓 pytest 發現此目錄）。
+### `tests/tools/test_changelog_generator.py`（14 個測試）
 
-#### `tests/tools/test_changelog_generator.py`（≥12 個測試）
-
-測試模式遵循 `test_compute_log_audit_trend.py` 慣例（`tmp_path` fixture、UTF-8、`ensure_ascii=False`）：
+仿照 `tests/tools/test_compute_log_audit_trend.py` 慣例：`tmp_path` fixture、UTF-8、`ensure_ascii=False`。
 
 | 測試函式 | 驗證點 |
 |---------|-------|
-| `test_parse_feat_commit()` | `feat: msg` → `Added` 分類 |
-| `test_parse_fix_commit()` | `fix: msg` → `Fixed` 分類 |
-| `test_parse_breaking_commit()` | `feat!: msg` → `Breaking Changes` |
-| `test_parse_scoped_commit()` | `fix(hooks): msg` → `Fixed`，scope 保留 |
-| `test_parse_non_conventional()` | `解決飢餓問題` → `Other` 分類 |
-| `test_ignored_prefix_skipped()` | `Merge branch ...` → 不出現在輸出 |
-| `test_group_by_type_structure()` | 分組 dict 包含所有 key |
-| `test_json_output_schema()` | JSON 包含 generated_at/since/until/new_entries_count/grouped |
-| `test_markdown_output_format()` | markdown 含 `### Added` 標題與 `- ` 列表 |
-| `test_dedup_skips_existing_hash()` | 現有 CHANGELOG 含 short-hash，跳過重複 |
-| `test_update_changelog_inserts_below_added(tmp_path)` | 插入在 `### Added` 下方第一行 |
+| `test_parse_feat_commit()` | `feat: msg` → grouped["Added"] |
+| `test_parse_fix_commit()` | `fix: msg` → grouped["Fixed"] |
+| `test_parse_breaking_commit()` | `feat!: msg` → grouped["Breaking Changes"] |
+| `test_parse_scoped_commit()` | `fix(hooks): msg` → grouped["Fixed"] |
+| `test_parse_non_conventional()` | `解決飢餓問題` → grouped["Other"] |
+| `test_ignored_prefix_skipped()` | `Merge branch ...` → 不出現在任何分組 |
+| `test_group_by_type_all_keys()` | 輸出 dict 含所有分類 key |
+| `test_json_output_schema()` | JSON 含 generated_at/since/until/new_entries_count/grouped |
+| `test_markdown_output_format()` | markdown 含 `### Added` 與 `- ` 列表 |
+| `test_dedup_skips_existing_hash(tmp_path)` | CHANGELOG 已有同 hash → skipped_duplicates+1 |
+| `test_update_changelog_inserts_below_added(tmp_path)` | 條目插入在 `### Added` 下方第一行 |
 | `test_dry_run_no_file_modification(tmp_path)` | dry-run 不寫入任何檔案 |
 | `test_since_relative_days()` | `--since 7d` 轉換為正確日期範圍 |
-| `test_empty_range_returns_zero_entries()` | 無提交時 new_entries_count=0 |
+| `test_empty_range_returns_zero(tmp_path)` | 無提交時 new_entries_count=0 |
 
-#### `tests/tools/test_doc_scanner.py`（≥10 個測試）
+### `tests/tools/test_doc_scanner.py`（11 個測試）
 
 | 測試函式 | 驗證點 |
 |---------|-------|
-| `test_module_docstring_detected(tmp_path)` | `"""..."""` 在頂層 → module_doc=true |
+| `test_module_docstring_detected(tmp_path)` | 頂層 `"""..."""` → module_doc=true |
 | `test_missing_module_docstring(tmp_path)` | 無頂層 docstring → module_doc=false |
-| `test_public_function_documented(tmp_path)` | `def foo(): """..."""` → documented |
-| `test_private_function_excluded(tmp_path)` | `def _bar():` → 不計入任何計數 |
+| `test_public_function_documented(tmp_path)` | `def foo(): """..."""` → documented+1 |
+| `test_private_function_excluded(tmp_path)` | `def _bar():` → 不計入任何數字 |
 | `test_dunder_excluded(tmp_path)` | `def __init__():` → 不計入 |
-| `test_coverage_pct_calculation(tmp_path)` | 3 項文件化 / 4 項 = 75.0% |
-| `test_exclude_patterns_applied(tmp_path)` | `query_logs.py` 不出現在結果 |
-| `test_debt_report_only_missing(tmp_path)` | debt_report 只含缺失項目 |
-| `test_json_output_schema(tmp_path)` | 輸出 dict 含 summary/by_file/debt_report |
+| `test_coverage_pct_calculation(tmp_path)` | 3 文件化 / 4 項 = 75.0% |
+| `test_exclude_patterns_applied(tmp_path)` | `query_logs.py` 不出現在 by_file |
+| `test_debt_report_only_missing(tmp_path)` | debt_report 只含未文件化的公開項目 |
+| `test_json_output_schema(tmp_path)` | 輸出含 summary/by_file/debt_report |
 | `test_text_format_contains_coverage(tmp_path)` | text 格式含 `Coverage:` 與百分比 |
-| `test_scan_empty_dir(tmp_path)` | 空目錄返回 coverage_pct=100.0, total_items=0 |
+| `test_scan_empty_dir(tmp_path)` | 空目錄 → coverage_pct=100.0, total_items=0 |
 
 ---
 
@@ -375,66 +491,50 @@ released_at: "2026-03-23"
 | 依賴 | 說明 | 狀態 |
 |------|------|------|
 | `subprocess` | 呼叫 `git log` | stdlib，已有 |
-| `ast` | 解析 Python 源碼 docstring | stdlib，已有 |
+| `ast` | 解析 Python docstring | stdlib，已有 |
 | `pathlib` | 路徑操作 | stdlib，已有 |
 | `pyyaml` | 讀取 doc-generation.yaml | pyproject.toml 已有 |
-| `git`（系統） | changelog_generator 的外部依賴 | 系統已有 |
+| `git`（系統） | changelog_generator 外部依賴 | 系統已有 |
 
-**不引入新 pip 套件**。
+**不引入任何新 pip 套件**。
 
 ---
 
 ## 驗證方式（端對端）
 
 ```bash
-# 1. 確認 tests/tools/__init__.py 存在
-ls tests/tools/__init__.py
-
-# 2. 執行新增的單元測試
+# 1. TDD — 先跑測試（紅燈，工具尚不存在）
 uv run pytest tests/tools/test_changelog_generator.py -v
 uv run pytest tests/tools/test_doc_scanner.py -v
 
-# 3. 手動驗證 changelog_generator（dry-run 不修改任何檔案）
+# 2. 實作後再跑（應全部綠燈）
+uv run pytest tests/tools/test_changelog_generator.py tests/tools/test_doc_scanner.py -v
+
+# 3. 手動驗證工具（dry-run，不修改任何檔案）
 uv run python tools/changelog_generator.py --since 7d --dry-run
-
-# 4. 手動驗證 doc_scanner（文字報告）
 uv run python tools/doc_scanner.py --format text
+uv run python tools/llms_txt_generator.py --dry-run
 
-# 5. 驗證 frequency-limits.yaml 一致性（auto-task 完整性檢查）
+# 4. 驗證 frequency-limits.yaml 一致性
 uv run python hooks/validate_config.py --check-auto-tasks
 
-# 6. 模擬完整 auto-task 執行
+# 5. 全套件測試不退步
+uv run pytest tests/ -v --tb=short
+
+# 6. 端對端模擬（更新實際檔案）
 uv run python tools/changelog_generator.py --since 7d --update-changelog
 uv run python tools/doc_scanner.py
+uv run python tools/llms_txt_generator.py
 cat results/todoist-auto-doc_generation.json | python -m json.tool
-
-# 7. 全套件測試不退步
-uv run pytest tests/ -v --tb=short
 ```
 
 ---
 
-## 實作順序（依依賴關係）
+## 審查記錄
 
-1. `tests/tools/__init__.py`（空檔，最先確認）
-2. `config/doc-generation.yaml`（無依賴，定義配置）
-3. `tests/tools/test_changelog_generator.py` → **紅燈**
-4. `tools/changelog_generator.py` → **綠燈**
-5. `tests/tools/test_doc_scanner.py` → **紅燈**
-6. `tools/doc_scanner.py` → **綠燈**
-7. `prompts/team/todoist-auto-doc_generation.md`（依賴步驟 4、6）
-8. `config/frequency-limits.yaml` 修改（最後，確保整合正確）
-
----
-
-## 審查記錄（v1 → v2 修正項目）
-
-| 問題 | 修正 |
-|------|------|
-| `execution_order: 34`（誤）| 改為 `33`（現有最大值 32） |
-| `missing` 陣列含 `_` 開頭私有函式（自相矛盾）| 修正為只列公開函式，並澄清「公開」定義 |
-| 缺少 `tests/tools/__init__.py` 交付物 | 加入交付物清單（#6） |
-| auto-task prompt 無 YAML front-matter 規範 | 補充完整格式 |
-| CHANGELOG 插入策略對現有手動條目處理不清 | 新增 `dedup_strategy: hash` + 插入位置精確說明 |
-| `--format text` 輸出格式未定義 | 補充文字報告範例 |
-| `daily_limit` 更新數值來源未確認 | 確認現有值 47，更新為 48 |
+| 版本 | 主要修正 |
+|------|---------|
+| v1 | 初版 |
+| v2 | execution_order 34→33；補 `__init__.py`；修正 private function 矛盾；補 front-matter；CHANGELOG 去重策略；text 格式定義 |
+| v3 | execution_order 33→36（確認 max=35）；刪除錯誤「47→48 daily_limit」；加 `llms.txt` + `llms_txt_generator`；加 OODA 閉環圖；7 步驟 auto-task prompt |
+| v4 | **移除已存在的 `tests/tools/__init__.py`**（已驗證存在）；**修正 improvement-backlog 條目 schema**（`source_pattern`/`priority`/`context`/`status`/`implementation_status` 對齊實際 arch_evolution 消費格式）；**加安全邊界說明**（hooks/*.py → schedule_adr；tools/*.py → immediate_fix）；**修正 `initial_schema` 計數欄位說明**；`improvement_backlog_type` 改名為 `improvement_backlog_source_pattern` |

@@ -18,6 +18,11 @@ autonomous_harness:
   resource_snapshot_path: "state/autonomous-resource-snapshot.json"
   self_heal_request_path: "state/autonomous-self-heal-requests.json"
 
+  # chatroom 範圍 API：失效時只鎖定 chatroom fetch agent，不觸發全局 degraded/recovery
+  chatroom_scope_apis:
+    - "gun-bot"
+    - "chatroom-scheduler"
+
   thresholds:
     stale_run_minutes: 45
     scheduler_failure_window: 10
@@ -25,7 +30,17 @@ autonomous_harness:
     failed_auto_task_threshold: 2
     api_open_circuit_threshold: 1
     starvation_task_threshold: 3
+    starvation_boost: 2           # 飢餓時在 team_mode 基礎上額外增加的並行數（獨立參數，不隨 team_mode 漂移）
     heartbeat_stale_minutes: 40
+
+  # 飢餓加班車：飢餓偵測後額外插入一次專屬補跑，不增加正常並行數
+  starvation_extra_run:
+    enabled: true
+    cooldown_minutes: 120         # 同一飢餓事件最多觸發一次（防止連打）
+    trigger_min_starvation: 1     # 至少幾個任務飢餓才觸發
+    max_priority_tasks: 3         # 單次加班車最多補跑幾個任務
+    lock_file: "state/run-todoist-starvation-recovery.lock"
+    cooldown_file: "state/starvation-extra-run.json"
 
   # Checkpoint 機制（受 LangGraph durable execution 啟發）
   checkpoint:
@@ -85,6 +100,15 @@ autonomous_harness:
         - "Bypass"
         - "-File"
         - "run-todoist-agent-team.ps1"
+    gun-bot:
+      # bot.js + chatroom-scheduler 重啟腳本（bot/restart-bot.ps1）
+      # 熔斷開啟時自動觸發，重啟後驗證 /api/health 健康狀態
+      restart_command:
+        - "pwsh"
+        - "-ExecutionPolicy"
+        - "Bypass"
+        - "-File"
+        - "bot/restart-bot.ps1"
 
   recovery_worker:
     restart_timeout_seconds: 30

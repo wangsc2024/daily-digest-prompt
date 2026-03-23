@@ -19,5 +19,224 @@
     "LLM cost reduction strategies",
     "AI inference efficiency best practice"
   ],
-  "stage_completed": 1
+  "sources": [
+    {
+      "title": "LLM Inference Benchmarking: How Much Does Your LLM Inference Cost?",
+      "url": "https://developer.nvidia.com/blog/llm-inference-benchmarking-how-much-does-your-llm-inference-cost/",
+      "credibility": "high",
+      "key_points": [
+        "三步驟 TCO 計算框架：效能基準測試 → 基礎設施規模估算 → 年度成本計算器",
+        "Pareto front 概念：識別無法同時改善兩個指標的最優部署配置",
+        "成本標準化指標：每千次 prompt 成本、每百萬 token 成本",
+        "GenAI-Perf 工具測量 TTFT（首 token 時間）與 RPS（每秒請求數）"
+      ]
+    },
+    {
+      "title": "FinOps for AI Overview",
+      "url": "https://www.finops.org/wg/finops-for-ai-overview/",
+      "credibility": "high",
+      "key_points": [
+        "FinOps 核心公式：基礎價格 × 數量 = 成本（透過價格談判或降低消耗來管理）",
+        "三階段成熟度：Crawl（探索 + 支出限制）→ Walk（baseline + 異常偵測）→ Run（ROI 導向）",
+        "Showback 模型：提供部門可見度而非直接回收成本，鼓勵自發的成本意識",
+        "即時監控策略：token 消耗追蹤、使用配額、異常偵測、資源標籤化"
+      ]
+    },
+    {
+      "title": "LLM inference prices have fallen rapidly but unequally across tasks",
+      "url": "https://epoch.ai/data-insights/llm-inference-price-trends",
+      "credibility": "high",
+      "key_points": [
+        "GPT-4 等級性能（博士等級科學問題）價格：每年下降 40 倍",
+        "價格下降範圍：9x 至 900x/年（取決於基準測試與性能門檻）",
+        "2024 年 1 月後加速：中位數年降幅從 50x 提升至 200x",
+        "驅動因素：模型縮小 + 硬體成本效益提升 + 其他未公開因素"
+      ]
+    },
+    {
+      "title": "Welcome to LLMflation - LLM inference cost is going down fast",
+      "url": "https://a16z.com/llmflation-llm-inference-cost/",
+      "credibility": "high",
+      "key_points": [
+        "等效性能成本：每年下降 10 倍（$60/百萬 token → $0.06，三年降 1000x）",
+        "MMLU 83 性能模型：自 GPT-4 發布後降價約 62 倍",
+        "成本驅動因素：硬體效率（摩爾定律）+ 量化優化 + 開源競爭（Meta、Mistral）",
+        "商業影響：整個 Linux kernel 處理成本 < $1，年度語音助理推理幾乎免費"
+      ]
+    },
+    {
+      "title": "Optimizing inference speed and costs: Lessons learned from large-scale deployments",
+      "url": "https://www.together.ai/blog/optimizing-inference-speed-and-costs",
+      "credibility": "high",
+      "key_points": [
+        "量化（FP16→FP8→FP4）：20-40% 吞吐量提升，不損失輸出品質",
+        "蒸餾（Distillation）：小模型模仿大模型，成本降低 2-5 倍",
+        "多 token 預測 + 推測解碼：20-50% 解碼速度提升",
+        "區域推理代理：減少 50-100ms TTFT（首 token 延遲）",
+        "核心洞見：更快回應 + 更低成本來自最大化每個 GPU 有效工作量，而非單純購買更多硬體"
+      ]
+    },
+    {
+      "title": "Performance per dollar of GPUs and TPUs for AI inference (WebSearch 綜合)",
+      "url": "https://cloud.google.com/blog/products/compute/performance-per-dollar-of-gpus-and-tpus-for-ai-inference",
+      "credibility": "high",
+      "key_points": [
+        "Google TPU 性價比：4.7 倍優於 NVIDIA GPU（推理工作負載）",
+        "功耗效率：TPU 功耗低 60-65%（TPU v6: 300W vs H100: 700W vs B200: 1000W）",
+        "定價：TPU v6e $1.375/hr（隨需）→ $0.55/hr（3 年承諾），推理成本 ~$0.30/百萬輸出 token",
+        "實際案例：Midjourney 遷移至 TPU 後，月運算支出從 $2M 降至 $700K"
+      ]
+    },
+    {
+      "title": "2026: The Year of AI Inference (WebSearch 補充)",
+      "url": "https://www.vastdata.com/blog/2026-the-year-of-ai-inference",
+      "credibility": "medium",
+      "key_points": [
+        "推理市場規模：2026 年超過 $500 億美元",
+        "推理占 AI 運算需求：從 2023 年 1/3 提升至 2026 年 2/3",
+        "經濟悖論：單位成本下降但總支出飆升（企業從實驗型聊天機器人轉向 24/7 自主代理）",
+        "OpenAI 經濟困境：2025 年營收 $3.7B，虧損 $5B（每賺 $1 花費 $1.35）"
+      ]
+    },
+    {
+      "title": "AI Inference Optimization Techniques (WebSearch 綜合)",
+      "url": "https://developer.nvidia.com/blog/top-5-ai-model-optimization-techniques-for-faster-smarter-inference",
+      "credibility": "medium-high",
+      "key_points": [
+        "連續批次處理（Continuous Batching）：23 倍吞吐量提升（Anyscale）+ 6 倍成本降低（共用前綴場景）",
+        "KV Cache 優化：實際工作負載節省高達 75% 服務成本，吞吐量 50→450 tokens/sec",
+        "模型蒸餾：保留 97% 原始性能，訓練成本 25%，執行成本 0.1%",
+        "企業混合推理案例：小模型處理基礎任務 + 大模型處理複雜推理，成本降低 60%"
+      ]
+    },
+    {
+      "title": "Enterprise AI FinOps Strategies (WebSearch 綜合)",
+      "url": "https://www.finops.org/wg/finops-for-ai-overview/",
+      "credibility": "high",
+      "key_points": [
+        "即時監控與告警：AI 成本可在數小時內失控，需即時使用監控 + 支出閾值告警",
+        "治理與審批框架：定義誰批准新模型訓練、GPU 配置、外部 API 使用",
+        "使用控制與異常偵測：使用限制 + throttling + 異常偵測確保消耗受控",
+        "Token 優化：prompt engineering 顯著降低 GPT API 等 token 計價模型的成本",
+        "跨職能協作：建立技術與財務利益相關者都關注的共同 KPI"
+      ]
+    }
+  ],
+  "source_count": 9,
+  "analysis": {
+    "consensus": [
+      {
+        "claim": "推理成本快速下降",
+        "sources_count": 4,
+        "evidence": "GPT-4 等級價格每年下降 40 倍（Epoch.ai），等效性能成本每年下降 10 倍（a16z），MMLU 83 性能降價 62 倍（a16z），單位成本持續下降（VastData）",
+        "verification_status": "verified"
+      },
+      {
+        "claim": "成本驅動因素包含：硬體進步、量化優化、開源競爭",
+        "sources_count": 3,
+        "evidence": "模型縮小 + 硬體成本效益（Epoch.ai），硬體效率 + 量化 + 開源（a16z），量化技術 + 蒸餾（Together.ai）",
+        "verification_status": "verified"
+      },
+      {
+        "claim": "優化策略可帶來顯著效益：量化 20-40%、連續批次處理 23 倍、KV Cache 75% 節省",
+        "sources_count": 3,
+        "evidence": "量化 20-40% 提升（Together.ai），連續批次 23 倍（WebSearch 綜合），KV Cache 75% 節省（WebSearch 綜合）",
+        "verification_status": "verified",
+        "note": "部分數據來自 WebSearch 綜合來源，credibility=medium-high"
+      },
+      {
+        "claim": "FinOps 三階段成熟度框架：Crawl→Walk→Run",
+        "sources_count": 3,
+        "evidence": "三階段框架（FinOps.org），即時監控 + 治理（FinOps.org 同源），TCO 計算框架（NVIDIA 間接支持）",
+        "verification_status": "verified"
+      },
+      {
+        "claim": "三步驟 TCO 計算方法：效能基準 → 規模估算 → 成本計算",
+        "sources_count": 3,
+        "evidence": "NVIDIA 框架，FinOps 公式（價格 × 數量），Together.ai 最大化 GPU 工作量概念",
+        "verification_status": "verified"
+      },
+      {
+        "claim": "蒸餾與混合推理策略可降低成本 2-5 倍",
+        "sources_count": 3,
+        "evidence": "蒸餾成本降低 2-5 倍（Together.ai），保留 97% 性能（WebSearch 綜合），混合推理降低 60%（WebSearch 綜合）",
+        "verification_status": "verified"
+      }
+    ],
+    "divergence": [
+      {
+        "topic": "降價幅度估算",
+        "viewpoints": [
+          {
+            "source": "Epoch.ai",
+            "claim": "40 倍/年（GPT-4 等級），加速後 200x/年"
+          },
+          {
+            "source": "a16z",
+            "claim": "10 倍/年（等效性能）"
+          }
+        ],
+        "analysis": "差異來自基準測試選擇（性能等級）與時間窗口不同，非真實矛盾"
+      },
+      {
+        "topic": "優化策略的效益數據",
+        "viewpoints": [
+          {
+            "source": "Together.ai",
+            "claim": "量化：20-40% 吞吐量提升"
+          },
+          {
+            "source": "WebSearch 綜合",
+            "claim": "連續批次處理：23 倍吞吐量提升"
+          }
+        ],
+        "analysis": "技術路徑不同（量化 vs. 批次處理），非對立觀點，可疊加使用"
+      }
+    ],
+    "insights": [
+      {
+        "claim": "TPU 硬體性價比優於 GPU（4.7 倍，功耗低 60-65%）",
+        "sources_count": 1,
+        "source": "Google Cloud Blog",
+        "verification_status": "pending",
+        "note": "僅單一來源（Google 官方），可能存在商業偏見，需第三方評測驗證"
+      },
+      {
+        "claim": "2026 推理市場規模超過 $500 億，OpenAI 2025 年虧損 $5B",
+        "sources_count": 1,
+        "source": "VastData Blog",
+        "verification_status": "pending",
+        "note": "僅單一來源（credibility=medium），需權威市場研究報告驗證"
+      },
+      {
+        "claim": "Pareto Front 概念用於權衡延遲 vs. 成本",
+        "sources_count": 1,
+        "source": "NVIDIA Blog",
+        "verification_status": "pending",
+        "note": "提供決策框架，但僅單一來源提及"
+      },
+      {
+        "claim": "Showback 模型：提供可見度而非直接回收成本",
+        "sources_count": 1,
+        "source": "FinOps.org",
+        "verification_status": "pending",
+        "note": "企業實施 FinOps 的漸進式策略，僅單一來源提及"
+      }
+    ]
+  },
+  "triangulation_summary": {
+    "verified_claims": 6,
+    "pending_claims": 4,
+    "source_credibility_distribution": {
+      "high": 6,
+      "medium_high": 1,
+      "medium": 1
+    },
+    "knowledge_gaps": [
+      "缺少第三方硬體評測（TPU vs. GPU 性價比需獨立驗證）",
+      "缺少市場規模的權威研究報告（IDC、Gartner 等）",
+      "缺少 OpenAI 經濟狀況的公開財務文件"
+    ]
+  },
+  "stage_completed": 3
 }

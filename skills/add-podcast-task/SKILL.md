@@ -1,10 +1,12 @@
 ---
 name: "add-podcast-task"
-version: "1.0.0"
+version: "1.0.1"
 description: |
   新增一條 Todoist 輪轉 Podcast 自動任務時的完整檢核：在 auto-task-creator 六步之外，
   補齊 config/podcast.yaml 節目名、auto-task 模板中的 ntfy 標題契約、resolve_podcast_series.py／腳本對齊與驗證清單。
+  Use when: 新增 Podcast 製作相關自動任務時，需要確保節目名稱、ntfy 標題、模板契約與腳本對齊。
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+cache-ttl: N/A
 depends-on:
   - skills/auto-task-creator/SKILL.md
   - skills/ntfy-notify/SKILL.md

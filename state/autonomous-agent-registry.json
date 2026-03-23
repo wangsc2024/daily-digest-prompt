@@ -1,7 +1,8 @@
 {
-  "generated_at": "2026-03-23T13:35:02.546058+08:00",
+  "generated_at": "2026-03-23T18:25:02.751712+08:00",
   "managed_agents": [
     "daily-digest",
+    "gun-bot",
     "todoist"
   ],
   "fetch_agents": [
@@ -213,7 +214,7 @@
     }
   ],
   "summary": {
-    "managed_agent_count": 2,
+    "managed_agent_count": 3,
     "fetch_agent_count": 10,
     "auto_task_count": 22,
     "heavy_auto_task_count": 11,

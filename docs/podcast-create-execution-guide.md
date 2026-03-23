@@ -14,6 +14,19 @@ pwsh -ExecutionPolicy Bypass -File run-podcast-create.ps1
 pwsh -ExecutionPolicy Bypass -File run-podcast-create.ps1 -SkipTts
 ```
 
+## article 結果目錄一鍵收尾（淨土學苑 / `results/article-*`）
+
+當 `podcast-script.jsonl` 與（建議）`podcast-meta.json` 已在 `results/article-<slug>/`，可用單一腳本銜接 **TTS → `podcast-final.mp3` → R2**（聲線自 `config/media-pipeline.yaml` 讀取，與 `article-to-podcast.ps1` 一致）：
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File tools/finish-article-podcast.ps1 `
+  -ResultsDir "results/article-<slug>" -Upload
+```
+
+- 加 `-Ntfy`：完成後依 `config/podcast.yaml` 的 topic 發 ntfy。
+- 已有分段 MP3、只缺合併：`-SkipTts`。
+- 已有 `podcast-final.mp3`、只上傳：`-SkipTts -SkipConcat -Upload`。
+
 ## 前置條件
 
 1. **知識庫服務**：`http://localhost:3000` 已啟動（`run-podcast-create.ps1` 會先檢查 `/api/health`）
@@ -58,7 +71,7 @@ pwsh -ExecutionPolicy Bypass -File run-podcast-create.ps1 -SkipTts
 
 對話腳本每行一筆 JSON，欄位為：
 
-- `host`: `host_a`（女聲）或 `host_b`（男聲）
+- `host`: `host_a`（女聲）、`host_b`（男聲）、`host_guest`（來賓，聲線見 `media-pipeline.yaml` 之 `voice_guest`）
 - `text`: 顯示用文字
 - `tts_text`: TTS 用文字（縮寫已展開，如 AI→A I）
 

@@ -29,6 +29,7 @@ uv run --project . python tools/generate_podcast_audio.py `
   --output "podcasts/20260316/audio_20260316_171500/" `
   --voice-a "zh-TW-HsiaoChenNeural" `
   --voice-b "zh-TW-YunJheNeural" `
+  --voice-guest "zh-TW-HsiaoYuNeural" `
   --abbrev-rules "config/tts-abbreviation-rules.yaml"
 
 # 步驟 5：音訊合併

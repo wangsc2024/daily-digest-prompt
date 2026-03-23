@@ -3,6 +3,30 @@
   "description": "workflow-forge 產出物註冊表，追蹤所有流程標準化與輸出規範產物",
   "entries": [
     {
+      "date": "2026-03-23",
+      "artifact_path": "workflows/phase-handoff-validation-checklist.md",
+      "gap_type": "workflow",
+      "gap_description": "run-todoist-agent-team.ps1 的 Phase 1（查詢）→ Phase 2（執行）→ Phase 3（組裝）缺乏明確的資料交接格式規範，導致組裝失敗",
+      "priority": "P0",
+      "total_score": 100,
+      "impact_range": "所有 Todoist 團隊模式執行（每日 ~44 次）",
+      "integration_status": "integrated",
+      "documented_in": "workflows/index.yaml",
+      "checklist_version": "1.0.0",
+      "validation_items": 22,
+      "validation_categories": 6,
+      "signal_source": [
+        "system-insight.json: daily_success_rate=0.875 (低於 0.95 閾值)",
+        "improvement-backlog.json: 高失敗時段根因診斷",
+        "workflows 未涵蓋 Phase 間交接"
+      ],
+      "expected_outcome": {
+        "immediate": "所有 Todoist 團隊模式開發者有明確的 Phase 交接規範",
+        "mid_term": "Phase 3 組裝失敗率下降 50%+，系統成功率提升至 92%+",
+        "long_term": "執行成功率穩定在 95% 以上"
+      }
+    },
+    {
       "date": "2026-03-17",
       "updated_date": "2026-03-18",
       "artifact_path": "config/schemas/results-auto-task-schema.json",

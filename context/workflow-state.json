@@ -1,6 +1,6 @@
 {
   "run_id": "5696c28361ac",
-  "updated_at": "2026-03-23T00:58:31+08:00",
+  "updated_at": "2026-03-23T18:09:08.600383+08:00",
   "history": [
     {
       "status": "completed",
@@ -143,6 +143,48 @@
       "artifacts": [
         "context/adr-registry.json（41 個 ADR：無變更）",
         "context/arch-decision.json（31 項決策：5 immediate_fix, 3 schedule_adr, 23 skip）"
+      ]
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-23T21:40:00+08:00",
+      "repairs": "1/2 項（含 arch-decision 2 項：ADR-043 success, ADR-044 failed_retry）"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-23T22:30:00+08:00",
+      "note": "arch-evolution 啟動"
+    },
+    {
+      "status": "completed",
+      "step": "act",
+      "ts": "2026-03-23T22:00:00+08:00",
+      "repairs": "8/10 項（含 arch-decision 0 項，ADR-044 需人工介入）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-23T22:40:00+08:00",
+      "artifacts": [
+        "context/adr-registry.json（47 個 ADR：+6 新增 ADR-045/046/047/048/049/050）",
+        "context/arch-decision.json（46 項決策：4 immediate_fix, 2 schedule_adr, 36 skip, 4 preserved_success）"
+      ]
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-23T22:49:00+08:00",
+      "note": "arch-evolution 啟動"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-23T18:09:08.600383+08:00",
+      "artifacts": [
+        "context/adr-registry.json（52 個 ADR：+5 新增 ADR-051/052/053/054/055）",
+        "context/arch-decision.json（50 項決策：6 immediate_fix, 5 schedule_adr, 39 skip）"
       ]
     }
   ],

@@ -1,0 +1,21 @@
+{
+  "failure-hour-analyzer": {
+    "generated_at": "2026-03-23",
+    "modified_templates": [],
+    "total_modified": 0,
+    "skipped_reason": "templates/ 無匹配觸發詞"
+  },
+  "phase-snapshot-recovery": {
+    "generated_at": "2026-03-23",
+    "modified_templates": [
+      {
+        "template": "templates/auto-tasks/chatroom-optimize.md",
+        "trigger": "Phase 2 timeout",
+        "insertion_type": "5",
+        "status": "skipped"
+      }
+    ],
+    "total_modified": 0,
+    "skipped_reason": "插入點類型5（匹配上下文不相關，為監控閾值非恢復功能）"
+  }
+}

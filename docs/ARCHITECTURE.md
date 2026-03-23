@@ -254,6 +254,7 @@ daily-digest-prompt/
     concat_audio.py               # 音頻合併（FFmpeg 封裝）
     run_podcast_create.py         # Podcast 生成主腳本
     generate_podcast_audio.py     # Podcast 音頻完整流程
+    finish-article-podcast.ps1    # results/article-*：TTS→合併→選用 R2/ntfy 一鍵收尾
     generate_long_term_memory_manual.py # 長期記憶手冊自動生成
     # 工具輔助
     config_loader.py              # 配置載入器（YAML 解析 + Schema 驗證）

@@ -38,7 +38,7 @@ released_at: "2026-03-21"
 - **台詞量**：6–10 輪，占全集 20–30%
 - **引薦台詞範例**：`{"turn": 10, "host": "host_b", "text": "說到這裡，我們請來了今天的特別來賓思齊，歡迎你！"}`
 - **退場台詞範例**：`{"turn": 20, "host": "host_guest", "text": "很高興能和大家分享，期待下次再聊！"}`
-- 若無來賓，TTS 命令**省略** `--voice-guest` 參數
+- TTS 階段**一律**帶入 `--voice-guest`（值須與 `config/media-pipeline.yaml` 之 `podcast.voice_guest` 一致）
 
 **JSONL 腳本格式規範（嚴格遵守）**：
 ```json
@@ -84,17 +84,7 @@ released_at: "2026-03-21"
    - host_guest（思齊，可選）：依上方「特別來賓出現規則」決定是否加入
    - 腳本完成後用 Write 工具寫入 `podcasts/{YYYYMMDD}/script_{timestamp}.jsonl`
    - ⚠️ **腳本寫入後立即進入步驟 4，不得停止**
-4. **TTS 語音合成**：【腳本寫入後立即執行，不可跳過】用 Bash tool 執行（填入實際路徑）：
-   - 無來賓時：
-   ```bash
-   uv run --project . python tools/generate_podcast_audio.py \
-     --input "podcasts/{YYYYMMDD}/script_{timestamp}.jsonl" \
-     --output "podcasts/{YYYYMMDD}/audio_{timestamp}/" \
-     --voice-a "zh-TW-HsiaoChenNeural" \
-     --voice-b "zh-TW-YunJheNeural" \
-     --abbrev-rules "config/tts-abbreviation-rules.yaml"
-   ```
-   - 有來賓（思齊）時，加入 `--voice-guest`：
+4. **TTS 語音合成**：【腳本寫入後立即執行，不可跳過】用 Bash tool 執行（填入實際路徑；聲音與 `config/media-pipeline.yaml` 之 `podcast` 區塊一致）：
    ```bash
    uv run --project . python tools/generate_podcast_audio.py \
      --input "podcasts/{YYYYMMDD}/script_{timestamp}.jsonl" \

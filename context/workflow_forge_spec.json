@@ -1,114 +1,122 @@
 {
-  "version": 4,
-  "generated_at": "2026-03-22T08:55:00+08:00",
+  "version": 5,
+  "generated_at": "2026-03-23T22:00:00+08:00",
   "gap_identified": {
-    "type": "consistency",
-    "title": "Config YAML 與實際檔案系統一致性缺口",
-    "description": "config/*.yaml 中定義的路徑、task_key、skills 等欄位與實際檔案系統、SKILL_INDEX.md、prompt 模板可能不一致，缺乏自動驗證機制。例如：frequency-limits.yaml 的 task_key 與 prompts/team/todoist-auto-{task_key}.md 檔名不一致、routing.yaml 引用的 skills 在 SKILL_INDEX.md 中不存在等。",
-    "impact": "導致執行時路徑錯誤、Skill 找不到、任務無法正常執行；配置膨脹問題（analyze-config.ps1 顯示配置複雜度）；命名不一致導致 Phase 2 未產出結果檔案（CLAUDE.md 自動任務命名規範的底線規則）。",
+    "type": "workflow",
+    "title": "Phase 間交接格式規範與驗證缺失",
+    "description": "run-todoist-agent-team.ps1 的 Phase 1（查詢）→ Phase 2（執行）→ Phase 3（組裝）缺乏明確的資料交接格式規範。雖然 results-validation-checklist.md 定義了 Phase 2 結果 Schema，但缺少 Phase 1 輸出格式、Phase 間資料流驗證、錯誤處理規範等，導致組裝時可能失敗。",
+    "impact": "system-insight 顯示成功率僅 87.5%（目標 95%），部分失敗來自 Phase 3 組裝時無法解析 Phase 1/2 的輸出格式；缺乏標準化的錯誤處理流程，導致部分失敗被靜默忽略。",
     "source_files": [
-      "config/frequency-limits.yaml",
-      "config/cache-policy.yaml",
-      "config/routing.yaml",
-      "config/pipeline.yaml",
-      "config/ooda-workflow.yaml",
-      "skills/SKILL_INDEX.md",
-      "prompts/team/todoist-auto-*.md"
+      "run-todoist-agent-team.ps1",
+      "results/todoist-query.json（Phase 1 輸出）",
+      "results/todoist-auto-*.json（Phase 2 輸出）",
+      "prompts/team/todoist-assemble.md（Phase 3 組裝）"
+    ],
+    "signal_source": [
+      "context/system-insight.json: daily_success_rate=0.875（低於 0.95 閾值）",
+      "context/improvement-backlog.json: 高失敗時段根因診斷",
+      "workflows/results-validation-checklist.md: 僅覆蓋 Phase 2，缺 Phase 1/3"
     ]
+  },
+  "selected_gap": {
+    "priority": "P0",
+    "score": 100,
+    "breakdown": {
+      "影響範圍": "40/40（影響所有 Todoist 團隊模式執行，每日 ~44 次）",
+      "可執行性": "35/35（僅需定義 workflow checklist，不需改 PowerShell 核心）",
+      "信號強度": "25/25（來自 system-insight critical + improvement-backlog）"
+    },
+    "開創性": "符合（現有 3 個 workflow 未涵蓋 Phase 間交接，此為新增補充）"
   },
   "artifact_spec": {
     "type": "validation_checklist",
-    "path": "workflows/config-consistency-validation-checklist.md",
+    "path": "workflows/phase-handoff-validation-checklist.md",
     "format": "Markdown",
+    "title": "Phase 間交接格式驗證清單",
     "sections": [
       {
-        "section": "1. frequency-limits.yaml 一致性",
+        "section": "1. Phase 1 輸出驗證（todoist-query.json）",
         "checks": [
-          "每個任務的 task_key 與 prompts/team/todoist-auto-{task_key}.md 檔案存在且一致（底線命名）",
-          "每個任務的 counter_field 與 initial_schema 中的欄位一致（{task_key}_count）",
-          "每個任務的 template 路徑指向的檔案確實存在",
-          "execution_order 無重複值（1-35 範圍內）",
-          "allowed_days 值在 0-6 範圍內（Mon=0, Sun=6）",
-          "skills 陣列中的 Skill 在 SKILL_INDEX.md 中存在",
-          "prompt_file（若有）路徑存在"
+          "必填欄位：processable_tasks, skipped_tasks, routing_summary, timestamp",
+          "processable_tasks[] 每項必含：id, content, labels, tier, confidence, skills, template",
+          "routing_summary.tier1_count + tier2_count + tier3_count = processable_tasks.length",
+          "skipped_tasks[] 每項必含：id, content, reason",
+          "timestamp 為 ISO 8601 格式"
         ]
       },
       {
-        "section": "2. cache-policy.yaml 一致性",
+        "section": "2. Phase 2 輸出驗證（todoist-auto-*.json）",
         "checks": [
-          "每個 source 的 file 路徑父目錄（cache/）存在",
-          "volatility 段落的 key 與 sources 段落的 key 一致",
-          "tracking.write_to 指向的檔案（context/digest-memory.json）存在"
+          "必填欄位：agent, task_key, status（已由 results-validation-checklist.md 定義，此處引用）",
+          "agent 欄位格式：todoist-auto-{task_key}（底線）",
+          "status 取值：success / partial / failed / format_failed",
+          "所有 Phase 2 結果檔案命名：results/todoist-auto-{task_key}.json（與 task_key 一致）"
+        ],
+        "reference": "workflows/results-validation-checklist.md"
+      },
+      {
+        "section": "3. Phase 1→2 交接驗證",
+        "checks": [
+          "Phase 2 執行的任務數 <= Phase 1 processable_tasks.length",
+          "Phase 2 每個執行任務的 task_id 對應 Phase 1 processable_tasks[].id",
+          "Phase 2 使用的 template 與 Phase 1 路由結果一致"
         ]
       },
       {
-        "section": "3. routing.yaml 一致性",
+        "section": "4. Phase 2→3 交接驗證",
         "checks": [
-          "label_routing.mappings 引用的 skills 在 SKILL_INDEX.md 中存在",
-          "template 路徑指向的檔案確實存在（templates/sub-agent/*.md）",
-          "skill_aliases 中的 template 路徑存在",
-          "chatroom_task_source.template 路徑存在"
+          "Phase 3 組裝前，所有 Phase 2 結果檔案存在且可讀",
+          "Phase 3 組裝時，可正確解析所有 Phase 2 結果 JSON",
+          "Phase 3 summary.total_tasks = Phase 2 實際執行任務數"
         ]
       },
       {
-        "section": "4. pipeline.yaml 一致性",
+        "section": "5. 錯誤處理規範",
         "checks": [
-          "每個 step 的 skill_files 路徑確實存在",
-          "cache_key 對應的 source 在 cache-policy.yaml 中存在",
-          "format_file（config/digest-format.md）存在",
-          "skills 陣列中的 Skill 在 SKILL_INDEX.md 中存在"
+          "Phase 1 失敗（查詢錯誤）→ 跳過 Phase 2，直接進入 Phase 3 通知",
+          "Phase 2 部分失敗 → 記錄失敗任務於 summary.failed_tasks，繼續組裝",
+          "Phase 3 組裝失敗 → 標記 status=format_failed，不中斷通知流程",
+          "所有錯誤訊息必須寫入對應結果 JSON 的 error.message 欄位"
         ]
       },
       {
-        "section": "5. ooda-workflow.yaml 一致性",
+        "section": "6. 整合驗證（端到端）",
         "checks": [
-          "每個 step 的 prompt_file 路徑確實存在（若 trigger_mode 非 ps_script）",
-          "auto_task_key 與 frequency-limits.yaml 的 task_key 一致",
-          "state_file（context/workflow-state.json）父目錄存在",
-          "history_file（logs/structured/ooda-transitions.jsonl）父目錄存在"
-        ]
-      },
-      {
-        "section": "6. 結果檔案命名一致性",
-        "checks": [
-          "prompts/team/todoist-auto-{task_key}.md 中寫入的結果檔案路徑為 results/todoist-auto-{task_key}.json（底線一致）",
-          "結果 JSON 的 agent 欄位格式為 todoist-auto-{task_key}（與 task_key 一致）",
-          "結果 JSON 的 task_key 欄位與 frequency-limits.yaml 的 task_key 完全一致"
-        ]
-      },
-      {
-        "section": "7. SKILL.md 引用一致性",
-        "checks": [
-          "config/*.yaml 引用的所有 Skill 名稱在 skills/SKILL_INDEX.md 速查表中存在",
-          "prompts/team/*.md 引用的 SKILL.md 路徑確實存在",
-          "routing.yaml 的 skill_aliases 中標記為 no_skill_file: true 的項目無需檢查 SKILL.md"
+          "Phase 1 輸出的 processable_tasks.length 與 Phase 3 summary.total_tasks 一致",
+          "Phase 1 routing_summary.total_processable 與 Phase 2 執行任務數邏輯一致（<=）",
+          "Phase 3 組裝後的 summary.success_tasks + failed_tasks + partial_tasks = total_tasks"
         ]
       }
     ],
     "validation_method": {
-      "manual": "人工審查 config/ 目錄下的 YAML 檔案，逐條核對清單",
-      "automated": "可選：建立 tools/validate_config_consistency.py 腳本，自動掃描 config/*.yaml 並驗證上述規則"
+      "manual": "人工審查 results/ 目錄下的 Phase 1/2 輸出，逐條核對清單",
+      "automated_integration": [
+        "run-todoist-agent-team.ps1: Phase 1 結束後驗證 todoist-query.json",
+        "run-todoist-agent-team.ps1: Phase 2 結束後驗證所有 todoist-auto-*.json",
+        "prompts/team/todoist-assemble.md: Phase 3 組裝前驗證 Phase 2 結果存在性"
+      ]
     },
     "integration": {
-      "location": "workflows/config-consistency-validation-checklist.md",
+      "location": "workflows/phase-handoff-validation-checklist.md",
       "reference_in": [
-        "workflows/index.yaml（新增 entry）",
+        "workflows/index.yaml（新增 entry，task_types: workflow_forge）",
         "docs/ARCHITECTURE.md（配置文件速查表新增一行）",
-        "config/README.md（若存在，新增驗證清單說明）"
+        "run-todoist-agent-team.ps1（Phase 間加入驗證呼叫，可選）"
       ]
     },
     "alignment_with_existing": {
-      "similar_workflows": [
-        "workflows/prompt-output-validation-checklist.md（Prompt 輸出規範驗證）",
-        "workflows/results-validation-checklist.md（結果檔案格式驗證）"
+      "complements": [
+        "workflows/results-validation-checklist.md（專注 Phase 2 結果 Schema）",
+        "workflows/prompt-output-validation-checklist.md（專注 Prompt 輸出規範）",
+        "workflows/config-consistency-validation-checklist.md（專注 Config 一致性）"
       ],
-      "complementary": "本清單聚焦於 config 與檔案系統的一致性，與現有 workflows 互補"
+      "gap_filled": "補充 Phase 1 輸出格式 + Phase 間資料流 + 錯誤處理規範，完整覆蓋執行流程"
     }
   },
-  "gap_addressed": "解決 config/*.yaml 與實際檔案系統、SKILL_INDEX.md、prompt 模板的一致性缺口，確保配置定義與實際可用資源一致，降低執行時錯誤與配置膨脹風險。",
+  "gap_addressed": "定義 run-todoist-agent-team.ps1 的 Phase 1→2→3 交接格式標準，確保資料流一致性，減少組裝失敗，提升系統成功率至目標 95%。",
   "expected_outcome": {
-    "immediate": "所有 config 維護者有明確檢查列表，修改 config 時可自我驗證一致性",
-    "mid_term": "config 相關執行時錯誤（檔案找不到、Skill 不存在）減少 80% 以上",
-    "long_term": "配置膨脹指標（config_complexity）保持在健康範圍內，系統可維護性提升"
+    "immediate": "所有 Todoist 團隊模式開發者有明確的 Phase 交接規範",
+    "mid_term": "Phase 3 組裝失敗率下降 50%+，系統成功率提升至 92%+",
+    "long_term": "執行成功率穩定在 95% 以上，Phase 間交接成為標準化流程"
   }
 }

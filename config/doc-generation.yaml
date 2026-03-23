@@ -1,0 +1,78 @@
+# 文件生成工作流配置（唯一真相來源）
+# 引用者：tools/changelog_generator.py, tools/doc_scanner.py,
+#         tools/llms_txt_generator.py, prompts/team/todoist-auto-doc_generation.md
+# 版本歷史：v1 (2026-03-23) 初版
+version: 1
+
+changelog:
+  output_file: CHANGELOG.md
+  unreleased_section: "[Unreleased]"
+  insert_after: "### Added"        # 在此小節標題下方第一行插入新條目
+  commit_type_mapping:
+    feat: Added
+    fix: Fixed
+    refactor: Changed
+    docs: Changed
+    chore: Changed
+    perf: Changed
+    test: Changed
+  breaking_label: "Breaking Changes"
+  ignored_prefixes:
+    - "Merge"
+    - "merge"
+    - "wip"
+  default_lookback_days: 7
+  dedup_strategy: "hash"           # 以 git 7-char short-hash 去重，不重複插入
+
+doc_scanner:
+  scan_dirs:
+    - hooks
+    - tools
+  exclude_patterns:
+    - "__init__.py"
+    - "query_logs.py"
+    - "generate_*.py"
+    - "concat_audio.py"
+    - "compose_video.py"
+    - "trip_plan_outline.py"
+    - "resolve_podcast_series.py"
+    - "run_podcast_create.py"
+  count_module_doc: true
+  count_class_doc: true
+  count_function_doc: true         # 非 `_` 開頭的函式/方法；dunder（__init__ 等）不計
+  min_coverage_pct: 60             # 低於此值在 auto-task 中警告
+  debt_threshold: 20               # debt_items 超過此數觸發 improvement-backlog 寫入
+
+llms_txt:
+  output_file: docs/llms.txt
+  site_name: "Daily Digest Prompt"
+  site_description: >
+    AI 自動化研究與知識庫系統。提供 Skills、研究模板、自動任務、
+    Hook 機器層、OODA 閉環自癒機制。
+  sections:
+    - title: "Core Rules"
+      paths:
+        - templates/shared/preamble.md
+        - CLAUDE.md
+    - title: "Skill Map"
+      paths:
+        - skills/SKILL_INDEX.md
+    - title: "Architecture"
+      paths:
+        - docs/ARCHITECTURE.md
+        - docs/OPERATIONS.md
+    - title: "Config"
+      paths:
+        - config/frequency-limits.yaml
+        - config/hook-rules.yaml
+        - config/doc-generation.yaml
+  optional_paths:
+    - context/research-registry.json
+    - state/autonomous-harness-plan.json
+
+auto_task:
+  result_file: results/todoist-auto-doc_generation.json
+  kb_tag: "文件生成"
+  improvement_backlog_source_pattern: "doc_coverage_deficit"  # arch_evolution 去重 key
+  improvement_backlog_priority: "medium"
+  improvement_backlog_effort: "medium"

@@ -2,7 +2,7 @@
 tools/generate_podcast_audio.py
 Podcast TTS 生成：讀取 podcast-script.jsonl，
 依 host 使用不同 edge-tts 聲音，逐段輸出 MP3 檔案。
-支援三聲道（host_a 曉晨、host_b 云哲、host_guest 特別來賓）。
+支援三路聲線：host_a（曉晨）、host_b（云哲）、host_guest（特別來賓；聲音見 --voice-guest / media-pipeline.yaml）。
 """
 
 import argparse
@@ -132,12 +132,16 @@ async def generate_all(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Podcast 雙聲道 TTS 生成")
+    parser = argparse.ArgumentParser(description="Podcast TTS（host_a / host_b / host_guest）")
     parser.add_argument("--input", required=True, help="podcast-script.jsonl 路徑")
     parser.add_argument("--output", required=True, help="音訊輸出目錄")
     parser.add_argument("--voice-a", default="zh-TW-HsiaoChenNeural", help="host_a 聲音（曉晨）")
     parser.add_argument("--voice-b", default="zh-TW-YunJheNeural", help="host_b 聲音（云哲）")
-    parser.add_argument("--voice-guest", default=None, help="host_guest 聲音（特別來賓，可選）")
+    parser.add_argument(
+        "--voice-guest",
+        default="zh-TW-HsiaoYuNeural",
+        help="host_guest TTS 聲音（與 config/media-pipeline.yaml 之 podcast.voice_guest 一致）",
+    )
     parser.add_argument("--abbrev-rules", default="config/tts-abbreviation-rules.yaml")
     args = parser.parse_args()
 

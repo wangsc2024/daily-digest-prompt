@@ -1,10 +1,13 @@
 {
   "version": 2,
-  "updated_at": "2026-03-22T15:25:38",
+  "updated_at": "2026-03-23T10:03:53.575936+00:00",
   "summary": {
-    "total_episodes": 83,
+    "total_episodes": 84,
     "cooldown_days": 90,
     "recent_note_ids": [
+      "2dc98f0a-cc36-43cd-a109-8e527277a651",
+      "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
+      "f921f22e-86d3-415a-b8d6-30b1da5572da",
       "ed138bbf-b608-4f05-8311-f6fc2e865392",
       {
         "note_id": "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
@@ -21,9 +24,30 @@
         "last_used": "2026-03-22",
         "expires_at": "2026-06-20"
       }
-    ]
+    ],
+    "updated_at": "2026-03-23T10:03:53.575936+00:00"
   },
   "episodes": [
+    {
+      "episode_title": "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由",
+      "notes_used": [
+        "f921f22e-86d3-415a-b8d6-30b1da5572da",
+        "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
+        "2dc98f0a-cc36-43cd-a109-8e527277a651"
+      ],
+      "note_titles": [
+        "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由、Skill 熱載入與並發控制實作（mechanism 階段）",
+        "2026-02-12 AI 最新技術研究筆記",
+        "心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal Newport 的最佳認知狀態研究"
+      ],
+      "topics": [
+        "技術",
+        "AI",
+        "研究"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-23T10:03:53.575936+00:00"
+    },
     {
       "episode_title": "天台止觀修持要義",
       "notes_used": [
@@ -2129,6 +2153,30 @@
       "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
       "slug": "note-ed138bbf-20260322",
       "used_at": "2026-03-22T15:25:38"
+    },
+    {
+      "note_id": "f921f22e-86d3-415a-b8d6-30b1da5572da",
+      "note_title": "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由、Skill 熱載入與並發控制實作（mechanism 階段）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:03:53.575936+00:00"
+    },
+    {
+      "note_id": "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
+      "note_title": "2026-02-12 AI 最新技術研究筆記",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:03:53.575936+00:00"
+    },
+    {
+      "note_id": "2dc98f0a-cc36-43cd-a109-8e527277a651",
+      "note_title": "心流理論與深度工作的科學 — 從 Csikszentmihalyi 到 Cal Newport 的最佳認知狀態研究",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:03:53.575936+00:00"
     }
   ]
 }

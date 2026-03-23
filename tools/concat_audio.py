@@ -122,12 +122,15 @@ def read_turn_order(script_path: Path) -> list[dict]:
 
 
 def resolve_host_key(turn: dict) -> str:
+    """與 generate_podcast_audio.resolve_host_key 一致，確保串接檔名與 TTS 輸出對齊。"""
     h = turn.get("host")
-    if h in ("host_a", "host_b"):
+    if h in ("host_a", "host_b", "host_guest"):
         return h
     sp = str(turn.get("speaker", "")).strip()
     if sp in ("Host-B", "host-b") or "Host-B" in sp:
         return "host_b"
+    if sp in ("Host-Guest", "host-guest", "guest") or "Guest" in sp:
+        return "host_guest"
     return "host_a"
 
 

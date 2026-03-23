@@ -1,0 +1,92 @@
+{
+  "execution_time": "2026-03-23T21:45:00+08:00",
+  "decisions_made": 42,
+  "immediate_fix_count": 4,
+  "schedule_adr_count": 2,
+  "wontfix_count": 0,
+  "skip_count": 36,
+  "new_adr_count": 6,
+  "artifacts": [
+    "context/adr-registry.json（更新：47 個 ADR）",
+    "context/arch-decision.json（更新：46 個決策，保留 4 個 success）"
+  ],
+  "immediate_fix_items": [
+    {
+      "adr_id": "ADR-20260323-045",
+      "title": "state檔案膨脹清理機制",
+      "backlog_id": "backlog_kso_20260323_state_file_bloat",
+      "priority": "P1",
+      "effort": "medium",
+      "estimated_minutes": 45,
+      "fix_instructions_steps": 3,
+      "verification": "執行清理後確認 state/ 目錄大小降低 30%+"
+    },
+    {
+      "adr_id": "ADR-20260323-046",
+      "title": "快取命中率優化：TTL 分層策略與 stale-while-revalidate",
+      "backlog_id": "backlog_kb_insight_20260323_cache_optimization",
+      "priority": "P0",
+      "effort": "medium",
+      "estimated_minutes": 45,
+      "fix_instructions_steps": 3,
+      "verification": "7 天後檢查 cache_hit_ratio 是否提升至 40%+"
+    },
+    {
+      "adr_id": "ADR-20260323-047",
+      "title": "高失敗時段根因分析與三層監控",
+      "backlog_id": "backlog_kb_insight_20260323_peak_hour_diagnosis",
+      "priority": "P0",
+      "effort": "medium",
+      "estimated_minutes": 45,
+      "fix_instructions_steps": 3,
+      "verification": "執行 peak_hour_analyzer.py 確認輸出根因報告"
+    },
+    {
+      "adr_id": "ADR-20260323-050",
+      "title": "ARC（Adaptive Replacement Cache）驅逐策略評估",
+      "backlog_id": "backlog_ib_20260323_arc_eviction",
+      "priority": "P1",
+      "effort": "medium",
+      "estimated_minutes": 45,
+      "fix_instructions_steps": 3,
+      "verification": "執行 benchmark 確認 ARC 命中率提升幅度"
+    }
+  ],
+  "schedule_adr_items": [
+    {
+      "adr_id": "ADR-20260323-048",
+      "title": "Weighted Round-robin 任務排程與飢餓保護",
+      "backlog_id": "backlog_kb_insight_20260323_task_fairness_wrr",
+      "priority": "P1",
+      "effort": "high",
+      "reason": "涉及 run-todoist-agent-team.ps1 核心排程邏輯修改（安全邊界），需人工確認 Weighted Round-robin 設計"
+    },
+    {
+      "adr_id": "ADR-20260323-049",
+      "title": "自適應 TTL（d-TTL/f-TTL）演算法整合",
+      "backlog_id": "backlog_ib_20260323_adaptive_ttl",
+      "priority": "P0",
+      "effort": "medium",
+      "reason": "涉及 config/cache-policy.yaml 新增 d-TTL/f-TTL 演算法段落（安全邊界），需人工確認演算法設計與收斂速度監控"
+    }
+  ],
+  "skip_breakdown": {
+    "done": 22,
+    "ongoing": 12,
+    "duplicate": 2,
+    "invalid": 0
+  },
+  "key_insights": [
+    "42 個 backlog items 中，36 個為歷史重複或已完成項目",
+    "4 個新 immediate_fix 均為 P0/P1 優先級，effort=medium（45 分鐘內完成）",
+    "2 個 schedule_adr 涉及核心腳本或配置修改（安全邊界），需人工決策",
+    "cache_hit_ratio 優化與失敗時段分析為本次最高優先級改善項目",
+    "新增 6 個 ADR（ADR-20260323-045 至 050），總計 47 個 ADR"
+  ],
+  "next_steps": [
+    "self-heal 執行 4 個 immediate_fix（git 備份後自動執行）",
+    "人工審議 2 個 schedule_adr（Weighted Round-robin + d-TTL 演算法）",
+    "7 天後驗證 cache_hit_ratio 是否提升至 40%+",
+    "持續監控 daily_success_rate（目前 87.5%，目標 95%+）"
+  ]
+}

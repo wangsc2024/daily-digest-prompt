@@ -1,27 +1,25 @@
 {
-  "generated_at": "2026-03-23T13:35:04.334492+08:00",
-  "mode": "degraded",
-  "reasons": [
-    "override: 偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務"
-  ],
+  "generated_at": "2026-03-23T18:25:05.976182+08:00",
+  "mode": "normal",
+  "reasons": [],
   "override": {
-    "active": true,
-    "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
+    "active": false,
+    "reason": null,
     "expires_at": "2026-03-23T14:00:07.073995+08:00"
   },
   "gates": {
     "heartbeat_stale": false,
-    "starvation_detected": true,
+    "starvation_detected": false,
     "token_budget_alert": false,
     "open_circuits": 0
   },
   "policies": {
     "max_parallel_auto_tasks": 2,
     "max_parallel_fetch_agents": 4,
-    "allow_heavy_auto_tasks": false,
+    "allow_heavy_auto_tasks": true,
     "allow_research_auto_tasks": true,
-    "daily_digest_assembly_mode": "degraded",
-    "daily_digest_phase2_retries": 0,
+    "daily_digest_assembly_mode": "full",
+    "daily_digest_phase2_retries": 1,
     "core_fetch_agents": [
       "todoist",
       "news",
@@ -32,18 +30,17 @@
       "security",
       "chatroom"
     ],
-    "blocked_fetch_agents": [
-      "chatroom",
-      "security"
-    ],
+    "blocked_fetch_agents": [],
     "allowed_fetch_agents": [
       "audit-dim1-5",
       "audit-dim2-6",
       "audit-dim3-7",
       "audit-dim4",
+      "chatroom",
       "gmail",
       "hackernews",
       "news",
+      "security",
       "todoist"
     ],
     "heavy_task_keys": [
@@ -71,53 +68,41 @@
       "tech_research",
       "unsloth_research"
     ],
-    "blocked_task_keys": [
-      "ai_deep_research",
-      "ai_domain_research",
-      "ai_github_research",
-      "ai_workflow_github_research",
-      "buddhist_research",
-      "podcast_create",
-      "podcast_jiaoguangzong",
-      "shurangama_research",
-      "system_insight",
-      "tech_research",
-      "unsloth_research"
-    ],
+    "blocked_task_keys": [],
     "priority_recovery_targets": []
   },
   "resource_snapshot": {
-    "generated_at": "2026-03-23T13:35:04.338489+08:00",
+    "generated_at": "2026-03-23T18:25:05.979182+08:00",
     "cpu": {
-      "percent": 13.35
+      "percent": 9.08
     },
     "memory": {
-      "percent": 52.81,
-      "available_mb": 15352.26
+      "percent": 57.05,
+      "available_mb": 13971.25
     },
     "gpu": {
       "available": true,
       "devices": [
         {
           "name": "NVIDIA GeForce RTX 4090",
-          "utilization_percent": 0.0,
-          "memory_used_mb": 1057.0,
+          "utilization_percent": 1.0,
+          "memory_used_mb": 1068.0,
           "memory_total_mb": 24564.0,
-          "memory_percent": 4.3
+          "memory_percent": 4.35
         }
       ]
     }
   },
   "agent_registry_summary": {
-    "managed_agent_count": 2,
+    "managed_agent_count": 3,
     "fetch_agent_count": 10,
     "auto_task_count": 22,
     "heavy_auto_task_count": 11,
     "research_auto_task_count": 10
   },
   "scheduler_heartbeat": {
-    "timestamp": "2026-03-23T13:31:59.344024",
+    "timestamp": "2026-03-23T18:23:18.719966",
     "status": "running",
-    "pid": 52220
+    "pid": 10528
   }
 }

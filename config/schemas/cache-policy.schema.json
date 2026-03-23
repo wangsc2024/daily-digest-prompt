@@ -8,8 +8,8 @@
   "properties": {
     "version": {
       "type": "integer",
-      "const": 1,
-      "description": "配置版本號（目前為 1）"
+      "minimum": 1,
+      "description": "配置版本號"
     },
     "cache_dir": {
       "type": "string",

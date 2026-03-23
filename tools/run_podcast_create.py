@@ -31,8 +31,6 @@ def podcast_series_display_name(task_key: str) -> str:
         return str(by.get(task_key) or n.get("series_default") or "知識電台").strip()
     except Exception:
         return "知識電台"
-# 與任務規格一致：僅排除佛學／佛教／淨土類標籤（不額外擴張）
-EXCLUDE_TAGS = {"佛學", "佛教", "淨土"}
 COOLDOWN_DAYS = 30
 KB_BASE = "http://localhost:3000"
 PODCAST_QUERY = "技術 AI 研究 學習 工具"
@@ -50,7 +48,8 @@ def fetch_hybrid_search(query: str, top_k: int = 15) -> list[dict]:
     )
     with urllib.request.urlopen(req, timeout=15) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    return data.get("items", [])
+    # KB API 可能回傳 items 或 results
+    return data.get("items") or data.get("results") or []
 
 
 def fetch_note(note_id: str) -> dict | None:
@@ -90,8 +89,8 @@ def load_used_note_ids(within_days: int = 30) -> set[str]:
                     used.add(e["note_id"])
             except Exception:
                 pass
-        # episodes 最近 30 天
-        for ep in data.get("episodes", [])[:20]:
+        # episodes 最近 30 天（掃描全部以符合去重規格）
+        for ep in data.get("episodes", []):
             created = ep.get("created_at", "")
             if not created:
                 continue
@@ -111,11 +110,15 @@ def load_used_note_ids(within_days: int = 30) -> set[str]:
 
 
 def has_excluded_tag(tags: list[str]) -> bool:
-    """是否含有排除標籤"""
+    """標籤字串含佛學／佛教／淨土任一字樣則排除（與任務「tags 含」一致）"""
     if not tags:
         return False
-    tag_set = {str(t).strip() for t in tags}
-    return bool(tag_set & EXCLUDE_TAGS)
+    needles = ("佛學", "佛教", "淨土")
+    for t in tags:
+        s = str(t).strip()
+        if any(n in s for n in needles):
+            return True
+    return False
 
 
 def fetch_notes_list(limit: int = 250) -> list[dict]:
@@ -188,17 +191,26 @@ def fallback_rank_notes(notes: list[dict], used: set[str], query: str) -> list[d
 
 def select_top3_notes() -> list[dict]:
     """選出 3 篇非佛學、未在 30 天內使用的高分筆記"""
-    items = fetch_hybrid_search(PODCAST_QUERY, top_k=20)
+    items = fetch_hybrid_search(PODCAST_QUERY, top_k=40)
     used = load_used_note_ids(COOLDOWN_DAYS)
     candidates: list[dict] = []
+    seen_hybrid: set[str] = set()
     for item in items:
-        mid = item.get("metadata", {})
-        note_id = item.get("id") or mid.get("id") or mid.get("noteId")
-        tags = mid.get("tags", []) or []
+        mid = item.get("metadata", {}) or {}
+        note_id = (
+            item.get("id")
+            or item.get("noteId")
+            or mid.get("id")
+            or mid.get("noteId")
+        )
+        tags = item.get("tags") or mid.get("tags") or []
+        if not note_id or note_id in seen_hybrid:
+            continue
         if has_excluded_tag(tags):
             continue
-        if note_id and note_id in used:
+        if note_id in used:
             continue
+        seen_hybrid.add(note_id)
         score = item.get("score", 0)
         candidates.append({"id": note_id, "score": score, "metadata": mid})
         if len(candidates) >= 3:
@@ -328,6 +340,7 @@ def main() -> int:
         cfg_path = PROJECT_DIR / "config" / "media-pipeline.yaml"
         voice_a = "zh-TW-HsiaoChenNeural"
         voice_b = "zh-TW-YunJheNeural"
+        voice_guest = "zh-TW-HsiaoYuNeural"
         if cfg_path.exists():
             txt = cfg_path.read_text(encoding="utf-8")
             if "voice_a:" in txt:
@@ -338,6 +351,10 @@ def main() -> int:
                 m = re.search(r"voice_b:\s*[\"']?([^\"'#\s]+)", txt)
                 if m:
                     voice_b = m.group(1).strip()
+            if "voice_guest:" in txt:
+                m = re.search(r"voice_guest:\s*[\"']?([^\"'#\s]+)", txt)
+                if m:
+                    voice_guest = m.group(1).strip()
         audio_dir.mkdir(parents=True, exist_ok=True)
         rc = subprocess.run([
             "uv", "run", "--project", str(PROJECT_DIR), "python",
@@ -346,6 +363,7 @@ def main() -> int:
             "--output", str(audio_dir),
             "--voice-a", voice_a,
             "--voice-b", voice_b,
+            "--voice-guest", voice_guest,
             "--abbrev-rules", str(PROJECT_DIR / "config" / "tts-abbreviation-rules.yaml"),
         ], capture_output=True, text=True, timeout=300)
         if rc.returncode != 0:

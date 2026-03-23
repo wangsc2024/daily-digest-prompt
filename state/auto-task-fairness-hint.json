@@ -1,13 +1,11 @@
 {
-  "generated_at": "2026-03-23T13:30:03.806498",
+  "generated_at": "2026-03-23T18:00:03.877439",
   "date": "2026-03-23",
-  "starvation_count": 1,
-  "starvation_detected": true,
-  "zero_count_tasks": [
-    "kb_system_optimize"
-  ],
-  "fairness_score": 0.0,
+  "starvation_count": 0,
+  "starvation_detected": false,
+  "zero_count_tasks": [],
+  "fairness_score": 0.39,
   "pointer_reset": false,
-  "next_execution_order": 32,
+  "next_execution_order": 23,
   "max_execution_order": 36
 }

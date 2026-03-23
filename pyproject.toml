@@ -9,7 +9,8 @@ dependencies = [
     "requests==2.32.5",
     "schedule==1.2.2",
     "pyyaml==6.0.3",
-    "edge-tts>=6.1.0,<7.0.0",
+    # 6.x 對微軟新端點常 403；7.2.7+ 含 Sec-MS-GEC / 新 websocket 相容（見 rany2/edge-tts#458）
+    "edge-tts==7.2.8",
     "fpdf2>=2.8.4,<3.0.0",
     "opentelemetry-api>=1.22.0,<2.0.0",
     "opentelemetry-sdk>=1.22.0,<2.0.0",

@@ -103,6 +103,7 @@ class AutonomousHarness:
         self._team_mode_limit: int = int(
             freq_cfg.get("max_auto_per_run", {}).get("team_mode", 3)
         )
+        self._starvation_boost: int = int(self.thresholds.get("starvation_boost", 2))
 
     def _resolve(self, key: str) -> Path:
         return self.repo_root / self.settings[key]
@@ -367,19 +368,32 @@ $os = Get-CimInstance Win32_OperatingSystem
 
     def _api_health_actions(self, api_health: dict[str, Any]) -> list[Action]:
         actions: list[Action] = []
-        for api_name, status in api_health.get("apis", {}).items():
-            circuit = status.get("circuit_breaker", {})
-            state = circuit.get("state")
-            if state != "open":
+        chatroom_scope_apis = set(self.settings.get("chatroom_scope_apis", []))
+        dispatch = self.settings.get("dispatch", {})
+        for api_name, status in api_health.items():
+            if not isinstance(status, dict):
                 continue
-            actions.append(
-                Action(
-                    action_type="queue_self_heal",
-                    target=api_name,
-                    reason=f"{api_name} circuit breaker 為 open，需自動降級與恢復檢查",
-                    severity="medium",
+            if status.get("state") != "open":
+                continue
+            # chatroom 範圍 API 且有 dispatch 設定 → 直接重啟，不觸發 queue_self_heal
+            if api_name in chatroom_scope_apis and api_name in dispatch:
+                actions.append(
+                    Action(
+                        action_type="restart_agent",
+                        target=api_name,
+                        reason=f"{api_name} circuit breaker 為 open，自動重啟 bot.js",
+                        severity="medium",
+                    )
                 )
-            )
+            else:
+                actions.append(
+                    Action(
+                        action_type="queue_self_heal",
+                        target=api_name,
+                        reason=f"{api_name} circuit breaker 為 open，需自動降級與恢復檢查",
+                        severity="medium",
+                    )
+                )
         return actions
 
     def _fairness_actions(self, fairness_hint: dict[str, Any]) -> list[Action]:
@@ -392,8 +406,8 @@ $os = Get-CimInstance Win32_OperatingSystem
             Action(
                 action_type="rebalance_tasks",
                 target="todoist",
-                reason=f"偵測到 {starvation_count} 個任務飢餓，需降低並行並優先補跑低頻任務",
-                severity="high",
+                reason=f"偵測到 {starvation_count} 個任務飢餓，需優先補跑低頻任務",
+                severity="medium",
             )
         ]
 
@@ -487,6 +501,7 @@ $os = Get-CimInstance Win32_OperatingSystem
         resource_snapshot: dict[str, Any],
         agent_registry: dict[str, Any],
         runtime_override: dict[str, Any],
+        api_health: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         has_critical = any(action["severity"] == "critical" for action in plan["actions"])
         has_high = any(action["severity"] == "high" for action in plan["actions"])
@@ -496,7 +511,7 @@ $os = Get-CimInstance Win32_OperatingSystem
 
         if has_critical or heartbeat_stale:
             mode = "recovery"
-        elif has_high or token_alert or starvation_detected or plan["summary"]["open_circuits"] > 0:
+        elif has_high or token_alert or plan["summary"]["open_circuits"] > 0:
             mode = "degraded"
         else:
             mode = "normal"
@@ -516,6 +531,17 @@ $os = Get-CimInstance Win32_OperatingSystem
         core_fetch_agents = self.discovery.get("core_fetch_agents", [])
         optional_fetch_agents = self.discovery.get("optional_fetch_agents", [])
         blocked_fetch_agents = list(profile.get("blocked_fetch_agents", []))
+        # chatroom 範圍 API（gun-bot / chatroom-scheduler）失效時，只鎖定 chatroom fetch agent，
+        # 不影響系統模式（不觸發 degraded / recovery）。
+        chatroom_scope_apis = set(self.settings.get("chatroom_scope_apis", []))
+        _health = api_health or {}
+        chatroom_circuit_open = any(
+            isinstance(status, dict) and status.get("state") == "open"
+            for api_name, status in _health.items()
+            if api_name in chatroom_scope_apis
+        )
+        if chatroom_circuit_open and "chatroom" not in blocked_fetch_agents:
+            blocked_fetch_agents.append("chatroom")
         fetch_agent_keys = [item["key"] for item in agent_registry.get("fetch_agents", [])]
         allowed_fetch_agents = [
             key for key in fetch_agent_keys if key not in blocked_fetch_agents
@@ -547,8 +573,8 @@ $os = Get-CimInstance Win32_OperatingSystem
         # 確保 runtime policy 不會壓低 Phase 1 的選取上限，加速清除積壓。
         # Recovery mode 排除：系統已有嚴重故障（heartbeat stale / open circuit），
         # 此時不應放大並行，以免加重系統負擔。
-        if len(starved_task_keys) > 1 and mode != "recovery":
-            max_parallel_auto_tasks = max(max_parallel_auto_tasks, self._team_mode_limit + 2)
+        if len(starved_task_keys) >= 1 and mode != "recovery":
+            max_parallel_auto_tasks = max(max_parallel_auto_tasks, self._team_mode_limit + self._starvation_boost)
         max_parallel_fetch_agents = profile.get("max_parallel_fetch_agents", len(fetch_agent_keys))
         if runtime_override.get("max_parallel_fetch_agents") is not None:
             max_parallel_fetch_agents = min(
@@ -643,8 +669,10 @@ $os = Get-CimInstance Win32_OperatingSystem
                 "scheduler_runs_analyzed": len(self._recent_scheduler_runs(scheduler_state)),
                 "open_circuits": sum(
                     1
-                    for status in api_health.get("apis", {}).values()
-                    if status.get("circuit_breaker", {}).get("state") == "open"
+                    for api_name, status in api_health.items()
+                    if isinstance(status, dict)
+                    and status.get("state") == "open"
+                    and api_name not in self.settings.get("chatroom_scope_apis", [])
                 ),
                 "failed_auto_tasks": sum(
                     1
@@ -676,6 +704,7 @@ $os = Get-CimInstance Win32_OperatingSystem
             resource_snapshot,
             agent_registry,
             runtime_override,
+            api_health=api_health,
         )
         if plan["runtime"]["mode"] == "recovery":
             self._notify_recovery(plan, now)

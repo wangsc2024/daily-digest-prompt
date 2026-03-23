@@ -103,4 +103,10 @@ def test_recovery_worker_executes_restart_command(tmp_path: Path) -> None:
     assert result["processed_count"] == 1
     assert result["processed"][0]["status"] == "completed"
     assert queue["items"][0]["status"] == "completed"
-    mocked_run.assert_called_once()
+    # Verify restart command was called (may also call subprocess for ntfy notifications)
+    assert mocked_run.call_count >= 1
+    restart_called = any(
+        call.args and call.args[0] == ["pwsh", "-File", "run-todoist-agent-team.ps1"]
+        for call in mocked_run.call_args_list
+    )
+    assert restart_called, f"Restart command not found in calls: {[c.args for c in mocked_run.call_args_list]}"

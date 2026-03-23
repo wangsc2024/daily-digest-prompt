@@ -317,6 +317,17 @@
       "verse_id": 29,
       "date": "2026-03-23",
       "time": "2026-03-23 06:30:02"
+    },
+    {
+      "date": "2026-03-23",
+      "verse_text": "一句彌陀，是斬群邪之寶劍；一句彌陀，是破地獄之猛將。",
+      "source": "《龍舒淨土文》",
+      "channel": "ntfy/wangsc2025",
+      "time": "2026-03-23 17:05:02",
+      "session": "evening",
+      "status": "success",
+      "author": "龍舒居士王日休",
+      "verse_id": 30
     }
   ]
 }

@@ -96,8 +96,10 @@ $ttsArgs = @(
 if (Test-Path $cfgPath) {
     $voiceA = (Get-Content $cfgPath | Select-String "voice_a:") -replace '.*voice_a:\s*"?([^"#\s]+)"?.*', '$1'
     $voiceB = (Get-Content $cfgPath | Select-String "voice_b:") -replace '.*voice_b:\s*"?([^"#\s]+)"?.*', '$1'
+    $voiceGuest = (Get-Content $cfgPath | Select-String "voice_guest:") -replace '.*voice_guest:\s*"?([^"#\s]+)"?.*', '$1'
     if ($voiceA) { $ttsArgs += "--voice-a", $voiceA.Trim() }
     if ($voiceB) { $ttsArgs += "--voice-b", $voiceB.Trim() }
+    if ($voiceGuest) { $ttsArgs += "--voice-guest", $voiceGuest.Trim() }
 }
 $phase2Start = Get-Date
 uv run --project $AgentDir python @ttsArgs

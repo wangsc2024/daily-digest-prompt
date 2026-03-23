@@ -1,8 +1,16 @@
 ---
 name: "auto-task-creator"
-version: "1.0.0"
-description: "自動任務建立精靈：逐步引導使用者依 CLAUDE.md 的 6 步 checklist 正確新增自動任務，包含 frequency-limits.yaml、prompt 檔、timeouts.yaml、PS1 腳本，確保命名一致（底線），支援 allowed_days 星期限制設定"
+version: "1.0.1"
+description: |
+  自動任務建立精靈：逐步引導使用者依 CLAUDE.md 的 6 步 checklist 正確新增自動任務，包含 frequency-limits.yaml、prompt 檔、timeouts.yaml、PS1 腳本，確保命名一致（底線），支援 allowed_days 星期限制設定。
+  Use when: 新增自動任務時，需要確保所有配置檔案（frequency-limits.yaml、timeouts.yaml、prompt 檔）命名一致且符合規範。
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+cache-ttl: N/A
+depends-on:
+  - config/frequency-limits.yaml
+  - config/timeouts.yaml
+  - run-todoist-agent-team.ps1
+  - skills/add-podcast-task/SKILL.md
 triggers:
   - "新增自動任務"
   - "add auto task"

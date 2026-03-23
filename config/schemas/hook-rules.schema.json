@@ -99,7 +99,7 @@
         },
         "check": {
           "type": "string",
-          "enum": ["basename_equals", "path_contains", "basename_in", "path_traversal"]
+          "enum": ["basename_equals", "path_contains", "basename_in", "path_traversal", "path_match"]
         },
         "value": {
           "type": "string"

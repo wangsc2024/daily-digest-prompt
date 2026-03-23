@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-23T12:23:32.916853+08:00",
+  "updated_at": "2026-03-23T13:45:24.439337+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -3094,7 +3094,7 @@
       "domain": "天台止觀實修 / Tiantai Zhiguan Practice",
       "description": "天台宗止觀實修體系深度研究，從小止觀入門到摩訶止觀圓頓修證",
       "initiated_at": "2026-03-15",
-      "last_active": "2026-03-15",
+      "last_active": "2026-03-23",
       "tags": [
         "小止觀",
         "佛學",
@@ -3122,7 +3122,18 @@
           ]
         },
         "mechanism": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "十乘觀法 — 天台圓教止觀的完整修證次第與內部原理（《摩訶止觀》核心）"
+          ],
+          "covered_concepts": [
+            "十乘觀法各乘詳細內容",
+            "十乘之間的次第關係",
+            "十境十乘對應",
+            "正修與助道分工",
+            "根性與乘數選擇",
+            "藏通別圓四教觀法差異"
+          ]
         },
         "application": {
           "status": "pending"
@@ -3139,7 +3150,7 @@
       "related_series": [
         "jiaoguangzong"
       ],
-      "next_research_hint": "完成foundation後進入mechanism：摩訶止觀十乘觀法深度研究",
+      "next_research_hint": "完成 mechanism 後進入 application：十乘觀法實修案例與現代禪修整合",
       "saturation_score": 0.4439,
       "saturation_matched_cluster": "天台止觀實修：《小止觀》完整研究"
     },
@@ -5314,6 +5325,51 @@
       "completion_pct": 80,
       "related_series": [],
       "next_research_hint": "完成後進入 synthesis：與其他智慧城市系統（智慧交通、智慧能源）的整合連結"
+    },
+    "temporal-ai-workflow": {
+      "series_id": "temporal-ai-workflow",
+      "domain": "Temporal — 分散式工作流引擎的 AI 應用擴充",
+      "description": "KB 中僅有 LangGraph 相關知識，缺乏工作流引擎類別的研究。本次開啟新系列，從 foundation 階段開始，建立 Temporal 工作流引擎的基礎認知",
+      "initiated_at": "2026-03-23",
+      "last_active": "2026-03-23",
+      "tags": [
+        "GitHub",
+        "AI工作流",
+        "自動化",
+        "Temporal",
+        "工作流引擎",
+        "分散式系統"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-23",
+          "kb_notes": [
+            "Temporal 深度研究報告 — 分散式工作流引擎的 AI 應用擴充"
+          ],
+          "covered_concepts": [
+            "Temporal 架構",
+            "持久化執行",
+            "工作流引擎"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [],
+      "next_research_hint": "完成後進入 mechanism：深入 Temporal 的持久化執行、錯誤重試、分散式協調機制"
     }
   }
 }
