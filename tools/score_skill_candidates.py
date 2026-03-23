@@ -27,11 +27,11 @@ def _load_config() -> dict:
     text = p.read_text(encoding="utf-8")
     # Minimal YAML parsing for numeric thresholds
     cfg: dict = {}
-    # Extract exclude_tools list
-    tools_match = re.search(r"exclude_tools:\s*\n((?:\s+- \w+\n)+)", text)
+    # Extract exclude_tools list（處理行尾註解）
+    tools_match = re.search(r"exclude_tools:.*?\n((?:\s+- \w+.*?\n)+)", text)
     exclude_tools = []
     if tools_match:
-        exclude_tools = re.findall(r"- (\w+)", tools_match.group(1))
+        exclude_tools = re.findall(r"-\s+(\w+)", tools_match.group(1))
 
     # Extract thresholds
     def extract_thresholds(section: str) -> dict:
