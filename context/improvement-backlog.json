@@ -1,10 +1,25 @@
 {
   "version": 1,
-  "generated_at": "2026-03-23T12:44:54.036682+08:00",
+  "generated_at": "2026-03-23T13:39:49.863195+08:00",
   "source": "github_scout",
   "total_score": 87.88,
   "grade": "A",
   "items": [
+    {
+      "id": "backlog_kso_20260323_state_file_bloat",
+      "source": "kb_system_optimize",
+      "title": "State 檔案膨脹治理（kb-note-scores.json 470KB）",
+      "description": "kb-note-scores.json (470KB, 15585 行) 和 research-quality.json (122KB, 4060 行) 佔 state/ 目錄 42% 空間。建議：① kb-curator 加入老舊評分清理機制（保留近 30 天）② research-quality 壓縮或歸檔 ③ 定期審查 state/ 目錄健康度",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-23T13:39:49.863195+08:00",
+      "status": "pending",
+      "tags": [
+        "kb_system_optimize",
+        "state_cleanup",
+        "medium_priority"
+      ]
+    },
     {
       "id": "backlog_kb_insight_20260323_cache_optimization",
       "source": "kb_insight_evaluation",
@@ -142,7 +157,10 @@
       "priority": "medium",
       "effort": "low",
       "created_at": "2026-03-23T12:37:12.328527",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "ADR-20260323-043",
+      "actual_result": "cache-optimizer 執行後命中率達 98.8%，遠超 40% 門檻",
       "tags": [
         "system_insight",
         "auto_detected",
@@ -188,7 +206,10 @@
       "priority": "high",
       "effort": "medium",
       "created_at": "2026-03-22T05:34:15+08:00",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "ADR-20260323-043",
+      "actual_result": "cache-optimizer 執行後命中率達 98.8%，問題已解決",
       "tags": [
         "system_insight",
         "auto_detected",
@@ -660,7 +681,10 @@
       "priority": "high",
       "effort": "medium",
       "created_at": "2026-03-21T18:42:23.430366",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "ADR-036",
+      "actual_result": "post_tool_logger.py L853 已整合 context_compressor（動態 import），context_usage_tracker 已就緒",
       "tags": [
         "insight_briefing",
         "research_derived",
@@ -676,7 +700,10 @@
       "priority": "high",
       "effort": "medium",
       "created_at": "2026-03-21T18:49:16.438777",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "tools/time_slot_risk_scorer.py",
+      "actual_result": "tools/time_slot_risk_scorer.py 已完整實作（含 --write-report CLI），tests/tools/test_time_slot_risk_scorer.py 測試已覆蓋",
       "tags": [
         "kb_insight_evaluation",
         "time_slot_analysis",
@@ -860,7 +887,10 @@
       "priority": "high",
       "effort": "medium",
       "created_at": "2026-03-22T08:49:00.56384+08:00",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "ADR-20260323-042",
+      "actual_result": "config/failure-taxonomy.yaml + tools/classify_failure.py 已實作，4 維度分類體系就緒",
       "tags": [
         "kb_insight_evaluation",
         "failure_taxonomy",
@@ -899,7 +929,10 @@
       "priority": "high",
       "effort": "low",
       "created_at": "2026-03-22T08:49:00.56384+08:00",
-      "status": "pending",
+      "status": "done",
+      "resolved_at": "2026-03-23",
+      "resolved_by": "ADR-20260323-043",
+      "actual_result": "cache-optimizer 執行完成，results/cache-optimizer-report.json 顯示命中率 98.8%（遠超目標 27%）",
       "tags": [
         "kb_insight_evaluation",
         "cache_optimization",
@@ -1139,6 +1172,270 @@
       "processed_at": "2026-03-23T12:52:43.837204+08:00",
       "implemented_count": 1,
       "plan_ready_count": 5
+    },
+    {
+      "id": "backlog_future_n9_self_heal_5tier",
+      "source": "future_plan",
+      "title": "5-tier 分級自癒機制（Tier 0-4 遞進）",
+      "description": "建立 5 層分級自癒機制：Tier 0（即時修復，< 30s）、Tier 1（自動重試）、Tier 2（降級執行）、Tier 3（隔離恢復）、Tier 4（人工審議）。來源：待辦事項.md N9。",
+      "priority": "high",
+      "effort": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "self_heal",
+        "reliability"
+      ],
+      "execution_plan": {
+        "steps": [
+          "定義 5-tier 自癒策略（閾值、動作、升級條件）",
+          "在 autonomous_harness.py 新增 tier_selector()",
+          "整合至 run-todoist-agent-team.ps1 失敗處理流程",
+          "新增 state/self-heal-log.json 追蹤自癒歷史",
+          "7 天觀察自癒觸發次數與成功率"
+        ],
+        "acceptance_criteria": [
+          "Tier 0-2 可自動處理 80%+ 的暫時性失敗",
+          "自癒日誌可追溯每次觸發的 tier 與結果",
+          "高風險操作正確升級至 Tier 3/4"
+        ],
+        "research_sources": [
+          "未來計畫/待辦事項.md N9"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_n10_llm_agnostic",
+      "source": "future_plan",
+      "title": "LLM-Agnostic 統一環境變數（LLM_PROVIDER routing）",
+      "description": "建立 LLM_PROVIDER 環境變數統一路由機制，讓 Claude/Groq/OpenRouter 切換只需改一個環境變數，不修改 Prompt 或 PS1 腳本。來源：待辦事項.md N10。",
+      "priority": "medium",
+      "effort": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "llm_router",
+        "portability"
+      ],
+      "execution_plan": {
+        "steps": [
+          "定義 LLM_PROVIDER 環境變數規格（claude/groq/openrouter）",
+          "修改 config/llm-router.yaml 支援 provider 層級路由",
+          "更新 tools/llm_router.py 讀取 LLM_PROVIDER",
+          "測試三種 provider 切換不影響 Prompt 輸出格式"
+        ],
+        "acceptance_criteria": [
+          "LLM_PROVIDER=groq 時所有任務自動走 Groq API",
+          "切換 provider 無需修改任何 Prompt 或 PS1 腳本",
+          "llm_router.py --dry-run 正確顯示選中的 provider"
+        ],
+        "research_sources": [
+          "未來計畫/待辦事項.md N10"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_n5_llm_judge",
+      "source": "future_plan",
+      "title": "LLM-as-Judge Agent 輸出品質四維度評估框架",
+      "description": "建立 LLM-as-Judge 評估機制，對每次自動任務輸出進行四維度評分（正確性、完整性、相關性、格式合規）。來源：待辦事項.md N5。",
+      "priority": "medium",
+      "effort": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "quality_evaluation",
+        "llm_judge"
+      ],
+      "execution_plan": {
+        "steps": [
+          "設計四維度評分 Prompt（正確性/完整性/相關性/格式合規）",
+          "新建 tools/llm_judge.py，呼叫 Groq 評分（低成本）",
+          "在 Phase 3 assemble 後自動觸發評分",
+          "評分結果寫入 results/*-quality.json",
+          "整合至 system-insight 形成品質趨勢監控"
+        ],
+        "acceptance_criteria": [
+          "每次自動任務有對應的品質評分記錄",
+          "低分任務（< 3/5）自動觸發 ntfy 告警",
+          "7 天品質分數基線建立完成"
+        ],
+        "research_sources": [
+          "未來計畫/待辦事項.md N5"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_gemini_error_classifier",
+      "source": "future_plan",
+      "title": "錯誤分類器 + Circuit Breaker（GeminiCli 借鑑 Phase B）",
+      "description": "參考 GeminiCli 借鑑方案，建立自動錯誤分類系統（4 類）+ Circuit Breaker（連續失敗 3 次自動斷路）。來源：GeminiCli借鑑方案.md Phase B。",
+      "priority": "high",
+      "effort": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "error_classifier",
+        "circuit_breaker",
+        "reliability"
+      ],
+      "execution_plan": {
+        "steps": [
+          "使用現有 config/failure-taxonomy.yaml + tools/classify_failure.py",
+          "新增 Circuit Breaker 狀態機（closed/open/half-open）",
+          "整合至 agent_guardian.py 的 CircuitBreaker 類別",
+          "新增 state/circuit-breaker-state.json 持久化狀態",
+          "斷路時自動降級並發送 ntfy 告警"
+        ],
+        "acceptance_criteria": [
+          "連續 3 次失敗後 Circuit Breaker 進入 open 狀態",
+          "30 秒後自動進入 half-open 嘗試恢復",
+          "分類準確率 >= 80%"
+        ],
+        "research_sources": [
+          "未來計畫/GeminiCli借鑑方案.md Phase B"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_gemini_security_engine",
+      "source": "future_plan",
+      "title": "分層安全策略引擎 + 結構化測試（GeminiCli Phase C）",
+      "description": "建立分層安全策略引擎（Hook 規則 → 語義分析 → 人工審議三層），搭配結構化安全測試套件（20 個攻擊向量）。來源：GeminiCli借鑑方案.md Phase C。",
+      "priority": "medium",
+      "effort": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "security",
+        "structured_testing"
+      ],
+      "execution_plan": {
+        "steps": [
+          "盤點現有三層 Hook 機制的覆蓋率與盲點",
+          "設計語義分析層（對 Prompt 輸出進行語義安全檢查）",
+          "建立結構化安全測試矩陣（20 個攻擊向量）",
+          "整合至 CI 管線自動執行安全測試"
+        ],
+        "acceptance_criteria": [
+          "語義分析層可識別 80%+ 的已知攻擊向量",
+          "安全測試套件覆蓋 20 個攻擊向量",
+          "CI 管線每次 PR 自動執行安全測試"
+        ],
+        "research_sources": [
+          "未來計畫/GeminiCli借鑑方案.md Phase C"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_adaptive_ttl",
+      "source": "future_plan",
+      "title": "自適應 TTL 演算法（d-TTL/f-TTL，arXiv 1704.04448）",
+      "description": "實作 d-TTL 演算法，依端點歷史命中率自動調整 TTL（收斂誤差 1.3%）。學術論文驗證 5 億次 CDN 請求生產場景。來源：backlog_ib_20260323 + arXiv 1704.04448。",
+      "priority": "high",
+      "effort": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "adaptive_ttl",
+        "cache_optimization"
+      ],
+      "execution_plan": {
+        "steps": [
+          "研究 d-TTL 演算法（arXiv 1704.04448）核心公式",
+          "新建 tools/adaptive_ttl_manager.py",
+          "整合至 api-cache Skill 的 TTL 設定流程",
+          "監控 7 天命中率收斂情況",
+          "若優於固定 TTL 則更新 config/cache-policy.yaml"
+        ],
+        "acceptance_criteria": [
+          "7 天內 cache_hit_ratio 收斂至目標值（±5%）",
+          "無需手動調整 TTL，系統自動收斂",
+          "命中率優於固定 TTL 方案至少 10%"
+        ],
+        "research_sources": [
+          "arXiv 1704.04448"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_arc_eviction",
+      "source": "future_plan",
+      "title": "ARC 快取驅逐策略（比 LRU+12-18%，Redis 官方）",
+      "description": "ARC 在混合工作負載下達 92% 命中率，比 LRU/LFU 高 12-18%。在測試環境比較三種策略後決定是否採用。來源：Redis 官方部落格、Stanford 論文。",
+      "priority": "medium",
+      "effort": "medium",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "arc",
+        "cache_eviction"
+      ],
+      "execution_plan": {
+        "steps": [
+          "在測試環境實作 ARC 演算法原型",
+          "比較 LRU/LFU/ARC 在現有工作負載的命中率",
+          "量測 ARC 元數據開銷（預期 < 5%）",
+          "若命中率提升 >= 10% 且開銷可接受 → 整合至 api-cache"
+        ],
+        "acceptance_criteria": [
+          "ARC vs LRU 命中率比較報告產出",
+          "元數據開銷 < 現有快取大小的 5%",
+          "若採用，7 天後確認命中率提升"
+        ],
+        "research_sources": [
+          "Redis 官方部落格",
+          "Stanford ARC 論文"
+        ]
+      }
+    },
+    {
+      "id": "backlog_future_wrr_fairness",
+      "source": "future_plan",
+      "title": "自動任務 WRR 公平輪轉（7 天觀測期）",
+      "description": "將純 round-robin 升級為 Weighted Round-robin + Aging 機制，消除任務飢餓並將 fairness_stddev 從 1.371 降至 < 0.5。需 PS1 修改 + 7 天觀測驗證。",
+      "priority": "high",
+      "effort": "high",
+      "status": "pending",
+      "retry_count": 0,
+      "evaluated_at": "2026-03-23",
+      "tags": [
+        "future_plan",
+        "wrr",
+        "fairness",
+        "scheduling"
+      ],
+      "execution_plan": {
+        "steps": [
+          "設計 WRR 權重公式（priority × effort_w × starvation_age）",
+          "在 run-todoist-agent-team.ps1 Phase 1 加入加權選擇邏輯",
+          "新增 state/auto-task-fairness-hint.json（執行歷史、權重）",
+          "7 天後執行 fairness 分析，確認 fairness_stddev < 0.5",
+          "若改善不足則調整權重係數"
+        ],
+        "acceptance_criteria": [
+          "零執行任務數降至 5 個以下（目前 18 個）",
+          "fairness_stddev 降至 0.5 以下（目前 1.371）",
+          "所有任務至少每週執行 1 次（若 allowed_days 允許）"
+        ],
+        "research_sources": [
+          "backlog_kb_insight_20260323_task_fairness_wrr"
+        ]
+      }
     }
   ],
   "entries": [
@@ -1620,6 +1917,126 @@
         },
         "research_depth": "adequate",
         "notes": "OpenClaw stars 較少但架構相關性高；SigNoz 和 Langfuse 皆為成熟專案（>20k stars）且活躍維護中"
+      }
+    },
+    {
+      "version": 1,
+      "scouted_at": "2026-03-23T15:30:00+08:00",
+      "topic": "Skill/Plugin 系統架構",
+      "projects": [
+        {
+          "name": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "stars": 106000,
+          "description": "強制工作流的 Agentic Skills 框架，106K stars，Skills 自動觸發、TDD 強制、Subagent 並行、Git worktrees 隔離",
+          "relevance": "high",
+          "last_updated": "2026-03-17"
+        },
+        {
+          "name": "sickn33/antigravity-awesome-skills",
+          "url": "https://github.com/sickn33/antigravity-awesome-skills",
+          "stars": 27000,
+          "description": "1,306+ skills 可安裝庫，27K stars，NPX 一鍵安裝、Bundle 策略、機器可讀索引、跨平台一致性",
+          "relevance": "high",
+          "last_updated": "2026-03-23"
+        },
+        {
+          "name": "NocoBase",
+          "url": "https://www.nocobase.com",
+          "stars": 15000,
+          "description": "Plugin-based extensibility 的 AI-powered no-code 平台，強調可擴展性",
+          "relevance": "medium",
+          "last_updated": "2026-03"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "antigravity-awesome-skills",
+          "pattern": "機器可讀 Skill Registry（skills_index.json）",
+          "target_files": [
+            "skills/skill-registry.json",
+            "skills/SKILL_INDEX.md"
+          ],
+          "priority": "P0",
+          "effort": "low",
+          "description": "建立 skills/skill-registry.json（機器可讀），包含每個 Skill 的 name/version/triggers/depends-on/allowed-tools，由 skill-registry-sync Skill 自動掃描 frontmatter 生成。benefits: 觸發詞衝突偵測、依賴圖驗證、LLM 快速查詢",
+          "status": "implemented",
+          "implemented_at": "2026-03-23T15:48:24.257072",
+          "implementation_notes": "✅ 成功生成 skills/skill-registry.json（59KB，61 個 Skills），包含觸發詞衝突偵測（5 個警告）與依賴圖驗證（0 個錯誤）"
+        },
+        {
+          "source_project": "antigravity-awesome-skills",
+          "pattern": "Bundle 策略（角色/目標導向的 Skill 組合）",
+          "target_files": [
+            "config/skill-bundles.yaml",
+            "skills/SKILL_INDEX.md"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "建立 config/skill-bundles.yaml，定義 bundles（如：daily-digest-core, todoist-agent-core, research-bundle），每個 bundle 含 skills 陣列。benefits: 簡化 Agent 啟動（讀取 bundle 而非逐一讀 SKILL.md）、角色明確、降低 I/O",
+          "status": "draft",
+          "notes": "待下次執行時繼續實作（medium/high risk）"
+        },
+        {
+          "source_project": "superpowers",
+          "pattern": "Skills 自動觸發機制（context-based activation）",
+          "target_files": [
+            "hooks/skill_trigger_guard.py",
+            "config/skill-triggers.yaml"
+          ],
+          "priority": "P1",
+          "effort": "high",
+          "description": "新增 PostToolUse Hook，監控 prompt 內容與 Skill triggers 關鍵字匹配，自動提示 Agent「建議使用 XXX Skill」。benefits: 強化 Skill-First 執行率、減少遺漏、主動提醒",
+          "status": "draft",
+          "notes": "待下次執行時繼續實作（medium/high risk）"
+        },
+        {
+          "source_project": "antigravity-awesome-skills",
+          "pattern": "Workflow Playbooks（step-by-step 執行劇本）",
+          "target_files": [
+            "workflows/playbooks/",
+            "workflows/index.yaml"
+          ],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "擴充 workflows/ 為 Playbooks 目錄，將現有 validation-checklist 改為可執行 playbook（含 steps、verification、rollback）。benefits: 標準化操作、可重複、降低人工錯誤",
+          "status": "draft",
+          "notes": "待下次執行時繼續實作（medium/high risk）"
+        },
+        {
+          "source_project": "superpowers",
+          "pattern": "Git Worktrees 隔離機制",
+          "target_files": [
+            "tools/worktree_manager.py",
+            "config/worktree-policy.yaml"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "新增 worktree_manager.py，高風險操作（如 github-scout 落實中風險方案）在臨時 worktree 執行，驗證通過後 merge，失敗直接刪除 worktree。benefits: 安全實驗、零成本 rollback、保護主分支",
+          "status": "draft",
+          "notes": "待下次執行時繼續實作（medium/high risk）"
+        },
+        {
+          "source_project": "antigravity-awesome-skills",
+          "pattern": "Skill 安全掃描（GitHub Actions 自動化審查）",
+          "target_files": [
+            ".github/workflows/skill-security-scan.yml",
+            "tools/skill_security_scanner.py"
+          ],
+          "priority": "P2",
+          "effort": "low",
+          "description": "新增 GitHub Actions workflow，PR 觸發時掃描新增/修改的 SKILL.md，檢查高風險命令（rm -rf / curl | bash / eval）、敏感路徑、硬編碼端點。benefits: 社區貢獻安全審查、降低惡意 Skill 風險",
+          "status": "draft",
+          "notes": "待下次執行時繼續實作（medium/high risk）"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 2,
+          "B": 1
+        },
+        "research_depth": "adequate"
       }
     }
   ]

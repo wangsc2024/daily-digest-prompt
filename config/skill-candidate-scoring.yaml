@@ -1,13 +1,14 @@
-version: 1
+version: 2
 # config/skill-candidate-scoring.yaml
 # Behavior Pattern → Skill 演化候選評分模型（ADR-20260323-044）
 # 由 tools/score_skill_candidates.py 讀取
+# v2: 新增 complexity 第四維度，修正簡單 Bash 命令過度得分問題
 
-# 三維度評分模型
+# 四維度評分模型
 dimensions:
   frequency:
     description: "行為模式出現頻率（count）"
-    weight: 0.4
+    weight: 0.30               # v2: 0.40 → 0.30（讓出給 complexity）
     thresholds:
       high: 500      # >= 500: 3分
       medium: 100    # >= 100: 2分
@@ -16,7 +17,7 @@ dimensions:
 
   confidence:
     description: "模式信心度（success_count / count）"
-    weight: 0.35
+    weight: 0.25               # v2: 0.35 → 0.25
     thresholds:
       high: 0.85     # >= 0.85: 3分
       medium: 0.65   # >= 0.65: 2分
@@ -25,18 +26,33 @@ dimensions:
 
   reusability:
     description: "跨 session 可重用性（pattern 在多少 session 出現）"
-    weight: 0.25
+    weight: 0.20               # v2: 0.25 → 0.20
     thresholds:
-      # 代理指標：count / confidence（高頻 + 高信心 = 高重用性）
+      # 代理指標：count * confidence（高頻 + 高信心 = 高重用性）
       high: 300      # >= 300: 3分
       medium: 80     # >= 80:  2分
       low: 20        # >= 20:  1分
 
+  complexity:
+    description: "命令複雜度（區分業務邏輯 vs 簡單工具操作）"
+    weight: 0.25               # v2: 新增
+    thresholds:
+      # 評分由 _score_complexity() 計算
+      # 含換行/條件判斷/多管道 → 3分
+      # 含管道或邏輯 → 2分
+      # 中等長度命令 → 1分
+      # 短命令（≤ 50 字元）→ 0分
+
+# 複雜度排除（v2 新增）
+complexity_exclusions:
+  max_simple_command_length: 80  # <= 80 字元且無換行無管道 → 視為簡單命令，直接排除
+
 # Skill 候選門檻
 candidate_threshold:
-  min_score: 6.0          # 滿分9分，>= 6.0 為候選
+  min_score: 6.0          # 滿分 9 分，>= 6.0 為候選
   min_confidence: 0.65    # 信心度至少 0.65
   min_frequency: 50       # 至少出現 50 次
+  min_complexity_score: 1.0   # v2 新增：純簡單命令（0 分）直接排除
   exclude_tools:          # 純工具操作，非 Skill 候選
     - Read
     - Write

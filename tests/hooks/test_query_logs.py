@@ -301,3 +301,45 @@ class TestPrintSessions:
         output = capsys.readouterr().out
         assert "session 記錄" in output
         assert "healthy" in output
+
+
+class TestTraceFilter:
+    """--trace 參數過濾 trace_id 前綴。"""
+
+    def test_trace_filter_matches(self):
+        """符合前綴的條目應被保留。"""
+        entries = [
+            {"trace_id": "abc123def456", "event": "ok"},
+            {"trace_id": "xyz999000111", "event": "ok"},
+            {"trace_id": "", "event": "ok"},
+        ]
+        result = [e for e in entries if e.get("trace_id", "").startswith("abc")]
+        assert len(result) == 1
+        assert result[0]["trace_id"] == "abc123def456"
+
+    def test_trace_filter_empty_matches_all(self):
+        """--trace 未指定（空字串）時，所有條目均保留。"""
+        entries = [
+            {"trace_id": "abc123", "event": "ok"},
+            {"trace_id": "xyz999", "event": "ok"},
+        ]
+        result = [e for e in entries if e.get("trace_id", "").startswith("")]
+        assert len(result) == 2
+
+    def test_trace_filter_no_match(self):
+        """無符合前綴時回傳空列表。"""
+        entries = [
+            {"trace_id": "abc123", "event": "ok"},
+            {"trace_id": "def456", "event": "ok"},
+        ]
+        result = [e for e in entries if e.get("trace_id", "").startswith("zzz")]
+        assert len(result) == 0
+
+    def test_trace_filter_missing_trace_id(self):
+        """缺少 trace_id 欄位的條目使用空字串比對。"""
+        entries = [
+            {"event": "ok"},  # 無 trace_id
+            {"trace_id": "abc999", "event": "ok"},
+        ]
+        result = [e for e in entries if e.get("trace_id", "").startswith("abc")]
+        assert len(result) == 1

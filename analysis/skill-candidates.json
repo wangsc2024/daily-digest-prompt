@@ -1,77 +1,30 @@
 {
   "agent": "score_skill_candidates",
-  "generated_at": "2026-03-23T13:08:48.352359+08:00",
+  "generated_at": "2026-03-23T17:36:16.971300+08:00",
   "source": "context/behavior-patterns.json",
   "total_patterns": 200,
   "skipped_tool_ops": 151,
-  "skipped_below_threshold": 31,
-  "candidates_found": 11,
+  "skipped_below_threshold": 39,
+  "candidates_found": 5,
   "top_n": 10,
   "min_score": 6.0,
   "candidates": [
     {
-      "pattern_id": "4a11dbbed05f",
-      "tool": "Bash",
-      "summary_sample": "date -u +%Y-%m-%dT%H:%M:%SZ",
-      "count": 799,
-      "confidence": 1.0,
-      "success_count": 799,
-      "scores": {
-        "frequency": 3.0,
-        "confidence": 3.0,
-        "reusability": 3.0,
-        "total": 9.0
-      },
-      "first_seen": "2026-03-04T05:30:51.981759+08:00",
-      "last_seen": "2026-03-23T13:00:23.583278+08:00"
-    },
-    {
-      "pattern_id": "1528d64c9087",
-      "tool": "Bash",
-      "summary_sample": "curl -s --max-time 5 http://localhost:3001/api/health 2>/dev/null",
-      "count": 631,
-      "confidence": 1.0,
-      "success_count": 631,
-      "scores": {
-        "frequency": 3.0,
-        "confidence": 3.0,
-        "reusability": 3.0,
-        "total": 9.0
-      },
-      "first_seen": "2026-03-04T05:11:12.363970+08:00",
-      "last_seen": "2026-03-23T13:00:17.812115+08:00"
-    },
-    {
-      "pattern_id": "25f5c6a778eb",
-      "tool": "Bash",
-      "summary_sample": "curl -s --max-time 5 http://localhost:3001/api/health",
-      "count": 407,
-      "confidence": 1.0,
-      "success_count": 407,
-      "scores": {
-        "frequency": 2.0,
-        "confidence": 3.0,
-        "reusability": 3.0,
-        "total": 7.8
-      },
-      "first_seen": "2026-03-04T05:30:55.143824+08:00",
-      "last_seen": "2026-03-23T12:31:51.847891+08:00"
-    },
-    {
       "pattern_id": "71eb498d2dce",
       "tool": "Bash",
       "summary_sample": "pwsh -Command '\n$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN <REDAC",
-      "count": 382,
+      "count": 386,
       "confidence": 1.0,
-      "success_count": 382,
+      "success_count": 386,
       "scores": {
         "frequency": 2.0,
         "confidence": 3.0,
         "reusability": 3.0,
-        "total": 7.8
+        "complexity": 2.0,
+        "total": 7.35
       },
       "first_seen": "2026-03-06T17:30:47.582617+08:00",
-      "last_seen": "2026-03-23T13:01:07.038133+08:00"
+      "last_seen": "2026-03-23T17:01:07.880518+08:00"
     },
     {
       "pattern_id": "035fa479c08b",
@@ -84,7 +37,8 @@
         "frequency": 2.0,
         "confidence": 3.0,
         "reusability": 3.0,
-        "total": 7.8
+        "complexity": 2.0,
+        "total": 7.35
       },
       "first_seen": "2026-03-07T02:44:19.607190+08:00",
       "last_seen": "2026-03-23T09:08:55.278470+08:00"
@@ -93,49 +47,35 @@
       "pattern_id": "841f88566a9e",
       "tool": "Bash",
       "summary_sample": "curl -s --max-time 10 -H \"Authorization: Bearer <REDACTED> \"http://localhost:300",
-      "count": 278,
+      "count": 280,
       "confidence": 1.0,
-      "success_count": 278,
+      "success_count": 280,
       "scores": {
         "frequency": 2.0,
         "confidence": 3.0,
         "reusability": 2.0,
-        "total": 7.05
+        "complexity": 2.0,
+        "total": 6.75
       },
       "first_seen": "2026-03-04T05:48:45.821167+08:00",
-      "last_seen": "2026-03-23T11:00:37.597148+08:00"
+      "last_seen": "2026-03-23T16:30:21.798555+08:00"
     },
     {
       "pattern_id": "8c94a17d7f79",
       "tool": "Bash",
       "summary_sample": "curl -s -X POST \"http://localhost:3000/api/import\" -H \"Content-Type: application",
-      "count": 181,
+      "count": 182,
       "confidence": 1.0,
-      "success_count": 181,
+      "success_count": 182,
       "scores": {
         "frequency": 2.0,
         "confidence": 3.0,
         "reusability": 2.0,
-        "total": 7.05
+        "complexity": 2.0,
+        "total": 6.75
       },
       "first_seen": "2026-03-04T05:37:48.778318+08:00",
-      "last_seen": "2026-03-23T10:07:28.984637+08:00"
-    },
-    {
-      "pattern_id": "ed566a0c61ef",
-      "tool": "Bash",
-      "summary_sample": "rm D:/Source/daily-digest-prompt/ntfy_temp.json",
-      "count": 155,
-      "confidence": 1.0,
-      "success_count": 155,
-      "scores": {
-        "frequency": 2.0,
-        "confidence": 3.0,
-        "reusability": 2.0,
-        "total": 7.05
-      },
-      "first_seen": "2026-03-04T07:49:21.352879+08:00",
-      "last_seen": "2026-03-23T10:11:27.670835+08:00"
+      "last_seen": "2026-03-23T14:36:28.559544+08:00"
     },
     {
       "pattern_id": "90a2ed8efb54",
@@ -148,27 +88,12 @@
         "frequency": 2.0,
         "confidence": 3.0,
         "reusability": 2.0,
-        "total": 7.05
+        "complexity": 2.0,
+        "total": 6.75
       },
       "first_seen": "2026-03-04T07:30:56.592499+08:00",
       "last_seen": "2026-03-22T02:31:03.541903+08:00"
-    },
-    {
-      "pattern_id": "b79d56683503",
-      "tool": "Bash",
-      "summary_sample": "curl -s \"http://localhost:3000/api/health\"",
-      "count": 135,
-      "confidence": 1.0,
-      "success_count": 135,
-      "scores": {
-        "frequency": 2.0,
-        "confidence": 3.0,
-        "reusability": 2.0,
-        "total": 7.05
-      },
-      "first_seen": "2026-03-04T15:20:54.742839+08:00",
-      "last_seen": "2026-03-23T05:04:32.716698+08:00"
     }
   ],
-  "summary": "從 200 個行為模式中識別 11 個 Skill 候選，前 10 個得分 >= 6.0"
+  "summary": "從 200 個行為模式中識別 5 個 Skill 候選，前 5 個得分 >= 6.0"
 }

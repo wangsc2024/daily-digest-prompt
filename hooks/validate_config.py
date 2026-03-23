@@ -1425,6 +1425,14 @@ def check_auto_tasks_consistency(config_dir: str = ".") -> tuple:
         key_hyphen = task_key.replace("_", "-")
         fl_key_parts.add(key_hyphen)
 
+        # 必填欄位驗證（inline，不依賴 jsonschema）
+        required_int_fields = ["execution_order", "daily_limit", "timeout_seconds"]
+        for field in required_int_fields:
+            if field not in task_cfg:
+                issues.append(f"❌ {task_key}: 缺少必填欄位 '{field}'")
+            elif not isinstance(task_cfg[field], int) or task_cfg[field] < 0:
+                issues.append(f"❌ {task_key}.{field} 必須為非負整數（實際值：{task_cfg[field]!r}）")
+
         # template field
         template = task_cfg.get("template", "")
         template_path = os.path.join(config_dir, template) if template else None

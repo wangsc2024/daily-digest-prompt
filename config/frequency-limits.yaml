@@ -76,6 +76,7 @@ initial_schema: |
     "phantom_butterfly_optimize_count": 0,
     "new_asset_onboard_count": 0,
     "kb_system_optimize_count": 0,
+    "doc_generation_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -849,7 +850,7 @@ tasks:
     prompt_file: "prompts/team/todoist-auto-kb_system_optimize.md"
     template_version: 1
     history_type: "kb_system_optimize"
-    execution_order: 32
+    execution_order: 27      # 2026-03-23: 從 32 提前至 27（空槽），確保每輪 round-robin 能執行
     allowed_hours: [7, 23]   # 依時段指引：系統優化類 07:00（需前段研究/審查已完成）
     timeout_seconds: 2400
     result_suffix: "json"
@@ -884,7 +885,22 @@ tasks:
 # Podcast（cursor_cli/claude_sonnet45）：podcast_create(2)+podcast_jiaoguangzong(3) = 5
 # Chatroom（claude_sonnet45）：chatroom_optimize(0) = 0
 # 其他：skill_forge(2)+ntfy_review(1)+future_plan(1)+kb_insight(1) = 5
-# 合計：39 次/日（含 daily_limit=0 的暫停任務 3 個：unsloth/creative_game/qa/chatroom；另含 phantom_butterfly_optimize 每日 1 次）
+  # --- 文件生成群組（共 1 次/日）---
+  doc_generation:
+    name: "程式碼文件生成"
+    daily_limit: 1
+    counter_field: "doc_generation_count"
+    template: "prompts/team/todoist-auto-doc_generation.md"
+    template_version: 1
+    history_type: "doc_generation"
+    execution_order: 36           # 現有最大值 35（qa_optimize）；跳號 27/33 為歷史預留
+    allowed_hours: [3, 4]         # 凌晨低峰，避開業務高峰
+    timeout_seconds: 900          # 15 分鐘上限（git log + ast 解析均快速）
+    result_suffix: "json"
+    backend: claude_sonnet45
+    skills: [knowledge-query]
+
+# 合計：40 次/日（含 daily_limit=0 的暫停任務 3 個；新增 doc_generation 1 次/日）
 
 # 歷史追蹤寫入規則
 history:

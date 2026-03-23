@@ -198,6 +198,7 @@ def main():
     parser.add_argument("--errors", action="store_true", help="僅顯示錯誤事件")
     parser.add_argument("--cache-audit", action="store_true", help="快取使用審計")
     parser.add_argument("--sessions", action="store_true", help="Session 摘要")
+    parser.add_argument("--trace", type=str, default="", help="依 trace_id 前綴過濾（由 DIGEST_TRACE_ID 設定）")
     parser.add_argument(
         "--format", choices=["text", "json"], default="text", help="輸出格式"
     )
@@ -216,6 +217,11 @@ def main():
         return
 
     entries = load_entries(args.days)
+
+    # trace_id 過濾（優先於其他過濾器）
+    if args.trace:
+        entries = [e for e in entries if e.get("trace_id", "").startswith(args.trace)]
+        print(f"  過濾: trace_id 前綴 '{args.trace}' ({len(entries)} 筆)")
 
     # Apply filters
     if args.blocked:

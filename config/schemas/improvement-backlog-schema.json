@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "improvement-backlog-schema",
+  "title": "improvement-backlog.json Schema",
+  "description": "context/improvement-backlog.json 的結構定義（文件用途，不由 Python 載入）",
+  "type": "object",
+  "required": ["version", "items"],
+  "properties": {
+    "version": { "type": "integer" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "priority", "effort", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "priority": { "enum": ["high", "medium", "low"] },
+          "effort": { "enum": ["high", "medium", "low"] },
+          "status": { "enum": ["pending", "in_progress", "done", "partial", "stale", "needs_human_review"] },
+          "retry_count": { "type": "integer", "minimum": 0 },
+          "created_at": { "type": "string" },
+          "evaluated_at": { "type": "string" },
+          "started_at": { "type": "string" },
+          "completed_at": { "type": "string" },
+          "resolved_at": { "type": "string" },
+          "resolved_by": { "type": "string" },
+          "actual_result": { "type": "string" },
+          "notes": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "execution_plan": { "type": ["object", "array"] }
+        }
+      }
+    }
+  }
+}

@@ -12,8 +12,49 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# ──────────────────────────────────────────────
+# Complexity helpers（v2 新增）
+# ──────────────────────────────────────────────
+
+_SIMPLE_BASH_PREFIXES = ("date ", "rm ", "mkdir ", "cat ", "echo ", "cp ", "mv ", "ls ", "pwd")
+_HEALTH_CHECK_RE = re.compile(r"curl -s --max-time \d+ http://localhost:\d+/api/health")
+
+
+def _is_complexity_excluded(pattern: dict) -> bool:
+    """簡單 Bash 命令（無業務邏輯）→ True，應排除出 Skill 候選。"""
+    if pattern.get("tool") != "Bash":
+        return False
+    s = str(pattern.get("summary_sample", ""))
+    if any(s.startswith(p) for p in _SIMPLE_BASH_PREFIXES):
+        return True
+    if _HEALTH_CHECK_RE.search(s):
+        return True
+    # 短命令且無換行無管道 → 視為簡單命令
+    if len(s) <= 80 and "|" not in s and "&&" not in s and "\\n" not in s and "\n" not in s:
+        return True
+    return False
+
+
+def _score_complexity(pattern: dict) -> float:
+    """計算 Bash 命令複雜度分數（0-3）。非 Bash 工具預設給 2 分（假設有業務邏輯）。"""
+    if pattern.get("tool") != "Bash":
+        return 2.0
+    s = str(pattern.get("summary_sample", ""))
+    pipes = s.count("|") + s.count("&&") + s.count(";")
+    has_logic = any(k in s for k in ("if ", "for ", "while ", "pwsh", "\\n", "\n", "$env", "switch"))
+    raw = pipes + (1 if has_logic else 0)
+    if len(s) > 200 or raw >= 3:
+        return 3.0
+    if len(s) > 100 or raw >= 1:
+        return 2.0
+    if len(s) > 50:
+        return 1.0
+    return 0.0
+
 
 # ──────────────────────────────────────────────
 # Config
@@ -48,7 +89,7 @@ def _load_config() -> dict:
         text[text.find("  confidence:"):text.find("  reusability:")]
     )
     cfg["reusability_thresholds"] = extract_thresholds(
-        text[text.find("  reusability:"):text.find("# Skill 候選門檻")]
+        text[text.find("  reusability:"):text.find("  complexity:")]
     )
 
     # Candidate thresholds
@@ -59,6 +100,7 @@ def _load_config() -> dict:
     cfg["min_score"] = extract_val("min_score")
     cfg["min_confidence"] = extract_val("min_confidence")
     cfg["min_frequency"] = extract_val("min_frequency")
+    cfg["min_complexity_score"] = extract_val("min_complexity_score")
     cfg["top_n"] = int(extract_val("top_n"))
 
     return cfg
@@ -104,6 +146,10 @@ def score_pattern(pid: str, pattern: dict, cfg: dict) -> dict | None:
     if tool in cfg["exclude_tools"]:
         return None
 
+    # v2: 複雜度排除（簡單 Bash 命令直接跳過）
+    if _is_complexity_excluded(pattern):
+        return None
+
     count = pattern.get("count", 0)
     conf = pattern.get("confidence", 0.0)
     success = pattern.get("success_count", 0)
@@ -114,9 +160,15 @@ def score_pattern(pid: str, pattern: dict, cfg: dict) -> dict | None:
     f_score = _score_frequency(count, cfg["frequency_thresholds"])
     c_score = _score_confidence(conf, cfg["confidence_thresholds"])
     r_score = _score_reusability(count, conf, cfg["reusability_thresholds"])
+    cx_score = _score_complexity(pattern)
 
-    # Weighted total — 各維度 0-3 分，加權後總分 0-9（weights: 0.4, 0.35, 0.25 → 乘以3讓總分與門檻6.0相容）
-    total = f_score * 0.4 * 3 + c_score * 0.35 * 3 + r_score * 0.25 * 3
+    # v2: 四維度加權（weights: 0.30, 0.25, 0.20, 0.25 → 乘以3讓總分與門檻6.0相容）
+    total = f_score * 0.30 * 3 + c_score * 0.25 * 3 + r_score * 0.20 * 3 + cx_score * 0.25 * 3
+
+    # 複雜度低於門檻直接排除
+    min_cx = cfg.get("min_complexity_score", 0.0)
+    if cx_score < min_cx:
+        return None
 
     return {
         "pattern_id": pid,
@@ -129,6 +181,7 @@ def score_pattern(pid: str, pattern: dict, cfg: dict) -> dict | None:
             "frequency": round(f_score, 2),
             "confidence": round(c_score, 2),
             "reusability": round(r_score, 2),
+            "complexity": round(cx_score, 2),
             "total": round(total, 2),
         },
         "first_seen": pattern.get("first_seen", ""),

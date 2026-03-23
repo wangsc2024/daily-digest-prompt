@@ -23,6 +23,65 @@ released_at: "2026-03-23"
 
 ---
 
+## Phase 0：Backlog 優先掃描（每次執行必跑）
+
+### Step 0-1：讀取 context/improvement-backlog.json
+
+用 Read 工具讀取全檔，取出 `items` 陣列。
+
+### Step 0-2：過濾可執行項目
+
+同時符合以下全部條件才納入候選：
+- `status == "pending"`
+- `retry_count < 3`（≥ 3 → 跳過，改為 needs_human_review 告警）
+- `effort != "high"` 或（`effort == "high"` 且本輪選中的 high-effort 項目 ≤ 1 個）
+
+### Step 0-3：評分公式（滿分 42 分）
+
+```
+score = priority_w[high=3, medium=2, low=1]
+      × effort_w[low=3, medium=2, high=1]   ← 低 effort 優先，防 high-effort 壟斷
+      × min(age_days, 14)                   ← 最多放大 14 倍（防飢餓）
+```
+
+`age_days` = 今日 ISO 日期 - `evaluated_at`（或 `created_at`）的天數差。
+
+### Step 0-4：取 Top 2
+
+- 取評分最高的 2 項（保留 1 個 budget 給 Phase 1 KB 新鮮洞察）
+- 若 Top 2 全為 high effort → 降為 Top 1 + 1 個 KB 新鮮洞察 budget
+
+### Step 0-5：標記 in_progress
+
+將選中項目寫回 `context/improvement-backlog.json`：
+- `status: "in_progress"`
+- `started_at: <ISO 8601 當前時間>`
+- `retry_count` 維持原值（落實成功後才重置）
+
+操作方式：Read → 修改對應項目 → Write
+
+### Step 0-6：永續健康檢查（每次執行都跑）
+
+```
+a) 若 pending 項目數 > 40
+   → ntfy 告警「backlog 過載（N 項 pending），請人工清理」（priority: 4）
+
+b) 若任何項目 age_days > 30 且 retry_count == 0
+   → 標記 status: "stale"，在通知中列出 stale 項目
+
+c) 若任何項目 retry_count >= 3
+   → 標記 status: "needs_human_review"
+   → ntfy 告警（每週最多告警一次：檢查 state/backlog-review-alerted.json，
+     若 alerted_at 距今 < 7 天則跳過發送，否則更新 alerted_at 並發送）
+```
+
+**Phase 0 完成後**：
+- 若選出 0 個 backlog 項目 → 完全依賴 Phase 1 KB 新鮮洞察（繼續階段一）
+- 若選出 1-2 個 backlog 項目 → 這些項目作為本次工作清單的一部分，Phase 1 仍執行（取 1 個 budget）
+- 無論如何都繼續執行階段一
+
+---
+
 ## 階段一：查詢 KB 近 2 天洞察筆記
 
 ### 1.1 執行混合搜尋（4 個維度並行查詢）
@@ -286,12 +345,46 @@ curl -s -X POST "http://localhost:3000/api/notes" \
 
 ---
 
+## Phase 7b：生命週期歸檔（落實通過後必跑）
+
+對每個本次執行的 backlog 項目（Phase 0 選中者），依結果更新 `context/improvement-backlog.json`：
+
+```
+成功落實（驗收全部通過）：
+  status: "done"
+  completed_at: <ISO 8601>
+  retry_count: 0
+  actual_result: "一句話說明實際完成了什麼"
+
+部分完成（部分驗收通過）：
+  status: "partial"
+  notes: "說明完成進度及剩餘工作"
+
+驗收失敗 / 已回滾：
+  status: "pending"
+  retry_count: retry_count + 1
+  notes: "失敗原因"
+  （若 retry_count >= 3 → status: "needs_human_review"）
+```
+
+操作方式：Read → 修改對應項目 → Write（不得只輸出命令文字，必須實際執行）
+
+**成功落實後觸發時段風險更新**：
+```bash
+uv run python tools/time_slot_risk_scorer.py --write-report
+```
+確保成功率改善即時反映到 `config/time-slot-risk.json`。
+
+---
+
 ## 品質自評（DONE_CERT 前確認）
-1. 洞察查詢是否已涵蓋全部 4 個維度？ ✓/✗
-2. 選定方案是否均通過全部驗收條件？ ✓/✗
-3. 是否已進行 git 備份（或確認無需備份）？ ✓/✗
-4. 測試套件是否全部通過？ ✓/✗
-5. 知識庫報告是否已寫入？ ✓/✗
+1. Phase 0 是否已執行健康檢查（pending > 40 / stale / needs_human_review）？ ✓/✗
+2. Backlog 選中項目是否已標記 in_progress（Phase 0）並在 Phase 7b 歸檔結果？ ✓/✗
+3. 洞察查詢是否已涵蓋全部 4 個維度？ ✓/✗
+4. 選定方案是否均通過全部驗收條件？ ✓/✗
+5. 是否已進行 git 備份（或確認無需備份）？ ✓/✗
+6. 測試套件是否全部通過？ ✓/✗
+7. 知識庫報告是否已寫入？ ✓/✗
 若任一為 ✗ → 補完後再輸出 DONE_CERT。
 
 ## 輸出 DONE 認證
