@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-03-23T18:34:22.123806",
+  "benchmark_config": {
+    "capacity": 50,
+    "requests": 5000
+  },
+  "results": {
+    "LRU": {
+      "hit_rate": 0.9964,
+      "hits": 4982,
+      "misses": 18,
+      "total_requests": 5000,
+      "metadata_overhead_bytes": 1440,
+      "elapsed_ms": 0.38
+    },
+    "LFU": {
+      "hit_rate": 0.9964,
+      "hits": 4982,
+      "misses": 18,
+      "total_requests": 5000,
+      "metadata_overhead_bytes": 2160,
+      "elapsed_ms": 1.27
+    },
+    "ARC": {
+      "hit_rate": 0.9964,
+      "hits": 4982,
+      "misses": 18,
+      "total_requests": 5000,
+      "metadata_overhead_bytes": 3608,
+      "elapsed_ms": 0.75
+    },
+    "_summary": {
+      "capacity": 50,
+      "total_requests": 5000,
+      "arc_vs_lru_improvement": 0.0,
+      "arc_vs_lfu_improvement": 0.0,
+      "recommendation": "維持 LRU：ARC 提升不顯著（0.0%），避免元數據開銷 3KB",
+      "workload_source": "behavior-patterns.json"
+    }
+  }
+}

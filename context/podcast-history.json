@@ -1,10 +1,13 @@
 {
   "version": 2,
-  "updated_at": "2026-03-23T10:03:53.575936+00:00",
+  "updated_at": "2026-03-23T10:33:15.190388+00:00",
   "summary": {
-    "total_episodes": 84,
+    "total_episodes": 85,
     "cooldown_days": 90,
     "recent_note_ids": [
+      "e07d958e-53e5-4e4f-9c58-fcba407e5c2e",
+      "f4694b84-4e31-434b-b75f-ac4f2b4cf5a1",
+      "26b9306c-da22-4924-93c1-039347aa858b",
       "2dc98f0a-cc36-43cd-a109-8e527277a651",
       "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
       "f921f22e-86d3-415a-b8d6-30b1da5572da",
@@ -25,9 +28,29 @@
         "expires_at": "2026-06-20"
       }
     ],
-    "updated_at": "2026-03-23T10:03:53.575936+00:00"
+    "updated_at": "2026-03-23T10:33:15.190388+00:00"
   },
   "episodes": [
+    {
+      "episode_title": "2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Stre",
+      "notes_used": [
+        "26b9306c-da22-4924-93c1-039347aa858b",
+        "f4694b84-4e31-434b-b75f-ac4f2b4cf5a1",
+        "e07d958e-53e5-4e4f-9c58-fcba407e5c2e"
+      ],
+      "note_titles": [
+        "2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Streaming、前後端分離與工具系統設計",
+        "2026-02-12 AI 最新技術研究筆記",
+        "深度研究agent harness後提出系統現有 harness 優化方案，反覆以落實系統自癒為目標對方案進行審查與優化…"
+      ],
+      "topics": [
+        "技術",
+        "AI",
+        "研究"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-23T10:33:15.190388+00:00"
+    },
     {
       "episode_title": "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由",
       "notes_used": [
@@ -2177,6 +2200,30 @@
       "note_id_input": "",
       "slug": "podcast-create-20260323",
       "used_at": "2026-03-23T10:03:53.575936+00:00"
+    },
+    {
+      "note_id": "26b9306c-da22-4924-93c1-039347aa858b",
+      "note_title": "2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Streaming、前後端分離與工具系統設計",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:33:15.190388+00:00"
+    },
+    {
+      "note_id": "f4694b84-4e31-434b-b75f-ac4f2b4cf5a1",
+      "note_title": "2026-02-12 AI 最新技術研究筆記",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:33:15.190388+00:00"
+    },
+    {
+      "note_id": "e07d958e-53e5-4e4f-9c58-fcba407e5c2e",
+      "note_title": "深度研究agent harness後提出系統現有 harness 優化方案，反覆以落實系統自癒為目標對方案進行審查與優化…",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260323",
+      "used_at": "2026-03-23T10:33:15.190388+00:00"
     }
   ]
 }

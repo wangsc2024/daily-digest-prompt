@@ -1,6 +1,6 @@
 {
   "agent": "score_skill_candidates",
-  "generated_at": "2026-03-23T17:36:16.971300+08:00",
+  "generated_at": "2026-03-23T18:29:44.939896+08:00",
   "source": "context/behavior-patterns.json",
   "total_patterns": 200,
   "skipped_tool_ops": 151,
@@ -30,9 +30,9 @@
       "pattern_id": "035fa479c08b",
       "tool": "Bash",
       "summary_sample": "cd D:/Source/daily-digest-prompt && pwsh -Command '\n$t = if ($env:TODOIST_API_TO",
-      "count": 332,
+      "count": 337,
       "confidence": 1.0,
-      "success_count": 332,
+      "success_count": 337,
       "scores": {
         "frequency": 2.0,
         "confidence": 3.0,
@@ -41,7 +41,7 @@
         "total": 7.35
       },
       "first_seen": "2026-03-07T02:44:19.607190+08:00",
-      "last_seen": "2026-03-23T09:08:55.278470+08:00"
+      "last_seen": "2026-03-23T17:43:12.010196+08:00"
     },
     {
       "pattern_id": "841f88566a9e",

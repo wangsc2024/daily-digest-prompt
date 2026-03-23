@@ -89,3 +89,44 @@ tracking:
   api_calls: "每次執行外部 curl 呼叫時 +1"
   cache_degraded: "API 失敗且使用過期快取時 +1"
   write_to: "context/digest-memory.json → skill_usage 區塊"
+
+# TTL 分層策略（ADR-046：命中率從 22.7% 提升至 40%+）
+ttl_tiers:
+  high_frequency:  # 高頻端點（每日查詢 >10 次）
+    recommended_ttl_minutes: 480  # 8h
+    endpoints: [hackernews, knowledge]
+    rationale: "高頻低波動端點，延長 TTL 顯著提升命中率"
+  medium_frequency:  # 中頻端點（每日查詢 3-10 次）
+    recommended_ttl_minutes: 240  # 4h
+    endpoints: [pingtung-news, gmail]
+    rationale: "中頻端點，平衡新鮮度與命中率"
+  low_frequency:  # 低頻端點（每日查詢 <3 次）
+    recommended_ttl_minutes: 45
+    endpoints: [todoist, chatroom]
+    rationale: "即時性需求高，TTL 較短"
+
+# stale-while-revalidate 機制（ADR-046）
+# 快取過期後，允許在背景更新期間仍回傳舊資料（避免等待延遲）
+stale_while_revalidate:
+  enabled: true
+  grace_period_minutes: 30  # 過期後額外寬限期，期間仍回傳舊資料
+  applicable_sources: [pingtung-news, hackernews, knowledge]  # 適用高穩定度來源
+  note: "即時性要求高的來源（todoist、chatroom）不適用"
+
+# 快取命中率目標（ADR-046）
+hit_rate_targets:
+  overall: 0.40   # 整體目標 40%+
+  per_source:
+    pingtung-news: 0.70  # 低波動，易達高命中率
+    hackernews: 0.50
+    knowledge: 0.60
+    gmail: 0.40
+    todoist: 0.20   # 即時性需求，目標較低
+    chatroom: 0.20
+
+# ARC 驅逐策略評估結果（ADR-050）
+eviction_policy:
+  current: "LRU"  # 目前使用策略
+  evaluated: [LRU, LFU, ARC]
+  benchmark_path: "analysis/cache-eviction-comparison.json"
+  note: "benchmark 結果見 analysis/cache-eviction-comparison.json；ARC 元數據開銷需評估"

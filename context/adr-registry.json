@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated_at": "2026-03-23T16:12:53.332450+08:00",
+  "updated_at": "2026-03-23T22:00:00",
   "summary": {
     "total": 52,
     "proposed": 5,
@@ -8,10 +8,10 @@
     "deferred": 1,
     "wontfix": 1,
     "implementation_breakdown": {
-      "done": 40,
+      "done": 44,
       "partial": 0,
       "pending": 2,
-      "immediate_fix": 4,
+      "immediate_fix": 0,
       "declined": 1
     }
   },
@@ -1446,7 +1446,7 @@
       "id": "ADR-20260323-045",
       "title": "state檔案膨脹清理機制",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-23",
       "decided_at": "2026-03-23",
       "source": "improvement-backlog",
@@ -1472,7 +1472,7 @@
         "skills/kb-curator/SKILL.md",
         "tools/cleanup_state.py"
       ],
-      "notes": "",
+      "notes": "tools/cleanup_state.py 建立（乾跑確認：kb-note-scores 716 筆、research-quality 258 筆均在 30 天內，工具已就位供未來自動清理）",
       "auto_generated": true,
       "fitness_functions": [],
       "tech_debt_score": 0.0,
@@ -1482,7 +1482,7 @@
       "id": "ADR-20260323-046",
       "title": "快取命中率優化：TTL 分層策略與 stale-while-revalidate",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-23",
       "decided_at": "2026-03-23",
       "source": "improvement-backlog",
@@ -1507,7 +1507,7 @@
         "tools/cache_analyzer.py",
         "skills/cache-optimizer/SKILL.md"
       ],
-      "notes": "",
+      "notes": "cache-policy.yaml 新增 ttl_tiers（high 8h/medium 4h/low 45m）+ stale_while_revalidate（寬限 30 分鐘）+ hit_rate_targets（整體 40%+）；tools/cache_analyzer.py 建立",
       "auto_generated": true,
       "fitness_functions": [],
       "tech_debt_score": 0.0,
@@ -1517,7 +1517,7 @@
       "id": "ADR-20260323-047",
       "title": "高失敗時段根因分析與三層監控",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-23",
       "decided_at": "2026-03-23",
       "source": "improvement-backlog",
@@ -1542,7 +1542,7 @@
         "config/peak-hour-alerts.yaml",
         "check-health.ps1"
       ],
-      "notes": "",
+      "notes": "tools/peak_hour_analyzer.py 建立（三層監控：alerts/logging/metrics，五類根因分類）；config/peak-hour-alerts.yaml 建立（峰值 7:00/13:00，閾值 15%/30%）；check-health.ps1 新增 [高失敗時段分析] 區塊",
       "auto_generated": true,
       "fitness_functions": [],
       "tech_debt_score": 0.0,
@@ -1624,7 +1624,7 @@
       "id": "ADR-20260323-050",
       "title": "ARC（Adaptive Replacement Cache）驅逐策略評估",
       "status": "Accepted",
-      "implementation_status": "immediate_fix",
+      "implementation_status": "done",
       "created_at": "2026-03-23",
       "decided_at": "2026-03-23",
       "source": "improvement-backlog",
@@ -1650,7 +1650,7 @@
         "analysis/cache-eviction-comparison.json",
         "config/cache-policy.yaml"
       ],
-      "notes": "",
+      "notes": "tools/cache_eviction_benchmark.py 建立（LRU/LFU/ARC 模擬）；benchmark 結果：三策略命中率均 99.64%（behavior-patterns 唯一 key 遠低於容量，無驅逐機會）；建議維持 LRU，避免 ARC 2.5x 元數據開銷；analysis/cache-eviction-comparison.json 已生成",
       "auto_generated": true,
       "fitness_functions": [],
       "tech_debt_score": 0.0,

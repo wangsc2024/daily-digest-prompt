@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-03-23T18:00:04.723583+08:00",
+  "generated_at": "2026-03-23T18:30:04.565116+08:00",
   "current_hour": 18,
   "risk": {
     "hour": 18,
-    "risk_score": 0.1334,
+    "risk_score": 0.1602,
     "risk_level": "low",
     "recommended_action": "normal",
     "skip_task_types": [],
     "contributing_factors": {
-      "historical_failure_rate": 0.0384,
+      "historical_failure_rate": 0.0652,
       "external_sla_risk": 0.025,
       "resource_contention": 0.04,
       "task_complexity": 0.03

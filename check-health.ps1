@@ -2095,5 +2095,14 @@ if (Test-Path $sloReportFile) {
     Write-Host "  尚無報告（執行 uv run python tools/slo_budget_manager.py 產生）" -ForegroundColor DarkGray
 }
 
+# [高失敗時段分析]
+Write-Host "`n[高失敗時段分析]" -ForegroundColor Cyan
+$peakResult = uv run --project D:/Source/daily-digest-prompt python D:/Source/daily-digest-prompt/tools/peak_hour_analyzer.py --days 7 2>/dev/null
+if ($LASTEXITCODE -eq 0 -and $peakResult) {
+    $peakResult | ForEach-Object { Write-Host "  $_" }
+} else {
+    Write-Host "  （無足夠日誌數據）" -ForegroundColor DarkGray
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

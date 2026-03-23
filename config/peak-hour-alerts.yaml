@@ -1,0 +1,50 @@
+# config/peak-hour-alerts.yaml
+# 高峰時段失敗告警設定（ADR-047）
+version: 1
+
+# 監控的高峰時段（本地時間 UTC+8）
+peak_hours: [7, 13]  # 7:00 和 13:00 成功率僅 87.5%
+
+# 失敗率閾值
+failure_threshold: 0.15  # 超過 15% 觸發 warning
+critical_threshold: 0.30  # 超過 30% 觸發 critical
+
+# 三層監控設定
+layers:
+  alerts:
+    enabled: true
+    channels: [ntfy, log]
+    ntfy_topic: "wangsc2025"
+    cooldown_minutes: 60  # 同一時段告警冷卻時間
+  logging:
+    enabled: true
+    log_path: "logs/structured/"
+    include_cause_breakdown: true
+  metrics:
+    enabled: true
+    trend_window_days: 14  # 趨勢分析視窗
+    report_path: "analysis/peak-hour-report.json"
+
+# 根因分類規則
+failure_causes:
+  timeout:
+    keywords: [timeout, "timed out", 逾時]
+    recommendation: "增加 config/timeouts.yaml 對應 Agent 的超時設定"
+  external_api:
+    keywords: [api, curl, http, connection, network]
+    recommendation: "檢查外部 API 服務健康度；考慮增加快取 TTL 降低依賴"
+  resource:
+    keywords: [memory, oom, resource, cpu]
+    recommendation: "避免高峰時段執行 heavy 任務；檢查 allow_heavy_auto_tasks 設定"
+  data_format:
+    keywords: [parse, json, format, schema]
+    recommendation: "更新 API 回應解析邏輯；確認 schema 版本"
+  pipeline_phase:
+    keywords: [phase, phase2, phase3]
+    recommendation: "檢查結果檔命名（todoist-auto-{plan_key}.json）"
+
+# check-health.ps1 整合
+health_check:
+  enabled: true
+  show_in_health_report: true
+  alert_if_peak_hour_failure_rate_above: 0.20

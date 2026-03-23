@@ -1,0 +1,50 @@
+{"turn": 1, "speaker": "Host-A", "text": "大家好，歡迎收聽今天的知識電台。", "tts_text": "大家好，歡迎收聽今天的知識電台。"}
+{"turn": 2, "speaker": "Host-B", "text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。", "tts_text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。"}
+{"turn": 3, "speaker": "Host-A", "text": "沒錯，我們選了 2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層…、2026-02-12 AI 最新技術研究筆記 等主題。", "tts_text": "沒錯，我們選了 2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層…、2026-02-12 A I 最新技術研究筆記 等主題。"}
+{"turn": 4, "speaker": "Host-A", "text": "我們先來看第一篇：2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Stre…。", "tts_text": "我們先來看第一篇：2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Stre…。"}
+{"turn": 5, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 6, "speaker": "Host-A", "text": "# 2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Streaming、前後端分離與工具系統設計", "tts_text": "# 2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Streaming、前後端分離與工具系統設計"}
+{"turn": 7, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 8, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 9, "speaker": "Host-A", "text": "本研究在既有「Function Calling 與工具調用架構」基礎上，擴展涵蓋傳輸層技術、前後端分離架構、Streaming 實作、工具系統設計與技術棧推薦，建構完整的 Chat 對話系統知識體系", "tts_text": "本研究在既有「Function Calling 與工具調用架構」基礎上，擴展涵蓋傳輸層技術、前後端分離架構、Streaming 實作、工具系統設計與技術棧推薦，建構完整的 Chat 對話系統知識體系"}
+{"turn": 10, "speaker": "Host-A", "text": "## 一、傳輸層技術比較：WebSocket vs SSE vs Long Polling", "tts_text": "## 一、傳輸層技術比較：WebSocket vs SSE vs Long Polling"}
+{"turn": 11, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 12, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 13, "speaker": "Host-A", "text": "### 1.1 核心技術差異", "tts_text": "### 1.1 核心技術差異"}
+{"turn": 14, "speaker": "Host-A", "text": "| 面向 | WebSocket | SSE (Server-Sent Events) | Long Polling |", "tts_text": "| 面向 | WebSocket | SSE (Server-Sent Events) | Long Polling |"}
+{"turn": 15, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 16, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 17, "speaker": "Host-A", "text": "| **通訊方向** | 全雙工（雙向） | 單向（Server → Client） | 偽雙向（輪詢） |", "tts_text": "| **通訊方向** | 全雙工（雙向） | 單向（Server → Client） | 偽雙向（輪詢） |"}
+{"turn": 18, "speaker": "Host-A", "text": "| **協議** | WS/WSS（獨立協議） | HTTP/HTTPS | HTTP/HTTPS |", "tts_text": "| **協議** | WS/WSS（獨立協議） | HTTP/HTTPS | HTTP/HTTPS |"}
+{"turn": 19, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 20, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 21, "speaker": "Host-A", "text": "| **連線方式** | 持久化連線 | 持久化連線 | 間歇性連線 |", "tts_text": "| **連線方式** | 持久化連線 | 持久化連線 | 間歇性連線 |"}
+{"turn": 22, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 23, "speaker": "Host-A", "text": "我們先來看第二篇：2026-02-12 AI 最新技術研究筆記。", "tts_text": "我們先來看第二篇：2026-02-12 A I 最新技術研究筆記。"}
+{"turn": 24, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 25, "speaker": "Host-A", "text": "# 2026 年 AI/LLM/ML 最新技術突破研究筆記", "tts_text": "# 2026 年 A I/L L M/ML 最新技術突破研究筆記"}
+{"turn": 26, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 27, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 28, "speaker": "Host-A", "text": "2026 年標誌著 AI 產業從「規模競賽」轉向「實用主義」的關鍵轉折點", "tts_text": "2026 年標誌著 A I 產業從「規模競賽」轉向「實用主義」的關鍵轉折點"}
+{"turn": 29, "speaker": "Host-A", "text": "業界不再追求更大的模型，而是專注於推理時間優化、後訓練技術和代理互操作性", "tts_text": "業界不再追求更大的模型，而是專注於推理時間優化、後訓練技術和代理互操作性"}
+{"turn": 30, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 31, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 32, "speaker": "Host-A", "text": "開源模型與閉源模型的差距快速縮小，中國科技公司如 DeepSeek 和 Qwen 在開源領域表現亮眼", "tts_text": "開源模型與閉源模型的差距快速縮小，中國科技公司如 DeepSeek 和 Qwen 在開源領域表現亮眼"}
+{"turn": 33, "speaker": "Host-A", "text": "### 1. 推理優先模型（Reasoning-First Models）成為主流", "tts_text": "### 1. 推理優先模型（Reasoning-First Models）成為主流"}
+{"turn": 34, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 35, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 36, "speaker": "Host-A", "text": "- GPT-5.2 等模型產生兩種輸出：「快速」對話回應和「慢速」結構化思考輸出", "tts_text": "- GPT-5.2 等模型產生兩種輸出：「快速」對話回應和「慢速」結構化思考輸出"}
+{"turn": 37, "speaker": "Host-A", "text": "- 更多計算資源投入推理階段而非訓練階段", "tts_text": "- 更多計算資源投入推理階段而非訓練階段"}
+{"turn": 38, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 39, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 40, "speaker": "Host-A", "text": "- 代理式工作流（Agentic Workflows）與理論研究到生產應用的距離大幅縮短", "tts_text": "- 代理式工作流（Agentic Workflows）與理論研究到生產應用的距離大幅縮短"}
+{"turn": 41, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 42, "speaker": "Host-A", "text": "我們先來看第三篇：深度研究agent harness後提出系統現有 harness 優化方案，反覆…。", "tts_text": "我們先來看第三篇：深度研究agent harness後提出系統現有 harness 優化方案，反覆…。"}
+{"turn": 43, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 44, "speaker": "Host-A", "text": "深度研究agent harness後提出系統現有 harness 優化方案，反覆以落實系統自癒為目標對方案進行審查與優化，直至方案能讓系統自主管理後再進行實作，完成實作後通知wsngsc2025", "tts_text": "深度研究agent harness後提出系統現有 harness 優化方案，反覆以落實系統自癒為目標對方案進行審查與優化，直至方案能讓系統自主管理後再進行實作，完成實作後通知wsngsc2025"}
+{"turn": 45, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 46, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 47, "speaker": "Host-A", "text": "Reading prompt from stdin...", "tts_text": "Reading prompt from stdin..."}
+{"turn": 48, "speaker": "Host-A", "text": "OpenAI Codex v0.111.0 (research preview)", "tts_text": "OpenAI Codex v0.111.0 (research preview)"}
+{"turn": 49, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 50, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}

@@ -1043,7 +1043,12 @@ Write-Log "[PID] $PID"
 # PID 存活檢查邏輯：
 #   死進程 → 強制清除孤立鎖，繼續執行
 #   活進程 → 等待 5 分鐘後再查；仍活 → ntfy 通知「前一任務執行中」後退出；已死 → 清除鎖繼續執行
-$TodoistTeamLockFile = "$AgentDir\state\run-todoist-agent-team.lock"
+# 飢餓加班車使用獨立鎖，不與正常排程競爭（避免等待 5 分鐘或直接被跳過）
+$TodoistTeamLockFile = if ($StarvationRecovery) {
+    "$AgentDir\state\run-todoist-starvation-recovery.lock"
+} else {
+    "$AgentDir\state\run-todoist-agent-team.lock"
+}
 if (Test-Path $TodoistTeamLockFile) {
     $lockContent = Get-Content $TodoistTeamLockFile -Raw -ErrorAction SilentlyContinue
     $lockPid = ($lockContent -split "`n")[0].Trim()
@@ -1428,6 +1433,87 @@ try {
 }
 
 # ============================================
+# Phase 0f: 飢餓加班車觸發檢查
+# 直接讀 fairness-hint，不依賴 recovery-queue（避免 harness 時機不對齊問題）
+# 加班車執行時跳過此 Phase，防止無限遞迴
+# ============================================
+if (-not $StarvationRecovery) {
+    try {
+        $fairnessHintPath = "$AgentDir\state\auto-task-fairness-hint.json"
+        $extraRunCooldownPath = "$AgentDir\state\starvation-extra-run.json"
+
+        # 讀取 starvation_extra_run 設定
+        $extraRunEnabled = $false
+        $extraRunCooldownMinutes = 120
+        $extraRunMinStarvation = 1
+        $extraRunMaxTasks = 3
+        try {
+            $ahCfg = ConvertFrom-YamlViapy -YamlPath "$AgentDir\config\autonomous-harness.yaml"
+            $erCfg = $ahCfg.autonomous_harness.starvation_extra_run
+            if ($erCfg) {
+                $extraRunEnabled = [bool]$erCfg.enabled
+                if ($erCfg.cooldown_minutes)      { $extraRunCooldownMinutes = [int]$erCfg.cooldown_minutes }
+                if ($erCfg.trigger_min_starvation){ $extraRunMinStarvation   = [int]$erCfg.trigger_min_starvation }
+                if ($erCfg.max_priority_tasks)    { $extraRunMaxTasks        = [int]$erCfg.max_priority_tasks }
+            }
+        } catch { Write-Log "[Phase0f] 設定讀取失敗，使用預設值: $_" }
+
+        if ($extraRunEnabled -and (Test-Path $fairnessHintPath)) {
+            $hint = Get-Content $fairnessHintPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            $zeroTasks = @($hint.zero_count_tasks | Where-Object { $_ })
+
+            if ($hint.starvation_detected -and $zeroTasks.Count -ge $extraRunMinStarvation) {
+                # 冷卻檢查
+                $withinCooldown = $false
+                if (Test-Path $extraRunCooldownPath) {
+                    try {
+                        $cd = Get-Content $extraRunCooldownPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                        if ($cd.last_triggered_at) {
+                            $lastTrigger = [datetime]::Parse($cd.last_triggered_at)
+                            $elapsedMin = ((Get-Date) - $lastTrigger).TotalMinutes
+                            if ($elapsedMin -lt $extraRunCooldownMinutes) {
+                                $withinCooldown = $true
+                                Write-Log "[Phase0f] 冷卻中（距上次觸發 $([int]$elapsedMin) 分鐘 / 上限 $extraRunCooldownMinutes 分鐘），跳過加班車"
+                            }
+                        }
+                    } catch { Write-Log "[Phase0f] 冷卻檔讀取失敗，視為未冷卻: $_" }
+                }
+
+                if (-not $withinCooldown) {
+                    # 取前 N 個飢餓任務作為加班車目標
+                    $priorityList = @($zeroTasks | Select-Object -First $extraRunMaxTasks)
+                    $priorityKeysStr = $priorityList -join ","
+                    Write-Log "[Phase0f] 觸發飢餓加班車：zero_count_tasks=$priorityKeysStr"
+
+                    # 寫入冷卻檔（先寫再啟動，防止競態）
+                    @{
+                        last_triggered_at = (Get-Date -Format "o")
+                        triggered_for     = $priorityKeysStr
+                        main_trace_id     = $traceId
+                        triggered_by      = "phase0f"
+                    } | ConvertTo-Json | Set-Content $extraRunCooldownPath -Encoding UTF8 -Force
+
+                    # 非同步啟動加班車（獨立 lock，不阻塞主流程）
+                    $psArgs = @(
+                        "-ExecutionPolicy", "Bypass",
+                        "-File", "$AgentDir\run-todoist-agent-team.ps1",
+                        "-StarvationRecovery",
+                        "-PriorityTasks", $priorityKeysStr
+                    )
+                    Start-Process -FilePath "pwsh" -ArgumentList $psArgs `
+                        -WorkingDirectory $AgentDir -WindowStyle Hidden
+                    Write-Log "[Phase0f] 加班車已非同步啟動（獨立鎖），主流程繼續"
+                }
+            } else {
+                Write-Log "[Phase0f] 無需觸發加班車（starvation_detected=$($hint.starvation_detected), zero_count=$($zeroTasks.Count)）"
+            }
+        }
+    } catch {
+        Write-Log "[Phase0f] 加班車觸發失敗（不影響主流程）: $_" "WARN"
+    }
+}
+
+# ============================================
 # Phase 1a: ToolOrchestra 前置簡易分類（P3-C）
 # 用 Groq Llama 8B 快速判斷今日任務複雜度
 # 若任務簡單（pure formatting / status update），可略過 Claude 深度分析
@@ -1491,6 +1577,43 @@ print(total)
 }
 
 $queryContent = Strip-Frontmatter (Get-Content -Path $queryPrompt -Raw -Encoding UTF8)
+
+# 飢餓加班車模式：注入前置覆寫指示，跳過 Todoist 查詢，只補跑指定任務
+if ($StarvationRecovery -and $PriorityTasks) {
+    $starvationPhase1Preamble = @"
+## ⚡ 飢餓加班車模式（Starvation Recovery Run）
+
+本次執行是系統自動排入的補跑，請嚴格遵守以下規則：
+
+### 強制規則
+1. **跳過 Todoist 人工任務查詢**：不呼叫 Todoist API，不處理任何人工任務
+2. **強制 plan_type = "auto"**
+3. **selected_tasks 只包含下列 priority_tasks 中、daily_limit 尚未達到的任務**：
+   priority_tasks: $PriorityTasks
+4. **next_execution_order_after = 沿用目前值，不推進輪轉指針**
+   （讀取 context/auto-tasks-today.json 的 next_execution_order 後原樣輸出）
+5. **不執行一般 round-robin 選取邏輯**
+
+### plan.json 必填欄位
+```json
+{
+  "plan_type": "auto",
+  "starvation_recovery": true,
+  "priority_tasks": "$PriorityTasks",
+  "auto_tasks": {
+    "selected_tasks": [ ... 只含 priority_tasks 中可執行的任務 ... ],
+    "next_execution_order_after": <沿用現有值>
+  }
+}
+```
+
+---
+
+"@
+    $queryContent = $starvationPhase1Preamble + $queryContent
+    Write-Log "[Phase1] 飢餓加班車模式：priority_tasks=$PriorityTasks，跳過 Todoist 查詢"
+}
+
 $phase1Success = $false
 $phase1Attempt = 0
 
@@ -3082,6 +3205,37 @@ if (-not (Test-Path $assemblePrompt)) {
 }
 
 $assembleContent = Strip-Frontmatter (Get-Content -Path $assemblePrompt -Raw -Encoding UTF8)
+
+# 飢餓加班車模式：Phase 3 限制寫入範圍，防止覆蓋主流程的輪轉狀態
+if ($StarvationRecovery -and $PriorityTasks) {
+    $starvationPhase3Preamble = @"
+## ⚡ 飢餓加班車模式（Starvation Recovery Run）
+
+本次為飢餓補跑，組裝時請嚴格遵守以下限制：
+
+### context/auto-tasks-today.json 寫入限制
+1. **只更新** priority_tasks 對應的 `_count` 欄位（例如 `podcast_jiaoguangzong_count`）
+2. **禁止修改** `next_execution_order`（維持現有值，不推進輪轉指針）
+3. **禁止修改**其他任何任務的計數欄位
+4. 使用 read-modify-write：先讀取現有 JSON，只改目標欄位，再整體寫回
+
+priority_tasks: $PriorityTasks
+
+### ntfy 通知
+任務完成後必須發送 ntfy 通知，主題格式：
+```
+⚡ 飢餓加班車完成
+補跑：$PriorityTasks
+狀態：✅ 成功 / ❌ 失敗（含原因）
+```
+
+---
+
+"@
+    $assembleContent = $starvationPhase3Preamble + $assembleContent
+    Write-Log "[Phase3] 飢餓加班車模式：限制 auto-tasks-today.json 寫入範圍，priority_tasks=$PriorityTasks"
+}
+
 $phase3Success = $false
 $phase3Seconds = 0
 $attempt = 0
