@@ -43,7 +43,6 @@ def _write_config(tmp_path: Path) -> Path:
                 "failed_auto_task_threshold": 2,
                 "api_open_circuit_threshold": 1,
                 "starvation_task_threshold": 3,
-                "starvation_boost": 2,
                 "heartbeat_stale_minutes": 40,
             },
             "discovery": {
@@ -479,13 +478,13 @@ def test_starved_heavy_tasks_are_exempt_from_degraded_block(tmp_path: Path) -> N
     assert plan["runtime"]["gates"]["starvation_detected"] is True
     # 核心斷言：飢餓任務不應出現在 blocked_task_keys
     assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
-    # 飢餓任務 >= 1 個 → 飢餓加速觸發（normal 的 4，加速至 team_mode+2=5）
-    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
+    # 飢餓加速已移除，維持 normal profile 的預設值 4
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 4
 
 
-def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> None:
-    """飢餓加速：多個任務積壓時保持 normal mode，max_parallel 提升至 team_mode+2=5。
-    starvation_detected 不再觸發 degraded；多任務飢餓直接走加速路徑。
+def test_starvation_max_parallel_stays_normal_when_multiple_starved(tmp_path: Path) -> None:
+    """飢餓保護：多個任務積壓時保持 normal mode，max_parallel 維持 normal profile 值 4（無加速）。
+    starvation_detected 不觸發 degraded；加班車機制在 Phase 0f 獨立處理積壓。
     """
     config_path = _write_config(tmp_path)
     # 寫入 frequency-limits.yaml，team_mode=3 以驗證加速邏輯（高於 degraded 的 2）
@@ -522,8 +521,8 @@ def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> 
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
     assert plan["runtime"]["mode"] == "normal"
-    # 飢餓加速：max_parallel 應為 team_mode(3) + 2 = 5
-    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
+    # 飢餓加速已移除，維持 normal profile 預設值 4
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 4
     # 飢餓任務仍不應被 blocked
     assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
     assert "ai_deep_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
@@ -543,8 +542,8 @@ def _make_starvation_state(tmp_path: Path, zero_count_tasks: list[str]) -> None:
     _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
 
 
-def test_starvation_boost_does_not_apply_in_recovery_mode(tmp_path: Path) -> None:
-    """Recovery mode + 多任務飢餓：飢餓加速不應突破 recovery 的並行限制。"""
+def test_starvation_does_not_override_recovery_mode_limit(tmp_path: Path) -> None:
+    """Recovery mode + 多任務飢餓：飢餓偵測不應突破 recovery 的並行限制（維持 1）。"""
     config_path = _write_config(tmp_path)
     _make_starvation_state(tmp_path, ["tech_research", "ai_deep_research", "github_scout"])
     # heartbeat stale → recovery mode
@@ -563,12 +562,14 @@ def test_starvation_boost_does_not_apply_in_recovery_mode(tmp_path: Path) -> Non
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
     assert plan["runtime"]["mode"] == "recovery"
-    # Recovery mode：飢餓加速不觸發，維持 recovery 的限制值 1
+    # Recovery mode：飢餓偵測不改變並行限制，維持 recovery 的限制值 1
     assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 1
 
 
-def test_starvation_boost_in_normal_mode(tmp_path: Path) -> None:
-    """Normal mode + 多任務飢餓：max_parallel 從 4 提升至 team_mode+2=5。"""
+def test_starvation_does_not_inflate_max_parallel_in_normal_mode(tmp_path: Path) -> None:
+    """Normal mode + 多任務飢餓：飢餓加速已移除，max_parallel 維持 normal profile 的 4。
+    積壓由加班車（Phase 0f）獨立補跑，不修改主流程並行數。
+    """
     config_path = _write_config(tmp_path)
     _make_starvation_state(tmp_path, ["tech_research", "ai_deep_research", "github_scout"])
     _write_json(
@@ -583,37 +584,10 @@ def test_starvation_boost_in_normal_mode(tmp_path: Path) -> None:
         "memory": {"percent": 42, "available_mb": 2048},
         "gpu": {"available": False, "devices": []},
     }
-    # normal mode 需要無 high/critical action：token alert 設為舊日期，無 open circuit
     plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
 
-    # starvation_detected=True 不再觸發 degraded → mode 保持 normal
-    # 飢餓加速（>= 1 starved）將 max_parallel 提升至 team_mode+2=5
-    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
-
-
-def test_starvation_boost_uses_config_value(tmp_path: Path) -> None:
-    """starvation_boost 外部化：設 starvation_boost=1 時，加速上限應為 team_mode+1=4（非 hardcode 的 +2）。"""
-    config_path = _write_config(tmp_path)
-    # 覆寫 starvation_boost=1
-    cfg = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    cfg["autonomous_harness"]["thresholds"]["starvation_boost"] = 1
-    config_path.write_text(yaml.dump(cfg, allow_unicode=True), encoding="utf-8")
-
-    _make_starvation_state(tmp_path, ["tech_research"])
-    _write_json(
-        tmp_path / "state" / "scheduler-heartbeat.json",
-        {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"},
-    )
-    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
-    harness._collect_resource_snapshot = lambda: {
-        "generated_at": "2026-03-20T07:00:00+08:00",
-        "cpu": {"percent": 20},
-        "memory": {"percent": 40, "available_mb": 4096},
-        "gpu": {"available": False, "devices": []},
-    }
-    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
-
-    # starvation_boost=1 → team_mode(3) + 1 = 4（正常 profile 也是 4，取 max → 4）
+    # starvation_detected=True 不觸發 degraded，也不觸發飢餓加速
+    assert plan["runtime"]["mode"] == "normal"
     assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 4
 
 

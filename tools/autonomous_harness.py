@@ -103,7 +103,6 @@ class AutonomousHarness:
         self._team_mode_limit: int = int(
             freq_cfg.get("max_auto_per_run", {}).get("team_mode", 3)
         )
-        self._starvation_boost: int = int(self.thresholds.get("starvation_boost", 2))
 
     def _resolve(self, key: str) -> Path:
         return self.repo_root / self.settings[key]
@@ -569,12 +568,6 @@ $os = Get-CimInstance Win32_OperatingSystem
                 max_parallel_auto_tasks,
                 int(runtime_override["max_parallel_auto_tasks"]),
             )
-        # 飢餓加速：多個任務積壓時，提升至 team_mode + 2，讓飢餓任務可以多跑 2 個，
-        # 確保 runtime policy 不會壓低 Phase 1 的選取上限，加速清除積壓。
-        # Recovery mode 排除：系統已有嚴重故障（heartbeat stale / open circuit），
-        # 此時不應放大並行，以免加重系統負擔。
-        if len(starved_task_keys) >= 1 and mode != "recovery":
-            max_parallel_auto_tasks = max(max_parallel_auto_tasks, self._team_mode_limit + self._starvation_boost)
         max_parallel_fetch_agents = profile.get("max_parallel_fetch_agents", len(fetch_agent_keys))
         if runtime_override.get("max_parallel_fetch_agents") is not None:
             max_parallel_fetch_agents = min(
