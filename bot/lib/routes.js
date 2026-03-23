@@ -137,6 +137,52 @@ function buildWorkflowFinalReply(wf, storeRef) {
 }
 
 /**
+ * 判斷結果是否為「交付元資料」——描述檔案位置而非實際任務內容。
+ */
+function isDeliveryMetadata(text) {
+    if (!text || typeof text !== 'string') return false;
+    return /已寫入[：:]/m.test(text) ||
+           /交付位置/m.test(text) ||
+           /完整.{0,30}已寫入/m.test(text) ||
+           /^##\s*(交付|完成|執行結果|輸出)/m.test(text);
+}
+
+/**
+ * 從結果文字中提取實際任務內容（適用於研究報告等被寫入檔案的情境）：
+ * 1. 優先從 ```1:N:filepath 代碼區塊提取嵌入內容
+ * 2. 其次嘗試讀取文中出現的 .md / .txt 檔案路徑
+ * 3. 最後回傳 null（讓呼叫端 fallback）
+ */
+function extractActualContent(resultStr) {
+    if (!isDeliveryMetadata(resultStr)) return null;
+
+    // 嘗試從 ```1:N:D:\path\file.md 格式的代碼區塊提取嵌入內容
+    const codeBlockMatch = resultStr.match(/```(?:\d+:\d+:)?([A-Za-z]:[^\n`]+\.(?:md|txt))\n([\s\S]*?)```/);
+    if (codeBlockMatch) {
+        const embeddedContent = codeBlockMatch[2].trim();
+        if (embeddedContent && embeddedContent.length > 50) {
+            // 嵌入內容夠長就直接用
+            return embeddedContent;
+        }
+        // 嵌入內容太短（只有幾行預覽），嘗試讀完整檔案
+        const filePath = codeBlockMatch[1].trim();
+        try {
+            return fs.readFileSync(filePath, 'utf8').trim();
+        } catch (_) { /* 讀檔失敗繼續 */ }
+    }
+
+    // 嘗試從文字中提取 Windows 路徑並讀取
+    const pathMatch = resultStr.match(/([A-Za-z]:[\\\/][^\n`\s"']+\.(?:md|txt))/);
+    if (pathMatch) {
+        try {
+            return fs.readFileSync(pathMatch[1], 'utf8').trim();
+        } catch (_) { /* 讀檔失敗繼續 */ }
+    }
+
+    return null;
+}
+
+/**
  * 從 LLM 完整輸出中擷取核心答案，移除執行過程、來源腳註、建議等雜訊。
  * LINE 回覆只需「任務：X\n結果：Y」格式。
  */
@@ -426,10 +472,15 @@ function mount(app, opts = {}) {
                         const labelSource = (rec && rec.original_text) || taskContent;
                         const taskLabel = labelSource.trim().slice(0, 80) + (labelSource.length > 80 ? '…' : '');
                         // 過濾執行過程、來源腳註、建議等雜訊，LINE 只顯示核心答案
-                        const coreResult = trimReplyForLINE(resultStr);
-                        const MAX_LEN = 1000;
+                        let coreResult = trimReplyForLINE(resultStr);
+                        // 若結果是「交付元資料」（描述檔案位置），嘗試提取實際任務內容
+                        const actualContent = extractActualContent(resultStr);
+                        if (actualContent) {
+                            coreResult = actualContent;
+                        }
+                        const MAX_LEN = 500;
                         const truncated = coreResult.length > MAX_LEN
-                            ? coreResult.slice(0, MAX_LEN) + '\n…[已截斷]'
+                            ? coreResult.slice(0, MAX_LEN) + '\n…[完整內容已存入知識庫]'
                             : coreResult;
                         const replyMsg = `任務：${taskLabel}\n結果：${truncated}`;
 

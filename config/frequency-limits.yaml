@@ -175,13 +175,13 @@ task_rules:
     - arch_evolution         # 架構決策分析：需讀取 improvement-backlog.json + context/*.json
     - zen_koan               # 禪宗公案：ntfy 推播任務，需 ntfy-notify Skill 與完整工具鏈
     - phantom_butterfly_optimize  # 幻碟星域：跨目錄遊戲優化 + game_web 倉庫 git push，需可靠 Bash
-
+    - new_asset_onboard      # 近三天新增資產整合：SKILL_INDEX/frequency-limits/OPERATIONS 同步更新
+    - kb_system_optimize     # KB 洞察系統優化：KB 查詢→方案規劃→git 備份→落實→測試驗收
 
   cursor_cli:           # Cursor CLI agent -p，非互動模式，完整工具權限（Write/Bash/Read）
     - fahua            # 法華經研究：確保長時研究成果持久化至 results/，任務檔 temp/cursor-cli-task-fahua.md
     - podcast_create   # Podcast 生成：創意對話撰寫 + TTS/concat + R2 上傳，任務檔 temp/cursor-cli-task-podcast_create.md
     - future_plan_optimize  # 未來計畫待辦優化：以 KB 完善 未來計畫/待辦事項.md，MD 格式輸出
-    - kb_system_optimize    # KB 洞察驅動系統優化：查詢近 2 天 KB 洞察，規劃並落實系統優化方案，任務檔 temp/cursor-cli-task-kb_system_optimize.md
 
   codex_exec:           # gpt-5.4，內建 WebSearch
     - ai_sysdev
@@ -830,7 +830,8 @@ tasks:
     name: "近三天新增資產系統整合"
     daily_limit: 2
     counter_field: "new_asset_onboard_count"
-    template: "templates/auto-tasks/new-asset-onboard.md"
+    template: "templates/auto-tasks/new-asset-onboard.md"  # 參考文件；實際邏輯在 team prompt
+    prompt_file: "prompts/team/todoist-auto-new_asset_onboard.md"
     template_version: 1
     history_type: "new_asset_onboard"
     execution_order: 31
@@ -844,7 +845,8 @@ tasks:
     name: "KB 洞察驅動系統優化落實"
     daily_limit: 1
     counter_field: "kb_system_optimize_count"
-    template: "templates/auto-tasks/kb-system-optimize.md"
+    template: "templates/auto-tasks/kb-system-optimize.md"  # 參考文件；實際邏輯在 team prompt
+    prompt_file: "prompts/team/todoist-auto-kb_system_optimize.md"
     template_version: 1
     history_type: "kb_system_optimize"
     execution_order: 32

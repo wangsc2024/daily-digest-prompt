@@ -1867,12 +1867,10 @@ if (Test-Path $runtimePolicyFile) {
 
             $tasksBeforeFilter = @($selectedTasks)
 
-            if (-not $allowHeavy) {
-                $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $heavyTaskKeys })
-            }
-            if (-not $allowResearch) {
-                $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $researchTaskKeys })
-            }
+            # 注意：不再獨立過濾 allowHeavy/allowResearch，
+            # 因為 autonomous_harness.py 計算 blocked_task_keys 時已套用飢餓豁免邏輯
+            # （starved tasks 不會進入 blocked_task_keys，避免降速→飢餓死鎖）。
+            # PS 腳本只需信任 blocked_task_keys 即可。
             if ($blockedTaskKeys.Count -gt 0) {
                 $selectedTasks = @($selectedTasks | Where-Object { $_.key -notin $blockedTaskKeys })
             }
@@ -1915,8 +1913,8 @@ if (Test-Path $runtimePolicyFile) {
             $filteredOutTasks = @($tasksBeforeFilter | Where-Object { $_.key -notin ($selectedTasks | ForEach-Object { $_.key }) })
             foreach ($ft in $filteredOutTasks) {
                 $skippedResultPath = "results/todoist-auto-$($ft.key).json"
-                $skipReason = if (-not $allowHeavy -and $ft.key -in $heavyTaskKeys) { "autonomy_heavy_blocked" }
-                              elseif (-not $allowResearch -and $ft.key -in $researchTaskKeys) { "autonomy_research_blocked" }
+                $skipReason = if ($ft.key -in $blockedTaskKeys -and $ft.key -in $heavyTaskKeys) { "autonomy_heavy_blocked" }
+                              elseif ($ft.key -in $blockedTaskKeys -and $ft.key -in $researchTaskKeys) { "autonomy_research_blocked" }
                               elseif ($ft.key -in $blockedTaskKeys) { "autonomy_explicit_blocked" }
                               else { "autonomy_max_parallel_exceeded" }
                 $skippedResult = [ordered]@{
@@ -1935,7 +1933,7 @@ if (Test-Path $runtimePolicyFile) {
 
             $plan.auto_tasks.selected_tasks = $selectedTasks
             $plan | ConvertTo-Json -Depth 10 | Set-Content -Path $planFile -Encoding UTF8 -Force
-            Write-Log "[Autonomy] auto-tasks adjusted: $beforeCount -> $($selectedTasks.Count) (allowHeavy=$allowHeavy, allowResearch=$allowResearch, maxParallel=$maxParallel, blocked=$($blockedTaskKeys.Count))"
+            Write-Log "[Autonomy] auto-tasks adjusted: $beforeCount -> $($selectedTasks.Count) (maxParallel=$maxParallel, blocked=$($blockedTaskKeys.Count), heavyPolicy=allow_heavy=$allowHeavy[harness-managed])"
         }
     } catch {
         Write-Log "[Autonomy] WARN: runtime policy parse failed: $_"

@@ -1,18 +1,19 @@
 {
-  "generated_at": "2026-03-23T08:30:03.882451",
+  "generated_at": "2026-03-23T11:00:02.959130",
   "date": "2026-03-23",
-  "starvation_count": 9,
+  "starvation_count": 12,
   "starvation_detected": true,
   "zero_count_tasks": [
     "tech_research",
     "ai_deep_research",
     "ai_github_research",
+    "skill_audit",
     "log_audit",
     "system_insight",
     "arch_evolution",
     "self_heal",
     "ai_workflow_github",
-    "new_asset_onboard"
+    "github_scout"
   ],
   "fairness_score": 0.0,
   "pointer_reset": false,
