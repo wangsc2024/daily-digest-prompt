@@ -281,9 +281,8 @@ curl -s --max-time 8 \
 9. **飢餓保護（ADR-027）**：
    - 用 Read 讀取 `state/auto-task-fairness-hint.json`（不存在則略過此步）
    - 若 `starvation_detected: true` 且 `zero_count_tasks` 不為空：
-     - 將 `zero_count_tasks` 中尚未被 round-robin 選中、且 `count < daily_limit` 的任務**插入批次最前面**（飢餓任務優先）
-     - **飢餓批次上限**：用 Read 讀取 `state/autonomous-runtime.json`，取 `policies.max_parallel_auto_tasks`；若該值 > `max_auto_per_run.team_mode`，以此值為批次上限（飢餓加速），否則沿用 `team_mode`。若檔案不存在或無 `policies` 欄位，fallback 到 `team_mode`。多餘的從尾部移除。
-     - 在 plan.json 中加 `"starvation_boosted": <boosted task key list>` 欄位供記錄
+     - 將 `zero_count_tasks` 中尚未被 round-robin 選中、且 `count < daily_limit` 的任務**插入批次最前面**（飢餓任務優先，批次總量不超過 `team_mode` 上限）
+     - 在 plan.json 中加 `"starvation_priority": <prioritized task key list>` 欄位供記錄
 
 > ⚠️ **唯一真相來源**：每日上限（`daily_limit`）以 `config/frequency-limits.yaml` 為準，此 prompt 不另行定義。新增/停用/調整任務只需修改 YAML。
 
