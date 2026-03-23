@@ -1,22 +1,18 @@
 {
-  "generated_at": "2026-03-23T11:00:02.959130",
+  "generated_at": "2026-03-23T13:00:03.683028",
   "date": "2026-03-23",
-  "starvation_count": 12,
+  "starvation_count": 6,
   "starvation_detected": true,
   "zero_count_tasks": [
-    "tech_research",
-    "ai_deep_research",
-    "ai_github_research",
-    "skill_audit",
-    "log_audit",
-    "system_insight",
-    "arch_evolution",
     "self_heal",
     "ai_workflow_github",
-    "github_scout"
+    "skill_forge",
+    "workflow_forge",
+    "new_asset_onboard",
+    "kb_system_optimize"
   ],
   "fairness_score": 0.0,
   "pointer_reset": false,
-  "next_execution_order": 7,
+  "next_execution_order": 18,
   "max_execution_order": 35
 }

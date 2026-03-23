@@ -74,7 +74,7 @@ def _write_config(tmp_path: Path) -> Path:
                     "blocked_fetch_agents": [],
                 },
                 "degraded": {
-                    "max_parallel_auto_tasks": 2,
+                    "max_parallel_auto_tasks": 3,
                     "max_parallel_fetch_agents": 4,
                     "allow_heavy_auto_tasks": False,
                     "allow_research_auto_tasks": True,
@@ -476,3 +476,176 @@ def test_starved_heavy_tasks_are_exempt_from_degraded_block(tmp_path: Path) -> N
     assert plan["runtime"]["gates"]["starvation_detected"] is True
     # 核心斷言：飢餓任務不應出現在 blocked_task_keys
     assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
+    # 飢餓任務僅 1 個 → 不觸發飢餓加速（max_parallel 維持 degraded 基準值 3）
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 3
+
+
+def test_starvation_boost_max_parallel_when_multiple_starved(tmp_path: Path) -> None:
+    """飢餓加速：多個任務積壓時 max_parallel_auto_tasks >= team_mode（來自 frequency-limits.yaml）。
+    team_mode=3 > degraded 的 2，飢餓加速後應對齊 3。
+    """
+    config_path = _write_config(tmp_path)
+    # 寫入 frequency-limits.yaml，team_mode=3 以驗證加速邏輯（高於 degraded 的 2）
+    freq_yaml = (
+        "max_auto_per_run:\n"
+        "  single_mode: 1\n"
+        "  team_mode: 3\n"
+    )
+    (tmp_path / "config").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "config" / "frequency-limits.yaml").write_text(freq_yaml, encoding="utf-8")
+    _write_json(tmp_path / "state" / "run-fsm.json", {"runs": {}, "updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
+    _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
+    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(
+        tmp_path / "state" / "auto-task-fairness-hint.json",
+        {
+            "starvation_detected": True,
+            "starvation_count": 5,
+            "zero_count_tasks": ["tech_research", "ai_deep_research", "github_scout"],
+        },
+    )
+    _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
+    _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"})
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    assert plan["runtime"]["mode"] == "degraded"
+    # 飢餓加速：max_parallel 應為 team_mode(3) + 2 = 5
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
+    # 飢餓任務仍不應被 blocked
+    assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
+    assert "ai_deep_research" not in plan["runtime"]["policies"]["blocked_task_keys"]
+
+
+def _make_starvation_state(tmp_path: Path, zero_count_tasks: list[str]) -> None:
+    """輔助：寫入基本 state 檔案，並設定多個飢餓任務。"""
+    _write_json(tmp_path / "state" / "run-fsm.json", {"runs": {}, "updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
+    _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
+    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(
+        tmp_path / "state" / "auto-task-fairness-hint.json",
+        {"starvation_detected": True, "starvation_count": 5, "zero_count_tasks": zero_count_tasks},
+    )
+    _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
+
+
+def test_starvation_boost_does_not_apply_in_recovery_mode(tmp_path: Path) -> None:
+    """Recovery mode + 多任務飢餓：飢餓加速不應突破 recovery 的並行限制。"""
+    config_path = _write_config(tmp_path)
+    _make_starvation_state(tmp_path, ["tech_research", "ai_deep_research", "github_scout"])
+    # heartbeat stale → recovery mode
+    _write_json(
+        tmp_path / "state" / "scheduler-heartbeat.json",
+        {"timestamp": "2026-03-20T04:00:00+08:00", "status": "stale"},
+    )
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    assert plan["runtime"]["mode"] == "recovery"
+    # Recovery mode：飢餓加速不觸發，維持 recovery 的限制值 1
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 1
+
+
+def test_starvation_boost_in_normal_mode(tmp_path: Path) -> None:
+    """Normal mode + 多任務飢餓：max_parallel 從 4 提升至 team_mode+2=5。"""
+    config_path = _write_config(tmp_path)
+    _make_starvation_state(tmp_path, ["tech_research", "ai_deep_research", "github_scout"])
+    _write_json(
+        tmp_path / "state" / "scheduler-heartbeat.json",
+        {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"},
+    )
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+    # normal mode 需要無 high/critical action：token alert 設為舊日期，無 open circuit
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    # starvation_detected=True → mode 至少 degraded（即使無其他 high action）
+    # normal mode 中飢餓本身會升 degraded，但 max_parallel 仍應被加速
+    assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 5
+
+
+def test_recovery_mode_sends_ntfy_notification(tmp_path: Path) -> None:
+    """Recovery mode 進入時應嘗試發送 ntfy 告警，並寫入冷卻檔。"""
+    from unittest.mock import MagicMock, patch
+
+    config_path = _write_config(tmp_path)
+    _make_starvation_state(tmp_path, [])
+    _write_json(
+        tmp_path / "state" / "scheduler-heartbeat.json",
+        {"timestamp": "2026-03-20T04:00:00+08:00", "status": "stale"},
+    )
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+
+    with patch("tools.autonomous_harness.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    assert plan["runtime"]["mode"] == "recovery"
+    # curl 應被呼叫一次
+    assert mock_run.call_count == 1
+    # 冷卻檔應被寫入
+    assert (tmp_path / "state" / "recovery-notified.json").exists()
+
+
+def test_recovery_mode_ntfy_respects_cooldown(tmp_path: Path) -> None:
+    """冷卻期（1 小時）內再次進入 recovery mode 不重複發送通知。"""
+    from unittest.mock import MagicMock, patch
+
+    config_path = _write_config(tmp_path)
+    _make_starvation_state(tmp_path, [])
+    _write_json(
+        tmp_path / "state" / "scheduler-heartbeat.json",
+        {"timestamp": "2026-03-20T04:00:00+08:00", "status": "stale"},
+    )
+    # 模擬 30 分鐘前已發過通知
+    _write_json(
+        tmp_path / "state" / "recovery-notified.json",
+        {"notified_at": "2026-03-20T06:30:00+08:00"},
+    )
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+
+    with patch("tools.autonomous_harness.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    assert plan["runtime"]["mode"] == "recovery"
+    # 冷卻期內不應呼叫 curl
+    assert mock_run.call_count == 0

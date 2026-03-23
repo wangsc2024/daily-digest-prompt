@@ -1612,16 +1612,29 @@ while ($phase1Attempt -le $MaxPhase1Retries) {
             }
             if ($job.State -eq 'Completed') {
                 $phase1Success = $true
+
+                # ─── 檢查對話性回應（優先於檔案時間檢查）───
+                # 防止 LLM 將 prompt 當成對話內容而非執行指令
+                $outputText = $output -join "`n"
+                $conversationalPattern = '(?:你貼了|已收到.*完整內容|請問你.*(?:希望|想要|需要).*做什麼|請說明你的需求|請告訴我你的需求|我看到你.*分享|我.*收到.*內容|需要.*協助|如何.*幫助|請.*詳細說明|這.*完整.*內容)'
+                if ($outputText -match $conversationalPattern) {
+                    $phase1Seconds_temp = [int]((Get-Date) - $phase1Start).TotalSeconds
+                    Write-Log "[Phase1] WARN: LLM 給出對話性回應（${phase1Seconds_temp}s），未執行 query，標記為失敗重試"
+                    $phase1Success = $false
+                    Update-FailureStats "phase_failure" "phase1" "todoist"
+                    Set-FsmState -RunId $traceId.Substring(0, 8) -Phase "phase1" -State "failed" -AgentType "todoist" -Detail "conversational response"
+                }
+
                 # ─── 驗證 plan 檔案是否在本次 Phase 1 執行期間寫入 ───
                 # 防止 LLM 給出對話性回應（未寫入 plan）時誤用前次 run 的舊 plan
-                if (Test-Path "$ResultsDir\todoist-plan.json") {
+                if ($phase1Success -and (Test-Path "$ResultsDir\todoist-plan.json")) {
                     $planWriteTime = (Get-Item "$ResultsDir\todoist-plan.json").LastWriteTime
                     if ($planWriteTime -lt $phase1Start) {
                         $planAgeMin = [int]((Get-Date) - $planWriteTime).TotalMinutes
                         Write-Log "[Phase1] WARN: plan 檔案（寫入 ${planAgeMin} min ago）早於本次 Phase 1 開始，LLM 疑似對話性回應未寫入新 plan，標記為失敗重試"
                         $phase1Success = $false
                     }
-                } else {
+                } elseif ($phase1Success) {
                     Write-Log "[Phase1] WARN: LLM job 完成但未產出 plan 檔案，疑似對話性回應，標記為失敗重試"
                     $phase1Success = $false
                 }

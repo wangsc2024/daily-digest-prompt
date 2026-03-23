@@ -5,46 +5,46 @@
   "max_runs": 3,
   "runs": [
     {
-      "run_id": "20260323030132",
-      "started_at": "2026-03-23T03:01:32Z",
-      "completed_at": "2026-03-23T11:04:45",
+      "run_id": "20260323043027",
+      "started_at": "2026-03-23T04:30:27Z",
+      "completed_at": "2026-03-23T12:57:25",
       "plan_type": "auto",
-      "auto_tasks_executed": [],
-      "auto_tasks_failed": [],
-      "auto_tasks_skipped": ["tech_research", "ai_deep_research"],
-      "human_tasks_completed": [],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "tech_research 與 ai_deep_research 均因 autonomy_heavy_blocked 被跳過，無實質產出",
-      "notable": "連續多輪 autonomy_heavy_blocked 阻擋（starvation_count=12），tech_research/ai_deep_research 持續飢餓"
-    },
-    {
-      "run_id": "20260323023216",
-      "started_at": "2026-03-23T02:32:16Z",
-      "completed_at": "2026-03-23T10:33:39",
-      "plan_type": "auto",
-      "auto_tasks_executed": [],
-      "auto_tasks_failed": [],
-      "auto_tasks_skipped": ["tech_research", "ai_deep_research"],
-      "human_tasks_completed": [],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "tech_research 與 ai_deep_research 均因 autonomy_heavy_blocked 被跳過，無實質產出",
-      "notable": "連續多輪 autonomy_heavy_blocked 阻擋（starvation_count=12），tech_research/ai_deep_research 持續飢餓"
-    },
-    {
-      "run_id": "20260323020316",
-      "started_at": "2026-03-23T02:03:16Z",
-      "completed_at": "2026-03-23T10:12:02",
-      "plan_type": "tasks",
-      "auto_tasks_executed": [],
+      "auto_tasks_executed": ["insight_briefing", "kb_insight_evaluation", "github_scout", "system_insight", "arch_evolution"],
       "auto_tasks_failed": [],
       "auto_tasks_skipped": [],
-      "human_tasks_completed": ["研究1項邏輯思維最熱門方案並將研究結果寫入 RAG 知識庫", "參考 RAG 知識庫找出一個熱門的 GitHub 專案進行深度瞭解"],
+      "human_tasks_completed": [],
       "human_tasks_failed": [],
       "all_exhausted": false,
-      "phase3_summary": "完成第一性原理思維研究(KB:90b8c23a)與MiroFish群體智慧引擎深度研究(KB:ac6c0104)，2/2任務成功",
-      "notable": ""
+      "phase3_summary": "5 項飢餓保護任務全部成功：洞察簡報完成快取優化機制研究（KB:d3846db5），KB洞察評估選定3項高價值優化，GitHub靈感蒐集分析n8n/Dify/LangGraph並落實checkpoint_manager，系統洞察4 alerts，架構演進31項決策（5 immediate_fix）",
+      "notable": "5 個飢餓保護任務全部成功，kb_insight_evaluation 與 github_scout 以備援模型 claude_sonnet45 執行"
+    },
+    {
+      "run_id": "20260323040055",
+      "started_at": "2026-03-23T04:00:55Z",
+      "completed_at": "2026-03-23T12:28:40",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["ai_github_research", "skill_audit", "log_audit"],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "ai_github_research 完成 OpenClaw Gateway mechanism 深度解析（KB:f921f22e），skill_audit 審查 kb-research-strategist+groq 修正 2 項，log_audit 修正 Phase 1 對話性回應防護",
+      "notable": "3 個飢餓保護任務全部成功執行，ai_github_research 以備援模型 claude_sonnet45 執行"
+    },
+    {
+      "run_id": "20260323033043",
+      "started_at": "2026-03-23T03:30:43Z",
+      "completed_at": "2026-03-23T11:49:13",
+      "plan_type": "auto",
+      "auto_tasks_executed": ["tech_research", "ai_deep_research"],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": ["github_scout"],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": false,
+      "phase3_summary": "tech_research 完成 skill-forge mechanism 深度研究（KB:6bb6a59c），ai_deep_research 完成 AI Inference Economics Stage 1 規劃，飢餓保護生效",
+      "notable": "兩個任務均以備援模型 claude_sonnet45 執行成功，github_scout 因 autonomy_max_parallel_exceeded 跳過"
     }
   ]
 }

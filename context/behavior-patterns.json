@@ -163,12 +163,12 @@
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\templates\\shared\\preamble.md",
       "tags": [],
-      "count": 1473,
+      "count": 1490,
       "confidence": 1.0,
-      "success_count": 1473,
+      "success_count": 1490,
       "first_seen": "2026-03-04T05:08:15.078064+08:00",
-      "last_seen": "2026-03-23T11:03:50.012077+08:00",
-      "total_input": 117906,
+      "last_seen": "2026-03-23T13:03:41.951604+08:00",
+      "total_input": 119266,
       "total_output": 0
     },
     "88a5506d5edb": {
@@ -177,12 +177,12 @@
       "tags": [
         "skill-read"
       ],
-      "count": 545,
+      "count": 549,
       "confidence": 1.0,
-      "success_count": 545,
+      "success_count": 549,
       "first_seen": "2026-03-04T05:08:15.322304+08:00",
-      "last_seen": "2026-03-23T11:03:50.459657+08:00",
-      "total_input": 41278,
+      "last_seen": "2026-03-23T12:54:50.945503+08:00",
+      "total_input": 41591,
       "total_output": 0
     },
     "4f173611dab2": {
@@ -191,24 +191,24 @@
       "tags": [
         "skill-read"
       ],
-      "count": 677,
+      "count": 685,
       "confidence": 1.0,
-      "success_count": 677,
+      "success_count": 685,
       "first_seen": "2026-03-04T05:08:15.502911+08:00",
-      "last_seen": "2026-03-23T11:03:50.910596+08:00",
-      "total_input": 53996,
+      "last_seen": "2026-03-23T13:03:51.194205+08:00",
+      "total_input": 54628,
       "total_output": 0
     },
     "98cd698212d2": {
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\results\\todoist-plan.json",
       "tags": [],
-      "count": 517,
+      "count": 520,
       "confidence": 1.0,
-      "success_count": 517,
+      "success_count": 520,
       "first_seen": "2026-03-04T05:08:15.617910+08:00",
-      "last_seen": "2026-03-23T11:03:51.218155+08:00",
-      "total_input": 39424,
+      "last_seen": "2026-03-23T12:54:51.658500+08:00",
+      "total_input": 39652,
       "total_output": 0
     },
     "fe1ad266f557": {
@@ -218,12 +218,12 @@
         "cache-read",
         "todoist"
       ],
-      "count": 996,
+      "count": 1003,
       "confidence": 1.0,
-      "success_count": 996,
+      "success_count": 1003,
       "first_seen": "2026-03-04T05:08:20.910361+08:00",
-      "last_seen": "2026-03-23T11:03:58.306551+08:00",
-      "total_input": 68867,
+      "last_seen": "2026-03-23T13:00:21.834777+08:00",
+      "total_input": 69350,
       "total_output": 0
     },
     "7be04a537082": {
@@ -232,24 +232,24 @@
       "tags": [
         "frequency-read"
       ],
-      "count": 1262,
+      "count": 1276,
       "confidence": 1.0,
-      "success_count": 1262,
+      "success_count": 1276,
       "first_seen": "2026-03-04T05:08:25.722101+08:00",
-      "last_seen": "2026-03-23T11:03:59.090893+08:00",
-      "total_input": 100960,
+      "last_seen": "2026-03-23T13:04:03.210940+08:00",
+      "total_input": 102080,
       "total_output": 0
     },
     "4c5b41d79363": {
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
       "tags": [],
-      "count": 948,
+      "count": 961,
       "confidence": 1.0,
-      "success_count": 948,
+      "success_count": 961,
       "first_seen": "2026-03-04T05:09:44.496746+08:00",
-      "last_seen": "2026-03-23T11:04:06.340714+08:00",
-      "total_input": 75915,
+      "last_seen": "2026-03-23T13:05:12.662262+08:00",
+      "total_input": 77058,
       "total_output": 0
     },
     "517748ded20c": {
@@ -258,12 +258,12 @@
       "tags": [
         "history-read"
       ],
-      "count": 1235,
+      "count": 1246,
       "confidence": 1.0,
-      "success_count": 1235,
+      "success_count": 1246,
       "first_seen": "2026-03-04T05:10:10.721248+08:00",
-      "last_seen": "2026-03-23T11:07:49.582084+08:00",
-      "total_input": 110904,
+      "last_seen": "2026-03-23T12:58:21.867349+08:00",
+      "total_input": 111870,
       "total_output": 0
     },
     "45dbf666a69d": {
@@ -273,24 +273,24 @@
         "skill-read",
         "loop-suspected"
       ],
-      "count": 49,
+      "count": 50,
       "confidence": 1.0,
-      "success_count": 49,
+      "success_count": 50,
       "first_seen": "2026-03-04T05:10:39.623009+08:00",
-      "last_seen": "2026-03-22T13:34:58.092400+08:00",
-      "total_input": 4265,
+      "last_seen": "2026-03-23T12:04:02.671458+08:00",
+      "total_input": 4360,
       "total_output": 0
     },
     "acc10f01c539": {
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\state\\api-health.json",
       "tags": [],
-      "count": 59,
+      "count": 60,
       "confidence": 1.0,
-      "success_count": 59,
+      "success_count": 60,
       "first_seen": "2026-03-04T05:10:40.135642+08:00",
-      "last_seen": "2026-03-23T00:59:04.795615+08:00",
-      "total_input": 4248,
+      "last_seen": "2026-03-23T13:04:03.574985+08:00",
+      "total_input": 4320,
       "total_output": 0
     },
     "1528d64c9087": {
@@ -300,12 +300,12 @@
         "api-call",
         "api-read"
       ],
-      "count": 627,
+      "count": 631,
       "confidence": 1.0,
-      "success_count": 627,
+      "success_count": 631,
       "first_seen": "2026-03-04T05:11:12.363970+08:00",
-      "last_seen": "2026-03-23T11:00:32.205399+08:00",
-      "total_input": 82034,
+      "last_seen": "2026-03-23T13:00:17.812115+08:00",
+      "total_input": 82578,
       "total_output": 0
     },
     "75c5b62dca26": {
@@ -315,12 +315,12 @@
         "api-write",
         "api-call"
       ],
-      "count": 75,
+      "count": 76,
       "confidence": 1.0,
-      "success_count": 75,
+      "success_count": 76,
       "first_seen": "2026-03-04T05:11:23.978476+08:00",
-      "last_seen": "2026-03-23T10:11:47.616871+08:00",
-      "total_input": 22702,
+      "last_seen": "2026-03-23T12:28:30.332605+08:00",
+      "total_input": 23082,
       "total_output": 0
     },
     "a263fbf291e1": {
@@ -329,12 +329,12 @@
       "tags": [
         "loop-suspected"
       ],
-      "count": 41,
+      "count": 42,
       "confidence": 1.0,
-      "success_count": 41,
+      "success_count": 42,
       "first_seen": "2026-03-04T05:14:27.808341+08:00",
-      "last_seen": "2026-03-23T04:03:57.460909+08:00",
-      "total_input": 3114,
+      "last_seen": "2026-03-23T12:39:44.324416+08:00",
+      "total_input": 3189,
       "total_output": 0
     },
     "4a11dbbed05f": {
@@ -343,12 +343,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 795,
+      "count": 799,
       "confidence": 1.0,
-      "success_count": 795,
+      "success_count": 799,
       "first_seen": "2026-03-04T05:30:51.981759+08:00",
-      "last_seen": "2026-03-23T11:00:32.697925+08:00",
-      "total_input": 63506,
+      "last_seen": "2026-03-23T13:00:23.583278+08:00",
+      "total_input": 63804,
       "total_output": 0
     },
     "25f5c6a778eb": {
@@ -359,12 +359,12 @@
         "team-mode",
         "api-call"
       ],
-      "count": 404,
+      "count": 407,
       "confidence": 1.0,
-      "success_count": 404,
+      "success_count": 407,
       "first_seen": "2026-03-04T05:30:55.143824+08:00",
-      "last_seen": "2026-03-23T11:01:33.218885+08:00",
-      "total_input": 49710,
+      "last_seen": "2026-03-23T12:31:51.847891+08:00",
+      "total_input": 50048,
       "total_output": 0
     },
     "44f9296e0182": {
@@ -374,12 +374,12 @@
         "skill-read",
         "team-mode"
       ],
-      "count": 541,
+      "count": 551,
       "confidence": 1.0,
-      "success_count": 541,
+      "success_count": 551,
       "first_seen": "2026-03-04T05:32:45.570249+08:00",
-      "last_seen": "2026-03-23T10:04:08.460847+08:00",
-      "total_input": 45918,
+      "last_seen": "2026-03-23T13:03:50.740608+08:00",
+      "total_input": 46761,
       "total_output": 0
     },
     "c6f650847091": {
@@ -388,12 +388,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 360,
+      "count": 366,
       "confidence": 1.0,
-      "success_count": 360,
+      "success_count": 366,
       "first_seen": "2026-03-04T05:32:46.000072+08:00",
-      "last_seen": "2026-03-23T10:04:15.897291+08:00",
-      "total_input": 27186,
+      "last_seen": "2026-03-23T12:41:50.908725+08:00",
+      "total_input": 27649,
       "total_output": 0
     },
     "bb9a2398f1fe": {
@@ -402,12 +402,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 976,
+      "count": 985,
       "confidence": 1.0,
-      "success_count": 976,
+      "success_count": 985,
       "first_seen": "2026-03-04T05:32:46.710568+08:00",
-      "last_seen": "2026-03-23T10:07:45.490047+08:00",
-      "total_input": 90685,
+      "last_seen": "2026-03-23T13:04:03.009631+08:00",
+      "total_input": 91468,
       "total_output": 0
     },
     "0dbba26354ce": {
@@ -416,12 +416,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 225,
+      "count": 228,
       "confidence": 1.0,
-      "success_count": 225,
+      "success_count": 228,
       "first_seen": "2026-03-04T05:32:47.118008+08:00",
-      "last_seen": "2026-03-23T10:05:56.396011+08:00",
-      "total_input": 19363,
+      "last_seen": "2026-03-23T12:15:32.854456+08:00",
+      "total_input": 19621,
       "total_output": 0
     },
     "f1710ee22289": {
@@ -431,12 +431,12 @@
         "skill-read",
         "team-mode"
       ],
-      "count": 273,
+      "count": 280,
       "confidence": 1.0,
-      "success_count": 273,
+      "success_count": 280,
       "first_seen": "2026-03-04T05:33:14.391923+08:00",
-      "last_seen": "2026-03-23T05:05:16.574978+08:00",
-      "total_input": 24961,
+      "last_seen": "2026-03-23T12:33:22.110247+08:00",
+      "total_input": 25631,
       "total_output": 0
     },
     "3274122e1a6f": {
@@ -445,12 +445,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 303,
+      "count": 307,
       "confidence": 1.0,
-      "success_count": 303,
+      "success_count": 307,
       "first_seen": "2026-03-04T05:34:39.424351+08:00",
-      "last_seen": "2026-03-23T05:05:25.100112+08:00",
-      "total_input": 25952,
+      "last_seen": "2026-03-23T12:34:00.854432+08:00",
+      "total_input": 26268,
       "total_output": 0
     },
     "8c94a17d7f79": {
@@ -476,12 +476,12 @@
       "tags": [
         "glob"
       ],
-      "count": 229,
+      "count": 232,
       "confidence": 1.0,
-      "success_count": 229,
+      "success_count": 232,
       "first_seen": "2026-03-04T05:40:30.266140+08:00",
-      "last_seen": "2026-03-23T11:03:58.148179+08:00",
-      "total_input": 19465,
+      "last_seen": "2026-03-23T12:55:01.015814+08:00",
+      "total_input": 19720,
       "total_output": 0
     },
     "c17531bf1a2b": {
@@ -518,12 +518,12 @@
       "tags": [
         "skill-index"
       ],
-      "count": 277,
+      "count": 285,
       "confidence": 1.0,
-      "success_count": 277,
+      "success_count": 285,
       "first_seen": "2026-03-04T05:48:41.124129+08:00",
-      "last_seen": "2026-03-23T05:04:31.910135+08:00",
-      "total_input": 20726,
+      "last_seen": "2026-03-23T13:04:33.747436+08:00",
+      "total_input": 21302,
       "total_output": 0
     },
     "841f88566a9e": {
@@ -551,24 +551,24 @@
         "team-mode",
         "api-call"
       ],
-      "count": 9,
-      "confidence": 0.49999999999999994,
-      "success_count": 9,
+      "count": 11,
+      "confidence": 0.6,
+      "success_count": 11,
       "first_seen": "2026-03-04T05:50:25.481123+08:00",
-      "last_seen": "2026-03-22T13:36:49.442658+08:00",
-      "total_input": 3553,
+      "last_seen": "2026-03-23T12:16:27.914422+08:00",
+      "total_input": 4116,
       "total_output": 0
     },
     "e6bfdded4211": {
       "tool": "Read",
       "summary_sample": "d:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
       "tags": [],
-      "count": 125,
+      "count": 139,
       "confidence": 1.0,
-      "success_count": 125,
+      "success_count": 139,
       "first_seen": "2026-03-04T05:53:07.332590+08:00",
-      "last_seen": "2026-03-23T11:16:45.405946+08:00",
-      "total_input": 12208,
+      "last_seen": "2026-03-23T13:01:51.148718+08:00",
+      "total_input": 13572,
       "total_output": 0
     },
     "c7005f1c144d": {
@@ -622,12 +622,12 @@
         "skill-read",
         "team-mode"
       ],
-      "count": 79,
+      "count": 80,
       "confidence": 1.0,
-      "success_count": 79,
+      "success_count": 80,
       "first_seen": "2026-03-04T06:15:46.672395+08:00",
-      "last_seen": "2026-03-23T00:40:53.670328+08:00",
-      "total_input": 6382,
+      "last_seen": "2026-03-23T12:04:08.692911+08:00",
+      "total_input": 6472,
       "total_output": 0
     },
     "9af084b45036": {
@@ -637,12 +637,12 @@
         "skill-read",
         "team-mode"
       ],
-      "count": 43,
+      "count": 46,
       "confidence": 1.0,
-      "success_count": 43,
+      "success_count": 46,
       "first_seen": "2026-03-04T06:15:48.066254+08:00",
-      "last_seen": "2026-03-22T13:34:57.636789+08:00",
-      "total_input": 3369,
+      "last_seen": "2026-03-23T12:07:26.517007+08:00",
+      "total_input": 3626,
       "total_output": 0
     },
     "718635abc5a9": {
@@ -651,12 +651,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 40,
+      "count": 41,
       "confidence": 1.0,
-      "success_count": 40,
+      "success_count": 41,
       "first_seen": "2026-03-04T06:15:48.507056+08:00",
-      "last_seen": "2026-03-23T04:03:47.368177+08:00",
-      "total_input": 2974,
+      "last_seen": "2026-03-23T12:06:15.554055+08:00",
+      "total_input": 3047,
       "total_output": 0
     },
     "a8d2020de6ec": {
@@ -711,12 +711,12 @@
       "tags": [
         "memory-read"
       ],
-      "count": 67,
+      "count": 68,
       "confidence": 1.0,
-      "success_count": 67,
+      "success_count": 68,
       "first_seen": "2026-03-04T06:18:51.199338+08:00",
-      "last_seen": "2026-03-22T21:23:04.627374+08:00",
-      "total_input": 5344,
+      "last_seen": "2026-03-23T12:03:44.481706+08:00",
+      "total_input": 5421,
       "total_output": 0
     },
     "fa85b97e4c6d": {
@@ -725,24 +725,24 @@
       "tags": [
         "state-read"
       ],
-      "count": 83,
+      "count": 85,
       "confidence": 1.0,
-      "success_count": 83,
+      "success_count": 85,
       "first_seen": "2026-03-04T06:18:51.774049+08:00",
-      "last_seen": "2026-03-22T21:19:04.766024+08:00",
-      "total_input": 7634,
+      "last_seen": "2026-03-23T12:33:29.091407+08:00",
+      "total_input": 7818,
       "total_output": 0
     },
     "93b04a0bc50b": {
       "tool": "Read",
       "summary_sample": "d:\\Source\\daily-digest-prompt\\config\\timeouts.yaml",
       "tags": [],
-      "count": 30,
+      "count": 31,
       "confidence": 1.0,
-      "success_count": 30,
+      "success_count": 31,
       "first_seen": "2026-03-04T06:22:02.950622+08:00",
-      "last_seen": "2026-03-23T06:31:42.146924+08:00",
-      "total_input": 2306,
+      "last_seen": "2026-03-23T11:26:01.001643+08:00",
+      "total_input": 2377,
       "total_output": 0
     },
     "5179d7722220": {
@@ -889,12 +889,12 @@
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\routing.yaml",
       "tags": [],
-      "count": 56,
+      "count": 58,
       "confidence": 1.0,
-      "success_count": 56,
+      "success_count": 58,
       "first_seen": "2026-03-04T06:48:32.247072+08:00",
-      "last_seen": "2026-03-23T04:03:46.705079+08:00",
-      "total_input": 4104,
+      "last_seen": "2026-03-23T13:04:07.801192+08:00",
+      "total_input": 4258,
       "total_output": 0
     },
     "2b9ddbe1aa06": {
@@ -913,12 +913,12 @@
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\ai-research-plan.json",
       "tags": [],
-      "count": 16,
-      "confidence": 0.8500000000000002,
-      "success_count": 16,
+      "count": 17,
+      "confidence": 0.9000000000000002,
+      "success_count": 17,
       "first_seen": "2026-03-04T06:49:41.254474+08:00",
-      "last_seen": "2026-03-22T13:42:32.191297+08:00",
-      "total_input": 1280,
+      "last_seen": "2026-03-23T11:39:16.732296+08:00",
+      "total_input": 1360,
       "total_output": 0
     },
     "b765ebb2dca5": {
@@ -1106,12 +1106,12 @@
       "tags": [
         "loop-suspected"
       ],
-      "count": 270,
+      "count": 272,
       "confidence": 1.0,
-      "success_count": 270,
+      "success_count": 272,
       "first_seen": "2026-03-04T13:08:16.754459+08:00",
-      "last_seen": "2026-03-23T11:18:35.761863+08:00",
-      "total_input": 27905,
+      "last_seen": "2026-03-23T12:13:03.798951+08:00",
+      "total_input": 28117,
       "total_output": 0
     },
     "5db9f0acb156": {
@@ -1180,12 +1180,12 @@
         "skill-read",
         "cognitive-skill-select"
       ],
-      "count": 23,
+      "count": 24,
       "confidence": 1.0,
-      "success_count": 23,
+      "success_count": 24,
       "first_seen": "2026-03-04T17:57:23.894007+08:00",
-      "last_seen": "2026-03-23T04:09:05.321103+08:00",
-      "total_input": 1614,
+      "last_seen": "2026-03-23T12:34:03.826894+08:00",
+      "total_input": 1676,
       "total_output": 0
     },
     "7e7b28d3ac1d": {
@@ -1195,12 +1195,12 @@
         "python",
         "team-mode"
       ],
-      "count": 70,
+      "count": 71,
       "confidence": 1.0,
-      "success_count": 70,
+      "success_count": 71,
       "first_seen": "2026-03-04T18:30:53.112587+08:00",
-      "last_seen": "2026-03-23T10:30:37.443329+08:00",
-      "total_input": 11199,
+      "last_seen": "2026-03-23T12:00:55.515725+08:00",
+      "total_input": 11353,
       "total_output": 0
     },
     "8489a4cd87ca": {
@@ -1313,12 +1313,12 @@
         "team-mode",
         "skill-read"
       ],
-      "count": 94,
+      "count": 95,
       "confidence": 1.0,
-      "success_count": 94,
+      "success_count": 95,
       "first_seen": "2026-03-06T14:35:36.701511+08:00",
-      "last_seen": "2026-03-22T13:35:16.122155+08:00",
-      "total_input": 7900,
+      "last_seen": "2026-03-23T12:33:22.562479+08:00",
+      "total_input": 7980,
       "total_output": 0
     },
     "445a3ba1420d": {
@@ -1371,12 +1371,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 106,
+      "count": 110,
       "confidence": 1.0,
-      "success_count": 106,
+      "success_count": 110,
       "first_seen": "2026-03-06T16:34:33.399650+08:00",
-      "last_seen": "2026-03-23T00:40:59.904128+08:00",
-      "total_input": 10201,
+      "last_seen": "2026-03-23T12:11:00.553193+08:00",
+      "total_input": 10618,
       "total_output": 0
     },
     "f9329cc10380": {
@@ -1464,12 +1464,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 380,
+      "count": 382,
       "confidence": 1.0,
-      "success_count": 380,
+      "success_count": 382,
       "first_seen": "2026-03-06T17:30:47.582617+08:00",
-      "last_seen": "2026-03-23T10:30:36.884968+08:00",
-      "total_input": 207928,
+      "last_seen": "2026-03-23T13:01:07.038133+08:00",
+      "total_input": 209023,
       "total_output": 0
     },
     "b4d1f7d08b7c": {
@@ -1608,12 +1608,12 @@
         "team-mode",
         "cognitive-skill-select"
       ],
-      "count": 52,
+      "count": 53,
       "confidence": 1.0,
-      "success_count": 52,
+      "success_count": 53,
       "first_seen": "2026-03-07T05:33:48.825205+08:00",
-      "last_seen": "2026-03-22T13:39:13.513579+08:00",
-      "total_input": 4719,
+      "last_seen": "2026-03-23T12:03:58.806214+08:00",
+      "total_input": 4813,
       "total_output": 0
     },
     "850cf6dad0bc": {
@@ -1624,12 +1624,12 @@
         "cognitive-skill-select",
         "team-mode"
       ],
-      "count": 46,
+      "count": 48,
       "confidence": 1.0,
-      "success_count": 46,
+      "success_count": 48,
       "first_seen": "2026-03-07T05:33:50.749325+08:00",
-      "last_seen": "2026-03-22T13:35:22.360530+08:00",
-      "total_input": 4086,
+      "last_seen": "2026-03-23T13:03:42.191250+08:00",
+      "total_input": 4250,
       "total_output": 0
     },
     "80ba0a953b36": {
@@ -1686,24 +1686,24 @@
       "tags": [
         "file-edit"
       ],
-      "count": 159,
+      "count": 161,
       "confidence": 1.0,
-      "success_count": 159,
+      "success_count": 161,
       "first_seen": "2026-03-08T11:56:54.433156+08:00",
-      "last_seen": "2026-03-23T08:33:43.852194+08:00",
-      "total_input": 95206,
+      "last_seen": "2026-03-23T12:14:27.959430+08:00",
+      "total_input": 95782,
       "total_output": 0
     },
     "f1749b0d6fd6": {
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\kb-research-brief.json",
       "tags": [],
-      "count": 64,
+      "count": 66,
       "confidence": 1.0,
-      "success_count": 64,
+      "success_count": 66,
       "first_seen": "2026-03-08T20:20:45.890253+08:00",
-      "last_seen": "2026-03-23T01:46:43.096943+08:00",
-      "total_input": 5250,
+      "last_seen": "2026-03-23T11:38:20.142164+08:00",
+      "total_input": 5412,
       "total_output": 0
     },
     "b37606eee45a": {
@@ -1814,12 +1814,12 @@
       "tool": "Read",
       "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\continuity\\todoist-hourly.json",
       "tags": [],
-      "count": 477,
+      "count": 486,
       "confidence": 1.0,
-      "success_count": 477,
+      "success_count": 486,
       "first_seen": "2026-03-18T03:42:16.933554+08:00",
-      "last_seen": "2026-03-23T11:10:53.042433+08:00",
-      "total_input": 43004,
+      "last_seen": "2026-03-23T13:00:21.494126+08:00",
+      "total_input": 43814,
       "total_output": 0
     },
     "bf743c0b19a8": {
@@ -1904,24 +1904,24 @@
       "tags": [
         "team-mode"
       ],
-      "count": 219,
+      "count": 223,
       "confidence": 1.0,
-      "success_count": 219,
+      "success_count": 223,
       "first_seen": "2026-03-18T06:30:37.641366+08:00",
-      "last_seen": "2026-03-23T11:00:52.230224+08:00",
-      "total_input": 17739,
+      "last_seen": "2026-03-23T13:00:37.103012+08:00",
+      "total_input": 18063,
       "total_output": 0
     },
     "a547c151240d": {
       "tool": "Bash",
       "summary_sample": "cd D:/Source/daily-digest-prompt && pwsh -Command \"Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'\"",
       "tags": [],
-      "count": 75,
+      "count": 76,
       "confidence": 1.0,
-      "success_count": 75,
+      "success_count": 76,
       "first_seen": "2026-03-18T06:46:48.786391+08:00",
-      "last_seen": "2026-03-23T10:33:40.150370+08:00",
-      "total_input": 11153,
+      "last_seen": "2026-03-23T11:49:13.534602+08:00",
+      "total_input": 11300,
       "total_output": 0
     },
     "01051df446b8": {
@@ -1930,12 +1930,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 73,
+      "count": 77,
       "confidence": 1.0,
-      "success_count": 73,
+      "success_count": 77,
       "first_seen": "2026-03-18T07:00:46.985988+08:00",
-      "last_seen": "2026-03-23T10:01:40.315906+08:00",
-      "total_input": 5833,
+      "last_seen": "2026-03-23T13:04:57.584451+08:00",
+      "total_input": 6141,
       "total_output": 0
     },
     "21a75f32112b": {
@@ -1960,12 +1960,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 223,
+      "count": 228,
       "confidence": 1.0,
-      "success_count": 223,
+      "success_count": 228,
       "first_seen": "2026-03-18T08:00:18.079332+08:00",
-      "last_seen": "2026-03-23T11:00:52.027226+08:00",
-      "total_input": 17617,
+      "last_seen": "2026-03-23T13:04:04.069990+08:00",
+      "total_input": 18012,
       "total_output": 0
     },
     "eb83a6e0da8c": {
@@ -1974,12 +1974,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 242,
+      "count": 248,
       "confidence": 1.0,
-      "success_count": 242,
+      "success_count": 248,
       "first_seen": "2026-03-18T11:02:20.392881+08:00",
-      "last_seen": "2026-03-23T11:00:52.000242+08:00",
-      "total_input": 18901,
+      "last_seen": "2026-03-23T13:04:03.611492+08:00",
+      "total_input": 19369,
       "total_output": 0
     },
     "4ecb26cde626": {
@@ -2026,12 +2026,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 175,
+      "count": 179,
       "confidence": 1.0,
-      "success_count": 175,
+      "success_count": 179,
       "first_seen": "2026-03-19T01:00:33.901564+08:00",
-      "last_seen": "2026-03-23T11:00:52.056224+08:00",
-      "total_input": 13125,
+      "last_seen": "2026-03-23T13:00:37.137850+08:00",
+      "total_input": 13425,
       "total_output": 0
     },
     "a9d593b5c0fa": {
@@ -2058,12 +2058,12 @@
         "team-mode",
         "knowledge"
       ],
-      "count": 30,
+      "count": 32,
       "confidence": 1.0,
-      "success_count": 30,
+      "success_count": 32,
       "first_seen": "2026-03-19T01:05:23.364107+08:00",
-      "last_seen": "2026-03-22T08:39:38.152918+08:00",
-      "total_input": 10259,
+      "last_seen": "2026-03-23T12:34:44.781208+08:00",
+      "total_input": 11636,
       "total_output": 0
     },
     "f02b4b4c130e": {
@@ -2074,12 +2074,12 @@
         "skill-read",
         "cognitive-skill-select"
       ],
-      "count": 14,
-      "confidence": 0.7500000000000001,
-      "success_count": 14,
+      "count": 15,
+      "confidence": 0.8000000000000002,
+      "success_count": 15,
       "first_seen": "2026-03-19T02:07:21.229437+08:00",
-      "last_seen": "2026-03-22T13:35:06.684934+08:00",
-      "total_input": 1238,
+      "last_seen": "2026-03-23T11:37:56.293869+08:00",
+      "total_input": 1317,
       "total_output": 0
     },
     "a7e7c92da099": {
@@ -2090,12 +2090,12 @@
         "team-mode",
         "cognitive-skill-select"
       ],
-      "count": 8,
-      "confidence": 0.44999999999999996,
-      "success_count": 8,
+      "count": 9,
+      "confidence": 0.49999999999999994,
+      "success_count": 9,
       "first_seen": "2026-03-19T02:07:29.809966+08:00",
-      "last_seen": "2026-03-22T13:35:07.101012+08:00",
-      "total_input": 803,
+      "last_seen": "2026-03-23T12:04:08.431113+08:00",
+      "total_input": 900,
       "total_output": 0
     },
     "242abd09eaf1": {
@@ -2135,12 +2135,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 31,
+      "count": 37,
       "confidence": 1.0,
-      "success_count": 31,
+      "success_count": 37,
       "first_seen": "2026-03-19T07:34:37.527119+08:00",
-      "last_seen": "2026-03-23T00:58:46.819751+08:00",
-      "total_input": 2460,
+      "last_seen": "2026-03-23T13:04:28.692604+08:00",
+      "total_input": 2941,
       "total_output": 0
     },
     "6034b1bc823b": {
@@ -2177,12 +2177,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 43,
+      "count": 56,
       "confidence": 1.0,
-      "success_count": 43,
+      "success_count": 56,
       "first_seen": "2026-03-20T03:03:37.944853+08:00",
-      "last_seen": "2026-03-23T01:00:33.552557+08:00",
-      "total_input": 3791,
+      "last_seen": "2026-03-23T13:04:31.472805+08:00",
+      "total_input": 4991,
       "total_output": 0
     },
     "bbdf65c4f24f": {
@@ -2192,12 +2192,12 @@
         "team-mode",
         "toolsearch"
       ],
-      "count": 30,
+      "count": 32,
       "confidence": 1.0,
-      "success_count": 30,
+      "success_count": 32,
       "first_seen": "2026-03-20T03:35:29.928657+08:00",
-      "last_seen": "2026-03-23T09:04:13.970702+08:00",
-      "total_input": 1410,
+      "last_seen": "2026-03-23T12:42:25.687378+08:00",
+      "total_input": 1504,
       "total_output": 0
     },
     "f8f60c5cfebd": {
@@ -2399,12 +2399,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 15,
-      "confidence": 0.8000000000000002,
-      "success_count": 15,
+      "count": 16,
+      "confidence": 0.8500000000000002,
+      "success_count": 16,
       "first_seen": "2026-03-21T08:08:24.649064+08:00",
-      "last_seen": "2026-03-21T12:23:44.962228+08:00",
-      "total_input": 1475,
+      "last_seen": "2026-03-23T12:49:04.404332+08:00",
+      "total_input": 1566,
       "total_output": 0
     },
     "a5108b466cfe": {
@@ -2469,12 +2469,12 @@
       "tool": "Bash",
       "summary_sample": "cd /d/Source/daily-digest-prompt && pwsh -Command '\n$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN <REDACTED> else {\n  (Get-Content \"D:/Sou",
       "tags": [],
-      "count": 46,
+      "count": 47,
       "confidence": 1.0,
-      "success_count": 46,
+      "success_count": 47,
       "first_seen": "2026-03-21T11:41:07.656959+08:00",
-      "last_seen": "2026-03-23T11:00:51.548524+08:00",
-      "total_input": 26523,
+      "last_seen": "2026-03-23T12:00:54.986517+08:00",
+      "total_input": 27101,
       "total_output": 0
     },
     "fbd6059bf91a": {
@@ -2581,12 +2581,12 @@
         "skill-read",
         "team-mode"
       ],
-      "count": 20,
+      "count": 23,
       "confidence": 1.0,
-      "success_count": 20,
+      "success_count": 23,
       "first_seen": "2026-03-21T23:01:29.998408+08:00",
-      "last_seen": "2026-03-23T10:04:08.873302+08:00",
-      "total_input": 1686,
+      "last_seen": "2026-03-23T12:14:17.379755+08:00",
+      "total_input": 1929,
       "total_output": 0
     },
     "2385e9263440": {
@@ -2595,12 +2595,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 39,
+      "count": 51,
       "confidence": 1.0,
-      "success_count": 39,
+      "success_count": 51,
       "first_seen": "2026-03-22T01:33:51.732501+08:00",
-      "last_seen": "2026-03-23T05:03:38.193963+08:00",
-      "total_input": 2769,
+      "last_seen": "2026-03-23T13:03:41.345453+08:00",
+      "total_input": 3621,
       "total_output": 0
     },
     "aa7739f26cc5": {
@@ -2681,12 +2681,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 12,
-      "confidence": 0.65,
-      "success_count": 12,
+      "count": 20,
+      "confidence": 1.0,
+      "success_count": 20,
       "first_seen": "2026-03-22T08:02:41.664638+08:00",
-      "last_seen": "2026-03-23T02:36:22.466470+08:00",
-      "total_input": 1104,
+      "last_seen": "2026-03-23T13:03:56.836090+08:00",
+      "total_input": 1840,
       "total_output": 0
     },
     "b4e891c79757": {
@@ -2726,12 +2726,12 @@
       "tags": [
         "team-mode"
       ],
-      "count": 6,
-      "confidence": 0.35,
-      "success_count": 6,
+      "count": 11,
+      "confidence": 0.6,
+      "success_count": 11,
       "first_seen": "2026-03-23T00:45:11.006866+08:00",
-      "last_seen": "2026-03-23T00:55:58.481639+08:00",
-      "total_input": 471,
+      "last_seen": "2026-03-23T13:04:33.673734+08:00",
+      "total_input": 865,
       "total_output": 0
     },
     "4f587682e66d": {
@@ -2764,12 +2764,12 @@
       "tags": [
         "python"
       ],
-      "count": 14,
-      "confidence": 0.7500000000000001,
-      "success_count": 14,
+      "count": 15,
+      "confidence": 0.8000000000000002,
+      "success_count": 15,
       "first_seen": "2026-03-23T04:15:30.787205+08:00",
-      "last_seen": "2026-03-23T11:11:13.459358+08:00",
-      "total_input": 2800,
+      "last_seen": "2026-03-23T11:50:39.642444+08:00",
+      "total_input": 2998,
       "total_output": 0
     },
     "fe72746f9beb": {
@@ -2791,12 +2791,12 @@
       "tool": "Read",
       "summary_sample": "d:\\Source\\daily-digest-prompt\\tests\\tools\\test_autonomous_harness.py",
       "tags": [],
-      "count": 6,
-      "confidence": 0.35,
-      "success_count": 6,
+      "count": 17,
+      "confidence": 0.9000000000000002,
+      "success_count": 17,
       "first_seen": "2026-03-23T06:17:55.135406+08:00",
-      "last_seen": "2026-03-23T06:18:18.448982+08:00",
-      "total_input": 706,
+      "last_seen": "2026-03-23T12:29:42.533807+08:00",
+      "total_input": 1999,
       "total_output": 0
     },
     "d875f1d755bb": {
@@ -2813,47 +2813,53 @@
       "total_input": 5774,
       "total_output": 0
     },
-    "8f6ad2235281": {
-      "tool": "Read",
-      "summary_sample": "D:/Source/daily-digest-prompt/bot/process_messages.ps1",
-      "tags": [],
+    "3869c17a87a2": {
+      "tool": "Bash",
+      "summary_sample": "curl -s -X POST \"http://localhost:3000/api/search/hybrid\" -H \"Content-Type: application/json; charset=utf-8\" -d @\"D:\\Source\\daily-digest-prompt\\kb_sea",
+      "tags": [
+        "knowledge",
+        "api-write",
+        "python",
+        "team-mode",
+        "api-call"
+      ],
       "count": 3,
       "confidence": 0.2,
       "success_count": 3,
-      "first_seen": "2026-03-23T08:43:18.039883+08:00",
-      "last_seen": "2026-03-23T08:43:23.270150+08:00",
-      "total_input": 300,
+      "first_seen": "2026-03-23T11:35:42.367291+08:00",
+      "last_seen": "2026-03-23T11:35:45.219425+08:00",
+      "total_input": 1302,
       "total_output": 0
     },
-    "594d4988b0eb": {
-      "tool": "ToolSearch",
-      "summary_sample": "{'query': 'select:WebSearch,WebFetch', 'max_results': 2}",
+    "267ccd5d25c7": {
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\workflows\\config-consistency-validation-checklist.md",
       "tags": [
-        "toolsearch",
         "team-mode"
       ],
-      "count": 2,
-      "confidence": 0.15000000000000002,
-      "success_count": 2,
-      "first_seen": "2026-03-23T10:04:43.928296+08:00",
-      "last_seen": "2026-03-23T10:04:50.040020+08:00",
-      "total_input": 112,
+      "count": 5,
+      "confidence": 0.3,
+      "success_count": 5,
+      "first_seen": "2026-03-23T12:32:57.617599+08:00",
+      "last_seen": "2026-03-23T13:03:56.123480+08:00",
+      "total_input": 515,
       "total_output": 0
     },
-    "5557d782b7e5": {
-      "tool": "Grep",
-      "summary_sample": "{'pattern': 'allowHeavy|allowResearch|blockedTaskKeys|heavyTaskKeys', 'path': 'd:\\\\Source\\\\daily-digest-prompt\\\\run-todoist-agent-team.ps1', 'output_m",
+    "894e76d97e24": {
+      "tool": "Agent",
+      "summary_sample": "{'description': 'Extract skill signals from contexts', 'prompt': '你是信號提取 Agent。請從以下三個 JSON 檔案中提取「Skill 化信號」。\\n\\n**任務**：\\n1. 讀取 `context/improvement-ba",
       "tags": [
-        "grep"
+        "agent",
+        "team-mode"
       ],
       "count": 1,
       "confidence": 0.1,
       "success_count": 1,
-      "first_seen": "2026-03-23T11:17:33.604060+08:00",
-      "last_seen": "2026-03-23T11:17:33.604060+08:00",
-      "total_input": 180,
+      "first_seen": "2026-03-23T13:05:18.339311+08:00",
+      "last_seen": "2026-03-23T13:05:18.339311+08:00",
+      "total_input": 1314,
       "total_output": 0
     }
   },
-  "last_cleanup": "2026-03-23T11:03:58.306551+08:00"
+  "last_cleanup": "2026-03-23T13:04:37.835987+08:00"
 }

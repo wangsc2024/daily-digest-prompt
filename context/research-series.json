@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-23T03:10:51.047671+08:00",
+  "updated_at": "2026-03-23T12:23:32.916853+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -2120,7 +2120,7 @@
       "domain": "OpenClaw Personal AI Assistant Architecture",
       "description": "OpenClaw 開源個人 AI 助手架構研究系列",
       "initiated_at": "2026-03-10",
-      "last_active": "2026-03-10",
+      "last_active": "2026-03-23",
       "tags": [
         "OpenClaw",
         "AI Agent",
@@ -2146,7 +2146,16 @@
           ]
         },
         "mechanism": {
-          "status": "pending"
+          "status": "in_progress",
+          "kb_notes": [
+            "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由、Skill 熱載入與並發控制實作（mechanism 階段）"
+          ],
+          "covered_concepts": [
+            "Gateway WebSocket 路由",
+            "Skill 熱載入",
+            "Lane-based Queue",
+            "Session 並發控制"
+          ]
         },
         "application": {
           "status": "pending"
@@ -2161,7 +2170,7 @@
       "current_stage": "mechanism",
       "completion_pct": 20,
       "related_series": [],
-      "next_research_hint": "深入 Gateway WebSocket 路由機制與 Skill 自動生成的實作細節",
+      "next_research_hint": "完成 mechanism 後進入 application：實作 OpenClaw 風格的 local gateway 整合到 daily-digest-prompt",
       "saturation_score": 0.1,
       "saturation_matched_cluster": null
     },
@@ -5128,7 +5137,7 @@
       "domain": "skill-forge 系統",
       "description": "自動化 Skill 鑄造系統的完整研究系列",
       "initiated_at": "2026-03-22",
-      "last_active": "2026-03-22",
+      "last_active": "2026-03-23",
       "tags": [
         "skill-forge",
         "Skill系統",
@@ -5152,7 +5161,17 @@
           ]
         },
         "mechanism": {
-          "status": "pending"
+          "status": "completed",
+          "completed_at": "2026-03-23",
+          "kb_notes": [
+            "skill-forge 核心機制深度解析 — 評分算法實作、KB 分析邏輯與去重機制（mechanism 階段）"
+          ],
+          "covered_concepts": [
+            "評分算法實作細節",
+            "KB 分析邏輯",
+            "去重機制計算方法",
+            "Reflexion 品質閘門"
+          ]
         },
         "application": {
           "status": "pending"
@@ -5164,10 +5183,10 @@
           "status": "pending"
         }
       },
-      "current_stage": "mechanism",
-      "completion_pct": 20,
+      "current_stage": "application",
+      "completion_pct": 40,
       "related_series": [],
-      "next_research_hint": "完成後進入 mechanism：深入研究評分算法實作細節、KB 分析邏輯、去重機制"
+      "next_research_hint": "完成後進入 application：實際生成 Skill 的完整範例與最佳實踐"
     },
     "japanese-pure-land": {
       "series_id": "japanese-pure-land",

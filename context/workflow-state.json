@@ -129,8 +129,23 @@
       "step": "act",
       "ts": "2026-03-23T01:12:00+08:00",
       "repairs": "4/4 項（含 arch-decision 3 項）"
+    },
+    {
+      "status": "running",
+      "step": "decide",
+      "ts": "2026-03-23T12:33:53+08:00",
+      "note": "arch-evolution 啟動（改善清單 32 項，來源：system-audit 87.88/100）"
+    },
+    {
+      "status": "completed",
+      "step": "decide",
+      "ts": "2026-03-23T12:37:22+08:00",
+      "artifacts": [
+        "context/adr-registry.json（41 個 ADR：無變更）",
+        "context/arch-decision.json（31 項決策：5 immediate_fix, 3 schedule_adr, 23 skip）"
+      ]
     }
   ],
   "status": "completed",
-  "current_step": "complete"
+  "current_step": "act"
 }

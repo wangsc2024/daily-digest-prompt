@@ -1,7 +1,7 @@
 {
   "mode": "degraded",
-  "reason": "偵測到 12 個任務飢餓，需降低並行並優先補跑低頻任務",
-  "expires_at": "2026-03-23T11:45:04.773140+08:00",
+  "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
+  "expires_at": "2026-03-23T13:35:07.463292+08:00",
   "blocked_task_keys": [],
   "blocked_fetch_agents": [],
   "max_parallel_auto_tasks": 2,

@@ -15,6 +15,7 @@ from post_tool_logger import (
     classify_read,
     classify_edit,
     _sanitize_bash_summary,
+    _skill_change_summary_for_ntfy,
     ERROR_KEYWORDS,
     BENIGN_PATTERNS,
 )
@@ -556,6 +557,34 @@ class TestCognitiveTags:
         assert "cognitive-routing" not in tags
         assert "cognitive-skill-select" not in tags
         assert "cognitive-retry" not in tags
+
+
+class TestSkillChangeSummaryForNtfy:
+    """Skill 修改 ntfy 內文截斷（段落／行邊界）。"""
+
+    def test_empty_returns_placeholder(self):
+        assert _skill_change_summary_for_ntfy("") == "（無內文）"
+        assert _skill_change_summary_for_ntfy("   ") == "（無內文）"
+
+    def test_short_text_unchanged(self):
+        s = "## 標題\n\n段落。"
+        assert _skill_change_summary_for_ntfy(s) == s
+
+    def test_truncates_at_paragraph_boundary(self):
+        p1 = "A" * 400
+        p2 = "B" * 400
+        body = f"{p1}\n\n{p2}\n\n尾段。"
+        out = _skill_change_summary_for_ntfy(body, max_chars=500)
+        assert p1 in out
+        assert p2 not in out
+        assert "已截斷" in out
+        assert "原稿共" in out
+        assert out.endswith("檢視全文）")
+
+    def test_truncation_footer_shows_total_chars(self):
+        long = "x" * 6000
+        out = _skill_change_summary_for_ntfy(long, max_chars=100)
+        assert "6000" in out
 
 
 class TestSpanTypeInLogEntry:

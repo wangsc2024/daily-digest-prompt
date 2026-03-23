@@ -1,4 +1,4 @@
-version: 2
+version: 3
 
 # ============================================
 # 分層安全策略預設集（Presets）
@@ -225,6 +225,7 @@ write_rules:
     priority: medium  # 可觀測性：不阻擋寫入
     # 合法外部目錄白名單（專案與知識庫協作、Claude 設定、遊戲專案等）
     allowed_paths:
+      - "D:/tmp"  # 使用者暫存目錄（臨時檔／協作產出，不觸發 traversal-guard 告警）
       - "D:/Source/knowledge"  # 知識庫同步腳本與 RAG 協作目錄
       - "D:/Source/knowledge-worker"
       - "D:/Source/game_web"  # 遊戲專案（Cursor CLI 遊戲型任務產出）

@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-03-23T11:15:04.779139+08:00",
+  "generated_at": "2026-03-23T13:05:07.468296+08:00",
   "mode": "degraded",
   "reasons": [
-    "偵測到 12 個任務飢餓，需降低並行並優先補跑低頻任務",
-    "override: 偵測到 12 個任務飢餓，需降低並行並優先補跑低頻任務"
+    "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
+    "override: 偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務"
   ],
   "override": {
     "active": true,
-    "reason": "偵測到 12 個任務飢餓，需降低並行並優先補跑低頻任務",
-    "expires_at": "2026-03-23T11:45:04.773140+08:00"
+    "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
+    "expires_at": "2026-03-23T13:35:07.463292+08:00"
   },
   "gates": {
     "heartbeat_stale": false,
@@ -17,7 +17,7 @@
     "open_circuits": 0
   },
   "policies": {
-    "max_parallel_auto_tasks": 2,
+    "max_parallel_auto_tasks": 5,
     "max_parallel_fetch_agents": 4,
     "allow_heavy_auto_tasks": false,
     "allow_research_auto_tasks": true,
@@ -73,12 +73,16 @@
       "unsloth_research"
     ],
     "blocked_task_keys": [
+      "ai_deep_research",
       "ai_domain_research",
+      "ai_github_research",
       "ai_workflow_github_research",
       "buddhist_research",
       "podcast_create",
       "podcast_jiaoguangzong",
       "shurangama_research",
+      "system_insight",
+      "tech_research",
       "unsloth_research"
     ],
     "priority_recovery_targets": [
@@ -86,23 +90,23 @@
     ]
   },
   "resource_snapshot": {
-    "generated_at": "2026-03-23T11:15:04.782139+08:00",
+    "generated_at": "2026-03-23T13:05:07.472296+08:00",
     "cpu": {
-      "percent": 19.75
+      "percent": 10.23
     },
     "memory": {
-      "percent": 59.28,
-      "available_mb": 13247.06
+      "percent": 54.93,
+      "available_mb": 14664.09
     },
     "gpu": {
       "available": true,
       "devices": [
         {
           "name": "NVIDIA GeForce RTX 4090",
-          "utilization_percent": 1.0,
-          "memory_used_mb": 1007.0,
+          "utilization_percent": 6.0,
+          "memory_used_mb": 1022.0,
           "memory_total_mb": 24564.0,
-          "memory_percent": 4.1
+          "memory_percent": 4.16
         }
       ]
     }
@@ -115,8 +119,8 @@
     "research_auto_task_count": 10
   },
   "scheduler_heartbeat": {
-    "timestamp": "2026-03-23T11:11:35.990955",
+    "timestamp": "2026-03-23T13:01:54.052935",
     "status": "running",
-    "pid": 279952
+    "pid": 52220
   }
 }

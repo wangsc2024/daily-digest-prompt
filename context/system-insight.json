@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "generated_at": "2026-03-22T12:33:00+08:00",
+  "generated_at": "2026-03-23T21:30:00+08:00",
   "period_days": 7,
   "period": {
-    "start": "2026-03-16",
-    "end": "2026-03-22"
+    "start": "2026-03-17",
+    "end": "2026-03-23"
   },
-  "total_skills": 56,
-  "actual_skills_used": 56,
+  "total_skills": 59,
+  "actual_skills_used": 61,
   "data_sources": {
     "jsonl_logs": "complete",
     "scheduler_state": "complete",
@@ -16,16 +16,16 @@
     "behavior_patterns": "complete"
   },
   "metrics": {
-    "daily_success_rate": 0.865,
-    "skill_usage_coverage": 1.0,
-    "cache_hit_ratio": 0.217,
-    "error_rate": 0.0039,
-    "block_rate": 0.0008,
-    "topic_diversity": 0.965,
-    "auto_task_fairness": 0.592,
-    "avg_io_per_call": 24968,
+    "daily_success_rate": 0.875,
+    "skill_usage_coverage": 1.034,
+    "cache_hit_ratio": 0.227,
+    "error_rate": 0.0,
+    "block_rate": 0.0006,
+    "topic_diversity": 0.976,
+    "auto_task_fairness": 1.371,
+    "avg_io_per_call": 23706,
     "behavior_pattern_count": 200,
-    "high_confidence_patterns": 161
+    "high_confidence_patterns": 160
   },
   "thresholds": {
     "daily_success_rate": 0.95,
@@ -43,119 +43,70 @@
     {
       "level": "critical",
       "metric": "daily_success_rate",
-      "value": 0.865,
+      "value": 0.875,
       "threshold": 0.95,
-      "message": "每日成功率 86.5% 持續低於目標 95%（200 runs，27 failed）"
+      "message": "每日執行成功率 87.5% 低於目標 95%（200 runs，25 failed）"
     },
     {
-      "level": "critical",
+      "level": "warning",
       "metric": "cache_hit_ratio",
-      "value": 0.217,
-      "threshold": 0.4,
-      "message": "快取命中率 21.7% 顯著低於健康門檻 40%（655 hits / 3015 total）"
-    },
-    {
-      "level": "critical",
-      "metric": "avg_io_per_call",
-      "value": 24968,
-      "threshold": 12000,
-      "message": "平均輸出長度 24,968 字元超過基準門檻 12,000（超標 108%），Context 保護機制未有效啟用"
+      "value": 0.227,
+      "threshold": 0.40,
+      "message": "快取命中率 22.7% 低於目標 40%"
     },
     {
       "level": "warning",
       "metric": "auto_task_fairness",
-      "value": 0.592,
+      "value": 1.371,
       "threshold": 0.5,
-      "message": "自動任務公平性分數 0.592 略高於門檻 0.5，但已大幅改善（-51.1% vs 上次 1.211）"
+      "message": "自動任務公平性 stddev=1.371 超過門檻 0.5，任務分配嚴重不均（18 個任務零執行）"
+    },
+    {
+      "level": "warning",
+      "metric": "avg_io_per_call",
+      "value": 23706,
+      "threshold": 12000,
+      "message": "每次工具呼叫平均 I/O 23,706 chars 超過目標 12,000（已排除研究類任務）"
     }
   ],
   "recommendations": [
-    "【P0-持續】每日成功率 86.5% 持平，高失敗時段在 5、7、13 時，建議檢查這些時段的系統資源與外部 API 穩定性",
-    "【P0-持續】快取命中率極低（21.7%），建議檢查 cache-policy.yaml TTL 設定、Phase 0 預計算是否正常執行，以及快取失效邏輯",
-    "【P0-新增】I/O 膨脹嚴重（24,968 字元/次），建議立即啟用 Context 保護策略（委派子 Agent 處理重量操作），或檢查是否有迴圈累積大量輸出",
-    "【P1-改善中】自動任務公平性已大幅改善（1.211→0.592，-51.1%），接近目標 0.5，建議持續監控 round-robin 邏輯",
-    "【優良】block_rate 維持 0.08%（25/31827），Hook 防護機制運作正常",
-    "【優良】topic_diversity 達 96.5%（109/113），研究主題多樣性優異",
-    "【優良】skill_usage_coverage 達 100%（56/56），所有 Skills 均有使用",
-    "【優良】behavior_pattern_count 達 200，high_confidence_patterns 達 161，行為識別完善"
+    "成功率偏低（87.5%），建議檢查失敗模式與高失敗時段（7 點、13 點）根因",
+    "快取命中率偏低（22.7%），建議執行 cache-optimizer Skill 調整 TTL 設定或檢查 api-cache Skill 使用情況",
+    "自動任務飢餓嚴重：18 個任務零執行（fairness_stddev=1.371），建議執行 task-fairness-analyzer Skill 診斷排程公平性與輪轉邏輯",
+    "工具呼叫 I/O 過大（23.7K chars/call），建議執行 context-budget-monitor Skill 分析膨脹原因並啟用 Context 壓縮策略（BufferWindow/Summary）"
   ],
   "skill_heatmap": {
-    "knowledge-query": 985,
-    "todoist": 642,
-    "api-cache": 655,
-    "ntfy-notify": 122,
-    "digest-memory": 63,
-    "hackernews-ai-digest": 11,
-    "pingtung-news": 11,
-    "system-audit": 1,
-    "skill-forge": 1,
-    "workflow-forge": 1,
-    "groq": 1,
-    "github-scout": 1
+    "Read": 13264,
+    "Bash": 11416,
+    "Write": 3590,
+    "Grep": 1120,
+    "Edit": 1105,
+    "todoist": 85,
+    "knowledge-query": 72,
+    "api-cache": 68,
+    "web-research": 45,
+    "ntfy-notify": 38
   },
-  "skill_usage_details": {
-    "total_skill_reads": 2160,
-    "unique_skills_used": 56,
-    "unused_skills": 0,
-    "unused_skills_list": []
+  "high_failure_hours": [7, 13],
+  "data_quality": {
+    "jsonl_calls_analyzed": 33127,
+    "scheduler_runs_analyzed": 200,
+    "auto_tasks_tracked": 31,
+    "research_entries": 124,
+    "behavior_patterns_identified": 200,
+    "data_completeness": "100%"
   },
-  "high_failure_hours": [5, 7, 13],
-  "statistics": {
-    "total_runs_7d": 200,
-    "successful_runs": 173,
-    "failed_runs": 27,
-    "failure_rate_percent": "13.5%",
-    "total_tool_calls": 31827,
-    "unique_skills_used": 56,
-    "skill_read_count": 2160,
-    "research_entries": 113,
-    "unique_topics": 109,
-    "auto_tasks_total": 31,
-    "auto_tasks_executed_today": 31,
-    "cache_stats": {
-      "cache_read": 655,
-      "api_call": 2360,
-      "cache_write": 182,
-      "cache_miss": 8,
-      "cache_hit_ratio_percent": "21.7%"
-    },
-    "error_count": 123,
-    "blocked_count": 25,
-    "block_rate_percent": "0.08%",
-    "avg_output_per_call": 24968,
-    "loop_suspected_events": 606,
-    "tool_distribution": {
-      "Read": 12747,
-      "Bash": 11042,
-      "Write": 3399,
-      "Edit": 1004,
-      "Grep": 1039,
-      "Glob": 715,
-      "Agent": 321,
-      "WebSearch": 612,
-      "WebFetch": 422,
-      "TodoWrite": 232,
-      "ToolSearch": 228
-    }
-  },
-  "trends": {
-    "note": "與上次報告（2026-03-22 05:33）對比",
-    "daily_success_rate": "持平（0.865 → 0.865）",
-    "cache_hit_ratio": "持平（0.2167 → 0.217）",
-    "auto_task_fairness": "大幅改善（1.211 → 0.592, -51.1%）✅✅",
-    "avg_io_per_call": "改善（25454 → 24968, -1.9%）✅",
-    "block_rate": "持平（0.0008）",
-    "topic_diversity": "微升（0.962 → 0.965, +0.3%）",
-    "skill_usage_coverage": "持平（1.0）",
-    "behavior_pattern_count": "持平（200）",
-    "high_confidence_patterns": "微降（162 → 161, -0.6%）",
-    "total_tool_calls": "+8.1% (29432 → 31827)"
-  },
-  "summary": "系統整體健康狀態：部分指標顯著改善，但核心問題持續。關鍵改善：(1) auto_task_fairness 大幅下降 51.1%（1.211→0.592），接近目標 0.5，round-robin 機制生效；(2) avg_io_per_call 持續改善（-1.9%），但仍超標 108%。持續警戒：(1) daily_success_rate 持平 86.5%（仍低於 95%），高失敗時段未解決；(2) cache_hit_ratio 持平 21.7%（仍遠低於 40%），快取機制效能不佳。新增 critical：avg_io_per_call 超標 108%，需立即啟用 Context 保護。正向指標：block_rate 0.08%，skill_usage_coverage 100%，topic_diversity 96.5%，behavior patterns 完善。整體評估：自動任務公平性已達標範圍，但成功率、快取、I/O 膨脹仍需優先改善。",
   "notes": [
-    "total_skills 已更新為 56（實際 Skill 數量），與 actual_skills_used 一致",
-    "avg_io_per_call=24968 超過基準 12000（多 Agent 並行架構），但根據 benchmark.yaml 正常範圍 8000-15000，超過 15000 才 critical。當前值 24968 已超過正常範圍上限，升級為 critical",
-    "error_rate=0.39% 包含 warn + block 標籤（123 events / 31827 calls）",
-    "auto_tasks_executed_today=31（所有任務今日均有執行記錄），fairness 大幅改善原因是分配更均衡"
-  ]
+    "Skill 使用覆蓋率 103.4%（61/59）：實際使用 61 個 Skill，但 SKILL_INDEX.md 列 59 個，可能有 2 個舊/測試 Skill 未更新索引或已退役",
+    "auto_task_fairness 異常偏高（1.371）：標準差過大表示執行次數極不均衡，13 個任務有執行記錄，18 個零執行（包含 4 個佛經任務、5 個 AI 研究任務等）",
+    "cache_hit_ratio 計算基礎：707 次 cache-read / (707 + 2406 api-call) = 22.7%，低於預期可能與 TTL 設定過短或新增 API 端點未啟用快取有關",
+    "avg_io_per_call 已排除 14 個研究類任務（tech_research, ai_deep_research 等），排除後仍達 23.7K 表示一般任務也有 I/O 膨脹問題",
+    "behavior_patterns 高信心率 80%（160/200）表示 Instinct Lite 機制運作良好，可考慮演化部分模式為正式 Skill"
+  ],
+  "comparison_with_last_run": {
+    "daily_success_rate_change": "+1.0%",
+    "cache_hit_ratio_change": "+1.0%",
+    "auto_task_fairness_change": "+131.6%（惡化）",
+    "avg_io_per_call_change": "-5.1%（改善）"
+  }
 }

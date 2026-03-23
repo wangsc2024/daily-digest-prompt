@@ -12,6 +12,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -97,6 +98,11 @@ class AutonomousHarness:
         self.discovery = self.settings.get("discovery", {})
         self.resources = self.settings.get("resources", {})
         self.recovery_worker = self.settings.get("recovery_worker", {})
+        freq_path = repo_root / "config" / "frequency-limits.yaml"
+        freq_cfg = yaml.safe_load(freq_path.read_text(encoding="utf-8")) if freq_path.exists() else {}
+        self._team_mode_limit: int = int(
+            freq_cfg.get("max_auto_per_run", {}).get("team_mode", 3)
+        )
 
     def _resolve(self, key: str) -> Path:
         return self.repo_root / self.settings[key]
@@ -537,6 +543,12 @@ $os = Get-CimInstance Win32_OperatingSystem
                 max_parallel_auto_tasks,
                 int(runtime_override["max_parallel_auto_tasks"]),
             )
+        # 飢餓加速：多個任務積壓時，提升至 team_mode + 2，讓飢餓任務可以多跑 2 個，
+        # 確保 runtime policy 不會壓低 Phase 1 的選取上限，加速清除積壓。
+        # Recovery mode 排除：系統已有嚴重故障（heartbeat stale / open circuit），
+        # 此時不應放大並行，以免加重系統負擔。
+        if len(starved_task_keys) > 1 and mode != "recovery":
+            max_parallel_auto_tasks = max(max_parallel_auto_tasks, self._team_mode_limit + 2)
         max_parallel_fetch_agents = profile.get("max_parallel_fetch_agents", len(fetch_agent_keys))
         if runtime_override.get("max_parallel_fetch_agents") is not None:
             max_parallel_fetch_agents = min(
@@ -665,7 +677,63 @@ $os = Get-CimInstance Win32_OperatingSystem
             agent_registry,
             runtime_override,
         )
+        if plan["runtime"]["mode"] == "recovery":
+            self._notify_recovery(plan, now)
         return plan
+
+    def _notify_recovery(self, plan: dict[str, Any], now: datetime) -> None:
+        """Recovery mode 進入時發 ntfy 告警，1 小時冷卻避免重複推播。"""
+        cooldown_path = self.repo_root / "state" / "recovery-notified.json"
+        if cooldown_path.exists():
+            try:
+                last = _load_json(cooldown_path, {}).get("notified_at", "")
+                if last and (now - datetime.fromisoformat(last)).total_seconds() < 3600:
+                    return
+            except Exception:
+                pass
+
+        gates = plan["runtime"]["gates"]
+        reasons: list[str] = []
+        if gates.get("heartbeat_stale"):
+            reasons.append("排程器 heartbeat 逾時（scheduler stale）")
+        if gates.get("open_circuits", 0) > 0:
+            reasons.append(f"API 熔斷開啟（{gates['open_circuits']} 個）")
+        reason_text = "、".join(reasons) or "嚴重告警觸發"
+
+        payload = {
+            "topic": "wangsc2025",
+            "title": "🔴 自律排程進入 Recovery Mode",
+            "message": f"原因：{reason_text}\n並行上限已降至 1，待系統恢復後自動解除。",
+            "priority": 5,
+            "tags": ["rotating_light", "shield"],
+        }
+        fd = None
+        try:
+            fd = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".json", prefix="ntfy_recovery_",
+                encoding="utf-8", delete=False,
+            )
+            json.dump(payload, fd, ensure_ascii=False)
+            fd.close()
+            subprocess.run(
+                ["curl", "-s", "-H", "Content-Type: application/json; charset=utf-8",
+                 "-d", f"@{fd.name}", "https://ntfy.sh"],
+                capture_output=True, timeout=10,
+            )
+            cooldown_path.write_text(
+                json.dumps({"notified_at": now.isoformat()}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+        finally:
+            if fd and not fd.closed:
+                fd.close()
+            if fd:
+                try:
+                    os.unlink(fd.name)
+                except OSError:
+                    pass
 
     def enqueue_recovery(self, plan: dict[str, Any]) -> dict[str, Any]:
         queue_path = self._resolve("recovery_queue_path")

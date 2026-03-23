@@ -27,6 +27,13 @@ autonomous_harness:
     starvation_task_threshold: 3
     heartbeat_stale_minutes: 40
 
+  # Checkpoint 機制（受 LangGraph durable execution 啟發）
+  checkpoint:
+    enabled: true
+    checkpoint_dir: "state/checkpoints"
+    max_checkpoints_per_task: 5
+    auto_cleanup_on_success: true
+
   discovery:
     fetch_agents_glob: "prompts/team/fetch-*.md"
     auto_tasks_glob: "templates/auto-tasks/*.md"
@@ -96,7 +103,7 @@ autonomous_harness:
       daily_digest_phase2_retries: 1
       blocked_fetch_agents: []
     degraded:
-      max_parallel_auto_tasks: 2
+      max_parallel_auto_tasks: 3
       max_parallel_fetch_agents: 4
       allow_heavy_auto_tasks: false
       allow_research_auto_tasks: true

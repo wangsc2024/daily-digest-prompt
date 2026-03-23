@@ -1,33 +1,15 @@
 {
-  "updated": "2026-03-23T03:03:41.733203+00:00",
+  "updated": "2026-03-23T04:24:53.629620+00:00",
   "summary": {
-    "jiaoguangzong": {
-      "avg": 31.7,
-      "count": 38,
-      "last": 35,
-      "alert": true
-    },
-    "fahua": {
-      "avg": 37.4,
-      "count": 31,
-      "last": 35,
-      "alert": true
-    },
-    "jingtu": {
-      "avg": 32.5,
-      "count": 21,
-      "last": 35,
-      "alert": true
-    },
     "tech_research": {
-      "avg": 33.1,
-      "count": 26,
-      "last": 30,
+      "avg": 33.4,
+      "count": 27,
+      "last": 40,
       "alert": true
     },
     "ai_deep_research": {
-      "avg": 31.4,
-      "count": 28,
+      "avg": 31.3,
+      "count": 29,
       "last": 30,
       "alert": true
     },
@@ -37,16 +19,34 @@
       "last": 40,
       "alert": true
     },
+    "jiaoguangzong": {
+      "avg": 31.8,
+      "count": 37,
+      "last": 35,
+      "alert": true
+    },
     "shurangama": {
       "avg": 30.4,
       "count": 25,
       "last": 30,
       "alert": true
     },
+    "jingtu": {
+      "avg": 32.6,
+      "count": 20,
+      "last": 35,
+      "alert": true
+    },
+    "fahua": {
+      "avg": 37.6,
+      "count": 30,
+      "last": 35,
+      "alert": true
+    },
     "ai_github_research": {
       "avg": 34.4,
-      "count": 11,
-      "last": 30,
+      "count": 12,
+      "last": 35,
       "alert": true
     },
     "ai_sysdev": {
@@ -3990,6 +3990,54 @@
       },
       "output_length": 222,
       "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-tech_research.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "ai_deep_research",
+      "timestamp": "2026-03-23T03:47:29.322534+00:00",
+      "score": 30,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 5,
+        "tool_utilization": 0
+      },
+      "output_length": 474,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_deep_research.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "tech_research",
+      "timestamp": "2026-03-23T03:47:29.469384+00:00",
+      "score": 40,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 15,
+        "tool_utilization": 0
+      },
+      "output_length": 1002,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-tech_research.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "ai_github_research",
+      "timestamp": "2026-03-23T04:24:53.623622+00:00",
+      "score": 35,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 25,
+        "output_depth": 10,
+        "tool_utilization": 0
+      },
+      "output_length": 760,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_github_research.json",
       "backend": "unknown",
       "alert": true
     }

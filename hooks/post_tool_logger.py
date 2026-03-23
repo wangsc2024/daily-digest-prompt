@@ -46,6 +46,40 @@ except ImportError:
 # Import shared API source patterns and sanitization
 from hook_utils import sanitize_sensitive_data, send_ntfy_alert
 
+# Skill 修改 ntfy 內文上限（Unicode 字元數）。
+SKILL_CHANGE_NTFY_MAX_CHARS = 1000
+# 智慧截斷時，段落或行斷點至少需落在此比例之後，否則改為硬截斷以免摘要過短
+SKILL_CHANGE_NTFY_MIN_HEAD_RATIO = 0.25
+
+
+def _skill_change_summary_for_ntfy(
+    change_text: str,
+    max_chars: int = SKILL_CHANGE_NTFY_MAX_CHARS,
+) -> str:
+    """產生 Skill 變更 ntfy 內文；超長時優先在段落或行邊界截斷並附原稿字數提示。"""
+    text = (change_text or "").strip()
+    if not text:
+        return "（無內文）"
+    total = len(text)
+    if total <= max_chars:
+        return text
+    head = text[:max_chars]
+    min_keep = int(max_chars * SKILL_CHANGE_NTFY_MIN_HEAD_RATIO)
+    last_para = head.rfind("\n\n")
+    if last_para >= min_keep:
+        snippet = text[:last_para].rstrip()
+    else:
+        last_nl = head.rfind("\n")
+        if last_nl >= min_keep:
+            snippet = text[:last_nl].rstrip()
+        else:
+            snippet = head.rstrip()
+    return (
+        f"{snippet}\n\n"
+        f"…（已截斷：原稿共 {total} 字元，請於路徑開啟 SKILL.md 檢視全文）"
+    )
+
+
 # ── Proposal 004: OpenTelemetry 雙寫支援 ───────────────────────────────────
 # 全部包在 try-except，任何失敗均靜默降級，不影響主流程
 try:
@@ -754,7 +788,7 @@ def main():
         tool_name=entry.get("tool", ""),
     )
 
-    # Skill 修改通知：當 SKILL.md 被 Write/Edit 時發送 ntfy（標題含 Skill 名稱，內文 500 字摘要）
+    # Skill 修改通知：當 SKILL.md 被 Write/Edit 時發送 ntfy（標題含 Skill 名稱；內文上限見 SKILL_CHANGE_NTFY_MAX_CHARS）
     if "skill-modified" in tags:
         try:
             _skill_path = tool_input.get("file_path", "")
@@ -766,11 +800,9 @@ def main():
                     _skill_name = _path_parts[_i - 1]
                     break
 
-            # 建立 500 字摘要（Write: content；Edit: new_string）
+            # Write: content；Edit: new_string
             _change_text = tool_input.get("content") or tool_input.get("new_string", "")
-            _summary = _change_text[:500].strip()
-            if len(_change_text) > 500:
-                _summary += "…"
+            _summary = _skill_change_summary_for_ntfy(_change_text)
 
             send_ntfy_alert(
                 title=f"[Skill 修改] {_skill_name}",

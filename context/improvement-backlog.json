@@ -1,10 +1,169 @@
 {
   "version": 1,
-  "generated_at": "2026-03-22T08:49:00.56384+08:00",
-  "source": "system_insight",
+  "generated_at": "2026-03-23T12:44:54.036682+08:00",
+  "source": "github_scout",
   "total_score": 87.88,
   "grade": "A",
   "items": [
+    {
+      "id": "backlog_kb_insight_20260323_cache_optimization",
+      "source": "kb_insight_evaluation",
+      "title": "快取命中率優化深度方案（22.7% → 40%+）",
+      "description": "依據最佳實踐（Cachefly、Redis Blog、Medium），將快取命中率從 22.7% 提升至 40%+。採用 TTL 分層策略（高頻端點 4-8h、中頻 2-4h）、新增 stale-while-revalidate 機制、進行 per-endpoint 分析並形成閉環監控。",
+      "pattern": "cache_hit_ratio_optimization",
+      "dimension": "performance",
+      "effort": "medium",
+      "priority": "high",
+      "status": "pending",
+      "execution_plan": {
+        "steps": [
+          "使用 cache-optimizer Skill 分析各端點快取效率",
+          "依存取頻率分層端點（>10 次/日=高頻、1-10=中頻、<1=低頻）",
+          "調整 config/cache-policy.yaml TTL 設定",
+          "新增 stale-while-revalidate 機制",
+          "觀察 7 天後變化並調整",
+          "結果寫入 system-insight 形成閉環"
+        ],
+        "acceptance_criteria": [
+          "快取命中率提升至 40% 以上",
+          "高頻端點（pingtung-news、hackernews）命中率 >60%",
+          "無因快取過時導致的內容錯誤"
+        ],
+        "research_sources": [
+          "https://www.cachefly.com/news/understanding-and-implementing-cache-shielding-for-optimal-hit-ratio/",
+          "https://redis.io/blog/why-your-cache-hit-ratio-strategy-needs-an-update/",
+          "https://medium.com/@vinaybilla2021/caching-strategies-for-apis-when-to-ttl-and-when-to-evict-8ce8dfcb3356"
+        ]
+      },
+      "evaluated_at": "2026-03-23T12:44:23.230125",
+      "tags": [
+        "kb_insight",
+        "cache",
+        "performance",
+        "high_priority"
+      ]
+    },
+    {
+      "id": "backlog_kb_insight_20260323_peak_hour_diagnosis",
+      "source": "kb_insight_evaluation",
+      "title": "高失敗時段根因診斷與預防機制（7 點、13 點）",
+      "description": "針對 7 點、13 點高失敗時段（成功率 87.5%）進行根因分析。依據 Dynatrace、JAMS、GeeksforGeeks 的最佳實踐，採用集中化日誌、趨勢分析、三層監控（alerts + logging + metrics）識別外部 API 不穩定、資源競爭等根因，並建立預防機制。",
+      "pattern": "time_based_failure_diagnosis",
+      "dimension": "reliability",
+      "effort": "medium",
+      "priority": "high",
+      "status": "pending",
+      "execution_plan": {
+        "steps": [
+          "使用 query_logs.py 分析 7 點、13 點失敗事件分佈",
+          "交叉比對外部 API 可用性（Todoist、pingtung-news）",
+          "分析系統資源使用峰值（CPU、Memory、並行任務數）",
+          "建立 config/time-slot-risk.json（風險等級、建議動作）",
+          "整合 pre-flight-check Skill（執行前風險評估）",
+          "新增 ntfy 高風險時段失敗告警"
+        ],
+        "acceptance_criteria": [
+          "識別出至少 2 個根因（外部 API / 資源競爭 / 排程衝突）",
+          "config/time-slot-risk.json 完成並整合至 pre-flight-check",
+          "高風險時段成功率提升 10%+"
+        ],
+        "research_sources": [
+          "https://www.dynatrace.com/hub/detail/windows-scheduled-tasks/",
+          "https://www.jamsscheduler.com/blog/windows-task-scheduler-error-diagnostics/",
+          "https://www.geeksforgeeks.org/system-design/design-distributed-job-scheduler-system-design/"
+        ]
+      },
+      "evaluated_at": "2026-03-23T12:44:23.230125",
+      "tags": [
+        "kb_insight",
+        "reliability",
+        "time_slot",
+        "high_priority"
+      ]
+    },
+    {
+      "id": "backlog_kb_insight_20260323_task_fairness_wrr",
+      "source": "kb_insight_evaluation",
+      "title": "自動任務飢餓輪轉演算法優化（18 個零執行任務）",
+      "description": "針對自動任務飢餓問題（18 個零執行任務、fairness_stddev=1.371），依據 Wikipedia、GeeksforGeeks、Grokipedia 的排程理論，從純 round-robin 升級為 Weighted Round-robin + Aging 機制，消除任務飢餓並將 fairness_stddev 降至 <0.5。",
+      "pattern": "task_scheduling_fairness",
+      "dimension": "fairness",
+      "effort": "high",
+      "priority": "medium",
+      "status": "pending",
+      "execution_plan": {
+        "steps": [
+          "使用 task-fairness-analyzer Skill 生成診斷報告（識別飢餓根因）",
+          "分析零執行任務的 allowed_days 設定（星期限制）",
+          "設計 Weighted Round-robin 演算法（優先級 + 上次執行時間 + daily_limit 剩餘）",
+          "新增 state/auto-task-fairness-hint.json（執行歷史、權重、優先級）",
+          "修改 run-todoist-agent-team.ps1 選擇邏輯（weighted + aging）",
+          "觀察 7 天後調整權重公式"
+        ],
+        "acceptance_criteria": [
+          "零執行任務數量降至 5 個以下",
+          "fairness_stddev 降至 0.5 以下",
+          "所有任務至少每週執行 1 次（若 allowed_days 允許）"
+        ],
+        "research_sources": [
+          "https://en.wikipedia.org/wiki/Round-robin_scheduling",
+          "https://www.geeksforgeeks.org/operating-systems/starvation-and-aging-in-operating-systems/",
+          "https://grokipedia.com/page/Weighted_round_robin"
+        ]
+      },
+      "evaluated_at": "2026-03-23T12:44:23.230125",
+      "tags": [
+        "kb_insight",
+        "fairness",
+        "scheduling",
+        "medium_priority"
+      ]
+    },
+    {
+      "id": "backlog_si_20260323_daily_success_rate",
+      "source": "system_insight",
+      "title": "系統洞察告警：daily_success_rate 超閾值",
+      "description": "daily_success_rate=0.875，門檻 0.95。建議：檢查失敗模式與高失敗時段（7 點、13 點）根因，可能與外部 API 不穩定或資源競爭有關。",
+      "priority": "high",
+      "effort": "low",
+      "created_at": "2026-03-23T12:37:12.328527",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "critical"
+      ]
+    },
+    {
+      "id": "backlog_si_20260323_cache_hit_ratio",
+      "source": "system_insight",
+      "title": "系統洞察告警：cache_hit_ratio 超閾值",
+      "description": "cache_hit_ratio=0.227，門檻 0.40。建議：執行 cache-optimizer Skill 調整 TTL 設定或檢查 api-cache Skill 使用情況。",
+      "priority": "medium",
+      "effort": "low",
+      "created_at": "2026-03-23T12:37:12.328527",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "warning"
+      ]
+    },
+    {
+      "id": "backlog_si_20260323_auto_task_fairness",
+      "source": "system_insight",
+      "title": "系統洞察告警：auto_task_fairness 超閾值",
+      "description": "auto_task_fairness=1.371，門檻 0.5。建議：執行 task-fairness-analyzer Skill 診斷排程公平性與輪轉邏輯（18 個任務零執行）。",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-23T12:37:12.328527",
+      "status": "pending",
+      "tags": [
+        "system_insight",
+        "auto_detected",
+        "warning"
+      ]
+    },
     {
       "id": "backlog_si_20260322_daily_success_rate",
       "source": "system_insight",
@@ -823,6 +982,163 @@
         "health_check",
         "auto_detected"
       ]
+    },
+    {
+      "id": "backlog_ib_20260323_adaptive_ttl",
+      "source": "insight_briefing",
+      "title": "研究洞察建議：導入自適應 TTL 演算法（f-TTL 或 d-TTL）提升快取命中率",
+      "description": "當前系統 cache_hit_ratio 僅 21.7%（門檻 40%），學術論文驗證 d-TTL/f-TTL 可收斂至目標命中率（誤差 1.3%）。f-TTL 雙層架構空間效率更高，適合 CDN 場景。建議優先實作 d-TTL（複雜度較低），監控收斂速度與命中率提升幅度。來源：arXiv 1704.04448（5 億次 CDN 請求生產驗證）。",
+      "priority": "high",
+      "effort": "medium",
+      "created_at": "2026-03-23T12:39:35.343200",
+      "status": "pending",
+      "tags": [
+        "insight_briefing",
+        "research_derived",
+        "cache-optimization",
+        "adaptive-ttl",
+        "f-ttl",
+        "d-ttl"
+      ]
+    },
+    {
+      "id": "backlog_ib_20260323_arc_eviction",
+      "source": "insight_briefing",
+      "title": "研究洞察建議：評估 ARC 驅逐策略取代現有 LRU/LFU",
+      "description": "ARC（Adaptive Replacement Cache）在混合工作負載下達 92% 命中率，比單純 LRU/LFU 高 12-18%（Redis 官方、Medium 實戰案例）。動態平衡時效性與頻率，適用於「無法事先判定 LRU/LFU 較佳」的場景。建議在測試環境比較 LRU/LFU/ARC 命中率，量測 ARC 元數據開銷，若開銷可接受則採用 ARC。來源：Redis 官方部落格、Stanford 論文。",
+      "priority": "medium",
+      "effort": "medium",
+      "created_at": "2026-03-23T12:39:35.343200",
+      "status": "pending",
+      "tags": [
+        "insight_briefing",
+        "research_derived",
+        "cache-optimization",
+        "arc",
+        "eviction-policy"
+      ]
+    },
+    {
+      "version": 1,
+      "scouted_at": "2026-03-23T00:00:00+08:00",
+      "topic": "Multi-Agent Coordination & Workflow 引擎",
+      "projects": [
+        {
+          "name": "n8n-io/n8n",
+          "url": "https://github.com/n8n-io/n8n",
+          "stars": 181000,
+          "description": "Fair-code workflow automation，400+ 整合連接器，基於 LangChain 的 AI agent workflow，視覺化 + 程式碼混合開發",
+          "relevance": "high",
+          "last_updated": "2026-03"
+        },
+        {
+          "name": "langgenius/dify",
+          "url": "https://github.com/langgenius/dify",
+          "stars": 134000,
+          "description": "開源 LLM app 開發平台，drag-and-drop workflow，RAG pipeline，50+ 內建工具，可觀測性整合（Langfuse/Opik）",
+          "relevance": "high",
+          "last_updated": "2026-03"
+        },
+        {
+          "name": "langchain-ai/langgraph",
+          "url": "https://github.com/langchain-ai/langgraph",
+          "stars": 27200,
+          "description": "低層級編排框架，stateful agents，自動失敗恢復，human-in-the-loop，graph-based orchestration（Pregel/Apache Beam），階層式 agent coordination",
+          "relevance": "high",
+          "last_updated": "2026-03-20"
+        }
+      ],
+      "proposals": [
+        {
+          "source_project": "langchain-ai/langgraph",
+          "pattern": "自動失敗恢復機制（Durable Execution with Auto-Recovery）",
+          "target_files": [
+            "tools/autonomous_harness.py",
+            "config/autonomous-harness.yaml"
+          ],
+          "priority": "P0",
+          "effort": "low",
+          "description": "引入 LangGraph 的持久化執行與自動恢復策略。目前系統只有重試一次（run-*.ps1），缺乏從中斷點恢復的能力。可在 autonomous_harness.py 新增 checkpoint 機制，記錄每個步驟的狀態，失敗時從最後成功的 checkpoint 恢復，而非從頭重跑。",
+          "status": "implemented",
+          "implemented_at": "2026-03-23T12:52:43.837204+08:00",
+          "verification_result": "✅ 所有測試通過（3 個測試場景）"
+        },
+        {
+          "source_project": "langgenius/dify",
+          "pattern": "API-first 架構與統一 API 層",
+          "target_files": [
+            "bot/routes.js",
+            "新建 api/unified_gateway.py"
+          ],
+          "priority": "P0",
+          "effort": "medium",
+          "description": "參考 Dify 的 API-first 設計，建立統一 API 閘道層。目前 Todoist/Gmail/Pingtung News 等外部服務呼叫散落各處，缺乏統一管理。建議新建 api/unified_gateway.py，提供 /api/todoist、/api/gmail、/api/news 等端點，內部整合 api-cache、llm-router、budget_guard，外部提供一致介面。",
+          "status": "plan_ready",
+          "plan_file": "docs/plans/github-scout-20260323-workflow-orchestration.md"
+        },
+        {
+          "source_project": "n8n-io/n8n",
+          "pattern": "Monorepo + Workspace 架構",
+          "target_files": [
+            "pnpm-workspace.yaml（新建）",
+            "重組專案結構"
+          ],
+          "priority": "P1",
+          "effort": "high",
+          "description": "參考 n8n 的 monorepo 架構（pnpm workspace），將專案重組為 packages/core、packages/skills、packages/hooks、packages/bot 等子模組。當前平面結構（27 個 skills、13 個 tools、8 個 hooks 混雜根目錄）缺乏模組邊界，導致依賴關係不清晰。monorepo 可強制模組化，每個 package 有獨立 pyproject.toml。",
+          "status": "plan_ready",
+          "plan_file": "docs/plans/github-scout-20260323-workflow-orchestration.md"
+        },
+        {
+          "source_project": "langchain-ai/langgraph",
+          "pattern": "Graph-based Workflow Orchestration",
+          "target_files": [
+            "config/workflow-graph.yaml（新建）",
+            "tools/workflow_executor.py"
+          ],
+          "priority": "P1",
+          "effort": "medium",
+          "description": "引入 LangGraph 的圖式編排機制。目前 run-agent-team.ps1 是線性 Phase 0→1→2，無法處理條件分支、並行任務、動態路由。建議新增 workflow-graph.yaml 定義節點（fetch/analyze/assemble）與邊（條件/並行），workflow_executor.py 解析圖並執行，支援 branching、subgraphs、human-in-the-loop。",
+          "status": "plan_ready",
+          "plan_file": "docs/plans/github-scout-20260323-workflow-orchestration.md"
+        },
+        {
+          "source_project": "langgenius/dify",
+          "pattern": "聲明式 Workflow 定義（Declarative Workflow Model）",
+          "target_files": [
+            "config/pipeline.yaml",
+            "templates/workflows/*.yaml"
+          ],
+          "priority": "P1",
+          "effort": "low",
+          "description": "參考 Dify 的聲明式 workflow 模型，將複雜任務編排從 prompt 中抽離到 YAML 配置。當前 todoist-auto-*.md 包含大量執行邏輯（if/else、迴圈），難以維護。建議新增 templates/workflows/ 目錄，用 YAML 定義步驟、條件、循環，prompt 僅負責呼叫 workflow_executor.py。",
+          "status": "plan_ready",
+          "plan_file": "docs/plans/github-scout-20260323-workflow-orchestration.md"
+        },
+        {
+          "source_project": "langgenius/dify",
+          "pattern": "可觀測性整合（Langfuse/Opik 等）",
+          "target_files": [
+            "tools/observability_bridge.py",
+            "config/observability.yaml"
+          ],
+          "priority": "P2",
+          "effort": "medium",
+          "description": "參考 Dify 整合 Langfuse、Opik、Arize Phoenix 等可觀測性平台。目前 post_tool_logger.py 只寫 JSONL，缺乏視覺化 dashboard 和 trace 分析。建議新增 observability_bridge.py，將 Hook 日誌轉發到 Langfuse（開源 LLM observability），提供 token 使用、latency、error rate 的即時監控。",
+          "status": "plan_ready",
+          "plan_file": "docs/plans/github-scout-20260323-workflow-orchestration.md"
+        }
+      ],
+      "quality": {
+        "sources_count": 3,
+        "grade_distribution": {
+          "A": 3
+        },
+        "research_depth": "adequate"
+      },
+      "processed_at": "2026-03-23T12:52:43.837204+08:00",
+      "implemented_count": 1,
+      "plan_ready_count": 5
     }
   ],
   "entries": [

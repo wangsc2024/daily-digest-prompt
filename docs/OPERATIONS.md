@@ -233,6 +233,14 @@ uv run python hooks/query_logs.py --sessions --days 7
 uv run python hooks/query_logs.py --format json
 ```
 
+**Log 審查任務（phase_failure 趨勢，決定性輸出）**：`todoist-auto-log_audit` 會依 `prompts/team/todoist-auto-log_audit.md` 呼叫下列指令；手動抽查時可用：
+
+```bash
+uv run python tools/compute_log_audit_trend.py --days 7
+# 可選：對齊報告基準日
+uv run python tools/compute_log_audit_trend.py --days 7 --end-date YYYY-MM-DD
+```
+
 ### 執行成果查詢（query-logs.ps1）
 
 ```powershell

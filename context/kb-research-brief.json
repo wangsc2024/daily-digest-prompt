@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-03-23T21:00:00+08:00",
+  "research_topic": "快取命中率優化的內部機制：TTL 動態調整演算法、熱點預測與驅逐策略",
+  "series": {
+    "series_id": "cache-optimization",
+    "is_new": false,
+    "current_stage": "mechanism",
+    "completion_pct": 20,
+    "stage_context": "已完成 foundation（快取基礎概念與 TTL 設計原則），本次目標：完成 mechanism 階段（TTL 動態調整演算法、熱點預測、驅逐策略的內部機制）"
+  },
+  "kb_foundation": {
+    "notes_analyzed": 1,
+    "depth_level": "foundation",
+    "synthesis": "KB 已有 foundation 階段筆記（Cache-Aside Pattern、TTL 設計原則、效能指標監控），但缺乏 TTL 動態調整演算法、熱點預測機制、驅逐策略（LRU/LFU/ARC）的內部原理與演算法細節",
+    "covered_concepts": [
+      "Cache-Aside Pattern",
+      "TTL 設計原則",
+      "快取效能指標（命中率、驅逐率、記憶體使用率）",
+      "TTL 固定值設定方法"
+    ],
+    "partial_concepts": [
+      "自適應 TTL（提及但未深入演算法）",
+      "熱點預測（概念存在但無實作細節）"
+    ],
+    "missing_concepts": [
+      "TTL 動態調整演算法（基於存取頻率、時間衰減、機器學習預測）",
+      "驅逐策略比較（LRU vs LFU vs ARC vs FIFO）",
+      "熱點預測演算法（LFU-Aging、Count-Min Sketch、機率資料結構）",
+      "TTL 自適應閾值計算（基於系統負載、記憶體壓力、業務特性）",
+      "快取失效模式與雪崩防護機制"
+    ]
+  },
+  "knowledge_gaps": [
+    {
+      "type": "mechanism",
+      "gap": "缺少 TTL 動態調整演算法的數學模型與實作細節",
+      "why_important": "當前系統 cache_hit_ratio 僅 21.7%，遠低於 40% 門檻，需要自適應 TTL 演算法根據存取模式動態調整，而非固定值",
+      "builds_on": "KB 已有的 TTL 設計原則與效能指標監控",
+      "stage": "mechanism"
+    },
+    {
+      "type": "mechanism",
+      "gap": "缺少驅逐策略（LRU/LFU/ARC）的演算法原理與實作比較",
+      "why_important": "不同驅逐策略適用於不同存取模式，需深入理解內部機制才能選擇最適合當前系統的策略",
+      "builds_on": "KB 已有的快取效能指標定義",
+      "stage": "mechanism"
+    },
+    {
+      "type": "mechanism",
+      "gap": "缺少熱點預測演算法（LFU-Aging、Count-Min Sketch）的原理與權衡",
+      "why_important": "熱點預測可提前載入高頻存取資料，顯著提升命中率，但需理解不同演算法的記憶體開銷與準確度權衡",
+      "builds_on": "KB 已有的快取命中率監控基礎",
+      "stage": "mechanism"
+    }
+  ],
+  "research_plan": {
+    "stage": "mechanism",
+    "primary_question": "TTL 動態調整演算法、熱點預測機制、驅逐策略的內部原理與實作細節為何？如何根據系統特性選擇最佳組合？",
+    "approach": "學術論文 + 工業實踐案例 + 開源實作（Redis/Memcached/Caffeine）分析",
+    "steps": [
+      {
+        "step": 1,
+        "action": "搜尋 TTL 動態調整演算法的學術論文與工業實踐",
+        "search_keywords": [
+          "adaptive TTL cache algorithm 2024 2025",
+          "dynamic time-to-live adjustment cache optimization",
+          "TTL auto-tuning machine learning cache"
+        ],
+        "expected_insight": "至少 2 種 TTL 動態調整演算法（基於存取頻率、時間衰減、ML 預測）的數學模型與實作複雜度"
+      },
+      {
+        "step": 2,
+        "action": "比較主流驅逐策略（LRU/LFU/ARC/FIFO）的演算法原理與適用場景",
+        "search_keywords": [
+          "LRU LFU ARC cache eviction policy comparison",
+          "cache replacement algorithm benchmark 2024",
+          "adaptive replacement cache ARC algorithm"
+        ],
+        "expected_insight": "各驅逐策略的時間複雜度、空間複雜度、命中率表現與適用存取模式"
+      },
+      {
+        "step": 3,
+        "action": "研究熱點預測演算法（LFU-Aging、Count-Min Sketch、Bloom Filter）",
+        "search_keywords": [
+          "cache hotspot prediction algorithm",
+          "Count-Min Sketch cache optimization",
+          "LFU-Aging cache policy implementation"
+        ],
+        "expected_insight": "熱點預測演算法的記憶體開銷、準確度、假陽性率權衡"
+      },
+      {
+        "step": 4,
+        "action": "整合為 mechanism 階段完整筆記",
+        "search_keywords": [],
+        "expected_insight": "含演算法原理、偽程式碼、複雜度分析、適用場景比較的深度筆記"
+      }
+    ],
+    "kb_enrichment_plan": {
+      "new_note_title": "快取命中率優化內部機制 — TTL 動態調整演算法、驅逐策略比較與熱點預測（Mechanism）",
+      "tags": [
+        "快取優化",
+        "TTL",
+        "驅逐策略",
+        "LRU",
+        "LFU",
+        "ARC",
+        "熱點預測",
+        "演算法",
+        "mechanism"
+      ],
+      "references_from_existing": [
+        "快取命中率調優與自適應 TTL 治理基礎 — Cache-Aside Pattern、TTL 設計原則與效能指標監控（Foundation）"
+      ],
+      "cross_reference_note": "承接「Foundation」階段的 TTL 設計原則與效能指標，本文進入「Mechanism」階段，深入 TTL 動態調整演算法、驅逐策略內部原理與熱點預測機制",
+      "series_stage_completion": "mechanism"
+    }
+  },
+  "series_update": {
+    "action": "update_stage",
+    "series_id": "cache-optimization",
+    "stage_to_update": "mechanism",
+    "new_status": "in_progress",
+    "next_stage_hint": "完成後進入 application：實作 TTL 自適應函式庫或整合現有解決方案（Redis Modules、Caffeine）"
+  },
+  "recommendation": "deepen",
+  "skip_reason": null
+}

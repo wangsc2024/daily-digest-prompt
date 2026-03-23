@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-03-23T11:00:03.732721+08:00",
-  "current_hour": 11,
+  "generated_at": "2026-03-23T13:00:04.518627+08:00",
+  "current_hour": 13,
   "risk": {
-    "hour": 11,
-    "risk_score": 0.1415,
+    "hour": 13,
+    "risk_score": 0.2541,
     "risk_level": "low",
     "recommended_action": "normal",
     "skip_task_types": [],
     "contributing_factors": {
-      "historical_failure_rate": 0.0065,
-      "external_sla_risk": 0.025,
-      "resource_contention": 0.08,
+      "historical_failure_rate": 0.0341,
+      "external_sla_risk": 0.15,
+      "resource_contention": 0.04,
       "task_complexity": 0.03
     }
   }

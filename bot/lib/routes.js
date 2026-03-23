@@ -156,19 +156,17 @@ function isDeliveryMetadata(text) {
 function extractActualContent(resultStr) {
     if (!isDeliveryMetadata(resultStr)) return null;
 
-    // 嘗試從 ```1:N:D:\path\file.md 格式的代碼區塊提取嵌入內容
+    // 嘗試從 ```1:N:D:\path\file.md 格式的代碼區塊提取路徑並讀完整檔案
     const codeBlockMatch = resultStr.match(/```(?:\d+:\d+:)?([A-Za-z]:[^\n`]+\.(?:md|txt))\n([\s\S]*?)```/);
     if (codeBlockMatch) {
-        const embeddedContent = codeBlockMatch[2].trim();
-        if (embeddedContent && embeddedContent.length > 50) {
-            // 嵌入內容夠長就直接用
-            return embeddedContent;
-        }
-        // 嵌入內容太短（只有幾行預覽），嘗試讀完整檔案
+        // 優先讀完整檔案（代碼區塊嵌入的只是前幾行預覽）
         const filePath = codeBlockMatch[1].trim();
         try {
             return fs.readFileSync(filePath, 'utf8').trim();
-        } catch (_) { /* 讀檔失敗繼續 */ }
+        } catch (_) { /* 讀檔失敗，改用嵌入內容 */ }
+        // fallback：使用代碼區塊的嵌入內容
+        const embeddedContent = codeBlockMatch[2].trim();
+        if (embeddedContent) return embeddedContent;
     }
 
     // 嘗試從文字中提取 Windows 路徑並讀取
@@ -210,6 +208,9 @@ function trimReplyForLINE(raw) {
 
         // 跳過「已依 skills/...」等執行過程描述行
         if (/^已依\s*`?skills\//.test(line) || /^本任務由\s*\*\*Cursor/.test(line)) continue;
+
+        // 跳過研究報告頭部的 blockquote 方法說明（> **研究方法說明**、> **關於...**）
+        if (/^>\s*\*\*(研究方法|關於|Note:|注意|說明|免責|Disclaimer)/.test(line)) continue;
 
         // 跳過純粹的 URL 行（http/https 開頭或帶編號 1. https://）
         if (/^\s*\d+\.\s+https?:\/\//.test(line) || /^\s*https?:\/\/\S+$/.test(line)) continue;
@@ -472,12 +473,9 @@ function mount(app, opts = {}) {
                         const labelSource = (rec && rec.original_text) || taskContent;
                         const taskLabel = labelSource.trim().slice(0, 80) + (labelSource.length > 80 ? '…' : '');
                         // 過濾執行過程、來源腳註、建議等雜訊，LINE 只顯示核心答案
-                        let coreResult = trimReplyForLINE(resultStr);
-                        // 若結果是「交付元資料」（描述檔案位置），嘗試提取實際任務內容
+                        // 若結果是「交付元資料」（描述檔案位置），先提取實際任務內容再過濾
                         const actualContent = extractActualContent(resultStr);
-                        if (actualContent) {
-                            coreResult = actualContent;
-                        }
+                        let coreResult = trimReplyForLINE(actualContent || resultStr);
                         const MAX_LEN = 500;
                         const truncated = coreResult.length > MAX_LEN
                             ? coreResult.slice(0, MAX_LEN) + '\n…[完整內容已存入知識庫]'

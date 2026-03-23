@@ -99,6 +99,8 @@ result = {
             'title': n.get('title', ''),
             'score': round(n.get('score', 0), 3),
             'tags': n.get('tags', []),
+            # contentText 是 KB 的主要內容欄位（knowledge-query SKILL 規範）
+            # 若欄位缺失（舊資料或格式不一致）會取到空字串，步驟 3 會判定為無知識
             'content': n.get('contentText', '')[:2000]
         }
         for n in selected

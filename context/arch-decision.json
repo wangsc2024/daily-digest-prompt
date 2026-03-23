@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-03-23T00:52:00+08:00",
+  "generated_at": "2026-03-23T12:37:00+08:00",
   "generated_by": "arch-evolution",
   "source_backlog": "context/improvement-backlog.json",
   "source_audit_score": 87.88,
@@ -504,7 +504,13 @@
   ],
   "immediate_fix_summary": {
     "count": 5,
-    "items": ["ADR-20260323-040", "ADR-20260323-041", "ADR-20260323-042", "ADR-20260323-043", "ADR-20260323-044"],
+    "items": [
+      "ADR-20260323-040",
+      "ADR-20260323-041",
+      "ADR-20260323-042",
+      "ADR-20260323-043",
+      "ADR-20260323-044"
+    ],
     "safe_to_automate": true
   },
   "meta": {

@@ -21,7 +21,7 @@ daily_digest_single:
 # Todoist 任務 - 團隊模式 (run-todoist-agent-team.ps1)
 # ADR-018: Phase 2 支援 max 1 retry（僅 timeout）、30s backoff，retry 事件寫入 spans；總 Phase 2 時間最壞約 phase2_timeout + 30 + phase2_timeout
 todoist_team:
-  phase1_timeout: 420        # Phase 1: 查詢+路由+規劃+寫入 task prompt 檔案（300s 偶爾不足）
+  phase1_timeout: 480        # Phase 1: 查詢+路由+規劃+寫入 task prompt 檔案（team_mode=3 多規劃一個任務）
   phase1_max_retries: 1      # Phase 1 重試次數（降為 1，避免過長等待）
   phase1_retry_delay_base: 30  # Phase 1 重試間隔基數（秒）
   phase1_retry_delay_jitter: 10  # Phase 1 隨機抖動

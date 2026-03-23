@@ -1,8 +1,8 @@
 ---
 name: "todoist-auto-log_audit"
 template_type: "team_prompt"
-version: "1.1.0"
-released_at: "2026-03-21"
+version: "1.2.0"
+released_at: "2026-03-23"
 ---
 你是系統維護助手，全程使用正體中文。
 你的任務是對 daily-digest-prompt 系統進行 Log 深度審查，找出問題並執行修正。
@@ -65,6 +65,28 @@ pwsh -ExecutionPolicy Bypass -File query-logs.ps1 -Mode errors 2>&1
 用 Read 工具讀取 `state/failure-stats.json`，統計 `daily` 欄位中最近 7 天各日的 `phase_failure` 值。若**單日超過 10 次**，標記為 🔴 高風險，納入步驟 3 嚴重問題。
 
 用 Read 工具讀取 `state/slo-budget-report.json`（若存在），確認 `slo_status` 各項的 `budget_consumed_pct`。若任一 SLO 超過 100%，標記為 🔴 告警並列出受影響 SLO 名稱。
+
+### 1b-1a：phase_failure 趨勢（機器決定性，必跑）
+
+**目的**：根治 LLM 以「全窗最大→全窗最小」或顛倒時間序誤判趨勢（例如 ERROR 21→5「改善中」）。
+
+在專案根目錄執行（stdout 為單一 JSON 物件，必須保留於結果檔）：
+
+```bash
+uv run python tools/compute_log_audit_trend.py --days 7
+```
+
+- 若審查報告落款日需對齊「昨日」或特定基準日，可加 `--end-date YYYY-MM-DD`（與 `failure-stats.json` 的 `daily` 鍵一致）。
+- **禁止**手寫或改寫 `summary_zh`、`short_term_vs_prior`、`narrative_guardrails_zh`；**必須**與指令 stdout **逐字一致**地併入步驟 8 之 `trend_analysis.phase_failure_stats`。
+- 知識庫 Markdown（`import_note.json` 的 `contentText`）中「觀察／趨勢分析」段落：**必須**完整引用 `phase_failure_stats.summary_zh`（建議小標：`phase_failure（failure-stats）`）。若有 `data_lag_warning_zh`，亦須一併引用。
+- **禁止**另寫與 `summary_zh` 矛盾的 phase_failure 趨勢句。**禁止**使用已廢棄欄位 `improvement_trend`（自由敘述易誤判）。
+
+**子 Agent 彙總之 log grep（ERROR／WARN 等）若製表**：
+
+1. 表格**僅能**依**日期欄由舊到新**排序。
+2. 敘述「ERROR 趨勢」時**僅得**：同一欄位內，**時間序上最末筆有資料日**對 **其前一有資料日**；或「相較 YYYY-MM-DD 尖峰…」，且**不得**暗示終點為更早的較低值。
+3. **禁止**以全窗最大 ERROR 銜接全窗最小 ERROR 寫成「A→B 改善」類句子。
+4. **禁止**將 log `ERROR` 次數與 `phase_failure` 混在同一趨勢句（兩者定義不同）；若兩者都要寫，分開兩句並各註資料來源。
 
 ### 1b-2：偵測 autonomous-runtime.json 殭屍降級狀態
 
@@ -233,7 +255,15 @@ cp "目標檔案" "目標檔案.bak"
     "quality_score": 4,
     "remaining_issues": []
   },
+  "trend_analysis": {
+    "phase_failure_stats": {},
+    "log_grep_daily": null
+  },
   "summary": "發現 3 個問題，修正 2 個",
   "error": null
 }
 ```
+
+- `trend_analysis.phase_failure_stats`：**必填**（除非指令失敗且 status=failed，則可為 `null` 並在 `error` 說明）。將 `uv run python tools/compute_log_audit_trend.py --days 7` 的 stdout **整棵 JSON 物件**取代範例中的 `{}`，**禁止**手改其中 `summary_zh`／`short_term_vs_prior` 等欄位。
+- `trend_analysis.log_grep_daily`：選填；若步驟 2 子 Agent 有按日聚合 log 關鍵字，則為陣列 `[{"date":"YYYY-MM-DD","ERROR":n,"WARN":n,...}, ...]`，**必須已按日期遞增排序**；無則 `null`。
+- **禁止**在結果 JSON 使用自由文字欄位 `improvement_trend`（易與機器結論衝突）。
