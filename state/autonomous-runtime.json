@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-23T18:35:06.379165+08:00",
+  "generated_at": "2026-03-23T21:00:04.436058+08:00",
   "mode": "normal",
   "reasons": [],
   "override": {
@@ -72,13 +72,13 @@
     "priority_recovery_targets": []
   },
   "resource_snapshot": {
-    "generated_at": "2026-03-23T18:35:06.382165+08:00",
+    "generated_at": "2026-03-23T21:00:04.442059+08:00",
     "cpu": {
-      "percent": 19.59
+      "percent": 33.55
     },
     "memory": {
-      "percent": 56.16,
-      "available_mb": 14263.96
+      "percent": 60.37,
+      "available_mb": 12892.62
     },
     "gpu": {
       "available": true,
@@ -86,9 +86,9 @@
         {
           "name": "NVIDIA GeForce RTX 4090",
           "utilization_percent": 0.0,
-          "memory_used_mb": 1076.0,
+          "memory_used_mb": 822.0,
           "memory_total_mb": 24564.0,
-          "memory_percent": 4.38
+          "memory_percent": 3.35
         }
       ]
     }
@@ -101,7 +101,7 @@
     "research_auto_task_count": 10
   },
   "scheduler_heartbeat": {
-    "timestamp": "2026-03-23T18:33:20.610928",
+    "timestamp": "2026-03-23T20:59:11.336231",
     "status": "running",
     "pid": 10528
   }

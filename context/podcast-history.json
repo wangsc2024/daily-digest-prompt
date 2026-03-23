@@ -1,17 +1,11 @@
 {
   "version": 2,
-  "updated_at": "2026-03-23T10:33:15.190388+00:00",
+  "updated_at": "2026-03-23T19:37:47",
   "summary": {
-    "total_episodes": 85,
+    "total_episodes": 88,
     "cooldown_days": 90,
     "recent_note_ids": [
-      "e07d958e-53e5-4e4f-9c58-fcba407e5c2e",
-      "f4694b84-4e31-434b-b75f-ac4f2b4cf5a1",
-      "26b9306c-da22-4924-93c1-039347aa858b",
-      "2dc98f0a-cc36-43cd-a109-8e527277a651",
-      "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
-      "f921f22e-86d3-415a-b8d6-30b1da5572da",
-      "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "dfd8cd24-5427-4c04-9b31-e69c948c5a4a",
       {
         "note_id": "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
         "last_used": "2026-03-22",
@@ -19,18 +13,71 @@
       }
     ],
     "recent_topics": [
-      "教觀綱宗",
+      "楞嚴經",
       "佛學",
-      "天台宗",
+      "七處徵心",
       {
         "topic": "教觀綱宗",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
+        "last_used": "2026-03-23",
+        "expires_at": "2026-06-21"
       }
-    ],
-    "updated_at": "2026-03-23T10:33:15.190388+00:00"
+    ]
   },
   "episodes": [
+    {
+      "episode_title": "七處徵心破妄顯真",
+      "notes_used": [
+        "dfd8cd24-5427-4c04-9b31-e69c948c5a4a"
+      ],
+      "note_titles": [
+        "楞嚴經研究：七處徵心 — 卷一心性辯證與破妄顯真"
+      ],
+      "topics": [
+        "楞嚴經",
+        "佛學",
+        "七處徵心"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-23T19:37:47",
+      "mp3_url": "https://podcasts.pdoont.us.kg/jiaoguang-ep11-20260323.mp3",
+      "slug": "jiaoguang-ep11-20260323"
+    },
+    {
+      "episode_title": "止觀雙運：天台實修體系",
+      "notes_used": [
+        "ed138bbf-b608-4f05-8311-f6fc2e865392"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系"
+      ],
+      "topics": [
+        "觀法修持",
+        "止觀",
+        "一心三觀"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-23T19:11:02+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep10_觀法修持_止觀雙運天台實修體系.mp3",
+      "slug": "淨土學苑_ep10_觀法修持_止觀雙運天台實修體系"
+    },
+    {
+      "episode_title": "天台傳燈：教觀綱宗千年史",
+      "notes_used": [
+        "893e05b0-2573-489f-b9d4-455364a6a9f8"
+      ],
+      "note_titles": [
+        "教觀綱宗的歷史傳承與註疏傳統 — 從智者大師到蕅益大師、諦觀《四教儀》到《綱宗》的判教演進與明清天台復興"
+      ],
+      "topics": [
+        "天台宗",
+        "教觀綱宗",
+        "歷史傳承"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-23T18:41:23+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep09_歷史傳承_天台傳燈教觀綱宗千年史.mp3",
+      "slug": "淨土學苑_ep09_歷史傳承_天台傳燈教觀綱宗千年史"
+    },
     {
       "episode_title": "2025-2026 年 Chat 對話系統主流架構模式完整研究：傳輸層、Stre",
       "notes_used": [
@@ -49,7 +96,7 @@
         "研究"
       ],
       "source": "auto-task",
-      "created_at": "2026-03-23T10:33:15.190388+00:00"
+      "created_at": "2026-03-23T18:33:15.190388+08:00"
     },
     {
       "episode_title": "OpenClaw Gateway 內部機制深度解析 — WebSocket 路由",
@@ -69,7 +116,7 @@
         "研究"
       ],
       "source": "auto-task",
-      "created_at": "2026-03-23T10:03:53.575936+00:00"
+      "created_at": "2026-03-23T18:03:53.575936+08:00"
     },
     {
       "episode_title": "天台止觀修持要義",
@@ -2183,7 +2230,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:03:53.575936+00:00"
+      "used_at": "2026-03-23T18:03:53.575936+08:00"
     },
     {
       "note_id": "aeb17ee8-8cea-42cf-a02d-5c7017e9e8b8",
@@ -2191,7 +2238,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:03:53.575936+00:00"
+      "used_at": "2026-03-23T18:03:53.575936+08:00"
     },
     {
       "note_id": "2dc98f0a-cc36-43cd-a109-8e527277a651",
@@ -2199,7 +2246,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:03:53.575936+00:00"
+      "used_at": "2026-03-23T18:03:53.575936+08:00"
     },
     {
       "note_id": "26b9306c-da22-4924-93c1-039347aa858b",
@@ -2207,7 +2254,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:33:15.190388+00:00"
+      "used_at": "2026-03-23T18:33:15.190388+08:00"
     },
     {
       "note_id": "f4694b84-4e31-434b-b75f-ac4f2b4cf5a1",
@@ -2215,7 +2262,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:33:15.190388+00:00"
+      "used_at": "2026-03-23T18:33:15.190388+08:00"
     },
     {
       "note_id": "e07d958e-53e5-4e4f-9c58-fcba407e5c2e",
@@ -2223,7 +2270,15 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260323",
-      "used_at": "2026-03-23T10:33:15.190388+00:00"
+      "used_at": "2026-03-23T18:33:15.190388+08:00"
+    },
+    {
+      "note_id": "dfd8cd24-5427-4c04-9b31-e69c948c5a4a",
+      "note_title": "楞嚴經研究：七處徵心 — 卷一心性辯證與破妄顯真",
+      "query": "五戒修學述要 第003講",
+      "note_id_input": "",
+      "slug": "jiaoguang-ep11-20260323",
+      "used_at": "2026-03-23T19:37:47"
     }
   ]
 }

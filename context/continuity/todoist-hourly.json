@@ -5,60 +5,46 @@
   "max_runs": 3,
   "runs": [
     {
-      "run_id": "20260323100113",
-      "started_at": "2026-03-23T10:01:13Z",
-      "completed_at": "2026-03-23T18:11:37",
-      "plan_type": "auto",
-      "auto_tasks_executed": [
-        "arch_evolution",
-        "podcast_create"
-      ],
-      "auto_tasks_failed": [],
-      "auto_tasks_skipped": [
-        "podcast_jiaoguangzong"
-      ],
-      "human_tasks_completed": [],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "架構演進處理50項backlog產出5個新ADR，Podcast生成完成TTS/R2上傳，教觀綱宗Podcast因並行超限跳過",
-      "notable": "podcast_jiaoguangzong 因 autonomy_max_parallel_exceeded 跳過"
-    },
-    {
-      "run_id": "20260323093045",
-      "started_at": "2026-03-23T09:30:45Z",
-      "completed_at": "2026-03-23T17:45:04",
-      "plan_type": "tasks",
+      "run_id": "20260323123041",
+      "started_at": "2026-03-23T12:30:41Z",
+      "completed_at": "2026-03-23T20:32:46",
+      "plan_type": "idle",
       "auto_tasks_executed": [],
       "auto_tasks_failed": [],
       "auto_tasks_skipped": [],
-      "human_tasks_completed": [
-        "研究1項 GitHub 最熱門方案並將研究結果寫入 RAG 知識庫",
-        "以skill瞭解專案，完成優化計劃"
-      ],
-      "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "完成2筆人工待辦：Agency-Agents研究（KB:49071c92）、五維度專案優化策略（KB:5cdb6590）",
-      "notable": ""
-    },
-    {
-      "run_id": "20260323090236",
-      "started_at": "2026-03-23T09:02:36Z",
-      "completed_at": "2026-03-23T17:13:44",
-      "plan_type": "auto",
-      "auto_tasks_executed": [
-        "skill_audit"
-      ],
-      "auto_tasks_failed": [
-        "podcast_jiaoguangzong"
-      ],
-      "auto_tasks_skipped": [
-        "system_insight"
-      ],
       "human_tasks_completed": [],
       "human_tasks_failed": [],
-      "all_exhausted": false,
-      "phase3_summary": "Skill 審查修正 add-podcast-task+auto-task-creator 共 7 項（品質 9.5/10，KB:5b114f22），教觀綱宗 Podcast 腳本完成但 TTS 403 失敗",
-      "notable": "edge-tts 403 錯誤導致 Podcast TTS 全面失敗，system_insight 因 autonomy_heavy_blocked 跳過"
+      "all_exhausted": true,
+      "phase3_summary": "idle 輪次，無可處理待辦，自動任務接近上限（45/49），剩餘 4 個受時段限制",
+      "notable": "剩餘：git_push(需21-23h)、ntfy_review(需7-10h)、zen_koan(需7-9h)、doc_generation(需3-4h)"
+    },
+    {
+      "run_id": "20260323120052",
+      "started_at": "2026-03-23T12:00:52Z",
+      "completed_at": "2026-03-23T20:03:18",
+      "plan_type": "idle",
+      "auto_tasks_executed": [],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": true,
+      "phase3_summary": "idle 輪次，無可處理待辦，自動任務接近上限（45/49），剩餘 4 個受時段限制",
+      "notable": "剩餘：git_push(需21-23h)、ntfy_review(需7-10h)、zen_koan(需7-9h)、doc_generation(需3-4h)"
+    },
+    {
+      "run_id": "20260323113134",
+      "started_at": "2026-03-23T11:31:34Z",
+      "completed_at": "2026-03-23T19:39:03",
+      "plan_type": "idle",
+      "auto_tasks_executed": [],
+      "auto_tasks_failed": [],
+      "auto_tasks_skipped": [],
+      "human_tasks_completed": [],
+      "human_tasks_failed": [],
+      "all_exhausted": true,
+      "phase3_summary": "idle 輪次，無可處理待辦，自動任務已達上限（45/49），exhausted-fallback 產出 podcast EP11",
+      "notable": "exhausted-fallback 產出淨土教觀學苑 podcast：七處徵心破妄顯真"
     }
   ]
 }
