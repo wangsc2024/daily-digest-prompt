@@ -520,11 +520,15 @@ $os = Get-CimInstance Win32_OperatingSystem
         research_task_keys = [
             item["key"] for item in agent_registry.get("auto_tasks", []) if item.get("is_research")
         ]
+        # 飢餓豁免：在飢餓清單內的任務，即使屬於 heavy/research 也不阻擋
+        # 原因：降速的目的是讓輕量任務補跑，但若 heavy task 本身就是飢餓任務，
+        #       繼續阻擋反而讓它更飢餓（悖論），故豁免以允許其補跑。
+        starved_task_keys = set(fairness_hint.get("zero_count_tasks", []))
         blocked_task_keys: list[str] = []
         if not profile.get("allow_heavy_auto_tasks", True):
-            blocked_task_keys.extend(heavy_task_keys)
+            blocked_task_keys.extend(k for k in heavy_task_keys if k not in starved_task_keys)
         if not profile.get("allow_research_auto_tasks", True):
-            blocked_task_keys.extend(research_task_keys)
+            blocked_task_keys.extend(k for k in research_task_keys if k not in starved_task_keys)
         blocked_fetch_agents.extend(runtime_override.get("blocked_fetch_agents", []))
         blocked_task_keys.extend(runtime_override.get("blocked_task_keys", []))
         max_parallel_auto_tasks = profile.get("max_parallel_auto_tasks", 4)

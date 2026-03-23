@@ -119,5 +119,115 @@
     }
   ],
   "source_count": 6,
-  "stage_completed": 2
+  "analysis": {
+    "consensus": [
+      {
+        "claim": "約束解碼顯著提升輸出品質和效率",
+        "sources_count": 3,
+        "evidence": [
+          "JSONSchemaBench: 約束解碼加速 50%",
+          "Claude 文件: token 生成時驗證，消除無效輸出",
+          "技術博客: 正確性從 61-94% 提升至 96-98%+"
+        ],
+        "status": "verified"
+      },
+      {
+        "claim": "引擎效能差異顯著，選型需依 workload 特性",
+        "sources_count": 3,
+        "evidence": [
+          "XGrammar: JSON 快 3.5x，CFG 快 10x+",
+          "llguidance: 每 token ~50μs",
+          "技術博客: 重複 schemas → XGrammar 勝出；動態 schemas → llguidance 勝出"
+        ],
+        "status": "verified"
+      },
+      {
+        "claim": "框架覆蓋率存在顯著差異",
+        "sources_count": 2,
+        "evidence": [
+          "JSONSchemaBench: 最佳框架支援 schemas 數是最差的兩倍；Guidance 覆蓋率最高（6/8 資料集 >90%）",
+          "Claude 文件: 不支援 minimum/maximum/minLength/maxLength/pattern"
+        ],
+        "status": "verified"
+      },
+      {
+        "claim": "生產部署需考量框架整合與批次策略",
+        "sources_count": 3,
+        "evidence": [
+          "XGrammar: 批次規模越大效能優勢越明顯",
+          "llguidance: batch size 可達 3200",
+          "技術博客: SGLang 遠勝 vLLM（重疊 mask 生成與推理）"
+        ],
+        "status": "verified"
+      },
+      {
+        "claim": "主流引擎已獲廣泛生產採用",
+        "sources_count": 3,
+        "evidence": [
+          "XGrammar: MLC-LLM、SGLang、WebLLM 整合",
+          "llguidance: OpenAI Structured Outputs、Chromium、vLLM、SGLang、llama.cpp",
+          "Claude: Opus 4.6、Sonnet 4.6/4.5 通用可用"
+        ],
+        "status": "verified"
+      }
+    ],
+    "divergence": [
+      {
+        "topic": "引擎選型標準",
+        "perspectives": [
+          {
+            "source": "技術博客",
+            "view": "workload 特性（重複 vs. 動態）決定選型"
+          },
+          {
+            "source": "JSONSchemaBench",
+            "view": "覆蓋率優先（Guidance 最高）"
+          },
+          {
+            "source": "各來源",
+            "view": "優先考量不同維度（效能 vs. 覆蓋率 vs. 生態整合）"
+          }
+        ],
+        "learner_note": "實務選型需綜合評估：workload 特性 + schema 複雜度 + 現有技術棧整合度"
+      }
+    ],
+    "insights": [
+      {
+        "claim": "DCCD 兩階段方法突破性提升小模型效能",
+        "sources_count": 1,
+        "evidence": [
+          "DCCD 論文: GSM8K 準確度從 15.2% 提升至 39.0%（+24 pp）"
+        ],
+        "status": "pending_verification",
+        "note": "2026 年 2 月新論文，學術突破但尚未廣泛驗證"
+      },
+      {
+        "claim": "DCCD 的 KL-projection 理論框架",
+        "sources_count": 1,
+        "evidence": [
+          "DCCD 論文: draft 擴展可行概率質量，減少硬約束的「投影稅」"
+        ],
+        "status": "pending_verification",
+        "note": "理論創新，為學術貢獻，但生產應用案例尚未見報導"
+      },
+      {
+        "claim": "Claude 的 Zero Data Retention 與 schemas 快取 24 小時",
+        "sources_count": 1,
+        "evidence": [
+          "Claude 文件: Zero Data Retention、schemas 快取 24 小時"
+        ],
+        "status": "pending_verification",
+        "note": "Claude 特有生產特性，其他引擎文件未提及類似機制"
+      }
+    ]
+  },
+  "triangulation_summary": {
+    "verified_claims": 5,
+    "pending_verification_claims": 3,
+    "divergence_points": 1,
+    "total_sources": 6,
+    "high_credibility_sources": 5,
+    "medium_credibility_sources": 1
+  },
+  "stage_completed": 3
 }

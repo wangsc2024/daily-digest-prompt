@@ -52,7 +52,9 @@
     "feasibility_score": 9,
     "stability_score": 9,
     "review_rounds": 1,
-    "status": "approved"
+    "status": "implemented",
+    "implemented_at": "2026-03-22T12:50:00+08:00",
+    "implementation_notes": "已建立 skills/task-quality-gate/SKILL.md 和 config/evaluation-criteria.yaml，驗證格式正確。待整合至 todoist-assemble.md（步驟 6.5）。"
   },
   {
     "proposal_id": "github_scout_20260322_003",

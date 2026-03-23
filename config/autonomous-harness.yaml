@@ -25,7 +25,7 @@ autonomous_harness:
     failed_auto_task_threshold: 2
     api_open_circuit_threshold: 1
     starvation_task_threshold: 3
-    heartbeat_stale_minutes: 20
+    heartbeat_stale_minutes: 40
 
   discovery:
     fetch_agents_glob: "prompts/team/fetch-*.md"

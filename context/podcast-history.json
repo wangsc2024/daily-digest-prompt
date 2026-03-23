@@ -1,186 +1,87 @@
 {
   "version": 2,
-  "updated_at": "2026-03-21T23:35:30.035023+00:00",
+  "updated_at": "2026-03-22T15:25:38",
   "summary": {
-    "total_episodes": 79,
+    "total_episodes": 83,
     "cooldown_days": 90,
     "recent_note_ids": [
+      "ed138bbf-b608-4f05-8311-f6fc2e865392",
       {
         "note_id": "8e73b477-1ecc-4ef4-b852-17e1fc9c81a7",
         "last_used": "2026-03-22",
         "expires_at": "2026-06-20"
-      },
-      {
-        "note_id": "27b39fa4-f2ad-4bc1-8c24-869396c8c6cf",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "9846abc5-ea48-4608-b13e-fb8d3a99978c",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "9d73c34f-fb52-447e-8c76-e9ce5514b238",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "380fd658-b788-4d1b-8744-41cf650c3596",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "8c14fbf0-4d12-4f3d-b9d4-3aaeaf3c644b",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "f735b445-c2e4-417f-aa5a-76692d05b4b0",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "b76a6cad-8e37-4676-b5d3-44e7186e690c",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "5c3f760c-42d2-4d85-a7a1-77d38b49285f",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "6de7ac89-bed0-4657-88de-116583d8da1f",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "01b8d87c-cf79-4a97-9e23-9730d3b33fbc",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "893e05b0-2573-489f-b9d4-455364a6a9f8",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "note_id": "c4c5f326-f98a-4593-b9fb-993200a425b0",
-        "last_used": "2026-03-18",
-        "expires_at": "2026-06-16"
       }
     ],
     "recent_topics": [
+      "教觀綱宗",
+      "佛學",
+      "天台宗",
       {
         "topic": "教觀綱宗",
         "last_used": "2026-03-22",
         "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "教觀雙美",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "蕅益智旭",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "融通諸宗",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "六即佛",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "淨土",
-        "last_used": "2026-03-22",
-        "expires_at": "2026-06-20"
-      },
-      {
-        "topic": "法華經",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "佛學",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "天台宗",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "金剛經",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "般若",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "淨土宗",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "念佛",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "Vite",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "SSG",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "靜態網站",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "歷史傳承",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "判教演進",
-        "last_used": "2026-03-21",
-        "expires_at": "2026-06-19"
-      },
-      {
-        "topic": "別教",
-        "last_used": "2026-03-19",
-        "expires_at": "2026-06-17"
       }
-    ],
-    "updated_at": "2026-03-22T07:41:30+08:00"
+    ]
   },
   "episodes": [
+    {
+      "episode_title": "天台止觀修持要義",
+      "notes_used": [
+        "ed138bbf-b608-4f05-8311-f6fc2e865392"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "佛學",
+        "天台宗"
+      ],
+      "source": "manual",
+      "created_at": "2026-03-22T15:25:38",
+      "mp3_url": "https://podcasts.pdoont.us.kg/note-ed138bbf-20260322.mp3",
+      "slug": "note-ed138bbf-20260322"
+    },
+    {
+      "episode_title": "教觀雙美：天台判教雙璧",
+      "notes_used": [
+        "b4e213b0-2d06-4d39-9c94-9dbd4924a6b5"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：《天台四教儀》與《教觀綱宗》的判教教材化比較 — 從諦觀到蕅益智旭的傳承與互補"
+      ],
+      "topics": [
+        "教觀綱宗",
+        "天台四教儀",
+        "教觀雙美"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-22T14:11:30+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep08_四教儀_教觀雙美天台判教雙璧.mp3",
+      "slug": "淨土學苑_ep08_四教儀_教觀雙美天台判教雙璧"
+    },
+    {
+      "episode_title": "skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 ",
+      "notes_used": [
+        "d00dc2b8-9f0d-40ea-acac-715dd040b66b",
+        "f24b5ae5-1f98-4a78-8aac-2eee11e4870b",
+        "6e05a4c5-6ec0-49b9-af8e-0b1c5f89cbaa"
+      ],
+      "note_titles": [
+        "skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 KB 整合機制（foundation 階段）",
+        "karpathy/autoresearch — 自主 AI 實驗迴圈框架深度洞察：三原語設計、630 行極簡架構、Karpathy Loop 範式與對 Daily-Digest-Prompt 自動化管線的五大借鑑啟示（23K Stars, 2026-03）",
+        "MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框架"
+      ],
+      "topics": [
+        "技術",
+        "AI",
+        "研究"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-22T13:03:59.106927+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/podcast-create-20260322-cursor-retry.mp3",
+      "slug": "podcast-create-20260322-cursor-retry"
+    },
     {
       "episode_title": "蕅益智旭判教革新",
       "notes_used": [
@@ -223,7 +124,7 @@
         "測試生成"
       ],
       "source": "auto-task",
-      "created_at": "2026-03-21T23:35:30.035023+00:00",
+      "created_at": "2026-03-22T07:35:30.035023+08:00",
       "mp3_url": "https://podcasts.pdoont.us.kg/podcast-create-20260322-cursor.mp3",
       "slug": "podcast-create-20260322-cursor"
     },
@@ -1636,6 +1537,24 @@
   ],
   "entries": [
     {
+      "episode_title": "天台別教修行階梯",
+      "notes_used": [
+        "539bf8cc-3400-4309-bed1-efea59c37c9a"
+      ],
+      "note_titles": [
+        "教觀綱宗研究：化法四教之別教 — 次第三觀、無量四諦與菩薩歷別行位的教觀體系"
+      ],
+      "topics": [
+        "別教",
+        "次第三觀",
+        "菩薩行位"
+      ],
+      "source": "auto-task",
+      "created_at": "2026-03-22T13:11:30+08:00",
+      "mp3_url": "https://podcasts.pdoont.us.kg/淨土學苑_ep07_別教_天台別教修行階梯.mp3",
+      "slug": "淨土學苑_ep07_別教_天台別教修行階梯"
+    },
+    {
       "note_id": "d37f196d-0f90-4e6a-b5b0-c6d26ca1ead5",
       "note_title": "MCP（Model Context Protocol）生態系統完整指南",
       "query": "技術 AI 研究 學習 工具",
@@ -2161,7 +2080,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260322-cursor",
-      "used_at": "2026-03-21T23:35:30.035023+00:00"
+      "used_at": "2026-03-22T07:35:30.035023+08:00"
     },
     {
       "note_id": "f1667a4e-8ffe-4ce5-a3e9-acb403e69d2c",
@@ -2169,7 +2088,7 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260322-cursor",
-      "used_at": "2026-03-21T23:35:30.035023+00:00"
+      "used_at": "2026-03-22T07:35:30.035023+08:00"
     },
     {
       "note_id": "9846abc5-ea48-4608-b13e-fb8d3a99978c",
@@ -2177,7 +2096,39 @@
       "query": "技術 AI 研究 學習 工具",
       "note_id_input": "",
       "slug": "podcast-create-20260322-cursor",
-      "used_at": "2026-03-21T23:35:30.035023+00:00"
+      "used_at": "2026-03-22T07:35:30.035023+08:00"
+    },
+    {
+      "note_id": "d00dc2b8-9f0d-40ea-acac-715dd040b66b",
+      "note_title": "skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 KB 整合機制（foundation 階段）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322",
+      "used_at": "2026-03-22T13:03:59.106927+08:00"
+    },
+    {
+      "note_id": "f24b5ae5-1f98-4a78-8aac-2eee11e4870b",
+      "note_title": "karpathy/autoresearch — 自主 AI 實驗迴圈框架深度洞察：三原語設計、630 行極簡架構、Karpathy Loop 範式與對 Daily-Digest-Prompt 自動化管線的五大借鑑啟示（23K Stars, 2026-03）",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322",
+      "used_at": "2026-03-22T13:03:59.106927+08:00"
+    },
+    {
+      "note_id": "6e05a4c5-6ec0-49b9-af8e-0b1c5f89cbaa",
+      "note_title": "MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框架",
+      "query": "技術 AI 研究 學習 工具",
+      "note_id_input": "",
+      "slug": "podcast-create-20260322",
+      "used_at": "2026-03-22T13:03:59.106927+08:00"
+    },
+    {
+      "note_id": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "note_title": "教觀綱宗研究：觀法修持 — 天台宗止觀法門與修行實踐體系",
+      "query": "",
+      "note_id_input": "ed138bbf-b608-4f05-8311-f6fc2e865392",
+      "slug": "note-ed138bbf-20260322",
+      "used_at": "2026-03-22T15:25:38"
     }
   ]
 }

@@ -432,6 +432,18 @@ rm -f results/broadcast_payload.json
 
 ---
 
+## 步驟 6.1：結果格式驗證（品質閘門）
+
+對所有 `results/*.json` 執行 schema 驗證：
+```bash
+uv run --project D:/Source/daily-digest-prompt python tools/validate_results.py --phase3 --soft-fail
+```
+- 驗證通過 → 繼續步驟 7
+- 驗證失敗 → 在結果 JSON 中標記 `"validation_passed": false`，**不中斷流程**（soft-fail）
+- 在 ntfy 通知中附加驗證結果：`📋 格式驗證：N/M 通過`
+
+---
+
 ## 步驟 7：清理 results/
 
 ```bash

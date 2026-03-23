@@ -1,0 +1,46 @@
+version: 1
+# Progressive Recovery Tiers — Proposal 001（參考 OpenClaw Self-Healing）
+# write_authority: Agent（self-heal Skill 讀寫）
+# tier3_ai: 2026-03-23 Proposal 003 落實後啟用（prompts/team/self-heal-diagnosis.md）
+
+tiers:
+  tier0_preflight:
+    enabled: true
+    checks:
+      - config_consistency    # validate_config.py 一致性檢查
+      - dependency_availability  # 外部 API / KB 可用性探測
+      - permission_check      # 檔案讀寫權限
+    on_failure: block_execution  # 阻止執行 + ntfy 告警
+
+  tier1_restart:
+    enabled: true
+    max_retries: 1
+    backoff_seconds: 10
+
+  tier2_health:
+    enabled: true
+    triggers:
+      - consecutive_failures: 2
+      - health_score_below: 80
+    thresholds:
+      daily_success_rate_min: 0.95
+      cache_hit_ratio_min: 0.4
+    remediation_skills:
+      - cache-optimizer
+      - task-fairness-analyzer
+
+  tier3_ai:
+    enabled: true  # Proposal 003 落實，2026-03-23 啟用
+    model: claude-haiku-4-5-20251001
+    max_diagnosis_time: 300
+    auto_remediate_risk_levels:
+      - low
+    requires_human_approval:
+      - medium
+      - high
+
+  tier4_human:
+    enabled: true
+    ntfy_topic: wangsc2025
+    include_logs: last_100_lines
+    priority: 4

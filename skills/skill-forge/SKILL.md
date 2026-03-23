@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-version: "1.0.0"
+version: "1.2.0"
 description: |
   Skill 鑄造廠。分析系統三大上下文（improvement-backlog、adr-registry、system-insight），
   識別最高價值的能力缺口，基於知識庫深研自動生成完整可用的 SKILL.md，
@@ -335,6 +335,125 @@ rm ntfy_scanner_alert.json
 
 ---
 
+## 步驟 8.5：流程整合（CLAUDE.md + 使用強度 + 模板掃描）
+
+**前提**：步驟 8 的 `skill_index_updated: true`（整合成功才執行本步驟）。
+
+### 8.5a. 更新 CLAUDE.md 分類索引
+
+1. 讀取 `CLAUDE.md`（專案根目錄），找到 `skills:` 節下的各分類（ai_ml / development / frontend / tools / knowledge / news / ...）
+2. 依以下規則判斷新 Skill 歸屬：
+   - `allowed-tools` 含 `WebSearch` → 優先歸 `tools` 類（研究輔助）
+   - 主題含「分析/審查/追蹤/治理」→ `development` 類
+   - 主題含「知識庫/研究/KB」→ `knowledge` 類
+   - 其他 → `tools` 類（預設）
+3. 在對應分類的清單末尾用 Edit 追加一行：
+   ```
+       - {skill-name}     # {一句話用途（≤20字）}
+   ```
+4. 同時更新分類後的數量注釋（如 `# 9` → `# 10`）
+
+### 8.5b. 更新 SKILL_INDEX.md 使用強度
+
+讀取 `skills/SKILL_INDEX.md`，依以下規則決定是否更新「使用強度」段落：
+
+| 信號強度 | 使用強度分類 |
+|---------|------------|
+| system-insight critical alert 觸發 | **積極用**（有機會就用）|
+| improvement-backlog P1 + 高品質分（≥8.5） | **積極用** |
+| 其餘情形 | 不修改（維持「按需使用」）|
+
+若需加入「積極用」：在 `skills/SKILL_INDEX.md` 的「積極用」行末用 Edit 追加 `、{skill-name}`。
+
+### 8.5c. 掃描並主動整合 prompt 模板（主動修改模式）
+
+**上限保護**：單次執行最多修改 **3 個**模板，防止大規模污染。
+
+#### 階段一：掃描（委派 Explore 子 Agent）
+
+> 掃描 `templates/` 目錄下所有 `.md` 文件（含子目錄），找出內容中出現以下任一關鍵字的文件：
+> 新 Skill 的 `triggers[]` 中前 3 個觸發詞。
+> 同時判斷該文件是否已含字串 `{skill_name}`（已整合則排除）。
+> 回傳格式（純 JSON，最多 5 筆，依匹配數量降序排列）：
+> ```json
+> [{"file": "相對路徑", "matched_trigger": "關鍵字", "context_line": "匹配行", "already_integrated": false}]
+> ```
+
+主 Agent 接收後，過濾 `already_integrated: false`，取前 3 筆作為修改目標。
+
+#### 階段二：插入點識別規則
+
+對每個目標模板，依序尋找插入點（找到第一個即停止）：
+
+| 優先順序 | 識別條件 | 插入位置 |
+|---------|---------|---------|
+| 1 | 含 `## 相關 Skill` 或 `## Skill 鏈` 段落 | 該段落列表末尾追加一項 |
+| 2 | 含 `depends-on:` 行（frontmatter 或正文） | 該行末追加 `、{skill_name}` |
+| 3 | 含「讀取 `skills/knowledge-query/SKILL.md`」等 Skill 呼叫語句 | 該語句下方插入同格式新行 |
+| 4 | 含 `## 步驟` 且最後一個步驟為「通知」或「結果」前一步 | 在該步驟前插入新步驟，呼叫 {skill_name} |
+| 5 | 以上均無 | **跳過此模板**（不強制修改，避免破壞結構） |
+
+#### 階段三：插入內容格式
+
+依插入點類型，使用 Edit 工具插入以下內容：
+
+**類型 1/2（列表追加）**：
+```
+- {skill_name}：{新 Skill 的 description 前 20 字}
+```
+
+**類型 3（Skill 呼叫行）**：
+```
+讀取 `skills/{skill_name}/SKILL.md`，依其指示執行{新 Skill 的主要動作}。
+```
+
+**類型 4（新步驟）**：
+```markdown
+### [步驟 N]：{skill_name} 分析
+
+讀取 `skills/{skill_name}/SKILL.md`，針對本次任務輸出執行 {skill_name}。
+結果整合至後續步驟輸出。
+```
+
+#### 階段四：驗證修改完整性
+
+每個模板修改後立即驗證：
+```bash
+uv run python -X utf8 -c "
+content = open('{template_path}', encoding='utf-8').read()
+integrated = '{skill_name}' in content
+print(f'INTEGRATED: {integrated}')
+"
+```
+- `INTEGRATED: True` → 修改成功，記錄 `status: modified`
+- `INTEGRATED: False` → 修改失敗，記錄 `status: failed`，**不重試**（避免重複插入）
+
+#### 階段五：寫入整合日誌
+
+無論找到 0 筆或修改完成，均更新 `context/skill-forge-integration-hints.json`（key = skill_name）：
+
+```json
+{
+  "{skill_name}": {
+    "generated_at": "{YYYY-MM-DD}",
+    "modified_templates": [
+      {
+        "template": "templates/xxx.md",
+        "trigger": "匹配觸發詞",
+        "insertion_type": "1-5 的類型編號",
+        "status": "modified | failed | skipped"
+      }
+    ],
+    "total_modified": 2,
+    "skipped_reason": "插入點類型5（無匹配結構）| null"
+  }
+}
+```
+
+若檔案已存在，用 Read 讀取後以 Edit 追加新 key，不覆蓋既有記錄。
+
+---
+
 ## 步驟 9：匯入知識庫
 
 讀取 `skills/knowledge-query/SKILL.md`，依其指示將本次生成報告匯入 KB。
@@ -483,3 +602,5 @@ rm ntfy_skill_forge.json
 **版本歷史**：
 - v1.0.0（2026-03）：初始正式版
 - v1.0.1（2026-03-19）：移除步驟 10b 重複內容（skill-audit 發現）
+- v1.1.0（2026-03-22）：新增步驟 8.5 流程整合（CLAUDE.md 分類索引同步 + 使用強度更新 + prompt 模板掃描建議）
+- v1.2.0（2026-03-22）：步驟 8.5c 升級為主動修改模式（5 級插入點識別 + Edit 直接修改 + 整合日誌 + 上限保護 max 3）

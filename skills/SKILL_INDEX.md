@@ -2,7 +2,7 @@
 
 > **更新時間:** 2026-03-22 | **能用 Skill 就用 Skill，絕不自行拼湊。**
 
-## 速查表（20 個核心 + 37 個工具 = 57 個 Skills）
+## 速查表（20 個核心 + 39 個工具 = 59 個 Skills）
 
 ### 核心 Skill（每日摘要 / Todoist Agent 使用）
 
@@ -44,7 +44,7 @@
 | 28 | writing-masters | 西方文學巨匠寫作技巧（海明威/奧威爾/史蒂芬金） | 寫作技巧、writing、寫作、文字、創作、冰山理論、極簡、海明威、史蒂芬金、show don't tell |
 | 29 | writing-plans | 實作計畫撰寫（TDD 任務拆解，2-5 分鐘粒度） | write plan、create plan、implementation plan、計畫、規劃、怎麼實作、步驟、拆解任務 |
 | 30 | markdown-editor | Markdown 指令／編輯／總結（依知識庫完整指南，33 種語法+TOC+摘要） | Markdown、md、格式化、摘要、TOC、目錄生成、表格、連結替換、內容總結、大綱、錨點、腳註、Mermaid、告警區塊、GFM、CommonMark |
-| 31 | skill-forge | 知識庫驅動的 Skill 自動生成（分析三大上下文→優先級矩陣→KB深研→生成SKILL.md→LLM自評分→整合） | skill-forge、生成 Skill、新增 Skill、Skill 缺口、能力缺口、Skill 鑄造、自動生成技能 |
+| 31 | skill-forge | 知識庫驅動的 Skill 自動生成（分析三大上下文→優先級矩陣→KB深研→生成SKILL.md→LLM自評分→整合→**同步 CLAUDE.md + 使用強度 + 模板整合建議**） | skill-forge、生成 Skill、新增 Skill、Skill 缺口、能力缺口、Skill 鑄造、自動生成技能 |
 | 32 | workflow-forge | 流程標準化鑄造廠（config/prompts 掃描→格式與一致性缺口→工作流定義/輸出 Schema/驗證清單→整合） | workflow-forge、workflow 鑄造、流程標準化、輸出格式規範、工作流定義、系統一致性 |
 | 33 | insight-briefing | 深度研究洞察簡報（多 Skill 串接：研究策略→蒐集→洞察→簡報→KB 匯入→通知，depends-on: knowledge-query、web-research、kb-research-strategist、ntfy-notify） | 深度研究洞察簡報、insight briefing、研究簡報、多 Skill 研究簡報 |
 | 34 | academic-paper-research | 指定議題學術研究與報告生成（同行評審/學術專書/會議論文優先） | 學術研究、文獻回顧、研究報告、指定議題研究、論文等級、同行評審、literature review、academic research |
@@ -70,6 +70,8 @@
 | 54 | research-saturation-analyzer [草稿] | 研究主題飽和度分析與收穫遞減偵測（多因子評分\主題聚類\待深化識別，depends-on: kb-research-strategist、knowledge-query、system-insight） | 研究飽和度、收穫遞減、主題飽和、研究主題分析、saturation analysis、diminishing returns、研究方向建議、待深化主題、research saturation |
 | 55 | auto-task-creator | 自動任務建立精靈（6 步 checklist：frequency-limits.yaml + prompt + timeouts + PS1 + allowed_days 星期限制，確保命名一致） | 新增自動任務、建立自動任務、增加自動任務、add auto task、auto-task-creator、新自動任務、auto task checklist |
 | 56 | add-podcast-task | 新增 Podcast 自動任務（依 auto-task-creator + podcast.yaml 節目名、ntfy 標題契約、模板／resolver／腳本對齊） | 新增podcast任務、新增 podcast 任務、add podcast task、建立 podcast 自動任務、podcast 自動任務、add-podcast-task |
+| 57 | prompt-version-tracker | Prompt 模板主動版本管理（bump/init/report CLI、content hash registry、語義版本遞增、自主品質回歸偵測，depends-on: tools/prompt-versioning.py、system-insight、agent-result-validator） | prompt 版本、模板版本追蹤、prompt version、版本回溯、prompt history、模板變更追蹤、版本-品質分析、bump version、版本遞增、prompt changelog、版本覆蓋率 |
+| 58 | self-heal | 漸進式自我修復（Tier 0 預檢→Tier 1 重試→Tier 2 健康診斷→Tier 3 AI 診斷→Tier 4 人工告警，depends-on: config/recovery-tiers.yaml、cache-optimizer、task-fairness-analyzer、ntfy-notify） | self-heal、自我修復、系統修復、漸進式恢復、recovery tiers、失敗重試 |
 
 > **使用方式**：每個 Skill 的完整操作指南在 `skills/<name>/SKILL.md`，執行前必讀。
 

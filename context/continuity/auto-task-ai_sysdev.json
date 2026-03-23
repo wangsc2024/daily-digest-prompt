@@ -4,6 +4,16 @@
   "max_runs": 5,
   "runs": [
     {
+      "executed_at": "2026-03-23T05:11:21.500148+08:00",
+      "topic": "AI 文件生成與自動化 — 程式碼註解、API 文件、變更日誌的智能化工作流",
+      "status": "completed",
+      "key_findings": "本次為 ai-documentation-generation 新系列 foundation 階段研究，建立完整知識地圖：(1) 三大類別工具（程式碼文件、影片文件、Changelog）；(2) 量化效益（85-90% 時間節省、340% 文件覆蓋率提升、90% Changelog 工作量減少）；(3) 三個完整 workflow（GitHub Copilot+Mintlify、Guidde 影片文件、GitHub Actions+GPT-4 Changelog）；(4) 對 daily-digest-prompt 的四大應用場景（Skill 文件自動生成、CHANGELOG.md 自動更新、Hook 規則文件同步、系統審查報告摘要）。核心洞察：llms.txt 機器可讀標準成為 2026 年新趨勢，減少 AI 工具幻覺。",
+      "kb_note_ids": [
+        "27f25242-72ac-41b1-be76-dd1cedd53c5b"
+      ],
+      "next_suggested_angle": "進入 mechanism 階段：LLM 文件生成內部機制（Prompt Engineering、Few-Shot Learning、Context Window 管理、Anti-Hallucination 技術）"
+    },
+    {
       "executed_at": "2026-03-22T04:45:42.376825+08:00",
       "topic": "AI 需求工程核心機制 — 需求擷取、自然語言轉規格、使用者故事生成與驗收條件自動化",
       "status": "completed",
@@ -42,16 +52,6 @@
         "afe2f5c9-fc53-4974-acce-a815ec98aad2"
       ],
       "next_suggested_angle": "延伸到 synthesis：把 code review、需求閘門與 ADR 治理串成工程政策閉環"
-    },
-    {
-      "executed_at": "2026-03-18T03:09:51.008097+08:00",
-      "topic": "AI 驅動的持續整合進階實作：Flaky Test 根因分類、隔離治理與預測式選測",
-      "status": "completed",
-      "key_findings": "本次聚焦 flaky test 治理而非泛化 CI/CD 概論，整理出預測式選測、同 commit pass/fail 偵測、mute 優先於 skip 的隔離策略，以及 GitLab root-cause taxonomy。可直接用於降低 daily-digest-prompt 排程假失敗與驗證等待時間。",
-      "kb_note_ids": [
-        "5556934b-d083-4065-89a5-34efb5fdd528"
-      ],
-      "next_suggested_angle": "延伸到 build failure prediction 與自動回滾閘門"
     }
   ]
 }

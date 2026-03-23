@@ -1303,6 +1303,38 @@ if (Test-Path $cacheStatusFile) {
     Write-Host "  (cache/status.json 尚未生成，下次執行 run-agent-team.ps1 後會建立)" -ForegroundColor DarkGray
 }
 
+# [Prompt 版本覆蓋率]（prompt-version-tracker 自主審核）
+Write-Host ""
+Write-Host "[Prompt 版本覆蓋率]" -ForegroundColor Cyan
+$_pvTool = Join-Path $PSScriptRoot "tools/prompt-versioning.py"
+$_pvReport = Join-Path $PSScriptRoot "results/prompt-version-report.json"
+if (Test-Path $_pvTool) {
+    try {
+        # 先執行 report 產生/更新 results/prompt-version-report.json
+        uv run --project $PSScriptRoot python tools/prompt-versioning.py report 2>&1 | ForEach-Object {
+            Write-Host "  $_"
+        }
+        # 讀取結果並評估
+        if (Test-Path $_pvReport) {
+            $_pvData = Get-Content $_pvReport -Raw | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($_pvData) {
+                $_pct = $_pvData.coverage.pct
+                if ($_pct -ge 90) {
+                    Write-Host "  ✅ 版本覆蓋率 $($_pct)%（目標 >= 90%）" -ForegroundColor Green
+                } elseif ($_pct -ge 70) {
+                    Write-Host "  ⚠️  版本覆蓋率 $($_pct)%（目標 >= 90%，建議補齊）" -ForegroundColor Yellow
+                } else {
+                    Write-Host "  ❌ 版本覆蓋率 $($_pct)%（目標 >= 90%，需立即補齊）" -ForegroundColor Red
+                }
+            }
+        }
+    } catch {
+        Write-Host "  無法執行 prompt-versioning.py：$_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  (tools/prompt-versioning.py 尚未建立)" -ForegroundColor DarkGray
+}
+
 # [配置膨脹指標]
 Write-Host ""
 Write-Host "[配置膨脹指標]" -ForegroundColor Cyan

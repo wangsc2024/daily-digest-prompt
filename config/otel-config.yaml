@@ -1,0 +1,17 @@
+version: 1
+enabled: false  # 預設關閉，待驗證穩定後手動啟用（Edit 改為 true）
+exporter:
+  type: file  # file exporter（無需外部 OTEL Collector）
+  file_path: logs/otel/traces.jsonl
+  rotation:
+    max_bytes: 10485760  # 10MB
+    backup_count: 3
+resource:
+  service.name: daily-digest-agent
+  service.version: "1.0.0"
+  deployment.environment: production
+sampling:
+  rate: 0.1  # 10% 採樣（降低效能影響）
+fallback:
+  on_export_failure: continue  # export 失敗時繼續，不中斷 Agent
+  max_retry: 0  # 不重試（避免阻塞主流程）

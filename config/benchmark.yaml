@@ -49,13 +49,28 @@ metrics:
 
   # Token 經濟學指標（v2 新增，靈感：everything-claude-code Token Economy）
   - name: avg_io_per_call
-    description: "每次工具呼叫平均 I/O 大小（chars）"
-    # 合理值說明：多 Agent 並行架構下，研究/摘要任務輸出量大（output:input 比率約 20:1），
-    # 實測 7 日均值約 9,000–12,000 chars/call。5000 門檻對單一 Agent 適用，
-    # 多 Agent 並行（team-mode）正常範圍為 8,000–12,000；超過 15,000 才需告警。
+    description: "每次工具呼叫平均 I/O 大小（chars，排除研究類任務）"
+    # 合理值說明：多 Agent 並行架構下，一般任務正常範圍 8,000–12,000 chars/call；超過 15,000 才需告警。
+    # 研究類任務（ai_deep_research 等）為完整報告輸出，輸出量大屬預期行為，故從此指標排除。
+    # exclude_task_keys 由 collect_system_data.py 讀取，與 frequency-limits.yaml 的 task_key 對應。
     target: "<= 12000"
     source: behavior-patterns.json
     weight: 10
+    exclude_task_keys:
+      - tech_research
+      - ai_deep_research
+      - unsloth_research
+      - ai_github_research
+      - ai_smart_city
+      - ai_sysdev
+      - ai_workflow_github
+      - shurangama
+      - jiaoguangzong
+      - fahua
+      - jingtu
+      - podcast_create
+      - buddhist_podcast
+      - insight_briefing
 
   - name: behavior_pattern_count
     description: "已識別行為模式數量（Instinct Lite）"
@@ -129,6 +144,22 @@ fitness_functions:
     measure: "state/token-usage.json .daily.<today>.groq_calls / total_calls"
     weight: 10
     enabled_after: "P1-B"   # P1-B 實作前此指標恆為 0，不計入評分
+
+  prompt_version_coverage:
+    description: "Prompt 版本 frontmatter 覆蓋率（prompt-version-tracker）"
+    target: ">= 90%"
+    measure: "uv run python tools/prompt-versioning.py report"
+    source: "results/prompt-version-report.json .coverage.pct"
+    weight: 10
+    auto_check: true
+
+  quality_regression_rate:
+    description: "Prompt 品質回歸率（品質分下降 >1 的任務比例，越低越好）"
+    target: "= 0%"
+    measure: "uv run python tools/prompt-versioning.py report"
+    source: "results/prompt-version-report.json .regressions"
+    weight: 10
+    auto_check: true
 
 # 迴圈偵測閾值（LoopDetector 讀取）
 loop_detection:

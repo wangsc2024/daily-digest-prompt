@@ -46,6 +46,10 @@
 
 **違反症狀**：Agent 輸出「建議步驟」文字、「以下命令可執行...」等描述性語言，而未看到 Bash tool 的呼叫紀錄。
 
+## 結果檔案寫入前驗證
+
+寫入 `results/` JSON 前，建議呼叫 middleware 驗證確保必填欄位（task_type/task_key/status/summary）完整。缺失欄位可由 auto_fix_tier1() 自動補上。
+
 ## 知識庫寫入確認規則
 
 所有 `POST /api/import` 或 `POST /api/notes` 執行後，**必須**確認寫入成功：

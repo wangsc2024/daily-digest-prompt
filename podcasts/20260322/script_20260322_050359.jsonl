@@ -1,0 +1,50 @@
+{"turn": 1, "speaker": "Host-A", "text": "大家好，歡迎收聽今天的知識電台。", "tts_text": "大家好，歡迎收聽今天的知識電台。"}
+{"turn": 2, "speaker": "Host-B", "text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。", "tts_text": "嗨！今天我們要聊三篇很有意思的技術與學習主題。"}
+{"turn": 3, "speaker": "Host-A", "text": "沒錯，我們選了 skill-forge 自動化 Skill 鑄造系統 — 核心流程、評…、karpathy/autoresearch — 自主 AI 實驗迴圈框… 等主題。", "tts_text": "沒錯，我們選了 skill-forge 自動化 Skill 鑄造系統 — 核心流程、評…、karpathy/autoresearch — 自主 A I 實驗迴圈框… 等主題。"}
+{"turn": 4, "speaker": "Host-A", "text": "我們先來看第一篇：skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 …。", "tts_text": "我們先來看第一篇：skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 …。"}
+{"turn": 5, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 6, "speaker": "Host-A", "text": "# skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 KB 整合機制（foundation 階段）", "tts_text": "# skill-forge 自動化 Skill 鑄造系統 — 核心流程、評分算法與 KB 整合機制（foundation 階段）"}
+{"turn": 7, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 8, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 9, "speaker": "Host-A", "text": "> **研究日期**：2026-03-22", "tts_text": "> **研究日期**：2026-03-22"}
+{"turn": 10, "speaker": "Host-A", "text": "> **研究系列**：skill-forge-system（foundation 階段）", "tts_text": "> **研究系列**：skill-forge-system（foundation 階段）"}
+{"turn": 11, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 12, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 13, "speaker": "Host-A", "text": "> **研究層級**：Standard（Deep Research 協議）", "tts_text": "> **研究層級**：Standard（Deep Research 協議）"}
+{"turn": 14, "speaker": "Host-A", "text": "skill-forge 是 daily-digest-prompt 專案的元認知 Skill，透過分析系統三大上下文（improvement-backlog、adr-registry、system-i…", "tts_text": "skill-forge 是 daily-digest-prompt 專案的元認知 Skill，透過分析系統三大上下文（improvement-backlog、adr-registry、system-i…"}
+{"turn": 15, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 16, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 17, "speaker": "Host-A", "text": "本研究建立 skill-forge 的基礎概念與核心機制，包含八階段執行管線、四維度評分算法（滿分 100）、三層版本策略（v1.0.0/v0.5.0/v0.1.0）、五維度 LLM 自評分品質閘門（…", "tts_text": "本研究建立 skill-forge 的基礎概念與核心機制，包含八階段執行管線、四維度評分算法（滿分 100）、三層版本策略（v1.0.0/v0.5.0/v0.1.0）、五維度 L L M 自評分品質閘門（…"}
+{"turn": 18, "speaker": "Host-A", "text": "研究發現 skill-forge 與學術界的 SkillRL、ToolFactory、MARS 等框架在「從需求自動生成能力」的理念上高度一致，但 skill-forge 獨特之處在於深度整合知識庫（…", "tts_text": "研究發現 skill-forge 與學術界的 SkillRL、ToolFactory、MARS 等框架在「從需求自動生成能力」的理念上高度一致，但 skill-forge 獨特之處在於深度整合知識庫（…"}
+{"turn": 19, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 20, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 21, "speaker": "Host-A", "text": "### 1.1 什麼是 skill-forge", "tts_text": "### 1.1 什麼是 skill-forge"}
+{"turn": 22, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 23, "speaker": "Host-A", "text": "我們先來看第二篇：karpathy/autoresearch — 自主 AI 實驗迴圈框架深度洞察…。", "tts_text": "我們先來看第二篇：karpathy/autoresearch — 自主 A I 實驗迴圈框架深度洞察…。"}
+{"turn": 24, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 25, "speaker": "Host-A", "text": "# karpathy/autoresearch — 自主 AI 實驗迴圈框架深度洞察", "tts_text": "# karpathy/autoresearch — 自主 A I 實驗迴圈框架深度洞察"}
+{"turn": 26, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 27, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 28, "speaker": "Host-A", "text": "## 三原語設計、630 行極簡架構、Karpathy Loop 範式與對 Daily-Digest-Prompt 自動化管線的五大借鑑啟示", "tts_text": "## 三原語設計、630 行極簡架構、Karpathy Loop 範式與對 Daily-Digest-Prompt 自動化管線的五大借鑑啟示"}
+{"turn": 29, "speaker": "Host-A", "text": "研究日期：2026-03-22", "tts_text": "研究日期：2026-03-22"}
+{"turn": 30, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 31, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 32, "speaker": "Host-A", "text": "研究類型：GitHub 熱門專案深度分析", "tts_text": "研究類型：GitHub 熱門專案深度分析"}
+{"turn": 33, "speaker": "Host-A", "text": "**autoresearch**（[karpathy/autoresearch](https://github.com/karpathy/autoresearch)）由前 Tesla AI 總監、Op…", "tts_text": "**autoresearch**（[karpathy/autoresearch](https://github.com/karpathy/autoresearch)）由前 Tesla A I 總監、Op…"}
+{"turn": 34, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 35, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 36, "speaker": "Host-A", "text": "專案在發布後 3 天內獲得 **22,983 Stars**，登上 HN 最高討論分（198 分），Karpathy 的推文更在 2 天內獲得 **860 萬次觀看** [GitHub Trendin…", "tts_text": "專案在發布後 3 天內獲得 **22,983 Stars**，登上 HN 最高討論分（198 分），Karpathy 的推文更在 2 天內獲得 **860 萬次觀看** [GitHub Trendin…"}
+{"turn": 37, "speaker": "Host-A", "text": "這裡原本是表格的分隔線，我們直接談重點就好。", "tts_text": "這裡原本是表格的分隔線，我們直接談重點就好。"}
+{"turn": 38, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 39, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 40, "speaker": "Host-A", "text": "| Stars | 22,983+（3 天內） |", "tts_text": "| Stars | 22,983+（3 天內） |"}
+{"turn": 41, "speaker": "Host-B", "text": "好，我們接著看下一篇。", "tts_text": "好，我們接著看下一篇。"}
+{"turn": 42, "speaker": "Host-A", "text": "我們先來看第三篇：MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框…。", "tts_text": "我們先來看第三篇：MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框…。"}
+{"turn": 43, "speaker": "Host-B", "text": "嗯，這篇主要在講什麼？", "tts_text": "嗯，這篇主要在講什麼？"}
+{"turn": 44, "speaker": "Host-A", "text": "# MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框架", "tts_text": "# MetaGPT 深度研究報告 — 軟體公司模擬 Multi-agent 工作流框架"}
+{"turn": 45, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 46, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}
+{"turn": 47, "speaker": "Host-A", "text": "MetaGPT 是一個開源的多代理協作框架，其核心創新在於將「軟體公司」完整映射為 AI 代理系統，實現「Code = SOP(Team)」的設計哲學", "tts_text": "MetaGPT 是一個開源的多代理協作框架，其核心創新在於將「軟體公司」完整映射為 A I 代理系統，實現「Code = SOP(Team)」的設計哲學"}
+{"turn": 48, "speaker": "Host-A", "text": "與 AutoGen（對話式協作）和 CrewAI（角色式協作）不同，MetaGPT 採用「標準作業流程（SOP）驅動」的工作流設計，將真實軟體工程團隊的分工與協作模式編碼到 prompt 序列中，形成…", "tts_text": "與 AutoGen（對話式協作）和 CrewAI（角色式協作）不同，MetaGPT 採用「標準作業流程（SOP）驅動」的工作流設計，將真實軟體工程團隊的分工與協作模式編碼到 prompt 序列中，形成…"}
+{"turn": 49, "speaker": "Host-B", "text": "原來如此，還有呢？", "tts_text": "原來如此，還有呢？"}
+{"turn": 50, "speaker": "Host-B", "text": "有意思！", "tts_text": "有意思！"}

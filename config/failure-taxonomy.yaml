@@ -1,0 +1,66 @@
+# ADR-20260323-042: 失敗模式 Taxonomy
+# 4 維度失敗分類，用於自動根因分析
+version: 1
+
+categories:
+  external_dependency:
+    description: "外部服務不可用或回應異常"
+    examples:
+      - "Todoist API 401/403/410/429/500"
+      - "ntfy.sh 推播失敗"
+      - "localhost:3000 KB API 連線逾時"
+      - "WebSearch/WebFetch 逾時"
+    leading_indicators:
+      - "連續多個 api-call 標籤出現 error_category"
+      - "circuit_breaker state=open"
+    mitigation:
+      - "快取降級（讀取 cache/*.json）"
+      - "Circuit breaker 自動冷卻"
+      - "重試（最多 1 次）"
+    keywords: ["api-call", "timeout", "connection", "401", "403", "410", "429", "500", "502", "503"]
+
+  resource_contention:
+    description: "系統資源不足或競態條件"
+    examples:
+      - "Context window 超限"
+      - "Token 預算耗盡"
+      - "write_version 競態"
+      - "排程重疊導致鎖定"
+    leading_indicators:
+      - "avg_io_per_call 持續超標"
+      - "loop_suspected 事件增加"
+    mitigation:
+      - "Context 壓縮（ADR-036）"
+      - "子 Agent 委派減少主 Context 負擔"
+      - "write_version 樂觀鎖合併"
+    keywords: ["context", "token", "budget", "lock", "timeout", "loop_suspected", "OOM"]
+
+  schema_mismatch:
+    description: "資料格式不符預期"
+    examples:
+      - "results JSON 缺少必填欄位"
+      - "API 回應格式變更"
+      - "task_key 連字號/底線不一致"
+    leading_indicators:
+      - "validate_results.py 失敗數增加"
+      - "JSON 解析錯誤"
+    mitigation:
+      - "middleware_validate() 前置驗證"
+      - "auto_fix_tier1() 自動補欄位"
+      - "schema 版本遷移"
+    keywords: ["schema", "validate", "JSON", "parse", "missing", "required", "format_failed"]
+
+  logic_error:
+    description: "程式邏輯或 Prompt 指引導致的錯誤"
+    examples:
+      - "研究去重誤判（false positive）"
+      - "模板選擇路由錯誤"
+      - "自動任務輪轉指針異常"
+    leading_indicators:
+      - "同一任務反覆失敗"
+      - "結果品質分持續偏低"
+    mitigation:
+      - "修正 routing.yaml / frequency-limits.yaml"
+      - "更新 Prompt 模板"
+      - "新增測試案例"
+    keywords: ["logic", "route", "routing", "dedup", "fairness", "pointer", "order"]

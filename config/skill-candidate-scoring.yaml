@@ -1,0 +1,52 @@
+version: 1
+# config/skill-candidate-scoring.yaml
+# Behavior Pattern → Skill 演化候選評分模型（ADR-20260323-044）
+# 由 tools/score_skill_candidates.py 讀取
+
+# 三維度評分模型
+dimensions:
+  frequency:
+    description: "行為模式出現頻率（count）"
+    weight: 0.4
+    thresholds:
+      high: 500      # >= 500: 3分
+      medium: 100    # >= 100: 2分
+      low: 20        # >= 20:  1分
+                     # < 20:   0分
+
+  confidence:
+    description: "模式信心度（success_count / count）"
+    weight: 0.35
+    thresholds:
+      high: 0.85     # >= 0.85: 3分
+      medium: 0.65   # >= 0.65: 2分
+      low: 0.50      # >= 0.50: 1分
+                     # < 0.50:  0分
+
+  reusability:
+    description: "跨 session 可重用性（pattern 在多少 session 出現）"
+    weight: 0.25
+    thresholds:
+      # 代理指標：count / confidence（高頻 + 高信心 = 高重用性）
+      high: 300      # >= 300: 3分
+      medium: 80     # >= 80:  2分
+      low: 20        # >= 20:  1分
+
+# Skill 候選門檻
+candidate_threshold:
+  min_score: 6.0          # 滿分9分，>= 6.0 為候選
+  min_confidence: 0.65    # 信心度至少 0.65
+  min_frequency: 50       # 至少出現 50 次
+  exclude_tools:          # 純工具操作，非 Skill 候選
+    - Read
+    - Write
+    - Edit
+    - Glob
+    - Grep
+    - TodoWrite
+    - ToolSearch
+
+# 輸出
+output:
+  path: "analysis/skill-candidates.json"
+  top_n: 20               # 輸出前 20 個候選

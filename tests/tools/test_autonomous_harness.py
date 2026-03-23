@@ -43,7 +43,7 @@ def _write_config(tmp_path: Path) -> Path:
                 "failed_auto_task_threshold": 2,
                 "api_open_circuit_threshold": 1,
                 "starvation_task_threshold": 3,
-                "heartbeat_stale_minutes": 20,
+                "heartbeat_stale_minutes": 40,
             },
             "discovery": {
                 "fetch_agents_glob": "prompts/team/fetch-*.md",
@@ -441,3 +441,38 @@ def test_runtime_override_can_force_more_conservative_mode(tmp_path: Path) -> No
     assert "gmail" in plan["runtime"]["policies"]["blocked_fetch_agents"]
     assert plan["runtime"]["policies"]["max_parallel_auto_tasks"] == 1
     assert plan["runtime"]["policies"]["max_parallel_fetch_agents"] == 2
+
+
+def test_starved_heavy_tasks_are_exempt_from_degraded_block(tmp_path: Path) -> None:
+    """飢餓豁免：降速模式下，在 zero_count_tasks 內的 heavy task 不應被 blocked。"""
+    config_path = _write_config(tmp_path)
+    _write_json(tmp_path / "state" / "run-fsm.json", {"runs": {}, "updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "scheduler-state.json", {"runs": []})
+    _write_json(tmp_path / "state" / "failure-stats.json", {"updated": "2026-03-20T07:00:00+08:00"})
+    _write_json(tmp_path / "state" / "failed-auto-tasks.json", {"entries": []})
+    _write_json(tmp_path / "state" / "api-health.json", {"apis": {}})
+    _write_json(
+        tmp_path / "state" / "auto-task-fairness-hint.json",
+        {
+            "starvation_detected": True,
+            "starvation_count": 5,
+            # tech_research 本身是飢餓任務 → 應豁免 blocked
+            "zero_count_tasks": ["tech_research"],
+        },
+    )
+    _write_json(tmp_path / "state" / "token-budget-state.json", {"last_alerted_date": "2026-03-19"})
+    _write_json(tmp_path / "state" / "scheduler-heartbeat.json", {"timestamp": "2026-03-20T07:00:00+08:00", "status": "running"})
+
+    harness = AutonomousHarness(repo_root=tmp_path, config_path=config_path)
+    harness._collect_resource_snapshot = lambda: {
+        "generated_at": "2026-03-20T07:00:00+08:00",
+        "cpu": {"percent": 35},
+        "memory": {"percent": 42, "available_mb": 2048},
+        "gpu": {"available": False, "devices": []},
+    }
+    plan = harness.build_plan(now=datetime.fromisoformat("2026-03-20T07:00:00+08:00"))
+
+    assert plan["runtime"]["mode"] == "degraded"
+    assert plan["runtime"]["gates"]["starvation_detected"] is True
+    # 核心斷言：飢餓任務不應出現在 blocked_task_keys
+    assert "tech_research" not in plan["runtime"]["policies"]["blocked_task_keys"]

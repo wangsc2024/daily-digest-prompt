@@ -1256,15 +1256,35 @@ counts = {}
 for key in tasks:
     counts[key] = tracking.get(f'{key}_count', 0)
 
-# 偵測飢餓任務（今日執行次數 = 0，且今日為允許執行日）
+# 偵測飢餓任務（今日執行次數 = 0，且目前時段允許執行，且已逾寬限期）
 today_weekday = datetime.datetime.now().weekday()  # Mon=0...Sun=6
-def is_allowed_today(task):
-    allowed = task.get('allowed_days')
-    if not allowed:
-        return True
-    return today_weekday in allowed
+current_hour = datetime.datetime.now().hour
+STARVATION_GRACE_HOURS = 2  # 進入時段後至少 N 小時仍未執行才算飢餓，避免清晨誤判
 
-zero_tasks = [k for k, v in counts.items() if v == 0 and tasks[k].get('daily_limit', 0) > 0 and is_allowed_today(tasks[k])]
+def is_allowed_now(task):
+    """任務在當前日期與小時是否允許執行"""
+    allowed_days = task.get('allowed_days')
+    if allowed_days and today_weekday not in allowed_days:
+        return False
+    allowed_hours = task.get('allowed_hours')
+    if not allowed_hours:
+        return True
+    return allowed_hours[0] <= current_hour <= allowed_hours[1]
+
+def hours_since_eligible(task):
+    """任務已進入允許時段多少小時（用於寬限期判斷）"""
+    allowed_hours = task.get('allowed_hours')
+    if not allowed_hours:
+        return current_hour  # 無時段限制視為從 0 時起算
+    return max(0, current_hour - allowed_hours[0])
+
+zero_tasks = [
+    k for k, v in counts.items()
+    if v == 0
+    and tasks[k].get('daily_limit', 0) > 0
+    and is_allowed_now(tasks[k])
+    and hours_since_eligible(tasks[k]) >= STARVATION_GRACE_HOURS
+]
 
 # 偵測 next_execution_order 越界（大於所有 execution_order 的最大值 + 1）
 max_order = max((t.get('execution_order', 0) for t in tasks.values()), default=1)

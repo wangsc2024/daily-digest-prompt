@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-22T11:43:39.485230+08:00",
+  "updated_at": "2026-03-23T03:10:51.047671+08:00",
   "series": {
     "ai-security-testing": {
       "series_id": "ai-security-testing",
@@ -165,7 +165,7 @@
       "domain": "楞嚴經 / Shurangama Sutra 佛學研究",
       "description": "楞嚴經深度研究系列，涵蓋經文義理、修行法門、跨宗派比較",
       "initiated_at": "2026-02-15",
-      "last_active": "2026-03-22",
+      "last_active": "2026-03-23",
       "tags": [
         "楞嚴經",
         "佛學",
@@ -313,7 +313,9 @@
             "楞嚴經研究：大勢至菩薩念佛圓通章 — 都攝六根淨念相繼的修證體系與淨土宗實修連結",
             "楞嚴經二十五圓通與各宗派修行法門的實證比較 — 從六塵六根六識七大到禪淨密台的圓通選擇指南",
             "楞嚴經修行體系的當代實踐整合 — 從破妄顯真到圓通成就的現代禪修完整路徑（synthesis 完結篇）",
-            "楞嚴經與華嚴經的義理會通 — 如來藏與法界、性起與性具、一真法界與首楞嚴三昧的圓教對話"
+            "楞嚴經與華嚴經的義理會通 — 如來藏與法界、性起與性具、一真法界與首楞嚴三昧的圓教對話",
+            "楞嚴經四種清淨明誨的跨傳統比較與當代倫理對話 — 從南傳五戒、藏傳密戒、儒道倫理到行為科學的綜合視角",
+            "楞嚴經四種清淨明誨的跨傳統比較與當代倫理對話 — 從南傳五戒、藏傳密戒、儒道倫理到行為科學的綜合視角"
           ],
           "covered_concepts": [
             "天台圓教會通",
@@ -434,15 +436,26 @@
             "全經修行體系的現代整合",
             "分階段實踐路徑",
             "與當代禪修方法的對接",
-            "常見修行障礙與對治"
+            "常見修行障礙與對治",
+            "四種清淨明誨的跨文化倫理學分析",
+            "當代行為科學視角的戒律研究",
+            "楞嚴戒與其他佛教戒律體系的異同",
+            "四種清淨明誨跨傳統比較",
+            "南傳五戒對照",
+            "藏傳密戒對照",
+            "儒道倫理對照",
+            "德行倫理學",
+            "前額葉皮質與道德行為",
+            "正念療法與戒律",
+            "數位時代戒律應用"
           ],
-          "completed_at": "2026-03-21"
+          "completed_at": "2026-03-23"
         }
       },
       "current_stage": "synthesis",
       "completion_pct": 100,
       "related_series": [],
-      "next_research_hint": "完成後可繼續：楞嚴經與圓覺經會通、楞嚴經在藏傳佛教的傳播與詮釋",
+      "next_research_hint": "synthesis 持續深化：可探索楞嚴經與圓覺經、解深密經的修行體系比較，或楞嚴經在當代佛教教育的課程設計研究",
       "saturation_score": 0.5,
       "saturation_matched_cluster": null
     },
@@ -5155,6 +5168,133 @@
       "completion_pct": 20,
       "related_series": [],
       "next_research_hint": "完成後進入 mechanism：深入研究評分算法實作細節、KB 分析邏輯、去重機制"
+    },
+    "japanese-pure-land": {
+      "series_id": "japanese-pure-land",
+      "domain": "法然上人與親鸞聖人的他力本願思想與日本淨土宗實踐",
+      "description": "日本淨土宗研究系列：從法然上人專修念佛到親鸞聖人絕對他力的完整思想體系",
+      "initiated_at": "2026-03-23",
+      "last_active": "2026-03-23",
+      "tags": [
+        "淨土宗",
+        "佛學",
+        "念佛",
+        "日本淨土宗"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "in_progress",
+          "started_at": "2026-03-23",
+          "kb_notes": [
+            "法然上人與親鸞聖人研究 — 日本淨土宗的他力本願思想與專修念佛實踐（foundation）"
+          ],
+          "covered_concepts": [
+            "選擇本願念佛集",
+            "教行信證",
+            "絕對他力",
+            "惡人正機",
+            "專修念佛",
+            "本願寺系統",
+            "法然與親鸞師徒關係",
+            "日本淨土宗與淨土真宗差異"
+          ]
+        },
+        "mechanism": {
+          "status": "pending"
+        },
+        "application": {
+          "status": "pending"
+        },
+        "optimization": {
+          "status": "pending"
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "foundation",
+      "completion_pct": 0,
+      "related_series": [
+        "pure-land-buddhism"
+      ],
+      "next_research_hint": "完成 foundation 後進入 mechanism：深入研究選擇本願念佛集與教行信證的義理結構"
+    },
+    "ai-smart-waste-management": {
+      "series_id": "ai-smart-waste-management",
+      "domain": "AI Smart Waste Management / Circular Economy",
+      "description": "AI 智慧廢棄物管理與循環經濟研究系列",
+      "initiated_at": "2026-02-16",
+      "last_active": "2026-03-23",
+      "tags": [
+        "AI",
+        "智慧城市",
+        "廢棄物管理",
+        "循環經濟",
+        "smart-city",
+        "smart-waste"
+      ],
+      "stages": {
+        "foundation": {
+          "status": "completed",
+          "started_at": "2026-02-16",
+          "completed_at": "2026-02-16",
+          "kb_notes": [
+            "AI 驅動的智慧廢棄物管理與循環經濟：IoT 感測、AI 分選、動態路徑優化與台灣實踐（2026）"
+          ],
+          "covered_concepts": [
+            "IoT 感測與填充預測",
+            "AI 視覺分選",
+            "動態路徑優化",
+            "循環經濟",
+            "智慧垃圾桶"
+          ]
+        },
+        "mechanism": {
+          "status": "completed",
+          "started_at": "2026-02-16",
+          "completed_at": "2026-02-16",
+          "kb_notes": [
+            "AI 驅動的智慧廢棄物管理與循環經濟：IoT 感測、AI 分選、動態路徑優化與台灣實踐（2026）"
+          ],
+          "covered_concepts": [
+            "機器學習模型（XGBoost、LSTM、Random Forest）",
+            "AI 分選演算法"
+          ]
+        },
+        "application": {
+          "status": "completed",
+          "started_at": "2026-02-16",
+          "completed_at": "2026-02-16",
+          "kb_notes": [
+            "AI 驅動的智慧廢棄物管理與循環經濟：IoT 感測、AI 分選、動態路徑優化與台灣實踐（2026）"
+          ],
+          "covered_concepts": [
+            "台灣實踐案例"
+          ]
+        },
+        "optimization": {
+          "status": "completed",
+          "started_at": "2026-03-23",
+          "completed_at": "2026-03-23",
+          "kb_notes": [
+            "智慧廢棄物管理系統優化指南：效能 KPI、成本效益分析與架構權衡（optimization 階段）"
+          ],
+          "covered_concepts": [
+            "系統整合效能 KPI（準確率、延遲、能耗）",
+            "ROI 與 TCO 分析",
+            "邊緣運算 vs 雲端架構的效能權衡",
+            "多模態感測器融合最佳實踐",
+            "異常處理與降級策略"
+          ]
+        },
+        "synthesis": {
+          "status": "pending"
+        }
+      },
+      "current_stage": "synthesis",
+      "completion_pct": 80,
+      "related_series": [],
+      "next_research_hint": "完成後進入 synthesis：與其他智慧城市系統（智慧交通、智慧能源）的整合連結"
     }
   }
 }

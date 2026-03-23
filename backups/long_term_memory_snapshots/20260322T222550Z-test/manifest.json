@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-03-22T22:25:50.396049+00:00",
+  "label": "test",
+  "files": [
+    "context/digest-memory.json",
+    "context/research-registry.json"
+  ],
+  "directories": [
+    "context/continuity"
+  ]
+}

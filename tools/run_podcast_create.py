@@ -31,9 +31,11 @@ def podcast_series_display_name(task_key: str) -> str:
         return str(by.get(task_key) or n.get("series_default") or "知識電台").strip()
     except Exception:
         return "知識電台"
-EXCLUDE_TAGS = {"佛學", "佛教", "淨土", "天台宗", "教觀綱宗", "禪", "法華", "八識", "唯識"}
+# 與任務規格一致：僅排除佛學／佛教／淨土類標籤（不額外擴張）
+EXCLUDE_TAGS = {"佛學", "佛教", "淨土"}
 COOLDOWN_DAYS = 30
 KB_BASE = "http://localhost:3000"
+PODCAST_QUERY = "技術 AI 研究 學習 工具"
 
 
 def fetch_hybrid_search(query: str, top_k: int = 15) -> list[dict]:
@@ -108,7 +110,7 @@ def load_used_note_ids(within_days: int = 30) -> set[str]:
     return used
 
 
-def has_excluded_tag(tags: list) -> bool:
+def has_excluded_tag(tags: list[str]) -> bool:
     """是否含有排除標籤"""
     if not tags:
         return False
@@ -116,11 +118,79 @@ def has_excluded_tag(tags: list) -> bool:
     return bool(tag_set & EXCLUDE_TAGS)
 
 
+def fetch_notes_list(limit: int = 250) -> list[dict]:
+    """GET /api/notes?limit=…（hybrid 無結果時的後備選材）"""
+    url = f"{KB_BASE}/api/notes?limit={limit}"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url), timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return data.get("notes", data if isinstance(data, list) else [])
+    except Exception as e:
+        print(f"[WARN] 無法取得筆記列表: {e}")
+        return []
+
+
+def _note_updated_ts(note: dict) -> float:
+    raw = note.get("updatedAt") or note.get("createdAt") or ""
+    if not raw:
+        return 0.0
+    try:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+    except Exception:
+        return 0.0
+
+
+def fallback_rank_notes(notes: list[dict], used: set[str], query: str) -> list[dict]:
+    """依查詢詞命中數 + 更新時間排序（模擬相關性＋新鮮度）。"""
+    tokens = [t.strip() for t in query.split() if t.strip()]
+    scored: list[tuple[int, float, dict]] = []
+    for n in notes:
+        if n.get("isDeleted"):
+            continue
+        nid = n.get("id")
+        if not nid or nid in used:
+            continue
+        if has_excluded_tag(n.get("tags") or []):
+            continue
+        blob = (n.get("title") or "") + "\n" + str(n.get("contentText") or "")
+        rel = sum(1 for t in tokens if t and t in blob)
+        ts = _note_updated_ts(n)
+        scored.append((rel, ts, n))
+    scored.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    out: list[dict] = []
+    seen: set[str] = set()
+    for rel, _ts, n in scored:
+        nid = n.get("id")
+        if not nid or nid in seen:
+            continue
+        if rel == 0 and out:
+            continue
+        seen.add(nid)
+        out.append(n)
+        if len(out) >= 3:
+            break
+    if len(out) < 3:
+        for rel, _ts, n in scored:
+            if rel != 0:
+                continue
+            nid = n.get("id")
+            if not nid or nid in seen:
+                continue
+            seen.add(nid)
+            out.append(n)
+            if len(out) >= 3:
+                break
+    return out[:3]
+
+
 def select_top3_notes() -> list[dict]:
     """選出 3 篇非佛學、未在 30 天內使用的高分筆記"""
-    items = fetch_hybrid_search("技術 AI 研究 學習 工具", top_k=20)
+    items = fetch_hybrid_search(PODCAST_QUERY, top_k=20)
     used = load_used_note_ids(COOLDOWN_DAYS)
-    candidates = []
+    candidates: list[dict] = []
     for item in items:
         mid = item.get("metadata", {})
         note_id = item.get("id") or mid.get("id") or mid.get("noteId")
@@ -133,7 +203,17 @@ def select_top3_notes() -> list[dict]:
         candidates.append({"id": note_id, "score": score, "metadata": mid})
         if len(candidates) >= 3:
             break
-    # 取得完整筆記內容
+
+    if len(candidates) < 3:
+        print("[INFO] hybrid search 結果不足，改以 /api/notes 後備排序選材…")
+        ranked = fallback_rank_notes(fetch_notes_list(300), used, PODCAST_QUERY)
+        for n in ranked:
+            nid = n.get("id")
+            if nid and not any(c.get("id") == nid for c in candidates):
+                candidates.append({"id": nid, "score": 0.0, "metadata": n})
+            if len(candidates) >= 3:
+                break
+
     result = []
     for c in candidates[:3]:
         note = fetch_note(c["id"])
@@ -161,9 +241,10 @@ def generate_script(notes: list[dict]) -> list[dict]:
         contents.append((ct or "")[:3000])
 
     def add(host: str, text: str):
+        speaker = "Host-A" if host == "host_a" else "Host-B"
         turns.append({
             "turn": len(turns) + 1,
-            "host": host,
+            "speaker": speaker,
             "text": text,
             "tts_text": _expand_abbrev(text),
         })
@@ -176,7 +257,8 @@ def generate_script(notes: list[dict]) -> list[dict]:
     # 三篇筆記，每篇約 8-12 輪對話
     for idx, (title, content) in enumerate(zip(titles, contents)):
         parts = re.split(r"[。！？\n]+", content)
-        parts = [p.strip() for p in parts if len(p.strip()) > 12][:8]
+        parts = [p.strip() for p in parts if len(p.strip()) > 12]
+        parts = [p for p in parts if not re.match(r"^[|\s\-:=]+$", p)][:8]
         if not parts:
             parts = [content[:250] + "…" if len(content) > 250 else content] if content else ["這篇筆記涵蓋多個重點。"]
         ord_name = ["第一", "第二", "第三"][idx] if idx < 3 else "這"
@@ -207,7 +289,7 @@ def generate_script(notes: list[dict]) -> list[dict]:
     return out
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Podcast 生成任務")
     parser.add_argument("--dry-run", action="store_true", help="僅選材與生成腳本，不執行 TTS/R2")
     parser.add_argument("--skip-tts", action="store_true", help="跳過 TTS 與後製")

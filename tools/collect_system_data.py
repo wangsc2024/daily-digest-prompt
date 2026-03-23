@@ -6,11 +6,56 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 
+try:
+    import yaml
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
+
 # 資料路徑（以腳本位置動態計算，tools/ 的上一層即專案根目錄）
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOGS_DIR = BASE_DIR / "logs/structured"
 STATE_DIR = BASE_DIR / "state"
 CONTEXT_DIR = BASE_DIR / "context"
+CONFIG_DIR = BASE_DIR / "config"
+
+
+def _load_research_exclude_keys() -> set:
+    """從 benchmark.yaml 讀取 avg_io_per_call.exclude_task_keys（研究類任務排除清單）"""
+    benchmark_path = CONFIG_DIR / "benchmark.yaml"
+    if not benchmark_path.exists():
+        return set()
+    try:
+        if _YAML_AVAILABLE:
+            with open(benchmark_path, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f)
+        else:
+            # yaml 未安裝時：用簡單字串解析取得 exclude_task_keys 段落
+            with open(benchmark_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            keys = set()
+            in_exclude = False
+            for line in content.splitlines():
+                stripped = line.strip()
+                if "exclude_task_keys:" in stripped:
+                    in_exclude = True
+                    continue
+                if in_exclude:
+                    if stripped.startswith("- "):
+                        keys.add(stripped[2:].strip())
+                    elif stripped and not stripped.startswith("#"):
+                        in_exclude = False
+            return keys
+
+        for metric in data.get("metrics", []):
+            if metric.get("name") == "avg_io_per_call":
+                return set(metric.get("exclude_task_keys", []))
+    except Exception:
+        pass
+    return set()
+
+
+RESEARCH_EXCLUDE_KEYS = _load_research_exclude_keys()
 
 # 時間範圍（近 7 天）
 END_DATE = datetime.now()
@@ -27,6 +72,7 @@ def collect_jsonl_stats():
         "unique_skills": set(),
         "skill_count": 0,
         "avg_output_len": 0,
+        "excluded_research_calls": 0,
         "data_available": False
     }
 
@@ -72,11 +118,15 @@ def collect_jsonl_stats():
                                         skill_name = path_parts[1].split("/")[0]
                                         stats["unique_skills"].add(skill_name)
 
-                        # 輸出長度
+                        # 輸出長度（排除研究類任務，其報告完整性不受字元限制）
                         output_len = entry.get("output_len", 0)
                         if output_len:
-                            total_output_len += output_len
-                            call_count += 1
+                            task_key = entry.get("cause_chain", {}).get("task_key", "")
+                            if task_key in RESEARCH_EXCLUDE_KEYS:
+                                stats["excluded_research_calls"] += 1
+                            else:
+                                total_output_len += output_len
+                                call_count += 1
                     except json.JSONDecodeError:
                         continue
 

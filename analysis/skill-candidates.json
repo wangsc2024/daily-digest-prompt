@@ -1,0 +1,334 @@
+{
+  "agent": "score_skill_candidates",
+  "generated_at": "2026-03-23T07:04:06.378182+08:00",
+  "source": "context/behavior-patterns.json",
+  "total_patterns": 200,
+  "skipped_tool_ops": 0,
+  "skipped_below_threshold": 131,
+  "candidates_found": 41,
+  "top_n": 20,
+  "min_score": 6.0,
+  "candidates": [
+    {
+      "pattern_id": "8f33f374ce48",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\templates\\shared\\preamble.md",
+      "count": 1463,
+      "confidence": 1.0,
+      "success_count": 1463,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:15.078064+08:00",
+      "last_seen": "2026-03-23T07:02:53.419955+08:00"
+    },
+    {
+      "pattern_id": "7be04a537082",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\auto-tasks-today.json",
+      "count": 1240,
+      "confidence": 1.0,
+      "success_count": 1240,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:25.722101+08:00",
+      "last_seen": "2026-03-23T07:03:19.998149+08:00"
+    },
+    {
+      "pattern_id": "517748ded20c",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\state\\todoist-history.json",
+      "count": 1220,
+      "confidence": 1.0,
+      "success_count": 1220,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:10:10.721248+08:00",
+      "last_seen": "2026-03-23T07:03:35.469065+08:00"
+    },
+    {
+      "pattern_id": "fe1ad266f557",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\cache\\todoist.json",
+      "count": 980,
+      "confidence": 1.0,
+      "success_count": 980,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:20.910361+08:00",
+      "last_seen": "2026-03-23T07:03:02.436124+08:00"
+    },
+    {
+      "pattern_id": "bb9a2398f1fe",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\research-registry.json",
+      "count": 965,
+      "confidence": 1.0,
+      "success_count": 965,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:32:46.710568+08:00",
+      "last_seen": "2026-03-23T05:04:02.303696+08:00"
+    },
+    {
+      "pattern_id": "4c5b41d79363",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\frequency-limits.yaml",
+      "count": 936,
+      "confidence": 1.0,
+      "success_count": 936,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:09:44.496746+08:00",
+      "last_seen": "2026-03-23T07:03:20.277791+08:00"
+    },
+    {
+      "pattern_id": "4a11dbbed05f",
+      "tool": "Bash",
+      "summary_sample": "date -u +%Y-%m-%dT%H:%M:%SZ",
+      "count": 783,
+      "confidence": 1.0,
+      "success_count": 783,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:30:51.981759+08:00",
+      "last_seen": "2026-03-23T07:00:33.043269+08:00"
+    },
+    {
+      "pattern_id": "4f173611dab2",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\ntfy-notify\\SKILL.md",
+      "count": 669,
+      "confidence": 1.0,
+      "success_count": 669,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:15.502911+08:00",
+      "last_seen": "2026-03-23T07:02:53.920690+08:00"
+    },
+    {
+      "pattern_id": "1528d64c9087",
+      "tool": "Bash",
+      "summary_sample": "curl -s --max-time 5 http://localhost:3001/api/health 2>/dev/null",
+      "count": 619,
+      "confidence": 1.0,
+      "success_count": 619,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:11:12.363970+08:00",
+      "last_seen": "2026-03-23T06:30:17.252691+08:00"
+    },
+    {
+      "pattern_id": "44f9296e0182",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\knowledge-query\\SKILL.md",
+      "count": 538,
+      "confidence": 1.0,
+      "success_count": 538,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:32:45.570249+08:00",
+      "last_seen": "2026-03-23T06:02:57.903406+08:00"
+    },
+    {
+      "pattern_id": "88a5506d5edb",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\todoist\\SKILL.md",
+      "count": 537,
+      "confidence": 1.0,
+      "success_count": 537,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:15.322304+08:00",
+      "last_seen": "2026-03-23T07:02:53.650912+08:00"
+    },
+    {
+      "pattern_id": "98cd698212d2",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\results\\todoist-plan.json",
+      "count": 509,
+      "confidence": 1.0,
+      "success_count": 509,
+      "scores": {
+        "frequency": 3.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 9.0
+      },
+      "first_seen": "2026-03-04T05:08:15.617910+08:00",
+      "last_seen": "2026-03-23T07:02:54.101244+08:00"
+    },
+    {
+      "pattern_id": "f17cd5f0dfc8",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\continuity\\todoist-hourly.json",
+      "count": 460,
+      "confidence": 1.0,
+      "success_count": 460,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-18T03:42:16.933554+08:00",
+      "last_seen": "2026-03-23T07:03:36.451232+08:00"
+    },
+    {
+      "pattern_id": "25f5c6a778eb",
+      "tool": "Bash",
+      "summary_sample": "curl -s --max-time 5 http://localhost:3001/api/health",
+      "count": 398,
+      "confidence": 1.0,
+      "success_count": 398,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-04T05:30:55.143824+08:00",
+      "last_seen": "2026-03-23T07:01:06.236877+08:00"
+    },
+    {
+      "pattern_id": "71eb498d2dce",
+      "tool": "Bash",
+      "summary_sample": "pwsh -Command '\n$t = if ($env:TODOIST_API_TOKEN) { $env:TODOIST_API_TOKEN <REDAC",
+      "count": 371,
+      "confidence": 1.0,
+      "success_count": 371,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-06T17:30:47.582617+08:00",
+      "last_seen": "2026-03-23T07:00:42.452210+08:00"
+    },
+    {
+      "pattern_id": "c6f650847091",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\config\\dedup-policy.yaml",
+      "count": 356,
+      "confidence": 1.0,
+      "success_count": 356,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-04T05:32:46.000072+08:00",
+      "last_seen": "2026-03-23T05:03:38.294963+08:00"
+    },
+    {
+      "pattern_id": "035fa479c08b",
+      "tool": "Bash",
+      "summary_sample": "cd D:/Source/daily-digest-prompt && pwsh -Command '\n$t = if ($env:TODOIST_API_TO",
+      "count": 329,
+      "confidence": 1.0,
+      "success_count": 329,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-07T02:44:19.607190+08:00",
+      "last_seen": "2026-03-23T06:05:28.475494+08:00"
+    },
+    {
+      "pattern_id": "3274122e1a6f",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\context\\research-series.json",
+      "count": 303,
+      "confidence": 1.0,
+      "success_count": 303,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 3.0,
+        "total": 7.8
+      },
+      "first_seen": "2026-03-04T05:34:39.424351+08:00",
+      "last_seen": "2026-03-23T05:05:25.100112+08:00"
+    },
+    {
+      "pattern_id": "8869ac1d7587",
+      "tool": "Read",
+      "summary_sample": "D:\\Source\\daily-digest-prompt\\skills\\SKILL_INDEX.md",
+      "count": 277,
+      "confidence": 1.0,
+      "success_count": 277,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 2.0,
+        "total": 7.05
+      },
+      "first_seen": "2026-03-04T05:48:41.124129+08:00",
+      "last_seen": "2026-03-23T05:04:31.910135+08:00"
+    },
+    {
+      "pattern_id": "841f88566a9e",
+      "tool": "Bash",
+      "summary_sample": "curl -s --max-time 10 -H \"Authorization: Bearer <REDACTED> \"http://localhost:300",
+      "count": 277,
+      "confidence": 1.0,
+      "success_count": 277,
+      "scores": {
+        "frequency": 2.0,
+        "confidence": 3.0,
+        "reusability": 2.0,
+        "total": 7.05
+      },
+      "first_seen": "2026-03-04T05:48:45.821167+08:00",
+      "last_seen": "2026-03-23T07:00:28.537540+08:00"
+    }
+  ],
+  "summary": "從 200 個行為模式中識別 41 個 Skill 候選，前 20 個得分 >= 6.0"
+}

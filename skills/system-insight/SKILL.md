@@ -61,7 +61,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
    - 近 7 天新增主題分佈
 
 5. **behavior-patterns.json**（`context/behavior-patterns.json`，可選 — 尚無自動產出程式）
-   - Token 經濟學指標：avg_io_per_call（每次工具呼叫平均 I/O 字元數）
+   - Token 經濟學指標：avg_io_per_call（每次工具呼叫平均 I/O 字元數，排除研究類任務）
    - 行為模式統計：behavior_pattern_count（已識別模式數）
    - 高信心模式：high_confidence_patterns（confidence >= 0.5 可演化為 Skill 的模式數）
    - 若檔案不存在 → 對應 3 個指標設為 null，不影響整體報告健康判定
@@ -77,7 +77,7 @@ Observe(system-insight) → Orient(system-audit) → Decide(arch-evolution) → 
 | block_rate | blocked_count / total_calls（由 collect_system_data 產出，禁止手動從 JSONL 推斷） | <= 2% |
 | topic_diversity | unique topics / total research entries | >= 0.5 |
 | auto_task_fairness | stddev(task_counts) / mean(task_counts) | <= 0.5 |
-| avg_io_per_call | 所有工具呼叫 output_len 平均值 | <= 5000 chars |
+| avg_io_per_call | 所有工具呼叫 output_len 平均值（排除研究類任務，見 benchmark.yaml `exclude_task_keys`） | <= 12000 chars |
 | behavior_pattern_count | behavior-patterns.json 中模式總數（可選，null 不扣分） | >= 20（有資料時） |
 | high_confidence_patterns | confidence >= 0.5 的模式數（可選，null 不扣分） | >= 5（有資料時） |
 

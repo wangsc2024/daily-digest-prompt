@@ -4,12 +4,6 @@
   "daily_limit_warn": 1500000,
   "days": {},
   "daily": {
-    "2026-03-15": {
-      "estimated_tokens": 11251964.285714308,
-      "tool_calls": 3552,
-      "input_chars": 1593478,
-      "output_chars": 37788397
-    },
     "2026-03-16": {
       "estimated_tokens": 8140862.5714285625,
       "tool_calls": 3205,
@@ -47,26 +41,26 @@
       "output_chars": 68541860
     },
     "2026-03-22": {
-      "estimated_tokens": 8903308.285714304,
-      "tool_calls": 4142,
-      "input_chars": 2191380,
-      "output_chars": 28970199,
+      "estimated_tokens": 10854884.857142938,
+      "tool_calls": 5497,
+      "input_chars": 2714134,
+      "output_chars": 35277963,
       "phases": {
         "phase2-auto": {
-          "estimated_tokens": 1443116.8571428587,
-          "tool_calls": 545
+          "estimated_tokens": 1961960.571428574,
+          "tool_calls": 756
         },
         "phase3": {
-          "estimated_tokens": 401342.2857142858,
-          "tool_calls": 310
+          "estimated_tokens": 1101634.0000000016,
+          "tool_calls": 849
         },
         "phase1": {
-          "estimated_tokens": 465614.28571428516,
-          "tool_calls": 428
+          "estimated_tokens": 831276.5714285702,
+          "tool_calls": 829
         },
         "phase2": {
-          "estimated_tokens": 374954.28571428574,
-          "tool_calls": 127
+          "estimated_tokens": 618025.7142857143,
+          "tool_calls": 280
         }
       },
       "traces": {
@@ -178,14 +172,365 @@
         },
         "6300c0edf288": {
           "start_time": "2026-03-22T12:30:13.315081",
-          "total_tokens": 195086.28571428574,
+          "total_tokens": 245106.2857142858,
           "phase_breakdown": {
             "phase1": 15878.0,
-            "phase2-auto": 179208.28571428574
+            "phase2-auto": 187761.71428571432,
+            "phase3": 41466.57142857143
+          }
+        },
+        "330fa25bd139": {
+          "start_time": "2026-03-22T13:00:17.261835",
+          "total_tokens": 167108.2857142857,
+          "phase_breakdown": {
+            "phase1": 15795.428571428572,
+            "phase2-auto": 109693.7142857143,
+            "phase3": 41619.14285714286
+          }
+        },
+        "45cac1b36f2e": {
+          "start_time": "2026-03-22T13:30:13.593741",
+          "total_tokens": 341380.5714285713,
+          "phase_breakdown": {
+            "phase1": 16110.857142857143,
+            "phase2-auto": 295133.1428571427,
+            "phase3": 30136.571428571424
+          }
+        },
+        "cc252ba3e74b": {
+          "start_time": "2026-03-22T14:00:15.433128",
+          "total_tokens": 170875.99999999997,
+          "phase_breakdown": {
+            "phase1": 15586.0,
+            "phase2-auto": 105463.42857142857,
+            "phase3": 49826.571428571435
+          }
+        },
+        "dc436bc8fc8b": {
+          "start_time": "2026-03-22T14:30:14.475517",
+          "total_tokens": 45149.14285714286,
+          "phase_breakdown": {
+            "phase1": 15994.571428571428,
+            "phase3": 29154.57142857143
+          }
+        },
+        "00a5bbfb2d59": {
+          "start_time": "2026-03-22T15:00:16.374632",
+          "total_tokens": 51315.142857142855,
+          "phase_breakdown": {
+            "phase1": 15950.571428571428,
+            "phase3": 35364.57142857142
+          }
+        },
+        "dfb8f06fc223": {
+          "start_time": "2026-03-22T15:30:13.523853",
+          "total_tokens": 44381.999999999985,
+          "phase_breakdown": {
+            "phase1": 15330.0,
+            "phase3": 29052.0
+          }
+        },
+        "dc65621229e0": {
+          "start_time": "2026-03-22T16:00:13.767489",
+          "total_tokens": 44606.285714285696,
+          "phase_breakdown": {
+            "phase1": 15687.999999999998,
+            "phase3": 28918.28571428572
+          }
+        },
+        "d4f39bc0c90b": {
+          "start_time": "2026-03-22T16:30:17.083118",
+          "total_tokens": 51881.142857142855,
+          "phase_breakdown": {
+            "phase1": 15865.142857142857,
+            "phase3": 36016.00000000001
+          }
+        },
+        "107d728d81e4": {
+          "start_time": "2026-03-22T17:00:16.310589",
+          "total_tokens": 45499.42857142856,
+          "phase_breakdown": {
+            "phase1": 15837.714285714286,
+            "phase3": 29661.714285714286
+          }
+        },
+        "9806db806bdf": {
+          "start_time": "2026-03-22T17:30:13.307740",
+          "total_tokens": 43891.14285714286,
+          "phase_breakdown": {
+            "phase1": 15471.714285714284,
+            "phase3": 28419.42857142857
+          }
+        },
+        "ca5b9b890d13": {
+          "start_time": "2026-03-22T18:00:13.598513",
+          "total_tokens": 118948.85714285714,
+          "phase_breakdown": {
+            "phase1": 18721.428571428572,
+            "phase2": 76915.42857142855,
+            "phase3": 23312.0
+          }
+        },
+        "04adb20aa186": {
+          "start_time": "2026-03-22T18:30:14.081826",
+          "total_tokens": 45065.71428571429,
+          "phase_breakdown": {
+            "phase1": 15750.857142857143,
+            "phase3": 29314.85714285714
+          }
+        },
+        "0d4eb30f632c": {
+          "start_time": "2026-03-22T19:00:16.601383",
+          "total_tokens": 44677.71428571429,
+          "phase_breakdown": {
+            "phase1": 15764.571428571428,
+            "phase3": 28913.142857142862
+          }
+        },
+        "999175833539": {
+          "start_time": "2026-03-22T19:30:14.532609",
+          "total_tokens": 44974.2857142857,
+          "phase_breakdown": {
+            "phase1": 15751.142857142857,
+            "phase3": 29223.14285714286
+          }
+        },
+        "e100a2c5344c": {
+          "start_time": "2026-03-22T20:00:15.087164",
+          "total_tokens": 44512.85714285714,
+          "phase_breakdown": {
+            "phase1": 15300.285714285716,
+            "phase3": 29212.571428571424
+          }
+        },
+        "19ada5d28c2d": {
+          "start_time": "2026-03-22T20:30:13.179753",
+          "total_tokens": 157273.14285714278,
+          "phase_breakdown": {
+            "phase1": 18374.285714285717,
+            "phase2": 107436.28571428571,
+            "phase3": 31462.571428571428
+          }
+        },
+        "7bd285401573": {
+          "start_time": "2026-03-22T21:00:15.082472",
+          "total_tokens": 43756.28571428571,
+          "phase_breakdown": {
+            "phase1": 15560.857142857143,
+            "phase3": 28195.428571428572
+          }
+        },
+        "12573d3ccc9f": {
+          "start_time": "2026-03-22T21:15:13.291380",
+          "total_tokens": 90653.4285714286,
+          "phase_breakdown": {
+            "phase1": 31933.714285714294,
+            "phase2": 58719.71428571429
+          }
+        },
+        "efa544f8e5bf": {
+          "start_time": "2026-03-22T21:30:13.483918",
+          "total_tokens": 43772.28571428573,
+          "phase_breakdown": {
+            "phase1": 15309.428571428572,
+            "phase3": 28462.85714285714
+          }
+        },
+        "0c087c1f3fc4": {
+          "start_time": "2026-03-22T22:00:14.204112",
+          "total_tokens": 50694.28571428572,
+          "phase_breakdown": {
+            "phase1": 15277.714285714284,
+            "phase3": 35416.57142857143
+          }
+        },
+        "2a2ba7ce6644": {
+          "start_time": "2026-03-22T22:30:13.315859",
+          "total_tokens": 43286.57142857141,
+          "phase_breakdown": {
+            "phase1": 15043.142857142857,
+            "phase3": 28243.42857142858
+          }
+        },
+        "92d8835b0d02": {
+          "start_time": "2026-03-22T23:00:14.603865",
+          "total_tokens": 44144.57142857143,
+          "phase_breakdown": {
+            "phase1": 15244.857142857141,
+            "phase3": 28899.71428571429
+          }
+        }
+      }
+    },
+    "2026-03-23": {
+      "estimated_tokens": 3779879.42857144,
+      "tool_calls": 2008,
+      "input_chars": 1068795,
+      "output_chars": 12160783,
+      "phases": {
+        "phase1": {
+          "estimated_tokens": 820558.8571428575,
+          "tool_calls": 654
+        },
+        "phase2": {
+          "estimated_tokens": 477996.8571428571,
+          "tool_calls": 233
+        },
+        "phase3": {
+          "estimated_tokens": 590679.9999999997,
+          "tool_calls": 438
+        },
+        "phase2-auto": {
+          "estimated_tokens": 648895.7142857141,
+          "tool_calls": 213
+        }
+      },
+      "traces": {
+        "5696c28361ac": {
+          "start_time": "2026-03-23T00:40:14.357785",
+          "total_tokens": 576768.8571428577,
+          "phase_breakdown": {
+            "phase1": 524760.0000000003,
+            "phase2": 52008.85714285715
+          }
+        },
+        "8bad053c4499": {
+          "start_time": "2026-03-23T01:00:14.540060",
+          "total_tokens": 158068.28571428565,
+          "phase_breakdown": {
+            "phase1": 19260.571428571428,
+            "phase2": 107361.14285714287,
+            "phase3": 31446.571428571428
+          }
+        },
+        "d94bf55f6d4e": {
+          "start_time": "2026-03-23T01:30:15.490536",
+          "total_tokens": 325706.85714285733,
+          "phase_breakdown": {
+            "phase1": 17285.14285714286,
+            "phase2-auto": 266026.28571428586,
+            "phase3": 42395.42857142857
+          }
+        },
+        "cfa7d181553a": {
+          "start_time": "2026-03-23T02:00:14.371498",
+          "total_tokens": 189343.99999999994,
+          "phase_breakdown": {
+            "phase1": 19434.0,
+            "phase2": 126434.0,
+            "phase3": 43476.0
+          }
+        },
+        "c7d9ba348ded": {
+          "start_time": "2026-03-23T02:30:15.199686",
+          "total_tokens": 194167.99999999997,
+          "phase_breakdown": {
+            "phase1": 17259.714285714286,
+            "phase2-auto": 127578.85714285712,
+            "phase3": 49329.42857142859
+          }
+        },
+        "8375ead9c804": {
+          "start_time": "2026-03-23T03:00:14.453343",
+          "total_tokens": 185067.71428571435,
+          "phase_breakdown": {
+            "phase1": 16497.428571428572,
+            "phase2-auto": 124790.57142857138,
+            "phase3": 43779.71428571429
+          }
+        },
+        "e68ffb7e8463": {
+          "start_time": "2026-03-23T03:30:15.103177",
+          "total_tokens": 47312.0,
+          "phase_breakdown": {
+            "phase1": 17147.428571428572,
+            "phase3": 30164.57142857143
+          }
+        },
+        "2d97e6ac2c65": {
+          "start_time": "2026-03-23T04:00:16.973714",
+          "total_tokens": 238944.00000000006,
+          "phase_breakdown": {
+            "phase1": 24293.428571428572,
+            "phase2": 183360.85714285716,
+            "phase3": 31289.71428571429
+          }
+        },
+        "3d24dba0c268": {
+          "start_time": "2026-03-23T04:30:16.277120",
+          "total_tokens": 59655.71428571429,
+          "phase_breakdown": {
+            "phase1": 17261.714285714286,
+            "phase3": 42394.0
+          }
+        },
+        "908002c1276e": {
+          "start_time": "2026-03-23T05:00:18.501208",
+          "total_tokens": 190991.42857142858,
+          "phase_breakdown": {
+            "phase1": 17098.57142857143,
+            "phase2-auto": 130499.99999999996,
+            "phase3": 43392.85714285715
+          }
+        },
+        "8388653019e4": {
+          "start_time": "2026-03-23T05:30:17.809373",
+          "total_tokens": 48704.28571428572,
+          "phase_breakdown": {
+            "phase1": 17177.714285714286,
+            "phase3": 31526.571428571428
+          }
+        },
+        "1d7e95d31068": {
+          "start_time": "2026-03-23T06:00:15.419271",
+          "total_tokens": 59215.14285714285,
+          "phase_breakdown": {
+            "phase1": 18211.714285714286,
+            "phase2": 8832.000000000004,
+            "phase3": 32171.42857142857
+          }
+        },
+        "daf4b5aad4a9": {
+          "start_time": "2026-03-23T06:30:15.858875",
+          "total_tokens": 48444.00000000001,
+          "phase_breakdown": {
+            "phase1": 17066.285714285717,
+            "phase3": 31377.71428571429
+          }
+        },
+        "b1dec854e9dd": {
+          "start_time": "2026-03-23T07:00:17.125876",
+          "total_tokens": 77454.85714285714,
+          "phase_breakdown": {
+            "phase1": 24573.14285714286,
+            "phase3": 52881.71428571428
+          }
+        },
+        "20ce30442a0c": {
+          "start_time": "2026-03-23T07:30:15.160273",
+          "total_tokens": 56913.42857142856,
+          "phase_breakdown": {
+            "phase1": 18121.999999999996,
+            "phase3": 38791.428571428565
+          }
+        },
+        "a25eb5a6b5af": {
+          "start_time": "2026-03-23T08:00:15.658711",
+          "total_tokens": 64419.714285714304,
+          "phase_breakdown": {
+            "phase1": 18156.85714285714,
+            "phase3": 46262.85714285716
+          }
+        },
+        "fe34a6804c75": {
+          "start_time": "2026-03-23T08:30:16.541919",
+          "total_tokens": 16953.142857142855,
+          "phase_breakdown": {
+            "phase1": 16953.142857142855
           }
         }
       }
     }
   },
-  "updated": "2026-03-22T12:46:46.288768"
+  "updated": "2026-03-23T08:30:38.959945"
 }

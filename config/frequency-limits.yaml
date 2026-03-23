@@ -74,6 +74,8 @@ initial_schema: |
     "ntfy_review_count": 0,
     "zen_koan_count": 0,
     "phantom_butterfly_optimize_count": 0,
+    "new_asset_onboard_count": 0,
+    "kb_system_optimize_count": 0,
     "closed_task_ids": [],
     "warned_labels": [],
     "next_execution_order": 1
@@ -179,6 +181,7 @@ task_rules:
     - fahua            # 法華經研究：確保長時研究成果持久化至 results/，任務檔 temp/cursor-cli-task-fahua.md
     - podcast_create   # Podcast 生成：創意對話撰寫 + TTS/concat + R2 上傳，任務檔 temp/cursor-cli-task-podcast_create.md
     - future_plan_optimize  # 未來計畫待辦優化：以 KB 完善 未來計畫/待辦事項.md，MD 格式輸出
+    - kb_system_optimize    # KB 洞察驅動系統優化：查詢近 2 天 KB 洞察，規劃並落實系統優化方案，任務檔 temp/cursor-cli-task-kb_system_optimize.md
 
   codex_exec:           # gpt-5.4，內建 WebSearch
     - ai_sysdev
@@ -288,9 +291,27 @@ phase_overrides:
 #   template_version: 模板版本號（配合模板內部版本控制）
 #   template_params:  傳入模板的參數（僅參數化模板使用）
 #   history_type:     歷史記錄分類 key
-#   execution_order:  round-robin 輪轉順序（1-35，非連續；active: 1-26,28,29；disabled: 34,35）
+#   execution_order:  round-robin 輪轉順序（1-35，非連續；active: 1-26,28-32；disabled: 34,35）
 #   allowed_days:     允許執行的星期幾清單（Python weekday：Mon=0,Tue=1,Wed=2,Thu=3,Fri=4,Sat=5,Sun=6）
 #                     未設定 = 每日執行；設定後 Phase 0c + Phase 1 均會跳過非允許日
+#   allowed_hours:    允許執行的小時範圍 [start_hour, end_hour]（含端點，24h制）
+#                     未設定 = 任何小時均可執行
+#                     飢餓偵測：進入時段後 2 小時仍未執行才計入飢餓數，避免清晨一開始即誤判
+#
+#   ★ 新增任務時的時段選擇指引（agent 排程 01:00-23:00，每 30 分鐘一次）：
+#     - [1, 23]  系統維護類（self_heal）：最早啟動，修復隔夜問題
+#     - [2, 23]  日誌審查、隔夜日誌類：日誌已累積
+#     - [1-4, 23] 佛學/靜態研究類：無時效性，深夜靜態處理
+#     - [5-6, 23] AI/技術研究類：需 WebSearch，晨間批次
+#     - [7, 10]  晨間推播審查類（ntfy_review）：限上午
+#     - [7, 9]   晨間靈感推播類（zen_koan）：限上午＋有 allowed_days
+#     - [8-9, 23] 分析/稽核類：早上
+#     - [10-12, 23] 洞察/評估/鑄造類：需前段研究完成
+#     - [15-17, 23] Podcast 製作類：下午/傍晚，留足時段
+#     - [19, 23] 遊戲/創意類：晚間
+#     - [21, 23] Git 推送類：一日結束後統一推送
+#     通用原則：每個整點時段至多引入 2 個新任務（配合 2h 寬限期防飢餓誤判）
+#
 #   skills:           此任務依賴的 Skills 清單
 #
 # 群組摘要（12 群組，28 任務，合計依 daily_limit 加總）：
@@ -318,6 +339,7 @@ tasks:
     template_version: 1
     history_type: "shurangama"
     execution_order: 1
+    allowed_hours: [1, 23]   # 凌晨起佛學讀誦
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -336,6 +358,7 @@ tasks:
       study_path: "概論 → 五時判教 → 八教分類 → 化法四教（藏通別圓）→ 化儀四教 → 觀法修持 → 判教實例"
     history_type: "jiaoguangzong"
     execution_order: 2
+    allowed_hours: [2, 23]   # 凌晨 2 時起佛學研讀（2次/日）
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -354,6 +377,7 @@ tasks:
       study_path: "經典概論 → 方便品（開權顯實）→ 譬喻品（三車火宅）→ 信解品 → 藥草喻品 → 化城喻品 → 壽量品 → 觀世音菩薩普門品 → 一佛乘義理"
     history_type: "fahua"
     execution_order: 3
+    allowed_hours: [3, 23]   # 凌晨 3 時起佛學研讀（3次/日需最寬時段）
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -372,6 +396,7 @@ tasks:
       study_path: "淨土三經概論 → 阿彌陀經要義 → 觀無量壽經十六觀 → 無量壽經四十八願 → 善導大師五正行 → 念佛法門修持 → 淨土十疑論 → 臨終正念"
     history_type: "jingtu"
     execution_order: 4
+    allowed_hours: [4, 23]   # 凌晨 4 時起佛學研讀（2次/日）
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -385,6 +410,7 @@ tasks:
     template_version: 1
     history_type: "tech_research"
     execution_order: 5
+    allowed_hours: [5, 23]   # 凌晨 5 時起技術研究（Todoist 任務早已載入）
     timeout_seconds: 2600
     result_suffix: "json"
     skills: [knowledge-query, web-research, todoist]
@@ -398,6 +424,7 @@ tasks:
     template_version: 1
     history_type: "ai_deep_research"
     execution_order: 6
+    allowed_hours: [5, 23]   # 凌晨 5 時起 AI 深度研究（3次/日需最寬時段）
     timeout_seconds: 720
     result_suffix: "json"
     skills: [knowledge-query, hackernews-ai-digest, web-research, kb-research-strategist, groq]
@@ -429,6 +456,7 @@ tasks:
     template_version: 1
     history_type: "ai_github_research"
     execution_order: 8
+    allowed_hours: [6, 23]   # 凌晨 6 時起 GitHub 研究
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, web-research, github-scout, kb-research-strategist]
@@ -442,6 +470,7 @@ tasks:
     template_version: 2
     history_type: "ai_smart_city"
     execution_order: 9
+    allowed_hours: [8, 23]   # 早上 AI 領域研究
     timeout_seconds: 600
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -475,6 +504,7 @@ tasks:
     template_version: 2
     history_type: "ai_sysdev"
     execution_order: 10
+    allowed_hours: [9, 23]   # 上午 AI 系統開發研究
     timeout_seconds: 600
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist]
@@ -504,12 +534,13 @@ tasks:
   # --- 系統優化群組 ---
   skill_audit:
     name: "Skill 審查優化"
-    daily_limit: 1  # 停用：使用 claude_sonnet45
+    daily_limit: 2
     counter_field: "skill_audit_count"
     template: "templates/auto-tasks/skill-audit.md"
     template_version: 1
     history_type: "skill_audit"
     execution_order: 11
+    allowed_hours: [8, 23]   # 早上起 Skill 審查
     timeout_seconds: 720
     result_suffix: "json"
     skills: [knowledge-query, skill-scanner, system-insight]
@@ -524,6 +555,7 @@ tasks:
     template_version: 1
     history_type: "log_audit"
     execution_order: 12
+    allowed_hours: [2, 23]   # 凌晨 2 時審查隔夜日誌（2次/日）
     timeout_seconds: 720
     result_suffix: "json"
     skills: [scheduler-state, knowledge-query, system-insight]
@@ -536,6 +568,7 @@ tasks:
     template_version: 1
     history_type: "git_push"
     execution_order: 23  # 原 13，讓位給 insight_briefing（需在 arch_evolution 之前完成洞察產出）
+    allowed_hours: [21, 23]  # 一天工作結束後統一推送
     timeout_seconds: 600
     result_suffix: "json"
     skills: [knowledge-query, git-smart-commit]
@@ -578,6 +611,7 @@ tasks:
     template_version: 1
     history_type: "system_insight"
     execution_order: 16
+    allowed_hours: [3, 23]   # 凌晨 3 時起系統分析（2次/日）
     timeout_seconds: 720
     result_suffix: "json"
     skills: [system-insight, scheduler-state, knowledge-query]
@@ -585,13 +619,14 @@ tasks:
 
   arch_evolution:
     name: "架構演進決策"
-    daily_limit: 2  
+    daily_limit: 3
     counter_field: "arch_evolution_count"
     template: "templates/auto-tasks/arch-evolution.md"  # 佔位符，實際邏輯在 team prompt
     prompt_file: "prompts/team/todoist-auto-arch_evolution.md"
     template_version: 1
     history_type: "arch_evolution"
     execution_order: 17
+    allowed_hours: [4, 23]   # 凌晨 4 時起架構決策（2次/日，system_insight 凌晨 3 時已跑）
     timeout_seconds: 900
     result_suffix: "json"
     skills: [system-insight, ntfy-notify]
@@ -607,6 +642,7 @@ tasks:
     template_version: 1
     history_type: "self_heal"
     execution_order: 18
+    allowed_hours: [1, 23]   # 凌晨 1 時起系統自癒（最早啟動修復隔夜問題）
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [system-insight, scheduler-state, knowledge-query]
@@ -636,6 +672,7 @@ tasks:
     template_version: 1
     history_type: "ai_workflow_github"
     execution_order: 20
+    allowed_hours: [6, 23]   # 凌晨 6 時起 AI 工作流研究
     timeout_seconds: 720
     result_suffix: "json"
     skills: [knowledge-query, kb-research-strategist, web-research, github-scout]
@@ -650,6 +687,7 @@ tasks:
     template_version: 2
     history_type: "github_scout"
     execution_order: 15  # 原 23，前移至 arch_evolution(17) 之前（原 14/15 由 disabled 任務讓出），當輪即可被決策並落實
+    allowed_hours: [9, 23]   # 上午起 GitHub 靈感蒐集（2次/日）
     timeout_seconds: 1800  # WebSearch×2 + WebFetch + 分析 + 落實方案研擬 + KB 匯入 + 審查優化 + 落實
     result_suffix: "json"
     skills: [github-scout, knowledge-query, web-research, kb-research-strategist]
@@ -664,6 +702,7 @@ tasks:
     template_version: 2
     history_type: "podcast_create"
     execution_order: 21
+    allowed_hours: [17, 23]  # 傍晚起 Podcast 製作（2次/日）
     timeout_seconds: 4000
     result_suffix: "json"
     skills: [knowledge-query, ntfy-notify, deep-research]
@@ -677,6 +716,7 @@ tasks:
     template_version: 2
     history_type: "podcast_jiaoguangzong"
     execution_order: 22
+    allowed_hours: [15, 23]  # 下午 3 時起 Podcast 製作（3次/日需更早開始）
     timeout_seconds: 4000
     result_suffix: "json"
     skills: [knowledge-query, ntfy-notify, deep-research]
@@ -691,6 +731,7 @@ tasks:
     template_version: 1
     history_type: "skill_forge"
     execution_order: 24
+    allowed_hours: [11, 23]  # 午前起 Skill 鑄造（2次/日）
     timeout_seconds: 900
     result_suffix: "json"
     skills: [kb-research-strategist, skill-scanner, knowledge-query, ntfy-notify]
@@ -705,6 +746,7 @@ tasks:
     template_version: 1
     history_type: "ntfy_review"
     execution_order: 25
+    allowed_hours: [7, 10]   # 早晨審查隔夜通知記錄（僅限上午）
     timeout_seconds: 3000
     result_suffix: "json"
     skills: [ntfy-notify, system-insight, self-heal, knowledge-query]
@@ -719,6 +761,7 @@ tasks:
     template_version: 1
     history_type: "future_plan_optimize"
     execution_order: 26
+    allowed_hours: [12, 23]  # 午後優化未來計畫
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, writing-plans, markdown-editor]
@@ -732,6 +775,7 @@ tasks:
     template_version: 1
     history_type: "kb_insight_evaluation"
     execution_order: 14  # 原 27，前移至 arch_evolution(17) 之前，當輪即可被決策並落實
+    allowed_hours: [10, 23]  # 上午起知識庫洞察評估
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [knowledge-query, system-insight, arch-evolution]
@@ -745,6 +789,7 @@ tasks:
     template_version: 1
     history_type: "workflow_forge"
     execution_order: 28
+    allowed_hours: [11, 23]  # 午前起工作流鑄造
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, system-insight, ntfy-notify]
@@ -758,6 +803,7 @@ tasks:
     template_version: 1
     history_type: "insight_briefing"
     execution_order: 13  # 原 29，提前到 arch_evolution(17) 之前，洞察當輪即可被決策消費
+    allowed_hours: [10, 23]  # 上午起深度洞察簡報
     timeout_seconds: 900
     result_suffix: "json"
     skills: [knowledge-query, web-research, kb-research-strategist, markdown-editor, ntfy-notify]
@@ -773,11 +819,40 @@ tasks:
     template_version: 1
     history_type: "zen_koan"
     execution_order: 29
+    allowed_hours: [7, 9]    # 晨間禪宗公案推播
     timeout_seconds: 300
     result_suffix: "json"
     allowed_days: [0, 3, 6]   # Mon=0, Thu=3, Sun=6（Python weekday）
     skills: [ntfy-notify]
     description: "每週一/四/日選出一則禪宗公案（碧巖錄/無門關/景德傳燈錄），附白話釋義與禪門一語，透過 ntfy 推播給使用者"
+
+  new_asset_onboard:
+    name: "近三天新增資產系統整合"
+    daily_limit: 2
+    counter_field: "new_asset_onboard_count"
+    template: "templates/auto-tasks/new-asset-onboard.md"
+    template_version: 1
+    history_type: "new_asset_onboard"
+    execution_order: 31
+    allowed_hours: [6, 23]   # 早上起即可偵測昨夜新增資產（依時段指引：系統整合類 06:00）
+    timeout_seconds: 900
+    result_suffix: "json"
+    skills: [knowledge-query, skill-scanner, system-insight]
+    description: "偵測近 3 天新增的 Skill/自動任務模板/工具腳本，自動整合進系統（登錄 SKILL_INDEX、頻率配置、文件說明），確保每項新資產實際發揮功效"
+
+  kb_system_optimize:
+    name: "KB 洞察驅動系統優化落實"
+    daily_limit: 1
+    counter_field: "kb_system_optimize_count"
+    template: "templates/auto-tasks/kb-system-optimize.md"
+    template_version: 1
+    history_type: "kb_system_optimize"
+    execution_order: 32
+    allowed_hours: [7, 23]   # 依時段指引：系統優化類 07:00（需前段研究/審查已完成）
+    timeout_seconds: 2400
+    result_suffix: "json"
+    skills: [knowledge-query, system-insight, self-heal]
+    description: "以 Cursor CLI 查詢近 2 天 KB 洞察（系統優化建議/審查報告/深度研究報告），優先排序可行方案，git 備份後逐步落實，通過 YAML/JSON 語法驗證 + 測試套件後記錄報告並 ntfy 通知"
 
   phantom_butterfly_optimize:
     name: "幻碟星域遊戲優化與 GitHub 同步"
@@ -788,6 +863,7 @@ tasks:
     template_version: 1
     history_type: "phantom_butterfly_optimize"
     execution_order: 30
+    allowed_hours: [19, 23]  # 晚間遊戲創作與 GitHub 同步
     timeout_seconds: 1200
     result_suffix: "json"
     skills: [game-design, knowledge-query, git-smart-commit]
@@ -799,7 +875,9 @@ tasks:
 # 各後端每日上限摘要（以 daily_limit 為準）：
 # 佛學（shurangama:claude_sonnet45, jiaoguangzong:claude_sonnet45, fahua:cursor_cli, jingtu:codex_exec）= 8
 # AI/技術（codex_exec）：tech(2)+ai_deep(3)+unsloth(0)+ai_github(1)+ai_smart_city(1)+ai_sysdev(1)+ai_workflow(1) = 9
-# 系統（claude_sonnet45）：skill_audit(1)+log_audit(2)+git_push(1)+system_insight(2)+arch_evolution(2)+self_heal(2) = 10
+# 系統（claude_sonnet45）：skill_audit(2)+log_audit(2)+git_push(1)+system_insight(2)+arch_evolution(3)+self_heal(2) = 12
+# 資產整合：new_asset_onboard(2) = 2
+# KB 系統優化（cursor_cli）：kb_system_optimize(1) = 1
 # 創意/品質（codex_standard）：creative_game(0)+qa(0)+github_scout(1) = 1
 # Podcast（cursor_cli/claude_sonnet45）：podcast_create(2)+podcast_jiaoguangzong(3) = 5
 # Chatroom（claude_sonnet45）：chatroom_optimize(0) = 0

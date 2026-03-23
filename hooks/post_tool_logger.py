@@ -46,6 +46,89 @@ except ImportError:
 # Import shared API source patterns and sanitization
 from hook_utils import sanitize_sensitive_data, send_ntfy_alert
 
+# ── Proposal 004: OpenTelemetry 雙寫支援 ───────────────────────────────────
+# 全部包在 try-except，任何失敗均靜默降級，不影響主流程
+try:
+    import random as _random
+    import yaml as _yaml
+    from pathlib import Path as _Path
+
+    def _load_otel_config() -> dict:
+        """載入 config/otel-config.yaml，失敗回傳 {'enabled': False}。"""
+        try:
+            from hook_utils import get_project_root
+            cfg_path = os.path.join(get_project_root(), "config", "otel-config.yaml")
+            with open(cfg_path, encoding="utf-8") as _f:
+                return _yaml.safe_load(_f) or {}
+        except Exception:
+            return {}
+
+    _OTEL_CFG = _load_otel_config()
+    _OTEL_ENABLED = bool(_OTEL_CFG.get("enabled", False))
+
+    if _OTEL_ENABLED:
+        from opentelemetry import trace as _ot_trace
+        from opentelemetry.sdk.trace import TracerProvider as _TracerProvider
+        from opentelemetry.sdk.trace.export import SimpleSpanProcessor as _SimpleSpanProcessor
+        from opentelemetry.sdk.resources import Resource as _Resource
+
+        class _FileSpanExporter:
+            """Simple append-only JSONL file exporter（無需 OTEL Collector）。"""
+            def __init__(self, file_path: str):
+                self._path = _Path(file_path)
+
+            def export(self, spans):
+                try:
+                    self._path.parent.mkdir(parents=True, exist_ok=True)
+                    # 輪轉：超過 max_bytes 時重命名
+                    rotation = _OTEL_CFG.get("exporter", {}).get("rotation", {})
+                    max_bytes = rotation.get("max_bytes", 10 * 1024 * 1024)
+                    if self._path.exists() and self._path.stat().st_size > max_bytes:
+                        rotated = _Path(str(self._path) + ".rotated")
+                        if rotated.exists():
+                            rotated.unlink()
+                        self._path.rename(rotated)
+                    with open(self._path, "a", encoding="utf-8") as _f:
+                        for span in spans:
+                            _f.write(json.dumps({
+                                "trace_id": format(span.context.trace_id, "032x"),
+                                "span_id": format(span.context.span_id, "016x"),
+                                "name": span.name,
+                                "start_time": span.start_time,
+                                "end_time": span.end_time,
+                                "attributes": dict(span.attributes or {}),
+                                "status": span.status.status_code.name,
+                            }, ensure_ascii=False) + "\n")
+                    from opentelemetry.sdk.trace.export import SpanExportResult
+                    return SpanExportResult.SUCCESS
+                except Exception:
+                    from opentelemetry.sdk.trace.export import SpanExportResult
+                    return SpanExportResult.FAILURE
+
+            def shutdown(self):
+                pass
+
+            def force_flush(self, timeout_millis=30000):
+                return True
+
+        _resource_attrs = _OTEL_CFG.get("resource", {})
+        _provider = _TracerProvider(resource=_Resource(attributes=_resource_attrs))
+        _exporter_cfg = _OTEL_CFG.get("exporter", {})
+        _file_path = _exporter_cfg.get("file_path", "logs/otel/traces.jsonl")
+        _provider.add_span_processor(_SimpleSpanProcessor(_FileSpanExporter(_file_path)))
+        _ot_trace.set_tracer_provider(_provider)
+        _OTEL_TRACER = _ot_trace.get_tracer("post_tool_logger")
+    else:
+        _OTEL_TRACER = None
+
+    _OTEL_SAMPLING_RATE = float(_OTEL_CFG.get("sampling", {}).get("rate", 0.1))
+
+except Exception:
+    _OTEL_ENABLED = False
+    _OTEL_TRACER = None
+    _OTEL_SAMPLING_RATE = 0.1
+# ── end Proposal 004 ────────────────────────────────────────────────────────
+
 # Error keywords in tool output
 ERROR_KEYWORDS = [
     "error",
@@ -710,6 +793,25 @@ def main():
             )
         except Exception:
             pass  # Silent fail — behavior tracking is optional
+
+    # Proposal 004: OTEL span 記錄（雙寫，10% 採樣，靜默失敗）
+    if _OTEL_ENABLED and _OTEL_TRACER and _random.random() < _OTEL_SAMPLING_RATE:
+        try:
+            with _OTEL_TRACER.start_as_current_span(
+                f"tool.{tool_name.lower()}",
+                attributes={
+                    "tool.name": tool_name,
+                    "tool.summary": summary[:200],
+                    "tool.has_error": has_error,
+                    "tool.tags": ",".join(tags),
+                    "agent.phase": os.environ.get("AGENT_PHASE", ""),
+                    "agent.name": os.environ.get("AGENT_NAME", ""),
+                    "trace.id": trace_id,
+                }
+            ):
+                pass  # span 在 context manager 結束時自動 export
+        except Exception:
+            pass  # 靜默失敗，不影響主流程
 
     # ADR-036: Context Compression 閾值追蹤（dynamic import，silent fail）
     try:

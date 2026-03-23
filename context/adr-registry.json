@@ -1,19 +1,18 @@
 {
   "version": 2,
-  "updated_at": "2026-03-22T07:35:00+08:00",
+  "updated_at": "2026-03-23T07:04:32.304536+08:00",
   "summary": {
-    "total": 36,
-    "proposed": 9,
-    "accepted": 25,
+    "total": 41,
+    "proposed": 0,
+    "accepted": 39,
     "deferred": 1,
     "wontfix": 1,
-    "rejected": 0,
-    "superseded": 0,
     "implementation_breakdown": {
-      "done": 30,
+      "done": 40,
       "partial": 0,
-      "pending": 3,
-      "immediate_fix": 0
+      "pending": 0,
+      "immediate_fix": 0,
+      "declined": 1
     }
   },
   "records": [
@@ -1098,21 +1097,33 @@
     {
       "id": "ADR-20260322-035",
       "title": "實時預算監控與 per-trace 成本歸因",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-22",
-      "decided_at": null,
+      "decided_at": "2026-03-23T06:57:55.515801+08:00",
       "source": "improvement-backlog",
       "source_pattern": "實時預算監控與 per-trace 成本歸因",
       "priority": "P1",
       "effort": "medium",
       "context": "來源：Agent Context Window 治理研究（洞見 3）。建議實作 per-phase token budget 監控，在每個 Phase 結束時累計 token 用量，超過 80% warning、100% 暫停執行並發送 ntfy 告警。在 results/*.json 新增 token_usage 欄位。",
-      "decision": "",
+      "decision": "Accepted：tools/budget_guard.py 已實作 per-phase token budget 監控（80%警告/100%暫停），config/budget.yaml 定義預算門檻，post_tool_logger.py 整合 context-usage 追蹤。state/context-usage.json 持久化 Session token 用量。",
       "consequences": {
-        "positive": ["per-phase token 用量可量化", "超預算時自動暫停避免浪費", "results 含成本歸因欄位"],
-        "negative": ["需修改 hooks/post_tool_logger.py（安全邊界）", "token 計數精度受限於 API 回傳"]
+        "positive": [
+          "per-phase token 用量可量化",
+          "超預算時自動暫停避免浪費",
+          "results 含成本歸因欄位"
+        ],
+        "negative": [
+          "需修改 hooks/post_tool_logger.py（安全邊界）",
+          "token 計數精度受限於 API 回傳"
+        ]
       },
-      "related_files": ["tools/budget_guard.py", "config/budget.yaml", "hooks/post_tool_logger.py", "results/"],
+      "related_files": [
+        "tools/budget_guard.py",
+        "config/budget.yaml",
+        "hooks/post_tool_logger.py",
+        "results/"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -1121,21 +1132,32 @@
     {
       "id": "ADR-20260322-036",
       "title": "Context Compression 閾值觸發機制",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-22",
-      "decided_at": null,
+      "decided_at": "2026-03-23T06:57:55.515801+08:00",
       "source": "improvement-backlog",
       "source_pattern": "Context Compression 閾值觸發機制",
       "priority": "P1",
       "effort": "medium",
       "context": "來源：Agent Context Window 治理研究（洞見 4）。建議在 post_tool_logger.py 新增 context_usage_tracker，累計 Session input_tokens，使用率超過 65% 時注入強制提示。實作 BufferWindow 與 Summary 兩種壓縮策略。",
-      "decision": "",
+      "decision": "Accepted：tools/context_compressor.py 已實作 BufferWindow + Summary 兩種壓縮策略，context_usage_tracker 在 post_tool_logger.py 中追蹤 input_tokens，state/context-usage.json 持久化 Session 使用率。65% 閾值觸發壓縮提示。",
       "consequences": {
-        "positive": ["Context Window 使用率可即時監控", "65% 閾值自動觸發壓縮避免截斷", "兩種壓縮策略適應不同場景"],
-        "negative": ["需修改 hooks/post_tool_logger.py（安全邊界）", "壓縮策略可能損失關鍵上下文"]
+        "positive": [
+          "Context Window 使用率可即時監控",
+          "65% 閾值自動觸發壓縮避免截斷",
+          "兩種壓縮策略適應不同場景"
+        ],
+        "negative": [
+          "需修改 hooks/post_tool_logger.py（安全邊界）",
+          "壓縮策略可能損失關鍵上下文"
+        ]
       },
-      "related_files": ["hooks/post_tool_logger.py", "tools/context_compressor.py", "templates/shared/preamble.md"],
+      "related_files": [
+        "hooks/post_tool_logger.py",
+        "tools/context_compressor.py",
+        "templates/shared/preamble.md"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -1144,21 +1166,34 @@
     {
       "id": "ADR-20260322-037",
       "title": "高失敗時段根因分析與時段風險評估",
-      "status": "Proposed",
-      "implementation_status": "pending",
+      "status": "Accepted",
+      "implementation_status": "done",
       "created_at": "2026-03-22",
-      "decided_at": null,
+      "decided_at": "2026-03-23T06:57:55.515801+08:00",
       "source": "improvement-backlog",
       "source_pattern": "高失敗時段根因分析與時段風險評估",
       "priority": "P1",
       "effort": "medium",
       "context": "system-insight 顯示 5、7、13 時為高失敗時段。建議建立時段失敗統計、外部 SLA 盤點、風險評分模型與預防性檢查機制，在高風險時段降級執行或跳過非關鍵任務。涉及 run-todoist-agent-team.ps1 Phase 0 閘門（安全邊界）。",
-      "decision": "",
+      "decision": "Accepted：tools/time_slot_risk_scorer.py 已實作時段失敗統計、外部 SLA 盤點（config/external-sla.yaml）、RiskScore 評分模型。state/time-slot-risk.json 持久化當前時段風險評分，pre-flight-check Skill 整合高風險時段閘門。",
       "consequences": {
-        "positive": ["高風險時段可預防性降級", "risk_score 多因子可量化", "失敗率預計降低 30%+"],
-        "negative": ["需修改 run-todoist-agent-team.ps1（安全邊界）", "hooks/post_tool_logger.py 新增 system_snapshot", "風險評分模型需持續校準"]
+        "positive": [
+          "高風險時段可預防性降級",
+          "risk_score 多因子可量化",
+          "失敗率預計降低 30%+"
+        ],
+        "negative": [
+          "需修改 run-todoist-agent-team.ps1（安全邊界）",
+          "hooks/post_tool_logger.py 新增 system_snapshot",
+          "風險評分模型需持續校準"
+        ]
       },
-      "related_files": ["run-todoist-agent-team.ps1", "hooks/post_tool_logger.py", "tools/time_slot_risk_scorer.py", "config/external-sla.yaml"],
+      "related_files": [
+        "run-todoist-agent-team.ps1",
+        "hooks/post_tool_logger.py",
+        "tools/time_slot_risk_scorer.py",
+        "config/external-sla.yaml"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -1178,10 +1213,22 @@
       "context": "avg_io_per_call 達 26567（超標 5.3 倍），建議識別過度使用、使用不足、高失敗率、低效 I/O、重複 API 呼叫等 5 類異常模式，並識別低效 Skill 鏈。",
       "decision": "自動接受：建立 tools/skill_anomaly_detector.py 掃描 logs/structured/*.jsonl 統計 Skill 使用頻率、耗時與 I/O，偵測 5 類異常模式並產出 analysis/skill-usage-baseline.json 與 analysis/inefficient-skill-chains.json，操作安全且步驟明確，由 self-heal git 備份後立即執行",
       "consequences": {
-        "positive": ["識別至少 5 個異常 Skill 並產出具體優化建議", "低效 Skill 鏈可量化追蹤", "skill-health-report.json 可作為 system-audit 輸入"],
-        "negative": ["需建立 Skill 使用統計基線", "異常閾值需持續校準"]
+        "positive": [
+          "識別至少 5 個異常 Skill 並產出具體優化建議",
+          "低效 Skill 鏈可量化追蹤",
+          "skill-health-report.json 可作為 system-audit 輸入"
+        ],
+        "negative": [
+          "需建立 Skill 使用統計基線",
+          "異常閾值需持續校準"
+        ]
       },
-      "related_files": ["tools/skill_anomaly_detector.py", "analysis/skill-usage-baseline.json", "analysis/inefficient-skill-chains.json", "context/skill-health-report.json"],
+      "related_files": [
+        "tools/skill_anomaly_detector.py",
+        "analysis/skill-usage-baseline.json",
+        "analysis/inefficient-skill-chains.json",
+        "context/skill-health-report.json"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
@@ -1201,14 +1248,199 @@
       "context": "context/research-registry.json 含 152 筆研究（topic_diversity 97.4%），建議分析已飽和主題與待深化主題，建立飽和度評分模型與收穫遞減偵測。",
       "decision": "自動接受：建立 tools/research_saturation_analyzer.py 掃描 research-registry.json 進行主題聚類與飽和度評分（saturation_score = 研究次數×0.4 + (1-新穎度)×0.3 + 時間間隔×0.2 + (1-深度)×0.1），產出 analysis/research-topic-clusters.json 與 analysis/high-potential-topics.json，操作安全且步驟明確，由 self-heal git 備份後立即執行",
       "consequences": {
-        "positive": ["識別已飽和主題避免浪費研究資源", "待深化主題優先排程提升研究效率", "研究方向建議可整合至 kb-research-strategist"],
-        "negative": ["語義聚類精度受限於關鍵字比對", "飽和度閾值需持續校準"]
+        "positive": [
+          "識別已飽和主題避免浪費研究資源",
+          "待深化主題優先排程提升研究效率",
+          "研究方向建議可整合至 kb-research-strategist"
+        ],
+        "negative": [
+          "語義聚類精度受限於關鍵字比對",
+          "飽和度閾值需持續校準"
+        ]
       },
-      "related_files": ["tools/research_saturation_analyzer.py", "context/research-registry.json", "context/research-series.json", "analysis/research-topic-clusters.json", "analysis/high-potential-topics.json"],
+      "related_files": [
+        "tools/research_saturation_analyzer.py",
+        "context/research-registry.json",
+        "context/research-series.json",
+        "analysis/research-topic-clusters.json",
+        "analysis/high-potential-topics.json"
+      ],
       "fitness_functions": [],
       "tech_debt_score": 0.0,
       "auto_generated": true,
       "review_due": "2026-06-20"
+    },
+    {
+      "id": "ADR-20260323-040",
+      "title": "整合驗證至 Phase 3 assemble（品質閘門）",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-23",
+      "decided_at": "2026-03-23",
+      "source": "improvement-backlog",
+      "source_pattern": "整合驗證至 Phase 3 assemble",
+      "priority": "P1",
+      "effort": "low",
+      "context": "Agent 品質閘門研究建議在 Phase 3 assemble 步驟加入驗證，呼叫 tools/validate_results.py，驗證失敗時標記 format_failed 而非中斷流程。",
+      "decision": "自動接受：在 todoist-assemble.md 步驟 6 後新增驗證步驟，soft-fail 模式確保品質閘門不阻塞流程，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "Phase 3 輸出品質可驗證",
+          "format_failed 標記供後續分析",
+          "不阻塞正常流程"
+        ],
+        "negative": [
+          "增加 Phase 3 執行時間約 5 秒",
+          "需維護驗證規則與 schema"
+        ]
+      },
+      "related_files": [
+        "prompts/team/todoist-assemble.md",
+        "tools/validate_results.py"
+      ],
+      "auto_generated": true,
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "review_due": "2026-06-21"
+    },
+    {
+      "id": "ADR-20260323-041",
+      "title": "Agent Middleware 驗證層（自動補正 Tier 1）",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-23",
+      "decided_at": "2026-03-23",
+      "source": "improvement-backlog",
+      "source_pattern": "引入 Agent Middleware 驗證層",
+      "priority": "P2",
+      "effort": "medium",
+      "context": "參考 Microsoft Agent Framework 三層架構，將 validate_results.py 重構為 Agent middleware，在 run() 結束前自動驗證輸出 JSON，驗證失敗時自動補上可修復欄位。",
+      "decision": "自動接受：在 tools/validate_results.py 新增 middleware_validate() 與 auto_fix_tier1() 函數，操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "Agent 輸出品質自動驗證",
+          "Tier 1 缺失欄位自動補正",
+          "降低人工檢查成本"
+        ],
+        "negative": [
+          "增加 tools/validate_results.py 複雜度",
+          "需定義明確的 Tier 1 auto-fix 規則"
+        ]
+      },
+      "related_files": [
+        "tools/validate_results.py",
+        "templates/shared/preamble.md"
+      ],
+      "auto_generated": true,
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "review_due": "2026-06-21"
+    },
+    {
+      "id": "ADR-20260323-042",
+      "title": "失敗模式 Taxonomy 與根因自動分類系統",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-23",
+      "decided_at": "2026-03-23",
+      "source": "improvement-backlog",
+      "source_pattern": "失敗模式 Taxonomy 與根因自動分類系統",
+      "priority": "P0",
+      "effort": "medium",
+      "context": "建立 4 維度失敗分類體系（External Dependency / Resource Contention / Schema Mismatch / Logic Error），整合至 system-insight。來源：Microsoft AI agents 失敗模式白皮書 + AWS 彈性框架。",
+      "decision": "自動接受：建立 config/failure-taxonomy.yaml 與 tools/classify_failure.py，操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "失敗根因可自動分類",
+          "leading indicators 提供預警",
+          "failure_breakdown 指標整合至 system-insight"
+        ],
+        "negative": [
+          "需維護 taxonomy 分類規則",
+          "初期分類準確率可能不足 60%"
+        ]
+      },
+      "related_files": [
+        "config/failure-taxonomy.yaml",
+        "tools/classify_failure.py",
+        "analysis/failure-classification.json"
+      ],
+      "auto_generated": true,
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "review_due": "2026-06-21"
+    },
+    {
+      "id": "ADR-20260323-043",
+      "title": "Cache-optimizer 執行與 TTL 調優",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-23",
+      "decided_at": "2026-03-23",
+      "source": "improvement-backlog",
+      "source_pattern": "Cache-optimizer Skill 立即執行與 TTL 調優",
+      "priority": "P1",
+      "effort": "low",
+      "context": "cache_hit_ratio 僅 21.67%，遠低於 40% 門檻。執行 cache-optimizer 分析近 7 天 JSONL logs，產出端點級 TTL 調優建議，採用混合驅逐策略。",
+      "decision": "自動接受：執行快取分析並保守調整最低 2 個端點 TTL（增幅 ≤ 50%），操作安全且步驟明確，由 self-heal git 備份後立即執行",
+      "consequences": {
+        "positive": [
+          "命中率預期提升至 ≥ 27%",
+          "端點級 TTL 有數據支撐",
+          "產出可追蹤的調優報告"
+        ],
+        "negative": [
+          "TTL 增加可能導致短暫資料過期",
+          "需 3 天觀察期驗證效果"
+        ]
+      },
+      "related_files": [
+        "config/cache-policy.yaml",
+        "tools/cache_optimizer.py",
+        "results/cache-optimizer-report.json"
+      ],
+      "auto_generated": true,
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "review_due": "2026-06-21",
+      "notes": "cache-optimizer 執行完成（2026-03-23）。JSONL logs 分析 7 天 747 個 cache-read 事件：整體命中率 98.6%（todoist 100%, pingtung-news 100%, unknown 95.5%），遠超 40% 門檻。無需調整 TTL。報告：results/cache-optimizer-report.json。"
+    },
+    {
+      "id": "ADR-20260323-044",
+      "title": "Behavior Pattern → Skill 演化自動化評估流程",
+      "status": "Accepted",
+      "implementation_status": "done",
+      "created_at": "2026-03-23",
+      "decided_at": "2026-03-23",
+      "source": "improvement-backlog",
+      "source_pattern": "Behavior Pattern → Skill 演化的自動化評估流程",
+      "priority": "P2",
+      "effort": "high",
+      "context": "從 200 個 behavior patterns（162 個高信心）中識別 Skill 候選，建立 3 維度評分模型，試點 1 個新 Skill。",
+      "decision": "自動接受：建立 config/skill-candidate-scoring.yaml 與 tools/score_skill_candidates.py，fix_instructions 拆分 6 步驟含 git 備份檢查點，由 self-heal 分批執行",
+      "consequences": {
+        "positive": [
+          "自動化 Skill 候選識別",
+          "數據驅動的 Skill 演化決策",
+          "試點驗證模型可行性"
+        ],
+        "negative": [
+          "評分模型需多輪校準",
+          "effort=high 執行時間較長（~90 分鐘）",
+          "試點 Skill 可能不達預期使用次數"
+        ]
+      },
+      "related_files": [
+        "config/skill-candidate-scoring.yaml",
+        "tools/score_skill_candidates.py",
+        "context/behavior-patterns.json",
+        "analysis/skill-candidates.json"
+      ],
+      "auto_generated": true,
+      "fitness_functions": [],
+      "tech_debt_score": 0.0,
+      "review_due": "2026-06-21",
+      "notes": "Behavior Pattern 演化評估完成（2026-03-23）。建立 config/skill-candidate-scoring.yaml + tools/score_skill_candidates.py（3 維度評分，9 分制）。200 個模式中 41 個候選，但前 20 名均為 Read/Bash 原子操作（已被現有 59 個 Skills 覆蓋）。結論：無需試點新 Skill；現有 Skill 覆蓋率充足。報告：analysis/skill-candidates.json。"
     }
   ]
 }

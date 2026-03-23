@@ -1,0 +1,57 @@
+# config/evaluation-criteria.yaml
+# LLM-as-a-Judge 品質評估標準（task-quality-gate Skill 使用）
+
+version: 1
+pass_threshold: 7  # 0-10 分，低於此分數標記為 needs_review
+model: claude-haiku-4-5-20251001  # 使用 Haiku 確保低成本
+timeout_seconds: 30
+
+# 依任務類型的評估標準
+criteria_by_task_type:
+  research:
+    - 必須包含來源 URL 或參考資料
+    - 摘要長度 >= 100 字
+    - 包含 key_findings 或明確結論
+    - 資訊準確性可驗證
+
+  news_summary:
+    - 必須包含新聞標題或主題
+    - 時間範圍明確（日期或時段）
+    - 摘要客觀中立，無主觀評論
+    - 來源標註清楚
+
+  auto:
+    - 必須包含 task_key 和 status
+    - summary 長度 >= 20 字
+    - 若 status=failed 必須包含 error 欄位或失敗原因
+    - 輸出結構完整（無缺失關鍵欄位）
+
+  workflow_forge:
+    - 必須包含 workflow 名稱和版本
+    - 步驟清晰且可執行
+    - 包含驗證方法或檢查清單
+    - 整合點明確標註
+
+  skill_forge:
+    - 必須包含 Skill 名稱和觸發關鍵字
+    - 步驟完整且邏輯連貫
+    - allowed-tools 清單正確
+    - 包含錯誤處理或降級策略
+
+  github_scout:
+    - 必須包含專案名稱和 GitHub URL
+    - 改進建議具體且可執行
+    - 優先級（P0/P1/P2）標註清楚
+    - 包含風險評估或實施難度
+
+# 預設標準（當 task_type 不在上述清單中時使用）
+default_criteria:
+  - 輸出結構完整，無缺失關鍵欄位
+  - 邏輯清晰，前後一致
+  - 資訊準確，無明顯錯誤
+
+# 評估維度權重（僅作為參考，實際由 LLM 綜合判斷）
+evaluation_dimensions:
+  completeness: 0.4  # 完整性佔 40%
+  coherence: 0.3     # 連貫性佔 30%
+  accuracy: 0.3      # 準確性佔 30%

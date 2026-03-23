@@ -295,6 +295,28 @@
       "date": "2026-03-22",
       "source": "《雜阿含經》卷二",
       "status": "success"
+    },
+    {
+      "channel": "ntfy/wangsc2025",
+      "session": "evening",
+      "verse_id": 28,
+      "date": "2026-03-22",
+      "author": "龍樹菩薩",
+      "time": "2026-03-22 17:05:00",
+      "source": "《中論・觀四諦品》",
+      "status": "success",
+      "verse_text": "以有空義故，一切法得成。"
+    },
+    {
+      "source": "《大慈菩薩發願偈》",
+      "session": "morning",
+      "status": "success",
+      "channel": "ntfy/wangsc2025",
+      "author": "大慈菩薩",
+      "verse_text": "願生西方淨土中，九品蓮花為父母；花開見佛悟無生，不退菩薩為伴侶。",
+      "verse_id": 29,
+      "date": "2026-03-23",
+      "time": "2026-03-23 06:30:02"
     }
   ]
 }
