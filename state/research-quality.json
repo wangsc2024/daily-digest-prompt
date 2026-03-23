@@ -1,12 +1,6 @@
 {
-  "updated": "2026-03-23T04:24:53.629620+00:00",
+  "updated": "2026-03-23T05:23:11.555884+00:00",
   "summary": {
-    "tech_research": {
-      "avg": 33.4,
-      "count": 27,
-      "last": 40,
-      "alert": true
-    },
     "ai_deep_research": {
       "avg": 31.3,
       "count": 29,
@@ -15,8 +9,8 @@
     },
     "ai_workflow_github": {
       "avg": 35.3,
-      "count": 10,
-      "last": 40,
+      "count": 11,
+      "last": 35,
       "alert": true
     },
     "jiaoguangzong": {
@@ -41,6 +35,12 @@
       "avg": 37.6,
       "count": 30,
       "last": 35,
+      "alert": true
+    },
+    "tech_research": {
+      "avg": 33.5,
+      "count": 26,
+      "last": 40,
       "alert": true
     },
     "ai_github_research": {
@@ -4038,6 +4038,22 @@
       },
       "output_length": 760,
       "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_github_research.json",
+      "backend": "unknown",
+      "alert": true
+    },
+    {
+      "task_key": "ai_workflow_github",
+      "timestamp": "2026-03-23T05:23:11.548884+00:00",
+      "score": 35,
+      "dimensions": {
+        "source_count": 0,
+        "source_diversity": 0,
+        "kb_novelty": 15,
+        "output_depth": 20,
+        "tool_utilization": 0
+      },
+      "output_length": 1522,
+      "result_file": "D:\\Source\\daily-digest-prompt\\results\\todoist-auto-ai_workflow_github.json",
       "backend": "unknown",
       "alert": true
     }

@@ -1,73 +1,68 @@
 {
-  "generated_at": "2026-03-23T13:05:07.468296+08:00",
+  "generated_at": "2026-03-23T13:35:04.334492+08:00",
   "summary": {
     "scheduler_runs_analyzed": 0,
     "open_circuits": 0,
     "failed_auto_tasks": 0,
-    "pending_actions": 1
+    "pending_actions": 0
   },
   "signals": {
-    "run_fsm_updated": "2026-03-23T13:03:24",
+    "run_fsm_updated": "2026-03-23T13:33:57",
     "failure_stats_updated": "2026-03-21T15:04:04",
     "fairness_hint": {
-      "generated_at": "2026-03-23T13:00:03.683028",
+      "generated_at": "2026-03-23T13:30:03.806498",
       "date": "2026-03-23",
-      "starvation_count": 6,
+      "starvation_count": 1,
       "starvation_detected": true,
       "zero_count_tasks": [
-        "self_heal",
-        "ai_workflow_github",
-        "skill_forge",
-        "workflow_forge",
-        "new_asset_onboard",
         "kb_system_optimize"
       ],
       "fairness_score": 0.0,
       "pointer_reset": false,
-      "next_execution_order": 18,
-      "max_execution_order": 35
+      "next_execution_order": 32,
+      "max_execution_order": 36
     },
     "token_budget_state": {
       "last_alerted_date": "2026-03-21"
     },
     "scheduler_heartbeat": {
-      "timestamp": "2026-03-23T13:01:54.052935",
+      "timestamp": "2026-03-23T13:31:59.344024",
       "status": "running",
       "pid": 52220
     },
     "runtime_override": {
       "mode": "degraded",
       "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
-      "expires_at": "2026-03-23T13:35:07.463292+08:00",
+      "expires_at": "2026-03-23T14:00:07.073995+08:00",
       "blocked_task_keys": [],
       "blocked_fetch_agents": [],
       "max_parallel_auto_tasks": 2,
       "max_parallel_fetch_agents": 4
     },
     "resource_snapshot": {
-      "generated_at": "2026-03-23T13:05:07.472296+08:00",
+      "generated_at": "2026-03-23T13:35:04.338489+08:00",
       "cpu": {
-        "percent": 10.23
+        "percent": 13.35
       },
       "memory": {
-        "percent": 54.93,
-        "available_mb": 14664.09
+        "percent": 52.81,
+        "available_mb": 15352.26
       },
       "gpu": {
         "available": true,
         "devices": [
           {
             "name": "NVIDIA GeForce RTX 4090",
-            "utilization_percent": 6.0,
-            "memory_used_mb": 1022.0,
+            "utilization_percent": 0.0,
+            "memory_used_mb": 1057.0,
             "memory_total_mb": 24564.0,
-            "memory_percent": 4.16
+            "memory_percent": 4.3
           }
         ]
       }
     },
     "agent_registry": {
-      "generated_at": "2026-03-23T13:05:07.472296+08:00",
+      "generated_at": "2026-03-23T13:35:04.338489+08:00",
       "managed_agents": [
         "daily-digest",
         "todoist"
@@ -290,25 +285,17 @@
     },
     "scheduler_state_recent_statuses": []
   },
-  "actions": [
-    {
-      "action_type": "rebalance_tasks",
-      "target": "todoist",
-      "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
-      "severity": "high"
-    }
-  ],
+  "actions": [],
   "runtime": {
-    "generated_at": "2026-03-23T13:05:07.468296+08:00",
+    "generated_at": "2026-03-23T13:35:04.334492+08:00",
     "mode": "degraded",
     "reasons": [
-      "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
       "override: 偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務"
     ],
     "override": {
       "active": true,
       "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
-      "expires_at": "2026-03-23T13:35:07.463292+08:00"
+      "expires_at": "2026-03-23T14:00:07.073995+08:00"
     },
     "gates": {
       "heartbeat_stale": false,
@@ -317,7 +304,7 @@
       "open_circuits": 0
     },
     "policies": {
-      "max_parallel_auto_tasks": 5,
+      "max_parallel_auto_tasks": 2,
       "max_parallel_fetch_agents": 4,
       "allow_heavy_auto_tasks": false,
       "allow_research_auto_tasks": true,
@@ -385,28 +372,26 @@
         "tech_research",
         "unsloth_research"
       ],
-      "priority_recovery_targets": [
-        "todoist"
-      ]
+      "priority_recovery_targets": []
     },
     "resource_snapshot": {
-      "generated_at": "2026-03-23T13:05:07.472296+08:00",
+      "generated_at": "2026-03-23T13:35:04.338489+08:00",
       "cpu": {
-        "percent": 10.23
+        "percent": 13.35
       },
       "memory": {
-        "percent": 54.93,
-        "available_mb": 14664.09
+        "percent": 52.81,
+        "available_mb": 15352.26
       },
       "gpu": {
         "available": true,
         "devices": [
           {
             "name": "NVIDIA GeForce RTX 4090",
-            "utilization_percent": 6.0,
-            "memory_used_mb": 1022.0,
+            "utilization_percent": 0.0,
+            "memory_used_mb": 1057.0,
             "memory_total_mb": 24564.0,
-            "memory_percent": 4.16
+            "memory_percent": 4.3
           }
         ]
       }
@@ -419,7 +404,7 @@
       "research_auto_task_count": 10
     },
     "scheduler_heartbeat": {
-      "timestamp": "2026-03-23T13:01:54.052935",
+      "timestamp": "2026-03-23T13:31:59.344024",
       "status": "running",
       "pid": 52220
     }

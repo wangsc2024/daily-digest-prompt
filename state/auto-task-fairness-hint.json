@@ -1,18 +1,13 @@
 {
-  "generated_at": "2026-03-23T13:00:03.683028",
+  "generated_at": "2026-03-23T13:30:03.806498",
   "date": "2026-03-23",
-  "starvation_count": 6,
+  "starvation_count": 1,
   "starvation_detected": true,
   "zero_count_tasks": [
-    "self_heal",
-    "ai_workflow_github",
-    "skill_forge",
-    "workflow_forge",
-    "new_asset_onboard",
     "kb_system_optimize"
   ],
   "fairness_score": 0.0,
   "pointer_reset": false,
-  "next_execution_order": 18,
-  "max_execution_order": 35
+  "next_execution_order": 32,
+  "max_execution_order": 36
 }

@@ -1,14 +1,13 @@
 {
-  "generated_at": "2026-03-23T13:05:07.468296+08:00",
+  "generated_at": "2026-03-23T13:35:04.334492+08:00",
   "mode": "degraded",
   "reasons": [
-    "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
     "override: 偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務"
   ],
   "override": {
     "active": true,
     "reason": "偵測到 6 個任務飢餓，需降低並行並優先補跑低頻任務",
-    "expires_at": "2026-03-23T13:35:07.463292+08:00"
+    "expires_at": "2026-03-23T14:00:07.073995+08:00"
   },
   "gates": {
     "heartbeat_stale": false,
@@ -17,7 +16,7 @@
     "open_circuits": 0
   },
   "policies": {
-    "max_parallel_auto_tasks": 5,
+    "max_parallel_auto_tasks": 2,
     "max_parallel_fetch_agents": 4,
     "allow_heavy_auto_tasks": false,
     "allow_research_auto_tasks": true,
@@ -85,28 +84,26 @@
       "tech_research",
       "unsloth_research"
     ],
-    "priority_recovery_targets": [
-      "todoist"
-    ]
+    "priority_recovery_targets": []
   },
   "resource_snapshot": {
-    "generated_at": "2026-03-23T13:05:07.472296+08:00",
+    "generated_at": "2026-03-23T13:35:04.338489+08:00",
     "cpu": {
-      "percent": 10.23
+      "percent": 13.35
     },
     "memory": {
-      "percent": 54.93,
-      "available_mb": 14664.09
+      "percent": 52.81,
+      "available_mb": 15352.26
     },
     "gpu": {
       "available": true,
       "devices": [
         {
           "name": "NVIDIA GeForce RTX 4090",
-          "utilization_percent": 6.0,
-          "memory_used_mb": 1022.0,
+          "utilization_percent": 0.0,
+          "memory_used_mb": 1057.0,
           "memory_total_mb": 24564.0,
-          "memory_percent": 4.16
+          "memory_percent": 4.3
         }
       ]
     }
@@ -119,7 +116,7 @@
     "research_auto_task_count": 10
   },
   "scheduler_heartbeat": {
-    "timestamp": "2026-03-23T13:01:54.052935",
+    "timestamp": "2026-03-23T13:31:59.344024",
     "status": "running",
     "pid": 52220
   }
